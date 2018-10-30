@@ -1,74 +1,69 @@
-/*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-import React, { Component } from 'react';
-/* MUI Imports */
-import { Grid, Button, Typography } from '@material-ui/core';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
-import StepContent from '@material-ui/core/StepContent';
-import Paper from '@material-ui/core/Paper';
-import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
-import InputForm from 'AppComponents/Apis/Create/Endpoint/APIInputForm';
+import APIInputForm from 'AppComponents/Apis/Create/Endpoint/APIInputForm';
 import Progress from 'AppComponents/Shared/Progress';
-import { FormattedMessage } from 'react-intl';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
 import BindingInfo from './BindingInfo';
 
 const styles = theme => ({
+    instructions: {
+        marginTop: theme.spacing.unit,
+        marginBottom: theme.spacing.unit,
+    },
     root: {
         flexGrow: 1,
+        marginLeft: 0,
+        marginTop: 0,
+        paddingLeft: theme.spacing.unit * 4,
+        paddingTop: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing.unit*2,
+        width: theme.custom.contentAreaWidth,
     },
-    paper: {
-        padding: theme.spacing.unit * 2,
+    buttonProgress: {
+        position: 'relative',
+        marginTop: theme.spacing.unit * 5,
+        marginLeft: theme.spacing.unit * 6.25,
     },
-    textWelcome: {
-        'font-weight': 300,
+    button: {
+        marginTop: theme.spacing.unit * 2,
+        marginRight: theme.spacing.unit,
     },
-    stepLabel: {
-        'font-weight': 300,
-        'font-size': '24px',
-        color: 'rgba(0, 0, 0, 0.87)',
-        'line-height': '1.35417em',
+    buttonSection: {
+        paddingTop: theme.spacing.unit * 2,
     },
-    optionAction: {
-        'margin-top': '1.5em',
+    subTitle: {
+        color: theme.palette.grey[500],
     },
-    optionContent: {
-        width: '100%',
-        'margin-bottom': '1em',
-        'margin-right': '.5em',
-    },
-    optionContent50: {
-        width: '45%',
+    stepper: {
+        paddingLeft: 0,
+        marginLeft: 0,
+        width: 400,
     },
 });
 
-/**
- * Component for creating an API using WSDL file or URL
- * @class ApiCreateWSDL
- * @extends {Component}
- */
-class ApiCreateWSDL extends Component {
+function getSteps() {
+    return [<FormattedMessage id='select.wsdl' defaultMessage='Select WSDL' />, <FormattedMessage id='create.api' defaultMessage='Create API' />];
+}
+
+function isEmpty(obj) {
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) return false;
+    }
+    return true;
+}
+
+class APICreateWSDL extends React.Component {
     /**
      * Creates an instance of ApiCreateWSDL.
      * @param {any} props @inheritDoc
@@ -79,57 +74,34 @@ class ApiCreateWSDL extends Component {
         this.state = {
             doValidate: false,
             wsdlBean: {},
-            currentStep: 0,
+            activeStep: 0,
             api: new API('', 'v1.0.0'),
             loading: false,
+            valid: {
+                wsdlUrl: { empty: false, invalidUrl: false },
+                wsdlFile: { empty: false, invalidFile: false },
+                name: { empty: false, alreadyExists: false },
+                context: { empty: false, alreadyExists: false },
+                version: { empty: false },
+                endpoint: { empty: false },
+            },
         };
-        this.updateWSDLValidity = this.updateWSDLValidity.bind(this);
+        this.updateWSDLBean = this.updateWSDLBean.bind(this);
         this.updateApiInputs = this.updateApiInputs.bind(this);
-        this.nextStep = this.nextStep.bind(this);
-        this.stepBack = this.stepBack.bind(this);
         this.createWSDLAPI = this.createWSDLAPI.bind(this);
-    }
-
-    /**
-     * Go to next step in mini wizard
-     * @memberof ApiCreateWSDL
-     */
-    nextStep() {
-        const { currentStep } = this.state;
-        if (currentStep === 0) {
-            this.setState({ doValidate: true });
-        } else {
-            this.setState({
-                currentStep: this.state.currentStep + 1,
-            });
-        }
-    }
-
-    /**
-     * Go step back word in the Wizard
-     * @memberof ApiCreateWSDL
-     */
-    stepBack() {
-        this.setState({
-            currentStep: this.state.currentStep - 1,
-        });
+        this.updateFileErrors = this.updateFileErrors.bind(this);
+        this.provideWSDL = null;
     }
 
     /**
      * Check the WSDL file or URL validity through REST API
-     * @param {Boolean} validity Validity of the WSDL
      * @param {Object} wsdlBean Bean object holding WSDL file/url info
      * @memberof ApiCreateWSDL
      */
-    updateWSDLValidity(validity, wsdlBean) {
-        let { currentStep } = this.state;
-        if (validity) {
-            currentStep = 1;
-        }
+    updateWSDLBean(wsdlBean) {
+        console.info(wsdlBean);
         this.setState({
             wsdlBean,
-            doValidate: false,
-            currentStep,
         });
     }
 
@@ -140,7 +112,7 @@ class ApiCreateWSDL extends Component {
      */
     updateApiInputs({ target }) {
         const { name, value } = target;
-        this.setState(({ api }) => {
+        this.setState(({ api, valid }) => {
             const changes = api;
             if (name === 'endpoint') {
                 changes[name] = [
@@ -186,7 +158,15 @@ class ApiCreateWSDL extends Component {
             } else {
                 changes[name] = value;
             }
-            return { api: changes };
+
+             // Checking validity.
+             const validUpdated = valid;
+             validUpdated.name.empty = !api.name;
+             validUpdated.context.empty = !api.context;
+             validUpdated.version.empty = !api.version;
+             validUpdated.endpoint.empty = !api.endpoint;
+             // TODO we need to add the already existing error for (context) by doing an api call ( the swagger definition does not contain such api call)
+             return { api: changes, valid: validUpdated };
         });
     }
 
@@ -231,108 +211,166 @@ class ApiCreateWSDL extends Component {
                 Alert.error(messageTxt);
             });
     }
+    updateFileErrors(newValid) {
+        this.setState({ valid: newValid });
+    }
+    handleNext = () => {
+        const { activeStep, wsdlBean, valid } = this.state;
+        let uploadMethod;
+        if(this.provideWSDL){
+          uploadMethod = this.provideWSDL.getUploadMethod() ;
+        } else if (wsdlBean.file) {
+          uploadMethod = "file";
+        } else {
+          uploadMethod = "url";
+        }
+        const validNew = JSON.parse(JSON.stringify(valid));
 
-    /**
-     * @inheritDoc
-     * @returns {React.Component} API Create using WSDL
-     * @memberof ApiCreateWSDL
-     */
+        // Handling next ( getting wsdl file/url info and validating)
+        if (activeStep === 0) {
+            if (isEmpty(wsdlBean)) {
+                if (uploadMethod === 'file') {
+                    validNew.wsdlFile.empty = true;
+                } else {
+                    validNew.wsdlUrl.empty = true;
+                }
+                this.setState({ valid: validNew });
+                return;
+            } else {
+                if (wsdlBean.file && uploadMethod === 'url') {
+                    validNew.wsdlUrl.empty = true;
+                    this.setState({ valid: validNew });
+                    return;
+                }
+                if (wsdlBean.url && uploadMethod === 'file') {
+                    validNew.wsdlFile.empty = true;
+                    this.setState({ valid: validNew });
+                    return;
+                }
+            }
+            // No errors so let's fill the inputs with the wsdlBean
+            if (wsdlBean.info) {
+                if (wsdlBean.info.version) {
+                    this.updateApiInputs({ target: { name: 'version', value: wsdlBean.info.version } });
+                }
+                if (wsdlBean.info.endpoints && wsdlBean.info.endpoints.length > 0) {
+                    this.updateApiInputs({ target: { name: 'endpoint', value: wsdlBean.info.endpoints[0].location } });
+                }
+            }
+            this.setState({
+              activeStep: activeStep + 1,
+            });
+        } else if (activeStep === 1) { // Handling Finish step ( validating the input fields )
+          const { api } = this.state;
+          if (!api.name || !api.context || !api.version || !api.endpoint) {
+            // Checking the api name,version,context undefined or empty states
+            this.setState((oldState) => {
+                const { valid, api } = oldState;
+                const validUpdated = valid;
+                validUpdated.name.empty = !api.name;
+                validUpdated.context.empty = !api.context;
+                validUpdated.version.empty = !api.version;
+                validUpdated.endpoint.empty = !api.endpoint;
+                return { valid: validUpdated };
+            });
+            return;
+          }
+          this.createWSDLAPI();
+        }
+    };
+
+    handleBack = () => {
+        this.setState(state => ({
+            activeStep: state.activeStep - 1,
+        }));
+    };
+
+    handleReset = () => {
+        this.setState({
+            activeStep: 0,
+        });
+    };
+
     render() {
         const { classes } = this.props;
+        const steps = getSteps();
         const {
-            doValidate, currentStep, wsdlBean, api, loading,
+            doValidate, activeStep, wsdlBean, api, loading, valid,
         } = this.state;
         const uploadMethod = wsdlBean.url ? 'url' : 'file';
         const provideWSDLProps = {
             uploadMethod,
             [uploadMethod]: wsdlBean[uploadMethod],
-            updateWSDLValidity: this.updateWSDLValidity,
+            updateWSDLBean: this.updateWSDLBean,
             validate: doValidate,
+            valid,
+            updateFileErrors: this.updateFileErrors,
         };
         return (
-            <Grid container className={classes.root} spacing={0} justify='center'>
-                <Grid item md={10}>
-                    <Paper className={classes.paper}>
-                        <Typography type='display1' className={classes.textWelcome}>
-                            <FormattedMessage
-                                id='design.a.new.rest.api.using.wsdl'
-                                defaultMessage='Design a new REST API using WSDL'
-                            />
+            <Grid container spacing={24} className={classes.root}>
+                <Grid item xs={12} xl={6}>
+                    <div className={classes.titleWrapper}>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            <FormattedMessage id='design.a.new.rest.api.using.wsdl' defaultMessage='Design a new REST API using WSDL' />
                         </Typography>
-                        <Stepper activeStep={currentStep} orientation='vertical'>
-                            <Step key='provideWSDL'>
-                                <StepLabel>
-                                    <Typography
-                                        type='headline'
-                                        gutterBottom
-                                        className={classes.stepLabel}
-                                        component='span'
-                                    >
-                                        <FormattedMessage id='select.wsdl' defaultMessage='Select WSDL' />
-                                    </Typography>
-                                </StepLabel>
-                                <StepContent>
-                                    <ProvideWSDL {...provideWSDLProps} />
-                                    <div className={classes.optionAction}>
-                                        <Button color='primary' onClick={this.nextStep}>
-                                            <FormattedMessage id='next' defaultMessage='Next' />
-                                        </Button>
-                                        <Button><FormattedMessage id='cancel' defaultMessage='Cancel' /></Button>
-                                    </div>
-                                </StepContent>
-                            </Step>
-                            <Step key='createAPI'>
-                                <StepLabel className={classes.stepLabel}>
-                                    <Typography
-                                        type='headline'
-                                        gutterBottom
-                                        className={classes.stepLabel}
-                                        component='span'
-                                    ><FormattedMessage id='create.api' defaultMessage='Create API' />
+                    </div>
+                    <Stepper activeStep={activeStep} className={classes.stepper}>
+                        {steps.map((label, index) => {
+                            const props = {};
+                            const labelProps = {};
 
-                                    </Typography>
-                                </StepLabel>
-                                <StepContent>
-                                    <Typography type='caption' gutterBottom align='left'>
-                                        <FormattedMessage
-                                            id='fill.the.mandatory.fields'
-                                            defaultMessage={'Fill the mandatory fields (Name, Version, Context) and' +
-                                            'create the API. Configure advanced configurations later.'}
-                                        />
-                                    </Typography>
-                                    <InputForm api={api} handleInputChange={this.updateApiInputs} />
-                                    <Grid item xs={10}>
-                                        <BindingInfo
-                                            updateApiInputs={this.updateApiInputs}
-                                            wsdlBean={wsdlBean}
-                                            classes={classes}
-                                            api={api}
-                                        />
-                                    </Grid>
-                                    <div className={classes.optionAction}>
-                                        <Button disabled={loading} color='primary' onClick={this.createWSDLAPI}>
-                                            {loading && <Progress />}
-                                            <FormattedMessage id='create' defaultMessage='Create' />
-                                        </Button>
-                                        <Button color='primary' onClick={this.stepBack}>
-                                            <FormattedMessage id='back' defaultMessage='Back' />
-                                        </Button>
-                                    </div>
-                                </StepContent>
-                            </Step>
-                        </Stepper>
-                    </Paper>
+                            return (
+                                <Step key={label} {...props}>
+                                    <StepLabel {...labelProps}>{label}</StepLabel>
+                                </Step>
+                            );
+                        })}
+                    </Stepper>
+                    <div>
+                        {activeStep === 0 && (
+                            <ProvideWSDL
+                                {...provideWSDLProps}
+                                innerRef={(instance) => {
+                                    this.provideWSDL = instance;
+                                }}
+                            />
+                        )}
+                        {activeStep === 1 && (
+                            <React.Fragment>
+                                <APIInputForm api={api} handleInputChange={this.updateApiInputs} valid={valid} />
+                                <BindingInfo updateApiInputs={this.updateApiInputs} wsdlBean={wsdlBean} classes={classes} api={api} />
+                            </React.Fragment>
+                        )}
+                    </div>
+                    <div>
+                        {activeStep === steps.length ? (
+                            <div>
+                                <Typography className={classes.instructions}>All steps completed - you&quot;re finished</Typography>
+                                <Button onClick={this.handleReset} className={classes.button}>
+                                    Reset
+                                </Button>
+                            </div>
+                        ) : (
+                            <div>
+                                <div>
+                                    <Button disabled={activeStep === 0} onClick={this.handleBack} className={classes.button}>
+                                        Back
+                                    </Button>
+                                    <Button variant='contained' color='primary' onClick={this.handleNext} className={classes.button} disabled={(valid.wsdlFile.invalidFile && uploadMethod === 'file') || (valid.wsdlUrl.invalidUrl && uploadMethod === 'url')}>
+                                        {activeStep === steps.length - 1 ? 'Finish' : <FormattedMessage id='next' defaultMessage='Next' />}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </Grid>
             </Grid>
         );
     }
 }
 
-ApiCreateWSDL.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    history: PropTypes.shape({
-        push: PropTypes.func,
-    }).isRequired,
+APICreateWSDL.propTypes = {
+    classes: PropTypes.object,
 };
 
-export default withStyles(styles)(ApiCreateWSDL);
+export default withStyles(styles)(APICreateWSDL);

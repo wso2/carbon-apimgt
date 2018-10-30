@@ -16,9 +16,9 @@
  * under the License.
  */
 import React from 'react';
-import Commons from 'AppComponents/Apis/Create/Components/Commons';
+import APICreateForm from 'AppComponents/Apis/Create/Components/APICreateForm';
 
 const ApiCreateEndpoint = (props) => {
-    return (<Commons {...props} type='http' />);
+    return (<APICreateForm {...props} type='http' />);
 };
 export default ApiCreateEndpoint;

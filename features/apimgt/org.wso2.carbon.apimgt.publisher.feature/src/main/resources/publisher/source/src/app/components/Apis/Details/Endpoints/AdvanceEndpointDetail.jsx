@@ -16,10 +16,10 @@
 
 import React from 'react';
 import { Component } from 'react';
-import { Grid, Paper, Typography, Divider } from '@material-ui/core';
+import { Grid, Typography } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
-import { withStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
 
@@ -52,13 +52,17 @@ const styles = theme => ({
         textAlign: 'center',
         color: theme.palette.text.primary,
     },
-    textField: {
-        marginLeft: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
-    },
     selectEmpty: {
         marginTop: theme.spacing.unit * 2,
         textAlign: 'left',
+    },
+    widthControl: {
+        minWidth: '100%',
+    },
+    grid: {
+        paddingLeft: '10px',
+        paddingRight: '10px',
+        minWidth: 0,
     },
 });
 
@@ -160,11 +164,10 @@ class AdvanceEndpointDetail extends Component {
                             </Typography>
                         </ExpansionPanelSummary>
                         <ExpansionPanelDetails>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} className={classes.grid}>
                                 <TextField
                                     id='maxTps'
                                     label={<FormattedMessage id='max.tps' defaultMessage='Max TPS' />}
-                                    className={classes.textField}
                                     value={this.props.endpoint.maxTps}
                                     fullWidth
                                     margin='normal'
@@ -172,11 +175,10 @@ class AdvanceEndpointDetail extends Component {
                                     disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} className={classes.grid}>
                                 <TextField
                                     id='type'
                                     label={<FormattedMessage id='endpoint.type' defaultMessage='Endpoint Type' />}
-                                    className={classes.textField}
                                     value={this.props.endpoint.type}
                                     fullWidth
                                     margin='normal'
@@ -190,13 +192,19 @@ class AdvanceEndpointDetail extends Component {
                 <Grid item xs={12}>
                     <ExpansionPanel>
                         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography className={classes.heading}>Security</Typography>
+                            <Typography className={classes.heading}>
+                                <FormattedMessage
+                                    id='security'
+                                    defaultMessage='Security'
+                                />
+                            </Typography>
                         </ExpansionPanelSummary>
                         <ExpansionPanelDetails>
-                            <Grid container>
+                            <Grid container className={classes.grid}>
                                 <FormControl
                                     variant='subheading'
                                     disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
+                                    className={classes.widthControl}
                                 >
                                     <InputLabel htmlFor='security'>
                                         <FormattedMessage
@@ -213,15 +221,15 @@ class AdvanceEndpointDetail extends Component {
                                             id: 'security',
                                         }}
                                     >
-                                        <MenuItem value={false}>Un secured</MenuItem>
+                                        <MenuItem value={false}>Unsecured</MenuItem>
                                         <MenuItem value>Secured</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
                             {this.props.endpointSecurity.enabled && (
-                                <Grid container>
+                                <Grid container className={classes.grid}>
                                     <FormControl
-                                        className={classes.formControl}
+                                        className={classes.widthControl}
                                         disabled={this.props.readOnly || (!this.props.readOnly && !this.props.isInline)}
                                     >
                                         <InputLabel htmlFor='securityType'>
@@ -242,28 +250,28 @@ class AdvanceEndpointDetail extends Component {
                                             <MenuItem value='digest'>Digest Auth</MenuItem>
                                         </Select>
                                     </FormControl>
-                                    <Grid container>
+                                    <Grid container >
                                         <TextField
                                             id='username'
                                             label={<FormattedMessage id='username' defaultMessage='Username' />}
-                                            className={classes.textField}
                                             value={this.props.endpointSecurity.username}
                                             margin='normal'
                                             onChange={this.handleTextFieldChange}
                                             disabled={
                                                 this.props.readOnly || (!this.props.readOnly && !this.props.isInline)
                                             }
+                                            className={classes.widthControl}
                                         />
                                         <TextField
                                             id='password'
                                             label={<FormattedMessage id='password' defaultMessage='Password' />}
-                                            className={classes.textField}
                                             value={this.props.endpointSecurity.password}
                                             margin='normal'
                                             onChange={this.handleTextFieldChange}
                                             disabled={
                                                 this.props.readOnly || (!this.props.readOnly && !this.props.isInline)
                                             }
+                                            className={classes.widthControl}
                                         />
                                     </Grid>
                                 </Grid>

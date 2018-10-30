@@ -71,7 +71,7 @@ public class ApplicationImportExportManager {
             throws APIManagementException {
         Application updatedApp = null;
         try {
-            if (daoFactory.getApplicationDAO().isApplicationNameExists(importedApplication.getName())) {
+            if (daoFactory.getApplicationDAO().isApplicationNameExists(importedApplication.getName(), username)) {
                 Application existingApplication = apiStore.getApplicationByName(importedApplication.getName(),
                         username);
                 apiStore.updateApplication(existingApplication.getUuid(), importedApplication);

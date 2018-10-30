@@ -16,6 +16,15 @@ public class CommentDTO   {
   @SerializedName("apiId")
   private String apiId = null;
 
+  @SerializedName("category")
+  private String category = null;
+
+  @SerializedName("parentCommentId")
+  private String parentCommentId = null;
+
+  @SerializedName("entryPoint")
+  private String entryPoint = null;
+
   @SerializedName("username")
   private String username = null;
 
@@ -68,6 +77,60 @@ public class CommentDTO   {
 
   public void setApiId(String apiId) {
     this.apiId = apiId;
+  }
+
+  public CommentDTO category(String category) {
+    this.category = category;
+    return this;
+  }
+
+   /**
+   * Get category
+   * @return category
+  **/
+  @ApiModelProperty(value = "")
+  public String getCategory() {
+    return category;
+  }
+
+  public void setCategory(String category) {
+    this.category = category;
+  }
+
+  public CommentDTO parentCommentId(String parentCommentId) {
+    this.parentCommentId = parentCommentId;
+    return this;
+  }
+
+   /**
+   * Get parentCommentId
+   * @return parentCommentId
+  **/
+  @ApiModelProperty(value = "")
+  public String getParentCommentId() {
+    return parentCommentId;
+  }
+
+  public void setParentCommentId(String parentCommentId) {
+    this.parentCommentId = parentCommentId;
+  }
+
+  public CommentDTO entryPoint(String entryPoint) {
+    this.entryPoint = entryPoint;
+    return this;
+  }
+
+   /**
+   * Get entryPoint
+   * @return entryPoint
+  **/
+  @ApiModelProperty(value = "")
+  public String getEntryPoint() {
+    return entryPoint;
+  }
+
+  public void setEntryPoint(String entryPoint) {
+    this.entryPoint = entryPoint;
   }
 
   public CommentDTO username(String username) {
@@ -190,6 +253,9 @@ public class CommentDTO   {
     CommentDTO comment = (CommentDTO) o;
     return Objects.equals(this.commentId, comment.commentId) &&
         Objects.equals(this.apiId, comment.apiId) &&
+        Objects.equals(this.category, comment.category) &&
+        Objects.equals(this.parentCommentId, comment.parentCommentId) &&
+        Objects.equals(this.entryPoint, comment.entryPoint) &&
         Objects.equals(this.username, comment.username) &&
         Objects.equals(this.commentText, comment.commentText) &&
         Objects.equals(this.createdTime, comment.createdTime) &&
@@ -200,7 +266,7 @@ public class CommentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(commentId, apiId, username, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
+    return Objects.hash(commentId, apiId, category, parentCommentId, entryPoint, username, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
   }
 
   @Override
@@ -210,6 +276,9 @@ public class CommentDTO   {
     
     sb.append("    commentId: ").append(toIndentedString(commentId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
+    sb.append("    category: ").append(toIndentedString(category)).append("\n");
+    sb.append("    parentCommentId: ").append(toIndentedString(parentCommentId)).append("\n");
+    sb.append("    entryPoint: ").append(toIndentedString(entryPoint)).append("\n");
     sb.append("    username: ").append(toIndentedString(username)).append("\n");
     sb.append("    commentText: ").append(toIndentedString(commentText)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");

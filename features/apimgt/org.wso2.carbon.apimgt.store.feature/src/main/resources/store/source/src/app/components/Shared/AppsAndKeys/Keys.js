@@ -12,7 +12,10 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormLabel from '@material-ui/core/FormLabel';
+import { FormattedMessage } from 'react-intl';
 
 // Styles for Grid and Paper elements
 const styles = theme => ({
@@ -43,10 +46,12 @@ class Keys extends React.Component {
         this.key_type = props.type;
         this.state = {
             application: null,
+            tokenType: "OAUTH",
         };
         this.appId = this.props.selectedApp.value;
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
         this.handleTextChange = this.handleTextChange.bind(this);
+        this.handleTokenTypeChange = this.handleTokenTypeChange.bind(this);
         this.key_type = this.props.keyType;
     }
     handleTextChange(event) {
@@ -57,6 +62,7 @@ class Keys extends React.Component {
                 "supportedGrantTypes":
                     ["client_credentials"],
                 "keyType": this.key_type,
+                "tokenType": this.state.tokenType,
             }
         keys.callbackUrl = currentTarget.value;
         application.keys.set(this.key_type, keys);
@@ -70,6 +76,7 @@ class Keys extends React.Component {
                 "supportedGrantTypes":
                     ["client_credentials"],
                 "keyType": this.key_type,
+                "tokenType": this.state.tokenType,
             }
         let index;
 
@@ -82,6 +89,21 @@ class Keys extends React.Component {
         application.keys.set(this.key_type, keys);
         // update the state with the new array of options
         this.setState({ application });
+    };
+
+    handleTokenTypeChange(event) {
+        const {application} = this.state;
+        const keys = application.keys.get(this.key_type) ||
+            {
+                "supportedGrantTypes":
+                    ["client_credentials"],
+                "keyType": this.key_type,
+                "tokenType": this.state.tokenType,
+            }
+        keys.tokenType = event.target.value;
+        application.keys.set(this.key_type, keys);
+        // update the state with the new array of options
+        this.setState({application, tokenType:event.target.value});
     };
     //We have to wrap the two update and generate methods in a single mehtod.
     keygenWrapper() {
@@ -101,14 +123,14 @@ class Keys extends React.Component {
         if (!keys.callbackUrl) {
             keys.callbackUrl = "https://wso2.am.com";
         }
-        let keyPromiss = application.generateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl);
+        let keyPromiss = application.generateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl,keys.tokenType);
         return keyPromiss;
     }
 
     updateKeys() {
         const { application } = this.state;
         const keys = application.keys.get(this.key_type);
-        let updatePromiss = application.updateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
+        let updatePromiss = application.updateKeys(keys.tokenType, this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
         return updatePromiss;
     }
     /**
@@ -151,10 +173,27 @@ class Keys extends React.Component {
             <div className={classes.root}>
                 <Grid container spacing={24} className={classes.root}>
                     <Grid item xs={12} md={6}>
-                    
+                        <FormControl component="fieldset" className={classes.formControl}>
+                            <FormLabel component="legend">
+                                <FormattedMessage
+                                    id='token.type'
+                                    defaultMessage='Token Type'/></FormLabel>
+                            <RadioGroup
+                                aria-label="Token Type"
+                                name="tokenType"
+                                className={classes.group}
+                                value={this.state.tokenType}
+                                onChange={this.handleTokenTypeChange}>
+                                <FormControlLabel value="OAUTH" control={<Radio/>} label="OAUTH"/>
+                                <FormControlLabel value="JWT" control={<Radio/>} label="JWT"/>
+                            </RadioGroup>
+                        </FormControl>
                     <FormControl className={classes.FormControl} component="fieldset">
                         <InputLabel shrink htmlFor="age-label-placeholder" className={classes.quotaHelp}>
-                            Call Back Url
+                            <FormattedMessage
+                                id='grant.types'
+                                defaultMessage='Grant Types'
+                            />
                         </InputLabel>
                             <div className={classes.checkboxWrapper}>
                                 <div className={classes.checkboxWrapperColumn}>

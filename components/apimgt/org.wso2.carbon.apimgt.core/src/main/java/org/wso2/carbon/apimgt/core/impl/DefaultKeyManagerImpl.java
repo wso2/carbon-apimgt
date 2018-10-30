@@ -69,7 +69,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
     public DefaultKeyManagerImpl() throws APIManagementException {
 
         this(DCRMServiceStubFactory.getDCRMServiceStub(), OAuth2ServiceStubsFactory.getOAuth2ServiceStubs(),
-                ScopeRegistrationServiceStubFactory.getScopeRegistration());
+             ScopeRegistrationServiceStubFactory.getScopeRegistration());
     }
 
     /**
@@ -81,7 +81,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
      * @throws APIManagementException if error occurred while instantiating DefaultKeyManagerImpl
      */
     public DefaultKeyManagerImpl(DCRMServiceStub dcrmServiceStub, OAuth2ServiceStubs oAuth2ServiceStubs,
-                                 ScopeRegistration scopeRegistration)
+            ScopeRegistration scopeRegistration)
             throws APIManagementException {
 
         this.dcrmServiceStub = dcrmServiceStub;
@@ -103,14 +103,16 @@ public class DefaultKeyManagerImpl implements KeyManager {
         DCRClientInfo dcrClientInfo = new DCRClientInfo();
         dcrClientInfo.setClientName(applicationName);
         dcrClientInfo.setGrantTypes(oauthAppRequest.getGrantTypes());
+        dcrClientInfo.setTokenType(oauthAppRequest.getTokenType());
         if (StringUtils.isNotEmpty(oauthAppRequest.getCallBackURL())) {
             dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallBackURL());
         }
+        dcrClientInfo.setAudiences(oauthAppRequest.getAudiences());
 
         Response response = dcrmServiceStub.registerApplication(dcrClientInfo);
         if (response == null) {
             throw new KeyManagementException("Error occurred while DCR application creation. Response is null",
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+                                             ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         }
         if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_201_CREATED) {  //201 - Success
             try {
@@ -121,22 +123,23 @@ public class DefaultKeyManagerImpl implements KeyManager {
                 return oAuthApplicationInfoResponse;
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing the DCR application creation response " +
-                        "message.", e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+                                                         "message.", e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             }
         } else if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_400_BAD_REQUEST) {  //400 - Known Error
             try {
                 DCRError error = (DCRError) new GsonDecoder().decode(response, DCRError.class);
                 throw new KeyManagementException("Error occurred while DCR application creation. Error: " +
-                        error.getError() + ". Error Description: " + error.getErrorDescription() + ". Status Code: " +
-                        response.status(), ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+                                                         error.getError() + ". Error Description: " + error
+                        .getErrorDescription() + ". Status Code: " +
+                                                         response.status(), ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing the DCR error message.", e,
-                        ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+                                                 ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             }
         } else {  //Unknown Error
             throw new KeyManagementException("Error occurred while DCR application creation. Error: " +
-                    response.body().toString() + " Status Code: " + response.status(),
-                    ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+                                                     response.body().toString() + " Status Code: " + response.status(),
+                                             ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         }
     }
 
@@ -160,11 +163,11 @@ public class DefaultKeyManagerImpl implements KeyManager {
         dcrClientInfo.setClientSecret(oAuthApplicationInfo.getClientSecret());
         dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallBackURL());
         dcrClientInfo.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
-
+        dcrClientInfo.setTokenType(oAuthApplicationInfo.getTokenType());
         Response response = dcrmServiceStub.updateApplication(dcrClientInfo, dcrClientInfo.getClientId());
         if (response == null) {
             throw new KeyManagementException("Error occurred while updating DCR application. Response is null",
-                    ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+                                             ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
         }
         if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {   //200 - Success
             try {
@@ -177,22 +180,23 @@ public class DefaultKeyManagerImpl implements KeyManager {
                 return oAuthApplicationInfoResponse;
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing the DCR application update response " +
-                        "message.", e, ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+                                                         "message.", e, ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
             }
         } else if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_400_BAD_REQUEST) {  //400 - Known Error
             try {
                 DCRError error = (DCRError) new GsonDecoder().decode(response, DCRError.class);
                 throw new KeyManagementException("Error occurred while updating DCR application. Error: " +
-                        error.getError() + ". Error Description: " + error.getErrorDescription() + ". Status Code: " +
-                        response.status(), ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+                                                         error.getError() + ". Error Description: " + error
+                        .getErrorDescription() + ". Status Code: " +
+                                                         response.status(), ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing the DCR error message.", e,
-                        ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+                                                 ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
             }
         } else {  //Unknown Error
             throw new KeyManagementException("Error occurred while updating DCR application. Error: " +
-                    response.body().toString() + " Status Code: " + response.status(),
-                    ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+                                                     response.body().toString() + " Status Code: " + response.status(),
+                                             ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
         }
     }
 
@@ -204,17 +208,17 @@ public class DefaultKeyManagerImpl implements KeyManager {
         }
         if (StringUtils.isEmpty(consumerKey)) {
             throw new KeyManagementException("Unable to delete OAuth Application. Consumer Key is null or empty",
-                    ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
+                                             ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
         }
         Response response = dcrmServiceStub.deleteApplication(consumerKey);
         if (response == null) {
             throw new KeyManagementException("Error occurred while deleting DCR application. Response is null",
-                    ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
+                                             ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
         }
         if (response.status() != APIMgtConstants.HTTPStatusCodes.SC_204_NO_CONTENT) {
             throw new KeyManagementException("Error occurred while deleting DCR application. Error: " +
-                    response.body().toString() + " Status Code: " + response.status(),
-                    ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
+                                                     response.body().toString() + " Status Code: " + response.status(),
+                                             ExceptionCodes.OAUTH2_APP_DELETION_FAILED);
         }
 
         if (log.isDebugEnabled()) {
@@ -231,13 +235,13 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
         if (StringUtils.isEmpty(consumerKey)) {
             throw new KeyManagementException("Unable to retrieve OAuth Application. Consumer Key is null or empty",
-                    ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+                                             ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
 
         Response response = dcrmServiceStub.getApplication(consumerKey);
         if (response == null) {
             throw new KeyManagementException("Error occurred while retrieving DCR application. Response is null",
-                    ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+                                             ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
         if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {   //200 - Success
             try {
@@ -248,12 +252,13 @@ public class DefaultKeyManagerImpl implements KeyManager {
                 return oAuthApplicationInfoResponse;
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing the DCR application retrieval " +
-                        "response message.", e, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+                                                         "response message.", e, ExceptionCodes
+                                                         .OAUTH2_APP_RETRIEVAL_FAILED);
             }
         } else {  //Unknown Error
             throw new KeyManagementException("Error occurred while retrieving DCR application. Error: " +
-                    response.body().toString() + " Status Code: " + response.status(),
-                    ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+                                                     response.body().toString() + " Status Code: " + response.status(),
+                                             ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
     }
 
@@ -262,13 +267,13 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
         if (tokenRequest == null) {
             throw new KeyManagementException("No information available to generate Token. AccessTokenRequest is null",
-                    ExceptionCodes.INVALID_TOKEN_REQUEST);
+                                             ExceptionCodes.INVALID_TOKEN_REQUEST);
         }
 
         // Call the /revoke only if there's a token to be revoked.
         if (!StringUtils.isEmpty(tokenRequest.getTokenToRevoke())) {
             this.revokeAccessToken(tokenRequest.getTokenToRevoke(), tokenRequest.getClientId(),
-                    tokenRequest.getClientSecret());
+                                   tokenRequest.getClientSecret());
         }
 
         Response response;
@@ -296,23 +301,24 @@ public class DefaultKeyManagerImpl implements KeyManager {
                         tokenRequest.getValidityPeriod(), tokenRequest.getClientId(), tokenRequest.getClientSecret());
             } else {
                 throw new KeyManagementException("Invalid access token request. Unsupported grant type: "
-                        + tokenRequest.getGrantType(), ExceptionCodes.INVALID_TOKEN_REQUEST);
+                                                         + tokenRequest.getGrantType(), ExceptionCodes
+                                                         .INVALID_TOKEN_REQUEST);
             }
         } catch (APIManagementException ex) {
             throw new KeyManagementException("Token generation request failed. Error: " + ex.getMessage(), ex,
-                    ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
+                                             ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
 
         if (response == null) {
             throw new KeyManagementException("Error occurred while generating an access token. " +
-                    "Response is null", ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
+                                                     "Response is null", ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
 
         if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {   //200 - Success
             log.debug("A new access token is successfully generated.");
             try {
                 OAuth2TokenInfo oAuth2TokenInfo = (OAuth2TokenInfo) new GsonDecoder().decode(response,
-                        OAuth2TokenInfo.class);
+                                                                                             OAuth2TokenInfo.class);
                 AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
                 accessTokenInfo.setAccessToken(oAuth2TokenInfo.getAccessToken());
                 accessTokenInfo.setScopes(oAuth2TokenInfo.getScope());
@@ -322,12 +328,12 @@ public class DefaultKeyManagerImpl implements KeyManager {
                 return accessTokenInfo;
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing token response", e,
-                        ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
+                                                 ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
             }
         } else {  //Error case
             throw new KeyManagementException("Token generation request failed. HTTP error code: " + response.status() +
-                    " Error Response Body: " + response.body().toString(),
-                    ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
+                                                     " Error Response Body: " + response.body().toString(),
+                                             ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
     }
 
@@ -340,11 +346,11 @@ public class DefaultKeyManagerImpl implements KeyManager {
             response = oAuth2ServiceStubs.getIntrospectionServiceStub().introspectToken(accessToken);
         } catch (APIManagementException e) {
             throw new KeyManagementException("Error occurred while introspecting access token.", e,
-                    ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+                                             ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         }
         if (response == null) {
             throw new KeyManagementException("Error occurred while introspecting access token. " +
-                    "Response is null", ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+                                                     "Response is null", ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         }
         if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
             log.debug("Token introspection is successful");
@@ -379,12 +385,13 @@ public class DefaultKeyManagerImpl implements KeyManager {
                 return tokenInfo;
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing token introspection response", e,
-                        ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+                                                 ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
             }
         } else {
             throw new KeyManagementException("Token introspection request failed. HTTP error code: "
-                    + response.status() + " Error Response Body: " + response.body().toString(),
-                    ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+                                                     + response.status() + " Error Response Body: " + response.body()
+                    .toString(),
+                                             ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         }
     }
 
@@ -491,7 +498,12 @@ public class DefaultKeyManagerImpl implements KeyManager {
         oAuthApplicationInfoResponse.setClientId(dcrClientInfoResponse.getClientId());
         oAuthApplicationInfoResponse.setClientSecret(dcrClientInfoResponse.getClientSecret());
         oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
-        oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
+        oAuthApplicationInfoResponse.setTokenType(dcrClientInfoResponse.getTokenType());
+        if (dcrClientInfoResponse.getRedirectURIs() != null) {
+            oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
+        } else {
+            oAuthApplicationInfoResponse.setCallBackURL("");
+        }
         return oAuthApplicationInfoResponse;
     }
 

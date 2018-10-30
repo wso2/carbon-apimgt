@@ -56,7 +56,7 @@ const styles = (theme) => ({
         width: 100,
     },
     contentWrapper: {
-        width: theme.palette.custom.contentAreaWidth - theme.palette.custom.leftMenuWidth,
+        width: theme.custom.contentAreaWidth - theme.custom.leftMenuWidth,
     },
     root: {
         marginTop: 20,

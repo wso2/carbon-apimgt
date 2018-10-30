@@ -258,6 +258,7 @@ class TableView extends React.Component {
                                             <TableCell numeric>{api.context}</TableCell>
                                             <TableCell numeric>{Math.floor(Math.random() * 20)}</TableCell>
                                             <TableCell numeric>{api.provider}</TableCell>
+                                            <TableCell numeric>{api.lifeCycleStatus}</TableCell>
                                         </TableRow>
                                     );
                                 })}

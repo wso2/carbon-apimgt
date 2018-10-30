@@ -16,51 +16,13 @@ import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
+import Configurations from 'Config';
+import AppErrorBoundaryStyled from 'AppComponents/Shared/AppErrorBoundaryStyled';
 
 const themes = [];
-const darkTheme = createMuiTheme({
-    palette: {
-        type: 'dark', // Switching the dark mode on is a single property value change.
-        background: {
-            active: 'rgba(27, 94, 32, 1)',
-            navBar: '#29434e',
-            container: '#001114',
-            paper: '#29434e',
-        },
-        primary: {
-            light: '#315564',
-            main: '#002c3a',
-            dark: '#000115',
-        },
-    },
-    overrides: {
-        MuiButton: {
-            textPrimary: {
-                color: '#00ffe0',
-                '&:hover': {
-                    backgroundColor: '##00c1ff36',
-                },
-            },
-        },
-    },
-});
-const lightTheme = createMuiTheme({
-    palette: {
-        type: 'light', // Switching the dark mode on is a single property value change.
-        background: {
-            active: 'rgba(165, 214, 167, 1)',
-            navBar: '#fafafa',
-            container: '#fefefe',
-            contentFrame: 'rgba(227, 242, 253, 1)',
-        },
-        text: {
-            brand: 'rgba(255,255,255,1)',
-        },
-    },
-});
-themes.push(darkTheme);
-themes.push(lightTheme);
-// themes.push(createMuiTheme(MaterialDesignCustomTheme));
+
+themes.push(createMuiTheme(Configurations.themes.light));
+themes.push(createMuiTheme(Configurations.themes.dark));
 
 /**
  * Language.
@@ -139,10 +101,8 @@ export default class Protected extends Component {
      * Change the theme index incrementally
      */
     toggleTheme() {
-        this.setState(
-            ({ themeIndex }) => ({ themeIndex: (themeIndex + 1) % 2 }),
-            () => localStorage.setItem('themeIndex', this.state.themeIndex),
-        );
+        this.state.themeIndex++;
+        localStorage.setItem('themeIndex', this.state.themeIndex);
     }
 
     /**
@@ -151,7 +111,7 @@ export default class Protected extends Component {
      */
     render() {
         const user = AuthManager.getUser();
-        const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} />} user={user} />;
+        const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} user={user} />} user={user} />;
 
         if (!user) {
             const { pathname } = window.location;
@@ -166,15 +126,17 @@ export default class Protected extends Component {
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
-                <MuiThemeProvider theme={themes[this.state.themeIndex]}>
-                    <Base header={header}>
-                        <Switch>
-                            <Redirect exact from='/' to='/apis' />
-                            <Route path='/apis' component={Apis} />
-                            <Route path='/endpoints' component={Endpoints} />
-                            <Route component={PageNotFound} />
-                        </Switch>
-                    </Base>
+                <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
+                    <AppErrorBoundaryStyled>
+                        <Base header={header}>
+                            <Switch>
+                                <Redirect exact from='/' to='/apis' />
+                                <Route path='/apis' component={Apis} />
+                                <Route path='/endpoints' component={Endpoints} />
+                                <Route component={PageNotFound} />
+                            </Switch>
+                        </Base>
+                    </AppErrorBoundaryStyled>
                 </MuiThemeProvider>
             </IntlProvider>
         );

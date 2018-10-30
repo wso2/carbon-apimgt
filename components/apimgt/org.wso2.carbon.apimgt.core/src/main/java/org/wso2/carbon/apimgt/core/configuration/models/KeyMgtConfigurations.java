@@ -53,6 +53,8 @@ public class KeyMgtConfigurations {
     private String scopeBindingType = "role";
     @Element(description = "Type of scope binding")
     private String productRestApiScopesKeyWord = "apim:";
+    @Element(description = "Audience")
+    private String audience = "http://org.wso2.apimgt/gateway";
 
     public String getKeyManagerImplClass() {
         return keyManagerImplClass;
@@ -154,5 +156,13 @@ public class KeyMgtConfigurations {
     public void setUserInfoEndpoint(String userInfoEndpoint) {
 
         this.userInfoEndpoint = userInfoEndpoint;
+    }
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
     }
 }

@@ -39,10 +39,6 @@ import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * Creates API Producers and API Consumers.
  */
@@ -60,49 +56,6 @@ public class APIManagerFactory {
     private APIGateway apiGateway;
     private APILifecycleManager apiLifecycleManager;
     private UserNameMapper userNameMapper;
-
-    private static final int MAX_PROVIDERS = 50;
-    private static final int MAX_CONSUMERS = 500;
-    private static final int MAX_ANALYZERS = 50;
-
-    // Thread safe Cache for API Providers
-    private static Map<String, APIPublisher> providers =
-            Collections.synchronizedMap(new LinkedHashMap<String, APIPublisher>
-                    (MAX_PROVIDERS + 1, 1.0F, false) {
-                private static final long serialVersionUID = -1801608393369727885L;
-
-                // This method is called just after a new entry has been added
-                @Override
-                public boolean removeEldestEntry(Map.Entry eldest) {
-                    return size() > MAX_PROVIDERS;
-                }
-            });
-
-    // Thread safe Cache for API Consumers
-    private static Map<String, APIStore> consumers = Collections.synchronizedMap(new LinkedHashMap<String, APIStore>
-            (MAX_CONSUMERS + 1, 1.0F, false) {
-        private static final long serialVersionUID = -585394249992765367L;
-
-        // This method is called just after a new entry has been added
-        @Override
-        public boolean removeEldestEntry(Map.Entry eldest) {
-            return size() > MAX_CONSUMERS;
-        }
-    });
-
-    // Thread safe Cache for Analyzers
-    private static Map<String, Analyzer> analyzers = Collections.synchronizedMap(new LinkedHashMap<String, Analyzer>
-            (MAX_ANALYZERS + 1, 1.0F, false) {
-
-        private static final long serialVersionUID = 1375888257077525302L;
-
-        // This method is called just after a new entry has been added
-        @Override
-        public boolean removeEldestEntry(Map.Entry eldest) {
-            return size() > MAX_ANALYZERS;
-        }
-    });
-
 
     private APIManagerFactory() {
 
@@ -169,19 +122,8 @@ public class APIManagerFactory {
      * @throws APIManagementException if error occurred while initializing API Publisher
      */
     public APIPublisher getAPIProvider(String username) throws APIManagementException {
-        APIPublisher provider = providers.get(username);
-        if (provider == null) {
-            synchronized (username.intern()) {
-                provider = providers.get(username);
-                if (provider != null) {
-                    return provider;
-                }
 
-                provider = newProvider(username);
-                providers.put(username, provider);
-            }
-        }
-        return provider;
+        return newProvider(username);
     }
 
     /**
@@ -192,19 +134,8 @@ public class APIManagerFactory {
      * @throws APIManagementException if error occurred while initializing Analytics object
      */
     public Analyzer getAnalyzer(String username) throws APIManagementException {
-        Analyzer analyzer = analyzers.get(username);
-        if (analyzer == null) {
-            synchronized (username.intern()) {
-                analyzer = analyzers.get(username);
-                if (analyzer != null) {
-                    return analyzer;
-                }
 
-                analyzer = newAnalyzer(username);
-                analyzers.put(username, analyzer);
-            }
-        }
-        return analyzer;
+        return newAnalyzer(username);
     }
 
     private Analyzer newAnalyzer(String username) throws APIMgtDAOException {
@@ -249,19 +180,7 @@ public class APIManagerFactory {
      * @throws APIManagementException if error occurred while initializing API Store
      */
     public APIStore getAPIConsumer(String username) throws APIManagementException {
-        APIStore consumer = consumers.get(username);
-        if (consumer == null) {
-            synchronized (username.intern()) {
-                consumer = consumers.get(username);
-                if (consumer != null) {
-                    return consumer;
-                }
-
-                consumer = newConsumer(username);
-                consumers.put(username, consumer);
-            }
-        }
-        return consumer;
+        return newConsumer(username);
     }
 
     /**

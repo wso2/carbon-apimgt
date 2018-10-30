@@ -18,14 +18,12 @@
 
 import React, { Component } from 'react';
 
-import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Redirect from 'react-router-dom/Redirect';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 import green from '@material-ui/core/colors/green';
-import { Divider, Card, CardContent, CardActions } from '@material-ui/core/';
 import Create from '@material-ui/icons/Create';
 import GetApp from '@material-ui/icons/GetApp';
 import { PropTypes } from 'prop-types';
@@ -33,6 +31,7 @@ import { FormattedMessage } from 'react-intl';
 
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import APICreateMenu from '../components/APICreateMenu';
 
 const styles = theme => ({
@@ -41,6 +40,15 @@ const styles = theme => ({
         position: 'relative',
     },
     headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+    head: {
+        paddingBottom: theme.spacing.unit,
+    },
+    content: {
+        paddingBottom: theme.spacing.unit,
+    },
+    buttonLeft: {
+        marginRight: theme.spacing.unit,
+    },
 });
 
 /**
@@ -75,21 +83,20 @@ class SampleAPI extends Component {
     handleDeploySample() {
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
-        promisedSampleAPI
-            .then((sampleAPI) => {
-                sampleAPI
-                    .publish()
-                    .then(() => {
-                        const message = 'Pet-Store API Published successfully';
-                        this.setState({ published: true, api: sampleAPI });
-                        Alert.info(message);
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                        this.setState({ deploying: false });
-                        Alert.error(error);
-                    });
-            });
+        promisedSampleAPI.then((sampleAPI) => {
+            sampleAPI
+                .publish()
+                .then(() => {
+                    const message = 'Pet-Store API Published successfully';
+                    this.setState({ published: true, api: sampleAPI });
+                    Alert.info(message);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    this.setState({ deploying: false });
+                    Alert.error(error);
+                });
+        });
     }
 
     /**
@@ -102,10 +109,9 @@ class SampleAPI extends Component {
             name: 'Swagger Petstore',
             context: '/v2',
             version: '1.0.0',
-            description:
-                'This is a sample server Petstore server.  You can find out more about Swagger at' +
-                '[http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).' +
-                '  For this sample, you can use the api key `special-key` to test the authorization filters.',
+            description: 'This is a sample server Petstore server.  You can find out more about Swagger at' +
+            '[http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).' +
+            '  For this sample, you can use the api key `special-key` to test the authorization filters.',
             isDefaultVersion: true,
             responseCaching: 'Disabled',
             cacheTimeout: 300,
@@ -169,47 +175,33 @@ class SampleAPI extends Component {
             return <Redirect to={url} />;
         }
         return (
-            <Grid container justify='center'>
-                <Grid item sm={4}>
-                    <Card className={classes.card}>
-                        <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
-                            <FormattedMessage
-                                id='welcome.to.wso2.api.manager'
-                                defaultMessage='Welcome to WSO2 API Manager'
-                            />
-                        </Typography>
-                        <Divider />
-                        <CardContent>
-                            <Typography align='justify' component='p'>
-                                <FormattedMessage
-                                    id={
-                                        'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' +
-                                        'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' +
-                                        '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'
-                                    }
-                                />
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <APICreateMenu buttonProps={{ size: 'small', color: 'primary', variant: 'outlined' }}>
-                                <Create />
-                                <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
-                            </APICreateMenu>
-                            <Button
-                                size='small'
-                                color='primary'
-                                disabled={deploying}
-                                variant='outlined'
-                                onClick={this.handleDeploySample}
-                            >
-                                <GetApp />
-                                <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
-                            </Button>
-                            {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
-                        </CardActions>
-                    </Card>
-                </Grid>
-            </Grid>
+            <InlineMessage type='info' height={140}>
+                <div className={classes.contentWrapper}>
+                    <Typography variant='headline' component='h3' className={classes.head}>
+                        <FormattedMessage id='welcome.to.wso2.api.manager' defaultMessage='Welcome to WSO2 API Manager' />
+                    </Typography>
+                    <Typography component='p' className={classes.content}>
+                        <FormattedMessage id={'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' +
+                        'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' +
+                        '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'}
+                        />
+                    </Typography>
+                    <div className={classes.actions}>
+                        <APICreateMenu buttonProps={{
+                            size: 'small', color: 'primary', variant: 'outlined', className: classes.buttonLeft,
+                        }}
+                        >
+                            <Create />
+                            <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
+                        </APICreateMenu>
+                        <Button size='small' color='primary' disabled={deploying} variant='outlined' onClick={this.handleDeploySample}>
+                            <GetApp />
+                            <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
+                        </Button>
+                        {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
+                    </div>
+                </div>
+            </InlineMessage>
         );
     }
 }

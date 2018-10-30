@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -17,19 +17,29 @@
  */
 
 import React from 'react';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import PropTypes from 'prop-types';
 
-export const Footer = () => (
-    <footer className='footer'>
-        <div style={{ textAlign: 'center' }}>
-            <p>
-                WSO2 APIM Publisher v3.0.0 | © 2018
-                <a href='http://wso2.com/' target='_blank' rel='noopener noreferrer'>
-                    <img className='footer-logo' src='/publisher/public/app/images/logo-footer.svg' alt='wso2-logo' />
-                    Inc
-                </a>.
-            </p>
-        </div>
-    </footer>
-);
+const styles = theme => ({
+    footer: {
+        backgroundColor: theme.palette.grey.A100,
+        paddingLeft: theme.spacing.unit * 3,
+        height: 50,
+        alignItems: 'center',
+        display: 'flex',
+    },
+});
+function Footer(props) {
+    const { classes } = props;
+    return (
+        <footer className={classes.footer}>
+            <Typography noWrap>WSO2 APIM v3.0.0 | © 2018 WSO2 Inc</Typography>
+        </footer>
+    );
+}
+Footer.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+};
 
-export default Footer;
+export default withStyles(styles)(Footer);

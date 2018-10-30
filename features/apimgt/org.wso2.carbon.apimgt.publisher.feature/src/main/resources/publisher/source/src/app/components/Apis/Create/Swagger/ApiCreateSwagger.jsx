@@ -23,13 +23,14 @@ import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage } from 'react-intl';
+import Backup from '@material-ui/icons/Backup';
+import classNames from 'classnames';
 
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import { withStyles } from '@material-ui/core/styles';
@@ -38,16 +39,76 @@ import API from 'AppData/api.js';
 
 const styles = theme => ({
     root: {
+        width: theme.custom.contentAreaWidth,
         flexGrow: 1,
+        marginLeft: 0,
+        marginTop: 0,
+        paddingLeft: theme.spacing.unit * 4,
+        paddingTop: theme.spacing.unit * 2,
     },
     paper: {
         padding: theme.spacing.unit * 2,
     },
     buttonProgress: {
-        color: 'green',
         position: 'relative',
-        marginTop: -20,
-        marginLeft: -50,
+        marginTop: theme.spacing.unit * 5,
+        marginLeft: theme.spacing.unit * 6.25,
+    },
+    button: {
+        marginTop: theme.spacing.unit * 2,
+        marginRight: theme.spacing.unit,
+    },
+    subTitle: {
+        color: theme.palette.grey[500],
+    },
+    FormControl: {
+        padding: 0,
+        width: '100%',
+        marginTop: 0,
+    },
+    FormControlOdd: {
+        padding: 0,
+        backgroundColor: theme.palette.background.paper,
+        width: '100%',
+        marginTop: 0,
+    },
+    radioWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    dropZoneInside: {},
+    dropZone: {
+        width: '100%',
+        color: theme.palette.grey[500],
+        border: 'dashed 1px ' + theme.palette.grey[500],
+        background: theme.palette.grey[100],
+        padding: theme.spacing.unit * 4,
+        textAlign: 'center',
+        cursor: 'pointer',
+    },
+    dropZoneIcon: {
+        color: theme.palette.grey[500],
+        width: 100,
+        height: 100,
+    },
+    dropZoneError: {
+        color: theme.palette.error.main,
+    },
+    dropZoneErrorBox: {
+        border: 'dashed 1px ' + theme.palette.error.main,
+    },
+    fileNameWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        '& div': {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+    },
+    buttonSection: {
+        paddingTop: theme.spacing.unit * 2,
     },
 });
 /**
@@ -68,6 +129,10 @@ class ApiCreateSwagger extends React.Component {
             files: [],
             swaggerUrl: '',
             loading: false,
+            valid: {
+                swaggerUrl: { empty: false, invalidUrl: false },
+                swaggerFile: { empty: false, invalidFile: false },
+            },
         };
         this.onDrop = this.onDrop.bind(this);
         this.swaggerUrlChange = this.swaggerUrlChange.bind(this);
@@ -80,8 +145,12 @@ class ApiCreateSwagger extends React.Component {
      * @memberof ApiCreateSwagger
      */
     onDrop(files) {
-        this.setState({
-            files,
+        this.state.files = files;
+        this.setState((oldState) => {
+            const { valid, files } = oldState;
+            const validUpdated = valid;
+            validUpdated.swaggerFile.empty = files.length === 0;
+            return { valid: validUpdated, files };
         });
     }
 
@@ -90,8 +159,13 @@ class ApiCreateSwagger extends React.Component {
      * @param {React.SyntheticEvent} e Event triggered when URL input field changed
      * @memberof ApiCreateSwagger
      */
-    swaggerUrlChange(e) {
-        this.setState({ swaggerUrl: e.target.value });
+    swaggerUrlChange(event) {
+        this.state.swaggerUrl = event.target.value;
+        this.setState(({ valid, swaggerUrl }) => {
+            const validUpdated = valid;
+            validUpdated.swaggerUrl.empty = !swaggerUrl;
+            return { valid: validUpdated, swaggerUrl };
+        });
     }
 
     /**
@@ -102,6 +176,15 @@ class ApiCreateSwagger extends React.Component {
      */
     handleSubmit = (e) => {
         e.preventDefault();
+        if ((this.state.uploadMethod === 'file' && this.state.files.length === 0) || (this.state.uploadMethod === 'url' && !this.state.swaggerUrl)) {
+            this.setState(({ valid, files, swaggerUrl }) => {
+                const validUpdated = valid;
+                validUpdated.swaggerFile.empty = files.length === 0;
+                validUpdated.swaggerUrl.empty = !swaggerUrl;
+                return { valid: validUpdated };
+            });
+            return;
+        }
         this.setState({ loading: true });
         const inputType = this.state.uploadMethod;
         if (inputType === 'url') {
@@ -124,8 +207,8 @@ class ApiCreateSwagger extends React.Component {
                 });
         } else if (inputType === 'file') {
             if (this.state.files.length === 0) {
-                Alert.error('Select a swagger file to upload.');
-                console.log('Select a swagger file to upload.');
+                Alert.error('Select a OpenAPI file to upload.');
+                console.log('Select a OpenAPI file to upload.');
                 return;
             }
             const swagger = this.state.files[0];
@@ -153,7 +236,7 @@ class ApiCreateSwagger extends React.Component {
 
     createAPICallback = (response) => {
         const uuid = JSON.parse(response.data).id;
-        const redirectURL = '/apis/' + uuid + '/overview';
+        const redirectURL = '/apis/'  + uuid + '/overview';
         this.props.history.push(redirectURL);
     };
 
@@ -164,127 +247,112 @@ class ApiCreateSwagger extends React.Component {
      */
     render() {
         const {
-            uploadMethod, files, swaggerUrl, loading,
+            uploadMethod, files, swaggerUrl, loading, valid,
         } = this.state;
         const { classes } = this.props;
         return (
-            <Grid container className={classes.root} spacing={0} justify='center'>
-                <Grid item md={10}>
-                    <Paper className={classes.paper}>
-                        <Typography className='page-title' type='display2' gutterBottom>
-                            <FormattedMessage id='create.new.api.swagger' defaultMessage='Create New API - ' />
+            <Grid container spacing={24} className={classes.root}>
+                <Grid item xs={12} md={6}>
+                    <div className={classes.titleWrapper}>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
                             {this.state.uploadMethod === 'file' ? (
                                 <span>
-                                    <FormattedMessage id='swagger.file.upload' defaultMessage='Swagger file upload' />
+                                    <FormattedMessage id='swagger.file.upload' defaultMessage='OpenAPI file upload' />
                                 </span>
                             ) : (
-                                <span><FormattedMessage id='by.swagger.url' defaultMessage='By swagger url' /></span>
+                                <span>
+                                    <FormattedMessage id='by.swagger.url' defaultMessage='By OpenAPI url' />
+                                </span>
                             )}
                         </Typography>
-                        <Typography type='caption' gutterBottom align='left' className='page-title-help'>
-                            <FormattedMessage
-                                id='fill.the.mandatory.fields'
-                                defaultMessage={'Fill the mandatory fields (Name, Version, Context) '
-                                + 'and create the API. Configure advanced configurations later.'}
-                            />
+                        <Typography type='caption' gutterBottom align='left'>
+                            <FormattedMessage id='fill.the.mandatory.fields' defaultMessage={'Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced configurations later.'} />
                         </Typography>
-
-                        <form onSubmit={this.handleSubmit} className='login-form'>
-                            <Grid item>
-                                <RadioGroup
-                                    aria-label='inputType'
-                                    name='inputType'
-                                    value={uploadMethod}
-                                    onChange={this.handleUploadMethodChange}
-                                    className='horizontal'
+                    </div>
+                    <form onSubmit={this.handleSubmit}>
+                        <FormControl margin='normal' className={classes.FormControl}>
+                            <RadioGroup aria-label='inputType' name='inputType' value={uploadMethod} onChange={this.handleUploadMethodChange} className={classes.radioWrapper}>
+                                <FormControlLabel value='file' control={<Radio />} label={<FormattedMessage id='file' defaultMessage='File' />} />
+                                <FormControlLabel value='url' control={<Radio />} label={<FormattedMessage id='url' defaultMessage='URL' />} />
+                            </RadioGroup>
+                        </FormControl>
+                        {uploadMethod === 'file' && (
+                            <FormControl className={classes.FormControlOdd}>
+                                {files &&
+                                    files.length > 0 && (
+                                    <div className={classes.fileNameWrapper}>
+                                        <Typography variant='subtitle2' gutterBottom>
+                                            <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
+                                        </Typography>
+                                        {files.map(f => (
+                                            <div key={f.name} className={classes.fileName}>
+                                                <Typography variant='body2' gutterBottom>
+                                                    {f.name} - {f.size} bytes
+                                                </Typography>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <Dropzone
+                                    onDrop={this.onDrop}
+                                    multiple={false}
+                                    className={classNames(classes.dropZone, {
+                                        [classes.dropZoneErrorBox]: valid.swaggerFile.empty,
+                                    })}
                                 >
-                                    <FormControlLabel
-                                        value='file'
-                                        control={<Radio />}
-                                        label={<FormattedMessage id='file' defaultMessage='File' />}
-                                    />
-                                    <FormControlLabel
-                                        value='url'
-                                        control={<Radio />}
-                                        label={<FormattedMessage id='url' defaultMessage='URL' />}
-                                    />
-                                </RadioGroup>
-                            </Grid>
-                            <Grid item>
-                                {uploadMethod === 'file' && (
-                                    <FormControl className='horizontal dropzone-wrapper'>
-                                        <div className='dropzone'>
-                                            <Dropzone onDrop={this.onDrop} multiple={false}>
-                                                <p><FormattedMessage
-                                                    id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
-                                                    defaultMessage={'Try dropping some files here, or click to select' +
-                                                    'files to upload.'}
-                                                />
-                                                </p>
-                                            </Dropzone>
-                                        </div>
-                                        <aside>
-                                            <h2><FormattedMessage id='uploaded.files' defaultMessage='Uploaded files' />
-                                            </h2>
-                                            <ul>
-                                                {files.map(f => (
-                                                    <li key={f.name}>
-                                                        {f.name} - {f.size} bytes
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </aside>
-                                    </FormControl>
+                                    <Backup className={classes.dropZoneIcon} />
+                                    <div>
+                                        <FormattedMessage id='try.dropping.some.files.here.or.click.to.select.files.to.upload' defaultMessage={'Try dropping some files here, or click to select files to upload.'} />
+                                    </div>
+                                </Dropzone>
+                                {valid.swaggerFile.empty && (
+                                    <Typography variant='caption' gutterBottom className={classes.dropZoneError}>
+                                        <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                    </Typography>
                                 )}
-                                {uploadMethod === 'url' && (
-                                    <FormControl className='horizontal full-width'>
-                                        <TextField
-                                            id='swaggerUrl'
-                                            label='Swagger Url'
-                                            type='text'
-                                            name='swaggerUrl'
-                                            required
-                                            margin='normal'
-                                            value={swaggerUrl}
-                                            onChange={this.swaggerUrlChange}
-                                        />
-                                    </FormControl>
-                                )}
-                            </Grid>
+                            </FormControl>
+                        )}
+                        {uploadMethod === 'url' && (
+                            <FormControl className={classes.FormControlOdd}>
+                                <TextField
+                                    error={valid.swaggerUrl.empty}
+                                    fullWidth
+                                    id='swaggerUrl'
+                                    label='Swagger Url'
+                                    placeholder='eg: http://petstore.swagger.io/v2/swagger.json'
+                                    helperText={valid.swaggerUrl.empty ? <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' /> : <FormattedMessage id='create.new.swagger.help' defaultMessage='Give a swagger definition such as http://petstore.swagger.io/v2/swagger.json' />}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    type='text'
+                                    name='swaggerUrl'
+                                    margin='normal'
+                                    value={swaggerUrl}
+                                    onChange={this.swaggerUrlChange}
+                                />
+                            </FormControl>
+                        )}
 
-                            <Grid item>
-                                <FormControl>
-                                    <Grid container direction='row' alignItems='flex-start' spacing={16}>
-                                        <Grid item>
-                                            {/* Allowing to create an API from swagger definition, based on scopes */}
-                                            <ScopeValidation
-                                                resourceMethod={resourceMethod.POST}
-                                                resourcePath={resourcePath.APIS}
-                                            >
-                                                <Button
-                                                    variant='outlined'
-                                                    disabled={loading}
-                                                    color='primary'
-                                                    type='submit'
-                                                >
-                                                    <FormattedMessage id='create.btn' defaultMessage='Create' />
-                                                </Button>
-                                                {loading && (
-                                                    <CircularProgress size={24} className={classes.buttonProgress} />
-                                                )}
-                                            </ScopeValidation>
-                                        </Grid>
+                        <FormControl>
+                            <Grid container direction='row' alignItems='flex-start' spacing={16} className={classes.buttonSection}>
+                                <Grid item>
+                                    {/* Allowing to create an API from swagger definition, based on scopes */}
+                                    <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.APIS}>
+                                        <Button variant='contained' disabled={loading} color='primary' type='submit'>
+                                            <FormattedMessage id='create.btn' defaultMessage='Create' />
+                                        </Button>
+                                        {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+                                    </ScopeValidation>
+                                </Grid>
 
-                                        <Grid item>
-                                            <Button raised onClick={() => this.props.history.push('/apis')}>
-                                                <FormattedMessage id='cancel.btn' defaultMessage='Cancel' />
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
-                                </FormControl>
+                                <Grid item>
+                                    <Button raised onClick={() => this.props.history.push('/apis')}>
+                                        <FormattedMessage id='cancel.btn' defaultMessage='Cancel' />
+                                    </Button>
+                                </Grid>
                             </Grid>
-                        </form>
-                    </Paper>
+                        </FormControl>
+                    </form>
                 </Grid>
             </Grid>
         );
@@ -296,6 +364,7 @@ ApiCreateSwagger.propTypes = {
         push: PropTypes.func.isRequired,
     }).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    valid: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(ApiCreateSwagger);

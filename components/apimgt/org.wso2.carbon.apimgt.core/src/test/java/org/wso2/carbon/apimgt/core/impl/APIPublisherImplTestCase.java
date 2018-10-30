@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -91,6 +92,7 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -122,6 +124,8 @@ public class APIPublisherImplTestCase {
     private static final String DEVELOPER_ROLE = "developer";
     private static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
     private static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
+    private static final String TEST_UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
+    private static final String API_PUBLISHER = "APIPublisher";
 
     @BeforeClass
     void init() {
@@ -168,6 +172,7 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
@@ -185,10 +190,11 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
                 gatewaySourceGenerator, gateway);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
+        Mockito.when(identityProvider.getRoleId(Mockito.anyString())).thenReturn(UUID.randomUUID().toString());
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -248,6 +254,8 @@ public class APIPublisherImplTestCase {
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        Mockito.when(identityProvider.getRoleId(Mockito.anyString())).thenReturn(UUID.randomUUID().toString());
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
@@ -266,7 +274,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
                 gatewaySourceGenerator, gateway);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -276,7 +284,8 @@ public class APIPublisherImplTestCase {
     @Test(description = "Test add api when uri templates are empty")
     public void testAddApiWithEmptyUriTemplate() throws APIManagementException, LifecycleException {
 
-        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().uriTemplates(new HashMap<>());
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().uriTemplates(new HashMap<>())
+                .apiPermission("");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
@@ -320,7 +329,7 @@ public class APIPublisherImplTestCase {
         uriTemplateBuilder.httpVerb("GET");
         uriTemplateMap.put("", uriTemplateBuilder.build());
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().uriTemplates(uriTemplateMap)
-                .apiDefinition("");
+                .apiDefinition("").apiPermission("");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
@@ -473,12 +482,12 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with restricted visibility")
     public void testAddApiWithRestrictedVisibility() throws APIManagementException, LifecycleException {
-
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add(ADMIN_ROLE);
-        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
-                .endpoint(SampleTestObjectCreator.getMockEndpointMap()).visibility(API.Visibility.RESTRICTED)
-                .visibleRoles(visibleRoles);
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(SampleTestObjectCreator
+                .getMockEndpointMap()).visibility(API.Visibility.RESTRICTED).visibleRoles(visibleRoles)
+                .apiPermission("");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         LabelDAO labelDao = Mockito.mock(LabelDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
@@ -502,7 +511,8 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(null, null, daoFactory, apiLifecycleManager,
+        Mockito.when(identityProvider.isValidRole(Mockito.anyString())).thenReturn(true);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
                 gatewaySourceGenerator, gateway);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
@@ -558,7 +568,7 @@ public class APIPublisherImplTestCase {
 
         //Assuming the user role list retrieved from IS is null
         Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenReturn(USER_ID);
-        Mockito.when(identityProvider.getRoleIdsOfUser(USER_ID)).thenReturn(null);
+        Mockito.when(identityProvider.getRoleIdsOfUser(USER_ID)).thenReturn(Arrays.asList(DEVELOPER_ROLE_ID));
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         try {
             apiPublisher.deleteAPI(uuid);
@@ -860,7 +870,7 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().apiPermission("");
         String uuid = api.getId();
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -941,7 +951,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
                 gatewaySourceGenerator, gateway);
-        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().apiPermission("");
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
@@ -1060,7 +1070,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(daoFactory.getPolicyDAO()).thenReturn(policyDAO);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, null, daoFactory, apiLifecycleManager,
                 gatewaySourceGenerator, gateway);
-        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().apiPermission("");
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
@@ -1132,7 +1142,7 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
-        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().apiPermission("");
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
@@ -1216,7 +1226,7 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().visibility(API.Visibility.RESTRICTED)
-                .visibleRoles(visibleRoles);
+                .visibleRoles(visibleRoles).apiPermission("");
         String uuid = api.getId();
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -1245,6 +1255,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
+        Mockito.when(identityProvider.isValidRole(Mockito.anyString())).thenReturn(true);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(0)).isAPIContextExists(api.getContext());
@@ -1262,7 +1273,7 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().visibility(API.Visibility.RESTRICTED)
-                .visibleRoles(visibleRoles);
+                .visibleRoles(visibleRoles).apiPermission("");
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
@@ -1286,6 +1297,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
+        Mockito.when(identityProvider.isValidRole(ADMIN_ROLE)).thenReturn(true);
         apiPublisher.updateAPI(api.context("testContext"));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIContextExists(api.getContext());
@@ -2500,7 +2512,7 @@ public class APIPublisherImplTestCase {
     public void testAddUpdateAPIFromWSDLFile() throws APIManagementException, LifecycleException, IOException {
 
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
-                .endpoint(SampleTestObjectCreator.getMockEndpointMap());
+                .endpoint(SampleTestObjectCreator.getMockEndpointMap()).apiPermission("");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2535,7 +2547,7 @@ public class APIPublisherImplTestCase {
     public void testAddUpdateAPIFromWSDLArchive() throws APIManagementException, LifecycleException, IOException {
 
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
-                .endpoint(SampleTestObjectCreator.getMockEndpointMap());
+                .endpoint(SampleTestObjectCreator.getMockEndpointMap()).apiPermission("");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -3148,8 +3160,8 @@ public class APIPublisherImplTestCase {
             uriTemplateBuilder.endpoint(resourceEndpoints);
             uriTemplateMap.replace(k, uriTemplateBuilder.build());
         });
-        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap)
-                .uriTemplates(uriTemplateMap);
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).uriTemplates
+                (uriTemplateMap).apiPermission("");
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -3309,8 +3321,8 @@ public class APIPublisherImplTestCase {
             uriTemplateBuilder.endpoint(resourceEndpoints);
             uriTemplateMap.replace(k, uriTemplateBuilder.build());
         });
-        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap)
-                .uriTemplates(uriTemplateMap);
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).uriTemplates
+                (uriTemplateMap).apiPermission("");
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -4261,6 +4273,91 @@ public class APIPublisherImplTestCase {
         DedicatedGateway dedicatedGateway = SampleTestObjectCreator.createDedicatedGateway(uuid, true,
                 api.getCreatedBy());
         apiPublisher.updateDedicatedGateway(dedicatedGateway);
+    }
+
+    @Test(description = "Add comment")
+    public void testAddComment() throws APIManagementException {
+
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
+        apiPublisher.addComment(comment, api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).addComment(comment, api.getId());
+    }
+
+    @Test(description = "Get comment")
+    public void testGetComment() throws APIManagementException {
+
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
+        Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
+        apiPublisher.getCommentByUUID(comment.getUuid(), api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).getCommentByUUID(comment.getUuid(), api.getId());
+    }
+
+    @Test(description = "Get all comments for an api")
+    public void testGetAllCommentsForApi() throws APIManagementException {
+
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
+        List<Comment> commentList = new ArrayList<>();
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
+        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
+        commentList.add(comment1);
+        commentList.add(comment2);
+        Mockito.when(apiDAO.getCommentsForApi(api.getId())).thenReturn(commentList);
+        List<Comment> commentListFromDB = apiPublisher.getCommentsForApi(api.getId());
+        Assert.assertNotNull(commentListFromDB);
+        Assert.assertEquals(commentList.size(), commentListFromDB.size());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).getCommentsForApi(api.getId());
+    }
+
+    @Test(description = "Delete comment")
+    public void testDeleteComment() throws APIManagementException {
+
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
+        Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
+        apiPublisher.deleteComment(comment.getUuid(), api.getId(), "admin");
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).deleteComment(comment.getUuid(), api.getId());
+    }
+
+    @Test(description = "Update comment")
+    public void testUpdateComment() throws APIManagementException {
+
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        DAOFactory daoFactory = Mockito.mock(DAOFactory.class);
+        Mockito.when(daoFactory.getApiDAO()).thenReturn(apiDAO);
+        APIPublisher apiPublisher = getApiPublisherImpl(daoFactory);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), API_PUBLISHER);
+        Mockito.when(apiDAO.getCommentByUUID(TEST_UUID, api.getId())).thenReturn(comment);
+        apiPublisher.updateComment(comment, TEST_UUID, api.getId(), "admin");
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).updateComment(comment, TEST_UUID, api.getId());
     }
 
     private APIPublisherImpl getApiPublisherImpl(DAOFactory daoFactory, KeyManager keyManager) {

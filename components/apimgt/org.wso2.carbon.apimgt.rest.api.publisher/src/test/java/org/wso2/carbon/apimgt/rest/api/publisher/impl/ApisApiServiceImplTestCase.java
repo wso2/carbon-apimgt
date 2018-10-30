@@ -24,6 +24,7 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -33,13 +34,17 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -47,13 +52,19 @@ import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -65,6 +76,7 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,14 +87,17 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.assertTrue;
+
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RestAPIPublisherUtil.class)
+@PrepareForTest({RestAPIPublisherUtil.class, CommentMappingUtil.class, APIManagerFactory.class})
 public class ApisApiServiceImplTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImplTestCase.class);
     private static final String USER = "admin";
+    private static final String IF_MATCH = null;
+    private static final String IF_UNMODIFIED_SINCE = null;
     private static final String WSDL = "WSDL";
     private static final String SWAGGER = "SWAGGER";
     private static final String WSDL_FILE = "stockQuote.wsdl";
@@ -91,6 +106,7 @@ public class ApisApiServiceImplTestCase {
     private static final String WSDL_ZIP_LOCATION = "wsdl" + File.separator + WSDL_ZIP;
     private static final String WSDL_FILE_INVALID = "stockQuote_invalid.wsdl";
     private static final String WSDL_FILE_INVALID_LOCATION = "wsdl" + File.separator + WSDL_FILE_INVALID;
+    UserNameMapper userNameMapper = Mockito.mock(UserNameMapper.class);
 
     @Test
     public void testDeleteApi() throws Exception {
@@ -2128,6 +2144,301 @@ public class ApisApiServiceImplTestCase {
                 .DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED.getErrorMessage()));
     }
 
+    @Test
+    public void testApisApiIdCommentsCommentIdDelete() throws Exception {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+
+        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .deleteComment(commentId, apiId, USER);
+
+        javax.ws.rs.core.Response response1 =
+                apisApiService.apisApiIdCommentsCommentIdDelete
+                        (null, apiId, null, null, request);
+
+        Assert.assertEquals(200, response1.getStatus());
+
+        // Error Case when commentId is not found
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
+                .when(apiPublisher).deleteComment(commentId, apiId, USER);
+
+        Response response2 = apisApiService.apisApiIdCommentsCommentIdDelete
+                (commentId, apiId, IF_MATCH, IF_UNMODIFIED_SINCE, request);
+
+        assertEquals(response2.getStatus(), 404);
+    }
+
+    @Test
+    public void testApisApiIdCommentsCommentIdDeleteIfMatchStringExistingFingerprintCheck()
+            throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Request request = getRequest();
+
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+
+        String existingFingerprint = "existingFingerprint";
+
+        Mockito.when(apisApiService.apisApiIdCommentsCommentIdDeleteFingerprint
+                (commentId, apiId, "test", "test", request))
+                .thenReturn(existingFingerprint);
+        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .deleteComment(commentId, apiId, USER);
+
+        Response response = apisApiService.apisApiIdCommentsCommentIdDelete
+                (commentId, apiId, "test", "test", request);
+
+        assertEquals(response.getStatus(), 412);
+    }
+
+
+    @Test
+    public void testApisApiIdCommentsPost() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setApiId(apiId);
+        commentDTO.setCommentId(commentId);
+        commentDTO.setCommentText("comment text");
+        commentDTO.setCategory("testCategory");
+        commentDTO.setParentCommentId("");
+        commentDTO.setEntryPoint("APIPublisher");
+        commentDTO.setCreatedBy("creater");
+        commentDTO.setLastUpdatedBy("updater");
+
+        Instant time = APIUtils.getCurrentUTCTime();
+        Comment comment = new Comment();
+        comment.setUuid(commentId);
+        comment.setApiId(apiId);
+        comment.setCommentedUser("commentedUser");
+        comment.setCommentText("this is a comment");
+        comment.setCategory("testCategory");
+        comment.setParentCommentId("");
+        comment.setEntryPoint("APIPublisher");
+        comment.setCreatedUser("createdUser");
+        comment.setUpdatedUser("updatedUser");
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
+
+        Mockito.when(apiPublisher.addComment(comment,apiId)).thenReturn(commentId);
+        Mockito.when(apiPublisher.getCommentByUUID(commentId, apiId)).thenReturn(comment);
+
+        PowerMockito.mockStatic(CommentMappingUtil.class);
+        PowerMockito.when(CommentMappingUtil.fromDTOToComment(commentDTO,USER)).thenReturn(comment);
+        PowerMockito.when(CommentMappingUtil.fromCommentToDTO(comment)).thenReturn(commentDTO);
+
+        Response response1 = apisApiService.apisApiIdCommentsPost
+                (apiId,commentDTO,getRequest());
+
+        Assert.assertEquals(201, response1.getStatus());
+
+        // Error Case
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiPublisher).addComment(comment,apiId);
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiPublisher).getCommentByUUID(commentId, apiId);
+
+        Response response2 = apisApiService.apisApiIdCommentsPost
+                (apiId,commentDTO,getRequest());
+
+        Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response2.getStatus());
+    }
+
+
+    @Test
+    public void testApisApiIdCommentsCommentIdGet() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        PowerMockito.when(APIManagerFactory.getInstance().getUserNameMapper()).thenReturn(userNameMapper);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+
+        Instant time = APIUtils.getCurrentUTCTime();
+        Comment comment = new Comment();
+        comment.setUuid(commentId);
+        comment.setApiId(apiId);
+        comment.setCommentedUser("commentedUser");
+        comment.setCommentText("this is a comment");
+        comment.setCategory("testCategory");
+        comment.setParentCommentId("");
+        comment.setEntryPoint("APIPublisher");
+        comment.setCreatedUser("createdUser");
+        comment.setUpdatedUser("updatedUser");
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
+
+        Mockito.when(apiPublisher.getCommentByUUID(commentId, apiId)).thenReturn(comment);
+
+        Response response1 = apisApiService.apisApiIdCommentsCommentIdGet
+                (commentId, apiId, null, null, request);
+
+        Assert.assertEquals(200, response1.getStatus());
+
+        // Error Case when commentId is not found
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
+                .when(apiPublisher).getCommentByUUID(commentId, apiId);
+
+        Response response2 = apisApiService.apisApiIdCommentsCommentIdGet
+                (commentId, apiId, null, null, request);
+
+        Assert.assertEquals(404, response2.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdCommentsGet() throws Exception {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+
+        Instant time = APIUtils.getCurrentUTCTime();
+        Comment comment1 = new Comment();
+        comment1.setUuid(UUID.randomUUID().toString());
+        comment1.setCommentedUser("commentedUser1");
+        comment1.setCommentText("this is a comment 1");
+        comment1.setCategory("testCategory1");
+        comment1.setParentCommentId("");
+        comment1.setEntryPoint("APIPublisher");
+        comment1.setCreatedUser("createdUser1");
+        comment1.setUpdatedUser("updatedUser1");
+        comment1.setCreatedTime(time);
+        comment1.setUpdatedTime(time);
+
+        time = APIUtils.getCurrentUTCTime();
+        Comment comment2 = new Comment();
+        comment2.setUuid(UUID.randomUUID().toString());
+        comment2.setCommentedUser("commentedUser2");
+        comment2.setCommentText("this is a comment 2");
+        comment2.setCategory("testCategory2");
+        comment2.setParentCommentId("");
+        comment2.setEntryPoint("APIPublisher");
+        comment2.setCreatedUser("createdUser2");
+        comment2.setUpdatedUser("updatedUser2");
+        comment2.setCreatedTime(time);
+        comment2.setUpdatedTime(time);
+
+        List<Comment> commentList = new ArrayList<>();
+        commentList.add(comment1);
+        commentList.add(comment2);
+
+        Mockito.when(apiPublisher.getCommentsForApi(apiId)).thenReturn(commentList);
+        Response response1 = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, request);
+
+        Assert.assertEquals(200, response1.getStatus());
+
+        // Error Case when commentId is not found
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
+                .when(apiPublisher).getCommentsForApi(apiId);
+
+        Response response2 = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, request);
+
+        Assert.assertEquals(404, response2.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdCommentsCommentIdPut() throws Exception {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        PowerMockito.when(APIManagerFactory.getInstance().getUserNameMapper()).thenReturn(userNameMapper);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setApiId(apiId);
+        commentDTO.setCommentText("comment text");
+        commentDTO.setCategory("testCategory");
+        commentDTO.setParentCommentId("");
+        commentDTO.setEntryPoint("APIPublisher");
+        commentDTO.setCreatedBy("creater");
+        commentDTO.setLastUpdatedBy("updater");
+
+        Instant time = APIUtils.getCurrentUTCTime();
+        Comment comment = new Comment();
+        comment.setCommentedUser("commentedUser");
+        comment.setCommentText("this is a comment");
+        comment.setCategory("testCategory");
+        comment.setParentCommentId("");
+        comment.setEntryPoint("APIPublisher");
+        comment.setCreatedUser("createdUser");
+        comment.setUpdatedUser("updatedUser");
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
+
+        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .updateComment(comment, commentId, apiId, USER);
+        Mockito.when(apiPublisher.getCommentByUUID(commentId, apiId)).thenReturn(comment);
+
+        Response response1 = apisApiService.apisApiIdCommentsCommentIdPut
+                (commentId, apiId, commentDTO, null, null, request);
+
+        Assert.assertEquals(200, response1.getStatus());
+
+        // Error Case
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiPublisher).updateComment(comment, commentId, apiId, USER);
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiPublisher).getCommentByUUID(commentId, apiId);
+
+
+        Response response2 = apisApiService.apisApiIdCommentsCommentIdPut
+                (commentId, apiId, commentDTO, IF_MATCH, IF_UNMODIFIED_SINCE, request);
+
+        Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response2.getStatus());
+    }
+
     private Matcher<API.APIBuilder> getAPIBuilderMatcher(API.APIBuilder apiBuilder) {
         return new BaseMatcher<API.APIBuilder>() {
             @Override
@@ -2151,7 +2462,7 @@ public class ApisApiServiceImplTestCase {
     }
 
     // Sample request to be used by tests
-    private Request getRequest() throws Exception {
+    private Request getRequest() throws APIMgtSecurityException {
         HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Mockito.when(carbonMessage.getProperty("LOGGED_IN_USER")).thenReturn(USER);
         Request request = new Request(carbonMessage);

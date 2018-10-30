@@ -76,7 +76,8 @@ public class ApplicationImportExportManagerTestCase {
         PowerMockito.mockStatic(DAOFactory.class);
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
-        PowerMockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString())).thenReturn(true);
+        PowerMockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiStore.getApplicationByName(testApp.getName(), USER)).thenReturn(testApp);
         WorkflowResponse workflowResponse = Mockito.mock(WorkflowResponse.class);
         Mockito.when(apiStore.updateApplication(testApp.getUuid(), testApp)).thenReturn(workflowResponse);
@@ -92,7 +93,8 @@ public class ApplicationImportExportManagerTestCase {
         PowerMockito.mockStatic(DAOFactory.class);
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         Mockito.when(daoFactory.getApplicationDAO()).thenReturn(applicationDAO);
-        PowerMockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString())).thenReturn(true);
+        PowerMockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
         Mockito.when(apiStore.getApplicationByName(testApp.getName(), USER)).thenReturn(testApp);
         WorkflowResponse workflowResponse = Mockito.mock(WorkflowResponse.class);
         Mockito.when(apiStore.updateApplication(testApp.getUuid(), testApp)).thenReturn(workflowResponse);

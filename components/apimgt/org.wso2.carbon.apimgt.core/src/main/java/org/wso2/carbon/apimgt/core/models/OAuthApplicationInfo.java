@@ -36,6 +36,7 @@ public final class OAuthApplicationInfo {
     private String callBackURL;
     private List<String> grantTypes;
     private String clientSecret;
+    private String tokenType;
     private Map<String, Object> parameters = new HashMap<>();
 
     public String getKeyType() {
@@ -115,6 +116,14 @@ public final class OAuthApplicationInfo {
         this.parameters = parameters;
     }
 
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
     @Override
     public String toString() {
         return "OAuthApplicationInfo{" +
@@ -123,6 +132,7 @@ public final class OAuthApplicationInfo {
                 ", callBackURL='" + callBackURL + '\'' +
                 ", parameters=" + parameters.toString() +
                 ", grantTypes=" + grantTypes +
+                ", tokenType='" + tokenType + '\'' +
                 '}';
     }
 

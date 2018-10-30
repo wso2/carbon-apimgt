@@ -44,10 +44,12 @@ import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.SearchType;
 import org.wso2.carbon.apimgt.core.dao.SecondarySearchType;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
@@ -66,6 +68,7 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -128,7 +131,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
     private static final String ATTRIBUTE_DELIMITER = ",";
     private static final String KEY_VALUE_DELIMITER = ":";
-
+    private static final String ENTRY_POINT_PUBLISHER = "APIPublisher";
     // Map to store observers, which observe APIPublisher events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
@@ -227,7 +230,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             api = super.getAPIbyUUID(uuid);
             if (api != null) {
-                api.setUserSpecificApiPermissions(getAPIPermissionsOfLoggedInUser(getUsername(), api));
+                List<String> userSpecificPermissionList = getAPIPermissionsOfLoggedInUser(getUsername(), api);
+                api.setUserSpecificApiPermissions(userSpecificPermissionList);
+                verifyUserPermissionsToReadAPI(getUsername(), api);
                 String permissionString = api.getApiPermission();
                 if (!StringUtils.isEmpty(permissionString)) {
                     api.setApiPermission(replaceGroupIdWithName(permissionString));
@@ -359,9 +364,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         APIGateway gateway = getApiGateway();
 
         apiBuilder.provider(getUsername());
-        if (StringUtils.isEmpty(apiBuilder.getId())) {
-            apiBuilder.id(UUID.randomUUID().toString());
-        }
+        apiBuilder.id(UUID.randomUUID().toString());
 
         Instant dateTime = Instant.now();
         apiBuilder.createdTime(dateTime);
@@ -448,12 +451,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().addAPI(createdAPI);
                 } else if (API.Visibility.RESTRICTED == createdAPI.getVisibility()) {
                     //get all the roles in the system
-                    Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
                     //get the roles needed to be associated with the API
                     apiRoleList = createdAPI.getVisibleRoles();
-                    if (APIUtils.checkAllowedRoles(allAvailableRoles, apiRoleList)) {
-                        getApiDAO().addAPI(createdAPI);
-                    }
+                    isRolesExist(apiRoleList);
+                    getApiDAO().addAPI(createdAPI);
                 }
 
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
@@ -495,6 +496,22 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
         }
         return apiBuilder.getId();
+    }
+
+    private void isRolesExist(Set<String> apiRoleList) throws APIManagementException {
+
+        if (apiRoleList.isEmpty()) {
+            String errorMsg = "Roles not added";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
+        }
+        for (String role : apiRoleList) {
+            if (!getIdentityProvider().isValidRole(role)) {
+                String errorMsg = "Invalid role(s) found.";
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.UNSUPPORTED_ROLE);
+            }
+        }
     }
 
     private void validateEndpoints(Map<String, Endpoint> endpointMap, boolean apiUpdate) throws
@@ -646,14 +663,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             if (API.Visibility.PUBLIC == api.getVisibility()) {
                                 getApiDAO().updateAPI(api.getId(), api);
                             } else if (API.Visibility.RESTRICTED == api.getVisibility()) {
-                                //get all the roles in the system
-                                Set<String> availableRoles = APIUtils.getAllAvailableRoles();
-                                //get the roles needed to be associated with the API
                                 Set<String> apiRoleList = api.getVisibleRoles();
-                                //if the API has role based visibility, update the API with role checking
-                                if (APIUtils.checkAllowedRoles(availableRoles, apiRoleList)) {
-                                    getApiDAO().updateAPI(api.getId(), api);
-                                }
+                                isRolesExist(apiRoleList);
+                                getApiDAO().updateAPI(api.getId(), api);
                             }
                             getApiDAO().updateApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
                             getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
@@ -666,14 +678,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         if (API.Visibility.PUBLIC == api.getVisibility()) {
                             getApiDAO().updateAPI(api.getId(), api);
                         } else if (API.Visibility.RESTRICTED == api.getVisibility()) {
-                            //get all the roles in the system
-                            Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
-                            //get the roles needed to be associated with the API
                             Set<String> apiRoleList = api.getVisibleRoles();
+                            isRolesExist(apiRoleList);
                             //if the API has role based visibility, update the API with role checking
-                            if (APIUtils.checkAllowedRoles(allAvailableRoles, apiRoleList)) {
-                                getApiDAO().updateAPI(api.getId(), api);
-                            }
+                            getApiDAO().updateAPI(api.getId(), api);
                         }
                         getApiDAO().updateApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
                         getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
@@ -779,6 +787,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
+     * This method checks whether the currently logged in user has the "DELETE" permission for the API
+     *
+     * @param user - currently logged in user
+     * @param api  - the api to be deleted
+     * @throws APIManagementException - If the user does not have "DELETE" permission for the API
+     */
+    private void verifyUserPermissionsToReadAPI(String user, API api) throws APIManagementException {
+        List<String> userPermissions = api.getUserSpecificApiPermissions();
+        if (userPermissions.isEmpty()) {
+            String message = "The user " + user + " does not have permission to read the api " + api.getName();
+            if (log.isDebugEnabled()) {
+                log.debug(message);
+            }
+            throw new APIManagementException(message, ExceptionCodes.NO_READ_PERMISSIONS);
+        }
+    }
+
+    /**
      * This method will return map with role names and its permission values.
      *
      * @param permissionJsonString Permission json object a string
@@ -794,6 +820,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         for (Object aBaseJsonArray : baseJsonArray) {
             JSONObject jsonObject = (JSONObject) aBaseJsonArray;
             String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
+            groupId = getIdentityProvider().getRoleId(groupId);
+            if (StringUtils.isEmpty(groupId)) {
+                throw new APIManagementException("Error while retrieving groupId: " + groupId, ExceptionCodes
+                        .ROLE_DOES_NOT_EXIST);
+            }
             JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
             int totalPermissionValue = 0;
             for (Object aSubJsonArray : subJsonArray) {
@@ -2533,6 +2564,162 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException("Scope couldn't found by name: " + scopeName, ExceptionCodes
                     .SCOPE_NOT_FOUND);
         }
+    }
+
+    /**
+     * Fail if api not exists
+     *
+     * @param apiId UUID of the api
+     * @throws APIMgtResourceNotFoundException if API does not exist
+     * @throws APIMgtDAOException              if error occurred while accessing data layer
+     */
+    private void failIfApiNotExists(String apiId) throws APIMgtResourceNotFoundException, APIMgtDAOException {
+        if (!getApiDAO().isAPIExists(apiId)) {
+            String errorMsg = "api not found for the id : " + apiId;
+            log.error(errorMsg);
+            throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public String addComment(Comment comment, String apiId) throws APICommentException,
+            APIMgtResourceNotFoundException {
+        validateCommentMaxCharacterLength(comment.getCommentText());
+        String generatedUuid = UUID.randomUUID().toString();
+        comment.setUuid(generatedUuid);
+        comment.setEntryPoint(ENTRY_POINT_PUBLISHER);
+        try {
+            failIfApiNotExists(apiId);
+            getApiDAO().addComment(comment, apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while adding comment for api - " + apiId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, e.getErrorHandler());
+        }
+        return comment.getUuid();
+    }
+
+    @Override
+    public void deleteComment(String commentId, String apiId, String username) throws APICommentException,
+            APIMgtResourceNotFoundException {
+        try {
+            ApiDAO apiDAO = getApiDAO();
+            failIfApiNotExists(apiId);
+            Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
+            if (comment != null) {
+                 /*if the delete operation is done by a user who isn't the owner of the comment
+                  and with a different end point*/
+                if (!(comment.getCommentedUser().equals(username) &&
+                        ENTRY_POINT_PUBLISHER.equals(comment.getEntryPoint()))) {
+                    checkIfUserIsAdmin(username);
+                }
+                apiDAO.deleteComment(commentId, apiId);
+            } else {
+                String errorMsg = "Couldn't find comment with comment_id : " + commentId;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while deleting comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, e.getErrorHandler());
+        }
+
+    }
+
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId, String username)
+            throws APICommentException, APIMgtResourceNotFoundException {
+        validateCommentMaxCharacterLength(comment.getCommentText());
+        try {
+            failIfApiNotExists(apiId);
+            Comment oldComment = getApiDAO().getCommentByUUID(commentId, apiId);
+            if (oldComment != null) {
+                /*if the update operation is done by a user who isn't the owner of the comment
+                  and with a different end point*/
+                if (!(oldComment.getCommentedUser().equals(username) &&
+                        ENTRY_POINT_PUBLISHER.equals(oldComment.getEntryPoint()))) {
+                    String errorMsg = "The user " + username + " does not have permission to update this comment";
+                    log.error(errorMsg);
+                    throw new APICommentException(errorMsg, ExceptionCodes.COULD_NOT_UPDATE_COMMENT);
+                }
+                getApiDAO().updateComment(comment, commentId, apiId);
+            } else {
+                String errorMsg = "Couldn't find comment with comment_id : " + commentId + "and api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APICommentException, APIMgtResourceNotFoundException {
+        try {
+            failIfApiNotExists(apiId);
+            List<Comment> commentList = getApiDAO().getCommentsForApi(apiId);
+            return commentList;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving comments for api " + apiId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public Comment getCommentByUUID(String commentId, String apiId) throws APICommentException,
+            APIMgtResourceNotFoundException {
+        Comment comment;
+        try {
+            failIfApiNotExists(apiId);
+            comment = getApiDAO().getCommentByUUID(commentId, apiId);
+            if (comment == null) {
+                String errorMsg = "Couldn't find comment with comment_id - " + commentId + " for api_id " + apiId;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving comment for comment_id " + commentId + " for api_id " + apiId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, e.getErrorHandler());
+        }
+        return comment;
+    }
+
+
+    /**
+     * Check whether current user is an admin
+     *
+     * @param username username of the user
+     * @throws APICommentException if user does not have admin role
+     */
+    private void checkIfUserIsAdmin(String username) throws APICommentException {
+        Set<String> roles = APIUtils.getAllRolesOfUser(username);
+        if (roles.contains("admin")) {
+            return;
+        }
+        String errorMsg = "admin permission needed";
+        log.error(errorMsg);
+        throw new APICommentException(errorMsg, ExceptionCodes.NEED_ADMIN_PERMISSION);
+    }
+
+    /**
+     * Validates the comment length is less than or equal to max comment length in config
+     *
+     * @param commentText comment text
+     * @throws APICommentException if comment length is larger than max length allowed
+     */
+    private void validateCommentMaxCharacterLength(String commentText) throws APICommentException {
+        if (commentText.length() <= getConfig().getCommentMaxLength()) {
+            return;
+        }
+        String errorMsg = "comment text exceeds allowed maximum length of characters";
+        log.error(errorMsg);
+        throw new APICommentException(errorMsg, ExceptionCodes.COMMENT_LENGTH_EXCEEDED);
     }
 
     private boolean validateScope(String swagger) throws APIManagementException {

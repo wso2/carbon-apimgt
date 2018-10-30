@@ -28,6 +28,9 @@ public final class Comment {
 
     private String uuid;
     private String apiId;
+    private String category;
+    private String parentCommentId;
+    private String entryPoint;
     private String commentedUser;
     private String commentText;
     private String createdUser;
@@ -49,6 +52,30 @@ public final class Comment {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getCategory() { 
+        return category; 
+    }
+
+    public void setCategory(String category) {
+        this.category = category; 
+    }
+
+    public String getParentCommentId() { 
+        return parentCommentId; 
+    }
+
+    public void setParentCommentId(String parentCommentId) { 
+        this.parentCommentId = parentCommentId; 
+    }
+
+    public String getEntryPoint() {
+        return entryPoint;
+    }
+
+    public void setEntryPoint(String entryPoint) {
+        this.entryPoint = entryPoint;
     }
 
     public String getCommentedUser() {

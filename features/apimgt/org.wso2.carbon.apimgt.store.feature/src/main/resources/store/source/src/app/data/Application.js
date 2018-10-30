@@ -94,15 +94,17 @@ export default class Application extends Resource {
      * @param key_type {string} Key type either `Production` or `SandBox`
      * @param supportedGrantTypes {string[]}
      * @param callbackUrl {string}
+     * @param tokenType {string} Token type either `OAUTH` or `JWT`
      * @returns {promise} Set the generated token into current instance and return tokenObject received as Promise object
      */
-    generateKeys(key_type, supportedGrantTypes, callbackUrl) {
+    generateKeys(key_type, supportedGrantTypes, callbackUrl, tokenType) {
         let promised_keys = this.client.then((client) => {
             let request_content =
                 {
                     keyType: key_type, /* TODO: need to support dynamic key types ~tmkb*/
                     grantTypesToBeSupported: supportedGrantTypes,
-                    callbackUrl: callbackUrl
+                    callbackUrl: callbackUrl,
+                    tokenType: tokenType
                 };
             let payload = { applicationId: this.id, body: request_content };
             return client.apis["Application (Individual)"].post_applications__applicationId__generate_keys(payload);
@@ -115,6 +117,7 @@ export default class Application extends Resource {
 
     /***
      * Generate Consumer Secret and Consumer Key for this application instance
+     * @param tokenType {string} Token Type either `OAUTH` or `JWT`
      * @param key_type {string} Key type either `Production` or `SandBox`
      * @param supportedGrantTypes {String []}
      * @param callbackUrl {String}
@@ -122,7 +125,7 @@ export default class Application extends Resource {
      * @param consumerSecret {String}
      * @returns {promise} Update the callbackURL and/or supportedGrantTypes
      */
-    updateKeys(key_type, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret) {
+    updateKeys(tokenType, key_type, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret) {
         let promised_put = this.client.then((client) => {
             let request_content =
             {
@@ -130,7 +133,8 @@ export default class Application extends Resource {
                 consumerSecret: consumerSecret,
                 supportedGrantTypes: supportedGrantTypes,
                 callbackUrl: callbackUrl,
-                keyType: key_type
+                keyType: key_type,
+                tokenType: token
               }
             let payload = { applicationId: this.id, keyType: key_type, body: request_content };
             return client.apis["Application (Individual)"].put_applications__applicationId__keys__keyType_(payload);

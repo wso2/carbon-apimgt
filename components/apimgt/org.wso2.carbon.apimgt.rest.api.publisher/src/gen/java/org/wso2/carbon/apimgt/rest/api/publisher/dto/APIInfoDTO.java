@@ -12,6 +12,9 @@ import java.util.Objects;
  * APIInfoDTO
  */
 public class APIInfoDTO   {
+  @SerializedName("type")
+  private String type = "API";
+
   @SerializedName("id")
   private String id = null;
 
@@ -38,6 +41,24 @@ public class APIInfoDTO   {
 
   @SerializedName("securityScheme")
   private List<String> securityScheme = new ArrayList<String>();
+
+  public APIInfoDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+   /**
+   * Specify whether the api object is APIInfo or API Object . 
+   * @return type
+  **/
+  @ApiModelProperty(example = "API", value = "Specify whether the api object is APIInfo or API Object . ")
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -216,7 +237,8 @@ public class APIInfoDTO   {
       return false;
     }
     APIInfoDTO apIInfo = (APIInfoDTO) o;
-    return Objects.equals(this.id, apIInfo.id) &&
+    return Objects.equals(this.type, apIInfo.type) &&
+        Objects.equals(this.id, apIInfo.id) &&
         Objects.equals(this.name, apIInfo.name) &&
         Objects.equals(this.description, apIInfo.description) &&
         Objects.equals(this.context, apIInfo.context) &&
@@ -229,7 +251,7 @@ public class APIInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, securityScheme);
+    return Objects.hash(type, id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, securityScheme);
   }
 
   @Override
@@ -237,6 +259,7 @@ public class APIInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIInfoDTO {\n");
     
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");

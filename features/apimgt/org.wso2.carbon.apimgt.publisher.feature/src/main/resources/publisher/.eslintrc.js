@@ -13,7 +13,7 @@ module.exports = {
     },
     extends: 'airbnb',
     rules: {
-        'max-len': ['error', 120],
+        'max-len': ['error', 5000],
         'require-jsdoc': [
             'warn',
             {

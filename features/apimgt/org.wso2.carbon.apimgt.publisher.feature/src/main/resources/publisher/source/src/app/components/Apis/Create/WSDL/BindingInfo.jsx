@@ -5,6 +5,18 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import { withStyles } from '@material-ui/core/styles'
+const styles = theme => ({
+    FormControl: {
+        padding: 0,
+        width: '100%',
+        marginTop: theme.spacing.unit*3,
+    },
+    radioWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
+});
 
 const BindingInfo = (props) => {
     const {
@@ -12,13 +24,14 @@ const BindingInfo = (props) => {
     } = props;
     if (wsdlBean.info && (wsdlBean.info.bindingInfo.hasHttpBinding || wsdlBean.info.bindingInfo.hasSoapBinding)) {
         return (
-            <FormControl component='fieldset'>
+            <FormControl className={classes.FormControl}>
                 <FormLabel component='legend'>Implementation Type</FormLabel>
                 <RadioGroup
                     aria-label='Implementation-Type'
                     name='implementationType'
                     value={api.implementationType}
                     onChange={updateApiInputs}
+                    className={classes.radioWrapper}
                 >
                     <FormControlLabel
                         disabled={!wsdlBean.info.bindingInfo.hasSoapBinding}
@@ -52,4 +65,4 @@ BindingInfo.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default BindingInfo;
+export default withStyles(styles)(BindingInfo);

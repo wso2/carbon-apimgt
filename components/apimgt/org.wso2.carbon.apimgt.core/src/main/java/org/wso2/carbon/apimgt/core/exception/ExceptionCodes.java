@@ -50,17 +50,12 @@ public enum ExceptionCodes implements ErrorHandler {
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
-    COMMENT_NOT_FOUND(900319, "Comment not found", 404, "Couldn't retrieve comment"),
     APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
     STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
-    NEED_COMMENT_MODERATOR_PERMISSION(900323, "Comment moderator permission needed", 403,
-            "This user is not a comment moderator"),
     RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
     RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
             + "values"),
-    COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
-            + "number of characters"),
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
     COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
             "A Composite API already exists for this application"),
@@ -77,7 +72,7 @@ public enum ExceptionCodes implements ErrorHandler {
     SDK_NOT_GENERATED(900337, "Error while generating SDK", 500, "Error while generating SDK"),
     APPLICATION_EXPORT_ERROR(900338, "Application Export Error", 500, "Error while exporting the given Application"),
     APPLICATION_IMPORT_ERROR(900339, "Application Import Error", 500, "Error while importing the given Application"),
-
+    NO_READ_PERMISSIONS(900340, "No permissions to read API.", 403, "No permissions to read API."),
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
     RESOURCE_NOT_FOUND(900401, "Resource not found", 404, "Requested resource not found"),
@@ -252,7 +247,18 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_DEDICATED_CONTAINER_BASED_GATEWAY_LABEL(900998, "Invalid gateway label is provided", 400,
             "Invalid gateway label is provided"),
     DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900999, "Dedicated gateway details not found for the API", 404, "Dedicated " +
-            "gateway details not found for the API");
+            "gateway details not found for the API"),
+
+    //Comments related Codes
+    NEED_COMMENT_MODERATOR_PERMISSION(901100, "Comment moderator permission needed", 403,
+            "This user is not a comment moderator"),
+    COULD_NOT_UPDATE_COMMENT(901101, "Error has occurred. Could not update the Comment", 500,
+            "Error has occurred. Could not update the Comment"),
+    COMMENT_NOT_FOUND(901102, "Comment not found", 404, "Couldn't retrieve comment"),
+    COMMENT_LENGTH_EXCEEDED(901103, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
+            + "number of characters"),
+    NEED_ADMIN_PERMISSION(901100, "Admin permission needed", 403,
+            "This user is not an admin");
 
     private final long errorCode;
     private final String errorMessage;

@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.AdditionalProperties;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
@@ -77,6 +78,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
 import java.util.ArrayList;
@@ -155,6 +157,15 @@ public class MappingUtil {
             apiOperationsDTO.setScopes(uriTemplate.getScopes());
             apidto.addOperationsItem(apiOperationsDTO);
         }
+
+        if (api.getAdditionalProperties() != null) {
+            List<API_additionalPropertiesDTO> additionalPropertiesDTOList = new ArrayList<>();
+            for (AdditionalProperties propertiesDTO : api.getAdditionalProperties()) {
+                additionalPropertiesDTOList.add(new API_additionalPropertiesDTO(propertiesDTO.getPropertyKey(), propertiesDTO.getPropertyValue()));
+            }
+            apidto.setAdditionalProperties(additionalPropertiesDTOList);
+        }
+
         if (api.getApiPolicy() != null) {
             apidto.setApiPolicy(api.getApiPolicy().getPolicyName());
         }
@@ -269,6 +280,20 @@ public class MappingUtil {
                 wsdlUri(apidto.getWsdlUri()).
                 scopes(apidto.getScopes()).
                 securityScheme(mapSecuritySchemeListToInt(apidto.getSecurityScheme()));
+
+        //additional properties
+        if (apidto.getAdditionalProperties() != null) {
+            List<AdditionalProperties> additionalProperties = new ArrayList<>();
+            //get additional properties for each list element in API_additionalPropertiesDTO
+            for (API_additionalPropertiesDTO propertiesDTO : apidto.getAdditionalProperties()) {
+                if (StringUtils.isEmpty(propertiesDTO.getId())) {
+                    propertiesDTO.setId(UUID.randomUUID().toString());
+                }
+                additionalProperties.add(new AdditionalProperties(propertiesDTO.getKey(), propertiesDTO.getValue(),
+                        propertiesDTO.getId()));
+            }
+            apiBuilder.additionalProperties(additionalProperties);
+        }
 
         if (apidto.getIsDefaultVersion() != null) {
             apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());

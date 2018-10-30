@@ -31,28 +31,10 @@ public class APIMgtConstants {
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require re-subscription when publish the API";
     public static final String CHECK_LIST_ITEM_CHANGE_EVENT = "CheckListItemChange";
     public static final String IS_EXTERNAL_KEYMANAGER = "IsExternalKeyManager";
-    //Swagger v2.0 constants
-    public static final String SWAGGER_X_SCOPE = "x-scope";
-    public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
-    public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
-    public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
-    public static final String SWAGGER_SCOPE_KEY = "key";
-    public static final String SWAGGER_NAME = "name";
-    public static final String SWAGGER_DESCRIPTION = "description";
-    public static final String SWAGGER_ROLES = "roles";
-    public static final String SWAGGER_TITLE = "title";
-    public static final String SWAGGER_EMAIL = "email";
-    public static final String SWAGGER_CONTACT = "contact";
-    public static final String SWAGGER_VER = "version";
     public static final String SWAGGER_OBJECT_NAME_APIM = "apim";
-    public static final String SWAGGER_PATHS = "paths";
-    public static final String SWAGGER_RESPONSES = "responses";
     public static final String SWAGGER = "swagger";
-    public static final String SWAGGER_V2 = "2.0";
-    public static final String SWAGGER_INFO = "info";
-    public static final String SWAGGER_RESPONSE_200 = "200";
     public static final String SWAGGER_APIKEY = "apikey";
     public static final String SWAGGER_OAUTH2 = "oauth2";
     public static final String API = "API";
@@ -68,6 +50,7 @@ public class APIMgtConstants {
     public static final String PRODUCTION_ENDPOINT = "production";
     public static final String OAUTH2SECURITY = "OAuth2Security";
     public static final String SCOPES = "scopes";
+    public static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
     public static final String DEFAULT_LABEL_NAME = "Default";
     public static final String DEFAULT_LABEL_ACCESS_URL = "https://localhost:9092";
@@ -554,5 +537,15 @@ public class APIMgtConstants {
     public static class EncryptionConstants {
         public static final String AES = "AES";
         public static final String ENCRYPTED_AES_KEY_FILE = "encryptedAESKeyFile";
+    }
+
+    /**
+     * Oauth2 Related Constants
+     */
+    public static class Oauth2Constants {
+        public static final String IMPLICIT_GRANT_TYPE = "implicit";
+        public static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
+        public static final String OAUTH_TOKEN_TYPE = "OAUTH";
+        public static final String JWT_TOKEN_TYPE = "JWT";
     }
 }

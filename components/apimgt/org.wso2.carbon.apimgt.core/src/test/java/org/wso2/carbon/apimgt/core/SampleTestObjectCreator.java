@@ -247,7 +247,7 @@ public class SampleTestObjectCreator {
                 securityScheme(3).
                 threatProtectionPolicies(threatProtectionPolicies);
         Map map = new HashMap();
-        map.put(DEVELOPER_ROLE_ID, 6);
+        map.put(DEVELOPER_ROLE_ID, 1);
         map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
@@ -1122,12 +1122,15 @@ public class SampleTestObjectCreator {
         return builder.build();
     }
 
-    public static Comment createDefaultComment(String apiId) {
+    public static Comment createDefaultComment(String apiId, String entryPoint) {
         Instant time = APIUtils.getCurrentUTCTime();
         Comment comment = new Comment();
         comment.setUuid(UUID.randomUUID().toString());
         comment.setApiId(apiId);
         comment.setCommentText("this is a sample comment");
+        comment.setCategory("sample category");
+        comment.setParentCommentId(UUID.randomUUID().toString());
+        comment.setEntryPoint(entryPoint);
         comment.setCommentedUser("admin");
         comment.setUpdatedUser("admin");
         comment.setCreatedTime(time);
@@ -1135,12 +1138,31 @@ public class SampleTestObjectCreator {
         return comment;
     }
 
-    public static Comment createAlternativeComment(String apiId) {
+    public static Comment createAlternativeComment(String apiId, String entryPoint) {
         Instant time = APIUtils.getCurrentUTCTime();
         Comment comment = new Comment();
         comment.setUuid(UUID.randomUUID().toString());
         comment.setApiId(apiId);
         comment.setCommentText("this is a sample comment - alternative");
+        comment.setCategory("sample alt category");
+        comment.setParentCommentId(UUID.randomUUID().toString());
+        comment.setEntryPoint(entryPoint);
+        comment.setCommentedUser("admin");
+        comment.setUpdatedUser("admin");
+        comment.setCreatedTime(time);
+        comment.setUpdatedTime(time);
+        return comment;
+    }
+
+    public static Comment createCommentReply(String apiId, String entryPoint, String parentCommentId) {
+        Instant time = APIUtils.getCurrentUTCTime();
+        Comment comment = new Comment();
+        comment.setUuid(UUID.randomUUID().toString());
+        comment.setApiId(apiId);
+        comment.setCommentText("this is a reply");
+        comment.setCategory("sample category");
+        comment.setParentCommentId(parentCommentId);
+        comment.setEntryPoint(entryPoint);
         comment.setCommentedUser("admin");
         comment.setUpdatedUser("admin");
         comment.setCreatedTime(time);

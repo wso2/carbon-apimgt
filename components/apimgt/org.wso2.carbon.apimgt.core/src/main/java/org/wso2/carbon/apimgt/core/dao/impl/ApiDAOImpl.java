@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.AdditionalProperties;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
@@ -756,6 +757,10 @@ public class ApiDAOImpl implements ApiDAO {
         addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition(), api.getCreatedBy());
         addAPIPermission(connection, api.getPermissionMap(), apiPrimaryKey);
 
+        if (api.getAdditionalProperties() != null) {
+            addAdditionalProperties(connection, api.getAdditionalProperties(), apiPrimaryKey);
+        }
+
         if (api.getThreatProtectionPolicies() != null) {
             addThreatProtectionPolicies(connection, apiPrimaryKey, api.getThreatProtectionPolicies());
         }
@@ -763,6 +768,7 @@ public class ApiDAOImpl implements ApiDAO {
         if (api.getApiPolicy() != null) {
             addApiPolicy(connection, api.getApiPolicy().getUuid(), apiPrimaryKey);
         }
+
     }
 
     /**
@@ -1256,8 +1262,8 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
-        final String query = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
-                + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+        final String query = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, CATEGORY, PARENT_COMMENT_ID,"
+                + " ENTRY_POINT, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
                 + "FROM AM_API_COMMENTS WHERE UUID = ? AND API_ID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -1271,7 +1277,7 @@ public class ApiDAOImpl implements ApiDAO {
                         return constructCommentFromResultSet(rs);
                     }
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 String errorMessage =
                         "getting comment for API: " + apiId + ", Comment: " + commentId;
                 throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
@@ -1300,13 +1306,16 @@ public class ApiDAOImpl implements ApiDAO {
      * @return
      * @throws SQLException
      */
-    private Comment constructCommentFromResultSet(ResultSet rs) throws SQLException {
+    private Comment constructCommentFromResultSet(ResultSet rs) throws SQLException, IOException {
         Comment comment = new Comment();
 
         comment.setUuid(rs.getString("UUID"));
-        comment.setCommentText(rs.getString("COMMENT_TEXT"));
+        comment.setCommentText(IOUtils.toString(rs.getBinaryStream("COMMENT_TEXT")));
         comment.setCommentedUser(rs.getString("USER_IDENTIFIER"));
         comment.setApiId(rs.getString("API_ID"));
+        comment.setCategory(rs.getString("CATEGORY"));
+        comment.setParentCommentId(rs.getString("PARENT_COMMENT_ID"));
+        comment.setEntryPoint(rs.getString("ENTRY_POINT"));
         comment.setCreatedUser(rs.getString("CREATED_BY"));
         comment.setCreatedTime(rs.getTimestamp("CREATED_TIME").toInstant());
         comment.setUpdatedUser(rs.getString("UPDATED_BY"));
@@ -1320,19 +1329,23 @@ public class ApiDAOImpl implements ApiDAO {
     public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
         final String addCommentQuery =
                 "INSERT INTO AM_API_COMMENTS (UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, " +
-                        "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME" + ") VALUES (?,?,?,?,?,?,?,?)";
+                        "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, CATEGORY, PARENT_COMMENT_ID,"
+                        + " ENTRY_POINT) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(addCommentQuery)) {
             try {
                 connection.setAutoCommit(false);
                 statement.setString(1, comment.getUuid());
-                statement.setString(2, comment.getCommentText());
+                statement.setBinaryStream(2, IOUtils.toInputStream(comment.getCommentText()));
                 statement.setString(3, comment.getCommentedUser());
                 statement.setString(4, apiId);
                 statement.setString(5, comment.getCreatedUser());
                 statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(7, comment.getUpdatedUser());
                 statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(9, comment.getCategory());
+                statement.setString(10, comment.getParentCommentId());
+                statement.setString(11, comment.getEntryPoint());
                 statement.execute();
                 connection.commit();
             } catch (SQLException e) {
@@ -1352,13 +1365,27 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
         final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE UUID = ? AND API_ID = ?";
+        final String getChildCommentsQuery = "SELECT UUID FROM AM_API_COMMENTS WHERE PARENT_COMMENT_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(deleteCommentQuery)) {
+             PreparedStatement statement1 = connection.prepareStatement(deleteCommentQuery)) {
             try {
                 connection.setAutoCommit(false);
-                statement.setString(1, commentId);
-                statement.setString(2, apiId);
-                statement.execute();
+                statement1.setString(1, commentId);
+                statement1.setString(2, apiId);
+                statement1.execute();
+                try (PreparedStatement statement2 = connection.prepareStatement(getChildCommentsQuery)) {
+                    statement2.setString(1, commentId);
+                    statement2.execute();
+                    try (ResultSet rs = statement2.getResultSet()) {
+                        while (rs.next()) {
+                            String deleteCommentReplyQuery = "DELETE FROM AM_API_COMMENTS WHERE UUID = ?";
+                            try (PreparedStatement statement3 = connection.prepareStatement(deleteCommentReplyQuery)) {
+                                statement3.setString(1, rs.getString("UUID"));
+                                statement3.execute();
+                            }
+                        }
+                    }
+                }
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -1374,21 +1401,21 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
-        final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? "
+        final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? , CATEGORY = ? "
                 + ", UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
                 + " WHERE UUID = ? AND API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(updateCommentQuery)) {
             try {
                 connection.setAutoCommit(false);
-                statement.setString(1, comment.getCommentText());
-                statement.setString(2, comment.getUpdatedUser());
-                statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-                statement.setString(4, commentId);
-                statement.setString(5, apiId);
+                statement.setBinaryStream(1, IOUtils.toInputStream(comment.getCommentText()));
+                statement.setString(2, comment.getCategory());
+                statement.setString(3, comment.getUpdatedUser());
+                statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(5, commentId);
+                statement.setString(6, apiId);
                 statement.execute();
                 connection.commit();
             } catch (SQLException e) {
@@ -1409,8 +1436,8 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
         List<Comment> commentList = new ArrayList<>();
-        final String getCommentsQuery = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
-                + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+        final String getCommentsQuery = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, CATEGORY,"
+                + " PARENT_COMMENT_ID, ENTRY_POINT, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
                 + "FROM AM_API_COMMENTS WHERE API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(getCommentsQuery)) {
@@ -1422,7 +1449,7 @@ public class ApiDAOImpl implements ApiDAO {
                         commentList.add(constructCommentFromResultSet(rs));
                     }
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 connection.rollback();
                 String errorMessage = "getting all comments for API " + apiId;
                 throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
@@ -2183,7 +2210,8 @@ public class ApiDAOImpl implements ApiDAO {
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
                         securityScheme(rs.getInt("SECURITY_SCHEME")).
                         apiPolicy(getApiPolicyByAPIId(connection, apiPrimaryKey)).
-                        threatProtectionPolicies(getThreatProtectionPolicies(connection, apiPrimaryKey)).build();
+                        threatProtectionPolicies(getThreatProtectionPolicies(connection, apiPrimaryKey)).
+                        additionalProperties(getAdditionalProperties(connection, apiPrimaryKey)).build();
             }
         }
 
@@ -2751,6 +2779,62 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return policies;
+    }
+
+    /**
+     * Add additional properties to the database
+     *
+     * @param connection SQL Connection
+     * @param apiID      ApiId of the API
+     * @param additionalProperties      List<AdditionalProperties>
+     * @throws SQLException If failed to add additional properties
+     */
+    private void addAdditionalProperties(Connection connection, List<AdditionalProperties> additionalProperties,
+                                         String apiID) throws SQLException {
+        final String query =
+                "INSERT INTO AM_API_ADDITIONAL_PROPERTIES(UUID, API_ID, PROPERTY_KEY, PROPERTY_VALUE) " +
+                        "VALUES (?, ?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            for (AdditionalProperties property : additionalProperties) {
+                statement.setString(1, property.getPropertyId());
+                statement.setString(2, apiID);
+                statement.setString(3, property.getPropertyKey());
+                statement.setString(4, property.getPropertyValue());
+                statement.execute();
+            }
+
+        }
+    }
+
+    /**
+     * Get additional properties from the database
+     *
+     * @param connection SQL Connection
+     * @param apiID      ApiId of the API
+     * @throws SQLException If failed to get additional properties
+     */
+    private List<AdditionalProperties> getAdditionalProperties(Connection connection, String apiID)
+            throws SQLException {
+
+        final String query = "SELECT PROPERTY_KEY,PROPERTY_VALUE  FROM AM_API_ADDITIONAL_PROPERTIES" +
+                             " WHERE API_ID = ?";
+        List<AdditionalProperties> additionalProperties = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.execute();
+            try (ResultSet rs = statement.getResultSet()) {
+                while (rs.next()) {
+                    additionalProperties.add(
+                            new AdditionalProperties(
+                                    rs.getString("PROPERTY_KEY"),
+                                    rs.getString("PROPERTY_VALUE")
+                            )
+                    );
+                }
+            }
+        }
+        return  additionalProperties;
     }
 
     private boolean checkTableColumnExists(DatabaseMetaData databaseMetaData, String tableName, String columnName)

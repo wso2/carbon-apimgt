@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.APIMAppConfigurationService;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
@@ -473,8 +474,8 @@ public class AuthenticatorService {
             // Here the keyType:"Application" will be passed as a default value
             // for the oAuthAppRequest constructor argument.
             // This value is not related to DCR application creation.
-            OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName,
-                    callBackURL, AuthenticatorConstants.APPLICATION_KEY_TYPE, grantTypes);
+            OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName, callBackURL, AuthenticatorConstants
+                    .APPLICATION_KEY_TYPE, grantTypes, APIMgtConstants.Oauth2Constants.OAUTH_TOKEN_TYPE);
             if (systemApplicationDao.isConsumerKeyExistForApplication(clientName)) {
                 String consumerKey = systemApplicationDao.getConsumerKeyForApplication(clientName);
                 oAuthApplicationInfo = getKeyManager().retrieveApplication(consumerKey);

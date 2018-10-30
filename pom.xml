@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.205-SNAPSHOT</version>
+    <version>7.0.236-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -42,7 +42,7 @@
     <modules>
         <module>components/apimgt</module>
         <module>features/apimgt</module>
-        <module>gateway-modules</module>
+        <!--<module>gateway-modules</module>-->
         <module>analyzer-modules</module>
     </modules>
 
@@ -823,7 +823,7 @@
                 <plugin>
                     <groupId>io.fabric8</groupId>
                     <artifactId>docker-maven-plugin</artifactId>
-                    <version>0.20.0</version>
+                    <version>0.26.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -870,7 +870,7 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.2.6</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.2.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.205-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.236-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.1.4</carbon.datasources.version>
 
@@ -1011,10 +1011,10 @@
         <wso2.carbon.config.version>2.1.5</wso2.carbon.config.version>
         <carbon.config.package.import.version.range>[2.0.0, 3.0.0)</carbon.config.package.import.version.range>
         <io.swagger.models.version>1.5.16</io.swagger.models.version>
-        <atlassian.commonmark.version>0.9.0</atlassian.commonmark.version> <!-- *BSD2*: used as a plugin dependency--> 
+        <atlassian.commonmark.version>0.9.0</atlassian.commonmark.version> <!-- *BSD2*: used as a plugin dependency-->
         <joda.time.version>2.9.9</joda.time.version>
         <broker.version>0.1.44</broker.version>
         <broker.package.import.version.range>[0.1.44,1.0.0)</broker.package.import.version.range>
-        <carbon.auth.version>1.0.50</carbon.auth.version>
+        <carbon.auth.version>1.0.56</carbon.auth.version>
     </properties>
 </project>

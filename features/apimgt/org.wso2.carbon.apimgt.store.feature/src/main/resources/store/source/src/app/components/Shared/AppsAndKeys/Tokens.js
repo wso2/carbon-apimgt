@@ -85,7 +85,7 @@ class Tokens extends React.Component {
     handleUpdateToken() {
         const { application } = this.state;
         const keys = application.keys.get(this.key_type);
-        application.updateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, 
+        application.updateKeys(keys.tokenType, this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey,
             keys.consumerSecret).
             then(() => this.setState({ application: application })
             ).catch(

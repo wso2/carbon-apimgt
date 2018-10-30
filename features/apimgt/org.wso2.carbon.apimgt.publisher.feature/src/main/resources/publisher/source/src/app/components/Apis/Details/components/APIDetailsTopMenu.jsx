@@ -1,110 +1,96 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import LaunchIcon from '@material-ui/icons/Launch';
-import EditIcon from '@material-ui/icons/Edit';
-import BackIcon from '@material-ui/icons/KeyboardBackspace';
-
-import Grid from '@material-ui/core/Grid';
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
-import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
-
 import DeleteApiButton from './DeleteApiButton';
 
 const styles = theme => ({
     root: {
-        flexGrow: 1,
+        height: 70,
+        background: theme.palette.background.paper,
+        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
+        display: 'flex',
+        alignItems: 'center',
     },
-    apiMetaInfo: {
-        borderRight: '2px solid',
-        padding: theme.spacing.unit,
+    backLink: {
+        alignItems: 'center',
+        textDecoration: 'none',
+        display: 'flex',
+    },
+    backIcon: {
+        color: theme.palette.primary.main,
+        fontSize: 56,
+        cursor: 'pointer',
+    },
+    backText: {
+        color: theme.palette.primary.main,
+        cursor: 'pointer',
+        fontFamily: theme.typography.fontFamily,
     },
     viewInStoreLauncher: {
-        padding: '0px',
+        display: 'flex',
+        flexDirection: 'column',
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        textAlign: 'center',
+    },
+    linkText: {
+        fontSize: theme.typography.fontSize,
     },
 });
 
-const DetailsTopMenu = ({ classes, api }) => {
+const DetailsTopMenu = ({ classes, api, theme }) => {
     const storeURL = `${window.location.origin}/store/${api.id}/overview`; // todo: need to support rev proxy ~tmkb
     return (
-        <Grid container alignItems='center' className={classes.root}>
-            <Grid item>
-                <Link to='/'>
-                    <Button aria-label='Back'>
-                        <BackIcon />
-                    </Button>
-                </Link>
-            </Grid>
-            <Grid item>
-                <ThumbnailView api={api} width={80} height={80} />
-            </Grid>
-            <Grid
-                item
-                xs={7}
-                md={7}
-                lg={7}
-                className={classes.apiMetaInfo}
-                sm
-                container
-                direction='row'
-                justify='space-between'
-            >
-                <Grid item xs container direction='column' justify='space-between' alignItems='flex-start'>
-                    <Grid item>
-                        <Typography variant='title'>
-                            {api.name} : {api.version}
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant='subheading'>Created by: {api.provider}</Typography>
-                    </Grid>
-                </Grid>
+        <div className={classes.root}>
+            <Link to='/apis' className={classes.backLink}>
+                <KeyboardArrowLeft className={classes.backIcon} />
+                <div className={classes.backText}>
+                    BACK TO <br />
+                    LISTING
+                </div>
+            </Link>
+            <VerticalDivider height={70} />
+            <ThumbnailView api={api} width={70} height={50} />
+            <div style={{ marginLeft: theme.spacing.unit }}>
+                <Typography variant='display1'>
+                    {api.name} : {api.version}
+                </Typography>
+                <Typography variant='caption' gutterBottom align='left'>
+                    Created by: {api.provider}
+                </Typography>
+            </div>
+            <VerticalDivider height={70} />
+            <div className={classes.infoItem}>
+                <Typography variant='subheading' gutterBottom>
+                    {api.lifeCycleStatus}
+                </Typography>
+                <Typography variant='caption' gutterBottom align='left'>
+                    State
+                </Typography>
+            </div>
 
-                <Grid item xs container direction='column' justify='space-between' alignItems='flex-end'>
-                    <Grid item>
-                        <Button
-                            component='a'
-                            target='_blank'
-                            href={storeURL}
-                            size='small'
-                            className={classes.viewInStoreLauncher}
-                        >
-                            <LaunchIcon />
-                            View In store
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        State: <Chip label={api.lifeCycleStatus} color='primary' variant='outlined' />
-                    </Grid>
-                </Grid>
-            </Grid>
-            <Grid
-                item
-                style={{ padding: '8px' }}
-                sm
-                container
-                direction='row'
-                alignItems='center'
-                justify='space-between'
-            >
-                <Grid item>
-                    <Button disabled size='small' className={classes.viewInStoreLauncher}>
-                        <EditIcon />
-                        Edit
-                    </Button>
-                    <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} />
-                </Grid>
-            </Grid>
-        </Grid>
+            <VerticalDivider height={70} />
+
+            <a target='_blank' rel='noopener noreferrer' href={storeURL} className={classes.viewInStoreLauncher}>
+                <div>
+                    <LaunchIcon />
+                </div>
+                <div className={classes.linkText}>View In store</div>
+            </a>
+            <VerticalDivider height={70} />
+            <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} />
+        </div>
     );
 };
 
 DetailsTopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(DetailsTopMenu);
+export default withStyles(styles, { withTheme: true })(DetailsTopMenu);

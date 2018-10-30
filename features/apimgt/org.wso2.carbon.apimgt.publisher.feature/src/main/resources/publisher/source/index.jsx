@@ -17,21 +17,13 @@
  */
 
 import 'typeface-roboto';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+
 import ReactDOM from 'react-dom';
 import React from 'react';
 import Publisher from './src/App.jsx';
-
 import './index.css';
 
-const theme = createMuiTheme({
-    palette: {
-        type: 'light', // Switching the dark mode on is a single property value change.
-    },
-});
 ReactDOM.render(
-    <MuiThemeProvider theme={theme}>
-        <Publisher />
-    </MuiThemeProvider>,
+    <Publisher />,
     document.getElementById('react-root'),
 );

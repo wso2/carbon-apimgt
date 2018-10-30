@@ -20,7 +20,6 @@ import React, { Component } from 'react';
 import Log from 'log4javascript';
 import PropTypes from 'prop-types';
 
-import OverviewIcon from '@material-ui/icons/SettingsOverscan';
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
@@ -28,80 +27,68 @@ import ScopesIcon from '@material-ui/icons/VpnKey';
 import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
-import PageContainer from 'AppComponents/Base/container/';
+import { withStyles } from '@material-ui/core/styles';
+import { Redirect, Route, Switch, Link } from 'react-router-dom';
 import Utils from 'AppData/Utils';
 import ConfigManager from 'AppData/ConfigManager';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 
-import APIDetailsTopMenu from './components/APIDetailsTopMenu';
-import APIDetailsRoutes from './components/APIDetailsRoutes';
 import Overview from './Overview/Overview';
 import LifeCycle from './LifeCycle/LifeCycle';
-import Documents from './Documents/Documents';
+import Documents from './Documents';
 import Resources from './Resources/Resources';
 import Endpoints from './Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
-import Scopes from './Scopes/Scopes';
+import Scope from './Scopes';
 import Security from './Security';
+import CustomIcon from '../../Shared/CustomIcon';
+import LeftMenuItem from '../../Shared/LeftMenuItem';
+import { PageNotFound } from '../../Base/Errors/index';
+import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 
-import APIDetailsNavBar from './components/APIDetailsNavBar';
+const styles = theme => ({
+    LeftMenu: {
+        backgroundColor: theme.palette.background.leftMenu,
+        width: theme.custom.leftMenuWidth,
+        textAlign: 'center',
+        fontFamily: theme.typography.fontFamily,
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        top: 0,
+    },
+    leftLInkMain: {
+        borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
+        paddingBottom: theme.spacing.unit,
+        paddingTop: theme.spacing.unit,
+        cursor: 'pointer',
+        backgroundColor: theme.palette.background.leftMenuActive,
+        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
+        textDecoration: 'none',
+    },
+    detailsContent: {
+        display: 'flex',
+        flex: 1,
+    },
+    content: {
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        marginLeft: theme.custom.leftMenuWidth,
+        paddingBottom: theme.spacing.unit * 3,
+    },
+    contentInside: {
+        paddingLeft: theme.spacing.unit * 3,
+        paddingTop: theme.spacing.unit * 2,
+    },
+});
 
-const apiDetailPages = [
-    {
-        name: 'Overview',
-        pathName: 'overview',
-        PageComponent: Overview,
-        NavIcon: <OverviewIcon />,
-    },
-    {
-        name: 'LifeCycle',
-        pathName: 'lifecycle',
-        PageComponent: LifeCycle,
-        NavIcon: <LifeCycleIcon />,
-    },
-    {
-        name: 'Endpoints',
-        pathName: 'endpoints',
-        PageComponent: Endpoints,
-        NavIcon: <EndpointIcon />,
-    },
-    {
-        name: 'Resources',
-        pathName: 'resources',
-        PageComponent: Resources,
-        NavIcon: <ResourcesIcon />,
-    },
-    {
-        name: 'Scopes',
-        pathName: 'scopes',
-        PageComponent: Scopes,
-        NavIcon: <ScopesIcon />,
-    },
-    {
-        name: 'Documents',
-        pathName: 'documents',
-        PageComponent: Documents,
-        NavIcon: <DocumentsIcon />,
-    },
-    {
-        name: 'Subscription',
-        pathName: 'subscription',
-        PageComponent: Subscriptions,
-        NavIcon: <SubscriptionsIcon />,
-    },
-    {
-        name: 'Security',
-        pathName: 'security',
-        PageComponent: Security,
-        NavIcon: <SecurityIcon />,
-    },
-];
 /**
  * Base component for API specific Details page, This component will be mount for any request coming for /apis/:api_uuid
  */
-export default class Details extends Component {
+class Details extends Component {
     /**
      * Creates an instance of Details.
      * @param {any} props @inheritDoc
@@ -109,9 +96,17 @@ export default class Details extends Component {
      */
     constructor(props) {
         super(props);
+        this.handleMenuSelect = this.handleMenuSelect.bind(this);
+        const { location } = this.props;
+        const currentLink = location.pathname.match(/[^/]+(?=\/$|$)/g);
+        let active = null;
+        if (currentLink && currentLink.length > 0) {
+            [active] = currentLink;
+        }
         this.state = {
             api: null,
             apiNotFound: false,
+            active: active || 'overview',
         };
         this.setAPI = this.setAPI.bind(this);
     }
@@ -178,7 +173,10 @@ export default class Details extends Component {
                 }
             });
     }
-
+    handleMenuSelect(menuLink) {
+        this.props.history.push({ pathname: '/apis/' + this.props.match.params.apiUUID + '/' + menuLink });
+        this.setState({ active: menuLink });
+    }
     /**
      * Renders Grid container layout with NavBar place static in LHS, Components which coming as children for
      * Details page
@@ -186,10 +184,12 @@ export default class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
-        const { api, apiNotFound } = this.state;
+        const { api, apiNotFound, active } = this.state;
+        const { classes, theme, match } = this.props;
+        const redirectUrl = '/apis/' + match.params.api_uuid + '/' + active;
 
         if (apiNotFound) {
-            const { apiUUID } = this.props.match.params;
+            const { apiUUID } = match.params;
             const resourceNotFountMessage = {
                 title: `API is Not Found in the "${Utils.getCurrentEnvironment().label}" Environment`,
                 body: `Can't find the API with the id "${apiUUID}"`,
@@ -200,20 +200,94 @@ export default class Details extends Component {
         if (!api) {
             return <Progress />;
         }
+        const { leftMenuIconMainSize } = theme.custom;
 
         return (
-            <PageContainer
-                pageNav={<APIDetailsNavBar apiDetailPages={apiDetailPages} />}
-                pageTopMenu={<APIDetailsTopMenu api={api} />}
-            >
-                <APIDetailsRoutes apiDetailPages={apiDetailPages} api={api} />
-            </PageContainer>
+            <React.Fragment>
+                <div className={classes.LeftMenu}>
+                    <Link to='/apis'>
+                        <div className={classes.leftLInkMain}>
+                            <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
+                        </div>
+                    </Link>
+                    <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem
+                        text='lifecycle'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<LifeCycleIcon />}
+                    />
+                    <LeftMenuItem
+                        text='endpoints'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<EndpointIcon />}
+                    />
+                    <LeftMenuItem
+                        text='resources'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<ResourcesIcon />}
+                    />
+                    <LeftMenuItem
+                        text='scopes'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<ScopesIcon />}
+                    />
+                    <LeftMenuItem
+                        text='documents'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<DocumentsIcon />}
+                    />
+                    <LeftMenuItem
+                        text='subscriptions'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<SubscriptionsIcon />}
+                    />
+                    <LeftMenuItem
+                        text='security'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<SecurityIcon />}
+                    />
+                </div>
+                <div className={classes.content}>
+                    <APIDetailsTopMenu api={api} />
+                    <div className={classes.contentInside}>
+                        <Switch>
+                            <Redirect exact from='/apis/:api_uuid' to={redirectUrl} />
+                            <Route path='/apis/:api_uuid/overview' component={() => <Overview api={api} />} />
+                            <Route path='/apis/:api_uuid/lifecycle' component={() => <LifeCycle api={api} />} />
+                            <Route path='/apis/:api_uuid/endpoints' component={() => <Endpoints api={api} />} />
+                            <Route path='/apis/:api_uuid/resources' component={() => <Resources api={api} />} />
+                            <Route path='/apis/:api_uuid/scopes' component={() => <Scope api={api} />} />
+                            <Route path='/apis/:api_uuid/documents' component={() => <Documents api={api} />} />
+                            <Route path='/apis/:api_uuid/subscriptions' component={() => <Subscriptions api={api} />} />
+                            <Route path='/apis/:api_uuid/security' component={() => <Security api={api} />} />
+                            <Route component={PageNotFound} />
+                        </Switch>
+                    </div>
+                </div>
+            </React.Fragment>
         );
     }
 }
 
 Details.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
     match: PropTypes.shape({
         params: PropTypes.object,
     }).isRequired,
+    location: PropTypes.shape({
+        pathname: PropTypes.object,
+    }).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.object,
+    }).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
+
+export default withStyles(styles, { withTheme: true })(Details);

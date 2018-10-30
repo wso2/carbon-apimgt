@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
@@ -127,6 +128,8 @@ import java.util.UUID;
  */
 public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMObservable {
 
+    private static final String ENTRY_POINT_STORE = "APIStore";
+    private static final String ADMIN_ROLE = "admin";
     // Map to store observers, which observe APIStore events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
@@ -187,6 +190,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
+
         API api = super.getAPIbyUUID(uuid);
         if (api != null && (APIStatus.CREATED.getStatus().equals(api.getLifeCycleStatus()) || APIStatus.MAINTENANCE
                 .getStatus()
@@ -195,6 +199,26 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(
                     "Attempt to access an API which is in a restricted state: " + api.getLifeCycleStatus()
                             + ", API uuid : " + uuid, ExceptionCodes.API_NOT_FOUND);
+        }
+        if (api != null && API.Visibility.RESTRICTED.equals(api.getVisibility())) {
+            Set<String> roles = new HashSet<>();
+            if (!APIMgtConstants.ANONYMOUS_USER.equals(getUsername())) {
+                String userId = getIdentityProvider().getIdOfUser(getUsername());
+                if (userId != null) {
+                    roles = new HashSet<>(getIdentityProvider().getRoleNamesOfUser(userId));
+                }
+            }
+            boolean found = false;
+            for (String role : api.getVisibleRoles()) {
+                if (roles.contains(role)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new APIManagementException("Attempt to access an API which is in a restricted visibility: " +
+                        api.getVisibility() + ", API uuid : " + uuid, ExceptionCodes.API_NOT_FOUND);
+            }
         }
         return api;
     }
@@ -314,7 +338,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public OAuthApplicationInfo generateApplicationKeys(String applicationId, String keyType,
-                                                        String callbackUrl, List<String> grantTypes)
+            String callbackUrl, List<String> grantTypes, String tokenType)
             throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Generating application keys for application: " + applicationId);
@@ -323,8 +347,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         Application application = getApplicationByUuid(applicationId);
 
         OAuthAppRequest oauthAppRequest = new OAuthAppRequest(application.getName(), callbackUrl, keyType,
-                grantTypes);
-
+                grantTypes, tokenType);
+        if (APIMgtConstants.Oauth2Constants.JWT_TOKEN_TYPE.equals(tokenType)) {
+            oauthAppRequest.getAudiences().add(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                    .getKeyManagerConfigs().getAudience());
+        }
         OAuthApplicationInfo oauthAppInfo = getKeyManager().createApplication(oauthAppRequest);
 
         if (log.isDebugEnabled()) {
@@ -418,6 +445,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 keys.setClientSecret(oAuthApp.getClientSecret());
                 keys.setGrantTypes(oAuthApp.getGrantTypes());
                 keys.setCallBackURL(oAuthApp.getCallBackURL());
+                keys.setTokenType(oAuthApp.getTokenType());
             }
             if (log.isDebugEnabled()) {
                 log.debug("Retrieved all keys of App: " + applicationId);
@@ -449,6 +477,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             keysFromDB.setClientSecret(oAuthApp.getClientSecret());
             keysFromDB.setGrantTypes(oAuthApp.getGrantTypes());
             keysFromDB.setCallBackURL(oAuthApp.getCallBackURL());
+            keysFromDB.setTokenType(oAuthApp.getTokenType());
             if (log.isDebugEnabled()) {
                 log.debug("Retrieved " + keyType + " keys of App: " + applicationId);
             }
@@ -462,10 +491,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public OAuthApplicationInfo updateGrantTypesAndCallbackURL(String applicationId, String keyType,
-                                                               List<String> grantTypes, String callbackURL)
+            List<String> grantTypes, String tokenType, String callbackURL)
             throws APIManagementException {
         if (log.isDebugEnabled()) {
-            log.debug("Updating " + keyType + " grant type/callback of App: " + applicationId);
+            log.debug("Updating " + keyType + " grant type/callback/tokenType of App: " + applicationId);
         }
 
         if (StringUtils.isEmpty(applicationId) || StringUtils.isEmpty(keyType)) {
@@ -475,17 +504,30 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
 
-        if (grantTypes == null || grantTypes.isEmpty() || StringUtils.isEmpty(callbackURL)) {
+        if (grantTypes == null || grantTypes.isEmpty()) {
             String msg = "Both Grant Types list and Callback URL can't be null or empty at once.";
             log.error(msg);
             throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+        if (grantTypes.contains(APIMgtConstants.Oauth2Constants.AUTHORIZATION_CODE_GRANT_TYPE) || grantTypes.contains
+                (APIMgtConstants.Oauth2Constants.IMPLICIT_GRANT_TYPE)) {
+            if (StringUtils.isEmpty(callbackURL)) {
+                String msg = "Callback URL can't be null or empty when " + APIMgtConstants.Oauth2Constants
+                        .AUTHORIZATION_CODE_GRANT_TYPE + " or " + APIMgtConstants.Oauth2Constants.IMPLICIT_GRANT_TYPE
+                        + " " + "present in grant types";
+                log.error(msg);
+                throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_UPDATE_FAILED);
+            }
         }
 
         try {
             OAuthApplicationInfo appFromDB = getApplicationDAO().getApplicationKeys(applicationId, keyType);
             OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(appFromDB.getClientId());
             oAuthApp.setGrantTypes(grantTypes);
-            oAuthApp.setCallBackURL(callbackURL);
+            if (StringUtils.isNotEmpty(callbackURL)) {
+                oAuthApp.setCallBackURL(callbackURL);
+            }
+            oAuthApp.setTokenType(tokenType);
             oAuthApp = getKeyManager().updateApplication(oAuthApp);
             if (log.isDebugEnabled()) {
                 log.debug("Updated " + keyType + " grant type/callback of App: " + applicationId);
@@ -789,6 +831,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         validateCommentMaxCharacterLength(comment.getCommentText());
         String generatedUuid = UUID.randomUUID().toString();
         comment.setUuid(generatedUuid);
+        comment.setEntryPoint(ENTRY_POINT_STORE);
         try {
             failIfApiNotExists(apiId);
             getApiDAO().addComment(comment, apiId);
@@ -808,9 +851,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             failIfApiNotExists(apiId);
             Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
             if (comment != null) {
-                // if the delete operation is done by a user who isn't the owner of the comment
-                if (!comment.getCommentedUser().equals(username)) {
-                    checkIfUserIsCommentModerator(username);
+                  /*if the delete operation is done by a user who isn't the owner of the comment
+                  and with a different end point*/
+                if (!(comment.getCommentedUser().equals(username) &&
+                        ENTRY_POINT_STORE.equals(comment.getEntryPoint()))) {
+                    checkIfUserIsAdmin(username);
                 }
                 apiDAO.deleteComment(commentId, apiId);
             } else {
@@ -833,9 +878,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             failIfApiNotExists(apiId);
             Comment oldComment = getApiDAO().getCommentByUUID(commentId, apiId);
             if (oldComment != null) {
-                // if the update operation is done by a user who isn't the owner of the comment
-                if (!oldComment.getCommentedUser().equals(username)) {
-                    checkIfUserIsCommentModerator(username);
+               /*if the update operation is done by a user who isn't the owner of the comment
+                  and with a different end point*/
+                if (!(oldComment.getCommentedUser().equals(username) &&
+                        ENTRY_POINT_STORE.equals(comment.getEntryPoint()))) {
+                    String errorMsg = "The user " + username + " does not have permission to update this comment";
+                    log.error(errorMsg);
+                    throw new APICommentException(errorMsg, ExceptionCodes.COULD_NOT_UPDATE_COMMENT);
                 }
                 getApiDAO().updateComment(comment, commentId, apiId);
             } else {
@@ -852,19 +901,19 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     /**
-     * Check whether current user is a comment moderator
+     * Check whether current user is an admin
      *
      * @param username username of the user
-     * @throws APICommentException if user does not have comment moderator role
+     * @throws APICommentException if user does not have admin role
      */
-    private void checkIfUserIsCommentModerator(String username) throws APICommentException {
+    private void checkIfUserIsAdmin(String username) throws APICommentException {
         Set<String> roles = APIUtils.getAllRolesOfUser(username);
-        if (roles.contains(getConfig().getCommentModeratorRole())) {
+        if (roles.contains(ADMIN_ROLE)) {
             return;
         }
-        String errorMsg = "comment moderator permission needed";
+        String errorMsg = "admin permission needed";
         log.error(errorMsg);
-        throw new APICommentException(errorMsg, ExceptionCodes.NEED_COMMENT_MODERATOR_PERMISSION);
+        throw new APICommentException(errorMsg, ExceptionCodes.NEED_ADMIN_PERMISSION);
     }
 
     /**
@@ -1428,16 +1477,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 String labelId = getLabelDAO().getLabelIdByNameAndType(label, APIMgtConstants.LABEL_TYPE_STORE);
                 labelIds.add(labelId);
             }
-
-            // TODO: Need to validate users roles against results returned
-            //this should be current logged in user
-            String user = "admin";
-            //role list of current user
-            Set<String> roles = APIUtils.getAllRolesOfUser(user);
+            Set<String> roles = new HashSet<>();
+            if (!APIMgtConstants.ANONYMOUS_USER.equals(getUsername())) {
+                String userId = getIdentityProvider().getIdOfUser(getUsername());
+                if (userId != null) {
+                    roles = new HashSet<>(getIdentityProvider().getRoleNamesOfUser(userId));
+                }
+            }
             if (query != null && !query.isEmpty()) {
                 String[] attributes = query.split(",");
                 Map<SearchType, String> attributeMap = new EnumMap<>(SearchType.class);
-                // TODO get the logged in user and user roles from key manager.
                 boolean isFullTextSearch = false;
                 String searchAttribute, searchValue;
                 if (!query.contains(":")) {
@@ -1454,7 +1503,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 }
 
                 if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIsByStoreLabel(roles, user, query, offset, limit, labelIds);
+                    apiResults = getApiDAO().searchAPIsByStoreLabel(roles, getUsername(), query, offset, limit,
+                            labelIds);
                 } else {
                     apiResults = getApiDAO().searchAPIsByAttributeInStore(roles, labelIds,
                             attributeMap,
@@ -1642,7 +1692,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         ApplicationCreationResponse applicationResponse = null;
 
         try {
-            if (getApplicationDAO().isApplicationNameExists(application.getName())) {
+            if (getApplicationDAO().isApplicationNameExists(application.getName(), getUsername())) {
                 String message = "An application already exists with a duplicate name - " + application.getName();
                 log.error(message);
                 throw new APIMgtResourceAlreadyExistsException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);

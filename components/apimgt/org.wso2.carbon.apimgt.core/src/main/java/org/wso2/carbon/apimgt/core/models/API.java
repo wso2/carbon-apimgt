@@ -92,6 +92,7 @@ public final class API {
         securityScheme = builder.securityScheme;
         scopes = builder.scopes;
         threatProtectionPolicies = builder.threatProtectionPolicies;
+        additionalProperties = builder.additionalProperties;
     }
 
     public Map getPermissionMap() {
@@ -319,7 +320,7 @@ public final class API {
      * Visibility options
      */
     public enum Visibility {
-        PUBLIC, PRIVATE, RESTRICTED,
+        PUBLIC, RESTRICTED,
     }
 
     private final String id;
@@ -363,6 +364,15 @@ public final class API {
     private int securityScheme;
     private List<String> scopes = new ArrayList<>();
     private Set<String> threatProtectionPolicies;
+    private  List<AdditionalProperties> additionalProperties;
+
+    public List<AdditionalProperties> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(List<AdditionalProperties> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
 
     public String getWorkflowStatus() {
         return workflowStatus;
@@ -428,6 +438,7 @@ public final class API {
             }
             userSpecificApiPermissions = api.getUserSpecificApiPermissions();
             threatProtectionPolicies = api.getThreatProtectionPolicies();
+            additionalProperties = api.getAdditionalProperties();
         }
 
         public String getId() {
@@ -497,7 +508,7 @@ public final class API {
         public Set<String> getTags() {
             return tags;
         }
-        
+
         public List<String> getGatewayLabels() {
             return gatewayLabels;
         }
@@ -541,6 +552,13 @@ public final class API {
         public Set<String> getThreatProtectionPolicies() {
             return threatProtectionPolicies;
         }
+        public List<AdditionalProperties> getAdditionalProperties() {
+            return additionalProperties;
+        }
+
+        public void setAdditionalProperties(List<AdditionalProperties> additionalProperties) {
+            this.additionalProperties = additionalProperties;
+        }
 
         private String version;
         private String context;
@@ -580,6 +598,7 @@ public final class API {
         private int securityScheme;
         private List<String> scopes = new ArrayList<>();
         private Set<String> threatProtectionPolicies;
+        private  List<AdditionalProperties> additionalProperties;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -631,6 +650,7 @@ public final class API {
             this.securityScheme = copy.securityScheme;
             this.scopes = copy.scopes;
             this.threatProtectionPolicies = copy.threatProtectionPolicies;
+            this.additionalProperties = copy.additionalProperties;
         }
 
         /**
@@ -1071,6 +1091,18 @@ public final class API {
          */
         public APIBuilder hasOwnGateway(boolean hasOwnGateway) {
             this.hasOwnGateway = hasOwnGateway;
+            return this;
+        }
+
+        /**
+         * Sets the {@code additionalProperties} and returns a reference to this APIBuilder so that the methods
+         * can be chained together.
+         *
+         * @param additionalProperties the {@code additionalProperties} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder additionalProperties(List<AdditionalProperties> additionalProperties) {
+            this.additionalProperties = additionalProperties;
             return this;
         }
 

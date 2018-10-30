@@ -18,27 +18,23 @@
 
 import React, {Component} from 'react'
 import PropTypes from 'prop-types';
+import {Route, Switch, Redirect, Link} from 'react-router-dom'
+import { withStyles } from '@material-ui/core/styles';
 import ProductionKey from './ProductionKey'
 import SandboxKey from './SandboxKey'
 import Subscriptions from './Subscriptions'
-import {Route, Switch, Redirect, Link} from 'react-router-dom'
 import API from '../../../data/api'
 import {PageNotFound} from '../../Base/Errors/index'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
 import InfoBar from './InfoBar';
-
-
+import LeftMenuItem from '../../Shared/LeftMenuItem';
 
 const styles = theme => ({
-    linkColor: {
-        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
-    },
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
-        width: 90,
+        width: theme.custom.leftMenuWidth,
         textAlign: 'center',
         fontFamily: theme.typography.fontFamily,
         position: 'absolute',
@@ -46,20 +42,10 @@ const styles = theme => ({
         left: 0,
         top: 0,
     },
-    leftLInk: {
-        paddingTop: 10,
-        paddingBottom: 10,  
-        paddingLeft: 5,
-        paddingRight: 5,
-        fontSize: 11,
-        cursor: 'pointer'
-    },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
-        paddingBottom: 5,
-        paddingTop: 5,
-        height: 60,
-        fontSize: 12,
+        paddingBottom: theme.spacing.unit,  
+        paddingTop: theme.spacing.unit,  
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
         color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
@@ -73,10 +59,11 @@ const styles = theme => ({
         display: 'flex',
         flex: 1,
         flexDirection: 'column',
-        marginLeft: 90,
-        paddingBottom: 20,
+        marginLeft: theme.custom.leftMenuWidth,
+        paddingBottom:  theme.spacing.unit*3,  
       }
 });
+
 class Details extends Component {
 
     constructor(props) {
@@ -131,32 +118,14 @@ class Details extends Component {
         return (
             <React.Fragment>
                 <div className={classes.LeftMenu}>
-                    <Link to={"/apis"}>
+                    <Link to={"/applications"}>
                         <div className={classes.leftLInkMain}>
                             <CustomIcon width={52} height={52} icon="applications" />
                         </div>
                     </Link>
-                    <div className={classes.leftLInk} 
-                        onClick={( () => this.handleMenuSelect('productionkeys') ) }
-                        style={{backgroundColor: this.state.active === "productionkeys" ? theme.palette.background.appBar : ''}}
-                        >
-                        <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="keys" />
-                        <div className={classes.linkColor}>Production Keys</div>
-                    </div>
-                    <div className={classes.leftLInk} 
-                        onClick={( () => this.handleMenuSelect('sandBoxkeys') ) }
-                        style={{backgroundColor: this.state.active === "sandBoxkeys" ? theme.palette.background.appBar : ''}}
-                        >
-                        <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="keys" />
-                        <div className={classes.linkColor}>Sandbox Keys</div>
-                    </div>
-                    <div className={classes.leftLInk} 
-                        onClick={( () => this.handleMenuSelect('subscriptions') ) }
-                        style={{backgroundColor: this.state.active === "subscriptions" ? theme.palette.background.appBar : ''}}
-                        >
-                        <CustomIcon strokeColor={strokeColor}  width={32} height={32} icon="keys" />
-                        <div className={classes.linkColor}>Subscriptions</div>
-                    </div>
+                    <LeftMenuItem text="productionkeys" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                    <LeftMenuItem text="sandBoxkeys" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                    <LeftMenuItem text="subscriptions" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
                 </div>
             <div className={classes.content}>
               <InfoBar applicationId={this.props.match.params.application_uuid} innerRef={node => this.infoBar = node}/>

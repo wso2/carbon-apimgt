@@ -74,6 +74,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     private static final String CUSTOMER_ROLE = "customer";
     private static final String EMPLOYEE_ROLE = "employee";
     private static final String MANAGER_ROLE = "manager";
+    private static final String ENTRY_POINT = "EntryPoint";
 
     @Test
     public void testGetAPIsByStatusStore() throws Exception {
@@ -1627,7 +1628,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId(), ENTRY_POINT);
         apiDAO.addComment(comment, api.getId());
         Comment commentFromDB = apiDAO.getCommentByUUID(comment.getUuid(), api.getId());
         Assert.assertNotNull(commentFromDB);
@@ -1641,8 +1642,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
-        Comment comment2 = SampleTestObjectCreator.createAlternativeComment(api.getId());
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId(), ENTRY_POINT);
+        Comment comment2 = SampleTestObjectCreator.createAlternativeComment(api.getId(), ENTRY_POINT);
         apiDAO.addComment(comment1, api.getId());
         apiDAO.addComment(comment2, api.getId());
 
@@ -1664,11 +1665,15 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
-        apiDAO.addComment(comment, api.getId());
-        apiDAO.deleteComment(comment.getUuid(), api.getId());
-        Comment commentFromDB = apiDAO.getCommentByUUID(comment.getUuid(), api.getId());
-        Assert.assertNull(commentFromDB);
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId(), ENTRY_POINT);
+        apiDAO.addComment(comment1, api.getId());
+        Comment comment2 = SampleTestObjectCreator.createCommentReply(api.getId(), ENTRY_POINT, comment1.getUuid());
+        apiDAO.addComment(comment2, api.getId());
+        apiDAO.deleteComment(comment1.getUuid(), api.getId());
+        Comment commentFromDB1 = apiDAO.getCommentByUUID(comment1.getUuid(), api.getId());
+        Comment commentFromDB2 = apiDAO.getCommentByUUID(comment2.getUuid(), api.getId());
+        Assert.assertNull(commentFromDB1);
+        Assert.assertNull(commentFromDB2);
     }
 
     @Test
@@ -1680,14 +1685,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId(), ENTRY_POINT);
         apiDAO.addComment(comment1, api.getId());
         String lastUpdatedTime1 = apiDAO.getLastUpdatedTimeOfComment(comment1.getUuid());
 
         //Keep at least millisecond difference between the two timestamps
         Thread.sleep(1);
 
-        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId(), ENTRY_POINT);
         comment2.setCommentText(newCommentText);
         apiDAO.updateComment(comment2, comment1.getUuid(), api.getId());
 

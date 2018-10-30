@@ -31,6 +31,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { Link } from 'react-router-dom';
 
 const styles = theme => ({
     buttonProgress: {
@@ -162,6 +163,7 @@ class Scopes extends React.Component {
         const { api } = this.props;
         const { scopes } = api;
         const { classes } = this.props;
+        const url = `/apis/${api.id}/scopes/create`;
 
         if (!scopes) {
             return <Progress />;
@@ -189,12 +191,14 @@ class Scopes extends React.Component {
                                 </Typography>
                             </CardContent>
                             <CardActions>
-                                <Button variant='contained' color='primary' className={classes.button}>
-                                    <FormattedMessage
-                                        id='create.scopes'
-                                        defaultMessage='Create Scopes'
-                                    />
-                                </Button>
+                                <Link to={url}>
+                                    <Button variant='contained' color='primary' className={classes.button}>
+                                        <FormattedMessage
+                                            id='create.scopes'
+                                            defaultMessage='Create Scopes'
+                                        />
+                                    </Button>
+                                </Link>
                             </CardActions>
                         </Card>
                     </Grid>

@@ -201,11 +201,12 @@ public interface APIStore extends APIManager {
      * @param keyType       Key type (PRODUCTION | SANDBOX)
      * @param callbackUrl   Callback URL
      * @param grantTypes    List of grant types to be supported by the application
+     * @param tokenType     Token type (OAUTH/JWT)
      * @return {@link OAuthApplicationInfo}  Generated OAuth client information
      * @throws APIManagementException If oauth application creation was failed
      */
     OAuthApplicationInfo generateApplicationKeys(String applicationId, String keyType,
-                                                 String callbackUrl, List<String> grantTypes)
+            String callbackUrl, List<String> grantTypes, String tokenType)
             throws APIManagementException;
 
     /**
@@ -246,12 +247,13 @@ public interface APIStore extends APIManager {
      * @param applicationId Application Id
      * @param keyType       Key Type (Production | Sandbox)
      * @param grantTypes    New Grant Type list
+     * @param tokenType     Token type (OAUTH/JWT)
      * @param callbackURL   New callback URL
      * @return {@link OAuthApplicationInfo}  Application key information list
      * @throws APIManagementException if error occurred while retrieving application keys
      */
     OAuthApplicationInfo updateGrantTypesAndCallbackURL(String applicationId, String keyType, List<String> grantTypes,
-                                                        String callbackURL) throws APIManagementException;
+            String tokenType, String callbackURL) throws APIManagementException;
 
     /**
      * Generate an application access token (and revoke current token, if any)
