@@ -91,6 +91,29 @@ var getAPISubscriptions = function (api, username) {
         };
     }
 };
+var getLightWeightAPISubscriptions = function (api, username) {
+	var subscriptions,
+		log = new Log(),
+		store = jagg.module("manager").getAPIStoreObj();
+
+	try {
+		var groupingId = session.get("groupId");
+		subscriptions = store.getLightWeightAPISubscriptions(api.provider, api.name, api.version, username, groupingId);
+		if (log.isDebugEnabled()) {
+			log.debug("getSubscriptions : " + stringify(subscriptions));
+		}
+		return {
+			error:false,
+			subscriptions:subscriptions
+		};
+	} catch (e) {
+		log.error(e.message);
+		return {
+			error:e,
+			subscriptions:null
+		};
+	}
+};
 
 var getAPISubscriptionsForApplication = function (username, appName, groupingId) {
     var subscriptions,

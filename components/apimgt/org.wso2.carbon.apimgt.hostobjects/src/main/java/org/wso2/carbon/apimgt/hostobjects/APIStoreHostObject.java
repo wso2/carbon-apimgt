@@ -2954,6 +2954,42 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
+    public static NativeArray jsFunction_getLightWeightAPISubscriptions(Context cx, Scriptable thisObj,
+            Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+
+        NativeArray myn = new NativeArray(0);
+        if (args != null && 5 <= args.length) {
+            String providerName = (String) args[0];
+            String apiName = (String) args[1];
+            String version = (String) args[2];
+            String user = (String) args[3];
+            String groupingId = (String) args[4];
+
+            APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+            Subscriber subscriber = new Subscriber(user);
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Set<SubscribedAPI> apis = apiConsumer.getLightWeightSubscribedIdentifiers(subscriber, apiIdentifier,
+                                                                                      groupingId);
+            int i = 0;
+            if (apis != null) {
+                for (SubscribedAPI api : apis) {
+                    NativeObject row = new NativeObject();
+                    row.put("application", row, api.getApplication().getName());
+                    row.put("applicationId", row, api.getApplication().getId());
+
+                    if(APIUtil.isMultiGroupSharingEnabled()){
+                        row.put("owner", row, api.getApplication().getOwner());
+                    }
+
+                    myn.put(i++, myn, row);
+                }
+            }
+        }
+        return myn;
+    }
+
+
     private static APIKey getKey(SubscribedAPI api, String keyType) {
         List<APIKey> apiKeys = api.getKeys();
         return getKeyOfType(apiKeys, keyType);
@@ -3835,6 +3871,46 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         return myn;
     }
+
+    public static NativeArray jsFunction_getLightWeightApplications(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj)
+            throws ScriptException, APIManagementException {
+
+        NativeArray myn = new NativeArray(0);
+        if (args != null && isStringArray(args)) {
+            String username = args[0].toString();
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Application[] applications;
+            String groupId = "";
+            if (args.length > 1 && args[1] != null) {
+                groupId = args[1].toString();
+            }
+            applications = apiConsumer.getLightWeightApplications(new Subscriber(username), groupId);
+            Subscriber subscriber = new Subscriber(username);
+
+            if (applications != null) {
+                int i = 0;
+                for (Application application : applications) {
+                    int subscriptionCount = apiConsumer.getSubscriptionCount(subscriber, application.getName(),
+                                                                             groupId);
+                    NativeObject row = new NativeObject();
+                    row.put("name", row, application.getName());
+                    row.put("tier", row, application.getTier());
+                    row.put("id", row, application.getId());
+                    row.put("callbackUrl", row, application.getCallbackUrl());
+                    row.put("status", row, application.getStatus());
+                    row.put("description", row, application.getDescription());
+                    row.put("apiCount", row, subscriptionCount);
+                    row.put("groupId", row, application.getGroupId());
+                    row.put("isBlacklisted", row, application.getIsBlackListed());
+                    row.put("owner", row, application.getOwner());
+                    myn.put(i++, myn, row);
+                }
+            }
+        }
+        return myn;
+    }
+
 
     /**
      * This method helps to get an APIM application by given name.

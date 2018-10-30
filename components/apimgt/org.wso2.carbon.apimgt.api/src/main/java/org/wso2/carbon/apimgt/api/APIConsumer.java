@@ -849,4 +849,6 @@ public interface APIConsumer extends APIManager {
      */
     JSONArray getAppAttributesFromConfig(String userId)  throws APIManagementException;
 
+    Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
+
 }

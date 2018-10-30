@@ -25,6 +25,7 @@ var getApplications = function (username) {
 
 };
 
+<<<<<<< HEAD
 var getApplicationsByOwner = function (username) {
     var allApps,
         userApps = [],
@@ -59,6 +60,32 @@ var getApplicationsByOwner = function (username) {
             applications:null
         };
     }
+=======
+var getLightWeightApplications = function (username) {
+	var applications,
+		log = new Log(),
+		store = jagg.module("manager").getAPIStoreObj();
+
+	try {
+		var groupId = session.get("groupId");
+		applications = store.getLightWeightApplications(username, groupId);
+		if (log.isDebugEnabled()) {
+			log.debug("getApplications : " + stringify(applications));
+		}
+		return {
+			error: false,
+			applications: applications
+		};
+	} catch (e) {
+		log.error(e.message);
+		return {
+			error: e.message,
+			applications: null
+		};
+
+	}
+
+>>>>>>> 0261cc6...  Fixing performance related issue on API Detail page in store
 };
 
 var getApplicationsWithPagination = function (username,start,offset,search,sortColumn,sortOrder) {

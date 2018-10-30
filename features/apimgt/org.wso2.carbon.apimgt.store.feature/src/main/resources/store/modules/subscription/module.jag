@@ -33,7 +33,11 @@ jagg.module("subscription", {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAPISubscriptions.apply(this, arguments);
     },
 
-    getAPISubscriptionsForApplication:function () {
+	getLightWeightAPISubscriptions:function () {
+		return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getLightWeightAPISubscriptions.apply(this, arguments);
+	},
+
+	getAPISubscriptionsForApplication:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAPISubscriptionsForApplication.apply(this, arguments);
     },
     getAPISubscriptionsForApplicationById:function () {
