@@ -210,7 +210,7 @@ class ThumbnailView extends Component {
         }
 
         return (
-            <div>
+            <React.Fragment>
                 {isEditable ?
                     <ButtonBase
                         focusRipple
@@ -305,7 +305,7 @@ class ThumbnailView extends Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
-            </div>
+            </React.Fragment>
         );
     }
 }

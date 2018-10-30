@@ -6,6 +6,7 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
+import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import DeleteApiButton from './DeleteApiButton';
 
 const styles = theme => ({
