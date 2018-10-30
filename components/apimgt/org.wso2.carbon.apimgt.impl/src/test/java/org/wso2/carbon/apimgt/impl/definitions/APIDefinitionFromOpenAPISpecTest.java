@@ -240,7 +240,7 @@ public class APIDefinitionFromOpenAPISpecTest {
     }
 
     @Test
-    public void testOpenApi3WithNonVerbElementHttpVerbInPathItem() throws APIManagementException {
+    public void testOpenApi3WithNonHttpVerbElementInPathItem() throws APIManagementException {
         APIDefinitionFromOpenAPISpec apiDef = new APIDefinitionFromOpenAPISpec();
         String openApi =
                 "{\n"

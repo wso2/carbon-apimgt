@@ -1081,6 +1081,7 @@ public final class APIConstants {
     public static final String SWAGGER_SCOPE_KEY = "key";
     public static final String SWAGGER_NAME = "name";
     public static final String SWAGGER_DESCRIPTION = "description";
+    public static final String SWAGGER_SERVERS = "servers";
     public static final String SWAGGER_SUMMARY = "summary";
     public static final String SWAGGER_ROLES = "roles";
     public static final String SWAGGER_TITLE = "title";
