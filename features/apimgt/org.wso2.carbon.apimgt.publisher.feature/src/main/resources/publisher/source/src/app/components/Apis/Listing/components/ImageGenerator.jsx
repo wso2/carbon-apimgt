@@ -6,22 +6,16 @@ import FaceIcon from '@material-ui/icons/Face';
 import PlaceIcon from '@material-ui/icons/Place';
 import MailIcon from '@material-ui/icons/Mail';
 
-import { Link } from 'react-router-dom';
-
 const icons = {
     InboxIcon, FaceIcon, PlaceIcon, MailIcon,
 };
 
 const iconNames = Object.keys(icons);
-const styles = theme => ({
+const styles = ({
     svgImage: {
         cursor: 'pointer',
         // ⚠️ object-fit is not supported by IE11.
         objectFit: 'cover',
-    },
-    suppressLinkStyles: {
-        textDecoration: 'none',
-        color: theme.palette.text.disabled,
     },
 });
 
@@ -43,7 +37,6 @@ class ImageGenerator extends PureComponent {
             classes, api, width, height,
         } = this.props;
         const str = api.name;
-        const overviewPath = `/apis/${api.id}/overview`;
 
         const colorPairs = [
             { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
@@ -79,13 +72,11 @@ class ImageGenerator extends PureComponent {
             }
         }
         return (
-            <Link className={classes.suppressLinkStyles} to={overviewPath}>
-                <svg width={width} height={height} className={classes.svgImage}>
-                    <rect {...thumbnailBox} fill={'#' + colorPair.prime.toString(16)} />
-                    {rects}
-                    <Icon />
-                </svg>
-            </Link>
+            <svg width={width} height={height} className={classes.svgImage}>
+                <rect {...thumbnailBox} fill={'#' + colorPair.prime.toString(16)} />
+                {rects}
+                <Icon />
+            </svg>
         );
     }
 }

@@ -16,7 +16,7 @@ import API from 'AppData/api.js';
 import Alert from 'AppComponents/Shared/Alert';
 import DeleteApiButton from 'AppComponents/Apis/Details/components/DeleteApiButton';
 
-import ImageGenerator from './ImageGenerator';
+import ThumbnailView from './ThumbnailView';
 
 const styles = theme => ({
     card: {
@@ -105,7 +105,7 @@ class APIThumb extends Component {
                 raised={isHover}
                 className={classes.card}
             >
-                <CardMedia src='None' component={ImageGenerator} height={140} title='Contemplative Reptile' api={api} />
+                <CardMedia src='None' component={ThumbnailView} height={140} title='Thumbnail' api={api} />
                 <CardContent className={classes.apiDetails}>
                     <Typography gutterBottom variant='headline' component='h2'>
                         {api.name}

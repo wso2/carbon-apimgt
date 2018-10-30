@@ -5,8 +5,8 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import ImageGenerator from '../../Listing/components/ImageGenerator';
 import DeleteApiButton from './DeleteApiButton';
 
 const styles = theme => ({
@@ -55,7 +55,7 @@ const DetailsTopMenu = ({ classes, api, theme }) => {
                 </div>
             </Link>
             <VerticalDivider height={70} />
-            <ImageGenerator api={api} width='70' height='50' />
+            <ThumbnailView api={api} width={70} height={50} />
             <div style={{ marginLeft: theme.spacing.unit }}>
                 <Typography variant='display1'>
                     {api.name} : {api.version}
