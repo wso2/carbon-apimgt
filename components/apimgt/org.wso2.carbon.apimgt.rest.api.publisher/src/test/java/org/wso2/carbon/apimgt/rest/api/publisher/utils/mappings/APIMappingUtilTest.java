@@ -217,7 +217,6 @@ public class APIMappingUtilTest {
         }
 
         json = "{\"ExposeEndpointPassword\": false}";
-
         try {
             Mockito.when(resource.getContent()).thenReturn(json.getBytes());
             Mockito.doThrow(UserStoreException.class).when(tenantManager).getTenantId("carbon.super");

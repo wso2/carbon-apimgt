@@ -672,8 +672,7 @@ public class APIMappingUtil {
         }
     }
 
-    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDetailedDTO dto) throws APIManagementException
-    {
+    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDetailedDTO dto) throws APIManagementException {
         if (api.isEndpointSecured()) {
             APIEndpointSecurityDTO securityDTO = new APIEndpointSecurityDTO();
             securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.basic); //set default as basic
