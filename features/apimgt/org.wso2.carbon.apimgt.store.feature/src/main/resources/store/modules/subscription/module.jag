@@ -72,7 +72,7 @@ jagg.module("subscription", {
     },
     updateAccessAllowDomains :function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").updateAccessAllowDomains .apply(this, arguments);
-    }
+    },
     getApplicationKeysOfApplication :function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getApplicationKeysOfApplication.apply(this, arguments);
     }
