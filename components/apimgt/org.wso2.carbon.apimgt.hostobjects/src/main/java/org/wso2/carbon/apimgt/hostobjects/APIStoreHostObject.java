@@ -2989,8 +2989,26 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
+    public static NativeArray jsFunction_getApplicationKeysOfApplication(Context cx, Scriptable thisObj,
+            Object[] args, Function funObj) throws APIManagementException {
+        NativeArray myn = new NativeArray(0);
+        if (args != null && 1 <= args.length) {
+            String appId = (String) args[0];
+            int applicationId = Integer.parseInt(appId);
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Set<APIKey> keys = apiConsumer.getApplicationKeysOfApplication(applicationId);
+            int i = 0;
+            for(APIKey key : keys){
+                NativeObject row = new NativeObject();
+                row.put(key.getType()+"_KEY", row, key.getAccessToken());
+                myn.put(i++, myn, row);
+            }
+        }
+        return myn;
+    }
 
-    private static APIKey getKey(SubscribedAPI api, String keyType) {
+
+        private static APIKey getKey(SubscribedAPI api, String keyType) {
         List<APIKey> apiKeys = api.getKeys();
         return getKeyOfType(apiKeys, keyType);
     }

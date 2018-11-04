@@ -4695,6 +4695,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPISet;
     }
 
+    public Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException {
+        Set<APIKey> apikeys = getApplicationKeys(applicationId);
+        return apikeys;
+    }
+
     /**
      * To check authorization of the API against current logged in user. If the user is not authorized an exception
      * will be thrown.
