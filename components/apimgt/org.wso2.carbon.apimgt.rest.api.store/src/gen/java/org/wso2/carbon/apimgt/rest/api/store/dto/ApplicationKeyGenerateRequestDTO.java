@@ -148,9 +148,9 @@ public class ApplicationKeyGenerateRequestDTO  {
 
   
   /**
-   * Client Id
+   * Client ID for generating access token.
    **/
-  @ApiModelProperty(value = "Client Id")
+  @ApiModelProperty(value = "Client ID for generating access token.")
   @JsonProperty("clientId")
   public String getClientId() {
     return clientId;
@@ -161,9 +161,9 @@ public class ApplicationKeyGenerateRequestDTO  {
 
   
   /**
-   * Client Secret
+   * Client secret for generating access token. This is given together with the client Id.
    **/
-  @ApiModelProperty(value = "Client Secret")
+  @ApiModelProperty(value = "Client secret for generating access token. This is given together with the client Id.")
   @JsonProperty("clientSecret")
   public String getClientSecret() {
     return clientSecret;

@@ -32,6 +32,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
@@ -56,11 +59,18 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
     }
 
     public boolean mediate(MessageContext mc) {
-        
+        TracingSpan span = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            span = Util.startSpan(APIMgtGatewayConstants.API_MGT_RESPONSE_HANDLER, responseLatencySpan, tracer);
+        }
         if (publisher == null) {
             this.initializeDataPublisher();
         }
-
+        if (Util.tracingEnabled()) {
+            Util.finishSpan(span);
+        }
         try {
             if (!enabled) {
                 return true;
@@ -167,13 +177,20 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                 username = authContext.getUsername();
                 applicationName = authContext.getApplicationName();
                 applicationId = authContext.getApplicationId();
+                if (applicationName == null || "".equals(applicationName)) {
+                    applicationName = "None";
+                    applicationId = "0";
+                }
                 tier = authContext.getTier();
                 applicationOwner = authContext.getSubscriber();
+                if (applicationOwner == null || "".equals(applicationOwner)) {
+                    applicationOwner = "None";
+                }
             }
 
             RequestResponseStreamDTO stream = new RequestResponseStreamDTO();
             stream.setApiContext((String) mc.getProperty(APIMgtGatewayConstants.CONTEXT));
-            stream.setApiHostname((String) mc.getProperty(APIMgtGatewayConstants.HOST_NAME));
+            stream.setApiHostname(GatewayUtils.getHostName(mc));
             stream.setApiMethod((String) mc.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
             stream.setApiName((String) mc.getProperty(APIMgtGatewayConstants.API));
             stream.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(creator));
@@ -182,7 +199,11 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             stream.setApiResourceTemplate((String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE));
             stream.setApiTier(tier);
             stream.setApiVersion(apiVersion);
-            stream.setApplicationConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
+            consumerKey = (String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
+            if (consumerKey == null || "".equals(consumerKey)) {
+                consumerKey = "None";
+            }
+            stream.setApplicationConsumerKey(consumerKey);
             stream.setApplicationId(applicationId);
             stream.setApplicationName(applicationName);
             stream.setApplicationOwner(applicationOwner);

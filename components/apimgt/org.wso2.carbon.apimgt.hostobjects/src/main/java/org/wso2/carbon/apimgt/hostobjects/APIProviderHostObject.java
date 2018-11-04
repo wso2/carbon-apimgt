@@ -51,6 +51,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.mozilla.javascript.ConsString;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.NativeArray;
@@ -63,6 +64,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -90,8 +92,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -108,7 +108,6 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -153,6 +152,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static String ICON_PATH = "tmp/icon";
     private static final String ALIAS = "alias";
     private static final String END_POINT = "endpoint";
+    private static final String TIER = "tier";
 
     private APIProvider apiProvider;
 
@@ -267,8 +267,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            CommonUtil.addDefaultLifecyclesIfNotAvailable(registryService.getConfigSystemRegistry(tenantId),
-                    CommonUtil.getRootSystemRegistry(tenantId));
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
@@ -432,7 +430,12 @@ public class APIProviderHostObject extends ScriptableObject {
             properties = (JSONObject) parser.parse(additionalProperties);
         }
         String authorizationHeader = (String) apiData.get("authorizationHeader", apiData);
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        Object apiSecurityObject = apiData.get("apiSecurity", apiData);
 
+        if (apiSecurityObject instanceof String || apiSecurityObject instanceof ConsString) {
+            apiSecurity = String.valueOf(apiSecurityObject);
+        }
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
             responseCache = APIConstants.ENABLED;
@@ -519,6 +522,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setAdditionalProperties(properties);
         api.setAuthorizationHeader(authorizationHeader);
+        api.setApiSecurity(apiSecurity);
 
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
@@ -965,7 +969,7 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
 
-        api.setDescription(StringEscapeUtils.unescapeHtml(description));
+        api.setDescription(description);
         HashSet<String> deletedTags = new HashSet<String>(api.getTags());
         deletedTags.removeAll(tag);
         api.removeTags(deletedTags);
@@ -1241,6 +1245,12 @@ public class APIProviderHostObject extends ScriptableObject {
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_ROLES_PARAMETER, apiData);
         }
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        Object apiSecurityObject = apiData.get("apiSecurity", apiData);
+
+        if (apiSecurityObject instanceof String || apiSecurityObject instanceof ConsString) {
+            apiSecurity = String.valueOf(apiSecurityObject);
+        }
 
         if (sandboxUrl != null && sandboxUrl.trim().length() == 0) {
             sandboxUrl = null;
@@ -1500,7 +1510,7 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
 
-        api.setDescription(StringEscapeUtils.escapeHtml(description));
+        api.setDescription(description);
         api.setWsdlUrl(wsdl);
         api.setWadlUrl(wadl);
         api.setLastUpdated(new Date());
@@ -1585,6 +1595,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
         api.setAdditionalProperties(properties);
+        api.setApiSecurity(apiSecurity);
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
         CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
         if (corsConfiguration != null) {
@@ -1794,6 +1805,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String visibleRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
         JSONObject properties = null;
+        String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+        Object apiSecurityObject = apiData.get("apiSecurity", apiData);
+
+        if (apiSecurityObject instanceof String || apiSecurityObject instanceof ConsString) {
+            apiSecurity = String.valueOf(apiSecurityObject);
+        }
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
             properties = (JSONObject) parser.parse(additionalProperties);
@@ -2041,7 +2058,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
         }
-        api.setDescription(StringEscapeUtils.unescapeHtml(description));
+        api.setDescription(description);
         api.setLastUpdated(new Date());
         api.setUrl(endpoint);
         api.setSandboxUrl(sandboxUrl);
@@ -2061,6 +2078,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+        api.setApiSecurity(apiSecurity);
         api.setAdditionalProperties(properties);
         Set<Tier> availableTier = new HashSet<Tier>();
         if (tier != null) {
@@ -2694,7 +2712,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 Set<URITemplate> uriTemplates = api.getUriTemplates();
 
                 myn.put(0, myn, checkValue(api.getId().getApiName()));
-                myn.put(1, myn, checkValue(StringEscapeUtils.unescapeHtml(api.getDescription())));
+                myn.put(1, myn, checkValue(api.getDescription()));
                 myn.put(2, myn, checkValue(api.getUrl()));
                 myn.put(3, myn, checkValue(api.getWsdlUrl()));
                 myn.put(4, myn, checkValue(api.getId().getVersion()));
@@ -2772,8 +2790,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(24, myn, checkValue(api.getEndpointUTPassword()));
                 myn.put(25, myn, checkValue(Boolean.toString(api.isEndpointSecured())));
                 myn.put(26, myn, APIUtil.replaceEmailDomainBack(checkValue(api.getId().getProviderName())));
-                myn.put(27, myn, checkTransport("http", api.getTransports()));
-                myn.put(28, myn, checkTransport("https", api.getTransports()));
+                myn.put(27, myn, checkValue("http", api.getTransports()));
+                myn.put(28, myn, checkValue("https", api.getTransports()));
                 Set<APIStore> storesSet = apiProvider.getExternalAPIStores(api.getId());
                 if (storesSet != null && storesSet.size() != 0) {
                     NativeArray apiStoresArray = new NativeArray(0);
@@ -2878,6 +2896,8 @@ public class APIProviderHostObject extends ScriptableObject {
                     }
                     myn.put(57, myn, apiLabelsArray);
                 }
+                myn.put(58, myn, checkValue("oauth2", api.getApiSecurity()));
+                myn.put(59, myn, checkValue("mutualssl", api.getApiSecurity()));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);
@@ -3068,10 +3088,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-    private static String checkTransport(String compare, String transport) throws APIManagementException {
-        if (transport != null) {
+    private static String checkValue(String compare, String value) throws APIManagementException {
+        if (value != null) {
             List<String> transportList = new ArrayList<String>();
-            transportList.addAll(Arrays.asList(transport.split(",")));
+            transportList.addAll(Arrays.asList(value.split(",")));
             if (transportList.contains(compare)) {
                 return "checked";
             } else {
@@ -5195,6 +5215,34 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
     /**
+     * This method is used to upload client certificate to support mutual ssl.
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments {userName, api name, version, provider, certificate, alias}
+     * @param funObj  Function object
+     * @return : True if uploading certificate is successful. False otherwise.
+     */
+    public static int jsFunction_uploadClientCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
+        if ((args == null) || (args.length != 7) || !isStringValues(args)) {
+            handleException(
+                    "Invalid number of arguments. The method expects user name, api name, version. provider, alias, "
+                            + "certificate string and tier name");
+        }
+        String userName = (String) args[0];
+        String apiName = (String) args[1];
+        String version = (String) args[2];
+        String provider = (String) args[3];
+        String alias = (String) args[4];
+        String certificate = (String) args[5];
+        String tierName = (String) args[6];
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, version);
+        return apiProvider.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName);
+    }
+
+    /**
      * This method is used to remove backend certificate for the given alias and endpoint.
      *
      * @param cx      Rhino context
@@ -5206,7 +5254,6 @@ public class APIProviderHostObject extends ScriptableObject {
     public static int jsFunction_deleteCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
-        CertificateManager certificateManager = new CertificateManagerImpl();
         if ((args == null) || (args.length != 3) || !isStringValues(args)) {
             handleException("Invalid number of arguments. Expect User Name, Alias and Endpoint.");
         }
@@ -5217,6 +5264,32 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIProvider apiProvider = getAPIProvider(thisObj);
         return apiProvider.deleteCertificate(userName, alias, endpoint);
+    }
+
+    /**
+     * This method is used to remove client certificate for the given alias and API.
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments {userName, alias, api name, version, provider}
+     * @param funObj  Function object
+     * @return : True if deleting certificate is successful. False otherwise.
+     */
+    public static int jsFunction_deleteClientCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        if ((args == null) || (args.length != 5) || !isStringValues(args)) {
+            handleException("Invalid number of arguments. The method expects user name, alias, api name, version and "
+                    + "provider.");
+        }
+        String userName = (String) args[0];
+        String alias = (String) args[1];
+        String apiName = (String) args[2];
+        String apiVersion = (String) args[3];
+        String providerName = (String) args[4];
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        return apiProvider
+                .deleteClientCertificate(userName, new APIIdentifier(providerName, apiName, apiVersion), alias);
     }
 
     /**
@@ -5233,7 +5306,6 @@ public class APIProviderHostObject extends ScriptableObject {
         NativeArray certificateMetaDataArray = new NativeArray(0);
 
         NativeObject certificateMetaData = new NativeObject();
-        CertificateManager certificateManager = new CertificateManagerImpl();
         if ((args == null) || (args.length != 2) || !isStringValues(args)) {
             log.error("Invalid arguments. Expect User Name and Endpoint");
             return null;
@@ -5261,6 +5333,47 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
     /**
+     * To get the client certificates related with an API.
+     *
+     * @param cx      Context.
+     * @param thisObj Scriptable object
+     * @param args    Arguments.
+     * @param funObj  Function object.
+     * @return Array of certificates uploaded against API.
+     * @throws APIManagementException API Management Exception.
+     */
+    public static NativeArray jsFunction_getClientCertificates(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws APIManagementException {
+        if ((args == null) || (args.length != 4) || !isStringValues(args)) {
+            handleException(
+                    "Invalid number of arguments. The method expects user name, api name, provider and version.");
+        }
+        String userName = (String) args[0];
+        String apiName = (String) args[1];
+        String provider = (String) args[2];
+        String apiVersion = (String) args[3];
+        NativeArray clientCertificateMetaData = new NativeArray(0);
+        NativeObject certificateMetaData = new NativeObject();
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, apiVersion);
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        List<ClientCertificateDTO> clientCertificateDTOList = apiProvider
+                .searchClientCertificates(APIUtil.getTenantIdFromTenantDomain(tenantDomain), null, apiIdentifier);
+        int index = 0;
+        if (clientCertificateDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+                NativeObject obj = new NativeObject();
+                obj.put(ALIAS, obj, clientCertificateDTO.getAlias());
+                obj.put(TIER, obj, clientCertificateDTO.getTierName());
+                clientCertificateMetaData.put(index, clientCertificateMetaData, obj);
+                index++;
+            }
+        }
+        return clientCertificateMetaData;
+    }
+
+
+    /**
      * This method is to check whether the required configuration is done in the AM distribution.
      *
      * @return : True if the configuration is present, false otherwise.
@@ -5268,6 +5381,21 @@ public class APIProviderHostObject extends ScriptableObject {
     public static boolean jsFunction_isConfigured(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         APIProvider apiProvider = getAPIProvider(thisObj);
         return apiProvider.isConfigured();
+    }
+
+    /**
+     * This method check the whether the client certificate based authentication is enabled in AM level.
+     *
+     * @param cx      Context.
+     * @param thisObj Scriptable object.
+     * @param args    Arguments.
+     * @param funObj  Function Object.
+     * @return true if the client certificate based authentication is enabled in AM level.
+     */
+    public static boolean jsFunction_isClientCertificateBasedAuthenticationConfigured(Context cx, Scriptable thisObj,
+            Object[] args, Function funObj) {
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        return apiProvider.isClientCertificateBasedAuthenticationConfigured();
     }
 
     /**

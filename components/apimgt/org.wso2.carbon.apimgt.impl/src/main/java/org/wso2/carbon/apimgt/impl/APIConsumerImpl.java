@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -70,6 +69,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -147,6 +147,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String ENVIRONMENT_TYPE = "environmentType";
     public static final String API_NAME = "apiName";
     public static final String API_VERSION = "apiVersion";
+    public static final String API_PROVIDER = "apiProvider";
 
     /* Map to Store APIs against Tag */
     private ConcurrentMap<String, Set<API>> taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
@@ -1410,7 +1411,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Map<String, Tag> tagsData = new HashMap<String, Tag>();
             try {
             	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
-                if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
+                if (requestedTenant != null ) {
                     isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenant);
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 }
@@ -2324,6 +2325,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApiProvider(identifier.getProviderName());
                 workflowDTO.setTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+                workflowDTO.setApplicationId(applicationId);
                 workflowDTO.setSubscriber(userId);
                 workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
             } catch (WorkflowException e) {
@@ -2341,27 +2343,51 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 invalidateCachedKeys(applicationId);
             }
 
-            SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
+            //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
+            //the response should have {"Status":"REJECTED"} in the json payload for this to work.
+            boolean subscriptionRejected = false;
+            String subscriptionStatus = null;
+            String subscriptionUUID = "";
+
+            if (workflowResponse != null && workflowResponse.getJSONPayload() != null
+                    && !workflowResponse.getJSONPayload().isEmpty()) {
+                try {
+                    JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
+                    if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
+                        subscriptionRejected = true;
+                        subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                    }
+                } catch (ParseException e) {
+                    log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
+                }
+            }
+
+            if (!subscriptionRejected) {
+                SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
+                subscriptionStatus = addedSubscription.getSubStatus();
+                subscriptionUUID = addedSubscription.getUUID();
+
+                JSONObject subsLogObject = new JSONObject();
+                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getApiName());
+                subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+                subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
+
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                        APIConstants.AuditLogConstants.CREATED, this.username);
+
+                workflowResponse = new GeneralWorkflowResponse();
+            }
 
             if (log.isDebugEnabled()) {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
-                        + ", Subscription Status: " + addedSubscription.getSubStatus() + " subscribe by " + userId
+                        + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId
                         + " for app " + applicationName;
                 log.debug(logMessage);
             }
 
-            JSONObject subsLogObject = new JSONObject();
-            subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getApiName());
-            subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
-            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
-            subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
-            subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
-
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
-                    APIConstants.AuditLogConstants.CREATED, this.username);
-
-            return new SubscriptionResponse(addedSubscription.getSubStatus(), addedSubscription.getUUID(),
-                    workflowResponse);
+            return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
         } else {
             throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs in the state: " +
                     api.getStatus());
@@ -3956,6 +3982,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 IOUtils.copy((InputStream) docResourceMap.get("Data"), arrayOutputStream);
                 String apiName = (String) apiDetails.get(API_NAME);
                 String apiVersion = (String) apiDetails.get(API_VERSION);
+                String apiProvider = (String) apiDetails.get(API_PROVIDER);
                 String environmentName = (String) environmentDetails.get(ENVIRONMENT_NAME);
                 String environmentType = (String) environmentDetails.get(ENVIRONMENT_TYPE);
                 if (log.isDebugEnabled()) {
@@ -3963,7 +3990,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             + environmentType);
                 }
                 byte[] updatedWSDLContent = this.getUpdatedWSDLByEnvironment(resourceUrl,
-                        arrayOutputStream.toByteArray(), environmentName, environmentType, apiName, apiVersion);
+                        arrayOutputStream.toByteArray(), environmentName, environmentType, apiName, apiVersion, apiProvider);
                 wsdlContent = new String(updatedWSDLContent);
             } catch (IOException e) {
                 handleException("Error occurred while copying wsdl content into byte array stream for resource: "
@@ -4035,7 +4062,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             String storeVisibilityRoles = apiResource.getProperty(APIConstants.STORE_VIEW_ROLES);
             if (storeVisibilityRoles != null && !storeVisibilityRoles.trim().isEmpty()) {
-                String[] storeVisibilityRoleList = storeVisibilityRoles.replaceAll("\\s+", "").split(",");
+                String[] storeVisibilityRoleList = storeVisibilityRoles.split(",");
                 if (log.isDebugEnabled()) {
                     log.debug("API has restricted access to users with the roles : " + Arrays
                             .toString(storeVisibilityRoleList));
@@ -4078,17 +4105,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     private byte[] getUpdatedWSDLByEnvironment(String wsdlResourcePath, byte[] wsdlContent, String environmentName,
-            String environmentType, String apiName, String apiVersion) throws APIManagementException {
+            String environmentType, String apiName, String apiVersion, String apiProvider) throws APIManagementException {
         APIMWSDLReader apimwsdlReader = new APIMWSDLReader(wsdlResourcePath);
         Definition definition = apimwsdlReader.getWSDLDefinitionFromByteContent(wsdlContent, false);
-        String wsdlFile = wsdlResourcePath.substring(wsdlResourcePath.lastIndexOf("/") + 1)
-                .replaceAll(APIConstants.WSDL_FILE_EXTENSION, "");
-        String provider = wsdlFile.substring(0, wsdlFile.indexOf(APIConstants.WSDL_PROVIDER_SEPERATOR));
 
         byte[] updatedWSDLContent = null;
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiProvider));
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -4105,7 +4129,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
                 API api = null;
                 if (!StringUtils.isEmpty(apiName) && !StringUtils.isEmpty(apiVersion)) {
-                    APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(apiProvider), apiName, apiVersion);
                     if (log.isDebugEnabled()) {
                         log.debug("Api identifier for the soap api artifact: " + apiIdentifier + "for api name: "
                                 + apiName + ", version: " + apiVersion);

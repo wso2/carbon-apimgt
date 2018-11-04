@@ -175,6 +175,7 @@ public class APIMappingUtil {
             dto.setEnvironmentList(environmentListToReturn);
         }
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
+        dto.setApiSecurity(model.getApiSecurity());
         return dto;
     }
 

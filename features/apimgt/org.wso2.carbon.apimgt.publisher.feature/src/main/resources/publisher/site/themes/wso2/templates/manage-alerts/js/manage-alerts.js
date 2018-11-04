@@ -57,6 +57,10 @@ var unSubscribeAlerts = function() {
 
 }
 
+var configureAlertType = function (alertType) {
+    location.href = jagg.url("/site/pages/configure-alert.jag?alertType=" + alertType);
+}
+
 $(document).ready(function () {
 
     var notChecked = [], checked = [], checkedValues = [];

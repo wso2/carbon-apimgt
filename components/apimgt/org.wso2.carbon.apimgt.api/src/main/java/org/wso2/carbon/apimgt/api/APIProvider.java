@@ -17,7 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -26,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -900,14 +903,44 @@ public interface APIProvider extends APIManager {
     int addCertificate(String userName, String certificate, String alias, String endpoint) throws APIManagementException;
 
     /**
+     * Method to add client certificate to gateway nodes to support mutual SSL based authentication.
+     *
+     * @param userName      : User name of the logged in user.
+     * @param apiIdentifier : Relevant API identifier which the certificate is added against.
+     * @param certificate   : Relevant public certificate.
+     * @param alias         : Alias of the certificate.
+     * @return SUCCESS : If operation succeeded,
+     * INTERNAL_SERVER_ERROR : If any internal error occurred,
+     * ALIAS_EXISTS_IN_TRUST_STORE : If alias is already present in the trust store,
+     * CERTIFICATE_EXPIRED : If the certificate is expired.
+     * @throws APIManagementException API Management Exception.
+     */
+    int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
+            String tierName) throws APIManagementException;
+
+    /**
      * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
      * @param userName : UserName of the logged in user.
-     * @param alias  : Alias of the certificate which needs to be deleted.
+     * @param alias    : Alias of the certificate which needs to be deleted.
      * @param endpoint : Endpoint which the certificate is mapped to.
      * @return Integer which represents the operation status.
      * @throws APIManagementException
      */
     int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException;
+
+    /**
+     * Method to remove the client certificates which is mapped to given alias and api identifier from database.
+     *
+     * @param userName      : Name of the logged in user.
+     * @param apiIdentifier : Identifier of API for which the certificate need to be deleted.
+     * @param alias         : Alias of the certificate which needs to be deleted.
+     * @return 1: If delete succeeded,
+     * 2: If delete failed, due to an un-expected error.
+     * 4 : If certificate is not found in the trust store.
+     * @throws APIManagementException API Management Exception.
+     */
+    int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+            throws APIManagementException;
 
     /**
      * Method to get the server is configured to Dynamic SSL Profile feature.
@@ -916,12 +949,126 @@ public interface APIProvider extends APIManager {
     boolean isConfigured();
 
     /**
+     * Method to check whether mutual ssl based client verification is configured.
+     * @return : TRUE if client certificate related configurations are configured, FALSE otherwise.
+     */
+    boolean isClientCertificateBasedAuthenticationConfigured();
+
+    /**
      * Method to retrieve all the certificates uploaded for the tenant represent by the user.
      * @param userName : User name of the logged in user.
      * @return : List of CertificateMetadata
      * @throws APIManagementException
      */
     List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException;
+
+    /**
+     * Method to search the certificate metadata database for the provided alias and endpoints.
+     *
+     * @param tenantId : The id of the tenant which the certificates are belongs to.
+     * @param alias : The alias of the certificate.
+     * @param endpoint : Endpoint which the certificate is applied to
+     * @return : Results as a CertificateMetadataDTO list.
+     * @throws APIManagementException :
+     */
+    List<CertificateMetadataDTO> searchCertificates(int tenantId, String alias, String endpoint) throws
+            APIManagementException;
+
+    /**
+     * Method to search the client certificates for the provided tenant id, alias and api identifier.
+     *
+     * @param tenantId      : ID of the tenant.
+     * @param alias         : Alias of the certificate.
+     * @param apiIdentifier : Identifier of the API.
+     * @return list of client certificates that match search criteria.
+     * @throws APIManagementException API Management Exception.
+     */
+    List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException;
+
+    /**
+     * Retrieve the total number of certificates which a specified tenant has.
+     *
+     * @param tenantId : The id of the tenant
+     * @return : The certificate count.
+     */
+    int getCertificateCountPerTenant(int tenantId) throws APIManagementException;
+
+    /**
+     * Retrieve the total number client certificates which the specified tenant has.
+     *
+     * @param tenantId : ID of the tenant.
+     * @return count of client certificates that exists for a particular tenant.
+     * @throws APIManagementException API Management Exception.
+     */
+    int getClientCertificateCount(int tenantId) throws APIManagementException;
+
+    /**
+     * Method to check whether an certificate for the given alias is present in the trust store and the database.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : True if a certificate is present, false otherwise.
+     * @throws APIManagementException :
+     */
+    boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException;
+
+    /**
+     * Method to check whether a client certificate for the given alias is present in trust store and whether it can
+     * be modified by current user.
+     *
+     * @param tenantId : Id of the tenant.
+     * @param alias    : Relevant alias.
+     * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
+     * modifiable by current user.
+     * @throws APIManagementException API Management Exception.
+     */
+    ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException;
+
+    /**
+     * Method to get the status of the certificate which matches the given alias.
+     * This method can me modified to get other necessary information as well. Such as CN etc.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : The status and the expiry date as a parameter map.
+     * @throws APIManagementException :
+     */
+    CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException;
+
+    /**
+     * Method to update an existing certificate.
+     *
+     * @param certificateString : The base64 encoded string of the uploaded certificate.
+     * @param alias : Alias of the certificate that should be updated.
+     * @return : Integer value which represent the operation status.
+     * @throws APIManagementException :
+     */
+    int updateCertificate(String certificateString, String alias) throws APIManagementException;
+
+    /**
+     * Method to update the existing client certificate.
+     *
+     * @param certificate   : Relevant certificate that need to be updated.
+     * @param alias         : Alias of the certificate.
+     * @param APIIdentifier : API Identifier of the certificate.
+     * @param tier          : tier name.
+     * @param tenantId      : Id of tenant.
+     * @return : 1 : If client certificate update is successful,
+     * 2 : If update failed due to internal error,
+     * 4 : If provided certificate is empty,
+     * 6 : If provided certificate is expired
+     * @throws APIManagementException API Management Exception.
+     */
+    int updateClientCertificate(String certificate, String alias, APIIdentifier APIIdentifier, String tier,
+            int tenantId) throws APIManagementException;
+
+    /**
+     * Retrieve the certificate which matches the given alias.
+     *
+     * @param alias : The alias of the certificate.
+     * @return : The certificate input stream.
+     * @throws APIManagementException :
+     */
+    ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException;
 
     /**
      * Method to get the selected mediation sequence as a String.

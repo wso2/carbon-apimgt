@@ -60,18 +60,21 @@ $( document ).ready(function() {
       renderGraph(from,to);        
     });
     $('#today-btn').on('click', function () {
+      currentDay = getDate();
       from = currentDay - 86400000;
       to = currentDay;
       renderGraph(from,to);
       btnActiveToggle(this);
     });
        $('#week-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - 604800000;
         to = currentDay;
         renderGraph(from,to);         
        btnActiveToggle(this);
       });
        $('#month-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - (604800000 * 4);
         to = currentDay;
         renderGraph(from,to);        
@@ -82,7 +85,7 @@ $( document ).ready(function() {
          }); 
                    //date picker
         $('#date-range').daterangepicker({
-                        timePicker: false,
+                        timePicker: true,
                         timePickerIncrement: 30,
                         format: 'YYYY-MM-DD h:mm',
                         opens: 'left'
@@ -93,7 +96,7 @@ $( document ).ready(function() {
                         to = picker.endDate;
                         var fromStr = convertTimeString(from).split(" ");
                         var toStr = convertTimeString(to).split(" ");
-                        var dateStr = fromStr[0] + " <b>to</b> " + toStr[0];
+                        var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                         $("#date-range span").html(dateStr);
                         renderGraph(from, to);
                          });
@@ -148,8 +151,8 @@ var populateVersionList = function(apiName,compare){
 
 function renderGraph(fromDate,toDate){
   if (statsEnabled) {
-   var toDateString = convertTimeString(toDate);
-    var fromDateString = convertTimeString(fromDate);
+   var toDateString = convertTimeStringUTC(toDate);
+    var fromDateString = convertTimeStringUTC(fromDate);
     getDateTime(toDate,fromDate);
     var data = [];
            jagg.post("/site/blocks/stats/api-user-agent-usage/ajax/stats.jag", { action : "getUserAgentUsageByAPI" , apiName : apiName , apiVersion : version , fromDate : fromDateString , toDate : toDateString,drilldown:drilldown},
@@ -245,7 +248,7 @@ function getDateTime(currentDay,fromDay){
     fromDateString = convertTimeString(fromDay);
     var toDate = toDateString.split(" ");
     var fromDate = fromDateString.split(" ");
-    var dateStr= fromDate[0] + " <b>to</b> " + toDate[0];
+    var dateStr= fromDate[0] + " <i>" + fromDate[1] + "</i> <b>to</b> " + toDate[0] + " <i>" + toDate[1] + "</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);

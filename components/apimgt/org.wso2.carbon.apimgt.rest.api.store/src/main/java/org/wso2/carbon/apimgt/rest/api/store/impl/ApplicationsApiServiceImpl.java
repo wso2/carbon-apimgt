@@ -174,10 +174,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             //subscriber field of the body is not honored. It is taken from the context
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
 
-            //setting the proper groupId. This is not honored for now.
-            // Later we can honor it by checking admin privileges of the user.
-            String groupId = RestApiUtil.getLoggedInUserGroupId();
-            application.setGroupId(groupId);
             int applicationId = apiConsumer.addApplication(application, username);
 
             //retrieves the created application and send as the response
@@ -481,6 +477,35 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
+    @Override
+    public Response applicationsApplicationIdScopesGet(String applicationId, Boolean filterByUserRoles, String ifNoneMatch, String ifModifiedSince) {
+        String userName = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+            if (log.isDebugEnabled()) {
+                log.debug("Scope retrieval request received from the " + userName + " for the application id "
+                        + applicationId + " with the query parameter('filterByUserRoles) value " + filterByUserRoles);
+            }
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    ScopeListDTO filteredScopes = RestAPIStoreUtils.getScopesForApplication(userName, application,
+                            ((filterByUserRoles != null) ? filterByUserRoles : false));
+
+                    return Response.ok().entity(filteredScopes).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError(
+                    "Error while getting scopes related with application " + applicationId, e, log);
+        }
+        return null;
+    }
+
     /**
      * Deletes an application by id
      *
@@ -533,9 +558,11 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @param filterByUserRoles Whether to filter scope by user roles.
      * @param ifNoneMatch       If-None-Match header value
      * @param ifModifiedSince   If-Modified-Since header value.
+     * @deprecated
      * @return the scopes
      */
     @Override
+    @Deprecated
     public Response applicationsScopesApplicationIdGet(String applicationId, Boolean filterByUserRoles,
             String ifNoneMatch, String ifModifiedSince) {
         String userName = RestApiUtil.getLoggedInUsername();
@@ -605,6 +632,11 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public String applicationsApplicationIdPutGetLastUpdatedTime(String applicationId, ApplicationDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
         return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    @Override
+    public String applicationsApplicationIdScopesGetGetLastUpdatedTime(String applicationId, Boolean filterByUserRoles, String ifNoneMatch, String ifModifiedSince) {
+        return null;
     }
 
     @Override

@@ -21,21 +21,25 @@ var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
                     //day picker
                     $('#today-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
+                       currentDay = getDate();
                        getDateTime(currentDay,currentDay-3600000);
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-604800000);
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
@@ -45,7 +49,7 @@ var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
                     //date picker
                     $('#date-range').daterangepicker({
-                          timePicker: false,
+                          timePicker: true,
                           timePickerIncrement: 30,
                           format: 'YYYY-MM-DD h:mm',
                           opens: 'left',
@@ -62,14 +66,12 @@ var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
                        to = convertTimeString(picker.endDate);
                        var fromStr = from.split(" ");
                        var toStr = to.split(" ");
-                       var dateStr = fromStr[0] + " <b>to</b> " + toStr[0];
+                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
                        $("#date-range span").html(dateStr);
                        drawAPIUsage(from,to,apiFilter);
                     });
-                    
 
                     getDateTime(to,from);
-
 
                     $('#date-range').click(function (event) {
                     event.stopPropagation();
@@ -80,14 +82,7 @@ var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
                         $(this).siblings().removeClass('active');
                     });
 
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }
@@ -229,9 +224,8 @@ var drawAPIUsage = function (from,to,apiFilter) {
 }
 var parsedResponse;
 var drawChart = function (from, to) {
-    var fromDate = from;
-    var toDate = to;
-
+    var fromDate = convertTimeStringUTC(from);
+    var toDate = convertTimeStringUTC(to);
     jagg.post("/site/blocks/stats/api-usage-user/ajax/stats.jag", { action: "getAPIUsageByUser", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate, apiFilter: apiFilter},
         function (json) {
             if (!json.error) {
@@ -680,7 +674,7 @@ function getDateTime(currentDay,fromDay){
     from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
-    var dateStr= fromDate[0] + " <b>to</b> " + toDate[0];
+    var dateStr = fromDate[0] + " <i>" + fromDate[1] + "</i> <b>to</b> " + toDate[0] + " <i>" + toDate[1] + "</i>";
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);

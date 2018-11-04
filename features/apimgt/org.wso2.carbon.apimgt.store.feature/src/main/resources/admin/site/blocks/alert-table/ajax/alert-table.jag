@@ -97,21 +97,19 @@ i18n.init(request,localeResourcesBasePath);
                 };
             } else {
                 var type = null;
-                if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_UNUSUALIPACCESS") {
+                if (tableName == "ApimIPAccessAbnormalityAlert") {
                     type = "Unseen Source IP Address";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALREQUESTSPERMINALERTSTREAM") {
+                } else if (tableName == "ApimAbnormalReqAlert") {
                     type = "Abnormal Request Count";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALRESPONSETIMEALERTSTREAM") {
+                } else if (tableName == "ApimAbnormalResponseTimeAlert") {
                     type = "Abnormal Response Time";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALERT_ABNORMALTIERUSAGEALERT") {
-                    type = "Abnormal API Usage";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_TIERLIMITHITTINGALERT") {
+                } else if (tableName == "ApimTierLimitHittingAlert") {
                     type = "Tier Crossing";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
+                } else if (tableName == "ApimAbnormalBackendTimeAlert") {
                     type = "Abnormal Backend Time";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
+                } else if (tableName == "ApimApiHealthMonitorAlert") {
                     type = "Health Availability";
-                } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
+                } else if (tableName == "ApimRequestPatternChangedAlert") {
                     type = "Abnormal Resource Access Pattern";
                 }
 
@@ -121,7 +119,7 @@ i18n.init(request,localeResourcesBasePath);
                     arr[i] = new Array(4);
 
                     arr[i][0] = (new Date(parsedDataResult[i]["values"]["alertTimestamp"])).toString();
-                    if (tableName == "ORG_WSO2_ANALYTICS_APIM_ALLAPIMALERTSSTREAM") {
+                    if (tableName == "ApimAllAlert") {
                         type = i18n.localize(parsedDataResult[i]["values"]["type"]);
                         arr[i][1] = '<a class="alertTypeLink">'+type+'</a>';
                     } else {

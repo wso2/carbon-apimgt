@@ -72,7 +72,7 @@
 	<div class="row">	  
 	  <div class="col-md-12 col-lg-9">
 	    <div class="add-margin-bottom-4x">
-	  	    <button type="button" class="btn btn-secondary show_keys">{{# if show_keys }}<%=i18n.localize("Hide Keys")%>{{else}}<%=i18n.localize("Show Keys")%>{{/if}}</button>
+	  	    <button type="button" class="btn btn-secondary show_keys">{{# if show_keys }}<%=i18n.localize("Hide Keys")%>{{else}}<%=i18n.localize("Show keys")%>{{/if}}</button>
 	  	</div>
 	  	<form class="add-margin-top-5x well">
 		  <div class="form-group">

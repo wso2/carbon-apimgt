@@ -161,6 +161,7 @@
                             org.apache.commons.io.*; version="${commons-io.version}",
                             org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
                             org.apache.http.*,
+                            org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.core.*; version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.utils.*; version="${carbon.kernel.package.import.version.range}",

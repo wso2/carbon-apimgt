@@ -1,7 +1,7 @@
 (function ($, window, document, undefined) {
-    var deleteConfirmation = i18n.t("Do you really want to delete the certificate for Endpoint");
+    var deleteConfirmation = i18n.t("Do you really want to delete the certificate for the endpoint");
     var aliasEPValidationMessage = i18n.t("Alias should not be empty");
-    var certFileError = i18n.t("You must upload a Certificate file");
+    var certFileError = i18n.t("You must upload a certificate file");
     var certSource = $("#certificate-ui-template").html();
     var certFormSource = $(".cert-upload-form-content").html();
     var certTemplate;
@@ -95,22 +95,28 @@
                         if (containInCertUrl) {
                             return containInCertUrl;
                         }
-                            }
+                    }
                 } else if (productionEndpoints) {
                     // Skip if productionEndpoints is `undefined`
-                    return productionEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
-                        }
+                    var containInCertUrl = productionEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
+                    if (containInCertUrl) {
+                        return containInCertUrl;
+                    }
+                }
                 if (Array.isArray(sandboxEndpoints)) {
                     for (var index in sandboxEndpoints) {
                         var containInCertUrl = sandboxEndpoints[index].url.toLowerCase().indexOf(certUrl) !== -1;
                         if (containInCertUrl) {
                             return containInCertUrl;
+                        }
                     }
-                }
                 } else if (sandboxEndpoints) {
                     // Skip if sandboxEndpoints is `undefined`
-                    return sandboxEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
-            }
+                    var containInCertUrl = sandboxEndpoints.url.toLowerCase().indexOf(certUrl) !== -1;
+                    if (containInCertUrl) {
+                        return containInCertUrl;
+                    }
+                }
             });
             return newCerts;
         },
@@ -168,7 +174,7 @@
                 content: deleteConfirmation + " " + dataEp + "? <br/> <strong>" +
                 i18n.t("This action cannot be undone") + ".</strong>",
                 type: "confirm",
-                title: i18n.t("Delete Certificate for Endpoint") + " " + dataEp,
+                title: i18n.t("Delete certificate for endpoint") + " " + dataEp,
                 okCallback: function () {
                     jagg.post("/site/blocks/item-design/ajax/add.jag",
                         {
@@ -324,9 +330,9 @@
             }
             case (2) : {
                 if (msgObject.action === "add") {
-                    return i18n.t("Failed to add Certificate due to an Internal Server Error.");
+                    return i18n.t("Failed to add certificate due to an Internal Server Error.");
                 } else {
-                    return i18n.t("Failed to delete Certificate due to an Internal Server Error.");
+                    return i18n.t("Failed to delete certificate due to an Internal Server Error");
                 }
             }
             case (3) : {
@@ -334,14 +340,14 @@
                     " the Alias");
             }
             case (4) : {
-                return i18n.t("Failed to delete the certificate. Certificate could not found for the given alias." +
-                    " Hence the entry is removed from the data base.");
+                return i18n.t("Failed to delete the certificate. Certificate could not be found for the given alias." +
+                    " Hence the entry is removed from the database.");
             }
             case (6) : {
-                return i18n.t("Failed to add Certificate. Certificate Expired");
+                return i18n.t("Failed to add certificate. Certificate expired");
             }
             case (7) : {
-                return i18n.t("Failed to add Certificate. Certificate for Endpoint exists.");
+                return i18n.t("Failed to add certificate. Certificate already exists for the endpoint.");
             }
         }
     };

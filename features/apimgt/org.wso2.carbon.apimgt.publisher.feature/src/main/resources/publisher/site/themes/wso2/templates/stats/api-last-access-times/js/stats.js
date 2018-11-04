@@ -25,19 +25,11 @@ jagg.post("/site/blocks/stats/api-last-access-times/ajax/stats.jag", { action: "
                             $(this).siblings().removeClass('active');
                         });
                         drawProviderAPIVersionUserLastAccess();
-                }
-
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('.stat-page').html("");
-                    showNoDataAnalyticsMsg();
-                }
-
-                else{
+                } else {
                     $('.stat-page').html("");
                     showEnableAnalyticsMsg();
                 }
-            }
-            else {
+            } else {
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {

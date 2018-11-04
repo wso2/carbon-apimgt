@@ -20,6 +20,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -27,6 +30,7 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.*;
 
@@ -332,6 +336,20 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
+            String tierName) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName);
+    }
+
+    @Override
+    public int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+            throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.deleteClientCertificate(userName, apiIdentifier, alias);
+    }
+
+    @Override
     public Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier) throws APIManagementException {
         checkAccessControlPermission(identifier);
         return super.getSubscribersOfAPI(identifier);
@@ -470,5 +488,70 @@ public class UserAwareAPIProvider extends APIProviderImpl {
             throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.getSequenceFileContent(apiIdentifier, sequenceType, sequenceName);
+    }
+
+    @Override
+    public int addCertificate(String userName, String certificate, String alias, String endpoint) throws APIManagementException {
+        checkCreatePermission();
+        return super.addCertificate(userName, certificate, alias, endpoint);
+    }
+
+    @Override
+    public int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException {
+        checkCreatePermission();
+        return super.deleteCertificate(userName, alias, endpoint);
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
+        checkCreatePermission();
+        return super.getCertificates(userName);
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> searchCertificates(int tenantId, String alias, String endpoint)
+            throws APIManagementException {
+        checkCreatePermission();
+        return super.searchCertificates(tenantId, alias, endpoint);
+    }
+
+    @Override
+    public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
+        checkCreatePermission();
+        return super.isCertificatePresent(tenantId, alias);
+    }
+
+    @Override
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+        if (clientCertificateDTO != null) {
+            checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
+        }
+        return clientCertificateDTO;
+    }
+
+    @Override
+    public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
+        checkCreatePermission();
+        return super.getCertificateStatus(alias);
+    }
+
+    @Override
+    public int updateCertificate(String certificateString, String alias) throws APIManagementException {
+        checkCreatePermission();
+        return super.updateCertificate(certificateString, alias);
+    }
+
+    @Override
+    public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
+            String tier, int tenantId) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId);
+    }
+
+    @Override
+    public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
+        checkCreatePermission();
+        return super.getCertificateContent(alias);
     }
 }

@@ -100,6 +100,7 @@ var jagg = jagg || {};
                 }},
                 {name:"No",cssClass:"btn",cbk:function() {
                     $('#messageModal').modal('hide');
+                    $("#messageModal div.modal-footer").html("");
                     if(typeof params.cancelCallback  == "function") {params.cancelCallback()};
                 }}
             ]
@@ -175,7 +176,7 @@ var jagg = jagg || {};
          );
         $('#username').focus();
         $('#loginErrorBox').show();
-        $('#loginErrorMsg').html('<strong>i18n.t("Session Timed Out") </strong>' + i18n.t("- your session has expired due to an extended period of inactivity. You will need to re-authenticate to access the requested information. "));
+        $('#loginErrorMsg').html('<strong>i18n.t("Session Timed Out") </strong>' + i18n.t("- Session expired due to inactivity. Please sign in again "));
     };
 
     jagg.login = function (username, password, params) {

@@ -1,0 +1,13 @@
+<%
+jagg.module("configure-alert", {
+    getPublisherAlertConfigs:function () {
+        return jagg.require(jagg.getModulesDir() + "configure-alert/alerts.jag").getPublisherAlertConfigs.apply(this, arguments);
+    },
+    addOrUpdatePublisherAlertConfigs:function () {
+        return jagg.require(jagg.getModulesDir() + "configure-alert/alerts.jag").addOrUpdatePublisherAlertConfigs.apply(this, arguments);
+    },
+    deletePublisherAlertConfigs:function () {
+        return jagg.require(jagg.getModulesDir() + "configure-alert/alerts.jag").deletePublisherAlertConfigs.apply(this, arguments);
+    }
+});
+%>

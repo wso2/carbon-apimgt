@@ -12,7 +12,7 @@ $(document).ready(function() {
                           }
                       });
         return this.optional(element) || contextExist != "true";
-    }, i18n.t('Duplicate context value.'));
+    }, i18n.t('Context exists.'));
     $.validator.addMethod('tenantContextExists', function(value, element) {
         if (value.charAt(0) != "/") {
             value = "/" + value;
@@ -33,7 +33,7 @@ $(document).ready(function() {
 
     $.validator.addMethod('validContext', function (value, element) {
         return value != "/";
-    }, i18n.t('Only / is not allowed as context.'));
+    }, i18n.t('Invalid context format'));
 
     $.validator.addMethod('selected', function(value, element) {
         return value!="";
@@ -59,11 +59,11 @@ $(document).ready(function() {
             return false;
         }
         return true;
-    }, i18n.t('"{version}" or "/{version}" cannot be used solely in the context field.'));
+    }, i18n.t('Invalid context format'));
 
     $.validator.addMethod('validTemplate', function(value, element) {
         return value.indexOf("{}") == -1
-    }, i18n.t('Empty curly brackets "{}" are not allowed in the context field.'));
+    }, i18n.t('Invalid context format'));
 
     $.validator.addMethod('validateUrl', function(value, element){
         var validUrlRegex = /^(http|https):\/\/(.)+/g;
@@ -104,7 +104,7 @@ $(document).ready(function() {
                 }
             });
         return this.optional(element) || valid == true;
-    }, i18n.t('Invalid role name[s] or roles provided do not contain any of the roles of API creator.'));
+    }, i18n.t('Role[s] provided must be associated with the API creator.'));
 
     $.validator.addMethod('validateEndpoints', function (value, element){
         return APP.is_production_endpoint_specified() || APP.is_sandbox_endpoint_specified();
@@ -128,7 +128,7 @@ $(document).ready(function() {
     	} 
     	return true;        
     }, i18n.t('Service Name must be provided for WSDL endpoint.'));
-    
+
     $.validator.addMethod('validateProdWSDLPort', function (value, element){
     	if (APP.is_production_endpoint_specified()) {
     		return APP.is_production_wsdl_endpoint_port_specified();
@@ -160,12 +160,12 @@ $(document).ready(function() {
             return ($.inArray(ext, validFileExtensions)) > -1;
         }
         return true;
-    }, i18n.t('File must be in an image file format.'));
+    }, i18n.t('Invalid file format. Valid formats are .jpg, .jpeg, .bmp, .gif and .png'));
 
     $.validator.addMethod('validateForwardSlashAtEnd', function(value, element) {
         var regexForwardSlashAtEnd = /.+\/$/;
         return !regexForwardSlashAtEnd.test(value);
-    }, i18n.t('Name or Context contains / at the end'));
+    }, i18n.t('Input should not contain / at the end'));
 
     $.validator.addMethod('validateAPIVersion', function(value, element)    {
         var illegalChars = /([\]\[\{\}\(\)\`~!@#;%^&*+=\|\\<>\"\'\/,])/;
@@ -174,7 +174,7 @@ $(document).ready(function() {
 
     $.validator.addMethod('validateDescriptionLength', function(value, element) {
         return value.length <= 20000;
-    }, i18n.t('maximum support 20000 characters only'));
+    }, i18n.t('Description cannot exceed 2000 characters'));
     
     $.validator.addMethod('email-validation', function(value, element) {
         var validationQuery = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;

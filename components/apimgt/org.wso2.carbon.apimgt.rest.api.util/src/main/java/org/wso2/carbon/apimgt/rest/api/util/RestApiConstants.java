@@ -96,11 +96,11 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
-    public static final String REST_API_STORE_VERSION="v0.13";
-    public static final String REST_API_PUBLISHER_VERSION="v0.13";
+    public static final String REST_API_STORE_VERSION="v0.14";
+    public static final String REST_API_PUBLISHER_VERSION="v0.14";
     public static final String REST_API_PUBLISHER_CONTEXT="/api/am/publisher/";
     public static final String REST_API_ADMIN_CONTEXT="/api/am/admin";
-    public static final String REST_API_ADMIN_VERSION="v0.13";
+    public static final String REST_API_ADMIN_VERSION="v0.14";
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
@@ -162,4 +162,11 @@ public final class RestApiConstants {
     public static final String ETAG = "ETag";
     public static final String PUT = "PUT";
     public static final String DELETE = "DELETE";
+
+    public static final String CERTS_BASE_PATH = "/certificates";
+    public static final String CLIENT_CERTS_BASE_PATH = "/clientCertificates";
+    public static final String CERTS_GET_PAGINATED_URL =
+            CERTS_BASE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + QUERY_PARAM;
+    public static final String CLIENT_CERTS_GET_PAGINATED_URL =
+            CLIENT_CERTS_BASE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + QUERY_PARAM;
 }

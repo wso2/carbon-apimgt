@@ -123,8 +123,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SB, " +
                     "   AM_APPLICATION APP " +
                     " WHERE " +
-                    "   SB.USER_ID = ? " +
-                    "   AND SB.TENANT_ID = ? " +
+                    "   SB.TENANT_ID = ? " +
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
@@ -144,8 +143,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SB, " +
                     "   AM_APPLICATION APP " +
                     " WHERE " +
-                    "   LOWER(SB.USER_ID) = LOWER(?) " +
-                    "   AND SB.TENANT_ID = ? " +
+                    "   SB.TENANT_ID = ? " +
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
@@ -1603,8 +1601,7 @@ public class SQLConstants {
             " UPDATE AM_WORKFLOWS " +
             " SET " +
             "   WF_STATUS = ?, " +
-            "   WF_STATUS_DESC = ?, " +
-            "   WF_UPDATED_TIME = ? " +
+            "   WF_STATUS_DESC = ? " +
             " WHERE " +
            "    WF_EXTERNAL_REFERENCE = ?";
 
@@ -1767,6 +1764,10 @@ public class SQLConstants {
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? ";
+
+    public static final String FIX_NULL_THROTTLING_TIERS =
+            "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
+                     " THROTTLING_TIER IS NULL";
 
     public static final String REMOVE_APPLICATION_MAPPINGS_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
@@ -2876,5 +2877,58 @@ public class SQLConstants {
 
         public static final String DELETE_CERTIFICATES = "DELETE FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
                 "AND ALIAS=?";
+
+        public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_CERTIFICATE_METADATA " +
+                "WHERE TENANT_ID=?";
+
+        public static final String SELECT_CERTIFICATE_FOR_ALIAS = "SELECT * FROM AM_CERTIFICATE_METADATA "
+                + "WHERE ALIAS=?";
+    }
+
+    public static class ClientCertificateConstants{
+        public static final String INSERT_CERTIFICATE = "INSERT INTO AM_API_CLIENT_CERTIFICATE " +
+                "(CERTIFICATE, TENANT_ID, ALIAS, API_ID, TIER_NAME) VALUES(?, ?, ?, ?, ?)";
+
+        public static final String GET_CERTIFICATES_FOR_API = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE WHERE "
+                + "TENANT_ID=? and API_ID=? and REMOVED=?";
+
+        public static final String DELETE_CERTIFICATES_FOR_API = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE TENANT_ID=? and API_ID=? and REMOVED=?";
+
+        public static final String SELECT_CERTIFICATE_FOR_ALIAS = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE ALIAS=? AND REMOVED=? AND TENANT_ID =?";
+
+        public static final String SELECT_CERTIFICATE_FOR_TENANT =
+                "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME, AA.API_PROVIDER, AA.API_NAME, "
+                        + "AA.API_VERSION FROM AM_API_CLIENT_CERTIFICATE AC, AM_API AA "
+                        + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AA.API_ID=AC.API_ID";
+
+        public static final String SELECT_CERTIFICATE_FOR_TENANT_ALIAS =
+                "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME, AA.API_PROVIDER, AA.API_NAME, AA.API_VERSION "
+                        + "FROM AM_API_CLIENT_CERTIFICATE AC, AM_API AA "
+                        + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AC.ALIAS=? AND AA.API_ID=AC.API_ID";
+
+        public static final String SELECT_CERTIFICATE_FOR_TENANT_ALIAS_APIID =
+                "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME FROM AM_API_CLIENT_CERTIFICATE AC "
+                        + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AC.ALIAS=? AND AC.API_ID = ?";
+
+        public static final String SELECT_CERTIFICATE_FOR_TENANT_APIID =
+                "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME FROM AM_API_CLIENT_CERTIFICATE AC "
+                        + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AC.API_ID=?";
+
+        public static final String PRE_DELETE_CERTIFICATES = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE TENANT_ID=? AND REMOVED=? ANd ALIAS=? AND API_ID=?";
+
+        public static final String PRE_DELETE_CERTIFICATES_WITHOUT_APIID = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE TENANT_ID=? AND REMOVED=? and ALIAS=?";
+
+        public static final String DELETE_CERTIFICATES = "UPDATE AM_API_CLIENT_CERTIFICATE SET REMOVED = ? "
+                + "WHERE TENANT_ID=? AND ALIAS=? AND API_ID=?";
+
+        public static final String DELETE_CERTIFICATES_WITHOUT_APIID = "UPDATE AM_API_CLIENT_CERTIFICATE SET REMOVED=? "
+                + "WHERE TENANT_ID=? AND ALIAS=?";
+
+        public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_API_CLIENT_CERTIFICATE " +
+                "WHERE TENANT_ID=? AND REMOVED=?";
     }
 }

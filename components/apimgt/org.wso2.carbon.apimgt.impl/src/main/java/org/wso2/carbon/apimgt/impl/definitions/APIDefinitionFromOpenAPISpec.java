@@ -85,11 +85,25 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                                 "for api \"" + api.getId().getApiName() + '\"');
                         continue;
                     }
+
+                    boolean isHttpVerbDefined = false;
+
                     for (Object o1 : path.keySet()) {
                         String httpVerb = (String) o1;
 
+                        if (APIConstants.SWAGGER_SUMMARY.equals(httpVerb.toLowerCase())
+                                || APIConstants.SWAGGER_DESCRIPTION.equals(httpVerb.toLowerCase())
+                                || APIConstants.SWAGGER_SERVERS.equals(httpVerb.toLowerCase())
+                                || APIConstants.PARAMETERS.equals(httpVerb.toLowerCase())
+                                || httpVerb.startsWith("x-")
+                                || httpVerb.startsWith("X-")) {
+                            // openapi 3.x allow 'summary', 'description' and extensions in PathItem Object.
+                            // which we are not interested at this point
+                            continue;
+                        }
                         //Only continue for supported operations
-                        if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                            isHttpVerbDefined = true;
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
                             Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants
@@ -125,6 +139,11 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
                                     + "' is invalid");
                         }
+                    }
+
+                    if (!isHttpVerbDefined) {
+                        handleException("Resource '" + uriTempVal + "' has global parameters without " +
+                                "HTTP methods");
                     }
                 }
             }

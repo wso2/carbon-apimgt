@@ -31,6 +31,15 @@ jagg.block("item-manage", {
     result = mod.isDataPublishingEnabled();
     isDataPublishingEnabled = result.isDataPublishingEnabled;
 
+    var isClientCertificateBasedAuthenticationEnabled = mod.isClientCertificateBasedAuthenticationConfigured().isConfigured;
+    var certificates = [];
+
+    if (isClientCertificateBasedAuthenticationEnabled) {
+        var results = mod.getClientCertificates(name, version, provider);
+        if (results.certificates) {
+            certificates = results.certificates;
+        }
+    }
 
         return {
             "api":api,
@@ -40,7 +49,9 @@ jagg.block("item-manage", {
             "isSynapseGateway":isSynapseGateway,
             "isDataPublishingEnabled":isDataPublishingEnabled,
             "lcStatus":lcStatus,
-            "wfStatus":apiWFstatus
+            "wfStatus":apiWFstatus,
+            "certificates" : certificates,
+            "isClientCertificateBasedAuthenticationEnabled" : isClientCertificateBasedAuthenticationEnabled
         }
     }
 

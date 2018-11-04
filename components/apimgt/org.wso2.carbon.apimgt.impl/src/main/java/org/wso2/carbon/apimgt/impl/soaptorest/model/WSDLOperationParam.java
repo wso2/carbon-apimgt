@@ -27,8 +27,10 @@ public class WSDLOperationParam {
     private ParamTypeEnum paramType;
     private String dataType;
     private boolean isComplexType;
+    private boolean isSimpleType;
     private boolean isArray;
     private WSDLComplexType wsdlComplexType;
+    private WSDLSimpleType wsdlSimpleType;
 
     /**
      * Parameter types
@@ -83,5 +85,21 @@ public class WSDLOperationParam {
 
     public void setArray(boolean array) {
         isArray = array;
+    }
+
+    public boolean isSimpleType() {
+        return isSimpleType;
+    }
+
+    public void setSimpleType(boolean simpleType) {
+        isSimpleType = simpleType;
+    }
+
+    public WSDLSimpleType getWsdlSimpleType() {
+        return wsdlSimpleType;
+    }
+
+    public void setWsdlSimpleType(WSDLSimpleType wsdlSimpleType) {
+        this.wsdlSimpleType = wsdlSimpleType;
     }
 }

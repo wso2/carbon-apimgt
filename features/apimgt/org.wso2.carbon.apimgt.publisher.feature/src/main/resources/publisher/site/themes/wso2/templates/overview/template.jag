@@ -160,7 +160,19 @@
             <% if(api.tags!=''){%>
             <tr>
                 <td><%=i18n.localize("Tags")%></td>
-                <td id="tags"><%=api.tags%></td>
+                <td id="tags">
+                     <% var tags = api.tags;
+                        var tag = "";
+                        for(i=0; i<tags.split(",").length; i++){
+                            if(i == tags.split(",").length-1){
+                                tag += tags.split(",")[i];
+                            }else{
+                                tag += tags.split(",")[i]+", ";
+                            }
+                        }
+                     %>
+                     <%=tag%>
+                </td>
             </tr>
              <%
             }if(api.bizOwner!=''){%>

@@ -17,6 +17,5 @@ jagg.module("manage-alerts", {
 
         return jagg.require(jagg.getModulesDir() + "manage-alerts/alerts.jag").unSubscribe.apply(this, arguments);
     }
-
 });
 %>

@@ -171,6 +171,4 @@ var retrieveSavedEmailList = function () {
 
 
 };
-
-
 %>
