@@ -267,8 +267,8 @@ $(document).ready(function(){
 
 	$('.env_name').selectpicker();
 	var change_token = function(){
-    	loadTokens();
-  };
+		loadTokens();
+	};
 
 var show_environments = function(){
     var type = $(".keytype option:selected").val();

@@ -3008,7 +3008,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
 
-        private static APIKey getKey(SubscribedAPI api, String keyType) {
+    private static APIKey getKey(SubscribedAPI api, String keyType) {
         List<APIKey> apiKeys = api.getKeys();
         return getKeyOfType(apiKeys, keyType);
     }

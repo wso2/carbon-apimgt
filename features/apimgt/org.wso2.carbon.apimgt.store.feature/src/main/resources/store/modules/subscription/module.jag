@@ -76,6 +76,5 @@ jagg.module("subscription", {
     getApplicationKeysOfApplication :function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getApplicationKeysOfApplication.apply(this, arguments);
     }
-
 });
 %>
