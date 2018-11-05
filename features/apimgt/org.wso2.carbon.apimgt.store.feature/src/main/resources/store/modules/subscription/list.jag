@@ -130,7 +130,7 @@ var getApplicationKeysOfApplication = function (applicationId) {
 			apikeys:apikeys
 		};
 	} catch (e) {
-		log.error(e.message);
+		log.error(e.message, e);
 		return {
 			error:e,
 			apikeys:null
