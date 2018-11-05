@@ -1,6 +1,9 @@
 <% jagg.template("application/application-view", function(inputs, outputs, jagg) {
  var application = outputs.application;
  var oauthapp = outputs.oauthapp;
+ var gatewayurlendpointtype = outputs.gatewayTypeurl;
+ var gatewayurlendpointproduction = gatewayurlendpointtype['production'];
+ var gatewayurlendpointsandbox = gatewayurlendpointtype['sandbox'];
  jagg.log(outputs.tiers);
  var user = jagg.getUser();
 var app_tier;
@@ -128,7 +131,8 @@ for(var i=0;i < outputs.tiers.length; i++){
             ValidityTime: oauthapp.prodValidityTime,
             keyState: oauthapp.prodKeyState,
             grants: prodGrants,
-            tokenType: application.tokenType
+            tokenType: application.tokenType,
+            gatewayurlendpoint: gatewayurlendpointproduction
 
         }
       %>
@@ -154,15 +158,16 @@ for(var i=0;i < outputs.tiers.length; i++){
             ValidityTime: oauthapp.sandValidityTime,
             keyState: oauthapp.sandboxKeyState,
             grants:sandboxGrants,
-            tokenType: application.tokenType
+            tokenType: application.tokenType,
+            gatewayurlendpoint: gatewayurlendpointsandbox
         }
       %>      
       <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
-      </div>      
-      <div role="tabpanel" class="tab-pane fade" id="subscription">      
-      <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>    
       </div>
-      <% } %>      
+      <div role="tabpanel" class="tab-pane fade" id="subscription">
+      <% jagg.includeBlock("subscription/subscribed-apis", { "application": application }); %>
+      </div>
+      <% } %>
     </div>
   </div>
   <% if(application.status == "APPROVED"){ %>
@@ -219,6 +224,6 @@ for(var i=0;i < outputs.tiers.length; i++){
       }
     }
   </script>
-  <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "" , "gatewayurl":outputs.gatewayurl} ); %>
+  <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "" , "gatewayurl":outputs.gatewayurl, "gatewayTypeurl":outputs.gatewayTypeurl} ); %>
   <% } %>
 <% }); %>

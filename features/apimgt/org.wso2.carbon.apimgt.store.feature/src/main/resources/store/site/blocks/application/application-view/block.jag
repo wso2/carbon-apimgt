@@ -43,10 +43,13 @@ jagg.block("application/application-view", {
 
         var store = jagg.module("manager").getAPIStoreObj();
         gatewayURL = store.getHTTPsGatewayEndpointURLs();
+        gatewayTypeURL = store.getHTTPSGatewayEndpointURLsWithType();
+        var gatewayURLType = JSON.parse(gatewayTypeURL);
 
         return {
             "tiers":tiers,
             "gatewayurl":gatewayURL[0],
+            "gatewayTypeurl": gatewayURLType,
             "application" : application,
             "scopes": scopes,
             "oauthapp": oauthapp,
