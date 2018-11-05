@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.keymgt;
 
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -27,7 +28,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
-import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
 
@@ -67,8 +68,8 @@ public class MethodTimeLogger
     @Pointcut("execution(* *(..)) && if()")
     public static boolean pointCutAll() {
         if (!isLogAllSet) {
-            String config = System.getProperty("logAllMethods");
-            if (config != null && !config.equals("")) {
+            String config = System.getProperty(APIConstants.LOG_ALL_METHODS);
+            if (StringUtils.isNotEmpty(config)) {
                 logAllMethods = config.contains("org.wso2.carbon.apimgt.keymgt");
                 isLogAllSet = true;
             }
@@ -84,8 +85,8 @@ public class MethodTimeLogger
     @Pointcut("if()")
     public static boolean isConfigEnabled() {
         if (!isSet) {
-            String config = System.getProperty("enableCorrelationLogs");
-            if (config != null && !config.equals("")) {
+            String config = System.getProperty(APIConstants.ENABLE_CORRELATION_LOGS);
+            if (StringUtils.isNotEmpty(config)) {
                 isEnabled = Boolean.parseBoolean(config);
                 isSet = true;
             }
@@ -102,8 +103,7 @@ public class MethodTimeLogger
      * @throws Throwable
      */
     @Around("isConfigEnabled() && (pointCut() || pointCutAll())")
-    public Object log(ProceedingJoinPoint point) throws Throwable
-    {
+    public Object log(ProceedingJoinPoint point) throws Throwable {
         long start = System.currentTimeMillis();
         MethodSignature signature = (MethodSignature) point.getSignature();
         Object result = point.proceed();
@@ -126,14 +126,15 @@ public class MethodTimeLogger
         if (messageContext != null) {
             Map headers = (Map) messageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
-                String correlationId = (String) headers.get("activityid");
+                String correlationId = (String) headers.get(APIConstants.AM_ACTIVITY_ID);
                 if (correlationId != null) {
-                    MDC.put("Correlation-ID", correlationId);
+                    MDC.put(APIConstants.CORRELATION_ID, correlationId);
                 }
             }
         }
-        log.info((System.currentTimeMillis() - start) + "|METHOD|" + MethodSignature.class.cast(point.getSignature()).getDeclaringTypeName() +
-                "|" + MethodSignature.class.cast(point.getSignature()).getMethod().getName()+ "|" + argString);
+        log.info((System.currentTimeMillis() - start) + "|METHOD|" +
+                MethodSignature.class.cast(point.getSignature()).getDeclaringTypeName() + "|" +
+                MethodSignature.class.cast(point.getSignature()).getMethod().getName()+ "|" + argString);
         return result;
     }
 }

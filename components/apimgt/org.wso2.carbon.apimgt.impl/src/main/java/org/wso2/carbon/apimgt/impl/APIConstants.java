@@ -1466,4 +1466,13 @@ public final class APIConstants {
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
     public static final String MIGRATION_MODE = "migrationMode";
+
+    /**
+     * Constants for correlation logging
+     * */
+    public static final String CORRELATION_ID = "Correlation-ID";
+    public static final String ENABLE_CORRELATION_LOGS = "enableCorrelationLogs";
+    public static final String CORRELATION_LOGGER = "correlation";
+    public static final String LOG_ALL_METHODS = "logAllMethods";
+    public static final String AM_ACTIVITY_ID = "activityid";
 }

@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
 
@@ -29,11 +31,11 @@ import java.util.Map;
 class LogUtils {
 
     protected static String getAuthorizationHeader(Map headers) {
-        return (String) headers.get("Authorization");
+        return (String) headers.get(HttpHeaders.AUTHORIZATION);
     }
 
     protected static String getCorrelationHeader(Map headers) {
-        return (String) headers.get(APIMgtGatewayConstants.AM_ACTIVITY_ID);
+        return (String) headers.get(APIConstants.AM_ACTIVITY_ID);
     }
 
     protected static String getOrganizationIdHeader(Map headers) {
