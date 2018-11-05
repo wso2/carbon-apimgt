@@ -3000,7 +3000,7 @@ public class APIStoreHostObject extends ScriptableObject {
             int i = 0;
             for(APIKey key : keys){
                 NativeObject row = new NativeObject();
-                row.put(key.getType()+"_KEY", row, key.getAccessToken());
+                row.put(key.getType()+APIConstants.KEY_SUFFIX, row, key.getAccessToken());
                 myn.put(i++, myn, row);
             }
         }

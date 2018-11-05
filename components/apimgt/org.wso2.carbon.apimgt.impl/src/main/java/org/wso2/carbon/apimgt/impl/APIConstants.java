@@ -1477,4 +1477,6 @@ public final class APIConstants {
     public static final String CORRELATION_LOGGER = "correlation";
     public static final String LOG_ALL_METHODS = "logAllMethods";
     public static final String AM_ACTIVITY_ID = "activityid";
+
+    public static final String KEY_SUFFIX = "_KEY";
 }
