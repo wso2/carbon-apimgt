@@ -256,7 +256,7 @@ var show_environments = function(){
      $(".btn-group.env_name").show();
     } else if ($("#api-gateways").children("option[class='hybrid']").length > 0) {
         $("#api-gateways").children("option[class='hybrid']")[0].selected = true;
-    } else if($("#api-gateways").children('optgroup').children("option[class='" + type + "']").length > 0) {
+    } else if($("#api-gateways").children("option[class='" + type + "']").length > 0) {
       $("#api-gateways").children("option[class='" + type + "']")[0].selected = true;
     } else if($("#micro-gateways").children("option[class='microgw-label']").length > 0){
       $("#micro-gateways").children("option[class='microgw-label']")[0].selected = true;
