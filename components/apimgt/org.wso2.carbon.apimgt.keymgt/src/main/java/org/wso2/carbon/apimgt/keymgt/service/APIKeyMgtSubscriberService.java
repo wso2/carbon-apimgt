@@ -400,13 +400,29 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 if (serviceProvider != null) {
                     serviceProvider.setApplicationName(applicationName);
                     serviceProvider.setDescription("Service Provider for application " + applicationName);
-                    ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
-                    ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
-                    serviceProviderProperty.setName(APIConstants.APP_DISPLAY_NAME);
-                    serviceProviderProperty.setValue(displayName);
-                    serviceProviderProperties[0] = serviceProviderProperty;
-                    serviceProvider.setSpProperties(serviceProviderProperties);
 
+                    ServiceProviderProperty[] serviceProviderPropertiesArray = serviceProvider.getSpProperties();
+                    ArrayList<ServiceProviderProperty> serviceProviderProperties = new ArrayList<>();
+                    if (serviceProviderPropertiesArray != null) {
+                        serviceProviderProperties = new ArrayList<>(Arrays.asList(serviceProviderPropertiesArray));
+                    }
+                    boolean displayNameExist = false;
+                    //check displayName property and modify if found
+                    for (ServiceProviderProperty serviceProviderProperty : serviceProviderProperties) {
+                        if (APIConstants.APP_DISPLAY_NAME.equals(serviceProviderProperty.getName())) {
+                            serviceProviderProperty.setValue(displayName);
+                            displayNameExist = true;
+                            break;
+                        }
+                    }
+                    //if displayName not found add new property
+                    if (!displayNameExist) {
+                        ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
+                        serviceProviderProperty.setName(APIConstants.APP_DISPLAY_NAME);
+                        serviceProviderProperty.setValue(displayName);
+                        serviceProviderProperties.add(serviceProviderProperty);
+                    }
+                    serviceProvider.setSpProperties(serviceProviderProperties.toArray(new ServiceProviderProperty[0]));
                     serviceProvider.setApplicationName(applicationName);
                     serviceProvider.setDescription("Service Provider for application " + applicationName);
                     appMgtService.updateApplication(serviceProvider, tenantDomain, userName);
