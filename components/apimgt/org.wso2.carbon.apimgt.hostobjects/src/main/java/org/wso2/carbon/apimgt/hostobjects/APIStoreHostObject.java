@@ -2164,7 +2164,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 return json;
             } else {
                 String environmentType = APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
-                        ? "production" : "sandbox";
+                        ? APIConstants.GATEWAY_ENV_TYPE_PRODUCTION : APIConstants.GATEWAY_ENV_TYPE_SANDBOX;
                 if (environment.isDefault()) {
                     json.put(environmentType,
                             APIStoreHostObject.getHttpsEnvironmentUrl(environment));
@@ -2172,7 +2172,7 @@ public class APIStoreHostObject extends ScriptableObject {
             }
         }
 
-        if (json.get("production") == null) {
+        if (json.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION) == null) {
             for (Environment environment : environments.values()) {
                 if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                     json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
@@ -2182,7 +2182,7 @@ public class APIStoreHostObject extends ScriptableObject {
             }
         }
 
-        if (json.get("sandbox") == null) {
+        if (json.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX) == null) {
             for (Environment environment : environments.values()) {
                 if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
                     json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
@@ -2197,7 +2197,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     private static String getHttpsEnvironmentUrl(Environment environment) {
         for (String url : environment.getApiGatewayEndpoint().split(",")) {
-            if (url.startsWith("https:")) {
+            if (url.startsWith(APIConstants.HTTPS_PROTOCOL)) {
                 return url;
             }
         }
