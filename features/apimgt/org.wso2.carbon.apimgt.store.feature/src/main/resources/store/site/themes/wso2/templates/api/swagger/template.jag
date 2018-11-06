@@ -241,6 +241,7 @@ $(document).ready(function(){
 var show_environments = function(){
     var type = $(".keytype option:selected").val();
     $("#environment_name").children('optgroup').hide();
+    $("#api-gateways").children().hide();
     $("#api-gateways").children("option[class='" + type + "']").show();
     $("#api-gateways").children("option[class='hybrid']").show();
     $("#micro-gateways").children("option[class='microgw-label']").show();
