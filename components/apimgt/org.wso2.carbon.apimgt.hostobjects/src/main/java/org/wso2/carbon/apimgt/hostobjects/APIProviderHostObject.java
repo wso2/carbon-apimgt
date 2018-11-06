@@ -990,7 +990,7 @@ public class APIProviderHostObject extends ScriptableObject {
             Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
                     (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
-
+            apiProvider.validateResourceThrottlingTiers(api, tenantDomain);
             // Save the swagger definition in the registry
             apiProvider.saveSwaggerDefinition(api, (String) apiData.get("swagger", apiData));
         }

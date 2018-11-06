@@ -675,6 +675,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addAPI(API api) throws APIManagementException {
         validateApiInfo(api);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        validateResourceThrottlingTiers(api, tenantDomain);
         createAPI(api);
 
         if (log.isDebugEnabled()) {
@@ -683,8 +686,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         int tenantId;
-        String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
@@ -969,6 +970,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(
                         "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
             }
+            validateResourceThrottlingTiers(api, tenantDomain);
             apiMgtDAO.updateAPI(api, tenantId);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated the API: " + api.getId() + " in the database");
@@ -4165,6 +4167,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException {
 
         return apiMgtDAO.getConsumerKeys(apiIdentifier);
+    }
+
+    @Override
+    public void validateResourceThrottlingTiers(API api, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating x-throttling tiers defined in swagger api definition resource");
+        }
+        Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+        if (tierMap != null) {
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            for (URITemplate template : uriTemplates) {
+                if (template.getThrottlingTier() != null && !tierMap.containsKey(template.getThrottlingTier())) {
+                    String message = "Invalid x-throttling tier " + template.getThrottlingTier() +
+                            " found in api definition for resource " + template.getHTTPVerb() + " " +
+                            template.getUriTemplate();
+                    log.error(message);
+                    throw new APIManagementException(message);
+                }
+            }
+        }
     }
 
     @Override
