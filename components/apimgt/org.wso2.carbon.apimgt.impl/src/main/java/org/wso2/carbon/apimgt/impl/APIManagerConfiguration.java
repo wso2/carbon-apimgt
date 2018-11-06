@@ -201,7 +201,7 @@ public class APIManagerConfiguration {
                         environment.setShowInConsole(true);
                     }
                     String isDefault = environmentElem.getAttributeValue(new QName("isDefault"));
-                    if (!StringUtils.isEmpty(isDefault)) {
+                    if (isDefault != null) {
                         environment.setDefault(Boolean.parseBoolean(isDefault));
                     } else {
                         environment.setDefault(false);
