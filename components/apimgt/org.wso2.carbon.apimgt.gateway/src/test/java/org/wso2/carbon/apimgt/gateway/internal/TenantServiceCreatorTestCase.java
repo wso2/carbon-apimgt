@@ -118,6 +118,8 @@ public class TenantServiceCreatorTestCase {
 
         copyFile("/repository/resources/apim-synapse-config/_cors_request_handler_.xml",
                 "/file/synapse-confgs" + File.separator + "sequences" + File.separator + "_cors_request_handler_.xml");
+        copyFile("/repository/resources/apim-synapse-config/_threat_fault.xml",
+                "/file/synapse-confgs" + File.separator + "sequences" + File.separator + "_threat_fault.xml");
         // test IOException Error while copying API manager specific synapse sequences
         tenantServiceCreator.createdConfigurationContext(configurationContext);
     }
