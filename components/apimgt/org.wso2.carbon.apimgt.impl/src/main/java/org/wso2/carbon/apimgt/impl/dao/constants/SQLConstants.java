@@ -1319,8 +1319,8 @@ public class SQLConstants {
             "   USER_ID, " +
             "   APP.CREATED_BY " +
             " FROM" +
-            "   AM_APPLICATION APP, "+
-            "   AM_SUBSCRIBER SUB  "+
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIBER SUB  " +
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
 
