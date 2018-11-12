@@ -1777,6 +1777,15 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+        - name: tenantDomain
+          in: query
+          description: |
+               Tenant domain of the applications to get. This has to be specified only if require to get applications of
+               another tenant other than the requester's tenant. So, if not specified, the default will be set as the
+               requester's tenant domain. This cross tenant Application access is allowed only for super tenant admin
+               users only at a migration process.
+          required: false
+          type: string
       tags:
         - Application (Collection)
       responses:

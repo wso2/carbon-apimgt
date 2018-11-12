@@ -45,7 +45,7 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdWsdlPost(String apiId,WsdlDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisChangeLifecyclePost(String action,String apiId,String lifecycleChecklist,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisCopyApiPost(String newVersion,String apiId);
-    public abstract Response apisGet(Integer limit,Integer offset,String query,String accept,String ifNoneMatch,Boolean expand);
+    public abstract Response apisGet(Integer limit,Integer offset,String query,String accept,String ifNoneMatch,Boolean expand,String tenantDomain);
     public abstract Response apisPost(APIDetailedDTO body,String contentType);
 }
 

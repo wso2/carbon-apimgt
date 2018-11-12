@@ -32,9 +32,13 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ExportApiService;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RestApiUtil.class, APIUtil.class})
@@ -67,7 +71,7 @@ public class ExportApiServiceImplTestCase {
 
     /**
      * This method tests the functionality of ExportApplicationsGet, for a cross tenant application
-     * export attempt
+     * export attempt when the migrationMode is not enabled
      *
      * @throws Exception Exception.
      */
@@ -84,6 +88,30 @@ public class ExportApiServiceImplTestCase {
         Mockito.when(apiConsumer.getApplicationById(1)).thenReturn(testApp);
         Response response = exportApiService.exportApplicationsGet("sampleApp", "admin@hr.lk");
         Assert.assertEquals(response.getStatus(), 403);
+    }
+
+    /**
+     * This method tests the functionality of ExportApplicationsGet, for a cross tenant application export attempt when
+     * the migrationMode is enabled
+     *
+     * @throws Exception Exception.
+     */
+    @Test
+    public void testExportApplicationsGetCrossTenantAtMigrationMode() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
+        System.setProperty(RestApiConstants.MIGRATION_MODE, "true");
+        PowerMockito.mockStatic(APIUtil.class);
+        Application testApp = new Application("sampleApp", new Subscriber("admin@hr.lk"));
+        Subscriber subscriber = new Subscriber("admin@hr.lk");
+        when(apiConsumer.getSubscriber("admin@hr.lk")).thenReturn(subscriber);
+        when(APIUtil.getApplicationId("sampleApp", "admin@hr.lk")).thenReturn(1);
+        when(apiConsumer.getApplicationById(1)).thenReturn(testApp);
+        doNothing().when(RestApiUtil.class, "handleMigrationSpecificPermissionViolations", "hr.lk", "admin");
+        Response response = exportApiService.exportApplicationsGet("sampleApp", "admin@hr.lk");
+        Assert.assertEquals(response.getStatus(), 200);
+        System.clearProperty(RestApiConstants.MIGRATION_MODE);
     }
 
     /**
