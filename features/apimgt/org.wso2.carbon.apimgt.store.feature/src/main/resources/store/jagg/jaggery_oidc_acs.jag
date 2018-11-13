@@ -26,7 +26,7 @@
     var security = require("oidc");
     var oidcRelyingParty = new security.OIDCRelyingParty(site.oidcConfiguration.issuer);
     var usernameClaim = site.oidcConfiguration.usernameClaim;
-    if (usernameClaim == null || usernameClaim != "") {
+    if (usernameClaim != null && usernameClaim != "") {
         oidcRelyingParty.setProperty("usernameClaim", usernameClaim);
     }
 
