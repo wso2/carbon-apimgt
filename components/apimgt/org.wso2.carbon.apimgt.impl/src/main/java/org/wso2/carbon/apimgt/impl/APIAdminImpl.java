@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
@@ -71,5 +72,10 @@ public class APIAdminImpl implements APIAdmin {
      */
     public Label updateLabel(Label label) throws APIManagementException{
         return apiMgtDAO.updateLabel(label);
+    }
+
+    @Override
+    public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException{
+        return apiMgtDAO.getAllApplicationsOfTenantForMigration(appTenantDomain);
     }
 }

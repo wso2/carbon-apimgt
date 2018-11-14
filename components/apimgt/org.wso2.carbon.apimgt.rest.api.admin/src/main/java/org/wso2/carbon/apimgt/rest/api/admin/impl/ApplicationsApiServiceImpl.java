@@ -1,10 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.admin.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationListDTO;
@@ -41,18 +44,11 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String ifNoneMatch) {
-
+    public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String ifNoneMatch,
+                                    String appTenantDomain) {
         // if no username provided user associated with access token will be used
         if (user == null || user.isEmpty()) {
             user = RestApiUtil.getLoggedInUsername();
-        }
-
-        if (!MultitenantUtils.getTenantDomain(user).equals
-                (RestApiUtil.getLoggedInUserTenantDomain())) {
-            String errorMsg = "User " + user + " is not available for the current tenant domain";
-            log.error(errorMsg);
-            return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
         }
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -60,9 +56,25 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
         ApplicationListDTO applicationListDTO;
         try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(user);
-            Application[] allMatchedApps = apiConsumer.getApplicationsByOwner(user);
+            Application[] allMatchedApps;
+            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
+            if (!migrationMode) { // normal non-migration flow
+                if (!MultitenantUtils.getTenantDomain(user).equals(RestApiUtil.getLoggedInUserTenantDomain())) {
+                    String errorMsg = "User " + user + " is not available for the current tenant domain";
+                    log.error(errorMsg);
+                    return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
+                }
+                APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(user);
+                allMatchedApps = apiConsumer.getApplicationsByOwner(user);
 
+            } else { // flow at migration process
+                if (StringUtils.isEmpty(appTenantDomain)) {
+                    appTenantDomain = MultitenantUtils.getTenantDomain(user);
+                }
+                RestApiUtil.handleMigrationSpecificPermissionViolations(appTenantDomain, RestApiUtil.getLoggedInUsername());
+                APIAdmin apiAdmin = new APIAdminImpl();
+                allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(appTenantDomain);
+            }
             //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
             ApplicationMappingUtil.setPaginationParams(applicationListDTO, limit, offset,
