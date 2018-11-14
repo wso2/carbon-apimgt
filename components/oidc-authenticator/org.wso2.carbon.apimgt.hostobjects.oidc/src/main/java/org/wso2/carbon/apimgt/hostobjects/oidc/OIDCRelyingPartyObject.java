@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.*;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -170,49 +171,76 @@ public class OIDCRelyingPartyObject extends ScriptableObject {
                                                            Function funObj)
             throws Exception {
 
-        log.debug("Validating OIDC signature");
-        boolean isSignatureValid;
-        OIDCRelyingPartyObject relyingPartyObject = (OIDCRelyingPartyObject) thisObj;
-
-        ServerConfiguration serverConfiguration = getServerConfiguration(relyingPartyObject);
-        AuthClient authClient = getClientConfiguration(relyingPartyObject);
-
         int argLength = args.length;
         if (argLength != 3 || !(args[0] instanceof String)) {
             throw new ScriptException("Invalid argument. Authorization Code, Nonce value or session ID is missing.");
         }
 
-        String authorizationCode = (String) args[0];
-        String storedNonce = (String) args[1];
-
-        String jsonResponse = getTokenFromTokenEP(serverConfiguration, authClient, authorizationCode);
-        AuthenticationToken oidcAuthenticationToken = getAuthenticationToken(jsonResponse);
-
-        String userName = getUserName(oidcAuthenticationToken, serverConfiguration);
-
-        if (userName == null || userName.equals("")) {
-            log.error("Authentication Request is rejected. "
-                    + "User Name is Null");
-            return false;
-        }
-
-        isSignatureValid = validateSignature(serverConfiguration, authClient,
-                oidcAuthenticationToken, storedNonce);
-
-        // If come here and signatureValid then set session as a authenticated one
-        SessionInfo sessionInfo = new SessionInfo((String) args[2]);
-        //sessionInfo.setSessionIndex(sessionIndex);
-        sessionInfo.setLoggedInUser(userName);
-        // sessionInfo.setSamlToken(userInfoJson);
-        relyingPartyObject.addSessionInfo(sessionInfo);
-        ///////////////////////
-
-        return isSignatureValid;
-
-
+        return validateSignature(thisObj, args) != null;
     }
 
+    /**
+     * To validate the OIDC signature and return userInfo JSON.
+     *
+     * @param oidcObject OIDC relying part object.
+     * @param args       Authorization Code, Nonce value.
+     * @return user info if the signature is validated.
+     * @throws Exception Exception
+     */
+    private static String validateSignature(Scriptable oidcObject, Object[] args) throws Exception {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating OIDC signature");
+        }
+        boolean isSignatureValid;
+        String authorizationCode = (String) args[0];
+        String storedNonce = (String) args[1];
+        OIDCRelyingPartyObject relyingPartyObject = (OIDCRelyingPartyObject) oidcObject;
+        ServerConfiguration serverConfiguration = getServerConfiguration(relyingPartyObject);
+        AuthClient authClient = getClientConfiguration(relyingPartyObject);
+        String jsonResponse = getTokenFromTokenEP(serverConfiguration, authClient, authorizationCode);
+        AuthenticationToken oidcAuthenticationToken = getAuthenticationToken(jsonResponse);
+        String userInfoJson = Util.getUserInfo(serverConfiguration, oidcAuthenticationToken);
+        String userName = getUserName(userInfoJson, relyingPartyObject);
 
+        if (StringUtils.isEmpty(userName)) {
+            log.error("Authentication Request is rejected. Username is null. Please make sure the username is not "
+                    + "empty");
+            return null;
+        }
+        isSignatureValid = validateSignature(serverConfiguration, authClient, oidcAuthenticationToken, storedNonce);
+        if (isSignatureValid) {
+            if (log.isDebugEnabled()) {
+                log.debug("OIDC signature validation succeeded for the user " + userName);
+            }
+            SessionInfo sessionInfo = new SessionInfo((String) args[2]);
+            sessionInfo.setLoggedInUser(userName);
+            relyingPartyObject.addSessionInfo(sessionInfo);
+            return userInfoJson;
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("OIDC signature validation failed for the user " + userName);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * To validate the OIDC signature and return the user info if the validation Succeeds.
+     *
+     * @param cx      Context.
+     * @param thisObj OIDC relying party object.
+     * @param args    Arguments.
+     * @param funObj  Function Objects.
+     * @return user info json string if the validation succeeds, otherwise null will be returned.
+     * @throws Exception Exception related with validating signature.
+     */
+    public static String jsFunction_validateSignature(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws Exception {
+        if (args.length != 3 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. Authorization Code, Nonce value or session ID is missing.");
+        }
+        return validateSignature(thisObj, args);
+    }
 
     /**
      * Get OIDC Server Configuration
@@ -339,14 +367,18 @@ public class OIDCRelyingPartyObject extends ScriptableObject {
         }
     }
 
-
-    private static String getUserName(AuthenticationToken authenticationToken, ServerConfiguration serverConfiguration) throws Exception {
+    /**
+     * To get the username from the userinfo.
+     *
+     * @param userInfoJson       Relevant user information.
+     * @param relyingPartyObject OIDC Relying party Object.
+     * @return extracted username.
+     * @throws Exception Exception.
+     */
+    static String getUserName(String userInfoJson, OIDCRelyingPartyObject relyingPartyObject)
+            throws Exception {
 
         String userName;
-
-
-        String userInfoJson = Util.getUserInfo(serverConfiguration, authenticationToken);
-
         JsonElement jsonRoot = new JsonParser().parse(userInfoJson);
 
         if (!jsonRoot.isJsonObject()) {
@@ -356,8 +388,12 @@ public class OIDCRelyingPartyObject extends ScriptableObject {
 
         JsonObject jsonResponse = jsonRoot.getAsJsonObject();
 
-        if (jsonResponse.has("preferred_username")) {
-            userName = jsonResponse.get("preferred_username").getAsString();
+        String usernameProperty = relyingPartyObject.getOIDCProperty("usernameClaim");
+        if (StringUtils.isEmpty(usernameProperty)) {
+            usernameProperty = "preferred_username";
+        }
+        if (jsonResponse.has(usernameProperty)) {
+            userName = jsonResponse.get(usernameProperty).getAsString();
             log.debug("User name taken from user info endpoint : " + userName);
         } else {
             throw new Exception("User Info JSON did not return an preferred_username");

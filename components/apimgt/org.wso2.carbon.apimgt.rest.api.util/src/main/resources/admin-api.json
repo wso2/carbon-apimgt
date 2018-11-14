@@ -1810,6 +1810,13 @@
           },
           {
             "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "name": "tenantDomain",
+            "in": "query",
+            "description": "Tenant domain of the applications to get. This has to be specified only if require to get applications of\nanother tenant other than the requester's tenant. So, if not specified, the default will be set as the\nrequester's tenant domain. This cross tenant Application access is allowed only for super tenant admin\nusers only at a migration process.\n",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -2037,8 +2044,10 @@
     },
     "/labels": {
       "get": {
-        "x-scope": "apim:label_view",
-        "x-wso2-response": "HTTP/1.1 200 OK",
+        "x-scope": "apim:label_read",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.13/labels\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.13/labels\"",
+        "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 1,\r\n  \"list\": [\r\n  {\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}",
         "summary": "Get all registered Labels",
         "description": "Get all registered Labels\n",
         "tags": [
@@ -2055,7 +2064,9 @@
       },
       "post": {
         "x-scope": "apim:label_manage",
-        "x-wso2-response": "HTTP/1.1 200 OK",
+        "x-wso2-curl": "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.13/labels -d @data.json",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.13/labels\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
+        "x-wso2-response": "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}",
         "summary": "Add a Label",
         "description": "Add a new gateway Label\n",
         "parameters": [
