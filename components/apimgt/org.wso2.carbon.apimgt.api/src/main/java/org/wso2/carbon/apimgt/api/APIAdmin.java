@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 
 import java.util.List;
@@ -57,4 +58,6 @@ public interface APIAdmin  {
      * @throws APIManagementException if failed to update label
      */
     Label updateLabel(Label label) throws APIManagementException;
+
+    Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException;
 }

@@ -71,12 +71,14 @@ public class ExportApiServiceImpl extends ExportApiService {
                 applicationDetails = importExportManager.getApplicationDetails(appName, appOwner);
             }
             if (applicationDetails == null) {
-                // 404
                 String errorMsg = "No application found with name " + appName + " owned by " + appOwner;
                 log.error(errorMsg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorMsg).build();
+            } else if (Boolean.getBoolean(RestApiConstants.MIGRATION_MODE)) { // migration flow
+                String appTenant = MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName());
+                RestApiUtil.handleMigrationSpecificPermissionViolations(appTenant, username);
             } else if (!MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName()).equals
-                    (MultitenantUtils.getTenantDomain(username))) {
+                    (MultitenantUtils.getTenantDomain(username))) {  // normal non-migration flow
                 String errorMsg = "Cross Tenant Exports are not allowed";
                 log.error(errorMsg);
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
