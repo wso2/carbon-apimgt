@@ -149,6 +149,13 @@ paths:
       - $ref : "#/parameters/Accept"
       - $ref : "#/parameters/If-None-Match"
       - $ref : "#/parameters/expand"
+      - name: tenantDomain
+        in: query
+        description: |
+             Tenant domain, whose APIs should be retrieved. If not specified, the logged in user's tenant domain will
+             be considered for this.
+        required: false
+        type: string
       tags:
       - API (Collection)
       responses:

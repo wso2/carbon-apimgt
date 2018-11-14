@@ -4115,6 +4115,48 @@ public class ApiMgtDAO {
         return applications;
     }
 
+    public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws
+            APIManagementException {
+
+        Connection connection;
+        PreparedStatement prepStmt = null;
+        ResultSet rs;
+        Application[] applications = null;
+        String sqlQuery = SQLConstants.GET_SIMPLE_APPLICATIONS;
+
+        String tenantFilter = "AND SUB.TENANT_ID=?";
+        sqlQuery += tenantFilter ;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            int appTenantId = APIUtil.getTenantIdFromTenantDomain(appTenantDomain);
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, appTenantId);
+            rs = prepStmt.executeQuery();
+
+            ArrayList<Application> applicationsList = new ArrayList<Application>();
+            Application application;
+            while (rs.next()) {
+                application = new Application(Integer.parseInt(rs.getString("APPLICATION_ID")));
+                application.setName(rs.getString("NAME"));
+                application.setOwner(rs.getString("CREATED_BY"));
+                applicationsList.add(application);
+            }
+            applications = applicationsList.toArray(new Application[applicationsList.size()]);
+        } catch (SQLException e) {
+            handleException("Error when reading the application information from the persistence store.", e);
+        } finally {
+            if (prepStmt != null) {
+                try {
+                    prepStmt.close();
+                } catch (SQLException e) {
+                    log.warn("Database error. Could not close Statement. Continuing with others." + e.getMessage(), e);
+                }
+            }
+        }
+        return applications;
+    }
+
     /**
      * Returns all the consumerkeys of application which are subscribed for the given api
      *
