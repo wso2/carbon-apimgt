@@ -61,6 +61,7 @@ var jagg = jagg || {};
         $('#messageModal div.modal-body').html(params.content);
         if(params.buttons != undefined){
             $('#messageModal a.btn-primary').hide();
+            $("#messageModal div.modal-footer").html("");
             for(var i=0;i<params.buttons.length;i++){
                 $('#messageModal div.modal-footer').append($('<a title="messageButton" class="btn '+params.buttons[i].cssClass+'">'+params.buttons[i].name+'</a>').click(params.buttons[i].cbk));
             }
@@ -100,7 +101,6 @@ var jagg = jagg || {};
                 }},
                 {name:"No",cssClass:"btn",cbk:function() {
                     $('#messageModal').modal('hide');
-                    $("#messageModal div.modal-footer").html("");
                     if(typeof params.cancelCallback  == "function") {params.cancelCallback()};
                 }}
             ]
