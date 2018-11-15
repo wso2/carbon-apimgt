@@ -733,11 +733,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void validateApiInfo(API api) throws APIManagementException {
         String apiName = api.getId().getApiName();
         String apiVersion = api.getId().getVersion();
-        if (containsIllegals(apiName)) {
+        if (apiName == null) {
+            handleException("API Name is required.");
+        } else if (containsIllegals(apiName)) {
             handleException("API Name contains one or more illegal characters  " +
                     "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }
-        if (containsIllegals(apiVersion)) {
+        if (apiVersion == null) {
+            handleException("API Version is required.");
+        } else if (containsIllegals(apiVersion)) {
             handleException("API Version contains one or more illegal characters  " +
                     "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }

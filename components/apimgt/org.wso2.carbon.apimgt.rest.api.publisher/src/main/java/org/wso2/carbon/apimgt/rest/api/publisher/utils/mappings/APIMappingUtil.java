@@ -432,7 +432,9 @@ public class APIMappingUtil {
         if (dto.getStatus() != null) {
             model.setStatus((dto.getStatus() != null) ? dto.getStatus().toUpperCase() : null);
         }
-        model.setAsDefaultVersion(dto.getIsDefaultVersion());
+        if (dto.getIsDefaultVersion() != null) {
+            model.setAsDefaultVersion(dto.getIsDefaultVersion());
+        }
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
             model.setCacheTimeout(dto.getCacheTimeout());
@@ -491,7 +493,9 @@ public class APIMappingUtil {
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
-        model.setVisibility(mapVisibilityFromDTOtoAPI(dto.getVisibility()));
+        if (dto.getVisibility() != null) {
+            model.setVisibility(mapVisibilityFromDTOtoAPI(dto.getVisibility()));
+        }
         if (dto.getVisibleRoles() != null) {
             String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
             model.setVisibleRoles(visibleRoles);
