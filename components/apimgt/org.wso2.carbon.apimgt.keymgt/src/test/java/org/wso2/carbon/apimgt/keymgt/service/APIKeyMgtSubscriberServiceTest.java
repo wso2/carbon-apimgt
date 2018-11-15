@@ -14,6 +14,8 @@ import org.mockito.BDDMockito;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -35,6 +37,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
+import org.wso2.carbon.identity.application.common.model.ServiceProviderProperty;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
@@ -275,6 +278,79 @@ public class APIKeyMgtSubscriberServiceTest {
             Assert.assertEquals("Error occurred while creating ServiceProvider for app secondary_admin_sample_app",
                     e.getMessage());
         }
+    }
+
+    @Test
+    public void testUpdateOAuthApplicationWithSpProperties() throws Exception {
+        ApplicationManagementService appMgtService = Mockito.mock(ApplicationManagementService.class);
+        ServiceProvider serviceProvider = new ServiceProvider();
+        PowerMockito.mockStatic(ApplicationManagementService.class);
+        BDDMockito.when(ApplicationManagementService.getInstance()).thenReturn(appMgtService);
+        PowerMockito.when(ApplicationManagementService.getInstance()).thenReturn(appMgtService);
+        System.setProperty(CARBON_HOME, "");
+        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        PowerMockito.when(privilegedCarbonContext.getUsername()).thenReturn(USER_NAME);
+        //Mocking OAuthAdminService
+        OAuthAdminService oAuthAdminService = Mockito.mock(OAuthAdminService.class);
+        PowerMockito.whenNew(OAuthAdminService.class).withNoArguments().thenReturn(oAuthAdminService);
+        OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
+        oAuthConsumerAppDTO.setOauthConsumerKey(CONSUMER_KEY);
+        Mockito.when(oAuthAdminService.getOAuthApplicationData(CONSUMER_KEY)).thenReturn(oAuthConsumerAppDTO);
+        //validating void method arguments
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                String arg2 = invocation.getArgumentAt(2, String.class);
+                ServiceProvider serviceProvider = invocation.getArgumentAt(0, ServiceProvider.class);
+                Assert.assertEquals(MultitenantUtils.getTenantAwareUsername(SECONDARY_USER_NAME), arg2);
+                ServiceProviderProperty[] serviceProviderPropertiesResult = serviceProvider.getSpProperties();
+                Assert.assertEquals(2, serviceProviderPropertiesResult.length);
+                for (ServiceProviderProperty serviceProviderProperty : serviceProviderPropertiesResult) {
+                    if (APIConstants.APP_DISPLAY_NAME.equals(serviceProviderProperty.getName())) {
+                        Assert.assertEquals(APPLICATION_NAME.substring(0, APPLICATION_NAME.lastIndexOf("_")),
+                                serviceProviderProperty.getValue());
+                        return null;
+                    }
+                }
+                Assert.fail(APIConstants.APP_DISPLAY_NAME + " cannot be empty");
+                // unused return
+                return null;
+            }
+        }).when(appMgtService).updateApplication(any(ServiceProvider.class), any(String.class), any(String.class));
+        //adding certificate property
+        ServiceProviderProperty[] serviceProviderPropertiesArray = new ServiceProviderProperty[1];
+        ServiceProviderProperty serviceProviderProperty1 = new ServiceProviderProperty();
+        serviceProviderProperty1.setName("certificate");
+        serviceProviderProperty1.setValue("certificate");
+        serviceProviderPropertiesArray[0] = serviceProviderProperty1;
+        serviceProvider.setSpProperties(serviceProviderPropertiesArray);
+        Mockito.when(appMgtService.getApplicationExcludingFileBasedSPs(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(serviceProvider);
+        Mockito.when(appMgtService.getServiceProviderNameByClientId(CONSUMER_KEY, "oauth2", TENANT_DOMAIN))
+                .thenReturn(APPLICATION_NAME);
+        OAuthApplicationInfo dto = apiKeyMgtSubscriberService
+                .updateOAuthApplication(SECONDARY_USER_NAME, APPLICATION_NAME, CALLBACK_URL, CONSUMER_KEY, GRANT_TYPES);
+        Assert.assertEquals("Consumer Key should be same", CONSUMER_KEY, dto.getClientId());
+        //adding certificate and displayName property
+        serviceProviderPropertiesArray = new ServiceProviderProperty[2];
+        serviceProviderProperty1 = new ServiceProviderProperty();
+        serviceProviderProperty1.setName(APIConstants.APP_DISPLAY_NAME);
+        serviceProviderProperty1.setValue(APPLICATION_NAME);
+        ServiceProviderProperty serviceProviderProperty2 = new ServiceProviderProperty();
+        serviceProviderProperty2.setName("certificate");
+        serviceProviderProperty2.setValue("certificate");
+        serviceProviderPropertiesArray[0] = serviceProviderProperty1;
+        serviceProviderPropertiesArray[1] = serviceProviderProperty2;
+        serviceProvider.setSpProperties(serviceProviderPropertiesArray);
+        Mockito.when(appMgtService.getApplicationExcludingFileBasedSPs(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(serviceProvider);
+        Mockito.when(appMgtService.getServiceProviderNameByClientId(CONSUMER_KEY, "oauth2", TENANT_DOMAIN))
+                .thenReturn(APPLICATION_NAME);
+        dto = apiKeyMgtSubscriberService
+                .updateOAuthApplication(SECONDARY_USER_NAME, APPLICATION_NAME, CALLBACK_URL, CONSUMER_KEY, GRANT_TYPES);
+        Assert.assertEquals("Consumer Key should be same", CONSUMER_KEY, dto.getClientId());
     }
 
     @Test
