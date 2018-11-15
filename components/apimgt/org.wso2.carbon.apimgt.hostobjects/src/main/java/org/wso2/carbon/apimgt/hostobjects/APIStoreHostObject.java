@@ -2147,6 +2147,64 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
+    public static JSONObject jsFunction_getHTTPSGatewayEndpointURLsWithType(Context cx, Scriptable thisObj,
+                                                                            Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        JSONObject json = new JSONObject();
+
+        for (Environment environment : environments.values()) {
+            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
+                json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                        APIStoreHostObject.getHttpsEnvironmentUrl(environment));
+                json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                        APIStoreHostObject.getHttpsEnvironmentUrl(environment));
+                return json;
+            } else {
+                String environmentType = APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
+                        ? APIConstants.GATEWAY_ENV_TYPE_PRODUCTION : APIConstants.GATEWAY_ENV_TYPE_SANDBOX;
+                if (environment.isDefault()) {
+                    json.put(environmentType,
+                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
+                }
+            }
+        }
+
+        if (json.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION) == null) {
+            for (Environment environment : environments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
+                    json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
+                    break;
+                }
+            }
+        }
+
+        if (json.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX) == null) {
+            for (Environment environment : environments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
+                    json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
+                    break;
+                }
+            }
+        }
+
+        return json;
+    }
+
+    private static String getHttpsEnvironmentUrl(Environment environment) {
+        for (String url : environment.getApiGatewayEndpoint().split(",")) {
+            if (url.startsWith(APIConstants.HTTPS_PROTOCOL)) {
+                return url;
+            }
+        }
+        return "";
+    }
+
+
     private static String filterUrlsByTransport(List<String> urlsList, List<String> transportList, String transportName) {
         String endpointUrl = "";
         if (transportList.contains(transportName)) {

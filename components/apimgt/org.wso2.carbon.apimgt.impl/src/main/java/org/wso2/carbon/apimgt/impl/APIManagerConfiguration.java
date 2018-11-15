@@ -200,6 +200,12 @@ public class APIManagerConfiguration {
                     } else {
                         environment.setShowInConsole(true);
                     }
+                    String isDefault = environmentElem.getAttributeValue(new QName("isDefault"));
+                    if (isDefault != null) {
+                        environment.setDefault(Boolean.parseBoolean(isDefault));
+                    } else {
+                        environment.setDefault(false);
+                    }
                     environment.setName(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName("Name")).getText()));
                     environment.setServerURL(APIUtil.replaceSystemProperty(
