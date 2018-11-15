@@ -134,6 +134,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.cache.Caching;
@@ -2136,6 +2137,10 @@ public class APIProviderImplTest {
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
         Set<URITemplate> newUriTemplates = new HashSet<URITemplate>();
 
+        Tier tier = new Tier("Gold");
+        Map<String, Tier> tiers = new TreeMap<>();
+        tiers.put("Gold",tier);
+
         URITemplate uriTemplate1 = new URITemplate();
         uriTemplate1.setHTTPVerb("POST");
         uriTemplate1.setAuthType("Application");
@@ -2223,8 +2228,19 @@ public class APIProviderImplTest {
         }).when(artifactManager).updateGenericArtifact(artifact);
 
         Mockito.when(gatewayManager.isAPIPublished(api, "carbon.super")).thenReturn(false);
+        Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
         apiProvider.updateAPI(api);
         Assert.assertEquals(0, api.getEnvironments().size());
+
+        tiers.remove("Gold", tier);
+        tier = new Tier("Unlimited");
+        tiers.put("Unlimited", tier);
+        try {
+            apiProvider.updateAPI(api);
+        } catch (APIManagementException ex) {
+            Assert.assertTrue(ex.getMessage().contains("Invalid x-throttling tier Gold found in api definition for " +
+                    "resource POST /add"));
+        }
     }
 
 
@@ -2277,7 +2293,10 @@ public class APIProviderImplTest {
         api.setAdditionalProperties(jsonObject);
         api.addProperty("secured", "false");
 
-
+        Tier tier = new Tier("Gold");
+        Map<String, Tier> tiers = new TreeMap<>();
+        tiers.put("Gold", tier);
+        Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
 
         List<Documentation> documentationList = getDocumentationList();
 
@@ -2393,6 +2412,10 @@ public class APIProviderImplTest {
         newUriTemplates.add(uriTemplate1);
         newUriTemplates.add(uriTemplate2);
 
+        Tier tier = new Tier("Gold");
+        Map<String, Tier> tiers = new TreeMap<>();
+        tiers.put("Gold", tier);
+
         final API api = new API(identifier);
         api.setStatus(APIConstants.CREATED);
         api.setVisibility("public");
@@ -2417,6 +2440,7 @@ public class APIProviderImplTest {
 
         Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, oldApi)).thenReturn(artifact);
+        Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
         apiProvider.addAPI(oldApi);
 
         //mock has permission
@@ -2497,6 +2521,10 @@ public class APIProviderImplTest {
         oldApi.setEnvironments(environments);
         api.setUriTemplates(uriTemplates);
 
+        Tier tier = new Tier("Gold");
+        Map<String, Tier> tiers = new TreeMap<>();
+        tiers.put("Gold", tier);
+
         PowerMockito.when(APIUtil.getLcStateFromArtifact((GovernanceArtifact) Mockito.any()))
                 .thenReturn(APIConstants.PUBLISHED);
         
@@ -2566,6 +2594,7 @@ public class APIProviderImplTest {
                 Matchers.anyString())).thenReturn(failedToUnPubGWEnv);
         Mockito.when(gatewayManager.publishToGateway(Matchers.any(API.class), Matchers.any(APITemplateBuilder.class),
                 Matchers.anyString())).thenReturn(failedToPubGWEnv);
+        Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
         apiProvider.updateAPI(api);
     }
 
@@ -4204,6 +4233,10 @@ public class APIProviderImplTest {
 
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
 
+        Tier tier = new Tier("Gold");
+        Map<String, Tier> tiers = new TreeMap<>();
+        tiers.put("Gold", tier);
+
         URITemplate uriTemplate1 = new URITemplate();
         uriTemplate1.setHTTPVerb("POST");
         uriTemplate1.setAuthType("Application");
@@ -4225,6 +4258,7 @@ public class APIProviderImplTest {
 
         final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, documentationList, null);
 
+        Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
         Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
         apiProvider.addAPI(api);

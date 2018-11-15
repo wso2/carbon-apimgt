@@ -231,6 +231,11 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_ADVANCED_POLICY, policyId, log);
             }
+            if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_API)) {
+                String message = "Policy " + policyId + " already attached to API/Resource";
+                log.error(message);
+                throw new APIManagementException(message);
+            }
             apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_API, existingPolicy.getPolicyName());
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -415,6 +420,11 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             ApplicationPolicy existingPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APP_POLICY, policyId, log);
+            }
+            if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_APP)) {
+                String message = "Policy " + policyId + " already attached to an application";
+                log.error(message);
+                throw new APIManagementException(message);
             }
             apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_APP, existingPolicy.getPolicyName());
             return Response.ok().build();
@@ -605,6 +615,11 @@ public class ThrottlingApiServiceImpl extends ThrottlingApiService {
             SubscriptionPolicy existingPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
             if (!RestApiAdminUtils.isPolicyAccessibleToUser(username, existingPolicy)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId, log);
+            }
+            if (apiProvider.hasAttachments(username, existingPolicy.getPolicyName(), PolicyConstants.POLICY_LEVEL_SUB)) {
+                String message = "Policy " + policyId + " already has subscriptions";
+                log.error(message);
+                throw new APIManagementException(message);
             }
             apiProvider.deletePolicy(username, PolicyConstants.POLICY_LEVEL_SUB, existingPolicy.getPolicyName());
             return Response.ok().build();
