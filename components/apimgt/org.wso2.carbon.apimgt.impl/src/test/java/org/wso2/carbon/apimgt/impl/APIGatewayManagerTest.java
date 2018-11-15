@@ -113,10 +113,8 @@ public class APIGatewayManagerTest {
         PowerMockito.mockStatic(CertificateMgtDAO.class);
         CertificateMgtDAO certificateMgtDAO = Mockito.mock(CertificateMgtDAO.class);
         PowerMockito.when(CertificateMgtDAO.getInstance()).thenReturn(certificateMgtDAO);
-        PowerMockito.when(APIUtil.isProductionEndpointsExists((API) Mockito.anyObject())).thenCallRealMethod();
         PowerMockito.when(APIUtil.isSandboxEndpointsExists((API) Mockito.anyObject())).thenCallRealMethod();
         PowerMockito.when(APIUtil.getSequenceExtensionName((API) Mockito.anyObject())).thenCallRealMethod();
-        PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenCallRealMethod();
         PowerMockito.when(APIUtil.extractEnvironmentsForAPI(Mockito.anyString())).thenCallRealMethod();
 
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
@@ -623,6 +621,8 @@ public class APIGatewayManagerTest {
                 .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(inSequence);
+        PowerMockito.when(APIUtil.isProductionEndpointsExists((API) Mockito.anyObject())).thenReturn(true);
+        PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
 
         //Test failure to deploy API when custom in/out sequence deployment failed
         Mockito.doThrow(new AxisFault("Error occurred while deploying sequence")).when(apiGatewayAdminClient)
@@ -678,13 +678,15 @@ public class APIGatewayManagerTest {
         OMElement inSequence = AXIOMUtil.stringToOM(testSequenceDefinition);
         api.setEnvironments(environments);
         Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        Mockito.when(apiGatewayAdminClient.isExistingSequence("admin--weatherAPI:vv1--In", tenantDomain))
+        Mockito.when(apiGatewayAdminClient.isExistingSequence(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(inSequence);
+        PowerMockito.when(APIUtil.isProductionEndpointsExists((API) Mockito.anyObject())).thenReturn(true);
+        PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
         //Test API deployment failure when custom sequence update failed
         Mockito.doThrow(new AxisFault("Error occurred while deploying sequence")).when(apiGatewayAdminClient)
-                .deleteSequence("admin--weatherAPI:vv1--In", tenantDomain);
+                .deleteSequence(Mockito.anyString(), Mockito.anyString());
         Map<String, String> failedEnvironmentsMap = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap.size(), 1);

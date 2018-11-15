@@ -377,7 +377,6 @@
                     <complianceLevel>1.7</complianceLevel>
                     <excludes>
                         <!--The following class have been excluded from aspectj weaving, to avoid build failures-->
-                        <exclude>**/utils/APIUtil.java</exclude>
                         <exclude>**/thrift/*Service.java</exclude>
                     </excludes>
                 </configuration>
