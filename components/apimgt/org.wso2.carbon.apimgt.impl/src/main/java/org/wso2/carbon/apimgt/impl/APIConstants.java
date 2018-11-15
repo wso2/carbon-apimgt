@@ -115,6 +115,8 @@ public final class APIConstants {
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
+    public static final String API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD = "ExposeEndpointPassword";
+
     public static final String API_CATEGORY_FREE = "Free";
 
     public static final String API_CATEGORY_FREEMIUM = "Freemium";
