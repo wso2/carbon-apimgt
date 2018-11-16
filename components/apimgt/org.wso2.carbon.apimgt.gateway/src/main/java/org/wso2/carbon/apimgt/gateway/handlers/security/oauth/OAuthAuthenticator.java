@@ -25,6 +25,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -85,6 +86,7 @@ public class OAuthAuthenticator implements Authenticator {
         }
     }
 
+    @MethodStats
     public boolean authenticate(MessageContext synCtx) throws APISecurityException {
         String apiKey = null;
         boolean defaultVersionInvoked = false;

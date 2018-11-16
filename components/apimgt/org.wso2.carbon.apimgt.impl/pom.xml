@@ -318,7 +318,10 @@
             <version>2.9.3</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -357,6 +360,29 @@
                                 <echo message="##################### END ########################" />
                             </tasks>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.8</version>
+                <configuration>
+                    <!--Uncomment the following in order to debug the aspectJ weaving-->
+                    <!--<showWeaveInfo>true</showWeaveInfo>-->
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <complianceLevel>1.7</complianceLevel>
+                    <excludes>
+                        <!--The following class have been excluded from aspectj weaving, to avoid build failures-->
+                        <exclude>**/thrift/*Service.java</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 
 public class AuthenticatorService {
 
@@ -49,6 +50,7 @@ public class AuthenticatorService {
       super(iprot, oprot);
     }
 
+    @MethodStats
     public String authenticate(String userName, String password) throws AuthenticationException, org.apache.thrift.TException
     {
       send_authenticate(userName, password);
@@ -928,6 +930,7 @@ public class AuthenticatorService {
       return sb.toString();
     }
 
+    @MethodStats
     public void validate() throws org.apache.thrift.TException {
       // check for required fields
     }

@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import java.util.List;
 
 /**
@@ -117,6 +118,7 @@ public class AuthenticationContext {
         this.keyType = keyType;
     }
 
+    @MethodStats
     public String getCallerToken() {
         return callerToken;
     }

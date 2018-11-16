@@ -26,6 +26,7 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -68,6 +69,7 @@ public class ThriftKeyValidatorClient {
         }
     }
 
+    @MethodStats
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
                                                  String requiredAuthenticationLevel, String clientDomain,
                                                  String matchingResource, String httpVerb) throws APISecurityException {
@@ -122,6 +124,7 @@ public class ThriftKeyValidatorClient {
         apiKeyValidationInfoDTO.setContentAware(thriftDTO.isIsContentAware());
         return apiKeyValidationInfoDTO;
     }
+    @MethodStats
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
     ) throws APISecurityException {
         ArrayList<URITemplate> templates=new ArrayList<URITemplate>();

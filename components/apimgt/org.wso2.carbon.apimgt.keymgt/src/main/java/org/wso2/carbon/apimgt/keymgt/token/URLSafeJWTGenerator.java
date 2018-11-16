@@ -22,7 +22,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.keymgt.MethodStats;
 
+@MethodStats
 public class URLSafeJWTGenerator extends JWTGenerator {
 
     private static final Log log = LogFactory.getLog(URLSafeJWTGenerator.class);

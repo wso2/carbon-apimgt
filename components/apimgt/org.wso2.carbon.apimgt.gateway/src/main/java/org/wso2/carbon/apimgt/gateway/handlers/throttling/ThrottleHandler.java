@@ -50,6 +50,7 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -528,6 +529,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * @return return true if message flow need to continue and pass requests to next handler in chain. Else return
      * false to notify error with handler
      */
+    @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
         return true;
     }
@@ -540,6 +542,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * @return return true if message flow need to continue(message not throttled) and pass requests to next
      * handler in chain. Else return false to notify throttled message.
      */
+    @MethodStats
     private boolean doThrottle(MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).

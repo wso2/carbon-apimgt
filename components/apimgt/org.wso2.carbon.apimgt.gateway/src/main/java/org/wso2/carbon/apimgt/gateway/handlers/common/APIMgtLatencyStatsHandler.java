@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.common;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -33,12 +34,25 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME, Long.toString(System
                     .currentTimeMillis()));
         }
+        /*
+        * The axis2 message context is set here so that the method level logging can access the transport headers
+        */
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MC);
         long currentTime = System.currentTimeMillis();
         messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
         return true;
     }
 
     public boolean handleResponse(MessageContext messageContext) {
+        /*
+         * The axis2 message context is set here so that the method level logging can access the
+         * transport headers
+         */
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MC);
         if (APIUtil.isAnalyticsEnabled()) {
             if (messageContext.getProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME) == null) {
 

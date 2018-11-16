@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
  * available operations. However if the user attempts to execute a privileged operation
  * when the object had been created in the anonymous mode, an exception will be thrown.
  */
+@MethodStats
 public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     private String username;

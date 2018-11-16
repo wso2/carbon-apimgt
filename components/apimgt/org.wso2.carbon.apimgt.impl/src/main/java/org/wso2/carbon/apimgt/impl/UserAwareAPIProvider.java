@@ -44,6 +44,7 @@ import java.util.*;
  * available operations. However if the user attempts to execute a privileged operation
  * when the object had been created in the anonymous mode, an exception will be thrown.
  */
+@MethodStats
 public class UserAwareAPIProvider extends APIProviderImpl {
     protected String username;
     private static final Log log = LogFactory.getLog(UserAwareAPIProvider.class);
