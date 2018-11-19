@@ -181,11 +181,6 @@
             <artifactId>powermock-api-mockito</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.consent.mgt</groupId>
-            <artifactId>org.wso2.carbon.claim.metadata.mgt.stub.dep</artifactId>
-            <version>2.0.19-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
