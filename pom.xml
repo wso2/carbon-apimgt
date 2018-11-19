@@ -397,6 +397,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.claim.metadata.mgt.stub</artifactId>
+                <version>${carbon.identity.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
                 <version>${carbon.identity-captcha.version}</version>
