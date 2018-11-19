@@ -9,7 +9,7 @@ jagg.block("user/sign-up", {
         var request_tenant = jagg.getTenantDomain();
         var purposes = SelfSignUpUtil.getConsentPurposes(request_tenant);
         var result, fields, user = jagg.module("user");
-        result = user.getUserFields();
+        result = user.getUserFields(request_tenant);
         fields = result.fields;
         return {
             "fields":fields,
