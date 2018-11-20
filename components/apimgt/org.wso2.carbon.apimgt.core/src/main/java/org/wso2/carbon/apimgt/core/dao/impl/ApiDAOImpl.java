@@ -1441,7 +1441,7 @@ public class ApiDAOImpl implements ApiDAO {
         Map commentListMap = new HashMap();
         final String getCommentsQuery = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, CATEGORY,"
                 + " PARENT_COMMENT_ID, ENTRY_POINT, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
-                + "FROM AM_API_COMMENTS WHERE API_ID = ?";
+                + "FROM AM_API_COMMENTS WHERE API_ID = ? ORDER BY CREATED_TIME";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(getCommentsQuery)) {
             try {
@@ -1453,12 +1453,11 @@ public class ApiDAOImpl implements ApiDAO {
                         Comment comment = constructCommentFromResultSet(rs);
                         String commentId = comment.getUuid();
                         String parentCommentId = comment.getParentCommentId();
-                        if (commentListMap.containsKey(parentCommentId)) {
+                        if (parentCommentId == null) {
+                            commentListMap.put(commentId, comment);
+                        } else {
                             Comment existingComment = (Comment) commentListMap.get(parentCommentId);
                             existingComment.getReplies().add(comment);
-                            commentListMap.put(parentCommentId, existingComment);
-                        } else {
-                            commentListMap.put(commentId, comment);
                         }
                     }
                     commentList = new ArrayList<Comment>(commentListMap.values());
