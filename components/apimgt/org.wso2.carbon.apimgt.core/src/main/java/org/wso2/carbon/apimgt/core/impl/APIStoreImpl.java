@@ -853,7 +853,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (comment != null) {
                   /*if the delete operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
-                if (!(comment.getCommentedUser().equals(username) &&
+                if (!(comment.getCommentOwner().equals(username) &&
                         ENTRY_POINT_STORE.equals(comment.getEntryPoint()))) {
                     checkIfUserIsAdmin(username);
                 }
@@ -880,7 +880,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (oldComment != null) {
                /*if the update operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
-                if (!(oldComment.getCommentedUser().equals(username) &&
+                if (!(oldComment.getCommentOwner().equals(username) &&
                         ENTRY_POINT_STORE.equals(oldComment.getEntryPoint()))) {
                     String errorMsg = "The user " + username + " does not have permission to update this comment";
                     log.error(errorMsg);

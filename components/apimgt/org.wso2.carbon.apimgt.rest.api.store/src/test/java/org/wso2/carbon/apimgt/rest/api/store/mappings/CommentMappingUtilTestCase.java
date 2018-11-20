@@ -58,7 +58,7 @@ public class CommentMappingUtilTestCase {
         ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment = new Comment();
         comment.setUuid(commentUUID);
-        comment.setCommentedUser("commentedUser");
+        comment.setCommentOwner("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCategory("testingCategory");
         comment.setParentCommentId("");
@@ -102,7 +102,7 @@ public class CommentMappingUtilTestCase {
         ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment1 = new Comment();
         comment1.setUuid(UUID.randomUUID().toString());
-        comment1.setCommentedUser("commentedUser1");
+        comment1.setCommentOwner("commentedUser1");
         comment1.setCommentText("this is a comment 1");
         comment1.setCategory("testingCategory1");
         comment1.setParentCommentId("");
@@ -116,7 +116,7 @@ public class CommentMappingUtilTestCase {
         time = APIUtils.getCurrentUTCTime();
         Comment comment2 = new Comment();
         comment2.setUuid(UUID.randomUUID().toString());
-        comment2.setCommentedUser("commentedUser2");
+        comment2.setCommentOwner("commentedUser2");
         comment2.setCommentText("this is a comment 2");
         comment2.setCategory("testingCategory1");
         comment2.setParentCommentId("");

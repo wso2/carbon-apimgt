@@ -1131,7 +1131,7 @@ public class SampleTestObjectCreator {
         comment.setCategory("sample category");
         comment.setParentCommentId(UUID.randomUUID().toString());
         comment.setEntryPoint(entryPoint);
-        comment.setCommentedUser("admin");
+        comment.setCommentOwner("admin");
         comment.setUpdatedUser("admin");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);
@@ -1147,7 +1147,7 @@ public class SampleTestObjectCreator {
         comment.setCategory("sample alt category");
         comment.setParentCommentId(UUID.randomUUID().toString());
         comment.setEntryPoint(entryPoint);
-        comment.setCommentedUser("admin");
+        comment.setCommentOwner("admin");
         comment.setUpdatedUser("admin");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);
@@ -1163,7 +1163,7 @@ public class SampleTestObjectCreator {
         comment.setCategory("sample category");
         comment.setParentCommentId(parentCommentId);
         comment.setEntryPoint(entryPoint);
-        comment.setCommentedUser("admin");
+        comment.setCommentOwner("admin");
         comment.setUpdatedUser("admin");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);

@@ -48,7 +48,7 @@ public class CommentMappingUtil {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setCommentId(comment.getUuid());
         String realName = APIManagerFactory.getInstance().getUserNameMapper().getLoggedInUserIDFromPseudoName(comment
-                .getCommentedUser());
+                .getCommentOwner());
         commentDTO.setUsername(realName);
         commentDTO.setCommentText(comment.getCommentText());
         commentDTO.setCategory(comment.getCategory());
@@ -79,7 +79,7 @@ public class CommentMappingUtil {
         comment.setCategory(body.getCategory());
         comment.setParentCommentId(body.getParentCommentId());
         comment.setEntryPoint(body.getEntryPoint());
-        comment.setCommentedUser(username);
+        comment.setCommentOwner(username);
         comment.setApiId(body.getApiId());
         comment.setCreatedUser(username);
         comment.setUpdatedUser(username);
