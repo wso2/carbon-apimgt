@@ -37,6 +37,9 @@ const styles = theme => ({
     buttonsWrapper: {
         marginTop: 40
     },
+    stateButton: {
+        marginRight: theme.spacing.unit,
+    },
 });
 
  class LifeCycleUpdate extends Component {
@@ -45,36 +48,14 @@ const styles = theme => ({
         this.updateLifeCycleState = this.updateLifeCycleState.bind(this);
         this.api = new API();
         this.state = {
-            checkList: []
+            newState: null,
         };
-    }
-    componentDidMount(){
-        const {lcState} = this.props;
-        const {privateJetModeEnabled} = this.props;
-        const checkList = [];
-        let index = 0;
-        for (let item of lcState.checkItemBeanList) {
-            checkList.push({index: index, label: item.name, value: item.name, checked: false});
-            index++;
-        }
-        this.setState({checkList});
-    }
-    componentWillReceiveProps(nextProps){
-        if(this.props.api.lifeCycleStatus !== nextProps.api.lifeCycleStatus){
-            const checkList = [];
-            let index = 0;
-            for (let item of nextProps.lcState.checkItemBeanList) {
-                checkList.push({index: index, label: item.name, value: item.name, checked: false});
-                index++;
-            }
-            this.setState({checkList});
-        }
     }
 
     updateLCStateOfAPI(apiUUID, newState){
 
         let promisedUpdate;
-        const lifecycleChecklist = this.state.checkList.map(item => item.value + ":" + item.checked);
+        const lifecycleChecklist = this.props.checkList.map(item => item.value + ":" + item.checked);
          if (lifecycleChecklist.length > 0) {
              promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
          } else {
@@ -82,6 +63,7 @@ const styles = theme => ({
          }
          promisedUpdate.then(response => { /*TODO: Handle IO erros ~tmkb*/
              this.props.handleUpdate(true);
+             this.setState({newState});
              Alert.info("Lifecycle state updated successfully");
              /*TODO: add i18n ~tmkb*/
          }).catch(
@@ -96,7 +78,6 @@ const styles = theme => ({
         let newState = event.currentTarget.getAttribute("data-value");
         const apiUUID = this.props.api.id;
         const {privateJetModeEnabled} = this.props;
-
         if (privateJetModeEnabled) {
             if(newState == "Published In Private Jet Mode") {
                 let promised_hasOwnGatewayForAPI = this.api.getHasOwnGateway(apiUUID);
@@ -129,7 +110,7 @@ const styles = theme => ({
 
              } else {
                     let promisedUpdate;
-                    const lifecycleChecklist = this.state.checkList.map(item => item.value + ":" + item.checked);
+                    const lifecycleChecklist = this.props.checkList.map(item => item.value + ":" + item.checked);
                     if (lifecycleChecklist.length > 0) {
                         promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
                     } else {
@@ -172,26 +153,22 @@ const styles = theme => ({
         }
     }
 
-    handleChange = index => (event, checked) => {
-        let checkList = this.state.checkList;
-        checkList[index].checked = checked;
-        this.setState({ checkList });
-    };
+    
 
     render() {
-        const {api,lcState} = this.props;
+        const {api,lcState, classes, theme, handleChangeCheckList, checkList} = this.props;
+        const { newState } = this.state;
         const is_workflow_pending = api.workflowStatus.toLowerCase() === "pending";
-        const { classes } = this.props;
         return (
                 <Grid container>
                 {
                     is_workflow_pending ?
                         (
                             <Grid item xs={12}>
-                                    <Typography type="headline" component="h2">
+                                    <Typography variant="h5">
                                         Pending lifecycle state change.
                                     </Typography>
-                                    <Typography type="body1">
+                                    <Typography>
                                         adjective
                                     </Typography>
                             </Grid>
@@ -199,7 +176,11 @@ const styles = theme => ({
                         ) :
                         (
                             <Grid item xs={12}>
-                                <LifeCycleImage  lifeCycleStatus={api.lifeCycleStatus} />
+                                {theme.custom.lifeCycleImage ?
+                                    <img src={theme.custom.lifeCycleImage} alt="Lifecycle image" />    
+                                    :
+                                    <LifeCycleImage  lifeCycleStatus={newState || api.lifeCycleStatus} />
+                                }
                             </Grid>
 
                         )
@@ -208,16 +189,16 @@ const styles = theme => ({
                 {
                     !is_workflow_pending &&
                     <FormGroup row>
-                        {this.state.checkList.map( (checkItem, index)  => <FormControlLabel
+                        {checkList.map( (checkItem, index)  => <FormControlLabel
                             key={index}
                             control={
                                 <Checkbox
-                                    checked={this.state.checkList[index].checked}
-                                    onChange={this.handleChange(index)}
-                                    value={this.state.checkList[index].value}
+                                    checked={checkList[index].checked}
+                                    onChange={handleChangeCheckList(index)}
+                                    value={checkList[index].value}
                                 />
                             }
-                            label={this.state.checkList[index].label}
+                            label={checkList[index].label}
                         />)}
 
                     </FormGroup>
@@ -236,7 +217,7 @@ const styles = theme => ({
                                         (
                                             lcState.availableTransitionBeanList.map(
                                                 transition_state => lcState.state !== transition_state.targetState &&
-                                                <Button key={transition_state.targetState} raised data-value={transition_state.targetState}
+                                                <Button variant="outlined" className={classes.stateButton} key={transition_state.targetState} data-value={transition_state.targetState}
                                                         onClick={this.updateLifeCycleState}>
                                                     {transition_state.event}
                                                 </Button>
@@ -254,6 +235,7 @@ const styles = theme => ({
 
 LifeCycleUpdate.propTypes = {
     classes: PropTypes.object.isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(LifeCycleUpdate);
+export default withStyles(styles, {withTheme: true})(LifeCycleUpdate);

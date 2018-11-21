@@ -44,10 +44,12 @@ var Configurations = {
           defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
           showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
           leftMenu: 'icon top', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-          leftMenuIconSize: 32,
+          leftMenuIconSize: 20,
           leftMenuIconMainSize: 52,
           leftMenuTextStyle: 'uppercase',
           resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
+          // lifeCycleImage: '/publisher/public/app/images/logo.png', 
+          // Uncomment above if you want to add a custom image to the lifecycle diagram.
         },
       },
       dark: {
