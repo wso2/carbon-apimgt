@@ -157,7 +157,7 @@ encode = new encode.Encode();
         print(obj);
     } else if (action == "getApplicationById") {
         if (!user) {
-            if(!ssoEnabled){
+            if (!ssoEnabled) {
                 print({
                     error:true,
                     message:msg.error.loginRequired(action)
