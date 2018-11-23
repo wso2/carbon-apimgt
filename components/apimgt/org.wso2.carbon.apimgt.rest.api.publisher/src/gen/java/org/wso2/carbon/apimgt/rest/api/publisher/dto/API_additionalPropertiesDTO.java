@@ -28,20 +28,20 @@ public class API_additionalPropertiesDTO   {
 
 
 
-    public API_additionalPropertiesDTO(String key, String value) {
-        this.key = key;
-        this.value = value;
-    }
+  public API_additionalPropertiesDTO(String key, String value) {
+    this.key = key;
+    this.value = value;
+  }
 
   public API_additionalPropertiesDTO key(String key) {
     this.key = key;
     return this;
   }
 
-   /**
+  /**
    * Get key
    * @return key
-  **/
+   **/
   @ApiModelProperty(example = "environment", value = "")
   public String getKey() {
     return key;
@@ -56,10 +56,10 @@ public class API_additionalPropertiesDTO   {
     return this;
   }
 
-   /**
+  /**
    * Get value
    * @return value
-  **/
+   **/
   @ApiModelProperty(example = "preprod", value = "")
   public String getValue() {
     return value;
@@ -80,7 +80,7 @@ public class API_additionalPropertiesDTO   {
     }
     API_additionalPropertiesDTO apIAdditionalProperties = (API_additionalPropertiesDTO) o;
     return Objects.equals(this.key, apIAdditionalProperties.key) &&
-        Objects.equals(this.value, apIAdditionalProperties.value);
+            Objects.equals(this.value, apIAdditionalProperties.value);
   }
 
   @Override

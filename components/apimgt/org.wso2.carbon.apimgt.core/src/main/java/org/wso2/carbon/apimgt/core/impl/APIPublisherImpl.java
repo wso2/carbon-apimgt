@@ -2609,7 +2609,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (comment != null) {
                  /*if the delete operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
-                if (!(comment.getCommentedUser().equals(username) &&
+                if (!(comment.getOwner().equals(username) &&
                         ENTRY_POINT_PUBLISHER.equals(comment.getEntryPoint()))) {
                     checkIfUserIsAdmin(username);
                 }
@@ -2637,7 +2637,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (oldComment != null) {
                 /*if the update operation is done by a user who isn't the owner of the comment
                   and with a different end point*/
-                if (!(oldComment.getCommentedUser().equals(username) &&
+                if (!(oldComment.getOwner().equals(username) &&
                         ENTRY_POINT_PUBLISHER.equals(oldComment.getEntryPoint()))) {
                     String errorMsg = "The user " + username + " does not have permission to update this comment";
                     log.error(errorMsg);

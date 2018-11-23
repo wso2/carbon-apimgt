@@ -75,6 +75,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1308,10 +1309,11 @@ public class ApiDAOImpl implements ApiDAO {
      */
     private Comment constructCommentFromResultSet(ResultSet rs) throws SQLException, IOException {
         Comment comment = new Comment();
+        ArrayList<Comment> replies = new ArrayList<Comment>();
 
         comment.setUuid(rs.getString("UUID"));
         comment.setCommentText(IOUtils.toString(rs.getBinaryStream("COMMENT_TEXT")));
-        comment.setCommentedUser(rs.getString("USER_IDENTIFIER"));
+        comment.setOwner(rs.getString("USER_IDENTIFIER"));
         comment.setApiId(rs.getString("API_ID"));
         comment.setCategory(rs.getString("CATEGORY"));
         comment.setParentCommentId(rs.getString("PARENT_COMMENT_ID"));
@@ -1320,6 +1322,7 @@ public class ApiDAOImpl implements ApiDAO {
         comment.setCreatedTime(rs.getTimestamp("CREATED_TIME").toInstant());
         comment.setUpdatedUser(rs.getString("UPDATED_BY"));
         comment.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toInstant());
+        comment.setReplies(replies);
 
         return comment;
     }
@@ -1337,7 +1340,7 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.setAutoCommit(false);
                 statement.setString(1, comment.getUuid());
                 statement.setBinaryStream(2, IOUtils.toInputStream(comment.getCommentText()));
-                statement.setString(3, comment.getCommentedUser());
+                statement.setString(3, comment.getOwner());
                 statement.setString(4, apiId);
                 statement.setString(5, comment.getCreatedUser());
                 statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
@@ -1435,19 +1438,30 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
-        List<Comment> commentList = new ArrayList<>();
+        List<Comment> commentList;
+        Map commentListMap = new LinkedHashMap();
         final String getCommentsQuery = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, CATEGORY,"
                 + " PARENT_COMMENT_ID, ENTRY_POINT, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
-                + "FROM AM_API_COMMENTS WHERE API_ID = ?";
+                + "FROM AM_API_COMMENTS WHERE API_ID = ? ORDER BY CREATED_TIME";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(getCommentsQuery)) {
             try {
                 statement.setString(1, apiId);
                 statement.execute();
+
                 try (ResultSet rs = statement.getResultSet()) {
                     while (rs.next()) {
-                        commentList.add(constructCommentFromResultSet(rs));
+                        Comment comment = constructCommentFromResultSet(rs);
+                        String commentId = comment.getUuid();
+                        String parentCommentId = comment.getParentCommentId();
+                        if (parentCommentId == null) {
+                            commentListMap.put(commentId, comment);
+                        } else {
+                            Comment existingComment = (Comment) commentListMap.get(parentCommentId);
+                            existingComment.getReplies().add(comment);
+                        }
                     }
+                    commentList = new ArrayList<Comment>(commentListMap.values());
                 }
             } catch (SQLException | IOException e) {
                 connection.rollback();

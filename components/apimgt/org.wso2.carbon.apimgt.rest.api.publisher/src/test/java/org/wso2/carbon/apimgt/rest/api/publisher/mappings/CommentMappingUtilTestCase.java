@@ -56,9 +56,10 @@ public class CommentMappingUtilTestCase {
         String commentUUID = UUID.randomUUID().toString();
         Instant time = APIUtils.getCurrentUTCTime();
 
+        ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment = new Comment();
         comment.setUuid(commentUUID);
-        comment.setCommentedUser("commentedUser");
+        comment.setOwner("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCategory("testingCategory");
         comment.setParentCommentId("");
@@ -67,6 +68,7 @@ public class CommentMappingUtilTestCase {
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);
+        comment.setReplies(comments);
 
         CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
 
@@ -98,9 +100,10 @@ public class CommentMappingUtilTestCase {
     public void testFromCommentListToDTO() throws APIManagementException {
         Mockito.when(userNameMapper.getLoggedInUserIDFromPseudoName(Mockito.anyString())).thenReturn(Mockito.anyString());
         Instant time = APIUtils.getCurrentUTCTime();
+        ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment1 = new Comment();
         comment1.setUuid(UUID.randomUUID().toString());
-        comment1.setCommentedUser("commentedUser1");
+        comment1.setOwner("commentedUser1");
         comment1.setCommentText("this is a comment 1");
         comment1.setCategory("testingCategory1");
         comment1.setParentCommentId("");
@@ -109,11 +112,12 @@ public class CommentMappingUtilTestCase {
         comment1.setUpdatedUser("updatedUser1");
         comment1.setCreatedTime(time);
         comment1.setUpdatedTime(time);
+        comment1.setReplies(comments);
 
         time = APIUtils.getCurrentUTCTime();
         Comment comment2 = new Comment();
         comment2.setUuid(UUID.randomUUID().toString());
-        comment2.setCommentedUser("commentedUser2");
+        comment2.setOwner("commentedUser2");
         comment2.setCommentText("this is a comment 2");
         comment2.setCategory("testingCategory1");
         comment2.setParentCommentId("");
@@ -122,6 +126,7 @@ public class CommentMappingUtilTestCase {
         comment2.setUpdatedUser("updatedUser2");
         comment2.setCreatedTime(time);
         comment2.setUpdatedTime(time);
+        comment2.setReplies(comments);
 
         List<Comment> commentList = new ArrayList<>();
         commentList.add(comment1);

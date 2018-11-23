@@ -188,7 +188,7 @@ public class ApisApiServiceImplTestCase {
         Comment comment = new Comment();
         comment.setUuid(commentId);
         comment.setApiId(apiId);
-        comment.setCommentedUser("commentedUser");
+        comment.setOwner("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCategory("testCategory");
         comment.setParentCommentId("");
@@ -240,10 +240,11 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Instant time = APIUtils.getCurrentUTCTime();
+        ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment = new Comment();
         comment.setUuid(commentId);
         comment.setApiId(apiId);
-        comment.setCommentedUser("commentedUser");
+        comment.setOwner("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCategory("testCategory");
         comment.setParentCommentId("");
@@ -252,6 +253,7 @@ public class ApisApiServiceImplTestCase {
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);
+        comment.setReplies(comments);
 
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
@@ -286,7 +288,7 @@ public class ApisApiServiceImplTestCase {
         Instant time = APIUtils.getCurrentUTCTime();
         Comment comment1 = new Comment();
         comment1.setUuid(UUID.randomUUID().toString());
-        comment1.setCommentedUser("commentedUser1");
+        comment1.setOwner("commentedUser1");
         comment1.setCommentText("this is a comment 1");
         comment1.setCategory("testCategory1");
         comment1.setParentCommentId("");
@@ -299,7 +301,7 @@ public class ApisApiServiceImplTestCase {
         time = APIUtils.getCurrentUTCTime();
         Comment comment2 = new Comment();
         comment2.setUuid(UUID.randomUUID().toString());
-        comment2.setCommentedUser("commentedUser2");
+        comment2.setOwner("commentedUser2");
         comment2.setCommentText("this is a comment 2");
         comment2.setCategory("testCategory2");
         comment2.setParentCommentId("");
@@ -354,8 +356,9 @@ public class ApisApiServiceImplTestCase {
         commentDTO.setLastUpdatedBy("updater");
 
         Instant time = APIUtils.getCurrentUTCTime();
+        ArrayList<Comment> comments = new ArrayList<Comment>();
         Comment comment = new Comment();
-        comment.setCommentedUser("commentedUser");
+        comment.setOwner("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCategory("testCategory");
         comment.setParentCommentId("");
@@ -364,6 +367,7 @@ public class ApisApiServiceImplTestCase {
         comment.setUpdatedUser("updatedUser");
         comment.setCreatedTime(time);
         comment.setUpdatedTime(time);
+        comment.setReplies(comments);
 
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
                 .updateComment(comment, commentId, apiId, USER);
