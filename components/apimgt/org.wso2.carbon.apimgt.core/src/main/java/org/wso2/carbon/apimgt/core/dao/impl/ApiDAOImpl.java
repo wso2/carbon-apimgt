@@ -75,6 +75,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1438,7 +1439,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
         List<Comment> commentList;
-        Map commentListMap = new HashMap();
+        Map commentListMap = new LinkedHashMap();
         final String getCommentsQuery = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, CATEGORY,"
                 + " PARENT_COMMENT_ID, ENTRY_POINT, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
                 + "FROM AM_API_COMMENTS WHERE API_ID = ? ORDER BY CREATED_TIME";
