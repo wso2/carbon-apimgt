@@ -66,9 +66,8 @@ for(var i=0;i < outputs.tiers.length; i++){
 <%}%>
   <%
     var applicationUtils = Packages.org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-    var result = applicationUtils.retrieveApplication(application.name, user.username, session.get("groupId"));
+    var result = applicationUtils.retrieveApplicationById(application.id);
 
-    var isOwner = true;
     if (!result.getSubscriber().getName().equalsIgnoreCase(user.username)) {
   %>
     <style>#appEditButton{display:none}</style>
@@ -132,7 +131,8 @@ for(var i=0;i < outputs.tiers.length; i++){
             keyState: oauthapp.prodKeyState,
             grants: prodGrants,
             tokenType: application.tokenType,
-            gatewayurlendpoint: gatewayurlendpointproduction
+            gatewayurlendpoint: gatewayurlendpointproduction,
+            id:application.id
 
         }
       %>
@@ -159,7 +159,8 @@ for(var i=0;i < outputs.tiers.length; i++){
             keyState: oauthapp.sandboxKeyState,
             grants:sandboxGrants,
             tokenType: application.tokenType,
-            gatewayurlendpoint: gatewayurlendpointsandbox
+            gatewayurlendpoint: gatewayurlendpointsandbox,
+            id:application.id
         }
       %>      
       <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">

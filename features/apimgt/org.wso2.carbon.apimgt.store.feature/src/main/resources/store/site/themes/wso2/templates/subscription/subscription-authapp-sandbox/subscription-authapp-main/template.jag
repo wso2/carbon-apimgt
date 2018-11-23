@@ -21,7 +21,7 @@
         }
 
         //iSandboxAuthAppContact
-        var requestModeSandBox = "updateClientApplication";
+        var requestModeSandBox = "updateAuthClientByAppId";
         var cancleBtnClass = "iBtnCancleUpdateSandbox";
 
     }else{

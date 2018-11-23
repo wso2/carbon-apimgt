@@ -1,4 +1,7 @@
 <% jagg.template("subscription/subscription-list-element", function(inputs, outputs, jagg) { %>
+<script>
+    var loggedInUser = '<%=jagg.getUser().username%>';
+</script>
 <% var i=outputs.i, app = outputs.app, thumbURL = '';
    var str_i = String(i).replace('.','_');
    var gatewayurlendpoint = outputs.gatewayurl;
@@ -193,7 +196,8 @@
 			   					</div>
 								<button title="<%=i18n.localize("cleanUpSubscriptions")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 											data-keyType="PRODUCTION"
-										    data-applicationName="<%=app.name%>">
+										    data-applicationName="<%=app.name%>"
+                                            data-appId="<%=app.id%>">
 											Clean up
 		   						</button>
 							<% } %>
@@ -438,7 +442,8 @@
 			   					</div>
 								<button title="<%=i18n.localize("cleanUpSubscriptions")%>" class="btn btn-primary btn-providekeys generateAgainBtn"
 											data-keyType="SANDBOX"
-										    data-applicationName="<%=app.name%>">
+										    data-applicationName="<%=app.name%>"
+                                            data-appId="<%=app.id%>">
 											Clean up
 		   						</button>
 							<% } %>

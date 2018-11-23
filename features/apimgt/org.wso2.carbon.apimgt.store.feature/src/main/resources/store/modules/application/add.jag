@@ -8,13 +8,15 @@ var addApplication = function (username, application, tier, callbackUrl,descript
             groupId = session.get("groupId");
         }
 
-        var status=store.addApplication(application, username, tier, callbackUrl,descriptionNew,groupId, tokenType, applicationAttributes);
+        var appInfo = store.addNewApplication(application, username, tier, callbackUrl, descriptionNew, groupId, tokenType, applicationAttributes);
         if (log.isDebugEnabled()) {
-            log.debug("addApplication");
+            log.debug("addNewApplication");
+            log.debug("appInfo = " + stringify(appInfo));
         }
         return {
             error:false,
-            status:status
+            status: appInfo[0].status,
+            applicationId: appInfo[0].applicationId
         };
     } catch (e) {
         log.error(e.message);

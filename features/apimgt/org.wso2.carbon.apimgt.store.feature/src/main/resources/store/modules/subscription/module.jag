@@ -3,6 +3,9 @@ jagg.module("subscription", {
     addAPISubscription:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/add.jag").addAPISubscription.apply(this, arguments);
     },
+    addAPISubscriptionByAppId:function () {
+            return jagg.require(jagg.getModulesDir() + "subscription/add.jag").addAPISubscriptionByAppId.apply(this, arguments);
+    },
     addSubscription:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/add.jag").addSubscription.apply(this, arguments);
     },
@@ -17,10 +20,15 @@ jagg.module("subscription", {
     getAllSubscriptionsOfApplication:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAllSubscriptionsOfApplication.apply(this, arguments);
     },
+    getAllSubscriptionsOfApplicationById:function () {
+            return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAllSubscriptionsOfApplicationById.apply(this, arguments);
+    },
     cleanUpApplicationRegistration:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").cleanUpApplicationRegistration.apply(this, arguments);
     },
-
+    cleanUpApplicationRegistrationByApplicationId:function () {
+            return jagg.require(jagg.getModulesDir() + "subscription/key.jag").cleanUpApplicationRegistrationByApplicationId.apply(this, arguments);
+    },
     getAPISubscriptions:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAPISubscriptions.apply(this, arguments);
     },
@@ -28,17 +36,26 @@ jagg.module("subscription", {
     getAPISubscriptionsForApplication:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAPISubscriptionsForApplication.apply(this, arguments);
     },
+    getAPISubscriptionsForApplicationById:function () {
+            return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAPISubscriptionsForApplicationById.apply(this, arguments);
+    },
     generateAPIKey:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").generateAPIKey.apply(this, arguments);
     },
     generateApplicationKey:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").generateApplicationKey.apply(this, arguments);
     },
+    generateApplicationKeyByApplicationId:function () {
+            return jagg.require(jagg.getModulesDir() + "subscription/key.jag").generateApplicationKeyByApplicationId.apply(this, arguments);
+    },
     deleteAuthApplication:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").deleteAuthApplication.apply(this, arguments);
     },
     updateAuthClient:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").updateAuthClient.apply(this, arguments);
+    },
+    updateAuthClientByAppId:function () {
+            return jagg.require(jagg.getModulesDir() + "subscription/key.jag").updateAuthClientByAppId.apply(this, arguments);
     },
     mapExistingOauthClient:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").mapExistingOauthClient.apply(this, arguments);

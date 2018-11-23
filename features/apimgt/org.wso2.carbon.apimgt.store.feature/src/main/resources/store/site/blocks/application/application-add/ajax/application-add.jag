@@ -82,7 +82,8 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    status: result.status
+                    status: result.status,
+                    applicationId: result.applicationId
                 }
             }
         } else {

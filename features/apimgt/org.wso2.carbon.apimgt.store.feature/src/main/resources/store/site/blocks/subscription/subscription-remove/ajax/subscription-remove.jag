@@ -44,40 +44,7 @@ include("/jagg/jagg.jag");
 
         username = user.username;
 
-        var applicationName = request.getParameter("applicationName");
-
-        if (null != applicationName) {
-            var groupId = session.get("groupId");
-
-            mod = jagg.module("application");
-            result = mod.getApplicationByName(username,applicationName,groupId);
-
-            if (result.error) {
-                print({
-                    error:result.error,
-                    message:msg.error.authError(action, username)
-                });
-
-                return;
-            }
-
-            if (result.application) {
-                applicationId = result.application.id;
-            } else {
-                print({
-                    error:true,
-                    message:msg.error.appNameError(applicationName)
-                });
-
-                return;
-            }
-        }
-        else {
-            applicationId = parseInt(request.getParameter("applicationId"), 10);
-        }
-
-
-
+        applicationId = parseInt(request.getParameter("applicationId"), 10);
         mod = jagg.module("subscription");
         result = mod.removeAPISubscription(username,applicationId,{
             apiName:apiName,

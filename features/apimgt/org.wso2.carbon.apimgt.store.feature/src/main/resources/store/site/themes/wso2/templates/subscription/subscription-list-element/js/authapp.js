@@ -349,6 +349,7 @@ $(document).ready(function () {
                 var keyType = "PRODUCTION";
                 var allowDomains = $('#allowedDomainsPro').val();
                 var application = $("#iHiddenApplicationName").val();
+                var applicationId = $("#iHiddenApplicationId").val();
                 var clientName = $("#iProductionAuthAppName").val();
                 var requestMode = $("#iHiddenRequestMode").val();
                 var consumerKey = $(".prodConsumerKey").val();
@@ -416,6 +417,7 @@ $(document).ready(function () {
                     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                         action: requestMode,
                         application: application,
+                        appId: applicationId,
                         key_type: keyType,
                         jsonParams: JSON.stringify(oJsonParams)
 
