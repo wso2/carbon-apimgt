@@ -32,7 +32,7 @@ public final class Comment {
     private String category;
     private String parentCommentId;
     private String entryPoint;
-    private String commentOwner;
+    private String owner;
     private String commentText;
     private String createdUser;
     private Instant createdTime;
@@ -80,12 +80,12 @@ public final class Comment {
         this.entryPoint = entryPoint;
     }
 
-    public String getCommentOwner() {
-        return commentOwner;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setCommentOwner(String commentOwner) {
-        this.commentOwner = commentOwner;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public String getCommentText() {

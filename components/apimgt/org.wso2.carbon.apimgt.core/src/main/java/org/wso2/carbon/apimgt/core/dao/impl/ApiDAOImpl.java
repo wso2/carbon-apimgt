@@ -1313,7 +1313,7 @@ public class ApiDAOImpl implements ApiDAO {
 
         comment.setUuid(rs.getString("UUID"));
         comment.setCommentText(IOUtils.toString(rs.getBinaryStream("COMMENT_TEXT")));
-        comment.setCommentOwner(rs.getString("USER_IDENTIFIER"));
+        comment.setOwner(rs.getString("USER_IDENTIFIER"));
         comment.setApiId(rs.getString("API_ID"));
         comment.setCategory(rs.getString("CATEGORY"));
         comment.setParentCommentId(rs.getString("PARENT_COMMENT_ID"));
@@ -1340,7 +1340,7 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.setAutoCommit(false);
                 statement.setString(1, comment.getUuid());
                 statement.setBinaryStream(2, IOUtils.toInputStream(comment.getCommentText()));
-                statement.setString(3, comment.getCommentOwner());
+                statement.setString(3, comment.getOwner());
                 statement.setString(4, apiId);
                 statement.setString(5, comment.getCreatedUser());
                 statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
