@@ -2227,7 +2227,7 @@ public class ApisApiServiceImplTestCase {
         commentDTO.setCommentId(commentId);
         commentDTO.setCommentText("comment text");
         commentDTO.setCategory("testCategory");
-        commentDTO.setParentCommentId("");
+        commentDTO.setParentCommentId(null);
         commentDTO.setEntryPoint("APIPublisher");
         commentDTO.setCreatedBy("creater");
         commentDTO.setLastUpdatedBy("updater");
@@ -2239,7 +2239,7 @@ public class ApisApiServiceImplTestCase {
         comment.setOwner("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCategory("testCategory");
-        comment.setParentCommentId("");
+        comment.setParentCommentId(null);
         comment.setEntryPoint("APIPublisher");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
@@ -2297,7 +2297,7 @@ public class ApisApiServiceImplTestCase {
         comment.setOwner("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCategory("testCategory");
-        comment.setParentCommentId("");
+        comment.setParentCommentId(null);
         comment.setEntryPoint("APIPublisher");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");
@@ -2342,7 +2342,7 @@ public class ApisApiServiceImplTestCase {
         comment1.setOwner("commentedUser1");
         comment1.setCommentText("this is a comment 1");
         comment1.setCategory("testCategory1");
-        comment1.setParentCommentId("");
+        comment1.setParentCommentId(null);
         comment1.setEntryPoint("APIPublisher");
         comment1.setCreatedUser("createdUser1");
         comment1.setUpdatedUser("updatedUser1");
@@ -2355,7 +2355,7 @@ public class ApisApiServiceImplTestCase {
         comment2.setOwner("commentedUser2");
         comment2.setCommentText("this is a comment 2");
         comment2.setCategory("testCategory2");
-        comment2.setParentCommentId("");
+        comment2.setParentCommentId(null);
         comment2.setEntryPoint("APIPublisher");
         comment2.setCreatedUser("createdUser2");
         comment2.setUpdatedUser("updatedUser2");
@@ -2402,7 +2402,7 @@ public class ApisApiServiceImplTestCase {
         commentDTO.setApiId(apiId);
         commentDTO.setCommentText("comment text");
         commentDTO.setCategory("testCategory");
-        commentDTO.setParentCommentId("");
+        commentDTO.setParentCommentId(null);
         commentDTO.setEntryPoint("APIPublisher");
         commentDTO.setCreatedBy("creater");
         commentDTO.setLastUpdatedBy("updater");
@@ -2413,7 +2413,7 @@ public class ApisApiServiceImplTestCase {
         comment.setOwner("commentedUser");
         comment.setCommentText("this is a comment");
         comment.setCategory("testCategory");
-        comment.setParentCommentId("");
+        comment.setParentCommentId(null);
         comment.setEntryPoint("APIPublisher");
         comment.setCreatedUser("createdUser");
         comment.setUpdatedUser("updatedUser");

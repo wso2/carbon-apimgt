@@ -1644,16 +1644,17 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addAPI(api);
         Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId(), ENTRY_POINT);
         Comment comment2 = SampleTestObjectCreator.createAlternativeComment(api.getId(), ENTRY_POINT);
+        Comment commentReply = SampleTestObjectCreator.createCommentReply(api.getId(), ENTRY_POINT, comment1.getUuid());
         apiDAO.addComment(comment1, api.getId());
         apiDAO.addComment(comment2, api.getId());
+        apiDAO.addComment(commentReply, api.getId());
 
         List<Comment> commentsFromDB = apiDAO.getCommentsForApi(api.getId());
         Assert.assertEquals(commentsFromDB.size(), 2);
         Assert.assertTrue(
-                commentsFromDB.get(0).getCommentText().equals(comment1.getCommentText()) || commentsFromDB.get(0)
-                        .getCommentText().equals(comment2.getCommentText()));
-        Assert.assertTrue(
-                commentsFromDB.get(1).getCommentText().equals(comment1.getCommentText()) || commentsFromDB.get(1)
+                commentsFromDB.get(0).getCommentText().equals(comment1.getCommentText()));
+        Assert.assertEquals(commentsFromDB.get(0).getReplies().size(), 1);
+        Assert.assertTrue(commentsFromDB.get(1)
                         .getCommentText().equals(comment2.getCommentText()));
     }
 
