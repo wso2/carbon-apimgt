@@ -19,15 +19,30 @@
 import React, { Component } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-
+import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import ConfigManager from 'AppData/ConfigManager';
 import LifeCycleUpdate from './LifeCycleUpdate';
 import { Progress } from 'AppComponents/Shared';
 import LifeCycleHistory from './LifeCycleHistory';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import { withStyles } from '@material-ui/core/styles';
 
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        marginTop: 10,
+        width: theme.custom.contentAreaWidth,
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    historyHead: {
+        marginTop: theme.spacing.unit * 2,
+        marginBottom: theme.spacing.unit * 2,
+    },
+});
 /**
  *
  *
@@ -45,14 +60,20 @@ class LifeCycle extends Component {
         this.api = new Api();
         this.state = {
             lcHistory: null,
+            checkList: [],
         };
         this.updateData = this.updateData.bind(this);
+        this.handleChangeCheckList = this.handleChangeCheckList.bind(this);
     }
 
     componentDidMount() {
         this.updateData();
     }
-
+    handleChangeCheckList = index => (event, checked) => {
+        const checkList = this.state.checkList;
+        checkList[index].checked = checked;
+        this.setState({ checkList });
+    };
     /**
      *
      *
@@ -91,7 +112,15 @@ class LifeCycle extends Component {
                         }
                     }
                 }
-
+                // Creating checklist
+                const checkList = [];
+                let index = 0;
+                for (const item of lcState.checkItemBeanList) {
+                    checkList.push({
+                        index, label: item.name, value: item.name, checked: false,
+                    });
+                    index++;
+                }
                 this.setState({
                     api,
                     policies: tiers,
@@ -99,6 +128,7 @@ class LifeCycle extends Component {
                     lcHistory,
                     labels,
                     privateJetModeEnabled,
+                    checkList,
                 });
             })
             .catch((error) => {
@@ -111,7 +141,6 @@ class LifeCycle extends Component {
                 }
             });
     }
-
     /**
      *
      *
@@ -119,37 +148,43 @@ class LifeCycle extends Component {
      * @memberof LifeCycle
      */
     render() {
-        const { api } = this.props;
+        const { classes, api } = this.props;
         const { lcHistory } = this.state;
 
         if (!lcHistory) {
             return <Progress />;
         }
         return (
-            <Grid container>
-                <Grid item xs={12}>
-                    <LifeCycleUpdate
-                        handleUpdate={this.updateData}
-                        lcState={this.state.lcState}
-                        api={api}
-                        privateJetModeEnabled={this.state.privateJetModeEnabled}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    {lcHistory.length > 1 && (
-                        <div>
-                            <Typography variant='headline' gutterBottom>
-                                History
-                            </Typography>
-                            <Paper>
-                                <LifeCycleHistory lcHistory={lcHistory} />
-                            </Paper>
-                        </div>
-                    )}
-                </Grid>
-            </Grid>
+            <div className={classes.root}>
+                <div className={classes.titleWrapper}>
+                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        Lifecycle
+                    </Typography>
+                </div>
+                <div className={classes.contentWrapper}>
+                    <Grid container>
+                        <Grid item xs={12}>
+                            <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState} checkList={this.state.checkList} handleChangeCheckList={this.handleChangeCheckList} api={api} privateJetModeEnabled={this.state.privateJetModeEnabled} />
+                        </Grid>
+                        <Grid item xs={12}>
+                            {lcHistory.length > 1 && (
+                                <div>
+                                    <Typography variant='h6' gutterBottom className={classes.historyHead}>
+                                        History
+                                    </Typography>
+                                    <LifeCycleHistory lcHistory={lcHistory} />
+                                </div>
+                            )}
+                        </Grid>
+                    </Grid>
+                </div>
+            </div>
         );
     }
 }
 
-export default LifeCycle;
+LifeCycle.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(LifeCycle);

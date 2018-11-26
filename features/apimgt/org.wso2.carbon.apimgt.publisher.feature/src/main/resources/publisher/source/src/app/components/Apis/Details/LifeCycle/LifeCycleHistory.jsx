@@ -22,28 +22,59 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Person from '@material-ui/icons/Person';
+import { withStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Paper from '@material-ui/core/Paper';
 
+const styles = theme => ({
+    firstCol: {
+        width: 100,
+    },
+    personIcon: {
+        fontSize: theme.typography.fontSize,
+    },
+    avatar: {
+        width: 25,
+        height: 25,
+    },
+});
 const LifeCycleHistory = (props) => {
+    const { classes } = props;
     return (
-        <List>
-            {props.lcHistory.map(entry =>
-                entry.previousState && (
-                    <ListItem button key={entry.postState}>
-                        <div>
-                            <Avatar>
-                                <Person />
-                            </Avatar>
-
-                            <div>{entry.user}</div>
-                        </div>
-                        <ListItemText
-                            primary={'LC has changed from ' + entry.previousState + ' to ' + entry.postState}
-                            secondary={entry.updatedTime}
-                        />
-                    </ListItem>
-                ))}
-        </List>
+        <Paper>
+            <Table className={classes.table}>
+                <TableHead>
+                    <TableRow>
+                        <TableCell className={classes.firstCol}>User</TableCell>
+                        <TableCell>Action</TableCell>
+                        <TableCell>Time</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {props.lcHistory.map(entry =>
+                        entry.previousState && (
+                            <TableRow key={entry.postState}>
+                                <TableCell component='th' scope='row'>
+                                    <Avatar className={classes.avatar}>
+                                        <Person className={classes.personIcon} />
+                                    </Avatar>
+                                    <div>{entry.user}</div>
+                                </TableCell>
+                                <TableCell>{'LC has changed from ' + entry.previousState + ' to ' + entry.postState}</TableCell>
+                                <TableCell>{entry.updatedTime}</TableCell>
+                            </TableRow>
+                        ))}
+                </TableBody>
+            </Table>
+        </Paper>
     );
 };
-
-export default LifeCycleHistory;
+LifeCycleHistory.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
+export default withStyles(styles)(LifeCycleHistory);

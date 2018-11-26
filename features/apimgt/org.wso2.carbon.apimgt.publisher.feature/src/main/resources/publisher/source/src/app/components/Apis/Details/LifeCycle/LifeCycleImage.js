@@ -18,7 +18,7 @@ class LifeCycleImage extends React.Component{
         const { classes } = this.props;
 
         return (
-            <svg xmlns="http://www.w3.org/2000/svg" width="792.638" height="306.502"
+            <svg xmlns="http://www.w3.org/2000/svg" width="633" height="244"
                  viewBox="0 0 743.09858 287.34519" id="svg5953"
                  className={classes.root}>
                 <defs id="defs5955">

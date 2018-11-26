@@ -30,18 +30,17 @@ const styles = theme => ({
     },
     input: {
         width: '300px',
+        background: theme.palette.getContrastText(theme.palette.background.appBar),
         '-webkit-transition': 'all .35s ease-in-out',
         transition: 'all .35s ease-in-out',
-        background: theme.palette.primary.light,
         padding: '5px 5px 5px 5px',
     },
     inputFocused: {
         width: '400px',
-        background: theme.palette.background.default,
-        padding: '10px 10px 10px 10px',
+        background: theme.palette.getContrastText(theme.palette.background.appBar),
+        padding: '5px 5px 5px 5px',
     },
     searchBox: {
-        background: '#6573c3',
         padding: '5px 5px 5px 5px',
     },
     buttonProgress: {
