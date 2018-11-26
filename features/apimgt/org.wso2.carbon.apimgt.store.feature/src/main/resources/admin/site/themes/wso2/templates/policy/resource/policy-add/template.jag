@@ -163,7 +163,7 @@
                 <div class="col-sm-3">
                     <select class="form-control select required" id="bandwidth-unit" name="bandwidth-unit">
                         <option value="KB" <%if(defaultBandwidthUnit=="kB") {%>selected<%}%>>KB</option>
-                		<option value="MB" <%if(defaultBandwidthUnit=="MB") {%>selected<%}%>>MB</option>
+                        <option value="MB" <%if(defaultBandwidthUnit=="MB") {%>selected<%}%>>MB</option>
                     </select>
                 </div>
             </div>
