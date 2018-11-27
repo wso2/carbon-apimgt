@@ -136,6 +136,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 
@@ -920,6 +921,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
+            visibleRoles = Arrays.stream(visibleRoles.split(",")).map(String::trim).collect(Collectors.
+                    joining(","));
         }
 
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
@@ -1240,6 +1243,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
+            visibleRoles = Arrays.stream(visibleRoles.split(",")).map(String::trim).collect(Collectors.
+                    joining(","));
         }
 
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
@@ -1818,6 +1823,8 @@ public class APIProviderHostObject extends ScriptableObject {
         String publisherAccessControlRoles = "";
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
+            visibleRoles = Arrays.stream(visibleRoles.split(",")).map(String::trim).collect(Collectors.
+                    joining(","));
         }
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             publisherAccessControlRoles = (String) apiData.get(APIConstants.ACCESS_CONTROL_ROLES_PARAMETER, apiData);
