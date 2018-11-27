@@ -67,7 +67,7 @@ include("/jagg/jagg.jag");
             }
             return;
         }
-        applicationId = request.getParameter("applicationId", "UTF-8");
+        applicationId = request.getParameter("appId", "UTF-8");
         username = user.username;
         var consumer = jagg.module("manager").getAPIConsumerObj();
         var application = consumer.getApplicationById(applicationId);

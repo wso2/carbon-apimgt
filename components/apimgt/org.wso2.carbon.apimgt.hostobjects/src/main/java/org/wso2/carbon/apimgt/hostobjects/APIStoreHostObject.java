@@ -369,10 +369,9 @@ public class APIStoreHostObject extends ScriptableObject {
                     appInfoMap.put("applicationId", applicationId);
                     keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistrationByApplicationId(appInfoMap);
                 } else {
-                    keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
-                            username, applicationName, tokenType, callbackUrl,
-                            accessAllowDomainsArray, validityPeriod, scopes, groupingId,
-                            jsonParams);
+                    keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(username,
+                            applicationName, tokenType, callbackUrl, accessAllowDomainsArray, validityPeriod, scopes,
+                            groupingId, jsonParams);
                 }
                 NativeObject row = new NativeObject();
 
@@ -2587,8 +2586,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static SubscriptionResponse jsFunction_addAPISubscriptionByAppId(Context cx, Scriptable thisObj,
-            Object[] args, Function funObj)
-            throws APIManagementException {
+            Object[] args, Function funObj) throws APIManagementException {
         if (!isStringArray(args)) {
             throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
         }

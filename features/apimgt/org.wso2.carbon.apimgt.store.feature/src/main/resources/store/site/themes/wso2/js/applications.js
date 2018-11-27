@@ -638,7 +638,7 @@ $("#application-actions").each(function(){
         $('#messageModal a.btn-primary').click(function() {
             jagg.post("/site/blocks/application/application-remove/ajax/application-remove.jag", {
                 action:"removeApplicationById",
-                applicationId:appId
+                appId:appId
             }, function (result) {
                 if (!result.error) {
                 	window.location.reload(true);

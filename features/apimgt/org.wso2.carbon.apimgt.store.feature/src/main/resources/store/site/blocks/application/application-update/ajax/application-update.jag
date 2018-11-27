@@ -91,7 +91,7 @@ include("/jagg/jagg.jag");
       		    print({
       		        error:true,
                     message:msg.error.loginRequired(action)
-            });
+                });
       	    }
       	    return;
         }

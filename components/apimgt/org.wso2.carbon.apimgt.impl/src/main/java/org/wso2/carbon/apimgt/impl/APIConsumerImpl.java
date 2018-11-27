@@ -3416,7 +3416,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Map<String, String> completeApplicationRegistration(String userId, int applicationId, String tokenType, String tokenScope, String groupingId) throws APIManagementException {
+    public Map<String, String> completeApplicationRegistration(String userId, int applicationId,
+            String tokenType, String tokenScope, String groupingId) throws APIManagementException {
         Application application = apiMgtDAO.getApplicationById(applicationId);
         String status = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
         Map<String, String> keyDetails = null;
@@ -3429,23 +3430,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             WorkflowDTO workflowDTO = null;
             // Creating workflowDTO for the correct key type.
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
-                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(
-                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                workflowDTO = WorkflowExecutorFactory.getInstance()
+                        .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
             } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) {
-                workflowDTO = WorkflowExecutorFactory.getInstance().createWorkflowDTO(
-                        WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                workflowDTO = WorkflowExecutorFactory.getInstance()
+                        .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
             }
             if (workflowDTO != null) {
                 // Set the workflow reference in the workflow dto and the populate method will fill in other details
                 // using the persisted request.
-                ApplicationRegistrationWorkflowDTO registrationWorkflowDTO = (ApplicationRegistrationWorkflowDTO)
-                        workflowDTO;
+                ApplicationRegistrationWorkflowDTO registrationWorkflowDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
                 registrationWorkflowDTO.setExternalWorkflowReference(workflowReference);
                 if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status)) {
                     apiMgtDAO.populateAppRegistrationWorkflowDTO(registrationWorkflowDTO);
                     try {
-                        AbstractApplicationRegistrationWorkflowExecutor.dogenerateKeysForApplication
-                                (registrationWorkflowDTO);
+                        AbstractApplicationRegistrationWorkflowExecutor
+                                .dogenerateKeysForApplication(registrationWorkflowDTO);
                         AccessTokenInfo tokenInfo = registrationWorkflowDTO.getAccessTokenInfo();
                         OAuthApplicationInfo oauthApp = registrationWorkflowDTO.getApplicationInfo();
                         keyDetails = new HashMap<String, String>();
@@ -3988,12 +3988,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
     public OAuthApplicationInfo updateAuthClientByAppId(String userId, String applicationName, int applicationId,
-            String tokenType,
-            String callbackUrl, String[] allowedDomains,
-            String validityTime,
-            String tokenScope,
-            String groupingId,
-            String jsonString) throws APIManagementException {
+            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
+            String groupingId, String jsonString) throws APIManagementException {
         boolean tenantFlowStarted = false;
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
