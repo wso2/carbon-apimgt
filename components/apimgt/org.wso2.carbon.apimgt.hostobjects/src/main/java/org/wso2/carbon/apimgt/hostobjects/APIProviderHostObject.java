@@ -921,8 +921,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
             StringBuilder roleBuilder = new StringBuilder();
-            for (String n : visibleRoles.split(",")) {
-                roleBuilder.append(n.trim()).append(",");
+            for (String role : visibleRoles.split(",")) {
+                roleBuilder.append(role.trim()).append(",");
             }
             roleBuilder.deleteCharAt(roleBuilder.length() - 1);
             visibleRoles = roleBuilder.toString();
@@ -1247,8 +1247,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
             StringBuilder roleBuilder = new StringBuilder();
-            for (String n : visibleRoles.split(",")) {
-                roleBuilder.append(n.trim()).append(",");
+            for (String role : visibleRoles.split(",")) {
+                roleBuilder.append(role.trim()).append(",");
             }
             roleBuilder.deleteCharAt(roleBuilder.length() - 1);
             visibleRoles = roleBuilder.toString();
@@ -1831,8 +1831,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
             StringBuilder roleBuilder = new StringBuilder();
-            for (String n : visibleRoles.split(",")) {
-                roleBuilder.append(n.trim()).append(",");
+            for (String role : visibleRoles.split(",")) {
+                roleBuilder.append(role.trim()).append(",");
             }
             roleBuilder.deleteCharAt(roleBuilder.length() - 1);
             visibleRoles = roleBuilder.toString();
