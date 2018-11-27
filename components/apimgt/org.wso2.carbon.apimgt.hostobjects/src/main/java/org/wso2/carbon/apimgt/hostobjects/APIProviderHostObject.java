@@ -920,6 +920,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
+            visibleRoles =  visibleRoles.replaceAll("\\s+","");
         }
 
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
@@ -1239,7 +1240,8 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
-            visibleRoles = (String) apiData.get("visibleRoles", apiData);
+            visibleRoles = ((String) apiData.get("visibleRoles", apiData));
+            visibleRoles = visibleRoles.replaceAll("\\s+","");
         }
 
         if (publisherAccessControl != null && publisherAccessControl.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
