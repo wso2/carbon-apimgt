@@ -11562,7 +11562,7 @@ public class ApiMgtDAO {
                 application.setKeyType(rs.getString("KEY_TYPE"));
 
                 if (multiGroupAppSharingEnabled) {
-                    if (application.getGroupId().isEmpty()) {
+                    if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
                         application.setGroupId(getGroupId(application.getId()));
                     }
                 }
