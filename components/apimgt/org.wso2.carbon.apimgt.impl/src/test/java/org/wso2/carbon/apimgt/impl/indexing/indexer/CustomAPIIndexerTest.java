@@ -67,7 +67,7 @@ public class CustomAPIIndexerTest {
     }
 
     /**
-     * This method checks the indexer's behaviour for custom APIs which does not have the relevant properties.
+     * This method checks the indexer's behaviour for APIs which does not have the relevant custom properties.
      *
      * @throws RegistryException Registry Exception.
      * @throws APIManagementException API Management Exception.
