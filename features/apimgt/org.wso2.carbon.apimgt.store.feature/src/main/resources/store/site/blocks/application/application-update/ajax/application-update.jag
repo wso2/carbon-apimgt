@@ -86,14 +86,14 @@ include("/jagg/jagg.jag");
         }
         print(obj);
     } else if (action == "updateApplicationById" && request.getMethod() == 'POST') {
-        if (!user) {
+	if (!user) {
             if (!ssoEnabled) {
-      		    print({
-      		        error:true,
+		print({
+		    error:true,
                     message:msg.error.loginRequired(action)
-                });
-      	    }
-      	    return;
+            	});
+	    }
+	    return;
         }
 
         applicationOld = request.getParameter("applicationOld");
