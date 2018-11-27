@@ -216,7 +216,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                     Long.parseLong((String) mc.getProperty(APIMgtGatewayConstants.REQUEST_START_TIME)));
             stream.setResponseCacheHit(cacheHit);
             int responseCode;
-            if(axis2MC.getProperty(SynapseConstants.HTTP_SC) instanceof  String){
+            if (axis2MC.getProperty(SynapseConstants.HTTP_SC) instanceof String) {
                 responseCode = Integer.parseInt((String) axis2MC.getProperty(SynapseConstants.HTTP_SC));
             } else {
                 responseCode = (Integer) axis2MC.getProperty(SynapseConstants.HTTP_SC);
