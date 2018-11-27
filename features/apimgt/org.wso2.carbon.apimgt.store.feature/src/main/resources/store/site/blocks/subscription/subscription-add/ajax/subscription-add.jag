@@ -114,7 +114,7 @@ include("/jagg/jagg.jag");
            if (!ssoEnabled) {
 		print({
 		    error:true,
-                   message:msg.error.loginRequired(action)
+                  message:msg.error.loginRequired(action)
             	});
 	    }
 	    return;
