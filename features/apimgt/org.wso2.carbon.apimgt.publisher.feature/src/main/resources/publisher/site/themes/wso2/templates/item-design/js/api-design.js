@@ -1396,6 +1396,7 @@ $(document).ready(function(){
                 title: i18n.t("Resource Not Specified"),
                 anotherDialog:true,
                 okCallback:function(){
+                    $('#messageModal').modal('hide');
                     var designer = APIDesigner();
                     designer.add_default_resource();
                     $("#design_form").submit();
