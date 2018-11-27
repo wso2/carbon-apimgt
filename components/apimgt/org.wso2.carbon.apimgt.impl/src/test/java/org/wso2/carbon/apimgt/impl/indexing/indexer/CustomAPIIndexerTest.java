@@ -85,12 +85,11 @@ public class CustomAPIIndexerTest {
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY)).thenReturn("public");
         PowerMockito.when(APIUtil.getAPI(genericArtifact, userRegistry))
                 .thenReturn(Mockito.mock(API.class));
-        resource.setProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY, APIConstants.CUSTOM_API_INDEXER_PROPERTY);
-        indexer.getIndexedDocument(file2Index);
-
-        Assert.assertNotNull(APIConstants.CUSTOM_API_INDEXER_PROPERTY +
-                        " property was not set for the API",resource.getProperty
-                (APIConstants.CUSTOM_API_INDEXER_PROPERTY));
+        resource.setProperty(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + APIConstants.
+                CUSTOM_API_INDEXER_PROPERTY, APIConstants.CUSTOM_API_INDEXER_PROPERTY);
+        Assert.assertEquals(APIConstants.OVERVIEW_PREFIX + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX +
+                APIConstants.CUSTOM_API_INDEXER_PROPERTY, indexer.getIndexedDocument(file2Index).getFields().keySet().
+                toArray()[0].toString());
     }
 
     /**
