@@ -1221,7 +1221,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String environments = (String) apiData.get("environments", apiData);
         String visibleRoles = "";
-        String visibleRolesArray[] ;
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
         String publisherAccessControlRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
