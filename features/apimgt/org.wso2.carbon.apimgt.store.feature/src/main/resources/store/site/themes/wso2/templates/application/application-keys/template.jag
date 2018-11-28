@@ -18,7 +18,7 @@
     var user = jagg.getUser().username;
 
     var applicationUtils = Packages.org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-    var result = applicationUtils.retrieveApplication(app.name, user, groupId);
+    var result = applicationUtils.retrieveApplicationById(app.id);
 
     var isOwner = true;
     if (!result.getSubscriber().getName().equalsIgnoreCase(user)) {
@@ -204,7 +204,8 @@
 		<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>
 		<button title="<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 					data-keyType={{type}}
-					data-applicationName={{name}}>
+					data-applicationName={{name}}
+					data-appId={{id}}>
 					Clean up
 		</button>
 	{{/ifCond}}
@@ -213,7 +214,8 @@
 		<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>
 		<button title="<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 					data-keyType={{type}}
-					data-applicationName={{name}}>
+					data-applicationName={{name}}
+					data-appId={{id}}>
 					Clean up
 		</button>
 	{{/ifCond}}

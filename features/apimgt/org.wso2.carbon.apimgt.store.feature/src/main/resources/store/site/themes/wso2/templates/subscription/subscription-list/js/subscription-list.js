@@ -125,6 +125,7 @@ $(document).ready(function () {
             authorizedDomains: authoDomains,
             validityTime: validityTime,
             tokenScope:tokenScope,
+            appId: elem.attr("data-application")
 	    //jsonParams: oJsonParams
         }, function (result) {
             if (!result.error) {

@@ -33,7 +33,7 @@ var loggedInUser = '<%=jagg.getUser().username%>';
   //@todo groupId inform if check 
 %>
 <script id="application-actions" type="text/x-handlebars-template">
-  <a title="View" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}&groupId={{groupId}}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+  <a title="View" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}&appId={{ id }}&groupId={{groupId}}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-view fw-stack-1x"></i>
@@ -42,7 +42,7 @@ var loggedInUser = '<%=jagg.getUser().username%>';
   </a>
   {{#if isActive}}
   {{#if isOwner}}
-  <a title="Edit" href="<%=jagg.urlTenanted("/site/pages/application-edit.jag?name={{ name }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+  <a title="Edit" href="<%=jagg.urlTenanted("/site/pages/application-edit.jag?name={{ name }}&appId={{ id }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-edit fw-stack-1x"></i>
@@ -52,7 +52,7 @@ var loggedInUser = '<%=jagg.getUser().username%>';
   {{/if}}
   {{/if}}
   {{#if isOwner}}
-  <a title="Delete" href="#" data-id="{{ name }}" data-count="{{ apiCount }}" class="btn btn-sm padding-reduce-on-grid-view deleteApp">
+  <a title="Delete" href="#" data-id="{{ name }}" data-appId="{{ id }}" data-count="{{ apiCount }}" class="btn btn-sm padding-reduce-on-grid-view deleteApp">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-delete fw-stack-1x"></i>
@@ -63,7 +63,7 @@ var loggedInUser = '<%=jagg.getUser().username%>';
 </script>
 
 <script id="application-name" type="text/x-handlebars-template">
-  <a title="applications" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}")%>">{{#if grpIdList}} {{ owner}}/{{/if}}{{name }}{{#if shared }}(Shared){{/if}}</a>
+  <a title="applications" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}&appId={{ id }}")%>">{{#if grpIdList}} {{ owner}}/{{/if}}{{name }}{{#if shared }}(Shared){{/if}}</a>
 </script>
 
  

@@ -67,7 +67,8 @@ include("/jagg/jagg.jag");
         } else {
             obj = {
                 error:false,
-                status:result.status
+                status:result.status,
+                applicationId: applicationId
             }
         }
         print(obj);
@@ -108,7 +109,41 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-    }else if (action == "generateAPIKey" && request.getMethod() == 'POST') {
+    } else if (action == "addAPISubscriptionByAppId" && request.getMethod() == 'POST') {
+        if (!user) {
+           if (!ssoEnabled) {
+		print({
+		    error:true,
+                  message:msg.error.loginRequired(action)
+            	});
+	    }
+	    return;
+        }
+        name = request.getParameter("name");
+        version = request.getParameter("version");
+        provider = request.getParameter("provider");
+        tier = request.getParameter("tier");
+        applicationId = request.getParameter("appId");
+        username = user.username;
+        mod = jagg.module("subscription");
+        result = mod.addAPISubscriptionByAppId({
+            name:name,
+            version:version,
+            provider:provider
+        }, tier, applicationId, username);
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:result.message
+            };
+        } else {
+            obj = {
+                error:false,
+                status:result.status
+            }
+        }
+        print(obj);
+    } else if (action == "generateAPIKey" && request.getMethod() == 'POST') {
         if (!user) {
             if(!ssoEnabled){
 		print({
@@ -255,6 +290,62 @@ include("/jagg/jagg.jag");
         }
         print(obj);
 
+    } else if (action == "generateApplicationKeyByApplicationId" && request.getMethod() == 'POST') {
+        if (!user) {
+            if (!ssoEnabled) {
+                print({
+                    error: true,
+                    message: msg.error.loginRequired(action)
+                });
+            }
+            return;
+        }
+        var application = request.getParameter("application");
+        var applicationId = request.getParameter("appId");
+        var keyType = request.getParameter("keytype");
+        var callbackUrl = request.getParameter("callbackUrl");
+        var username = user.username;
+        var accessAllowDomains = request.getParameter("authorizedDomains");
+        if (accessAllowDomains == null) {
+            accessAllowDomains = "ALL";
+        }
+        var tokenScope = request.getParameter("tokenScope");
+        var accessAllowDomainsArr = accessAllowDomains.split(",");
+        var validityTime = request.getParameter("validityTime");
+        var retryAfterFailure = request.getParameter("retryAfterFailure");
+        var jsonParams = request.getParameter("jsonParams");
+        var groupingId = session.get("groupId");
+        if (retryAfterFailure == null) {
+            retryAfterFailure = false;
+        }
+        if (jsonParams != null) {
+            //convert json string in to a javascript array. Then we can add user name attribute in to it.
+            var jsonParamsObject = JSON.parse(jsonParams);
+            jsonParamsObject.username = user.username;
+        } else {
+            var jsonParamsObject = {
+                username : user.username
+            };
+        }
+        mod = jagg.module("subscription");
+        var log = new Log();
+        result = mod.generateApplicationKeyByApplicationId(username, application , keyType, callbackUrl,
+                                accessAllowDomainsArr, validityTime, retryAfterFailure, tokenScope,groupingId,
+                                JSON.stringify(jsonParamsObject), applicationId);
+        if (result.error) {
+            obj = {
+                error: result.error,
+                message: msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error: false,
+                data: {
+                    key: result.key
+                }
+            }
+        }
+        print(obj);
     } else if (action == "updateClientApplication" && request.getMethod() == 'POST') {
 
         if (!user) {
@@ -324,7 +415,72 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
-     } else if (action == "updateAccessAllowDomains" && request.getMethod() == 'POST') {
+    } else if (action == "updateClientApplicationByAppId" && request.getMethod() == 'POST') {
+
+        if (!user) {
+            if (!ssoEnabled) {
+                print({
+                    error: true,
+                    message: msg.error.loginRequired(action)
+                });
+             }
+            return;
+        }
+
+        var application = request.getParameter("application");
+        var appId = request.getParameter("appId");
+        var keyType = request.getParameter("keytype");
+        var callbackUrl = request.getParameter("callbackUrl");
+        var username = user.username;
+        var accessAllowDomains = request.getParameter("authorizedDomains");
+        if (accessAllowDomains == null) {
+            accessAllowDomains = "ALL";
+        }
+        var tokenScope = "default";
+
+        var accessAllowDomainsArr = accessAllowDomains.split(",");
+
+        var validityTime = request.getParameter("validityTime");
+        var retryAfterFailure = request.getParameter("retryAfterFailure");
+        var jsonParams = request.getParameter("jsonParams");
+        var groupingId = session.get("groupId");
+
+        if (retryAfterFailure == null) {
+            retryAfterFailure = false;
+        }
+        var log = new Log();
+
+        if (jsonParams != null) {
+            //convert json string in to a javascript array. Then we can add user name attribute in to it.
+            var jsonParamsObject = JSON.parse(jsonParams);
+            jsonParamsObject.username = user.username;
+        } else {
+            var jsonParamsObject = {
+                username : user.username
+            };
+        }
+
+        mod = jagg.module("subscription");
+
+        result = mod.updateAuthClientByAppId(username, application, keyType, callbackUrl, accessAllowDomainsArr,
+               validityTime, retryAfterFailure, tokenScope, groupingId, JSON.stringify(jsonParamsObject), appId);
+
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                data:{
+                    key:result.key
+                }
+            }
+        }
+        print(obj);
+    } else if (action == "updateAccessAllowDomains" && request.getMethod() == 'POST') {
         if (!user) {
            if(!ssoEnabled){
 		print({
@@ -488,6 +644,35 @@ include("/jagg/jagg.jag");
 
         result = mod.cleanUpApplicationRegistration(applicationName , keyType, groupingId , username);
 
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                data:{
+                    key:result.key
+                }
+            }
+        }
+        print(obj);
+     } else if (action == "cleanUpApplicationRegistrationByApplicationId" && request.getMethod() == 'POST') {
+        if (!user) {
+            print({
+                error:true,
+                message:msg.error.loginRequired(action)
+            });
+            return;
+        }
+        var applicationId = request.getParameter("appId");
+        var applicationName = request.getParameter("applicationName");
+        var keyType = request.getParameter("keyType");
+        var groupingId=session.get("groupId");
+        var username = user.username;
+        mod = jagg.module("subscription");
+        result = mod.cleanUpApplicationRegistrationByApplicationId(applicationName, keyType, groupingId, username, applicationId);
         if (result.error) {
             obj = {
                 error:result.error,

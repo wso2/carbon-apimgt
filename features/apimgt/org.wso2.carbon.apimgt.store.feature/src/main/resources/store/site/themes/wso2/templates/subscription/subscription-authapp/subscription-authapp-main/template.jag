@@ -3,6 +3,7 @@
     var log = new Log();
     var application = inputs.application;
     var prodJsonString = inputs.app.prodJsonString;
+    var appId = inputs.app.id;
 
     if(typeof(prodJsonString) != "undefined" && prodJsonString != null){
 
@@ -36,6 +37,7 @@
 
     %>
     <input type="hidden" id="iHiddenApplicationName" value="<%=encode.forHtmlAttribute(application) %>" />
+    <input type="hidden" id="iHiddenApplicationId" value="<%=encode.forHtmlAttribute(appId) %>" />
     <input type="hidden" id="iHiddenRequestMode" value="<%=encode.forHtmlAttribute(requestMode) %>" />
     <fieldset>
         <div class="tabElementset">

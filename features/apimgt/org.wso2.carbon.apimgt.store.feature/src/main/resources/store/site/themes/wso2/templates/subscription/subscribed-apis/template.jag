@@ -6,6 +6,9 @@
         "?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}" + urlPrefix;
 %>
 
+    <script>
+         var loggedInUser = '<%=jagg.getUser().username%>';
+    </script>
 
 	<div  id="subscription-table-nodata" class="hide message message-info">
         <h4><i class="icon fw fw-info"></i><%= i18n.localize("No Subscriptions")%></h4>

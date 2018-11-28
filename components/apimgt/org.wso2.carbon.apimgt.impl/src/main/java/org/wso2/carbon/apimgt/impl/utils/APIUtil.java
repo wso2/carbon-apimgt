@@ -4028,6 +4028,15 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().getApplicationId(appName, userId);
     }
 
+    public static int getApplicationId(String appName, String userId, String groupId) throws APIManagementException {
+        Application application = ApiMgtDAO.getInstance().getApplicationByName(appName, userId, groupId);
+        if (application != null) {
+            return application.getId();
+        } else {
+            return 0;
+        }
+    }
+
     public static boolean isAPIManagementEnabled() {
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.Enabled"));
     }

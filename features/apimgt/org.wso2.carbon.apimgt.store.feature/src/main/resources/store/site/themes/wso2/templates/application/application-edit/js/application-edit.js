@@ -29,6 +29,7 @@ $(document).ready(function () {
 
     var updateApplication = function(){
         var application = $("#application-name").val();
+        var appId = $("#appId").val();
         var tier = $("#appTier").val();
         var apiPath = $("#apiPath").val();
         var goBack = $("#goBack").val();
@@ -49,7 +50,7 @@ $(document).ready(function () {
         }
         var tokenType = $("#tokenType").val();
         jagg.post("/site/blocks/application/application-update/ajax/application-update.jag", {
-            action:"updateApplication",
+            action:"updateApplicationById",
             applicationNew:application,
             applicationOld:applicationOld,
             tier:tier,
@@ -58,10 +59,11 @@ $(document).ready(function () {
             groupIdNew:groupIdNew,
             applicationAttributeNew:JSON.stringify(applicationAttributesNew),
             groupIdNew:groupIdNew,
+            appId: appId,
             tokenType:tokenType
         }, function (result) {
             if (result.error == false) {                
-                window.location = jagg.url("/site/pages/application.jag?name="+application);
+                window.location = jagg.url("/site/pages/application.jag?name=" + application + "&appId=" + appId);
             } else {
                 jagg.message({content:result.message,type:"error"});
             }
