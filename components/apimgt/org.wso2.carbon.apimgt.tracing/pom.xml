@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>org.wso2.carbon.apimgt</groupId>
 		<artifactId>apimgt</artifactId>
-		<version>6.4.82-SNAPSHOT</version>
+		<version>6.4.82</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -30,7 +30,7 @@
 	<artifactId>org.wso2.carbon.apimgt.tracing</artifactId>
 	<packaging>bundle</packaging>
 	<name>WSO2 Carbon - API Tracing</name>
-	<description></description>
+	<description />
 	<url>http://wso2.org</url>
 
 	<dependencies>
