@@ -227,6 +227,7 @@ var cleanUpApplicationRegistration = function (applicationName , keyType ,groupI
 
 var cleanUpApplicationRegistrationByApplicationId = function (applicationName , keyType ,groupId ,userName, applicationId) {
     var key,
+    log = new Log(),
     store = jagg.module("manager").getAPIStoreObj();
     try {
         key = store.cleanUpApplicationRegistration(applicationName, keyType ,groupId ,userName, applicationId);

@@ -3504,9 +3504,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Application getApplicationById(int id) throws APIManagementException {
 
         Application application = apiMgtDAO.getApplicationById(id);
-        Set<APIKey> keys = getApplicationKeys(application.getId());
-        for (APIKey key : keys) {
-            application.addKey(key);
+        if (application != null) {
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
         }
         return application;
     }
@@ -3517,10 +3519,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public Application getApplicationById(int id, String userId, String groupId) throws APIManagementException {
         Application application = apiMgtDAO.getApplicationById(id, userId, groupId);
-        Set<APIKey> keys = getApplicationKeys(application.getId());
-
-        for (APIKey key : keys) {
-            application.addKey(key);
+        if (application != null) {
+            checkAppAttributes(application, userId);
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+            for (APIKey key : keys) {
+                application.addKey(key);
+            }
         }
         return application;
     }
