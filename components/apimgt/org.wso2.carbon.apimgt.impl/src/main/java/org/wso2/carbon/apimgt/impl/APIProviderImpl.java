@@ -1218,6 +1218,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
+                    int index = 0;
+                    for (String role: visibleRoles) {
+                        visibleRoles[index] = role.trim();
+                        index++;
+                    }
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         artifactPath, registry);
@@ -2044,6 +2049,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String[] visibleRoles = new String[0];
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
+                    int index = 0;
+                    for (String role: visibleRoles) {
+                        visibleRoles[index] = role.trim();
+                        index++;
+                    }
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         filePath, registry);
@@ -2578,6 +2588,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String visibleRolesList = api.getVisibleRoles();
             if (visibleRolesList != null) {
                 authorizedRoles = visibleRolesList.split(",");
+                int index = 0;
+                for (String role: authorizedRoles) {
+                    authorizedRoles[index] = role.trim();
+                    index++;
+                }
             }
             String visibility = api.getVisibility();
             if (docVisibility != null) {
@@ -2704,6 +2719,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String[] visibleRoles = new String[0];
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
+                int index = 0;
+                for (String role: visibleRoles) {
+                    visibleRoles[index] = role.trim();
+                    index++;
+                }
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();

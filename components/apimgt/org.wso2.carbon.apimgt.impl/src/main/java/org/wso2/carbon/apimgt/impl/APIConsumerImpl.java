@@ -4395,6 +4395,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String storeVisibilityRoles = apiResource.getProperty(APIConstants.STORE_VIEW_ROLES);
             if (storeVisibilityRoles != null && !storeVisibilityRoles.trim().isEmpty()) {
                 String[] storeVisibilityRoleList = storeVisibilityRoles.split(",");
+                int index = 0;
+                for (String role: storeVisibilityRoleList) {
+                    storeVisibilityRoleList[index] = role.trim();
+                    index++;
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("API has restricted access to users with the roles : " + Arrays
                             .toString(storeVisibilityRoleList));
