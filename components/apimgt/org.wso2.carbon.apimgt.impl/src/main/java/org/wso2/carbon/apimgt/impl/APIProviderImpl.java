@@ -1212,6 +1212,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
+                    for(int i = 0; i < visibleRoles.length; i++) {
+                        visibleRoles[i] = visibleRoles[i].trim();
+                    }
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         artifactPath, registry);
@@ -2039,6 +2042,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String[] visibleRoles = new String[0];
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
+                    for(int i = 0; i < visibleRoles.length; i++) {
+                        visibleRoles[i] = visibleRoles[i].trim();
+                    }
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         filePath, registry);
@@ -2573,6 +2579,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String visibleRolesList = api.getVisibleRoles();
             if (visibleRolesList != null) {
                 authorizedRoles = visibleRolesList.split(",");
+                for(int i = 0; i < authorizedRoles.length; i++) {
+                    authorizedRoles[i] = authorizedRoles[i].trim();
+                }
             }
             String visibility = api.getVisibility();
             if (docVisibility != null) {
@@ -2699,6 +2708,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String[] visibleRoles = new String[0];
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
+                for(int i = 0; i < visibleRoles.length; i++) {
+                    visibleRoles[i] = visibleRoles[i].trim();
+                }
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
