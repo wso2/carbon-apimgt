@@ -3098,11 +3098,11 @@ public final class APIUtil {
                             isRoleEveryOne = true;
                         } else {
                             for (String role : roles) {
-                                if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role)) {
+                                if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
                                     isRoleEveryOne = true;
                                 }
-                                authManager.authorizeRole(role, resourcePath, ActionConstants.GET);
-                                publisherAccessRoles.append(",").append(role.toLowerCase());
+                                authManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
+                                publisherAccessRoles.append(",").append(role.trim().toLowerCase());
                             }
                         }
                     }
@@ -3121,7 +3121,7 @@ public final class APIUtil {
                         authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                     } else {
                         for (String role : roles) {
-                            authManager.denyRole(role, resourcePath, ActionConstants.GET);
+                            authManager.denyRole(role.trim(), resourcePath, ActionConstants.GET);
 
                         }
                     }
@@ -3137,10 +3137,10 @@ public final class APIUtil {
                     boolean isRoleEveryOne = false;
                     if (roles != null) {
                         for (String role : roles) {
-                            if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role)) {
+                            if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role.trim())) {
                                 isRoleEveryOne = true;
                             }
-                            authorizationManager.authorizeRole(role, resourcePath, ActionConstants.GET);
+                            authorizationManager.authorizeRole(role.trim(), resourcePath, ActionConstants.GET);
                             publisherAccessRoles.append(",").append(role.toLowerCase());
                         }
                     }
@@ -3159,7 +3159,7 @@ public final class APIUtil {
                         authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                     } else {
                         for (String role : roles) {
-                            authorizationManager.denyRole(role, resourcePath, ActionConstants.GET);
+                            authorizationManager.denyRole(role.trim(), resourcePath, ActionConstants.GET);
 
                         }
                     }
@@ -4214,7 +4214,7 @@ public final class APIUtil {
 
             String[] roles = roleName.split(",");
             for (String role : roles) {
-                if (!userStoreManager.isExistingRole(role)) {
+                if (!userStoreManager.isExistingRole(role.trim())) {
                     return false;
                 }
             }
