@@ -64,11 +64,11 @@ function updateStatus(status) {
     } else if (isSetDeprecation === 'true') {
         messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
     } else {
-        var displayStatus = status.toLowerCase();
         if (status == 'Demote to Created') {
-            displayStatus = displayStatus.replace("to created", ""); // Remove "to created" part
+            messageContent = i18n.t("Are you sure you want to demote this API to created state?");
+        } else {
+            messageContent = i18n.t("Are you sure you want to " + status.toLowerCase() + " this API?");
         }
-        messageContent = i18n.t("Are you sure you want to ") + displayStatus + " this API?";
     }
     jagg.message({
         content: messageContent,

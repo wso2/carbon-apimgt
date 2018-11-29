@@ -189,5 +189,11 @@
     "Do you really want to delete the certificate with alias" : "Do you really want to delete the certificate with alias",
     "Please provide a different alias name.": "Please provide a different alias name.",
     "Delete certificate with alias" : "Delete certificate with alias",
-    "This action cannot be reversed" : "This action cannot be reversed"
+    "This action cannot be reversed" : "This action cannot be reversed",
+    "Are you sure you want to demote this API to created state?" : "Are you sure you want to demote this API to created state?",
+    "Are you sure you want to publish this API?" : "Are you sure you want to publish this API?",
+    "Are you sure you want to block this API?" : "Are you sure you want to block this API?",
+    "Are you sure you want to retire this API?" : "Are you sure you want to retire this API?",
+    "Are you sure you want to deploy as a prototype this API?" : "Are you sure you want to deploy as a prototype this API?",
+    "Are you sure you want to re-publish this API?" : "Are you sure you want to re-publish this API?"
 }
