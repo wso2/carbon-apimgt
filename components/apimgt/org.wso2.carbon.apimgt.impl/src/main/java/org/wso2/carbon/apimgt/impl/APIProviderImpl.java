@@ -1212,8 +1212,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
-                    for(int i = 0; i < visibleRoles.length; i++) {
-                        visibleRoles[i] = visibleRoles[i].trim();
+                    int index = 0;
+                    for (String role: visibleRoles) {
+                        visibleRoles[index] = role.trim();
+                        index++;
                     }
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
@@ -2042,8 +2044,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String[] visibleRoles = new String[0];
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
-                    for(int i = 0; i < visibleRoles.length; i++) {
-                        visibleRoles[i] = visibleRoles[i].trim();
+                    int index = 0;
+                    for (String role: visibleRoles) {
+                        visibleRoles[index] = role.trim();
+                        index++;
                     }
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
@@ -2579,8 +2583,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String visibleRolesList = api.getVisibleRoles();
             if (visibleRolesList != null) {
                 authorizedRoles = visibleRolesList.split(",");
-                for(int i = 0; i < authorizedRoles.length; i++) {
-                    authorizedRoles[i] = authorizedRoles[i].trim();
+                int index = 0;
+                for (String role: authorizedRoles) {
+                    authorizedRoles[index] = role.trim();
+                    index++;
                 }
             }
             String visibility = api.getVisibility();
@@ -2708,8 +2714,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String[] visibleRoles = new String[0];
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
-                for(int i = 0; i < visibleRoles.length; i++) {
-                    visibleRoles[i] = visibleRoles[i].trim();
+                int index = 0;
+                for (String role: visibleRoles) {
+                    visibleRoles[index] = role.trim();
+                    index++;
                 }
             }
 
