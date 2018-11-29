@@ -669,7 +669,7 @@ include("/jagg/jagg.jag");
         var applicationId = request.getParameter("appId");
         var applicationName = request.getParameter("applicationName");
         var keyType = request.getParameter("keyType");
-        var groupingId=session.get("groupId");
+        var groupingId = session.get("groupId");
         var username = user.username;
         mod = jagg.module("subscription");
         result = mod.cleanUpApplicationRegistrationByApplicationId(applicationName, keyType, groupingId, username, applicationId);
