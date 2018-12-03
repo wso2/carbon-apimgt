@@ -159,9 +159,9 @@ public class APIMJWTGenerator extends JWTGenerator {
     public Map<String, Object> populateStandardClaims(JwtTokenInfoDTO jwtTokenInfoDTO) throws APIManagementException {
 
         //generating expiring timestamp
-        long currentTime = System.currentTimeMillis();
+        long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
         // jwtTokenInfoDTO.getExpirationTime() gives the token validity time given when the token is generated.
-        long expireIn = TimeUnit.MILLISECONDS.toSeconds(currentTime) + jwtTokenInfoDTO.getExpirationTime();
+        long expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime();
 
         String endUserName = jwtTokenInfoDTO.getEndUserName();
 
