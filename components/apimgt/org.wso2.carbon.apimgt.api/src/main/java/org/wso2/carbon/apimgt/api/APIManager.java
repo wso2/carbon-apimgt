@@ -661,4 +661,14 @@ public interface APIManager {
      * @param wsdlDefinition wsdl content
      */
     void updateWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException;
+
+    /**
+     * Returns the corresponding application given the subscriberId and application name
+     *
+     * @param subscriberId subscriberId of the Application
+     * @param applicationName name of the Application
+     * @return it will return Application corresponds to the subscriberId and name provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationBySubscriberIdAndName(int subscriberId, String applicationName) throws APIManagementException;
 }

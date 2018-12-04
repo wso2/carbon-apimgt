@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
@@ -4406,6 +4407,94 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return applications;
+    }
+
+    /**
+     *
+     * @param tenantId   The tenantId.
+     * @param start      The start index.
+     * @param offset     The offset.
+     * @param searchOwner     The search string.
+     * @param searchApplication     The search string.
+     * @param sortOrder  The sort order.
+     * @param sortColumn The sort column.
+     * @return Application[] The array of applications.
+     * @throws APIManagementException
+     */
+    public List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start, int offset,
+                                                                     String searchOwner, String searchApplication,
+                                                                     String sortColumn, String sortOrder)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        Application applications = null;
+        String sqlQuery = null;
+        List<Application> applicationList = new ArrayList<>();
+        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_TENANT_ID");
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            sqlQuery = sqlQuery.replace("$1", sortColumn);
+            sqlQuery = sqlQuery.replace("$2", sortOrder);
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(2, "%" + searchOwner + "%");
+            prepStmt.setString(3, "%" + searchApplication + "%");
+            prepStmt.setInt(4, start);
+            prepStmt.setInt(5, offset);
+            rs = prepStmt.executeQuery();
+            Application application;
+            while (rs.next()) {
+                String applicationName = rs.getString("NAME");
+                String subscriberName = rs.getString("CREATED_BY");
+                Subscriber subscriber = new Subscriber(subscriberName);
+                application = new Application(applicationName, subscriber);
+                application.setName(applicationName);
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                subscriber.setTenantId(rs.getInt("TENANT_ID"));
+                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                application.setOwner(subscriberName);
+                applicationList.add(application);
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application : " + tenantId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return applicationList;
+    }
+
+    public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
+            APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+        String sqlQuery = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            sqlQuery = SQLConstants.GET_APPLICATIONS_COUNT;
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setInt(1, tenantId);
+            prepStmt.setString(2, "%" + searchOwner + "%");
+            prepStmt.setString(3, "%" + searchApplication + "%");
+            resultSet = prepStmt.executeQuery();
+            int applicationCount = 0;
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    applicationCount = resultSet.getInt("count");
+                }
+            }
+            if (applicationCount > 0) {
+                return applicationCount;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get application count : ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return 0;
     }
 
     public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws
@@ -12430,5 +12519,70 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
+    }
+
+    /**
+     * Retrieves the Application which is corresponding to the given UUID String
+     *
+     * @param subscriberId subscriberId of the Application
+     * @param applicationName name of the Application
+     * @return
+     * @throws APIManagementException
+     */
+    public Application getApplicationBySubscriberIdAndName(int subscriberId, String applicationName) throws
+            APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        int applicationId = 0;
+        Application application = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String query = SQLConstants.GET_APPLICATION_BY_SUBSCRIBERID_AND_NAME_SQL;
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setInt(1, subscriberId);
+            prepStmt.setString(2, applicationName);
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                String subscriberName = rs.getString("USER_ID");
+                Subscriber subscriber = new Subscriber(subscriberName);
+                subscriber.setId(subscriberId);
+                application = new Application(applicationName, subscriber);
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                applicationId = rs.getInt("APPLICATION_ID");
+                application.setId(applicationId);
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
+                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(application.getId()));
+                    }
+                }
+                Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
+                application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
+                try {
+                    Timestamp updated_time = rs.getTimestamp("UPDATED_TIME");
+                    application.setLastUpdatedTime(
+                            updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                } catch (SQLException e) {
+                    application.setLastUpdatedTime(application.getCreatedTime());
+                }
+            }
+            if (application != null) {
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setApplicationAttributes(applicationAttributes);
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application : " + subscriberId + " and " +
+                    applicationName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return application;
     }
 }

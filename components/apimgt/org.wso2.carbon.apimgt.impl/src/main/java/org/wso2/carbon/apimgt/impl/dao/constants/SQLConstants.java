@@ -1386,6 +1386,44 @@ public class SQLConstants {
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
 
+    public static final String GET_APPLICATIONS_COUNT =
+            "SELECT " +
+            "   count(*) count " +
+            " FROM" +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIBER SUB  " +
+            " WHERE " +
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+            " AND " +
+            "   SUB.TENANT_ID=?" +
+            " And "+
+            "    ( SUB.CREATED_BY like ?" +
+            " OR APP.NAME like ? )";
+
+    public static final String GET_APPLICATION_BY_SUBSCRIBERID_AND_NAME_SQL =
+            " SELECT " +
+                    "   APP.APPLICATION_ID," +
+                    "   APP.NAME," +
+                    "   APP.SUBSCRIBER_ID," +
+                    "   APP.APPLICATION_TIER," +
+                    "   APP.CALLBACK_URL," +
+                    "   APP.DESCRIPTION, " +
+                    "   APP.SUBSCRIBER_ID," +
+                    "   APP.APPLICATION_STATUS, " +
+                    "   APP.GROUP_ID, " +
+                    "   APP.UPDATED_TIME, "+
+                    "   APP.CREATED_TIME, "+
+                    "   APP.UUID," +
+                    "   APP.TOKEN_TYPE," +
+                    "   SUB.USER_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP " +
+                    " WHERE " +
+                    "    APP.SUBSCRIBER_ID = ? " +
+                    "  AND APP.NAME = ? " +
+                    "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
+
     public static final String GET_SIMPLE_APPLICATIONS =
             " SELECT " +
             "   APPLICATION_ID, " +
