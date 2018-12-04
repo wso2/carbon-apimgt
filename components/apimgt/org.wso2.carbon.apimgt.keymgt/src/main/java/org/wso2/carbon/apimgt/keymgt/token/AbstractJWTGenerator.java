@@ -132,7 +132,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     public abstract Map<String, String> populateCustomClaims(TokenValidationContext validationContext) throws APIManagementException;
 
     public String encode(byte[] stringToBeEncoded) throws APIManagementException {
-        return Base64Utils.encode(stringToBeEncoded);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(stringToBeEncoded);
     }
 
     public String generateToken(TokenValidationContext validationContext) throws APIManagementException{
@@ -381,15 +381,18 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 publicCert = publicCerts.get(tenantId);
             }
 
-            //generate the SHA-1 thumbprint of the certificate
+            //generate the SHA-256 thumbprint of the certificate
             //TODO: maintain a hashmap with tenants' pubkey thumbprints after first initialization
             MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
             if (publicCert != null) {
+                if(log.isDebugEnabled()) {
+                    log.debug("x5t certificate: "+((java.security.cert.X509Certificate)publicCert).getSubjectDN().getName());
+                }  
                 byte[] der = publicCert.getEncoded();
                 digestValue.update(der);
                 byte[] digestInBytes = digestValue.digest();
                 // Base64  base64 = new Base64(true);
-                String base64UrlEncodedThumbPrint =  java.util.Base64.getEncoder().encodeToString(digestInBytes);
+                String base64UrlEncodedThumbPrint =  encode(digestInBytes);
                 StringBuilder jwtHeader = new StringBuilder();
                 //Sample header
                 //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
@@ -397,11 +400,11 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 jwtHeader.append("{\"typ\":\"JWT\",");
                 jwtHeader.append("\"alg\":\"");
                 jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
-                jwtHeader.append("\"");
+                jwtHeader.append("\", ");
 
-                // jwtHeader.append("\"x5t\":\"");
-                // jwtHeader.append(base64UrlEncodedThumbPrint);
-                // jwtHeader.append('\"');
+                jwtHeader.append("\"x5t\":\"");
+                jwtHeader.append(base64UrlEncodedThumbPrint);
+                jwtHeader.append('\"');
 
                 jwtHeader.append('}');
                 return jwtHeader.toString();
