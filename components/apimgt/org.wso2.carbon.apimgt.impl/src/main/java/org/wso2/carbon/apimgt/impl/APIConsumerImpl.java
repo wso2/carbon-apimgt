@@ -4100,15 +4100,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                     isAppUpdated = true;
                     audit.info("Successfully updated the owner of application " + application.getName() +
-                            " from " + oldUserName + " to " + userId);
+                            " from " + oldUserName + " to " + userId+".");
                 } else {
                     throw new APIManagementException("Unable to update application owner to " + userId +
-                            " as this user has a application with the same name. Update owner to another user");
+                            " as this user has an application with the same name. Update owner to another user.");
                 }
             }
         } else {
             throw new APIManagementException("Unable to update application owner to " +
-                    userId + " as this user does not belong to this tenant domain");
+                    userId + " as this user does not belong to "+oldTenantDomain+" domain.");
         }
         if (isAppUpdated) {
             isAppUpdated = apiMgtDAO.updateApplicationOwner(userId, application);
