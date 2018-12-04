@@ -140,6 +140,8 @@ public class ApiMgtDAO {
     private boolean multiGroupAppSharingEnabled = false;
     private static boolean initialAutoCommit = false;
 
+    private final Object scopeMutex = new Object();
+
     private ApiMgtDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -5295,7 +5297,9 @@ public class ApiMgtDAO {
             connection.commit();
 
             if (api.getScopes() != null) {
-                addScopes(api.getScopes(), api.getId(), apiId, tenantId);
+                synchronized (scopeMutex) {
+                    addScopes(api.getScopes(), api.getId(), apiId, tenantId);
+                }
             }
             addURLTemplates(apiId, api, connection);
             String tenantUserName = MultitenantUtils
@@ -6430,9 +6434,10 @@ public class ApiMgtDAO {
                 }
             }
             connection.commit();
-
-            updateScopes(api, tenantId);
-            updateURLTemplates(api);
+            synchronized (scopeMutex) {
+                updateScopes(api, tenantId);
+                updateURLTemplates(api);
+            }
         } catch (SQLException e) {
             handleException("Error while updating the API: " + api.getId() + " in the database", e);
         } finally {
@@ -6525,7 +6530,9 @@ public class ApiMgtDAO {
 
             id = getAPIID(apiId, connection);
 
-            removeAPIScope(apiId);
+            synchronized (scopeMutex) {
+                removeAPIScope(apiId);
+            }
 
             prepStmt = connection.prepareStatement(deleteSubscriptionQuery);
             prepStmt.setInt(1, id);
@@ -7986,6 +7993,82 @@ public class ApiMgtDAO {
         return populateScopeSet(scopeHashMap);
     }
 
+    public void addScopes(Connection conn, Set<?> objects, int api_id, int tenantID)
+            throws APIManagementException {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<Integer> scopeIds = new ArrayList<Integer>();
+        String scopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
+        try {
+            String scopeId = "SCOPE_ID";
+            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
+                scopeId = "scope_id";
+            }
+            if (objects != null) {
+                for (Object object : objects) {
+                    ps = conn.prepareStatement(scopeEntry, new String[]{scopeId});
+                    if (object instanceof URITemplate) {
+                        URITemplate uriTemplate = (URITemplate) object;
+                        if (uriTemplate.getScope() == null) {
+                            continue;
+                        }
+                        ps.setString(1, uriTemplate.getScope().getKey());
+                        ps.setString(2, uriTemplate.getScope().getName());
+                        ps.setString(3, uriTemplate.getScope().getDescription());
+                        ps.setInt(4, tenantID);
+                        ps.setString(5, uriTemplate.getScope().getRoles());
+                        ps.execute();
+                        rs = ps.getGeneratedKeys();
+                        if (rs.next()) {
+                            int scopeIdValue = rs.getInt(1);
+                            uriTemplate.getScope().setId(scopeIdValue);
+                            scopeIds.add(scopeIdValue);
+                        }
+                    } else if (object instanceof Scope) {
+                        Scope scope = (Scope) object;
+                        ps.setString(1, scope.getKey());
+                        ps.setString(2, scope.getName());
+                        ps.setString(3, scope.getDescription());
+                        ps.setInt(4, tenantID);
+                        ps.setString(5, scope.getRoles());
+                        ps.execute();
+                        rs = ps.getGeneratedKeys();
+                        if (rs.next()) {
+                            int scopeIdValue = rs.getInt(1);
+                            scope.setId(scopeIdValue);
+                            scopeIds.add(scopeIdValue);
+                        }
+                    }
+                }
+                addScopeLinks(conn, scopeIds, api_id);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while creating scopes ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+    }
+
+    private void addScopeLinks(Connection connection, List<Integer> scopeIds, int apiId) throws APIManagementException {
+        String scopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
+        PreparedStatement ps = null;
+        try {
+            if (scopeIds != null) {
+                ps = connection.prepareStatement(scopeLink);
+                for (Integer scopeId : scopeIds) {
+                    ps.setInt(1, apiId);
+                    ps.setInt(2, scopeId);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while creating scope links ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, null);
+        }
+    }
+
     /**
      * Generate Set<Scope> from HashMap
      *
@@ -8230,7 +8313,14 @@ public class ApiMgtDAO {
 
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while deleting Scopes for API : " + api.getId(), e);
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException e1) {
+                handleException("Error occurred while Rolling back changes done on Scopes updating", e1);
+            }
+            handleException("Error while updating Scopes for API : " + api.getId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
