@@ -229,7 +229,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());
             newAppInfo.setClientSecret(applicationInfo.getClientSecret());
             newAppInfo.setJsonString(applicationInfo.getJsonString());
-
             return newAppInfo;
         } catch (Exception e) {
             handleException("Error occurred while updating OAuth application owner : ", e);
@@ -749,7 +748,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } finally {
             SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
         }
-
     }
     
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo getOAuthApplication(String consumerKey)
