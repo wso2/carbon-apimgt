@@ -508,6 +508,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         String userName = MultitenantUtils.getTenantAwareUsername(userId);
         String ownerName = MultitenantUtils.getTenantAwareUsername(ownerId);
         String userNameForSP = userName;
+        String authorizationCodeGrantType = "authorization_code";
+        String implicitGrantType = "implicit";
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         // Acting as the provided user. When creating Service Provider/OAuth App,
@@ -595,7 +597,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
                     for (String grantType : allowedGrantTypes) {
                         if (callbackUrl == null || callbackUrl.isEmpty()) {
-                            if ("authorization_code".equals(grantType) || "implicit".equals(grantType)) {
+                            if (authorizationCodeGrantType.equals(grantType) || implicitGrantType.equals(grantType)) {
                                 continue;
                             }
                         }
@@ -603,11 +605,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                     }
                     oAuthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
                 }
-
-
                 oAuthAdminService.updateConsumerApplication(oAuthConsumerAppDTO);
                 log.debug("Updated the OAuthApplication...");
-
                 oAuthConsumerAppDTO = oAuthAdminService.getOAuthApplicationData(consumerKey);
                 OAuthApplicationInfo oAuthApplicationInfo = createOAuthAppInfoFromDTO(oAuthConsumerAppDTO);
                 return oAuthApplicationInfo;
