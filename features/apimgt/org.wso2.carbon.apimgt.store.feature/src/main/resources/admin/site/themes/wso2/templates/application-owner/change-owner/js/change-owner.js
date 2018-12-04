@@ -1,5 +1,5 @@
 var changeOwner = function () {
-    if(!validateInputs()){
+    if (!validateInputs()){
         return;
     }
     $('#add-tier-btn').buttonLoader('start');
@@ -25,12 +25,12 @@ var changeOwner = function () {
 function validateInput(text, element, errorMsg){
     var elementId = element.attr('id');
     text = text.trim();
-    if(text == ""){
+    if (text == "") {
         element.css("border", "1px solid red");
         $('#label'+elementId).remove();
         element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
         return false;
-    }else{
+    } else {
         $('#label'+elementId).remove();
         element.css("border", "1px solid #cccccc");
         return true;
@@ -62,11 +62,11 @@ function validateInputs(){
     var applicationNameTxt = applicationName.val();
     var errorHasSpacesMsg = $('#errorMessageSpaces').val();
  
-    if(!validateInput(applicationNameTxt,applicationName,requiredMsg)){
+    if (!validateInput(applicationNameTxt,applicationName,requiredMsg)){
         return false;
     }
  
-    if(!validateInputCharactors(applicationNameTxt,applicationName,illegalChars)){
+    if (!validateInputCharactors(applicationNameTxt,applicationName,illegalChars)){
         return false;
     }
  
@@ -97,12 +97,12 @@ function validateInputs(){
  function validateForSpaces(text, element, errorMsg){
      var elementId = element.attr('id');
      text = text.trim();
-     if(text.indexOf(' ') >= 0){
+     if (text.indexOf(' ') >= 0) {
          element.css("border", "1px solid red");
          $('#label'+elementId).remove();
          element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
          return false;
-     }else{
+     } else {
          $('#label'+elementId).remove();
          element.css("border", "1px solid #cccccc");
          return true;

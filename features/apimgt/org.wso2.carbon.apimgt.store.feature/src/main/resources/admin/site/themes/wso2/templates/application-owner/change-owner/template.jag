@@ -7,7 +7,7 @@
     var applicationOwner = request.getParameter("owner");
     var nameFieldDisableStatus = "";
 
-    if(applicationUuid != null){
+    if(applicationUuid){
         nameFieldDisableStatus = "readonly";
         pageTitle = "Change Application Owner";
     }

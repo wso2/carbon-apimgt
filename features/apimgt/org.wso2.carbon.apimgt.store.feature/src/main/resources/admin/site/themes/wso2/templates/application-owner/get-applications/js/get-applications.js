@@ -1,6 +1,6 @@
 $( document ).ready(function() {
     $('#get-app input').bind('keyup', function(e) {
-        if(e.keyCode == 13) {
+        if (e.keyCode == 13) {
             table.search( this.value ).draw();
         }
     });
