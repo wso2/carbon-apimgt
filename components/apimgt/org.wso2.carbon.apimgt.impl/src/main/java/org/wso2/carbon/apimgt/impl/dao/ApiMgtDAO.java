@@ -5294,13 +5294,13 @@ public class ApiMgtDAO {
                 apiId = rs.getInt(1);
             }
 
+            connection.commit();
 
             if (api.getScopes() != null) {
                 synchronized (scopeMutex) {
                     addScopes(api.getScopes(), api.getId(), apiId, tenantId);
                 }
             }
-            connection.commit();
             addURLTemplates(apiId, api, connection);
             String tenantUserName = MultitenantUtils
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -8311,7 +8311,6 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, apiId);
             prepStmt.execute();
 
-            addScopes(connection, api.getUriTemplates(), apiId, tenantId);
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -8325,7 +8324,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
-
+        addScopes(api.getUriTemplates(), api.getId(), apiId, tenantId);
     }
 
     public HashMap<String, String> getResourceToScopeMapping(APIIdentifier identifier) throws APIManagementException {
