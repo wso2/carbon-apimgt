@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.Charsets;
