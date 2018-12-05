@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.Charsets;
@@ -381,11 +380,11 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 publicCert = publicCerts.get(tenantId);
             }
 
-            //generate the SHA-256 thumbprint of the certificate
+            //generate the SHA-1 thumbprint of the certificate
             //TODO: maintain a hashmap with tenants' pubkey thumbprints after first initialization
             MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
             if (publicCert != null) {
-                if(log.isDebugEnabled()) {
+                if(log.isDebugEnabled() && (publicCert instanceof java.security.cert.X509Certificate)) {
                     log.debug("x5t certificate: "+((java.security.cert.X509Certificate)publicCert).getSubjectDN().getName());
                 }  
                 byte[] der = publicCert.getEncoded();
@@ -400,7 +399,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 jwtHeader.append("{\"typ\":\"JWT\",");
                 jwtHeader.append("\"alg\":\"");
                 jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
-                jwtHeader.append("\", ");
+                jwtHeader.append("\",");
 
                 jwtHeader.append("\"x5t\":\"");
                 jwtHeader.append(base64UrlEncodedThumbPrint);
