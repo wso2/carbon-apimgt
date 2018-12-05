@@ -32,7 +32,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
     private static final Log log   = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
 
-    private DataPublisher dataPublisher;
+    protected DataPublisher dataPublisher;
     private static DataPublisher dataPublisherStatics;
 
     public void init(){
