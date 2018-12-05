@@ -514,8 +514,15 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
-            if (!defaultVersionInvoked) {
-                ps.setString(3, version);
+            if (!isAdvancedThrottleEnabled) {
+                if (!defaultVersionInvoked) {
+                    ps.setString(3, version);
+                }
+            } else {
+                ps.setInt(3, apiOwnerTenantId);
+                if (!defaultVersionInvoked) {
+                    ps.setString(4, version);
+                }
             }
             rs = ps.executeQuery();
             if (rs.next()) {
@@ -11713,8 +11720,15 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
             ps.setString(2, consumerKey);
-            if (!defaultVersionInvoked) {
-                ps.setString(3, version);
+            if (!isAdvancedThrottleEnabled) {
+                if (!defaultVersionInvoked) {
+                    ps.setString(3, version);
+                }
+            } else {
+                ps.setInt(3, apiOwnerTenantId);
+                if (!defaultVersionInvoked) {
+                    ps.setString(4, version);
+                }
             }
 
             rs = ps.executeQuery();

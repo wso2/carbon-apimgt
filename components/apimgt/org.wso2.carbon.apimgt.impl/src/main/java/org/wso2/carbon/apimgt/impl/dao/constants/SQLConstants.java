@@ -350,7 +350,7 @@ public class SQLConstants {
                     "   AND API.API_ID = SUB.API_ID" +
                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
                     "   AND APS.NAME = SUB.TIER_ID" +
-                    "   AND SUBS.TENANT_ID = APS.TENANT_ID";
+                    "   AND APS.TENANT_ID = ? ";
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
             " SELECT " +
@@ -379,13 +379,14 @@ public class SQLConstants {
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND APS.TENANT_ID = ? " +
                     "   AND API.API_VERSION = ? " +
                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUB.API_ID" +
                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-                    "   AND APS.NAME = SUB.TIER_ID" +
-                    "   AND SUBS.TENANT_ID = APS.TENANT_ID";
+                    "   AND APS.NAME = SUB.TIER_ID" ;
+
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
 
