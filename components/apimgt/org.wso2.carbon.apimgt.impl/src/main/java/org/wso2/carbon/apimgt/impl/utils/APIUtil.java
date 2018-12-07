@@ -1241,6 +1241,19 @@ public final class APIUtil {
             documentation.setId(artifact.getId());
             documentation.setSummary(artifact.getAttribute(APIConstants.DOC_SUMMARY));
 
+            String visibilityAttr = artifact.getAttribute(APIConstants.DOC_VISIBILITY);
+            Documentation.DocumentVisibility documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
+            if (visibilityAttr != null) {
+                if (visibilityAttr.equals(Documentation.DocumentVisibility.API_LEVEL.name())) {
+                    documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
+                } else if (visibilityAttr.equals(Documentation.DocumentVisibility.PRIVATE.name())) {
+                    documentVisibility = Documentation.DocumentVisibility.PRIVATE;
+                } else if (visibilityAttr.equals(Documentation.DocumentVisibility.OWNER_ONLY.name())) {
+                    documentVisibility = Documentation.DocumentVisibility.OWNER_ONLY;
+                }
+            }
+            documentation.setVisibility(documentVisibility);
+
             Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
             String artifactAttribute = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE);
 
