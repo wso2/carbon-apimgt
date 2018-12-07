@@ -80,7 +80,7 @@ public class APIMConfigurations {
     private String commentModeratorRole = "comment-moderator";
 
     @Element(description = "comment text max length")
-    private int commentMaxLength = 1000;
+    private int commentMaxLength = 1300;
 
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
