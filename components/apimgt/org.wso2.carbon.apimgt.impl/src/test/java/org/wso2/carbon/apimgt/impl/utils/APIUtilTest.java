@@ -1145,8 +1145,6 @@ public class APIUtilTest {
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_VISIBILITY)).thenReturn(null).thenReturn
                 (Documentation.DocumentVisibility.API_LEVEL.name()).thenReturn(Documentation.DocumentVisibility
                 .PRIVATE.name()).thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
-
-
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_TYPE)).thenReturn(Documentation
                 .DocumentSourceType.URL.name()).thenReturn(Documentation.DocumentSourceType.FILE.name());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_URL)).thenReturn("https://localhost");
