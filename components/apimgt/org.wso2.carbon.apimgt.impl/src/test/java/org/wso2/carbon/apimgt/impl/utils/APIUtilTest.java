@@ -1160,6 +1160,37 @@ public class APIUtilTest {
     }
 
     @Test
+    public void testVisibilityOfDoc() throws Exception {
+        PowerMockito.mockStatic(CarbonUtils.class);
+        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
+        Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/abc").thenReturn("/");
+        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_TYPE)).thenReturn(DocumentationType.HOWTO.getType
+                ()).thenReturn(DocumentationType.PUBLIC_FORUM.getType()).thenReturn(DocumentationType.SUPPORT_FORUM
+                .getType()).thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
+                .SAMPLES.getType()).thenReturn(DocumentationType.OTHER.getType());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_NAME)).thenReturn("Docname");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_VISIBILITY)).thenReturn(null).thenReturn
+                (Documentation.DocumentVisibility.API_LEVEL.name()).thenReturn(Documentation.DocumentVisibility
+                .PRIVATE.name()).thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_TYPE)).thenReturn(Documentation
+                .DocumentSourceType.URL.name()).thenReturn(Documentation.DocumentSourceType.FILE.name());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_URL)).thenReturn("https://localhost");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("file://abc");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME)).thenReturn("abc");
+
+        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
+                Documentation.DocumentVisibility.API_LEVEL.name());
+        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
+                Documentation.DocumentVisibility.API_LEVEL.name());
+        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
+                Documentation.DocumentVisibility.PRIVATE.name());
+        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
+                Documentation.DocumentVisibility.OWNER_ONLY.name());
+    }
+
+    @Test
     public void testCreateDocArtifactContent() throws GovernanceException, APIManagementException {
         API api = getUniqueAPI();
         PowerMockito.mockStatic(CarbonUtils.class);
