@@ -451,4 +451,56 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         }
         return timeStampMap;
     }
+
+    /**
+     * Called using the jaggery api. Checks if the swagger contains valid api scopes.
+     *
+     * @param swagger Swagger definition
+     * @return true if the scope definition is valid
+     * @throws APIManagementException
+     */
+    public Boolean validateScopesFromSwagger(String swagger) throws APIManagementException {
+
+        try {
+            Set<Scope> scopes = getScopes(swagger);
+            JSONParser parser = new JSONParser();
+            JSONObject swaggerJson;
+            swaggerJson = (JSONObject) parser.parse(swagger);
+            if (swaggerJson.get("paths") != null) {
+                JSONObject paths = (JSONObject) swaggerJson.get("paths");
+                for (Object o : paths.keySet()) {
+                    String uriTempVal = (String) o;
+                    //if url template is a custom attribute "^x-" ignore.
+                    if (uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")) {
+                        continue;
+                    }
+                    JSONObject path = (JSONObject) paths.get(uriTempVal);
+                    // Following code check is done to handle $ref objects supported by swagger spec
+                    // See field types supported by "Path Item Object" in swagger spec.
+                    if (path.containsKey("$ref")) {
+                        continue;
+                    }
+
+                    for (Object o1 : path.keySet()) {
+                        String httpVerb = (String) o1;
+                        JSONObject operation = (JSONObject) path.get(httpVerb);
+                        String operationScope = (String) operation.get(APIConstants.SWAGGER_X_SCOPE);
+
+                        Scope scope = APIUtil.findScopeByKey(scopes, operationScope);
+
+                        if (scope == null && operationScope != null) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (APIManagementException e) {
+            handleException("Error when validating scopes", e);
+            return false;
+        } catch (ParseException e) {
+            handleException("Error when validating scopes", e);
+            return false;
+        }
+    }
 }

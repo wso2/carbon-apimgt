@@ -55,6 +55,17 @@ var isSupportedOpenAPIVersion = function (version) {
     return /^3\.0\.\d{1,}$/.test(version);
 }
 
+var isSwaggerScopesValid = function (swagger) {
+    try {
+        var ScopesValidator = Packages.org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+        var scopesValidator = new ScopesValidator();
+        return scopesValidator.validateScopesFromSwagger(swagger);
+    } catch (e) {
+        print({error: true, message: "Contains an invalid Swagger Definition"});
+        return;
+    }
+}
+
 if(jagg.isCSRFTokenValid())
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
@@ -96,6 +107,15 @@ if(jagg.isCSRFTokenValid())
                         //Manually parsing api definition for json/yaml, since SwaggerParser 3.x has not been
                         //released yet.
                         var apiDefinition = parseSwaggerDefinition(swagger);
+
+                        if(isSwaggerScopesValid(stringify(apiDefinition)) == false){
+                            print({
+                                error: true,
+                                message: "Error when validating api scopes in swagger, Please check api scopes again"
+                            });
+                            return;
+                        }
+
                         if (apiDefinition.openapi) {
                             if (!isSupportedOpenAPIVersion(apiDefinition.openapi.trim())) {
                                 print({
@@ -152,6 +172,15 @@ if(jagg.isCSRFTokenValid())
                         //Manually parsing api definition for json/yaml, since SwaggerParser 3.x has not been
                         //released yet.
                         var apiDefinition = parseSwaggerDefinition(swagger);
+
+                        if(isSwaggerScopesValid(stringify(apiDefinition)) == false){
+                            print({
+                                error: true,
+                                message: "Error when validating api scopes in swagger, Please check api scopes again"
+                            });
+                            return;
+                        }
+
                         if (apiDefinition.openapi) {
 
                             //Supported Open API Version check
@@ -812,6 +841,14 @@ if(jagg.isCSRFTokenValid())
         } else if (request.getMethod() === 'POST' && action === 'validateSwagger') {
             var swagger = request.getParameter("swaggerDefinition");
             var apiDefinition = parseSwaggerDefinition(swagger);
+
+            if(isSwaggerScopesValid(stringify(apiDefinition)) == false){
+                print({
+                    error: true,
+                    message: "Error when validating api scopes in swagger, Please check api scopes again"
+                });
+                return;
+            }
 
             if (apiDefinition.swagger) {
                 var swaggerDeserializationResult = parser.readWithInfo(swagger);
