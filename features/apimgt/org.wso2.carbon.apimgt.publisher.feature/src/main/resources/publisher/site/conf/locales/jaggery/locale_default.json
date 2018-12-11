@@ -665,5 +665,6 @@
     "This option determines the type of security that will be used to secure this API. An API can be secured with either one of them or it can be secured by both of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation. If Mutual SSL option is selected, a trusted client certificate should be presented to access the API":"This option determines the type of security that will be used to secure this API. An API can be secured with either one of them or it can be secured by both of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation. If Mutual SSL option is selected, a trusted client certificate should be presented to access the API",
     "OAuth2" : "OAuth2",
     "Mutual SSL" : "Mutual SSL",
-    "Subscription tiers are not applicable for this API, as it is only protected with mutual SSL." : "Subscription are not applicable for this API, as it is only protected with mutual SSL."
+    "Subscription tiers are not applicable for this API, as it is only protected with mutual SSL." : "Subscription are not applicable for this API, as it is only protected with mutual SSL.",
+    "API Usage By Applications" : "API Usage By Applications"
 }

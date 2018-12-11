@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
+import org.wso2.carbon.apimgt.usage.client.bean.APIUsageByApplication;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
 import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
@@ -71,7 +72,6 @@ import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByDestination;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByResourcePath;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByUser;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIUsageByUserName;
-import org.wso2.carbon.apimgt.usage.client.util.APIUsageClientUtil;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
@@ -2994,5 +2994,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             closeDatabaseLinks(rs, preparedStatement, connection);
         }
         return result;
+    }
+
+    @Override
+    public List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
+                                                                         String fromDate, String toDate) {
+        return null;
     }
 }

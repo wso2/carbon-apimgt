@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
+import org.wso2.carbon.apimgt.usage.client.bean.APIUsageByApplication;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
 import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
@@ -334,6 +335,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public ApiTopUsersListDTO getTopApiUsers(String apiName, String version, String tenantDomain, String fromDate,
             String toDate, int start, int limit) throws APIMgtUsageQueryServiceClientException {
+
         List<ApiTopUsersDTO> tenantFilteredTopUsersDTOs = getTopApiUsers(
                 APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, apiName, tenantDomain, version, fromDate,
                 toDate);
@@ -2472,6 +2474,89 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Error occurred while querying from Stream Processor ", e);
         }
         return result;
+    }
+
+    @Override
+    public List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
+                                                                         String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+
+        List<Result<APIUsageByApplication>> apiUsageByApplicationsResultList =
+                new ArrayList<Result<APIUsageByApplication>>();
+        try {
+            // Build the query.
+            StringBuilder apiUsageByAppQuery = new StringBuilder("from " +
+                    APIUsageStatisticsClientConstants.API_VERSION_PER_APP_AGG + " on ");
+
+            if (!APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(apiVersion)) {
+                apiUsageByAppQuery.append("(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' AND "
+                        + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion + "') ");
+            } else {
+                apiUsageByAppQuery.append("(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "') ");
+            }
+
+            if (fromDate != null && toDate != null) {
+                String granularity = APIUsageStatisticsClientConstants.SECONDS_GRANULARITY;
+                Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
+                        || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_HOURS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;
+                }
+                apiUsageByAppQuery.append("within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
+                        + "L per '" + granularity + "' select "
+                        + APIUsageStatisticsClientConstants.API_NAME + ", "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.APPLICATION_NAME + ", sum("
+                        + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_request_count group by "
+                        + APIUsageStatisticsClientConstants.API_NAME + ", "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.APPLICATION_NAME + ";");
+            }
+            // Invoke the rest api and get the results.
+            JSONObject apiUsageByAppResult = APIUtil.executeQueryOnStreamProcessor(
+                    APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP, apiUsageByAppQuery.toString());
+
+            // Create the api usage object and return.
+            long requestCount;
+            String api;
+            String version;
+            String appName;
+            if (apiUsageByAppResult != null) {
+                JSONArray jArray = (JSONArray) apiUsageByAppResult.get(
+                        APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                for (Object record : jArray) {
+                    JSONArray recordArray = (JSONArray) record;
+                    if (recordArray.size() == 4) {
+                        Result<APIUsageByApplication> result = new Result<APIUsageByApplication>();
+                        api = (String) recordArray.get(0);
+                        version = (String) recordArray.get(1);
+                        appName = (String) recordArray.get(2);
+                        requestCount = (Long) recordArray.get(3);
+
+                        APIUsageByApplication apiUsageByApplication = new APIUsageByApplication();
+                        apiUsageByApplication.setApiName(api);
+                        apiUsageByApplication.setApiVersion(version);
+                        apiUsageByApplication.setApplicationName(appName);
+                        apiUsageByApplication.setRequstCount(requestCount);
+
+                        result.setValues(apiUsageByApplication);
+                        result.setTableName(APIUsageStatisticsClientConstants.API_VERSION_PER_APP_AGG);
+                        result.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
+                        apiUsageByApplicationsResultList.add(result);
+                    }
+                }
+            }
+            return apiUsageByApplicationsResultList;
+        } catch (APIManagementException e) {
+            handleException("Error occurred while querying from Stream Processor.", e);
+        }
+        return new ArrayList<Result<APIUsageByApplication>>();
     }
 
     /**
