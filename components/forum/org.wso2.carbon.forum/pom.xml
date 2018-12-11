@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum</artifactId>
-        <version>6.4.94</version>
+        <version>6.4.95-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
