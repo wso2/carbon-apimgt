@@ -2478,8 +2478,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     @Override
     public List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
-                                                                         String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+           String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
 
         List<Result<APIUsageByApplication>> apiUsageByApplicationsResultList =
                 new ArrayList<Result<APIUsageByApplication>>();

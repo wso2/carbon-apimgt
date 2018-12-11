@@ -969,6 +969,5 @@ public abstract class APIUsageStatisticsClient {
      * @return List of ApiUsageByApplication objects.
      */
     public abstract List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
-                                                                                  String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException;
+                    String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException;
 }
