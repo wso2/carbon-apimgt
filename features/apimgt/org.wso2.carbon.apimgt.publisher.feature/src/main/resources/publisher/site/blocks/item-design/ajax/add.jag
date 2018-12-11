@@ -108,7 +108,7 @@ if(jagg.isCSRFTokenValid())
                         //released yet.
                         var apiDefinition = parseSwaggerDefinition(swagger);
 
-                        if(isSwaggerScopesValid(stringify(apiDefinition)) == false){
+                        if (isSwaggerScopesValid(stringify(apiDefinition)) == false) {
                             print({
                                 error: true,
                                 message: "Error when validating api scopes in swagger, Please check api scopes again"
@@ -173,7 +173,7 @@ if(jagg.isCSRFTokenValid())
                         //released yet.
                         var apiDefinition = parseSwaggerDefinition(swagger);
 
-                        if(isSwaggerScopesValid(stringify(apiDefinition)) == false){
+                        if (isSwaggerScopesValid(stringify(apiDefinition)) == false) {
                             print({
                                 error: true,
                                 message: "Error when validating api scopes in swagger, Please check api scopes again"
@@ -842,7 +842,7 @@ if(jagg.isCSRFTokenValid())
             var swagger = request.getParameter("swaggerDefinition");
             var apiDefinition = parseSwaggerDefinition(swagger);
 
-            if(isSwaggerScopesValid(stringify(apiDefinition)) == false){
+            if (isSwaggerScopesValid(stringify(apiDefinition)) == false) {
                 print({
                     error: true,
                     message: "Error when validating api scopes in swagger, Please check api scopes again"

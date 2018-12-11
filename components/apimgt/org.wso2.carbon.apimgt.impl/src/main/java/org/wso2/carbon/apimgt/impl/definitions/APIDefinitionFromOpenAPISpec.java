@@ -468,21 +468,21 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
             swaggerJson = (JSONObject) parser.parse(swagger);
             if (swaggerJson.get("paths") != null) {
                 JSONObject paths = (JSONObject) swaggerJson.get("paths");
-                for (Object o : paths.keySet()) {
-                    String uriTempVal = (String) o;
+                for (Object uriTempKey : paths.keySet()) {
+                    String uriTemp = (String) uriTempKey;
                     //if url template is a custom attribute "^x-" ignore.
-                    if (uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")) {
+                    if (uriTemp.startsWith("x-") || uriTemp.startsWith("X-")) {
                         continue;
                     }
-                    JSONObject path = (JSONObject) paths.get(uriTempVal);
+                    JSONObject path = (JSONObject) paths.get(uriTemp);
                     // Following code check is done to handle $ref objects supported by swagger spec
                     // See field types supported by "Path Item Object" in swagger spec.
                     if (path.containsKey("$ref")) {
                         continue;
                     }
 
-                    for (Object o1 : path.keySet()) {
-                        String httpVerb = (String) o1;
+                    for (Object httpVerbKey : path.keySet()) {
+                        String httpVerb = (String) httpVerbKey;
                         JSONObject operation = (JSONObject) path.get(httpVerb);
                         String operationScope = (String) operation.get(APIConstants.SWAGGER_X_SCOPE);
 
