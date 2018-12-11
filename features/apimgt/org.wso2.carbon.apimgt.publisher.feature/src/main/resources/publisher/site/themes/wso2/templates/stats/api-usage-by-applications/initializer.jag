@@ -12,10 +12,3 @@ jagg.initializer("stats/api-usage-by-applications", {
     }
 });
 %>
-
-
-
-
-
-
-
