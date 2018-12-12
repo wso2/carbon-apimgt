@@ -15,7 +15,7 @@ jagg.block("listing", {
     },
 
     getOutputs:function () {
-        var apis, result,query,error,message, mod,mode,length,user = jagg.getUser();
+        var apis, docsresult,query,error,message, mod,mode,length,user = jagg.getUser();
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
         query = request.getParameter("query");
@@ -38,6 +38,7 @@ jagg.block("listing", {
             apis = null;
             if (result.response != null) {
                 apis = result.response.apis;
+                docs = result.response.docs;
                 length = result.response.totalLength;
                 error = result.error;
                 message = result.message;
@@ -50,6 +51,7 @@ jagg.block("listing", {
             apis = null;
             if (result.response != null) {
                 apis = result.response.apis;
+                docs = null;
                 length = result.response.totalLength;
                 error = result.error;
                 message = result.message;
@@ -71,6 +73,7 @@ jagg.block("listing", {
 	var isPublishPermitted = jagg.getPublishPermitted().permitted;
         return {
             "apis":apis,
+            "docs":docs,
             "error":error,
             "message":message,
             "currentPage":currentPage,

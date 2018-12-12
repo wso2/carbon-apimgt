@@ -3845,6 +3845,67 @@ public class APIProviderHostObject extends ScriptableObject {
                     resultObj.put("totalLength", resultObj, result.get("length"));
                 }
 
+            } else if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                Set<API> apiSet = (Set<API>) result.get("apis");
+                Map<Documentation, API> docSet = (Map<Documentation, API>) result.get("docs");
+
+                if (apiSet != null && apiSet.size() > 0) {
+                    //List<API> searchedList = apiProvider.searchAPIs(searchTerm, searchType, providerName);
+                    Iterator it = apiSet.iterator();
+                    int i = 0;
+                    while (it.hasNext()) {
+                        NativeObject row = new NativeObject();
+                        Object apiObject = it.next();
+                        API api = (API) apiObject;
+                        APIIdentifier apiIdentifier = api.getId();
+                        row.put("name", row, apiIdentifier.getApiName());
+                        row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                        row.put("version", row, apiIdentifier.getVersion());
+                        row.put("status", row, checkValue(api.getStatus()));
+                        row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
+                        row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
+                        if (providerName != null) {
+                            row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
+                        }
+                        myn.put(i, myn, row);
+                        i++;
+                    }
+                    resultObj.put("apis", resultObj, myn);
+                }
+
+
+                if (docSet != null && docSet.size() > 0) {
+                    NativeObject row = new NativeObject();
+                    myn = new NativeArray(0);
+                    int i = 0;
+                    for (Map.Entry<Documentation, API> entry : docSet.entrySet()) {
+                        Documentation doc = entry.getKey();
+                        API api = entry.getValue();
+                        APIIdentifier apiIdentifier = api.getId();
+
+                        //NativeObject currentApi = new NativeObject();
+
+                        row.put("name", row, apiIdentifier.getApiName());
+                        row.put("provider", row,
+                                APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                        row.put("version", row, apiIdentifier.getVersion());
+                        row.put("status", row, checkValue(api.getStatus()));
+                        row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
+                        row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
+                        if (providerName != null) {
+                            row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
+                        }
+
+                        row.put("docName", row, doc.getName());
+                        row.put("docSummary", row, doc.getSummary());
+                        row.put("docSourceURL", row, doc.getSourceUrl());
+                        row.put("docFilePath", row, doc.getFilePath());
+
+                        myn.put(i, myn, row);
+                        i++;
+                    }
+                    resultObj.put("docs", resultObj, myn);
+                }
             } else {
                 Set<API> apiSet = (Set<API>) result.get("apis");
                 //List<API> searchedList = apiProvider.searchAPIs(searchTerm, searchType, providerName);

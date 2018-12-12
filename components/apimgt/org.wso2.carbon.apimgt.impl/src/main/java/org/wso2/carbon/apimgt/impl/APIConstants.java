@@ -475,6 +475,8 @@ public final class APIConstants {
 
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
     public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
+    public static final String API_OR_DOC_RXT_MEDIA_TYPE = "application/vnd.wso2-*+xml";
+    public static final String DOC_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
     public static final int TOP_TATE_MARGIN = 4;
 
     public static final class Permissions {
@@ -1290,6 +1292,7 @@ public final class APIConstants {
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+    public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1439,7 +1442,7 @@ public final class APIConstants {
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAG_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
-            API_STATUS.toLowerCase() };
+            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
     /**
