@@ -492,15 +492,12 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         return null;
     }
 
-    public Map<String, String> getApplicationAttributes(int applicationId) {
-
-        Map<String, String> applicationAttributes;
+    public Application getApplicationbyId(int applicationId) {
         try {
             Application application = dao.getApplicationById(applicationId);
-            applicationAttributes = application.getApplicationAttributes();
-            return applicationAttributes;
+            return application;
         } catch (APIManagementException e) {
-            log.error("Error in retrieving application attributes of application with id: " + applicationId);
+            log.error("Error in retrieving application with the id: " + applicationId);
             return null;
         }
     }
