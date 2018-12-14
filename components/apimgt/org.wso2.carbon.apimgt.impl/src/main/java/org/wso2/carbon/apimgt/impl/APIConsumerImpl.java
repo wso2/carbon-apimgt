@@ -4065,13 +4065,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (apiMgtDAO.getSubscriber(userId) != null) {
             isSubscribeValid = true;
         } else {
-            throw new APIManagementException(userId +
-                    " is not a subscriber");
+            return false;
         }
         return isSubscribeValid;
     }
 
-    @Override
     public boolean updateApplicationOwner(String userId, Application application) throws APIManagementException {
         boolean isAppUpdated = false;
         String consumerKey;
@@ -4082,7 +4080,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (oldTenantDomain.equals(newTenantDomain)) {
             if (isSubscriberValid(userId)) {
                 String applicationName = application.getName();
-                if (!APIUtil.isApplicationExist(userId, applicationName, application.getGroupId())) {
+                if (!APIUtil.doesUserOwnApplication(userId, applicationName)) {
                     for (int i = 0; i < application.getKeys().size(); i++) {
                         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                              /* retrieving OAuth application information for specific consumer key */
@@ -4105,10 +4103,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     throw new APIManagementException("Unable to update application owner to " + userId +
                             " as this user has an application with the same name. Update owner to another user.");
                 }
+            } else {
+                throw new APIManagementException(userId + " is not a subscriber");
             }
         } else {
             throw new APIManagementException("Unable to update application owner to " +
-                    userId + " as this user does not belong to "+oldTenantDomain+" domain.");
+                    userId + " as this user does not belong to " + oldTenantDomain + " domain.");
         }
         if (isAppUpdated) {
             isAppUpdated = apiMgtDAO.updateApplicationOwner(userId, application);

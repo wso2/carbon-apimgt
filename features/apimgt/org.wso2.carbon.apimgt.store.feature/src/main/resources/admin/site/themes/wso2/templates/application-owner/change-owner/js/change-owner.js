@@ -11,7 +11,9 @@ var changeOwner = function () {
         applicationName:$('#applicationName').val(),
         }, function (result) {
             if (result.error == false) {
-                jagg.message({content:i18n.t("Successfully updated owner"),type:"info",cbk : function() {
+                jagg.message({content:i18n.t("Successfully updated owner of the application "
+                + document.getElementById('applicationName').value + " to "
+                + document.getElementById('applicationOwner').value),type:"info",cbk : function() {
                     $('#add-tier-btn').buttonLoader('stop');
                }});
             } else {

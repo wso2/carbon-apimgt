@@ -212,6 +212,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public OAuthApplicationInfo  updateApplicationOwner(OAuthAppRequest appInfoDTO, String owner)
             throws APIManagementException {
         OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
+        String userId = oAuthApplicationInfo.getAppOwner();
 
         try {
             String applicationName = oAuthApplicationInfo.getClientName();
@@ -221,7 +222,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         .split(",");
             }
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = updateOAuthApplicationOwner(
-                    oAuthApplicationInfo.getAppOwner(), owner, applicationName,
+                    userId, owner, applicationName,
                     oAuthApplicationInfo.getCallBackURL(),oAuthApplicationInfo.getClientId(), grantTypes);
             OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
             newAppInfo.setAppOwner(applicationInfo.getAppOwner());
@@ -231,7 +232,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             newAppInfo.setJsonString(applicationInfo.getJsonString());
             return newAppInfo;
         } catch (Exception e) {
-            handleException("Error occurred while updating OAuth application owner : ", e);
+            handleException("Error occurred while updating OAuth application owner to " + userId, e);
         }
         return null;
     }
