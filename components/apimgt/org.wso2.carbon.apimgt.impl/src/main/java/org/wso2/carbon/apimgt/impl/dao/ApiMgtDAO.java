@@ -3928,7 +3928,7 @@ public class ApiMgtDAO {
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
-    public boolean doesUserOwnApplication(String appName, String username) throws APIManagementException {
+    public boolean IsApplicationOwnedBySubscriber(String appName, String username) throws APIManagementException {
         if (username == null) {
             return false;
         }
@@ -3964,7 +3964,7 @@ public class ApiMgtDAO {
         }
         return false;
     }
-    
+
     /**
      * @param username Subscriber
      * @return ApplicationId for given appname.

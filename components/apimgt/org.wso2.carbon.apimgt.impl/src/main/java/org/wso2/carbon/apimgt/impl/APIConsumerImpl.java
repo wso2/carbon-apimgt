@@ -4080,7 +4080,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (oldTenantDomain.equals(newTenantDomain)) {
             if (isSubscriberValid(userId)) {
                 String applicationName = application.getName();
-                if (!APIUtil.doesUserOwnApplication(userId, applicationName)) {
+                if (!APIUtil.IsApplicationOwnedBySubscriber(userId, applicationName)) {
                     for (int i = 0; i < application.getKeys().size(); i++) {
                         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                              /* retrieving OAuth application information for specific consumer key */
