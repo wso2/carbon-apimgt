@@ -127,7 +127,7 @@ public class APIClientGenerationManager {
             }
             Registry requiredRegistry = null;
             try {
-                requiredRegistry = getGovernanceUserRegistry(apiProvider, tenantId);
+                requiredRegistry = getGovernanceUserRegistry(MultitenantUtils.getTenantAwareUsername(apiProvider), tenantId);
             } catch (RegistryException e) {
                 handleSDKGenException("Error occurred when retrieving the tenant registry for tenant : " +
                         requestedTenant + " tenant ID : " + tenantId, e);
