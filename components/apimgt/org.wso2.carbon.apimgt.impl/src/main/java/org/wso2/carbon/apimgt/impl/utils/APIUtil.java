@@ -5665,9 +5665,9 @@ public final class APIUtil {
      * @return true if application is available for the subscriber
      * @throws APIManagementException if failed to get applications for given subscriber
      */
-    public static boolean IsApplicationOwnedBySubscriber(String subscriber, String applicationName)
+    public static boolean isApplicationOwnedBySubscriber(String subscriber, String applicationName)
             throws APIManagementException {
-        return ApiMgtDAO.getInstance().IsApplicationOwnedBySubscriber(applicationName, subscriber);
+        return ApiMgtDAO.getInstance().isApplicationOwnedBySubscriber(applicationName, subscriber);
     }
 
     public static String getHostAddress() {
