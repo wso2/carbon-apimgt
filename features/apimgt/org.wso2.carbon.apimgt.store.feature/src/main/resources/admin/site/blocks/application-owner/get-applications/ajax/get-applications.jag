@@ -39,11 +39,11 @@ include("/jagg/jagg.jag");
             return;
         }
         var sortColumn = null;
-        if(columnId == 0){
+        if (columnId == 0) {
             sortColumn = "NAME";
-        }else if(columnId == 1){
+        } else if (columnId == 1) {
             sortColumn = "CREATED_BY";
-        }else{
+        } else {
             sortColumn = "NAME";
         }
         if (sortOrder.equals("desc")) {

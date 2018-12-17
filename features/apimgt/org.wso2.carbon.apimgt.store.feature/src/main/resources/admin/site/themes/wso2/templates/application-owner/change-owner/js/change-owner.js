@@ -43,12 +43,12 @@ function validateInputCharactors(text, element, errorMsg){
     var elementId = element.attr('id');
     var illegalChars = /([~!&@#;%^*+={}\|\\<>\"\',])/;     
     text = text.trim();
-    if(illegalChars.test(text)){
+    if (illegalChars.test(text)) {
         element.css("border", "1px solid red");
         $('#label'+elementId).remove();
         element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
         return false;
-    }else{
+    } else {
         $('#label'+elementId).remove();
         element.css("border", "1px solid #cccccc");
         return true;
@@ -64,11 +64,11 @@ function validateInputs(){
     var applicationNameTxt = applicationName.val();
     var errorHasSpacesMsg = $('#errorMessageSpaces').val();
  
-    if (!validateInput(applicationNameTxt,applicationName,requiredMsg)){
+    if (!validateInput(applicationNameTxt,applicationName,requiredMsg)) {
         return false;
     }
  
-    if (!validateInputCharactors(applicationNameTxt,applicationName,illegalChars)){
+    if (!validateInputCharactors(applicationNameTxt,applicationName,illegalChars)) {
         return false;
     }
  
@@ -84,19 +84,19 @@ function validateInputs(){
                  var attributeName = attributeElement.val();
                  var attributeValue = attributeValueElement.val();
  
-                 if(!validateAttributesInput(attributeName, attributeElement, requiredMsg, invalidErrorMsg)){
+                 if (!validateAttributesInput(attributeName, attributeElement, requiredMsg, invalidErrorMsg)) {
                      isInvalidAttribute = true;
                      return false;
                  }
                  // We do not validate the attribute value input as it can be empty.
              });
-             if(isInvalidAttribute){
+             if (isInvalidAttribute) {
                  return false;
              }
              return true;
      };
  
- function validateForSpaces(text, element, errorMsg){
+ function validateForSpaces(text, element, errorMsg) {
      var elementId = element.attr('id');
      text = text.trim();
      if (text.indexOf(' ') >= 0) {
