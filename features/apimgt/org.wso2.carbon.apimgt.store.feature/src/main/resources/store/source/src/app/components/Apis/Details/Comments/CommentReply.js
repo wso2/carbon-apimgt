@@ -23,10 +23,8 @@ import AccountBox from '@material-ui/icons/AccountBox';
 import Grid from '@material-ui/core/Grid';
 import Alert from '../../../Shared/Alert';
 import ConfirmDialog from '../../../Shared/ConfirmDialog';
-import CommentAdd from './CommentAdd';
 import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
-import CommentReply from './CommentReply';
 import API from '../../../../data/api';
 
 const styles = theme => ({
@@ -44,9 +42,6 @@ const styles = theme => ({
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
         marginTop: 2,
-        width: '100%',
-        whiteSpace: 'pre-wrap',
-        overflowWrap: 'break-word',
     },
     root: {
         marginTop: 20,
@@ -65,29 +60,26 @@ const styles = theme => ({
 });
 
 /**
-   * Display a particular comment and details
-   * @class Comment
-   * @extends {React.Component}
-   */
-class Comment extends React.Component {
+ * Display a particular comment and details
+ * @class CommentReply
+ * @extends {React.Component}
+ */
+class CommentReply extends React.Component {
     /**
      * Creates an instance of Comment
      * @param {*} props properies passed by the parent element
-     * @memberof Comment
+     * @memberof CommentReply
      */
     constructor(props) {
         super(props);
         this.state = {
             openDialog: false,
-            replyIndex: -1,
             editIndex: -1,
             deleteComment: null,
         };
         this.handleClickDeleteComment = this.handleClickDeleteComment.bind(this);
         this.handleShowEdit = this.handleShowEdit.bind(this);
-        this.handleShowReply = this.handleShowReply.bind(this);
         this.handleClickOpen = this.handleClickOpen.bind(this);
-        this.showAddComment = this.showAddComment.bind(this);
         this.showEditComment = this.showEditComment.bind(this);
         this.handleConfirmDialog = this.handleConfirmDialog.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -97,7 +89,7 @@ class Comment extends React.Component {
 
     /**
      * Filters the comments to be remained
-     * @memberof Comment
+     * @memberof CommentReply
      */
     filterRemainingComments(commentToFilter) {
         const { deleteComment } = this.state;
@@ -106,7 +98,7 @@ class Comment extends React.Component {
 
     /**
      * Filters the comments to be deleted
-     * @memberof Comment
+     * @memberof CommentReply
      */
     filterCommentToDelete(commentToFilter) {
         const { deleteComment } = this.state;
@@ -114,21 +106,9 @@ class Comment extends React.Component {
     }
 
     /**
-     * Shows the component to add a new comment
-     * @param {any} index Index of comment in the array
-     * @memberof Comment
-     */
-    showAddComment(index) {
-        const { editIndex } = this.state;
-        if (editIndex === -1) {
-            this.setState({ replyIndex: index });
-        }
-    }
-
-    /**
      * Shows the component to edit a comment
      * @param {any} index Index of comment in the array
-     * @memberof Comment
+     * @memberof CommentReply
      */
     showEditComment(index) {
         const { editIndex } = this.state;
@@ -140,25 +120,16 @@ class Comment extends React.Component {
     /**
      * Hides the component to edit a comment
      * @param {any} index Index of comment in the array
-     * @memberof Comment
+     * @memberof CommentReply
      */
     handleShowEdit() {
         this.setState({ editIndex: -1 });
     }
 
     /**
-     * Hides the component to add a new comment
-     * @param {any} index Index of comment in the array
-     * @memberof Comment
-     */
-    handleShowReply() {
-        this.setState({ replyIndex: -1 });
-    }
-
-    /**
      * Shows the confimation dialog to delete a comment
      * @param {Object} comment Comment that has to be deleted
-     * @memberof Comment
+     * @memberof CommentReply
      */
     handleClickOpen(comment) {
         const { editIndex } = this.state;
@@ -169,7 +140,7 @@ class Comment extends React.Component {
 
     /**
      * Hides the confimation dialog to delete a comment
-     * @memberof Comment
+     * @memberof CommentReply
      */
     handleClose() {
         this.setState({ openDialog: false });
@@ -178,10 +149,10 @@ class Comment extends React.Component {
     /**
      * Handles the Confirm Dialog
      * @param {*} bool properies passed by the Confirm Dialog
-     * @memberof Comment
+     * @memberof CommentReply
      */
-    handleConfirmDialog(message) {
-        if (message) {
+    handleConfirmDialog(message){
+        if (message){
             this.handleClickDeleteComment();
         } else {
             this.handleClose();
@@ -190,7 +161,7 @@ class Comment extends React.Component {
 
     /**
      * Handles deleting a comment
-     * @memberof Comment
+     * @memberof CommentReply
      */
     handleClickDeleteComment() {
         const Api = new API();
@@ -225,61 +196,54 @@ class Comment extends React.Component {
     /**
      * Render method of the component
      * @returns {React.Component} Comment html component
-     * @memberof Comment
+     * @memberof CommentReply
      */
     render() {
-        const {
-            classes, comments, apiId, allComments, commentsUpdate,
-        } = this.props;
-        const { editIndex, replyIndex, openDialog } = this.state;
+        const { classes, comments, apiId, allComments, commentsUpdate } = this.props;
+        const { editIndex, openDialog } = this.state;
         return (
             [comments
-      && comments.slice(0).reverse().map((comment, index) => (
-          <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
-              <Grid container spacing={8} className={classes.root}>
-                  <Grid item>
-                      <AccountBox className={classes.commentIcon} />
-                  </Grid>
-                  <Grid item xs zeroMinWidth>
-                      <Typography noWrap className={classes.commentText} variant='body2'>
-                          {comment.createdBy}
-                      </Typography>
+            && comments.map((comment, index) => (
+                <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
+                    <Grid container spacing={8} className={classes.root}>
+                        <Grid item>
+                            <AccountBox className={classes.commentIcon} />
+                        </Grid>
+                        <Grid item xs zeroMinWidth>
+                            <Typography noWrap className={classes.commentText} variant='body2'>
+                                {comment.createdBy}
+                            </Typography>
 
-                      {index !== editIndex
-              && (
-                  <Typography className={classes.commentText}>
-                      {comment.commentText}
-                  </Typography>
-              )
-                      }
+                            {index !== editIndex
+                            && (
+                                <Typography className={classes.commentText}>
+                                    {comment.commentText}
+                                </Typography>
+                            )
+                            }
 
-                      {(index === editIndex)
-              && <CommentEdit apiId={apiId} allComments={allComments} commentsUpdate={commentsUpdate} comment={comment} toggleShowEdit={this.handleShowEdit} />
-                      }
+                            {editIndex === index && null}
 
-                      <CommentOptions classes={classes} comment={comment} editIndex={editIndex} index={index} showAddComment={this.showAddComment} handleClickOpen={this.handleClickOpen} showEditComment={this.showEditComment} />
+                            {(index === editIndex)
+                            && <CommentEdit apiId={apiId} allComments={allComments} commentsUpdate={commentsUpdate} comment={comment} toggleShowEdit={this.handleShowEdit} />
+                            }
+                            <CommentOptions classes={classes} comment={comment} editIndex={editIndex} index={index} showAddComment={this.showAddComment} handleClickOpen={this.handleClickOpen} showEditComment={this.showEditComment} />
+                        </Grid>
+                    </Grid>
+                </div>
 
-                      {(index === replyIndex)
-              && <CommentAdd apiId={apiId} parentCommentId={comment.commentId} allComments={allComments} commentsUpdate={commentsUpdate} toggleShowReply={this.handleShowReply} cancelButton />
-                      }
-                      {comment.replies.length !== 0
-              && <CommentReply classes={classes} apiId={apiId} comments={comment.replies} commentsUpdate={commentsUpdate} allComments={allComments} />}
-                  </Grid>
-              </Grid>
-          </div>
-
-      )),
-                <ConfirmDialog key='key-dialog' labelCancel='Cancel' title='Confirm Delete' message='Are you sure you want to delete this comment?' labelOk='Yes' callback={this.handleConfirmDialog} open={openDialog} />,
+            )),
+                <ConfirmDialog key='key-dialog' labelCancel={'Cancel'} title={'Confirm Delete'} message={'Are you sure you want to delete this comment?'} labelOk={'Yes'} callback={this.handleConfirmDialog} open={openDialog}/>,
             ]
         );
     }
 }
 
-Comment.defaultProps = {
+CommentReply.defaultProps = {
     api: null,
 };
 
-Comment.propTypes = {
+CommentReply.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     apiId: PropTypes.string.isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
@@ -287,4 +251,4 @@ Comment.propTypes = {
     comments: PropTypes.instanceOf(Array).isRequired,
 };
 
-export default withStyles(styles)(Comment);
+export default withStyles(styles)(CommentReply);

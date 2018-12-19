@@ -5,37 +5,37 @@ import Credentials from './Credentials/Credentials';
 import Comments from './Comments/Comments';
 
 const styles = theme => ({
-  root: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
-  },
+    root: {
+        flexGrow: 1,
+        backgroundColor: theme.palette.background.paper,
+    },
 });
 
 class Overview extends React.Component {
   state = {
-    value: 0,
+      value: 0,
   };
 
   handleExpandClick = () => {
-    this.setState(state => ({ expanded: !state.expanded }));
+      this.setState(state => ({ expanded: !state.expanded }));
   };
-  
+
 
   render() {
-    const { classes } = this.props;
-    const { value } = this.state;
-
-    return (
-        <React.Fragment>
-            <Credentials  />
-            <Comments  />
-        </React.Fragment>
-    );
+      const { classes, api } = this.props;
+      const { value } = this.state;
+      const apiId = this.props.match.params.api_uuid;
+      return (
+          <React.Fragment>
+              <Credentials />
+              <Comments api={api} apiId={apiId} />
+          </React.Fragment>
+      );
   }
 }
 
 Overview.propTypes = {
-  classes: PropTypes.object.isRequired,
+    classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(Overview);
