@@ -184,6 +184,7 @@ class CommentAdd extends React.Component {
                         className={classes.textField}
                         margin='normal'
                         placeholder='Write a comment'
+                        name='commentTextField'
                         inputProps={{ maxLength: theme.custom.maxCommentLength }}
                         value={commentText}
                         onChange={this.inputChange}

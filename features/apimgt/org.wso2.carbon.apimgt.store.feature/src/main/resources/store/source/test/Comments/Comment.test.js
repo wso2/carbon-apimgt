@@ -21,6 +21,7 @@ import Comment from '../../src/app/components/Apis/Details/Comments/Comment';
 import CommentEdit from '../../src/app/components/Apis/Details/Comments/CommentEdit';
 import CommentOptions from '../../src/app/components/Apis/Details/Comments/CommentOptions';
 import CommentReply from '../../src/app/components/Apis/Details/Comments/CommentReply';
+import ConfirmDialog from '../../src/app/components/Shared/ConfirmDialog';
 
 const CommentUnwrapped = unwrap(Comment);
 
@@ -90,6 +91,10 @@ describe('<Comment /> rendering', () => {
 
     it('should render a <CommentOptions /> component', () => {
         expect(wrapper.find(CommentOptions)).toHaveLength(1);
+    });
+
+    it('should render a <ConfirmDialog /> component', () => {
+        expect(wrapper.find(ConfirmDialog)).toHaveLength(1);
     });
 
     it('should not render a <CommentReply /> component when there are no replies', () => {

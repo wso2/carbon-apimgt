@@ -275,10 +275,6 @@ class Comment extends React.Component {
     }
 }
 
-Comment.defaultProps = {
-    api: null,
-};
-
 Comment.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     apiId: PropTypes.string.isRequired,

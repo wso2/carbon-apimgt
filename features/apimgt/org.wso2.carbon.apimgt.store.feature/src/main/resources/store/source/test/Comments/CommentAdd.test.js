@@ -37,6 +37,8 @@ function createTestProps(props) {
 }
 
 let wrapper;
+const commentText = 'New comment';
+const category = 'Another category';
 const props = createTestProps();
 
 beforeEach(() => {
@@ -52,7 +54,7 @@ describe('<CommentAdd /> rendering', () => {
         expect(wrapper.find(Select)).toHaveLength(1);
     });
 
-    it('should render a 3 <MenuItem /> s to select the categories', () => {
+    it('should render 3 <MenuItem /> s to select the categories', () => {
         expect(wrapper.find(Select).dive().find(MenuItem)).toHaveLength(3);
     });
 
@@ -83,5 +85,20 @@ describe('<CommentAdd /> interactions', () => {
         wrapper.instance().handleClickCancel = mockedHandleClickCancel;
         wrapper.find(Button).last().props().onClick();
         expect(mockedHandleClickCancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('should change the state commentText and currentlength when the onChange function of the TextField is invoked', () => {
+        wrapper.find(TextField).simulate('change',
+            { target: { value: commentText } }
+        );
+        expect(wrapper.state('commentText')).toEqual(commentText);
+        expect(wrapper.state('currentLength')).toEqual(commentText.length);
+    });
+
+    it('should change the state commentText and currentlength when the onChange function of the Select is invoked', () => {
+        wrapper.find(Select).simulate('change',
+            { target: { value: category } }
+        );
+        expect(wrapper.state('category')).toEqual(category);
     });
 });

@@ -20,6 +20,7 @@ import { Typography } from '@material-ui/core';
 import CommentEdit from '../../src/app/components/Apis/Details/Comments/CommentEdit';
 import CommentOptions from '../../src/app/components/Apis/Details/Comments/CommentOptions';
 import CommentReply from '../../src/app/components/Apis/Details/Comments/CommentReply';
+import ConfirmDialog from "../../src/app/components/Shared/ConfirmDialog";
 
 const CommentReplyUnwrapped = unwrap(CommentReply);
 
@@ -93,7 +94,12 @@ describe('<CommentReply /> rendering', () => {
         expect(wrapper.find(CommentOptions)).toHaveLength(1);
     });
 
-    it('should not render a <CommentReply /> component when there are no replies', () => {
+    it('should not render a <CommentReply /> component because replies cannot have replies', () => {
         expect(wrapper.find(CommentReply)).toHaveLength(0);
     });
+
+    it('should render a <ConfirmDialog /> component', () => {
+        expect(wrapper.find(ConfirmDialog)).toHaveLength(1);
+    });
+
 });

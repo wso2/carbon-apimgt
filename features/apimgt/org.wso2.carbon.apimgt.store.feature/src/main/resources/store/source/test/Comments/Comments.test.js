@@ -1,5 +1,6 @@
 import { unwrap } from '@material-ui/core/test-utils';
 import { Typography } from '@material-ui/core';
+import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleOutlined';
 import Comments from '../../src/app/components/Apis/Details/Comments/Comments';
 import Comment from '../../src/app/components/Apis/Details/Comments/Comment';
@@ -59,4 +60,40 @@ describe('<Comments /> rendering', () => {
         wrapper.setState({ startCommentsToDisplay: 1 });
         expect(wrapper.find(Typography)).toHaveLength(3);
     });
+});
+
+describe('<Comments /> interactions', () => {
+    it('should change the state \'expanded\' when the ArrowDropDownCircleOutlined is clicked', () => {
+        const stateBefore = wrapper.state('expanded');
+        wrapper.find(ArrowDropDownCircleOutlined).simulate('click');
+        expect(wrapper.state('expanded')).toEqual(!stateBefore);
+    });
+
+    it('should change the state \'expanded\' when the Title is clicked', () => {
+        const stateBefore = wrapper.state('expanded');
+        wrapper.find(Typography).first().simulate('click');
+        expect(wrapper.state('expanded')).toEqual(!stateBefore);
+    });
+
+    it('should not change the state startCommentsToDisplay when the load more comments Arrow is clicked when number of comments is equal to commentsLimit', () => {
+        const stateBefore = wrapper.state('startCommentsToDisplay');
+        wrapper.setState({ startCommentsToDisplay: theme.custom.commentsLimit });
+        wrapper.find(ArrowDropDown).first().simulate('click');
+        expect(wrapper.state('startCommentsToDisplay')).toEqual(stateBefore);
+    });
+
+    it('should not change the state startCommentsToDisplay when the load more comments Arrow is clicked when number of comments is less than  the commentsLimit', () => {
+        const stateBefore = wrapper.state('startCommentsToDisplay');
+        wrapper.setState({ startCommentsToDisplay: theme.custom.commentsLimit - 1 });
+        wrapper.find(ArrowDropDown).first().simulate('click');
+        expect(wrapper.state('startCommentsToDisplay')).toEqual(stateBefore);
+    });
+
+    it('should change the state startCommentsToDisplay when the load more comments Arrow is clicked when number of comments is greater than the commentsLimit', () => {
+        const stateBefore = wrapper.state('startCommentsToDisplay');
+        wrapper.setState({ startCommentsToDisplay: theme.custom.commentsLimit + 1 });
+        wrapper.find(ArrowDropDown).first().simulate('click');
+        expect(wrapper.state('startCommentsToDisplay')).toEqual(stateBefore + 1);
+    });
+
 });
