@@ -69,7 +69,6 @@ ShallowWrapper {
           }
           margin="normal"
           multiline={true}
-          name="commentTextField"
           onChange={[Function]}
           placeholder="Write a comment"
           required={false}
@@ -150,7 +149,6 @@ ShallowWrapper {
             }
             margin="normal"
             multiline={true}
-            name="commentTextField"
             onChange={[Function]}
             placeholder="Write a comment"
             required={false}
@@ -303,7 +301,6 @@ ShallowWrapper {
             },
             "margin": "normal",
             "multiline": true,
-            "name": "commentTextField",
             "onChange": [Function],
             "placeholder": "Write a comment",
             "required": false,
@@ -469,7 +466,6 @@ ShallowWrapper {
             }
             margin="normal"
             multiline={true}
-            name="commentTextField"
             onChange={[Function]}
             placeholder="Write a comment"
             required={false}
@@ -550,7 +546,6 @@ ShallowWrapper {
               }
               margin="normal"
               multiline={true}
-              name="commentTextField"
               onChange={[Function]}
               placeholder="Write a comment"
               required={false}
@@ -703,7 +698,6 @@ ShallowWrapper {
               },
               "margin": "normal",
               "multiline": true,
-              "name": "commentTextField",
               "onChange": [Function],
               "placeholder": "Write a comment",
               "required": false,

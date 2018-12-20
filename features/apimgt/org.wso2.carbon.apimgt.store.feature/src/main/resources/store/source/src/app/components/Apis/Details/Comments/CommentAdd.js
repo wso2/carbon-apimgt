@@ -37,7 +37,7 @@ const styles = theme => ({
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing.unit * 2,
         paddingTop: theme.spacing.unig,
-        marginTop: 10,
+        marginTop: theme.spacing.unit * 2,
     },
     textField: {
         marginTop: 0,
@@ -184,7 +184,6 @@ class CommentAdd extends React.Component {
                         className={classes.textField}
                         margin='normal'
                         placeholder='Write a comment'
-                        name='commentTextField'
                         inputProps={{ maxLength: theme.custom.maxCommentLength }}
                         value={commentText}
                         onChange={this.inputChange}

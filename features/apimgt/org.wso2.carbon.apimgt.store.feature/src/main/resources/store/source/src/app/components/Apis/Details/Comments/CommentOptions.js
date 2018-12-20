@@ -30,28 +30,13 @@ const styles = theme => ({
     },
     time: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: 3,
-    },
-    commentIcon: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
-    },
-    commentText: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: 2,
-    },
-    root: {
-        marginTop: 20,
+        marginTop: theme.spacing.unit * 0.3,
     },
     verticalSpace: {
-        marginTop: 1,
+        marginTop: theme.spacing.unit * 0.2,
     },
     disable: {
-        color: '#D3D3D3',
-    },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unig,
+        color: theme.custom.disableColor,
     },
 });
 

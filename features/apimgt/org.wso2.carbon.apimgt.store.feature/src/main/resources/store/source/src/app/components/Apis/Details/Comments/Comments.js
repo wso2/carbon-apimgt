@@ -32,8 +32,8 @@ const styles = theme => ({
     root: {
         display: 'flex',
         alignItems: 'center',
-        paddingTop: 8,
-        paddingBottom: 8,
+        paddingTop: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing.unit * 2,
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
@@ -48,7 +48,7 @@ const styles = theme => ({
         cursor: 'pointer',
     },
     verticalSpace: {
-        marginTop: 20,
+        marginTop: theme.spacing.unit * 0.2,
     },
     loadMoreLink: {
         textDecoration: 'underline',

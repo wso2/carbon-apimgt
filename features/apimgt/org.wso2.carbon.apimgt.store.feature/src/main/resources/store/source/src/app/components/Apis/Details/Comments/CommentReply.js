@@ -32,25 +32,18 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.default),
         cursor: 'pointer',
     },
-    time: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: 3,
-    },
     commentIcon: {
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: 2,
+        marginTop: theme.spacing.unig,
+        width: '100%',
+        whiteSpace: 'pre-wrap',
+        overflowWrap: 'break-word',
     },
     root: {
-        marginTop: 20,
-    },
-    verticalSpace: {
-        marginTop: 1,
-    },
-    disable: {
-        color: '#D3D3D3',
+        marginTop: theme.spacing.unit * 2.5,
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,

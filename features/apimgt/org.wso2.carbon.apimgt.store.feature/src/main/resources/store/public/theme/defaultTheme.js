@@ -29,6 +29,7 @@ const Configurations = {
             },
             custom: {
                 starColor: '#f2c73a',
+                disableColor: '#D3D3D3',
                 leftMenuWidth: 120,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
@@ -75,6 +76,7 @@ const Configurations = {
             },
             custom: {
                 starColor: '#f2c73a',
+                disableColor: '#D3D3D3',
                 leftMenuWidth: 120,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
