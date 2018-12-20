@@ -134,7 +134,7 @@ public class RegularExpressionProtector extends AbstractMediator {
             tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         if (!allowedTenantsList.contains(tenantDomain) &&
-                !tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).equals(tenantDomain)) {
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
                     "This tenant is not allowed to use Regular Expression Threat Protector mediator");
             return false;
