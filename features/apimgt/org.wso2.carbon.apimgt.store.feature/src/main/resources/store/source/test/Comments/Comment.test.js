@@ -81,6 +81,10 @@ beforeEach(() => {
 });
 
 describe('<Comment /> rendering', () => {
+    it('renders correctly', () => {
+        expect(wrapper).toMatchSnapshot();
+    });
+
     it('should render 2 <Typography /> s to display the username and the comment text', () => {
         expect(wrapper.find(Typography)).toHaveLength(2);
     });

@@ -18,9 +18,17 @@
 import { unwrap } from '@material-ui/core/test-utils';
 import { Typography } from '@material-ui/core';
 import CommentOptions from '../../src/app/components/Apis/Details/Comments/CommentOptions';
+import AuthManager from '../../src/app/data/AuthManager';
 
 const CommentOptionsUnwrapped = unwrap(CommentOptions);
-let reply, comment;
+let reply; let
+    comment;
+const user = {
+    expiryTime: '2018-12-16T17:38:24.193Z',
+    name: 'admin',
+    remember: false,
+    scopes: ['openid', 'apim:api_delete', 'apim:api_publish', 'apim:external_services_discover'],
+};
 
 /**
  * Initialize common properties to be passed
@@ -37,7 +45,7 @@ function createTestProps(props) {
         createdBy: 'admin',
         lastUpdatedTime: '2018-09-27T11:37:03.570Z',
         lastUpdatedBy: 'admin',
-        replies: []
+        replies: [],
     };
 
     comment = {
@@ -50,7 +58,7 @@ function createTestProps(props) {
         createdBy: 'admin',
         lastUpdatedTime: '2018-09-27T10:37:03.570Z',
         lastUpdatedBy: 'admin',
-        replies: [reply]
+        replies: [reply],
     };
 
     return {
@@ -62,18 +70,24 @@ function createTestProps(props) {
         showEditComment: jest.fn(),
         theme: { custom: { maxCommentLength: 1300 } },
         ...props,
-    }
+    };
 }
 
 let wrapper;
 const props = createTestProps();
 
 beforeEach(() => {
-    wrapper = shallow(<CommentOptionsUnwrapped {...props} /> );
+    wrapper = shallow(<CommentOptionsUnwrapped {...props} />);
 });
 
 describe('<CommentOptions /> rendering', () => {
+    it('renders correctly', () => {
+        expect(wrapper).toMatchSnapshot();
+    });
+
     it('should render a <Typography /> to type the comment', () => {
+        AuthManager.setUser(user, 'environment');
+        console.log(AuthManager.getUser());
         expect(wrapper.find(Typography)).toHaveLength(1);
     });
 });

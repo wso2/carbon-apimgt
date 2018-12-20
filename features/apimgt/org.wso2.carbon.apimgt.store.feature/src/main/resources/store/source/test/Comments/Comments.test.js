@@ -52,6 +52,10 @@ beforeAll(() => {
 
 
 describe('<Comments /> rendering', () => {
+    it('renders correctly', () => {
+        expect(wrapper).toMatchSnapshot();
+    });
+
     it('should render a <ArrowDropDownCircleOutlined /> with the title of the section - Comments', () => {
         expect(wrapper.find(ArrowDropDownCircleOutlined)).toHaveLength(1);
     });

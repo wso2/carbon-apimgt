@@ -46,6 +46,10 @@ beforeEach(() => {
 });
 
 describe('<CommentAdd /> rendering', () => {
+    it('renders correctly', () => {
+        expect(wrapper).toMatchSnapshot();
+    });
+
     it('should render a <TextField /> to type the comment', () => {
         expect(wrapper.find(TextField)).toHaveLength(1);
     });
