@@ -1202,6 +1202,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             artifactManager.updateGenericArtifact(updateApiArtifact);
+
+            //update api status in document artifacts as well if there are any associated documents.
+            updateAPIStatusInDocumentArtifacts(api);
+
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance
             String apiStatus = api.getStatus().toUpperCase();
@@ -2537,6 +2541,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility, authorizedRoles,contentPath, registry);
+
+            //write inline content to new rxt field too
+            docArtifact.setAttribute(APIConstants.DOC_INLINE_CONTENT, text);
+            artifactManager.updateGenericArtifact(docArtifact);
         } catch (RegistryException e) {
             String msg = "Failed to add the documentation content of : "
                     + documentationName + " of API :" + identifier.getApiName();
@@ -5948,6 +5956,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     "Registry Exception while trying to check the access control restriction of API " + identifier
                             .getApiName(), e);
         }
+    }
+
+    private void updateAPIStatusInDocumentArtifacts(API api)
+            throws RegistryException, APIManagementException {
+
+        String apiPath = APIUtil.getAPIPath(api.getId());
+        Association[] docAssociations = registry.getAssociations(apiPath, APIConstants.DOCUMENTATION_ASSOCIATION);
+
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
+
+        for (Association doc : docAssociations) {
+            String documentPath = doc.getDestinationPath();
+            Resource docResource = registry.get(documentPath);
+            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
+
+            docArtifact.setAttribute("overview_apiStatus", api.getStatus());
+            artifactManager.updateGenericArtifact(docArtifact);
+        }
+
     }
 
 }

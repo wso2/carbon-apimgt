@@ -1925,8 +1925,7 @@ public abstract class AbstractAPIManager implements APIManager {
         // Filtering the queries related with custom properties
         for (String query : searchQueries) {
             if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX) ||
-                    searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX) ||
-                        searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                    searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
                 subQuery = query;
                 break;
             }
@@ -2003,8 +2002,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             } else if (subQuery != null && subQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
                 result = searchAPIsByURLPattern(userRegistry, subQuery.split("=")[1], start, end);
-            } else if (subQuery != null && subQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = searchPaginatedAPIsByContent(userRegistry, subQuery, start, end, isLazyLoad);
+            } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
             } else {
                 result = searchPaginatedAPIs(userRegistry, searchQuery, start, end, isLazyLoad);
             }
@@ -2544,14 +2543,19 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return
      * @throws APIManagementException
      */
-    public Map<String, Object> searchPaginatedAPIsByContent(Registry registry, String searchQuery, int start, int end,
+    public Map<String, Object> searchPaginatedAPIsByContent(Registry registry, int tenantId, String searchQuery, int start, int end,
             boolean limitAttributes) throws APIManagementException {
 
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<String, Object> result = new HashMap<String, Object>();
+        int totalLength = 0;
+        boolean isMore = false;
 
         try {
+            GenericArtifactManager apiArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifactManager docArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
+
             String paginationLimit = getAPIManagerConfiguration()
                     .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
@@ -2579,10 +2583,16 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
 
-            UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+            if (tenantId == -1) {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            }
+
+            UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
             ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
             String newSearchQuery = getSearchQuery(searchQuery);
             String[] searchQueries = newSearchQuery.split("&");
+
+            String apiState = "";
             Map<String, String> attributes = new HashMap<String, String>();
             for (String searchCriterea : searchQueries) {
                 String[] keyVal = searchCriterea.split("=");
@@ -2591,11 +2601,27 @@ public abstract class AbstractAPIManager implements APIManager {
                     attributes.put("rightPropertyValue", keyVal[1]);
                     attributes.put("rightOp", "eq");
                 } else {
+                    if (APIConstants.LCSTATE_SEARCH_KEY.equals(keyVal[0])) {
+                        apiState = keyVal[1];
+                        continue;
+                    }
                     attributes.put(keyVal[0], keyVal[1]);
                 }
             }
-            attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) +
-                " OR " + ClientUtils.escapeQueryChars(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE) + ")");
+
+            //this complex attribute is to impose lcState filter to api results only
+            String complexMediaTypeLCStateAttribute = "";
+            if (!apiState.isEmpty()) {
+                complexMediaTypeLCStateAttribute = "(" + APIConstants.API_RXT_MEDIA_TYPE
+                        + " AND lcState_s:" + apiState + ") OR mediaType_s:text/plain";
+                attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, complexMediaTypeLCStateAttribute);
+            } else {
+                attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) +
+                          " OR " + ClientUtils.escapeQueryChars(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE) + ")");
+            }
+
+            //attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) +
+              //  " OR " + ClientUtils.escapeQueryChars(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE) + ")");
             //add media type attribute if required----
 
             SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(attributes, systemUserRegistry);
@@ -2603,56 +2629,74 @@ public abstract class AbstractAPIManager implements APIManager {
             if (errorMsg != null) {
                 handleException(errorMsg);
             }
+
             ResourceData[] resourceData = resultsBean.getResourceDataList();
 
-            contentBasedSearchService.searchContent(searchQuery.split("=")[1], (UserRegistry) registry);
-            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
-                    .findGovernanceArtifacts(getSearchQuery(searchQuery), registry, APIConstants.API_OR_DOC_RXT_MEDIA_TYPE,
-                            true);
+            if (resourceData == null || resourceData.length == 0) {
+                result.put("apis", apiSet);
+                result.put("docs", docMap);
+                result.put("length", 0);
+                result.put("isMore", isMore);
+            }
 
-            GenericArtifactManager apiArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            GenericArtifactManager docArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
+            totalLength = PaginationContext.getInstance().getLength();
 
+            // Check to see if we can speculate that there are more APIs to be loaded
+            if (maxPaginationLimit == totalLength) {
+                isMore = true;  // More APIs exist, cannot determine total API count without incurring perf hit
+                --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
+            }
 
-            for (GovernanceArtifact artifact : governanceArtifacts) {
-                if (APIConstants.API_RXT_MEDIA_TYPE.equals(artifact.getMediaType())) {
-                    API resultAPI = null;
-                    if (limitAttributes) {
-                        resultAPI = APIUtil.getAPI(artifact);
+            for (ResourceData data : resourceData) {
+                String resourcePath = data.getResourcePath();
+                int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
+                resourcePath = resourcePath.substring(index);
+                Resource resource = registry.get(resourcePath);
+                if (APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE.equals(resource.getMediaType())) {
+                    Association[] contentAssociations = registry.getAssociations(resourcePath, "hasContent");
+                    if (contentAssociations.length > 0) { // a doc can have one content association at most
+                        String documentationPath = contentAssociations[0].getSourcePath();
+                        String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                        RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + documentationPath);
+
+                        //doc is authorized check is skipped for the moment
+                        Resource docResource = registry.get(documentationPath);
+                        String docArtifactId = docResource.getUUID();
+                        GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
+                        Documentation doc = APIUtil.getDocumentation(docArtifact);
+                        Association[] docAssociations = registry
+                                .getAssociations(documentationPath, APIConstants.DOCUMENTATION_ASSOCIATION);
+                        API associatedAPI = null;
+                        if (docAssociations.length > 0) { // a content can have one api association at most
+                            String apiPath = docAssociations[0].getSourcePath();
+
+                            Resource apiResource = registry.get(apiPath);
+                            String apiArtifactId = apiResource.getUUID();
+                            if (apiArtifactId != null) {
+                                GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                                associatedAPI = APIUtil.getAPI(apiArtifact, registry);
+                            } else {
+                                throw new GovernanceException("artifact id is null for " + apiPath);
+                            }
+
+                            if (associatedAPI != null && doc != null) {
+                                docMap.put(doc, associatedAPI);
+                            }
+                        }
+                    }
+                } else {
+                    String apiArtifactId = resource.getUUID();
+                    API api;
+                    if (apiArtifactId != null) {
+                        GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                         api = APIUtil.getAPI(apiArtifact, registry);
+                         apiSet.add(api);
                     } else {
-                        resultAPI = APIUtil.getAPI(artifact, registry);
-                    }
-                    if (resultAPI != null) {
-                        apiSet.add(resultAPI);
-                    }
-                } else if (APIConstants.DOC_RXT_MEDIA_TYPE.equals(artifact.getMediaType())) {
-                    //There is only one document association to the owner API
-                    Resource docResource = registry.get(artifact.getPath());
-                    String docArtifactId = docResource.getUUID();
-                    GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
-                    Documentation doc = APIUtil.getDocumentation(docArtifact);
-                    Association[] docAssociations = registry
-                            .getAssociations(artifact.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
-                    API associatedAPI = null;
-                    if (docAssociations.length > 0) {
-                        String apiPath = docAssociations[0].getSourcePath();
-
-                        Resource resource = registry.get(apiPath);
-                        String apiArtifactId = resource.getUUID();
-                        if (apiArtifactId != null) {
-                            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                            associatedAPI = APIUtil.getAPI(apiArtifact, registry);
-                        } else {
-                            throw new GovernanceException("artifact id is null of " + apiPath);
-                        }
-
-                        if (associatedAPI != null && doc != null) {
-                            docMap.put(doc, associatedAPI);
-                        }
+                        throw new GovernanceException("artifact id is null for " + resourcePath);
                     }
                 }
             }
-
         } catch (RegistryException e) {
             handleException("Failed to search APIs by content", e);
         } catch (IndexerException e) {
@@ -2661,6 +2705,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
         result.put("apis", apiSet);
         result.put("docs", docMap);
+        result.put("length", totalLength);
+        result.put("isMore", isMore);
         return result;
     }
 
