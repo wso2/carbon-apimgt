@@ -4,7 +4,7 @@
   "description": "WSO2 API Manager Store Web App",
   "main": "app.js",
   "scripts": {
-    "test": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED='0' mocha --recursive --require babel-register  -r mock-local-storage \"./source/test/**/*.test.js\"",
+    "test": "jest",
     "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
     "build:dev": "NODE_ENV=development webpack -d --watch "
   },
@@ -22,6 +22,9 @@
     "caniuse-api": "^1.6.1",
     "cleanup-dependencies": "0.0.6",
     "downshift": "^2.1.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
     "file-loader": "^0.11.2",
     "js-file-download": "^0.4.1",
     "material-design-icons": "^3.0.1",
@@ -43,6 +46,7 @@
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
+    "babel-eslint": "^8.2.6",
     "babel-loader": "^7.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -51,10 +55,17 @@
     "babel-register": "^6.24.1",
     "chai": "^4.0.2",
     "css-loader": "^0.28.9",
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.7.1",
+    "eslint": "^5.9.0",
+    "eslint-plugin-react": "^7.11.1",
+    "jest": "^23.6.0",
     "less": "^2.7.2",
     "less-loader": "^4.0.4",
     "mocha": "^3.5.3",
     "mock-local-storage": "^1.0.5",
+    "react-test-renderer": "^16.7.0",
+    "sinon": "^7.2.2",
     "style-loader": "^0.18.1",
     "webpack": "^3.12.0"
   }

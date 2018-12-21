@@ -31,8 +31,8 @@ const styles = theme => ({
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
-        paddingBottom: theme.spacing.unit,  
-        paddingTop: theme.spacing.unit,  
+        paddingBottom: theme.spacing.unit,
+        paddingTop: theme.spacing.unit,
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
         color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
@@ -47,13 +47,13 @@ const styles = theme => ({
         flex: 1,
         flexDirection: 'column',
         marginLeft: theme.custom.leftMenuWidth,
-        paddingBottom:  theme.spacing.unit*3,  
+        paddingBottom:  theme.spacing.unit*3,
       }
 });
 class Details extends React.Component {
     constructor(props){
         super(props);
-        
+
         this.state = {
             active: 'overview',
             overviewHiden: false,
@@ -81,11 +81,10 @@ class Details extends React.Component {
         let promised_api = api.getAPIById(this.api_uuid);
         let existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
         let promised_applications = api.getAllApplications();
-        
+
         Promise.all([ promised_api, existing_subscriptions, promised_applications] ).then(
             response => {
                 let [api, subscriptions, applications] = response.map(data => data.obj);
-
                 //Getting the policies from api details
                 this.setState({api: api});
                 if(api && api.policies){
@@ -100,10 +99,10 @@ class Details extends React.Component {
                         this.setState({policyName: tiers[0].value});
                     }
                 }
-                
+
                 let subscribedApplications = [];
                 //get the application IDs of existing subscriptions
-                subscriptions.list.map(element => subscribedApplications.push({value: element.applicationId, 
+                subscriptions.list.map(element => subscribedApplications.push({value: element.applicationId,
                     policy: element.policy}));
                 this.setState({subscribedApplications: subscribedApplications});
 
@@ -139,15 +138,15 @@ class Details extends React.Component {
                 let status = error.status;
                 if (status === 404) {
                     this.setState({notFound: true});
-                } 
+                }
             }
         )
     }
     componentDidMount() {
-     
+
         var body = document.body,
         html = document.documentElement;
-  
+
         let currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
         if( currentLink && currentLink.length > 0){
             this.setState({ active: currentLink[0] });
@@ -155,10 +154,11 @@ class Details extends React.Component {
         console.info(this.state.active);
         this.updateSubscriptionData();
     }
-    
+
 
   render() {
     const { classes, theme } = this.props;
+    const { api } = this.state;
     let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
     const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
 
@@ -176,7 +176,7 @@ class Details extends React.Component {
                 <LeftMenuItem text="test" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
                 <LeftMenuItem text="docs" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
                 <LeftMenuItem text="sdk" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-               
+
             </div>
               <div className={classes.content}>
               <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => this.infoBar = node}/>
@@ -184,7 +184,7 @@ class Details extends React.Component {
                     <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
                     <Route path="/apis/:api_uuid/overview" component={Overview}/>
                     <Route path="/apis/:api_uuid/credentials" component={Credentials} />
-                    <Route path="/apis/:api_uuid/comments" component={Comments} />
+                    <Route path="/apis/:api_uuid/comments" component={() => <Comments api={api} apiId={this.props.match.params.api_uuid} />} />
                     <Route path="/apis/:api_uuid/test" component={ApiConsole}/>
                     <Route path="/apis/:api_uuid/docs" component={Documentation}/>
                     <Route path="/apis/:api_uuid/forum" component={Forum}/>
