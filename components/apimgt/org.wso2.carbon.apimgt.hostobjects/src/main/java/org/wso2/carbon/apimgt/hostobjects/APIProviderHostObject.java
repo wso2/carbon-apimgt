@@ -3848,6 +3848,8 @@ public class APIProviderHostObject extends ScriptableObject {
             } else if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 Set<API> apiSet = (Set<API>) result.get("apis");
                 Map<Documentation, API> docSet = (Map<Documentation, API>) result.get("docs");
+                NativeArray apiArray = new NativeArray(0);
+                NativeArray docArray = new NativeArray(0);
 
                 if (apiSet != null && apiSet.size() > 0) {
                     //List<API> searchedList = apiProvider.searchAPIs(searchTerm, searchType, providerName);
@@ -3867,23 +3869,19 @@ public class APIProviderHostObject extends ScriptableObject {
                         if (providerName != null) {
                             row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
                         }
-                        myn.put(i, myn, row);
+                        apiArray.put(i, apiArray, row);
                         i++;
                     }
-                    resultObj.put("apis", resultObj, myn);
                 }
 
 
                 if (docSet != null && docSet.size() > 0) {
-                    NativeObject row = new NativeObject();
-                    myn = new NativeArray(0);
                     int i = 0;
                     for (Map.Entry<Documentation, API> entry : docSet.entrySet()) {
+                        NativeObject row = new NativeObject();
                         Documentation doc = entry.getKey();
                         API api = entry.getValue();
                         APIIdentifier apiIdentifier = api.getId();
-
-                        //NativeObject currentApi = new NativeObject();
 
                         row.put("name", row, apiIdentifier.getApiName());
                         row.put("provider", row,
@@ -3901,11 +3899,14 @@ public class APIProviderHostObject extends ScriptableObject {
                         row.put("docSourceURL", row, doc.getSourceUrl());
                         row.put("docFilePath", row, doc.getFilePath());
 
-                        myn.put(i, myn, row);
+                        docArray.put(i, docArray, row);
                         i++;
                     }
-                    resultObj.put("docs", resultObj, myn);
                 }
+                resultObj.put("apis", resultObj, apiArray);
+                resultObj.put("docs", resultObj, docArray);
+                resultObj.put("totalLength", resultObj, result.get("length"));
+                resultObj.put("isMore", resultObj, result.get("isMore"));
             } else {
                 Set<API> apiSet = (Set<API>) result.get("apis");
                 //List<API> searchedList = apiProvider.searchAPIs(searchTerm, searchType, providerName);
