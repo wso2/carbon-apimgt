@@ -128,6 +128,13 @@ public class ApisApiServiceImpl extends ApisApiService {
         expand = (expand != null && expand) ? true : false;
         try {
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
+
+            //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
+            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+                newSearchQuery = newSearchQuery
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
+            }
+
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider

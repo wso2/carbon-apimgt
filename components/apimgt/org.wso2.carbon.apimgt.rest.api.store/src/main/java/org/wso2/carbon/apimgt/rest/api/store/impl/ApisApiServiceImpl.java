@@ -93,6 +93,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
+
+            //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
+            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+                newSearchQuery = newSearchQuery
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
+            }
             // Append LC state query criteria if the search is not doc or subcontext
             // based
             if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery) &&
