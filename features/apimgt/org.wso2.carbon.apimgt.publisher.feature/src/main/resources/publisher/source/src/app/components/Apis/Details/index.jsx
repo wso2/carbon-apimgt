@@ -26,6 +26,7 @@ import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import ScopesIcon from '@material-ui/icons/VpnKey';
 import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
+import CommentsIcon from '@material-ui/icons/CommentRounded';
 import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import { withStyles } from '@material-ui/core/styles';
 import { Redirect, Route, Switch, Link } from 'react-router-dom';
@@ -41,13 +42,13 @@ import Documents from './Documents';
 import Resources from './Resources/Resources';
 import Endpoints from './Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
+import Comments from './Comments/Comments';
 import Scope from './Scopes';
 import Security from './Security';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
-import { ApiContext } from './components/ApiContext';
 
 const styles = theme => ({
     LeftMenu: {
@@ -205,40 +206,40 @@ class Details extends Component {
 
         return (
             <React.Fragment>
-                <ApiContext.Provider value={this.state}>
-                    <div className={classes.LeftMenu}>
-                        <Link to='/apis'>
-                            <div className={classes.leftLInkMain}>
-                                <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
-                            </div>
-                        </Link>
-                        <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
-                        <LeftMenuItem text='lifecycle' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<LifeCycleIcon />} />
-                        <LeftMenuItem text='endpoints' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<EndpointIcon />} />
-                        <LeftMenuItem text='resources' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<ResourcesIcon />} />
-                        <LeftMenuItem text='scopes' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<ScopesIcon />} />
-                        <LeftMenuItem text='documents' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<DocumentsIcon />} />
-                        <LeftMenuItem text='subscriptions' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<SubscriptionsIcon />} />
-                        <LeftMenuItem text='security' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<SecurityIcon />} />
-                    </div>
-                    <div className={classes.content}>
-                        <APIDetailsTopMenu api={api} />
-                        <div className={classes.contentInside}>
-                            <Switch>
-                                <Redirect exact from='/apis/:api_uuid' to={redirectUrl} />
-                                <Route path='/apis/:api_uuid/overview' component={() => <Overview api={api} />} />
-                                <Route path='/apis/:api_uuid/lifecycle' component={() => <LifeCycle api={api} />} />
-                                <Route path='/apis/:api_uuid/endpoints' component={() => <Endpoints api={api} />} />
-                                <Route path='/apis/:api_uuid/resources' component={() => <Resources api={api} />} />
-                                <Route path='/apis/:api_uuid/scopes' component={() => <Scope api={api} />} />
-                                <Route path='/apis/:api_uuid/documents' component={() => <Documents api={api} />} />
-                                <Route path='/apis/:api_uuid/subscriptions' component={() => <Subscriptions api={api} />} />
-                                <Route path='/apis/:api_uuid/security' component={() => <Security api={api} />} />
-                                <Route component={PageNotFound} />
-                            </Switch>
+                <div className={classes.LeftMenu}>
+                    <Link to='/apis'>
+                        <div className={classes.leftLInkMain}>
+                            <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
                         </div>
+                    </Link>
+                    <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='lifecycle' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<LifeCycleIcon />} />
+                    <LeftMenuItem text='endpoints' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<EndpointIcon />} />
+                    <LeftMenuItem text='resources' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<ResourcesIcon />} />
+                    <LeftMenuItem text='scopes' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<ScopesIcon />} />
+                    <LeftMenuItem text='documents' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<DocumentsIcon />} />
+                    <LeftMenuItem text='subscriptions' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<SubscriptionsIcon />} />
+                    <LeftMenuItem text='security' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<SecurityIcon />} />
+                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<CommentsIcon />} />
+                </div>
+                <div className={classes.content}>
+                    <APIDetailsTopMenu api={api} />
+                    <div className={classes.contentInside}>
+                        <Switch>
+                            <Redirect exact from='/apis/:api_uuid' to={redirectUrl} />
+                            <Route path='/apis/:api_uuid/overview' component={() => <Overview api={api} />} />
+                            <Route path='/apis/:api_uuid/lifecycle' component={() => <LifeCycle api={api} />} />
+                            <Route path='/apis/:api_uuid/endpoints' component={() => <Endpoints api={api} />} />
+                            <Route path='/apis/:api_uuid/resources' component={() => <Resources api={api} />} />
+                            <Route path='/apis/:api_uuid/scopes' component={() => <Scope api={api} />} />
+                            <Route path='/apis/:api_uuid/documents' component={() => <Documents api={api} />} />
+                            <Route path='/apis/:api_uuid/subscriptions' component={() => <Subscriptions api={api} />} />
+                            <Route path='/apis/:api_uuid/security' component={() => <Security api={api} />} />
+                            <Route path='/apis/:api_uuid/comments' component={() => <Comments api={api} />} />
+                            <Route component={PageNotFound} />
+                        </Switch>
                     </div>
-                </ApiContext.Provider>
+                </div>
             </React.Fragment>
         );
     }

@@ -35,6 +35,7 @@ var Configurations = {
         },
         custom: {
           starColor: "#f2c73a",
+          disableColor: '#D3D3D3',
           leftMenuWidth: 120,
           contentAreaWidth: 1240,
           drawerWidth: 200,
@@ -48,8 +49,11 @@ var Configurations = {
           leftMenuIconMainSize: 52,
           leftMenuTextStyle: 'uppercase',
           resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
-          // lifeCycleImage: '/publisher/public/app/images/logo.png', 
+          // lifeCycleImage: '/publisher/public/app/images/logo.png',
           // Uncomment above if you want to add a custom image to the lifecycle diagram.
+          adminRole: 'admin',
+          commentsLimit: 5,
+          maxCommentLength: 1300,
         },
       },
       dark: {
@@ -84,6 +88,7 @@ var Configurations = {
         },
         custom: {
           starColor: "#f2c73a",
+          disableColor: '#D3D3D3',
           leftMenuWidth: 120,
           contentAreaWidth: 1240,
           drawerWidth: 200,
@@ -97,8 +102,11 @@ var Configurations = {
           leftMenuIconMainSize: 52,
           leftMenuTextStyle: 'uppercase',
           resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
+          adminRole: 'admin',
+          commentsLimit: 5,
+          maxCommentLength: 1300,
         },
       },
     },
   };
-  
+
