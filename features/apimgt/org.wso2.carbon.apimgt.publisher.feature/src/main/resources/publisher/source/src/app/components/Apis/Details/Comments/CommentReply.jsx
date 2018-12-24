@@ -21,11 +21,11 @@ import { Typography } from '@material-ui/core/';
 import { withStyles } from '@material-ui/core/styles';
 import AccountBox from '@material-ui/icons/AccountBox';
 import Grid from '@material-ui/core/Grid';
-import Alert from '../../../Shared/Alert';
-import ConfirmDialog from '../../../Shared/ConfirmDialog';
+import Alert from 'AppComponents/Shared/Alert';
+import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
+import API from 'AppData/api';
 import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
-import API from '../../../../data/api';
 
 const styles = theme => ({
     link: {
@@ -220,7 +220,7 @@ class CommentReply extends React.Component {
                                 {comment.createdBy}
                             </Typography>
 
-                            {index !== editIndex
+                            {(index !== editIndex)
                             && (
                                 <Typography className={classes.commentText}>
                                     {comment.commentText}

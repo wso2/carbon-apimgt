@@ -23,8 +23,8 @@ import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import Alert from '../../../Shared/Alert';
-import API from '../../../../data/api';
+import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api';
 
 const styles = theme => ({
     commentIcon: {

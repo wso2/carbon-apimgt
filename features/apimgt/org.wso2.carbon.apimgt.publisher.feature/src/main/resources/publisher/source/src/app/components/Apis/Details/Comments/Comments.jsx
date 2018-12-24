@@ -23,10 +23,10 @@ import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleO
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
-import Alert from '../../../Shared/Alert';
+import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
-import API from '../../../../data/api';
 
 const styles = theme => ({
     root: {

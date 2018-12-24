@@ -21,13 +21,14 @@ import { Typography } from '@material-ui/core/';
 import { withStyles } from '@material-ui/core/styles';
 import AccountBox from '@material-ui/icons/AccountBox';
 import Grid from '@material-ui/core/Grid';
-import Alert from '../../../Shared/Alert';
-import ConfirmDialog from '../../../Shared/ConfirmDialog';
+import Alert from 'AppComponents/Shared/Alert';
+import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
+import API from 'AppData/api';
 import CommentAdd from './CommentAdd';
 import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
 import CommentReply from './CommentReply';
-import API from '../../../../data/api';
+
 
 const styles = theme => ({
     link: {

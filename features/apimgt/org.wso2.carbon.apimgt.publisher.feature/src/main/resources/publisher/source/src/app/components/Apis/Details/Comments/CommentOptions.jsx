@@ -20,8 +20,9 @@ import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import VerticalDivider from '../../../Shared/VerticalDivider';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
+import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
+
 
 const styles = theme => ({
     link: {
