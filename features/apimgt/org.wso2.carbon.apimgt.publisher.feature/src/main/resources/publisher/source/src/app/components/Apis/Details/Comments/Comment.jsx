@@ -234,6 +234,7 @@ class Comment extends React.Component {
             classes, comments, api, allComments, commentsUpdate,
         } = this.props;
         const { editIndex, replyIndex, openDialog } = this.state;
+        const props = { api, allComments, commentsUpdate };
         return (
             [comments
       && comments.slice(0).reverse().map((comment, index) => (
@@ -255,16 +256,16 @@ class Comment extends React.Component {
                       }
 
                       {(index === editIndex)
-              && <CommentEdit api={api} allComments={allComments} commentsUpdate={commentsUpdate} comment={comment} toggleShowEdit={this.handleShowEdit} />
+              && <CommentEdit {...props} comment={comment} toggleShowEdit={this.handleShowEdit} />
                       }
 
                       <CommentOptions classes={classes} comment={comment} editIndex={editIndex} index={index} showAddComment={this.showAddComment} handleClickOpen={this.handleClickOpen} showEditComment={this.showEditComment} />
 
                       {(index === replyIndex)
-              && <CommentAdd api={api} parentCommentId={comment.commentId} allComments={allComments} commentsUpdate={commentsUpdate} toggleShowReply={this.handleShowReply} cancelButton />
+              && <CommentAdd {...props} parentCommentId={comment.commentId} toggleShowReply={this.handleShowReply} cancelButton />
                       }
                       {(comment.replies.length !== 0)
-              && <CommentReply classes={classes} api={api} comments={comment.replies} commentsUpdate={commentsUpdate} allComments={allComments} />}
+              && <CommentReply {...props} classes={classes} comments={comment.replies} /> }
                   </Grid>
               </Grid>
           </div>

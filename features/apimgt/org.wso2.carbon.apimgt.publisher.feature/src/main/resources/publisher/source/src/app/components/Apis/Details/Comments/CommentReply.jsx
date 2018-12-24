@@ -207,6 +207,7 @@ class CommentReply extends React.Component {
             classes, comments, api, allComments, commentsUpdate,
         } = this.props;
         const { editIndex, openDialog } = this.state;
+        const props = { api, allComments, commentsUpdate };
         return (
             [comments
             && comments.map((comment, index) => (
@@ -228,10 +229,8 @@ class CommentReply extends React.Component {
                             )
                             }
 
-                            {editIndex === index && null}
-
                             {(index === editIndex)
-                            && <CommentEdit api={api} allComments={allComments} commentsUpdate={commentsUpdate} comment={comment} toggleShowEdit={this.handleShowEdit} />
+                            && <CommentEdit {...props} comment={comment} toggleShowEdit={this.handleShowEdit} />
                             }
                             <CommentOptions classes={classes} comment={comment} editIndex={editIndex} index={index} showAddComment={this.showAddComment} handleClickOpen={this.handleClickOpen} showEditComment={this.showEditComment} />
                         </Grid>

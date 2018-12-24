@@ -19,4 +19,9 @@ module.exports = {
     setupFiles: [
         '<rootDir>/source/test/setupTests.js',
     ],
+    moduleNameMapper: {
+        'AppComponents(.*)$': '<rootDir>/source/src/app/components/$1',
+        'AppData(.*)$': '<rootDir>/source/src/app/data/$1',
+        '\\.(css|less)$': '<rootDir>/public/css/main',
+    },
 };
