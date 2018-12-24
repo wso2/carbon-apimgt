@@ -86,12 +86,10 @@ class Comments extends Component {
      */
     componentDidMount() {
         const { api, theme } = this.props;
-        console.log(api);
         const Api = new API();
         Api.getAllComments(api.id)
             .then((result) => {
                 const commentList = result.body.list;
-                console.log(commentList);
                 this.setState({ allComments: commentList, totalComments: commentList.length });
                 if (commentList.length < theme.custom.commentsLimit) {
                     this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });

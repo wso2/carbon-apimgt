@@ -246,7 +246,7 @@ class Comment extends React.Component {
                           {comment.createdBy}
                       </Typography>
 
-                      {index !== editIndex
+                      {(index !== editIndex)
               &&
               <Typography className={classes.commentText}>
                   {comment.commentText}
@@ -262,7 +262,7 @@ class Comment extends React.Component {
                       {(index === replyIndex)
               && <CommentAdd api={api} parentCommentId={comment.commentId} allComments={allComments} commentsUpdate={commentsUpdate} toggleShowReply={this.handleShowReply} cancelButton />
                       }
-                      {comment.replies.length !== 0
+                      {(comment.replies.length !== 0)
               && <CommentReply classes={classes} api={api} comments={comment.replies} commentsUpdate={commentsUpdate} allComments={allComments} />}
                   </Grid>
               </Grid>
