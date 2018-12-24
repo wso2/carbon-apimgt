@@ -84,7 +84,6 @@ describe('<CommentEdit /> rendering', () => {
     });
 });
 
-
 describe('<CommentEdit /> interactions', () => {
     it('should call the onClick function when \'Save\' button is clicked', () => {
         const mockedHandleClickUpdateComment = jest.fn();
