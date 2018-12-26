@@ -38,6 +38,24 @@ const styles = theme => ({
     disable: {
         color: theme.custom.disableColor,
     },
+    commentIcon: {
+        color: theme.palette.getContrastText(theme.palette.background.default),
+    },
+    commentText: {
+        color: theme.palette.getContrastText(theme.palette.background.default),
+        marginTop: theme.spacing.unig,
+        width: '100%',
+        whiteSpace: 'pre-wrap',
+        overflowWrap: 'break-word',
+    },
+    root: {
+        marginTop: theme.spacing.unit * 2.5,
+    },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+        paddingLeft: theme.spacing.unit * 2,
+        paddingTop: theme.spacing.unig,
+    },
 });
 
 
@@ -136,8 +154,8 @@ class CommentOptions extends React.Component {
                     </Typography>
                 </Grid>,
                     <Grid item key='key-reply-vertical-divider'>
-                    <VerticalDivider height={15} />
-                </Grid>,
+                        <VerticalDivider height={15} />
+                    </Grid>,
                 ]
                 }
 
@@ -149,8 +167,8 @@ class CommentOptions extends React.Component {
                     </Typography>
                 </Grid>,
                     <Grid item key='key-delete-vertical-divider'>
-                    <VerticalDivider height={15} />
-                </Grid>,
+                        <VerticalDivider height={15} />
+                    </Grid>,
                 ]
                 }
 
@@ -162,8 +180,8 @@ class CommentOptions extends React.Component {
                     </Typography>
                 </Grid>,
                     <Grid item key='key-edit-verical-divider'>
-                    <VerticalDivider height={15} />
-                </Grid>,
+                        <VerticalDivider height={15} />
+                    </Grid>,
                 ]
                 }
                 <Grid item className={classes.time}>
@@ -177,10 +195,10 @@ class CommentOptions extends React.Component {
                         <VerticalDivider height={15} />
                     </Grid>,
                         <Grid item className={classes.time} key='key-category'>
-                        <Typography component='a' variant='caption'>
+                            <Typography component='a' variant='caption'>
                                 {comment.category}
                             </Typography>
-                    </Grid>,
+                        </Grid>,
                     ]
                 }
             </Grid>
