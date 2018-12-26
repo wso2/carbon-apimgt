@@ -39,6 +39,24 @@ const styles = theme => ({
     disable: {
         color: theme.custom.disableColor,
     },
+    commentIcon: {
+        color: theme.palette.getContrastText(theme.palette.background.default),
+    },
+    commentText: {
+        color: theme.palette.getContrastText(theme.palette.background.default),
+        marginTop: theme.spacing.unig,
+        width: '100%',
+        whiteSpace: 'pre-wrap',
+        overflowWrap: 'break-word',
+    },
+    root: {
+        marginTop: theme.spacing.unit * 2.5,
+    },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+        paddingLeft: theme.spacing.unit * 2,
+        paddingTop: theme.spacing.unig,
+    },
 });
 
 
@@ -131,16 +149,16 @@ class CommentOptions extends React.Component {
         return (
             <Grid container spacing={8} className={classes.verticalSpace} key={comment.commentId}>
                 { comment.parentCommentId == null
-            && [
-                <Grid item key='key-reply'>
-                    <Typography component='a' className={(editIndex === -1 ? classes.link : classes.disable)} onClick={() => this.showAddComment(index)}>
-                        Reply
-                    </Typography>
-                </Grid>,
-                <Grid item key='key-reply-vertical-divider'>
-                    <VerticalDivider height={15} />
-                </Grid>,
-            ]
+                && [
+                    <Grid item key='key-reply'>
+                        <Typography component='a' className={(editIndex === -1 ? classes.link : classes.disable)} onClick={() => this.showAddComment(index)}>
+                            Reply
+                        </Typography>
+                    </Grid>,
+                    <Grid item key='key-reply-vertical-divider'>
+                        <VerticalDivider height={15} />
+                    </Grid>,
+                ]
                 }
 
                 {/* only the comment owner or admin can delete a comment */}
@@ -148,7 +166,7 @@ class CommentOptions extends React.Component {
                 && [
                     <Grid item key='key-delete'>
                         <Typography component='a' className={(editIndex === -1 ? classes.link : classes.disable)} onClick={() => this.handleClickOpen(comment)}>
-                        Delete
+                            Delete
                         </Typography>
                     </Grid>,
                     <Grid item key='key-delete-vertical-divider'>
@@ -162,7 +180,7 @@ class CommentOptions extends React.Component {
                 && [
                     <Grid item key='key-edit'>
                         <Typography component='a' className={(editIndex === -1 ? classes.link : classes.disable)} onClick={() => this.showEditComment(index)}>
-                        Edit
+                            Edit
                         </Typography>
                     </Grid>,
                     <Grid item key='key-edit-verical-divider'>
