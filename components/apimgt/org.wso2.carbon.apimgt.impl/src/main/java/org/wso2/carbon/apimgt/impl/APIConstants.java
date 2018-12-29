@@ -383,7 +383,8 @@ public final class APIConstants {
     public static final String DOC_FILE_PATH = "overview_filePath";
     public static final String DOC_SOURCE_TYPE = "overview_sourceType";
     public static final String DOC_OTHER_TYPE_NAME = "overview_otherTypeName";
-    public static final String DOC_INLINE_CONTENT = "overview_inlineContent";
+    public static final String DOC_CONTENT = "overview_content";
+    public static final String DOC_ASSOCIATED_API_STATUS = "overview_status";
     public static final String PUBLISHED = "PUBLISHED";
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";

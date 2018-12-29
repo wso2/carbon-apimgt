@@ -37,6 +37,8 @@ public class Documentation implements Serializable {
     private Date lastUpdated;
     private String filePath;
     private Date createdDate;
+    private String apiStatus;
+    private String content;
 
     public String getOtherTypeName() {
         return otherTypeName;
@@ -165,4 +167,19 @@ public class Documentation implements Serializable {
         this.createdDate = createdDate;
     }
 
+    public void setApiStatus(String apiStatus){
+        this.apiStatus = apiStatus;
+    }
+
+    public String getApiStatus() {
+        return apiStatus;
+    }
+
+    public  void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
+    }
 }

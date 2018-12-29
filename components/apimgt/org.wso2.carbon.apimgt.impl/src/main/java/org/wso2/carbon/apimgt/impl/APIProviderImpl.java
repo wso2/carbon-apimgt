@@ -2543,8 +2543,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility, authorizedRoles,contentPath, registry);
 
             //write inline content to new rxt field too
-            docArtifact.setAttribute(APIConstants.DOC_INLINE_CONTENT, text);
+            docArtifact.setAttribute(APIConstants.DOC_CONTENT, text);
             artifactManager.updateGenericArtifact(docArtifact);
+
         } catch (RegistryException e) {
             String msg = "Failed to add the documentation content of : "
                     + documentationName + " of API :" + identifier.getApiName();
@@ -5971,7 +5972,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Resource docResource = registry.get(documentPath);
             GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
 
-            docArtifact.setAttribute("overview_apiStatus", api.getStatus());
+            docArtifact.setAttribute(APIConstants.DOC_ASSOCIATED_API_STATUS, api.getStatus());
             artifactManager.updateGenericArtifact(docArtifact);
         }
 

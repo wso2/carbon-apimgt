@@ -118,9 +118,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3521,14 +3519,26 @@ public class APIProviderHostObject extends ScriptableObject {
                 apiProvider
                         .addFileToDocumentation(apiId, doc, fileHostObject.getName(), fileHostObject.getInputStream(),
                                 contentType);
+
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileHostObject.getInputStream()));
+                String line;
+                StringBuilder fileContent = new StringBuilder();
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    fileContent.append(line);
+                }
+                doc.setContent(fileContent.toString());
             } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
 
+            doc.setApiStatus(apiProvider.getAPI(apiId).getStatus());
             apiProvider.addDocumentation(apiId, doc);
             success = true;
         } catch (ScriptException e) {
             handleException("The attachment cannot be found for document- " + docName, e);
+        } catch (IOException e) {
+            handleException("Error while reading the attached document - " + docName, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
