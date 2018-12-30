@@ -300,7 +300,43 @@ public class APIConsumerImplTest {
         assertNotNull(apiConsumer.getAllPaginatedPublishedAPIs(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
     }
+    @Test
+    public void testGetAllPaginatedPublishedLightWeightAPIs() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
+        System.setProperty(CARBON_HOME, "");
+        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
 
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager(apiConsumer.registry, APIConstants.API_KEY)).
+                thenReturn(artifactManager);
+        GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(genericArtifacts);
+        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId1);
+        Mockito.when(APIUtil.getLightWeightAPI(artifact)).thenReturn(api);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+        assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+
+        //artifact manager null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+
+        //generic artifact null path
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
+        assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME, 0, 10));
+    }
     @Test
     public void testGetAllPaginatedAPIs() throws Exception {
         Registry userRegistry = Mockito.mock(Registry.class);
