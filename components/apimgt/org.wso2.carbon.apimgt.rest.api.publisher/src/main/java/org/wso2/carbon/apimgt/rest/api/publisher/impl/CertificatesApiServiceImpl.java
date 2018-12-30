@@ -209,7 +209,7 @@ public class CertificatesApiServiceImpl extends CertificatesApiService {
         List<CertificateMetadataDTO> certificates;
         String userName = RestApiUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
-        String query = CertificateRestApiUtils.buildQueryString(alias, endpoint);
+        String query = CertificateRestApiUtils.buildQueryString("alias", alias, "endpoint", endpoint);
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();

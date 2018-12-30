@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -38,6 +39,7 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
 
     private static final APIKeyValidatorClientPool clientPool = APIKeyValidatorClientPool.getInstance();
 
+    @MethodStats
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
                                                  String apiKey,String requiredAuthenticationLevel, String clientDomain,
                                                  String matchingResource, String httpVerb)
@@ -66,6 +68,7 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
         }
     }
 
+    @MethodStats
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
     )
             throws APISecurityException {

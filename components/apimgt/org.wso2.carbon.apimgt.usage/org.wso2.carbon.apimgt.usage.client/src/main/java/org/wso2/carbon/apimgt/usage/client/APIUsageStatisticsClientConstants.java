@@ -184,6 +184,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String DURATION_HOURS = "HOURS";
     public static final String DURATION_DAYS = "DAYS";
     public static final String DURATION_MONTHS = "MONTHS";
+    public static final String DURATION_WEEKS = "WEEKS";
     public static final String DURATION_YEARS = "YEARS";
 
     public static final String TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss";

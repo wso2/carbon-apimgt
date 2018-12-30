@@ -17,6 +17,10 @@
  */
 package org.wso2.carbon.apimgt.impl.soaptorest;
 
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Swagger;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.parser.SwaggerParser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +29,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+
+import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class})
@@ -47,4 +53,62 @@ public class SOAPOperationBindingTestCase {
         Assert.assertTrue("Failed to get soap binding operations from the WSDL", processor.getWsdlInfo().getSoapBindingOperations().size() > 0);
     }
 
+    @Test
+    public void testGetSwaggerFromWSDL() throws Exception {
+        String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(Thread.currentThread().getContextClassLoader()
+                .getResource("wsdls/phoneverify.wsdl").toExternalForm());
+
+        Swagger swagger = new SwaggerParser().parse(swaggerStr);
+        Assert.assertTrue("Unable to parse the swagger from the given string", swagger!= null);
+        Assert.assertNotNull(swagger.getPaths());
+        Assert.assertEquals(2, swagger.getPaths().size());
+        Assert.assertEquals(12, swagger.getDefinitions().size());
+        Assert.assertTrue(swagger.getDefinitions().get("CheckPhoneNumber").getProperties().size() == 2);
+    }
+
+    @Test
+    public void testCompareGeneratedSwagger() throws Exception {
+        String swaggerString = "{\n" + "  \"swagger\": \"2.0\",\n" + "  \"paths\": {\n" + "    \"/getCustomer\": {\n"
+                + "      \"get\": {\n" + "        \"operationId\": \"getCustomer\",\n" + "        \"parameters\": [],\n"
+                + "        \"responses\": {\n" + "          \"default\": {\n" + "            \"description\": \"\",\n"
+                + "            \"schema\": {\n" + "              \"$ref\": \"#/definitions/getCustomerOutput\"\n"
+                + "            }\n" + "          }\n" + "        },\n" + "        \"x-wso2-soap\": {\n"
+                + "          \"soap-action\": \"getCustomer\",\n" + "          \"soap-operation\": \"getCustomer\",\n"
+                + "          \"namespace\": \"http://service.jcombat.com/\"\n" + "        }\n" + "      }\n" + "    }\n"
+                + "  },\n" + "  \"info\": {\n" + "    \"title\": \"\",\n" + "    \"version\": \"\"\n" + "  },\n"
+                + "  \"definitions\": {\n" + "    \"getCustomerOutput\": {\n" + "      \"type\": \"object\"\n"
+                + "    }\n" + "  }\n" + "}";
+        String generatedSwagger = SOAPOperationBindingUtils.getSoapOperationMapping(
+                Thread.currentThread().getContextClassLoader().getResource("wsdls/simpleCustomerService.wsdl")
+                        .toExternalForm());
+        Swagger swagger = new SwaggerParser().parse(generatedSwagger);
+        Swagger actualSwagger = new SwaggerParser().parse(swaggerString);
+        Assert.assertTrue(actualSwagger.getPaths().size() == swagger.getPaths().size());
+        Assert.assertTrue(actualSwagger.getDefinitions().size() == swagger.getDefinitions().size());
+    }
+
+    @Test
+    public void testVendorExtensions() throws Exception {
+        String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(
+                Thread.currentThread().getContextClassLoader().getResource("wsdls/simpleCustomerService.wsdl")
+                        .toExternalForm());
+        Swagger swagger = new SwaggerParser().parse(swaggerStr);
+        Assert.assertNotNull(
+                swagger.getPath("/getCustomer").getOperationMap().get(HttpMethod.GET).getVendorExtensions());
+        Assert.assertNotNull(swagger.getPath("/getCustomer").getOperationMap().get(HttpMethod.GET).getVendorExtensions()
+                .get("x-wso2-soap"));
+        Map<String, Object> vendorExtensions = swagger.getPath("/getCustomer").getOperationMap().get(HttpMethod.GET)
+                .getVendorExtensions();
+        for (String s : vendorExtensions.keySet()) {
+            if (s.equals("soap-action")) {
+                Assert.assertEquals(vendorExtensions.get("soap-action"), "getCustomer");
+            }
+            if (s.equals("soap-operation")) {
+                Assert.assertEquals(vendorExtensions.get("soap-operation"), "getCustomer");
+            }
+            if (s.equals("namespace")) {
+                Assert.assertEquals(vendorExtensions.get("namespace"), "http://service.test.com/");
+            }
+        }
+    }
 }

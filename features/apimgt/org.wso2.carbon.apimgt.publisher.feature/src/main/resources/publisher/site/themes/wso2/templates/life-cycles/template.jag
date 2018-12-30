@@ -46,152 +46,56 @@ function setChecklistItemVal(element,order) {
               },"json");
 
 };
+
 function updateStatus(status) {
     var apiName = $("#name").val();
     var version = $("#apiVersion").val();
     var provider = $("#provider").val();
-    var isSetDeprecation = $("#itemDiv1").val();
+    var deprecateElement = $("[checkList='Deprecate old versions after publish the API']");
+    var isSetDeprecation = 'false';
+    var messageTitle = i18n.t("Change Lifecycle status");
+    var messageContent;
+    if (deprecateElement) {
+        isSetDeprecation = deprecateElement.val();
+    }
     $(".modal-footer").html("");
     if (status == 'Deprecate') {
-        var messageContent = i18n.t("Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API") + " - " + apiName + " - " + version + "?";
-        var messageTitle = i18n.t("Change Lifecycle status");
-        jagg.message({
-            content: messageContent,
-            type: "confirm",
-            title: messageTitle,
-            anotherDialog: true,
-            okCallback: function() {
-                $('#messageModal').modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                $(".modal-header .close").hide();
-                $(".modal-footer").html("");
-                $(".modal-title").html(i18n.t("Please wait"));
-                $(".modal-body").addClass("loadingButton");
-                $(".modal-body").css({
-                    "margin-left": 25
-                }); //todo param_string
-                $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
-                jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
-                        action: "updateStatus",
-                        provider: provider,
-                        name: apiName,
-                        version: version,
-                        status: status
-                    },
-                    function(result) {
-                        if (!result.error) {
-                            var jsonPayload = result.status.workflowResponse.jsonPayload;
-
-                            if (result.status.stateChangeStatus == 'REJECTED') {
-                                showWorkflowRejectedMessage();
-                            } else if (jsonPayload != null && jsonPayload != "") {
-                                var apiInfo = {};
-                                apiInfo.provider = provider;
-                                apiInfo.name = apiName;
-                                apiInfo.version = version;
-                                handleWorkflowRedirection(jsonPayload, apiInfo);
-                            } else {
-                                ///test
-                                $('#statusUpdateMsg').show();
-                                setTimeout(function() {
-                                    location = ''
-                                }, 1000)
-                            }
-                        } else {
-                            if (result.message == "AuthenticateError") {
-                                jagg.showLogin();
-                            } else {
-                                jagg.message({
-                                    content: result.message,
-                                    type: "error"
-                                });
-                            }
-                        }
-                    }, "json");
-
-            },
-            cancelCallback: function() {
-                $('#messageModal').modal('hide');
-                $(".modal-footer").html("");
-            }
-        });
+        messageContent = i18n.t("Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API") + " - " + apiName + " - " + version + "?";
     } else if (isSetDeprecation === 'true') {
-
-        var messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
-        var messageTitle = i18n.t("Change Lifecycle status");
-
-        jagg.message({
-            content: messageContent,
-            type: "confirm",
-            title: messageTitle,
-            anotherDialog: true,
-            okCallback: function() {
-                $('#messageModal').modal({
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                $(".modal-header .close").hide();
-                $(".modal-footer").html("");
-                $(".modal-title").html(i18n.t("Please wait"));
-                $(".modal-body").addClass("loadingButton");
-                $(".modal-body").css({
-                    "margin-left": 25
-                }); //todo param_string
-                $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
-
-                jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
-                    action: "updateStatus",
-                    provider: provider,
-                    name: apiName,
-                    version: version,
-                    status: status
-                }, function(result) {
-                    if (!result.error) {
-                        var jsonPayload = result.status.workflowResponse.jsonPayload;
-
-                        if (result.status.stateChangeStatus == 'REJECTED') {
-                            showWorkflowRejectedMessage();
-                        } else if (jsonPayload != null && jsonPayload != "") {
-                            var apiInfo = {};
-                            apiInfo.provider = provider;
-                            apiInfo.name = apiName;
-                            apiInfo.version = version;
-                            handleWorkflowRedirection(jsonPayload, apiInfo);
-                        } else {
-                            ///test
-                            $('#statusUpdateMsg').show();
-                            setTimeout(function() {
-                                location = ''
-                            }, 1000)
-                        }
-                    } else {
-                        if (result.message == "AuthenticateError") {
-                            jagg.showLogin();
-                        } else {
-                            jagg.message({
-                                content: result.message,
-                                type: "error"
-                            });
-                        }
-                    }
-                }, "json");
-            },
-            cancelCallback: function() {
-                $('#messageModal').modal('hide');
-                $(".modal-footer").html("");
-            }
-        });
+        messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
     } else {
-        jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+        if (status == 'Demote to Created') {
+            messageContent = i18n.t("Are you sure you want to demote this API to CREATED state?");
+        } else {
+            messageContent = i18n.t("Are you sure you want to " + status.toLowerCase() + " this API?");
+        }
+    }
+    jagg.message({
+        content: messageContent,
+        type: "confirm",
+        title: messageTitle,
+        anotherDialog: true,
+        okCallback: function() {
+            $('#messageModal').modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+            $(".modal-header .close").hide();
+            $(".modal-footer").html("");
+            $(".modal-title").html(i18n.t("Please wait"));
+            $(".modal-body").addClass("loadingButton");
+            $(".modal-body").css({
+                "margin-left": 25
+            });
+            $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
+
+            jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
                 action: "updateStatus",
                 provider: provider,
                 name: apiName,
                 version: version,
                 status: status
-            },
-            function(result) {
+            }, function(result) {
                 if (!result.error) {
                     var jsonPayload = result.status.workflowResponse.jsonPayload;
 
@@ -204,7 +108,6 @@ function updateStatus(status) {
                         apiInfo.version = version;
                         handleWorkflowRedirection(jsonPayload, apiInfo);
                     } else {
-                        ///test
                         $('#statusUpdateMsg').show();
                         setTimeout(function() {
                             location = ''
@@ -221,7 +124,12 @@ function updateStatus(status) {
                     }
                 }
             }, "json");
-    }
+        },
+        cancelCallback: function() {
+            $('#messageModal').modal('hide');
+            $(".modal-footer").html("");
+        }
+    });
 };
 
 var initOf_state = '<%=lcStatus%>';
@@ -276,18 +184,19 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                       <div class="form-group">
                          <label class="control-label col-sm-3"></label>
                        <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
-                            <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+                            <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" checkList="<%=itemName%>" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
                               <span class="helper"><%=i18n.localize(itemName, itemName)%></span>
                        </label>
                      </div>
                     <%}else{%>
-                        <%if((itemName == i18n.localize("Requires Re-Subscription"))||(itemName  == i18n.localize("Deprecate Old Versions"))){
+                         <% // skip localizing the text, because the exact check list value from life cycle xml should be matched
+                        if((itemName == "Requires re-subscription when publish the API")||(itemName  == "Deprecate old versions after publish the API")){
                                 continue;
                         }else{%>
                             <div class="form-group">
                                <label class="control-label col-sm-3"></label>
                                    <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
-                                    <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+                                   <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" checkList="<%=itemName%>" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
                                     <span class="helper"><%=i18n.localize(itemName, itemName)%></span>
                                 </label>
                               </div>

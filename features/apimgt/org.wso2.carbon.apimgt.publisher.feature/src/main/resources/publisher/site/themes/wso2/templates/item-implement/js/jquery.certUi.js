@@ -340,8 +340,8 @@
                     " the Alias");
             }
             case (4) : {
-                return i18n.t("Failed to delete the certificate. Certificate could not found for the given alias." +
-                    " Hence the entry is removed from the data base.");
+                return i18n.t("Failed to delete the certificate. Certificate could not be found for the given alias." +
+                    " Hence the entry is removed from the database.");
             }
             case (6) : {
                 return i18n.t("Failed to add certificate. Certificate expired");

@@ -86,14 +86,20 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                         continue;
                     }
 
-                    boolean isGlobalParameterDefined = false;
                     boolean isHttpVerbDefined = false;
 
                     for (Object o1 : path.keySet()) {
                         String httpVerb = (String) o1;
 
-                        if (APIConstants.PARAMETERS.equals(httpVerb.toLowerCase())) {
-                            isGlobalParameterDefined = true;
+                        if (APIConstants.SWAGGER_SUMMARY.equals(httpVerb.toLowerCase())
+                                || APIConstants.SWAGGER_DESCRIPTION.equals(httpVerb.toLowerCase())
+                                || APIConstants.SWAGGER_SERVERS.equals(httpVerb.toLowerCase())
+                                || APIConstants.PARAMETERS.equals(httpVerb.toLowerCase())
+                                || httpVerb.startsWith("x-")
+                                || httpVerb.startsWith("X-")) {
+                            // openapi 3.x allow 'summary', 'description' and extensions in PathItem Object.
+                            // which we are not interested at this point
+                            continue;
                         }
                         //Only continue for supported operations
                         else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
@@ -135,7 +141,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                         }
                     }
 
-                    if (isGlobalParameterDefined && !isHttpVerbDefined) {
+                    if (!isHttpVerbDefined) {
                         handleException("Resource '" + uriTempVal + "' has global parameters without " +
                                 "HTTP methods");
                     }
@@ -444,5 +450,57 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                     apiIdentifier.getVersion(), e);
         }
         return timeStampMap;
+    }
+
+    /**
+     * Called using the jaggery api. Checks if the swagger contains valid api scopes.
+     *
+     * @param swagger Swagger definition
+     * @return true if the scope definition is valid
+     * @throws APIManagementException
+     */
+    public Boolean validateScopesFromSwagger(String swagger) throws APIManagementException {
+
+        try {
+            Set<Scope> scopes = getScopes(swagger);
+            JSONParser parser = new JSONParser();
+            JSONObject swaggerJson;
+            swaggerJson = (JSONObject) parser.parse(swagger);
+            if (swaggerJson.get("paths") != null) {
+                JSONObject paths = (JSONObject) swaggerJson.get("paths");
+                for (Object uriTempKey : paths.keySet()) {
+                    String uriTemp = (String) uriTempKey;
+                    //if url template is a custom attribute "^x-" ignore.
+                    if (uriTemp.startsWith("x-") || uriTemp.startsWith("X-")) {
+                        continue;
+                    }
+                    JSONObject path = (JSONObject) paths.get(uriTemp);
+                    // Following code check is done to handle $ref objects supported by swagger spec
+                    // See field types supported by "Path Item Object" in swagger spec.
+                    if (path.containsKey("$ref")) {
+                        continue;
+                    }
+
+                    for (Object httpVerbKey : path.keySet()) {
+                        String httpVerb = (String) httpVerbKey;
+                        JSONObject operation = (JSONObject) path.get(httpVerb);
+                        String operationScope = (String) operation.get(APIConstants.SWAGGER_X_SCOPE);
+
+                        Scope scope = APIUtil.findScopeByKey(scopes, operationScope);
+
+                        if (scope == null && operationScope != null) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (APIManagementException e) {
+            handleException("Error when validating scopes", e);
+            return false;
+        } catch (ParseException e) {
+            handleException("Error when validating scopes", e);
+            return false;
+        }
     }
 }

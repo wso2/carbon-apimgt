@@ -67,13 +67,13 @@ public class CustomAPIIndexerTest {
     }
 
     /**
-     * This method checks the indexer's behaviour for migrated APIs which does not have the relevant properties.
+     * This method checks the indexer's behaviour for APIs which does not have the relevant custom properties.
      *
      * @throws RegistryException Registry Exception.
      * @throws APIManagementException API Management Exception.
      */
     @Test
-    public void testIndexDocumentForMigratedAPI() throws RegistryException, APIManagementException {
+    public void testIndexingCustomProperties() throws RegistryException, APIManagementException {
         Resource resource = new ResourceImpl();
         PowerMockito.mockStatic(APIUtil.class);
         Mockito.doReturn(resource).when(userRegistry).get(Mockito.anyString());
@@ -85,15 +85,11 @@ public class CustomAPIIndexerTest {
         Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY)).thenReturn("public");
         PowerMockito.when(APIUtil.getAPI(genericArtifact, userRegistry))
                 .thenReturn(Mockito.mock(API.class));
-        indexer.getIndexedDocument(file2Index);
-        Assert.assertNotNull(APIConstants.PUBLISHER_ROLES + " property was not set for the API",
-                resource.getProperty(APIConstants.PUBLISHER_ROLES));
-        Assert.assertNotNull(APIConstants.ACCESS_CONTROL + " property was not set for the API",
-                resource.getProperty(APIConstants.ACCESS_CONTROL));
-        Assert.assertNotNull(APIConstants.CUSTOM_API_INDEXER_PROPERTY + " property was not set for the API",
-                resource.getProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY));
-        Assert.assertNotNull(APIConstants.STORE_VIEW_ROLES + " property was not set for the API",
-                resource.getProperty(APIConstants.STORE_VIEW_ROLES));
+        resource.setProperty(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + APIConstants.
+                CUSTOM_API_INDEXER_PROPERTY, APIConstants.CUSTOM_API_INDEXER_PROPERTY);
+        Assert.assertEquals(APIConstants.OVERVIEW_PREFIX + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX +
+                APIConstants.CUSTOM_API_INDEXER_PROPERTY, indexer.getIndexedDocument(file2Index).getFields().keySet().
+                toArray()[0].toString());
     }
 
     /**

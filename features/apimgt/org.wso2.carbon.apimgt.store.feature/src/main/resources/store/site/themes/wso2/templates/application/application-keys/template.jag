@@ -18,7 +18,7 @@
     var user = jagg.getUser().username;
 
     var applicationUtils = Packages.org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-    var result = applicationUtils.retrieveApplication(app.name, user, groupId);
+    var result = applicationUtils.retrieveApplicationById(app.id);
 
     var isOwner = true;
     if (!result.getSubscriber().getName().equalsIgnoreCase(user)) {
@@ -116,15 +116,15 @@
 		  	<h4><%=i18n.localize("Generating Access Tokens")%></h4>
 		  	<p><%=i18n.localize("The following cURL command shows how to generate an access token using the Password Grant type.")%></p>
 			<div class="highlight"><pre>
-		 <a id="curlButtonPassword" data-clipboard-text='curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
+		 <a id="curlButtonPassword" data-clipboard-text='curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" -H "Authorization: Basic {{basickey}}" {{gatewayurlendpoint}}/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=password&username={{ username }}&password={{ password }}" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
-	     <%= gatewayurlendpoint %>/token</textarea></pre>
+	     {{gatewayurlendpoint}}/token</textarea></pre>
 	        </div>
 	        <p><%=i18n.localize("In a similar manner, you can generate an access token using the Client Credentials grant type with the following cURL command.")%></p>
 			<div class="highlight"><pre>
-			<a id="curlButtonClient" data-clipboard-text='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
+			<a id="curlButtonClient" data-clipboard-text='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" {{gatewayurlendpoint}}/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
-	     <%= gatewayurlendpoint %>/token</textarea></pre>
+	     {{gatewayurlendpoint}}/token</textarea></pre>
 	        </div>        
 		  </div>
 		</div>
@@ -204,7 +204,8 @@
 		<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>
 		<button title="<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 					data-keyType={{type}}
-					data-applicationName={{name}}>
+					data-applicationName={{name}}
+					data-appId={{id}}>
 					Clean up
 		</button>
 	{{/ifCond}}
@@ -213,7 +214,8 @@
 		<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>
 		<button title="<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
 					data-keyType={{type}}
-					data-applicationName={{name}}>
+					data-applicationName={{name}}
+					data-appId={{id}}>
 					Clean up
 		</button>
 	{{/ifCond}}

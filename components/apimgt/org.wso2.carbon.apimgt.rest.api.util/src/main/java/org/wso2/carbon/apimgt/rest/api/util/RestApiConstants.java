@@ -163,7 +163,13 @@ public final class RestApiConstants {
     public static final String PUT = "PUT";
     public static final String DELETE = "DELETE";
 
+    //System property set at server startup
+    public static final String MIGRATION_MODE = "migrationMode";
+
     public static final String CERTS_BASE_PATH = "/certificates";
+    public static final String CLIENT_CERTS_BASE_PATH = "/clientCertificates";
     public static final String CERTS_GET_PAGINATED_URL =
             CERTS_BASE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + QUERY_PARAM;
+    public static final String CLIENT_CERTS_GET_PAGINATED_URL =
+            CLIENT_CERTS_BASE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + QUERY_PARAM;
 }

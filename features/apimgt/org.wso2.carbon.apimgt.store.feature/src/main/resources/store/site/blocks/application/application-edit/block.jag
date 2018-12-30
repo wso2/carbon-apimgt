@@ -13,9 +13,9 @@ jagg.block("application/application-edit", {
             username = user.username;
             var applicationName = request.getParameter("name");
             var groupId = session.get("groupId");
-
+            var applicationId =  request.getParameter("appId");
             mod = jagg.module("application");
-            result = mod.getApplicationByName(username,applicationName,groupId);
+            result = mod.getApplicationById(username, applicationId + '', groupId);
             application = result.application;
         }
 

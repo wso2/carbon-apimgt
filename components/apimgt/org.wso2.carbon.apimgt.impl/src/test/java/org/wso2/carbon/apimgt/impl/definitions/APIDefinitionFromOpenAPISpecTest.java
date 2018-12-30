@@ -239,6 +239,43 @@ public class APIDefinitionFromOpenAPISpecTest {
 
     }
 
+    @Test
+    public void testOpenApi3WithNonHttpVerbElementInPathItem() throws APIManagementException {
+        APIDefinitionFromOpenAPISpec apiDef = new APIDefinitionFromOpenAPISpec();
+        String openApi =
+                "{\n"
+                        + "  \"openapi\": \"3.0.0\",\n"
+                        + "  \"info\": {\n"
+                        + "    \"title\": \"OAPI\",\n"
+                        + "    \"version\": \"1.0.0\"\n"
+                        + "  },\n"
+                        + "  \"paths\": {\n"
+                        + "    \"/item\": {\n"
+                        + "      \"parameters\": {},\n"
+                        + "      \"servers\": {},\n"
+                        + "      \"summary\": \"Valid summary but invalid in WSO2\",\n"
+                        + "      \"description\": \"Valid description but invalid in WSO2\",\n"
+                        + "      \"x-custom-field\": \"Valid custom field but invalid in WSO2\",\n"
+                        + "      \"get\": {\n"
+                        + "        \"responses\": {\n"
+                        + "          \"200\": {\n"
+                        + "            \"description\": \"OK\"\n"
+                        + "          }\n"
+                        + "        },\n"
+                        + "        \"x-auth-type\":\"Application\",\n"
+                        + "        \"x-throttling-tier\":\"Unlimited\"\n"
+                        + "      }\n"
+                        + "    }\n"
+                        + "  }\n"
+                        + "}";
+
+        Set<URITemplate> expectedTemplates = new LinkedHashSet<URITemplate>();
+        expectedTemplates.add(getUriTemplate("GET", "Application", "/item"));
+        API api = new API(new APIIdentifier("admin", "OAPI", "1.0.0"));
+        Set<URITemplate> actualTemplates = apiDef.getURITemplates(api, openApi);
+        Assert.assertEquals(actualTemplates, expectedTemplates);
+    }
+
     protected URITemplate getUriTemplate(String httpVerb, String authType, String uriTemplateString) {
         URITemplate uriTemplate = new URITemplate();
         uriTemplate.setAuthTypes(authType);

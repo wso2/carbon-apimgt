@@ -13,21 +13,25 @@ var statsEnabled = isDataPublishingEnabled();
 
                     //day picker
                     $('#today-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-86400000);
                     });
 
                     //hour picker
                     $('#hour-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-3600000);
                     })
 
                     //week picker
                     $('#week-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-604800000);
                     })
 
                     //month picker
                     $('#month-btn').on('click',function(){
+                        currentDay = getDate();
                         getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
@@ -93,40 +97,40 @@ $(document).ready(function(){
 var dt = false;
 var drawAppAPICallType = function(from,to){
 
-    var fromDate = from;
-    var toDate = to;
+    var fromDate = convertTimeStringUTC(from);
+    var toDate = convertTimeStringUTC(to);
     jagg.post("/site/blocks/stats/apiCallType/ajax/stats.jag", { action:"getAppApiCallType",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
-                $('#AppApiCallTypeTable').find("tr:gt(0)").remove();
+                $('#AppApiCallTypeTable').find("tbody").remove();
                 var length = json.usage.length;
 
                 if(length > 0){
-                      $('#noData').addClass('hide');
-                      $('#tableContainer').removeClass('hide');
-                      $('#AppApiCallTypeTable').removeClass('hide');
-                      $('#AppApiCallTypeTable_wrapper').removeClass('hide');
+                    $('#noData').addClass('hide');
+                    $('#tableContainer').removeClass('hide');
+                    $('#AppApiCallTypeTable').removeClass('hide');
+                    $('#AppApiCallTypeTable_wrapper').removeClass('hide');
 
-                      for (var i = 0; i < json.usage.length; i++) {
-                            $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' + json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].callType[0] + '</td></tr>'));
-                            if(json.usage[i].apiCallTypeArray[0].callType.length > 1){
-                                for(var k =1 ; k < json.usage[i].apiCallTypeArray[0].callType.length ; k++){
-                                     $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[0].apiName+ '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].callType[k] + '</td></tr>'));
-                                 }
-                             }
-                            if(json.usage[i].apiCallTypeArray.length > 1){
+                    for (var i = 0; i < json.usage.length; i++) {
+                        $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' + json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].callType[0] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[0].hitCount[0] + '</td>' + '</tr>'));
+                        if(json.usage[i].apiCallTypeArray[0].callType.length > 1){
+                            for(var k =1 ; k < json.usage[i].apiCallTypeArray[0].callType.length ; k++){
+                                 $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[0].apiName+ '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].callType[k] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[0].hitCount[k] + '</td>' + '</tr>'));
+                            }
+                        }
+                        if(json.usage[i].apiCallTypeArray.length > 1){
 
-                                for(var j = 1 ; j< json.usage[i].apiCallTypeArray.length ; j++){
-                                    $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[j].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].callType[0] + '</td></tr>'));
-                                    if(json.usage[i].apiCallTypeArray[j].callType.length > 1){
-                                        for(var k =1 ; k < json.usage[i].apiCallTypeArray[j].callType.length ; k++){
-                                           $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].callType[k] + '</td></tr>'));
-                                        }
+                            for(var j = 1 ; j< json.usage[i].apiCallTypeArray.length ; j++){
+                                $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[j].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].callType[0] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[j].hitCount[0] + '</td>' + '</tr>'));
+                                if(json.usage[i].apiCallTypeArray[j].callType.length > 1){
+                                    for(var k =1 ; k < json.usage[i].apiCallTypeArray[j].callType.length ; k++){
+                                       $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].callType[k] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[j].hitCount[k] + '</td>' + '</tr>'));
                                     }
                                 }
                             }
-                      }
+                        }
+                    }
                     if(dt != false) {
                         dt.destroy();
                     }

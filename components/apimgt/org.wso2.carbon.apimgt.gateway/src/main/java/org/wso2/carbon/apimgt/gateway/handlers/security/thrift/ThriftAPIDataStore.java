@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.thrift;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
@@ -66,6 +67,7 @@ public class ThriftAPIDataStore implements APIKeyDataStore{
             }
         }
     }
+    @MethodStats
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
             throws APISecurityException {
         ThriftKeyValidatorClient client = null;

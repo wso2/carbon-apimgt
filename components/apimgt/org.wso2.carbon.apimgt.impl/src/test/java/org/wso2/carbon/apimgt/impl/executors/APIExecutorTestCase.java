@@ -35,8 +35,10 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.governance.api.common.util.CheckListItemBean;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.app.RemoteRegistryService;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -54,7 +56,8 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({PrivilegedCarbonContext.class, CarbonContext.class, ServiceReferenceHolder.class, APIUtil.class, APIManagerFactory.class})
+@PrepareForTest({PrivilegedCarbonContext.class, CarbonContext.class, ServiceReferenceHolder.class, APIUtil.class,
+        APIManagerFactory.class, GovernanceUtils.class })
 public class APIExecutorTestCase {
 
     private RequestContext requestContext = Mockito.mock(RequestContext.class);
@@ -76,6 +79,7 @@ public class APIExecutorTestCase {
     private final String USER_NAME = "john";
     private final String API_NAME = "pizza-shack";
     private final String API_VERSION = "2.0.0";
+    private final String tenantAwareUserName = USER_NAME + "@" + TENANT_DOMAIN;
 
 
 
@@ -99,8 +103,9 @@ public class APIExecutorTestCase {
         Mockito.when(genericArtifact.getLifecycleState()).thenReturn("CREATED");
 
         Mockito.when(apiProvider.propergateAPIStatusChangeToGateways(apiIdentifier, APIConstants.PUBLISHED))
-                .thenReturn(null);
-        Mockito.when(apiProvider.updateAPIforStateChange(apiIdentifier, APIConstants.PUBLISHED, null)).thenReturn(true);
+                .thenReturn(new HashMap<>());
+        Mockito.when(apiProvider.updateAPIforStateChange(apiIdentifier, APIConstants.PUBLISHED, new HashMap<>())).thenReturn
+                (true);
         Mockito.when(userRegistry.get("/apimgt/applicationdata/provider/john/pizza-shack/2.0.0/api"))
                 .thenReturn(resource);
 
@@ -118,8 +123,8 @@ public class APIExecutorTestCase {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.getArtifactManager(requestContext.getSystemRegistry(),APIConstants.API_KEY)).thenReturn(genericArtifactManager);
 
-        PowerMockito.when(APIUtil.replaceEmailDomainBack(USER_NAME+'@'+TENANT_DOMAIN)).thenCallRealMethod();
-        PowerMockito.when(APIUtil.replaceEmailDomain(USER_NAME)).thenCallRealMethod();
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(tenantAwareUserName)).thenReturn(tenantAwareUserName);
+        PowerMockito.when(APIUtil.replaceEmailDomain(USER_NAME)).thenReturn(USER_NAME);
         PowerMockito.when(APIUtil.getAPIPath(apiIdentifier)).thenCallRealMethod();
         PowerMockito.when(APIUtil.getLcStateFromArtifact(genericArtifact)).thenReturn("CREATED");
 
@@ -131,6 +136,17 @@ public class APIExecutorTestCase {
         PowerMockito.mockStatic(APIManagerFactory.class);
         PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
         Mockito.when(apiManagerFactory.getAPIProvider(USER_NAME+'@'+TENANT_DOMAIN)).thenReturn(apiProvider);
+        CheckListItemBean checkListItemBean1 = new CheckListItemBean();
+        checkListItemBean1.setName(APIConstants.DEPRECATE_CHECK_LIST_ITEM);
+        checkListItemBean1.setOrder(0);
+        CheckListItemBean checkListItemBean2 = new CheckListItemBean();
+        checkListItemBean2.setName(APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM);
+        checkListItemBean2.setOrder(1);
+        CheckListItemBean[] checkListItemBeans = { checkListItemBean1, checkListItemBean2 };
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        PowerMockito
+                .when(GovernanceUtils.getAllCheckListItemBeans(resource, genericArtifact, APIConstants.API_LIFE_CYCLE))
+                .thenReturn(checkListItemBeans);
 
         Tier tier1 = new Tier("GOLD");
         Tier tier2 = new Tier("SILVER");
@@ -191,7 +207,7 @@ public class APIExecutorTestCase {
     public void testExecuteWhenFaultGatewayException() throws Exception {
         APIExecutor apiExecutor = new APIExecutor();
         PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider).updateAPIforStateChange
-                (apiIdentifier, APIConstants.PUBLISHED, null);
+                (apiIdentifier, APIConstants.PUBLISHED, new HashMap<>());
         boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
         Assert.assertFalse(isExecuted);
     }
@@ -200,7 +216,7 @@ public class APIExecutorTestCase {
     public void testExecuteWhenUserStoreException() throws Exception {
         APIExecutor apiExecutor = new APIExecutor();
         PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider).updateAPIforStateChange
-                (apiIdentifier, APIConstants.PUBLISHED, null);
+                (apiIdentifier, APIConstants.PUBLISHED, new HashMap<>());
         boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
         Assert.assertFalse(isExecuted);
     }

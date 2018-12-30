@@ -42,6 +42,9 @@ jagg.module("manager", {
     getAPIConsumerObj:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getAPIConsumerObj.apply(this, arguments);
     },
+    getApplicationId:function () {
+            return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getApplicationId.apply(this, arguments);
+    },
     getUsageClient:function () {
         return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getUsageClient.apply(this, arguments);
     },

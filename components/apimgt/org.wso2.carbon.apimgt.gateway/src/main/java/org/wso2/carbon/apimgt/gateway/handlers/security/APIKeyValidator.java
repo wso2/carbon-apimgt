@@ -30,6 +30,8 @@ import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
@@ -41,6 +43,9 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -162,6 +167,7 @@ public class APIKeyValidator {
         return getCacheFromCacheManager(APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME);
     }
 
+    @MethodStats
     protected Cache getResourceCache() {
 
         if (!resourceCacheInit) {
@@ -350,17 +356,32 @@ public class APIKeyValidator {
         return true;
     }
 
+    @MethodStats
     public String getResourceAuthenticationScheme(MessageContext synCtx) throws APISecurityException {
 
         VerbInfoDTO verb = null;
+        TracingSpan span = null;
         try {
+            if (Util.tracingEnabled()) {
+                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                TracingTracer tracer = Util.getGlobalTracer();
+                span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
+            }
             verb = findMatchingVerb(synCtx);
             if (verb != null) {
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
             }
         } catch (ResourceNotFoundException e) {
+            if (Util.tracingEnabled() && span != null) {
+                Util.setTag(span, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.RESOURCE_AUTH_ERROR);
+            }
             log.error("Could not find matching resource for request", e);
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
+        } finally {
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(span);
+            }
         }
 
         if (verb != null) {
@@ -570,7 +591,16 @@ public class APIKeyValidator {
             if (log.isDebugEnabled()) {
                 log.debug("Could not find API object in cache for key: " + apiCacheKey);
             }
+            TracingSpan apiInfoDTOSpan = null;
+            if (Util.tracingEnabled()) {
+                TracingSpan keySpan = (TracingSpan) synCtx.getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                apiInfoDTOSpan =
+                        Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
+            }
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(apiInfoDTOSpan);
+            }
 
             if (isGatewayAPIResourceValidationEnabled) {
                 getResourceCache().put(apiCacheKey, apiInfoDTO);
@@ -633,6 +663,7 @@ public class APIKeyValidator {
         return false;
     }
 
+    @MethodStats
     private APIInfoDTO doGetAPIInfo(String context, String apiVersion) throws APISecurityException {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
 
@@ -786,6 +817,7 @@ public class APIKeyValidator {
     }
 
 
+    @MethodStats
     protected ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
             throws APISecurityException {
         return dataStore.getAllURITemplates(context, apiVersion);

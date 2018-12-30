@@ -58,6 +58,35 @@ var generateApplicationKey = function (application, username, keyType, callbackU
     }
 };
 
+var generateApplicationKeyByApplicationId = function (application, username, keyType, callbackUrl, accessAllowDomainsArr,
+                                       validityTime, afterFailure, tokenScope, groupingId, jsonParams, applicationId) {
+    afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
+    var key,
+    log = new Log(),
+    store = jagg.module("manager").getAPIStoreObj();
+    try {
+	    if (afterFailure) {
+            key = store.createApplicationKeys(application, username, keyType, callbackUrl, accessAllowDomainsArr,
+                validityTime, afterFailure, tokenScope, groupingId, jsonParams, applicationId);
+	    } else {
+	        key = store.getApplicationKey(application, username, keyType, callbackUrl, accessAllowDomainsArr,
+                validityTime, afterFailure, tokenScope, groupingId, jsonParams, applicationId);
+	}
+        if (log.isDebugEnabled()) {
+            log.debug("generateAPIKey");
+        }
+        return {
+            error:false,
+            key:key
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            key:null
+        };
+    }
+};
 
 var deleteAuthApplication = function (authAppParams) {
 
@@ -88,7 +117,7 @@ var deleteAuthApplication = function (authAppParams) {
 
 
 var updateAuthClient = function (username, application , keyType, callbackUrl, accessAllowDomainsArr,
-                                 validityTime, retryAfterFailure, tokenScope,applicationId, jsonParams) {
+                                 validityTime, retryAfterFailure, tokenScope, groupingId, jsonParams) {
 
     afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
     var key,
@@ -98,7 +127,36 @@ var updateAuthClient = function (username, application , keyType, callbackUrl, a
     try {
 
         key = store.updateAuthClient(username, application , keyType, callbackUrl, accessAllowDomainsArr,
-                validityTime, retryAfterFailure, tokenScope,applicationId, jsonParams);;
+                validityTime, retryAfterFailure, tokenScope, groupingId, jsonParams);
+
+        if (log.isDebugEnabled()) {
+            log.debug("generateAPIKey");
+        }
+        return {
+            error:false,
+            key:key
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            key:null
+        };
+    }
+};
+
+var updateAuthClientByAppId = function (username, application, keyType, callbackUrl, accessAllowDomainsArr,
+                                 validityTime, retryAfterFailure, tokenScope, groupingId, jsonParams, applicationId) {
+
+    afterFailure = typeof afterFailure !== 'undefined' ? afterFailure : false;
+    var key,
+    log = new Log(),
+    store = jagg.module("manager").getAPIStoreObj();
+
+    try {
+
+        key = store.updateAuthClient(username, application , keyType, callbackUrl, accessAllowDomainsArr,
+                validityTime, retryAfterFailure, tokenScope, groupingId, jsonParams, applicationId);
 
         if (log.isDebugEnabled()) {
             log.debug("generateAPIKey");
@@ -167,7 +225,28 @@ var cleanUpApplicationRegistration = function (applicationName , keyType ,groupI
     }
 };
 
-
+var cleanUpApplicationRegistrationByApplicationId = function (applicationName , keyType ,groupId ,userName, applicationId) {
+    var key,
+    log = new Log(),
+    store = jagg.module("manager").getAPIStoreObj();
+    try {
+        key = store.cleanUpApplicationRegistration(applicationName, keyType ,groupId ,userName, applicationId);
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting from application registration. Application name = " + applicationName + "Key type =" +
+            keyType);
+        }
+        return {
+            error:false,
+            key:key
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            key:null
+        };
+    }
+};
 
 var refreshToken = function (username,application, keyType ,oldAccessToken,clientId, clientSecret, validityTime,tokenScope) {
     var key,

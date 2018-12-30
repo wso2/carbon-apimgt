@@ -45,9 +45,11 @@
     var manage_w_link = jagg.url('/manage?'+apiUrlId);
 
     var manage_wlabel = "";
-    if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
+    // When only mutual ssl is selected tiers need not be selected.
+    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") || api.availableTiers != "" || api
+        .availableSubscriptionPolicy != "")) {
         manage_wlabel = "completed";
-    }else{
+    } else {
         var manage_w_link = '#';
     }
 %>
@@ -197,12 +199,12 @@
 								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3">
 								                            </label>
 							                                <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
-																<label class="checkbox">
-																  <input type="checkbox" id="load_balance" name="load_balance" {{#if load_balance }}checked="checked"{{/if}}>
+																<label class="radio">
+																  <input type="radio" id="load_balance" name="load_balance" {{#if load_balance }}checked="checked"{{/if}}>
 																  <span class="helper">Load Balanced</span>
 																</label>
-							                                    <label class="checkbox">
-																  <input type="checkbox" id="failover" name="failover" {{#if failover }}checked="checked"{{/if}} {{#if failOver }}checked="checked"{{/if}}>
+							                                    <label class="radio">
+																  <input type="radio" id="failover" name="failover" {{#if failover }}checked="checked"{{/if}} {{#if failOver }}checked="checked"{{/if}}>
 																  <span class="helper"><%=i18n.localize("Failover")%></span>
 																</label>
 							                                </div>
@@ -1149,14 +1151,16 @@
 <table style="width:100%; table-layout:fixed">
 {{#each doc.paths}}
     {{# each this}}
-        <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
-            <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
-                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
-            </td>
-            <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ path }}</a></td>
-            <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
-        </tr>
-        <tr><td colspan="3" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+		{{#if this.responses}}
+            <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+                <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+                    <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+                </td>
+                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ path }}</a></td>
+                <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+            </tr>
+            <tr><td colspan="3" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+        {{/if}}
     {{/each}}
 {{/each}}
 </table>

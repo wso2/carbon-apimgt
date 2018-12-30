@@ -52,21 +52,25 @@ $(document).ready(function(){
      });
     //day picker
     $('#today-btn').on('click',function(){
+        currentDay = getDate();
         getDateTime(currentDay,currentDay-86400000);
     });
 
     //hour picker
     $('#hour-btn').on('click',function(){
+        currentDay = getDate();
         getDateTime(currentDay,currentDay-3600000);
     })
 
     //week picker
     $('#week-btn').on('click',function(){
+        currentDay = getDate();
         getDateTime(currentDay,currentDay-604800000);
     })
 
     //month picker
     $('#month-btn').on('click',function(){
+        currentDay = getDate();
         getDateTime(currentDay,currentDay-(604800000*4));
     });
 
@@ -183,8 +187,8 @@ function apiFilterList(){
 var drawAppTime = function(from, to) {
     jagg.post("/site/blocks/stats/applications-time/ajax/stats.jag" + window.location.search,
         {
-            "fromDate": from,
-            "toDate": to,
+            "fromDate": convertTimeStringUTC(from),
+            "toDate": convertTimeStringUTC(to),
             "developer": selectedDeveloper,
             "subscribedApi": subscribedApi,
             "apiFilter": apiFilter

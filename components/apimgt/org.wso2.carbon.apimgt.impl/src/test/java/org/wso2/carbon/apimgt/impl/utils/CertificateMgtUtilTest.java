@@ -25,6 +25,7 @@ import org.junit.runners.MethodSorters;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.base.MultitenantConstants;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
@@ -93,7 +94,7 @@ public class CertificateMgtUtilTest {
 
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
         System.setProperty("javax.net.ssl.trustStore", CERT_PATH.getPath());
-        certificateMgtUtils = new CertificateMgtUtils();
+        certificateMgtUtils = CertificateMgtUtils.getInstance();
     }
 
     @Test
@@ -205,5 +206,35 @@ public class CertificateMgtUtilTest {
         Object certificateStream = certificateMgtUtils.getCertificateContent(ALIAS);
         Assert.assertNotNull(certificateStream);
         Assert.assertEquals(certificateStream.getClass().getName(), ByteArrayInputStream.class.getName());
+    }
+
+    /**
+     * This method tests the validateCertificate method's behaviour, during different conditions
+     */
+    @Test
+    public void testValidateCertificate() {
+        certificateMgtUtils.addCertificateToTrustStore(BASE64_ENCODED_CERT_STRING,
+                ALIAS + "_" + MultitenantConstants.SUPER_TENANT_ID);
+        ResponseCode responseCode = certificateMgtUtils
+                .validateCertificate(ALIAS, MultitenantConstants.SUPER_TENANT_ID, BASE64_ENCODED_CERT_STRING);
+        Assert.assertEquals("Validation succeeded, even though certificate with same alias exist already",
+                ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
+        certificateMgtUtils.removeCertificateFromTrustStore(ALIAS + "_" + MultitenantConstants.SUPER_TENANT_ID);
+        responseCode = certificateMgtUtils
+                .validateCertificate(ALIAS, MultitenantConstants.SUPER_TENANT_ID, EXPIRED_CERTIFICATE);
+        Assert.assertEquals("Validation succeeded for an expired certificate", ResponseCode.CERTIFICATE_EXPIRED,
+                responseCode);
+        responseCode = certificateMgtUtils
+                .validateCertificate(ALIAS, MultitenantConstants.SUPER_TENANT_ID, BASE64_ENCODED_CERT_STRING);
+        Assert.assertEquals("Validation failed for a valid certificate", ResponseCode.SUCCESS, responseCode);
+    }
+
+    /**
+     * Tests the behaviour of getCertificateInfo method.
+     */
+    @Test
+    public void testGetCertificateInfo() {
+        Assert.assertNotNull("A valid certificate info retrieval failed",
+                certificateMgtUtils.getCertificateInfo(BASE64_ENCODED_CERT_STRING));
     }
 }

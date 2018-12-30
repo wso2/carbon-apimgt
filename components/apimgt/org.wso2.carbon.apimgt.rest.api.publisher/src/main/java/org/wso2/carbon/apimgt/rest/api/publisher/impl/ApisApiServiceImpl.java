@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -52,6 +53,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
@@ -69,6 +72,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
@@ -93,6 +98,8 @@ import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil.getErrorDTO;
+
 /**
  * This is the service implementation class for Publisher API related operations
  */
@@ -108,10 +115,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param query       search condition
      * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
+     * @param targetTenantDomain tenant domain of APIs to be returned
      * @return matched APIs for the given search condition
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand) {
+    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, Boolean expand,
+                            String targetTenantDomain) {
         List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
 
@@ -129,6 +138,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             // instead of looking at type and query
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
+
+            if (migrationMode) { // migration flow
+                if (!StringUtils.isEmpty(targetTenantDomain)) {
+                    tenantDomain = targetTenantDomain;
+                }
+                RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
+            }
+
             Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
                                         offset, limit, false);
             Set<API> apis = (Set<API>) result.get("apis");
@@ -183,6 +201,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
             boolean isWSAPI = APIDetailedDTO.TypeEnum.WS == body.getType();
+            boolean isSoapToRestConvertedApi = APIDetailedDTO.TypeEnum.SOAPTOREST == body.getType();
 
             // validate web socket api endpoint configurations
             if (isWSAPI) {
@@ -195,6 +214,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
+            String apiSecurity = body.getApiSecurity();
+            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
+                    .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                RestApiUtil.handleBadRequest("Mutual SSL Based authentication is not supported in this server", log);
+            }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
 
@@ -209,10 +233,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             }
-            if (body.getContext().endsWith("/")) {
+            if (body.getContext() == null) {
+                RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
+            } else if (StringUtils.endsWith(body.getContext(), "/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
-
             if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
                 RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                         + " already exists.", log);
@@ -278,6 +303,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified policy " + body.getApiLevelPolicy() + " is invalid", log);
             }
+            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {
+                String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
+                body.setApiDefinition(swaggerStr);
+            }
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
             //Overriding some properties:
             //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
@@ -293,7 +322,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
-            if (!isWSAPI) {
+            if (isSoapToRestConvertedApi) {
+                if (StringUtils.isNotBlank(apiToAdd.getWsdlUrl())) {
+                    String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
+                    apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
+                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, new Gson().toJson(body));
+                } else {
+                    String errorMessage =
+                            "Error while generating the swagger since the wsdl url is null for: " + body.getProvider()
+                                    + "-" + body.getName() + "-" + body.getVersion();
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            } else if (!isWSAPI) {
                 apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
             }
             APIIdentifier createdApiId = apiToAdd.getId();
@@ -817,6 +857,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 body.setThumbnailUri(apiInfo.getThumbnailUrl());
             }
 
+            // Validate API Security
+            String apiSecurity = body.getApiSecurity();
+            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
+                    .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                RestApiUtil.handleBadRequest("Mutual SSL based authentication is not supported in this server.", log);
+            }
             //validation for tiers
             List<String> tiersFromDTO = body.getTiers();
             if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
@@ -1124,6 +1170,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            newDocumentation.setFilePath(oldDocument.getFilePath());
             apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
 
             //retrieve the updated documentation

@@ -24,15 +24,23 @@ public class SOAPToRESTConstants {
 
     public static final String SOAP_TO_REST_RESOURCE = "soap_to_rest";
 
-    public static final String COMPLEX_TYPE_NODE_NAME = ":complexType";
+    public static final String COMPLEX_TYPE_NODE_NAME = "complexType";
+    public static final String SIMPLE_TYPE_NODE_NAME = "simpleType";
+    public static final String RESTRICTION_ATTR = "restriction";
+    public static final String BASE_ATTR = "base";
     public static final String TYPE_ATTRIBUTE = "type";
     public static final String NAME_ATTRIBUTE = "name";
+    public static final String REF_ATTRIBUTE = "ref";
     public static final String MAX_OCCURS_ATTRIBUTE = "maxOccurs";
     public static final String UNBOUNDED = "unbounded";
     public static final String METHOD = "method";
     public static final String PARAM_TYPE = "type";
     public static final String CONTENT = "content";
     public static final String EMPTY_STRING = "";
+    public static final String SOAP_VERSION_11 = "1.1";
+    public static final String SOAP_VERSION_12 = "1.2";
+    public static final String SOAP11_NAMESPACE = "http://schemas.xmlsoap.org/soap/envelope/";
+    public static final String SOAP12_NAMSPACE = "http://www.w3.org/2003/05/soap-envelope";
 
     public final class Swagger {
         public static final String DEFINITIONS = "definitions";
@@ -47,6 +55,17 @@ public class SOAPToRESTConstants {
         public static final String TYPE = "type";
         public static final String PATHS = "paths";
         public static final String ITEMS = "items";
+
+        public static final String INPUT_POSTFIX = "Input";
+        public static final String OUTPUT_POSTFIX = "Output";
+
+        //vendor extension specific
+        public static final String SOAP_ACTION = "soap-action";
+        public static final String SOAP_OPERATION = "soap-operation";
+        public static final String NAMESPACE = "namespace";
+        public static final String WSO2_SOAP = "x-wso2-soap";
+        public static final String SOAP_VERSION= "x-soap-version";
+
     }
 
     public final class ParamTypes {
@@ -93,6 +112,7 @@ public class SOAPToRESTConstants {
     public final class Template {
         public static final String HTTP_METHOD = "method";
         public static final String SOAP_ACTION = "soapAction";
+        public static final String SOAP_NAMESPACE = "soapNamespace";
         public static final String NAMESPACE = "namespace";
         public static final String RESOURCE_PATH = "resourcePath";
         public static final String MAPPING = "mapping";

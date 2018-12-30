@@ -121,6 +121,35 @@ var getApplicationByName = function (username, applicationName, groupId) {
     }
 };
 
+/**
+ * This method will accept username, application id and application id and sends a request to host object and gets the response.
+ * @param {string} username - subscriber name
+ * @param {string} applicationId - application id
+ * @param {string} group id.
+ * return {Application} a Application.
+ */
+var getApplicationById = function (username, applicationId, groupId) {
+    var application,
+    log = new Log(),
+    store = jagg.module("manager").getAPIStoreObj();
+    try {
+        application = store.getApplicationById(username , applicationId, groupId);
+        if (log.isDebugEnabled()) {
+            log.debug("getApplicationsById : " + stringify(application));
+        }
+        return {
+            error: false,
+            application: application
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error: e,
+            applications: null
+        };
+    }
+};
+
 
 var getAllowedGrantTypes = function(){
     var log = new Log(),store = jagg.module("manager").getAPIStoreObj();

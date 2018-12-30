@@ -57,6 +57,41 @@ include("/jagg/jagg.jag");
             }
         }
         print(obj);
+    } else if (action == "removeApplicationById" && request.getMethod() == 'POST') {
+        if (!user) {
+            if (!ssoEnabled) {
+                print({
+                    error: true,
+                    message: msg.error.loginRequired(action)
+                });
+            }
+            return;
+        }
+        applicationId = request.getParameter("appId", "UTF-8");
+        username = user.username;
+        var consumer = jagg.module("manager").getAPIConsumerObj();
+        var application = consumer.getApplicationById(applicationId);
+        var subscriber = application.getSubscriber().getName();
+        if (subscriber != username) {
+            print({
+                error: true,
+                message: "Only application owner can delete the application"
+            });
+            return;
+        }
+        result = consumer.removeApplication(application, username);
+        session.remove("selectedApp");
+        if (result) {
+            obj = {
+                error: true,
+                message: msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error: false
+            }
+        }
+        print(obj);
     } else {
         print({
             error:true,

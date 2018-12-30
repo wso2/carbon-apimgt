@@ -14,12 +14,12 @@ jagg.block("application/application-view", {
             username = user.username;
             var applicationName = request.getParameter("name");
             var groupId = session.get("groupId");
-
+            var applicationId = request.getParameter("appId");
             mod = jagg.module("application");
-            result = mod.getApplicationByName(username,applicationName,groupId);
+            result = mod.getApplicationById(username, applicationId + '', groupId);
             application = result.application;
 
-            var result2 = jagg.module("subscription").getAllSubscriptionsOfApplication(username, applicationName, 0, 10);
+            var result2 = jagg.module("subscription").getAllSubscriptionsOfApplicationById(username, applicationId, 0, 10);
 
             var log = new Log();
 
@@ -43,10 +43,13 @@ jagg.block("application/application-view", {
 
         var store = jagg.module("manager").getAPIStoreObj();
         gatewayURL = store.getHTTPsGatewayEndpointURLs();
+        gatewayTypeURL = store.getHTTPSGatewayEndpointURLsWithType();
+        var gatewayURLType = JSON.parse(gatewayTypeURL);
 
         return {
             "tiers":tiers,
             "gatewayurl":gatewayURL[0],
+            "gatewayTypeurl": gatewayURLType,
             "application" : application,
             "scopes": scopes,
             "oauthapp": oauthapp,

@@ -89,34 +89,31 @@ public class RestAPIStoreUtils {
      * @return true if current logged in consumer has access to the specified application
      */
     public static boolean isUserAccessAllowedForApplication(Application application) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String groupId;
 
         if (application != null) {
-            //if groupId is null or empty, it is not a shared app 
-            if (StringUtils.isEmpty(application.getGroupId())) {
-                //if the application is not shared, its subscriber and the current logged in user must be same
-                if (application.getSubscriber() != null) {
-                    if (application.getSubscriber().getName().equals(username)) {
-                        return true;
-                    } else if (application.getSubscriber().getName().toLowerCase().equals(username.toLowerCase())) {
-                        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                        String comparisonConfig = configuration
-                                .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
-                        if (StringUtils.isNotEmpty(comparisonConfig) && Boolean.valueOf(comparisonConfig)) {
+            groupId = application.getGroupId();
+            //If application  subscriber and the current logged in user  same then user can retrieve application
+            // irrespective of the groupId
+            if (application.getSubscriber() != null && isUserOwnerOfApplication(application)) {
+                return true;
+            }
+            // Check for shared apps
+            if (!StringUtils.isEmpty(groupId)) {
+                String userGroupId = RestApiUtil.getLoggedInUserGroupId();
+                //Check whether there is a common groupId between user and application
+                if (userGroupId != null) {
+                    List<String> groupIdList = new ArrayList<>(
+                            Arrays.asList(groupId.split(APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT)));
+                    for (String id : userGroupId.split(APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT)) {
+                        if (groupIdList.contains(id)) {
                             return true;
                         }
                     }
-                }
-            } else {
-                String userGroupId = RestApiUtil.getLoggedInUserGroupId();
-                //if the application is a shared one, application's group id and the user's group id should be same
-                if (application.getGroupId().equals(userGroupId)) {
-                    return true;
+
                 }
             }
         }
-
         //user don't have access
         return false;
     }
@@ -253,6 +250,13 @@ public class RestAPIStoreUtils {
 
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         API api = apiConsumer.getAPI(apiIdentifier);
+
+        String apiSecurity = api.getApiSecurity();
+        if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            String msg = "Subscription is not allowed for API " + apiIdentifier.toString() + ". To access the API, "
+                    + "please use the client certificate";
+            throw new APIMgtAuthorizationFailedException(msg);
+        }
         Set<Tier> tiers = api.getAvailableTiers();
 
         //Tenant based validation for subscription

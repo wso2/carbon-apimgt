@@ -55,7 +55,6 @@
                                               <a href=<%=jagg.getAbsoluteUrl("/site/pages/policy-pages/cookie-policy.jag")%> target="policy-pane">
                                                   <strong><%=i18n.localize("privacy.policy.cookies")%></strong>
                                               </a>
-                                              <%=i18n.localize("privacy.policy.for.more.details")%>
                                           </div>
                                        </div>
                                        <div class="alert alert-warning policy-alert-warning margin-none" role="alert">

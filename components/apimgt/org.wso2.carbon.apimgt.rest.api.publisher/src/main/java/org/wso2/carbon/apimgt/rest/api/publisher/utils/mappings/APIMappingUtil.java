@@ -22,6 +22,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -33,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -42,11 +45,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -328,7 +332,7 @@ public class APIMappingUtil {
             dto.setLabels(labels);
         }
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
-
+        dto.setApiSecurity(model.getApiSecurity());
         return dto;
     }
 
@@ -428,7 +432,9 @@ public class APIMappingUtil {
         if (dto.getStatus() != null) {
             model.setStatus((dto.getStatus() != null) ? dto.getStatus().toUpperCase() : null);
         }
-        model.setAsDefaultVersion(dto.getIsDefaultVersion());
+        if (dto.getIsDefaultVersion() != null) {
+            model.setAsDefaultVersion(dto.getIsDefaultVersion());
+        }
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
             model.setCacheTimeout(dto.getCacheTimeout());
@@ -487,7 +493,9 @@ public class APIMappingUtil {
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
-        model.setVisibility(mapVisibilityFromDTOtoAPI(dto.getVisibility()));
+        if (dto.getVisibility() != null) {
+            model.setVisibility(mapVisibilityFromDTOtoAPI(dto.getVisibility()));
+        }
         if (dto.getVisibleRoles() != null) {
             String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
             model.setVisibleRoles(visibleRoles);
@@ -544,6 +552,7 @@ public class APIMappingUtil {
         setEndpointSecurityFromApiDTOToModel(dto, model);
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
+        model.setApiSecurity(dto.getApiSecurity());
         return model;
     }
 
@@ -667,17 +676,65 @@ public class APIMappingUtil {
         }
     }
 
-    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDetailedDTO dto) {
+    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDetailedDTO dto) throws APIManagementException {
         if (api.isEndpointSecured()) {
             APIEndpointSecurityDTO securityDTO = new APIEndpointSecurityDTO();
             securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.basic); //set default as basic
             securityDTO.setUsername(api.getEndpointUTUsername());
-            securityDTO.setPassword(""); // Do not expose password
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
+                    .getProviderName()));
+            if (checkEndpointSecurityPasswordEnabled(tenantDomain)) {
+                securityDTO.setPassword(api.getEndpointUTPassword());
+            } else {
+                securityDTO.setPassword(""); //Do not expose password
+            }
             if (api.isEndpointAuthDigest()) {
                 securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.digest);
             }
             dto.setEndpointSecurity(securityDTO);
         }
+    }
+
+    /**
+     * This method used to check whether the config for exposing endpoint security password when getting API is enabled
+     * or not in tenant-config.json in registry.
+     *
+     * @return boolean as config enabled or not
+     * @throws APIManagementException
+     */
+    private static boolean checkEndpointSecurityPasswordEnabled(String tenantDomainName) throws APIManagementException {
+        JSONObject apiTenantConfig;
+        try {
+            APIMRegistryServiceImpl apimRegistryService = new APIMRegistryServiceImpl();
+            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomainName,
+                    APIConstants.API_TENANT_CONF_LOCATION);
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (JSONObject) parser.parse(content);
+                if (apiTenantConfig != null) {
+                    Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD);
+                    if (value != null) {
+                        return Boolean.parseBoolean(value.toString());
+                    }
+                }
+            }
+        } catch (UserStoreException e) {
+            String msg = "UserStoreException thrown when getting API tenant config from registry while reading " +
+                    "ExposeEndpointPassword config";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "RegistryException thrown when getting API tenant config from registry while reading " +
+                    "ExposeEndpointPassword config";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "ParseException thrown when parsing API tenant config from registry while reading " +
+                    "ExposeEndpointPassword config";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return false;
     }
 
     private static void setMaxTpsFromApiDTOToModel(APIDetailedDTO dto, API api) {

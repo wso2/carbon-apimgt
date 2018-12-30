@@ -5,6 +5,7 @@ var ENVIRONMENT_NAME = "environmentName";
 var ENVIRONMENT_TYPE = "environmentType";
 var API_NAME = "apiName";
 var API_VERSION = "apiVersion";
+var API_PROVIDER = "apiProvider";
 
 var tenantDomain = request.getParameter("tenant");
 var resourceUrl = request.getParameter("resourceUrl");
@@ -17,6 +18,7 @@ if (resourceUrl.indexOf("/documentation/files") != -1 ||
     if (environmentType != null && environmentName != null) {
         var apiName = request.getParameter(API_NAME);
         var apiVersion = request.getParameter(API_VERSION);
+        var apiProvider = request.getParameter(API_PROVIDER);
         if (jagg.getUser()) {
             var username = jagg.getUser().username;
         }
@@ -24,6 +26,7 @@ if (resourceUrl.indexOf("/documentation/files") != -1 ||
         var apiAttributesMap = new HashMap();
         apiAttributesMap.put(API_NAME, apiName);
         apiAttributesMap.put(API_VERSION, apiVersion);
+        apiAttributesMap.put(API_PROVIDER, apiProvider);
         var environmentDetails = new HashMap();
         environmentDetails.put(ENVIRONMENT_NAME, environmentName);
         environmentDetails.put(ENVIRONMENT_TYPE, environmentType);
@@ -41,6 +44,15 @@ if (object == null) {
 } else {
     response.contentType = "application/force-download";
     response.addHeader("Content-Disposition", "attachment; filename = \"" + object.name + "\"");
-    print(object.Data);
+    if (resourceUrl.indexOf("wsdls/archives") != -1) {
+        var file = new File("file:///" + object.Data);
+        file.open("r");
+        print(file.getStream());
+        file.close();
+        var FileUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
+        FileUtil.deleteParentDirectory(object.Data);
+    } else {
+        print(object.Data);
+    }
 }
 %>

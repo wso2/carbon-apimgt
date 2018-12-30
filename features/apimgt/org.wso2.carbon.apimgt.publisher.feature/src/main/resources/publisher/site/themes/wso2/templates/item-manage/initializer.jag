@@ -13,9 +13,9 @@ jagg.initializer("item-manage", {
         jagg.addFooterJS("ace-mode", "jagg", "libs/src-noconflict/mode-javascript.js");
         jagg.addFooterJS("jquery-ace", "jagg", "libs/jquery-ace.min.js");
 
-
+        jagg.addFooterJS("cert-ui-jq", "jagg", "templates/item-manage/js/jquery.certUi.js");
         jagg.addFooterJS("multiselect", "jagg", "libs/bootstrap-multiselect.js");               
-        jagg.addFooterJS("jsonpath-0.15.0", "jagg", "libs/jsonpath-0.15.0.js");        
+        jagg.addFooterJS("jsonpath-0.15.0", "jagg", "libs/jsonpath-0.15.0.js");
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
         jagg.addFooterJS("openapi3-definition", "jagg", "templates/item-design/js/oas3-definition-builder.js");
         jagg.addFooterJS("openapi2-definition", "jagg", "templates/item-design/js/oas2-definition-builder.js");

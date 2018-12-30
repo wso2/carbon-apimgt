@@ -123,8 +123,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SB, " +
                     "   AM_APPLICATION APP " +
                     " WHERE " +
-                    "   SB.USER_ID = ? " +
-                    "   AND SB.TENANT_ID = ? " +
+                    "   SB.TENANT_ID = ? " +
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
@@ -144,8 +143,7 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SB, " +
                     "   AM_APPLICATION APP " +
                     " WHERE " +
-                    "   LOWER(SB.USER_ID) = LOWER(?) " +
-                    "   AND SB.TENANT_ID = ? " +
+                    "   SB.TENANT_ID = ? " +
                     "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SP.APPLICATION_ID " +
                     "   AND API.API_ID = SP.API_ID" +
@@ -352,7 +350,7 @@ public class SQLConstants {
                     "   AND API.API_ID = SUB.API_ID" +
                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
                     "   AND APS.NAME = SUB.TIER_ID" +
-                    "   AND SUBS.TENANT_ID = APS.TENANT_ID";
+                    "   AND APS.TENANT_ID = ? ";
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
             " SELECT " +
@@ -381,13 +379,14 @@ public class SQLConstants {
                     " WHERE " +
                     "   API.CONTEXT = ? " +
                     "   AND AKM.CONSUMER_KEY = ? " +
+                    "   AND APS.TENANT_ID = ? " +
                     "   AND API.API_VERSION = ? " +
                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                     "   AND API.API_ID = SUB.API_ID" +
                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-                    "   AND APS.NAME = SUB.TIER_ID" +
-                    "   AND SUBS.TENANT_ID = APS.TENANT_ID";
+                    "   AND APS.NAME = SUB.TIER_ID" ;
+
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
 
@@ -573,6 +572,34 @@ public class SQLConstants {
             "   AND APP.NAME= ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_SUBSCRIBED_APIS_BY_ID_SQL =
+            " SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
+                    "   API.API_PROVIDER AS API_PROVIDER, " +
+                    "   API.API_NAME AS API_NAME, " +
+                    "   API.API_VERSION AS API_VERSION, " +
+                    "   SUBS.TIER_ID AS TIER_ID, " +
+                    "   APP.APPLICATION_ID AS APP_ID, " +
+                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "   APP.NAME AS APP_NAME, " +
+                    "   APP.CALLBACK_URL AS CALLBACK_URL, " +
+                    "   SUBS.UUID AS SUB_UUID, " +
+                    "   APP.UUID AS APP_UUID, " +
+                    "   APP.CREATED_BY AS OWNER" +
+                    " FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   SUB.TENANT_ID = ? " +
+                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND APP.APPLICATION_ID= ? " +
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String GET_SUBSCRIPTION_COUNT_SQL =
             " SELECT COUNT(*) AS SUB_COUNT " +
             " FROM " +
@@ -582,6 +609,16 @@ public class SQLConstants {
             "   AND APP.NAME=?" +
             "   AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID" +
             "   AND SUB.TENANT_ID=?";
+
+    public static final String GET_SUBSCRIPTION_COUNT_BY_APP_ID_SQL =
+            " SELECT COUNT(*) AS SUB_COUNT " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS, AM_APPLICATION APP, AM_SUBSCRIBER SUB " +
+                    " WHERE SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
+                    "   AND APP.APPLICATION_ID=?" +
+                    "   AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID" +
+                    "   AND SUB.TENANT_ID=?";
 
     public static final String GET_SUBSCRIPTION_COUNT_CASE_INSENSITIVE_SQL =
             " SELECT COUNT(*) AS SUB_COUNT " +
@@ -593,6 +630,17 @@ public class SQLConstants {
             "   AND APP.NAME=?" +
             "   AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID" +
             "   AND SUB.TENANT_ID=?";
+
+    public static final String GET_SUBSCRIPTION_COUNT_BY_APP_ID_CASE_INSENSITIVE_SQL =
+            " SELECT COUNT(*) AS SUB_COUNT " +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS,AM_APPLICATION APP,AM_SUBSCRIBER SUB " +
+                    " WHERE " +
+                    "   SUBS.SUBS_CREATE_STATE ='" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
+                    "   AND SUBS.APPLICATION_ID = APP.APPLICATION_ID" +
+                    "   AND APP.APPLICATION_ID=?" +
+                    "   AND APP.SUBSCRIBER_ID= SUB.SUBSCRIBER_ID" +
+                    "   AND SUB.TENANT_ID=?";
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
@@ -618,6 +666,31 @@ public class SQLConstants {
             "   AND API.API_ID=SUBS.API_ID" +
             "   AND APP.NAME= ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
+    public static final String GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL =
+            " SELECT " +
+                    "   SUBS.SUBSCRIPTION_ID, " +
+                    "   API.API_PROVIDER AS API_PROVIDER, " +
+                    "   API.API_NAME AS API_NAME, " +
+                    "   API.API_VERSION AS API_VERSION, " +
+                    "   SUBS.TIER_ID AS TIER_ID, " +
+                    "   APP.APPLICATION_ID AS APP_ID, " +
+                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "   APP.NAME AS APP_NAME, " +
+                    "   APP.CALLBACK_URL AS CALLBACK_URL " +
+                    " FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   SUB.TENANT_ID = ? " +
+                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND APP.APPLICATION_ID= ? " +
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
     public static final String GET_SUBSCRIBED_APIS_OF_SUBSCRIBER_SQL =
             " SELECT " +
@@ -1314,6 +1387,18 @@ public class SQLConstants {
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
 
+    public static final String GET_SIMPLE_APPLICATIONS =
+            " SELECT " +
+            "   APPLICATION_ID, " +
+            "   NAME," +
+            "   USER_ID, " +
+            "   APP.CREATED_BY " +
+            " FROM" +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIBER SUB  " +
+            " WHERE " +
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
+
     public static final String GET_APPLICATIONS_BY_OWNER =
             "SELECT " +
             "   UUID, " +
@@ -1477,6 +1562,18 @@ public class SQLConstants {
             "   SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID = AKM.APPLICATION_ID " +
             "   AND APP.NAME = ? AND AKM.KEY_TYPE=?  ";
+
+    public static final String GET_CONSUMER_KEY_FOR_APPLICATION_KEY_TYPE_BY_APP_ID_SQL =
+            " SELECT " +
+                    "   AKM.CONSUMER_KEY " +
+                    " FROM " +
+                    "   AM_APPLICATION APP," +
+                    "   AM_APPLICATION_KEY_MAPPING AKM," +
+                    "   AM_SUBSCRIBER SUB " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID = AKM.APPLICATION_ID " +
+                    "   AND APP.APPLICATION_ID = ? AND AKM.KEY_TYPE=?  ";
 
     public static final String GET_APPLICATION_ID_BY_CONSUMER_KEY_SQL =
             " SELECT " +
@@ -1654,7 +1751,8 @@ public class SQLConstants {
             "   APP.UUID," +
             "   APP.CREATED_BY," +
             "   APP.TOKEN_TYPE," +
-            "   SUB.USER_ID" +
+            "   SUB.USER_ID," +
+            "   APP.CREATED_BY" +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
             "   AM_APPLICATION APP";
@@ -1679,6 +1777,7 @@ public class SQLConstants {
             "   APP.APPLICATION_STATUS, " +
             "   SUB.USER_ID, " +
             "   APP.GROUP_ID," +
+            "   APP.CREATED_BY," +
             "   APP.UUID, " +
             "   APP.TOKEN_TYPE " +
             " FROM " +
@@ -1703,6 +1802,7 @@ public class SQLConstants {
             "   APP.CREATED_TIME, "+
             "   APP.UUID," +
             "   APP.TOKEN_TYPE," +
+            "   APP.CREATED_BY," +
             "   SUB.USER_ID " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -1766,6 +1866,10 @@ public class SQLConstants {
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
             "   AND" + " API_VERSION = ? ";
+
+    public static final String FIX_NULL_THROTTLING_TIERS =
+            "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
+                     " THROTTLING_TIER IS NULL";
 
     public static final String REMOVE_APPLICATION_MAPPINGS_BY_CONSUMER_KEY_SQL =
             "DELETE FROM AM_APPLICATION_KEY_MAPPING WHERE CONSUMER_KEY = ?";
@@ -1935,6 +2039,19 @@ public class SQLConstants {
             "   AND SUB.USER_ID=? " +
             "   AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             "   AND REG.APP_ID=APP.APPLICATION_ID";
+
+    public static final String GET_WORKFLOW_ENTRY_BY_APP_ID_SQL =
+            "SELECT " +
+                    "   REG.WF_REF" +
+                    " FROM " +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_APPLICATION_REGISTRATION REG, " +
+                    "   AM_SUBSCRIBER SUB" +
+                    " WHERE " +
+                    "   APP.APPLICATION_ID=? " +
+                    "   AND SUB.USER_ID=? " +
+                    "   AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    "   AND REG.APP_ID=APP.APPLICATION_ID";
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_SQL =
             "SELECT WF_EXTERNAL_REFERENCE FROM AM_WORKFLOWS WHERE WF_TYPE=? AND WF_REFERENCE=?";
@@ -2878,5 +2995,55 @@ public class SQLConstants {
 
         public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_CERTIFICATE_METADATA " +
                 "WHERE TENANT_ID=?";
+
+        public static final String SELECT_CERTIFICATE_FOR_ALIAS = "SELECT * FROM AM_CERTIFICATE_METADATA "
+                + "WHERE ALIAS=?";
+    }
+
+    public static class ClientCertificateConstants{
+        public static final String INSERT_CERTIFICATE = "INSERT INTO AM_API_CLIENT_CERTIFICATE " +
+                "(CERTIFICATE, TENANT_ID, ALIAS, API_ID, TIER_NAME) VALUES(?, ?, ?, ?, ?)";
+
+        public static final String GET_CERTIFICATES_FOR_API = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE WHERE "
+                + "TENANT_ID=? and API_ID=? and REMOVED=?";
+
+        public static final String DELETE_CERTIFICATES_FOR_API = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE TENANT_ID=? and API_ID=? and REMOVED=?";
+
+        public static final String SELECT_CERTIFICATE_FOR_ALIAS = "SELECT ALIAS FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE ALIAS=? AND REMOVED=? AND TENANT_ID =?";
+
+        public static final String SELECT_CERTIFICATE_FOR_TENANT =
+                "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME, AA.API_PROVIDER, AA.API_NAME, "
+                        + "AA.API_VERSION FROM AM_API_CLIENT_CERTIFICATE AC, AM_API AA "
+                        + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AA.API_ID=AC.API_ID";
+
+        public static final String SELECT_CERTIFICATE_FOR_TENANT_ALIAS =
+                "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME, AA.API_PROVIDER, AA.API_NAME, AA.API_VERSION "
+                        + "FROM AM_API_CLIENT_CERTIFICATE AC, AM_API AA "
+                        + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AC.ALIAS=? AND AA.API_ID=AC.API_ID";
+
+        public static final String SELECT_CERTIFICATE_FOR_TENANT_ALIAS_APIID =
+                "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME FROM AM_API_CLIENT_CERTIFICATE AC "
+                        + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AC.ALIAS=? AND AC.API_ID = ?";
+
+        public static final String SELECT_CERTIFICATE_FOR_TENANT_APIID =
+                "SELECT AC.CERTIFICATE, AC.ALIAS, AC.TIER_NAME FROM AM_API_CLIENT_CERTIFICATE AC "
+                        + "WHERE AC.REMOVED=? AND AC.TENANT_ID=? AND AC.API_ID=?";
+
+        public static final String PRE_DELETE_CERTIFICATES = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE TENANT_ID=? AND REMOVED=? ANd ALIAS=? AND API_ID=?";
+
+        public static final String PRE_DELETE_CERTIFICATES_WITHOUT_APIID = "DELETE FROM AM_API_CLIENT_CERTIFICATE "
+                + "WHERE TENANT_ID=? AND REMOVED=? and ALIAS=?";
+
+        public static final String DELETE_CERTIFICATES = "UPDATE AM_API_CLIENT_CERTIFICATE SET REMOVED = ? "
+                + "WHERE TENANT_ID=? AND ALIAS=? AND API_ID=?";
+
+        public static final String DELETE_CERTIFICATES_WITHOUT_APIID = "UPDATE AM_API_CLIENT_CERTIFICATE SET REMOVED=? "
+                + "WHERE TENANT_ID=? AND ALIAS=?";
+
+        public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_API_CLIENT_CERTIFICATE " +
+                "WHERE TENANT_ID=? AND REMOVED=?";
     }
 }

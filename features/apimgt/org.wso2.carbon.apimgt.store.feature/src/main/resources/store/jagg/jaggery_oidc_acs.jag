@@ -25,7 +25,10 @@
     // create a sso relying party js object
     var security = require("oidc");
     var oidcRelyingParty = new security.OIDCRelyingParty(site.oidcConfiguration.issuer);
-
+    var usernameClaim = site.oidcConfiguration.usernameClaim;
+    if (usernameClaim != null && usernameClaim != "") {
+        oidcRelyingParty.setProperty("usernameClaim", usernameClaim);
+    }
 
     var sessionId = session.getId();
     var requestedURI = session.get("STORE_REDIRECT_URI");

@@ -2,6 +2,7 @@
     <%
     var log = new Log();
     var application = inputs.application;
+    var appId = inputs.app.id;
 
     if(typeof(inputs.app.jsonParameters) != "undefined"){
 
@@ -14,7 +15,7 @@
         }else{
             var callbackURLs=null;
         }
-        var requestMode = "updateClientApplication";
+        var requestMode = "updateAuthClientByAppId";
 
     }else{
         var clientName = "";
@@ -25,6 +26,7 @@
 
     %>
     <input type="hidden" id="iHiddenApplicationName" value="<%=encode.forHtmlAttribute(application) %>" />
+    <input type="hidden" id="iHiddenApplicationId" value="<%=encode.forHtmlAttribute(appId) %>" />
     <input type="hidden" id="iHiddenRequestMode" value="<%=encode.forHtmlAttribute(requestMode) %>" />
     <fieldset>
         <div class="tabElementset">

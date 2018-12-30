@@ -712,7 +712,7 @@ paths:
     post:
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/store/v0.14/applications\""
-      x-wso2-request: "POST https://localhost:9443/api/am/store/v0.14/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingTier\": \"Unlimited\",\n    \"description\": \"sample app description\",\n    \"name\": \"sampleapp\",\n    \"callbackUrl\": \"http://my.server.com/callback\"\n}"
+      x-wso2-request: "POST https://localhost:9443/api/am/store/v0.14/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingTier\": \"Unlimited\",\n    \"description\": \"sample app description\",\n    \"name\": \"sampleapp\",\n    \"callbackUrl\": \"http://my.server.com/callback\"\n \"groupId\": \"org1\"\n}"
       x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
       summary: |
         Create a new application
@@ -839,7 +839,7 @@ paths:
     put:
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\""
-      x-wso2-request: "PUT https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n   \"callbackUrl\": \"\",\n   \"throttlingTier\": \"Bronze\",\n   \"description\": \"sample app description updated\",\n   \"name\": \"sampleapp\"\n}"
+      x-wso2-request: "PUT https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n   \"callbackUrl\": \"\",\n   \"throttlingTier\": \"Bronze\",\n   \"description\": \"sample app description updated\",\n   \"name\": \"sampleapp\",\n    \"groupId\": \"org1\"\n}"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Bronze\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description updated\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
       summary: |
         Update an application
@@ -2182,7 +2182,11 @@ definitions:
         type: string
         description: |
           Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
-          in tenant or system level will be used. 
+          in tenant or system level will be used.
+      apiSecurity :
+         type: string
+         description: |
+           Supported API security for the API ( mutualssl and/or oauth2)
       tags:
         type: array
         description: Search keywords related to the API
@@ -2332,7 +2336,7 @@ definitions:
           - JWT
         description: |
           Type of the access token generated for this application.
-          
+
           **OAUTH:** A UUID based access token which is issued by default.
           **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.
         default: OAUTH

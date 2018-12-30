@@ -22,13 +22,13 @@ var addUser = function (username, password, fields) {
     }
 };
 
-var getUserFields = function () {
+var getUserFields = function (tenant) {
 	var list, i, length, fields, field,
     log = new Log(),
     store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        fields = store.getUserFields();
+        fields = store.getUserFields(tenant);
         if (log.isDebugEnabled()) {
             log.debug("getUserFields");
         }

@@ -22,6 +22,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,10 +40,15 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
@@ -65,54 +71,83 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
     protected GoogleAnalyticsConfig config = null;
 
-	@Override
+    @MethodStats
+    @Override
 	public boolean handleRequest(MessageContext msgCtx) {
-		if (configKey == null) {
-            throw new SynapseException("Google Analytics configuration unspecified for the API");
-        }
-
-        Entry entry = msgCtx.getConfiguration().getEntryDefinition(configKey);
-        if (entry == null) {
-            log.warn("Cannot find Google Analytics configuration using key: " + configKey);
-            return true;
-        }
-        Object entryValue = null;
-        boolean reCreate = false;
-
-        if (entry.isDynamic()) {
-            if ((!entry.isCached()) || (entry.isExpired()) || config == null) {
-                entryValue = msgCtx.getEntry(this.configKey);
-                if (this.version != entry.getVersion()) {
-                	reCreate = true;
-                }
-            }
-        } else if (config == null){
-            entryValue = msgCtx.getEntry(this.configKey);
-        }
-        
-        if ( reCreate || config == null) {
-        	if (entryValue == null || !(entryValue instanceof OMElement)) {
-                log.warn("Unable to load Google Analytics configuration using key: " + configKey);
-                return true;
-            }
-            version = entry.getVersion();
-            config = getGoogleAnalyticsConfig((OMElement) entryValue);
-        }
-        
-        if (config == null) {
-            log.warn("Unable to create Google Analytics configuration using key: " + configKey);
-            return true;
-        }
-
-        if (!config.isEnabled()) {
-            return true;
+        TracingSpan span = null;
+        TracingTracer tracer = null;
+        Map<String, String> tracerSpecificCarrier = new HashMap<>();
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan = (TracingSpan) msgCtx.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            tracer = Util.getGlobalTracer();
+            span = Util.startSpan(APIMgtGatewayConstants.GOOGLE_ANALYTICS_HANDLER, responseLatencySpan, tracer);
         }
         try {
-            trackPageView(msgCtx);
+            if (configKey == null) {
+                throw new SynapseException("Google Analytics configuration unspecified for the API");
+            }
+
+            Entry entry = msgCtx.getConfiguration().getEntryDefinition(configKey);
+            if (entry == null) {
+                log.warn("Cannot find Google Analytics configuration using key: " + configKey);
+                return true;
+            }
+            Object entryValue = null;
+            boolean reCreate = false;
+
+            if (entry.isDynamic()) {
+                if ((!entry.isCached()) || (entry.isExpired()) || config == null) {
+                    entryValue = msgCtx.getEntry(this.configKey);
+                    if (this.version != entry.getVersion()) {
+                        reCreate = true;
+                    }
+                }
+            } else if (config == null) {
+                entryValue = msgCtx.getEntry(this.configKey);
+            }
+
+            if (reCreate || config == null) {
+                if (entryValue == null || !(entryValue instanceof OMElement)) {
+                    log.warn("Unable to load Google Analytics configuration using key: " + configKey);
+                    return true;
+                }
+                version = entry.getVersion();
+                config = getGoogleAnalyticsConfig((OMElement) entryValue);
+            }
+
+            if (config == null) {
+                log.warn("Unable to create Google Analytics configuration using key: " + configKey);
+                return true;
+            }
+            if (!config.isEnabled()) {
+                return true;
+            }
+            try {
+                if (Util.tracingEnabled()) {
+                    Util.inject(span, tracer, tracerSpecificCarrier);
+                    if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
+                        Map headers = (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                        headers.putAll(tracerSpecificCarrier);
+                        org.apache.axis2.context.MessageContext.getCurrentMessageContext()
+                                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+                    }
+                }
+                trackPageView(msgCtx);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            return true;
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            if (Util.tracingEnabled() && span != null) {
+                Util.setTag(span, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.GOOGLE_ANALYTICS_ERROR);
+            }
+            throw e;
+        } finally {
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(span);
+            }
         }
-        return true;
     }
 
     protected GoogleAnalyticsConfig getGoogleAnalyticsConfig(OMElement entryValue) {
@@ -235,6 +270,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 		return "0x" + md5String.substring(0, 16);
 	}
 
+    @MethodStats
 	@Override
 	public boolean handleResponse(MessageContext arg0) {
         return true;

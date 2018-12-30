@@ -71,6 +71,7 @@ if(app.tokenType != null ){
 <div class="white-wrapper add-padding-5x">
 <form class="form-horizontal" id="appAddForm">
   <input type="hidden" id="apiPath" value="<%=apiPath%>"/>
+  <input type="hidden" id="appId" value="<%=request.getParameter("appId")%>"/>
   <input type="hidden" id="goBack" value="<%= encode.forHtmlAttribute(goBack)%>"/>
   <div class="form-group">
     <label class="control-label col-md-3 col-lg-3" for="application-name"><%=i18n.localize("Name")%><span class="requiredAstrix">*</span></label>
@@ -191,8 +192,8 @@ if(jagg.isMultiGroupEnabled()){
 
   <div class="form-group">
     <div class="col-sm-offset-3 col-sm-9">
-        <input type="submit" id="application-edit-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="Update"/>
-        <a title="Cancel" href="<%= jagg.urlTenanted("/site/pages/application.jag?name="+request.getParameter("name")) %>" class="btn btn-default">Cancel</a>
+        <input type="submit" id="application-edit-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag?name=' + request.getParameter("name")})" value="Update"/>
+        <a title="Cancel" href="<%= jagg.urlTenanted("/site/pages/application.jag?name="+request.getParameter("name") + "&appId=" + request.getParameter("appId")) %>" class="btn btn-default">Cancel</a>
     </div>
   </div>
   <input type="hidden" id="application-name-old" value="<%= encode.forHtmlAttribute(app.name)%>"/>

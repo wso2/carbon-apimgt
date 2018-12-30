@@ -155,6 +155,34 @@ encode = new encode.Encode();
             }
         }
         print(obj);
+    } else if (action == "getApplicationById") {
+        if (!user) {
+            if (!ssoEnabled) {
+                print({
+                    error:true,
+                    message:msg.error.loginRequired(action)
+                });
+            }
+            return;
+        }
+        username = user.username;
+        var applicationName = request.getParameter("applicationName");
+        var groupId = session.get("groupId");
+        var applicationId =  request.getParameter("appId");
+        var mod = jagg.module("application");
+        result = mod.getApplicationById(username, applicationId, groupId);
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:msg.error.authError(action, username)
+            };
+        } else {
+            obj = {
+                error:false,
+                application:result.application
+            }
+        }
+        print(obj);
     }
     else {
         print({

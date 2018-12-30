@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -43,6 +44,7 @@ import java.util.*;
  * available operations. However if the user attempts to execute a privileged operation
  * when the object had been created in the anonymous mode, an exception will be thrown.
  */
+@MethodStats
 public class UserAwareAPIProvider extends APIProviderImpl {
     protected String username;
     private static final Log log = LogFactory.getLog(UserAwareAPIProvider.class);
@@ -335,6 +337,20 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public int addClientCertificate(String userName, APIIdentifier apiIdentifier, String certificate, String alias,
+            String tierName) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.addClientCertificate(userName, apiIdentifier, certificate, alias, tierName);
+    }
+
+    @Override
+    public int deleteClientCertificate(String userName, APIIdentifier apiIdentifier, String alias)
+            throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.deleteClientCertificate(userName, apiIdentifier, alias);
+    }
+
+    @Override
     public Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier) throws APIManagementException {
         checkAccessControlPermission(identifier);
         return super.getSubscribersOfAPI(identifier);
@@ -507,6 +523,15 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+        if (clientCertificateDTO != null) {
+            checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
+        }
+        return clientCertificateDTO;
+    }
+
+    @Override
     public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
         checkCreatePermission();
         return super.getCertificateStatus(alias);
@@ -519,9 +544,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public int getCertificateCountPerTenant(int tenantId) throws APIManagementException {
-        checkCreatePermission();
-        return super.getCertificateCountPerTenant(tenantId);
+    public int updateClientCertificate(String certificate, String alias, APIIdentifier apiIdentifier,
+            String tier, int tenantId) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId);
     }
 
     @Override

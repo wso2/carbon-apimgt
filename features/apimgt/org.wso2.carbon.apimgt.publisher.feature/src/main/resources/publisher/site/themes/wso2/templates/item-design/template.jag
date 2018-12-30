@@ -60,10 +60,11 @@
     }
 
     var manage_wlabel = "";
-    if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
-        manage_wlabel = "completed";      
-    }else{
-        var manage_w_link = '#';        
+    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") || api.availableTiers != "" || api
+        .availableSubscriptionPolicy != "")) {
+        manage_wlabel = "completed";
+    } else {
+        var manage_w_link = '#';
     }         
 %>
 
@@ -837,20 +838,22 @@
 <table style="width:100%">                       
 {{#each doc.paths}}
     {{# each this}}
-        <tr class="resource_container" data-path="$.paths.['{{ path }}'].{{@key}}">
-            <td class="resource-method-td resource_expand" data-path="$.paths.['{{ path }}'].{{ @key }}">
-                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
-            </td>
-            <td class="resource_expand"><a class="resource-path" title="resource-path">{{ path }}</a></td>
-            <td><span class="operation-summary change_summary" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="summary" >{{ summary }}</span></td>
-            <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.['{{ path }}'].{{@key}}" data-index="{{ @index }}">
-		<span class="fw-stack" style="font-size:10px">
-                                <i class="fw fw-delete fw-stack-1x"></i>
-                                <i class="fw fw-circle-outline fw-stack-2x"></i>
-                </span>
-	    </a></td>
-        </tr>
-        <tr><td colspan="4" class="resource_body" style="display:none" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+		{{#if this.responses}}
+            <tr class="resource_container" data-path="$.paths.['{{ path }}'].{{@key}}">
+                <td class="resource-method-td resource_expand" data-path="$.paths.['{{ path }}'].{{ @key }}">
+                    <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+                </td>
+                <td class="resource_expand"><a class="resource-path" title="resource-path">{{ path }}</a></td>
+                <td><span class="operation-summary change_summary" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+                <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.['{{ path }}'].{{@key}}" data-index="{{ @index }}">
+            <span class="fw-stack" style="font-size:10px">
+                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                    </span>
+            </a></td>
+            </tr>
+            <tr><td colspan="4" class="resource_body" style="display:none" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+		{{/if}}
     {{/each}}
 {{/each}}
 </table>
@@ -866,10 +869,9 @@
             var designer = APIDesigner();
             designer.load_api_document(data);
             $("#swaggerUpload").modal('hide');
-            if ((typeof $("#rest-paths").val() != "undefined" &&
-            $("#rest-paths").val() != "null") || $("#soapToRestCheck").val() === "true") {
+            if ($("#soapToRestCheck").val() === "true") {
                 $("#wsdl-content").hide();
-                $(".resource_create").hide();
+                $(".resource_create").show();
                 $('#resource_details').show();
                 $('#soap-swagger-editor').show();
                 isSoapView = true;

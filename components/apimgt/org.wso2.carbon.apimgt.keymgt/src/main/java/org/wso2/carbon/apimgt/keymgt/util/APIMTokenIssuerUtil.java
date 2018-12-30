@@ -20,21 +20,15 @@ package org.wso2.carbon.apimgt.keymgt.util;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
-import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class APIMTokenIssuerUtil {
 
@@ -45,15 +39,9 @@ public class APIMTokenIssuerUtil {
         String userName = tokReqMsgCtx.getAuthorizedUser().getUserName();
         String applicationName = application.getName();
 
-        String tenantedUserName;
-        if (StringUtils.isEmpty(tenantDomain) || tenantDomain.equals("carbon.super")) {
-            tenantedUserName = userName;
-        } else {
-            tenantedUserName = userName + "@" + tenantDomain;
-        }
-
+        String appOwner = application.getOwner();
         APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
-                .getSubscribedAPIsOfUserByApp(tenantedUserName, applicationName);
+                .getSubscribedAPIsForAnApp(appOwner, applicationName);
 
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setSubscriber("sub");

@@ -33,11 +33,15 @@ import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -111,10 +115,18 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
     }
 
+    @MethodStats
     public boolean handleRequest(MessageContext messageContext) {
 
         Timer.Context context = startMetricTimer();
-
+        TracingSpan CORSRequestHandlerSpan = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            CORSRequestHandlerSpan =
+                    Util.startSpan(APIMgtGatewayConstants.CORS_REQUEST_HANDLER, responseLatencySpan, tracer);
+        }
         try {
             if (!initializeHeaderValues) {
                 initializeHeaders();
@@ -211,8 +223,17 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             setCORSHeaders(messageContext, selectedResource);
             return true;
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && CORSRequestHandlerSpan != null) {
+                Util.setTag(CORSRequestHandlerSpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.CORS_REQUEST_HANDLER_ERROR);
+            }
+            throw e;
         } finally {
             stopMetricTimer(context);
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(CORSRequestHandlerSpan);
+            }
         }
     }
 
@@ -230,6 +251,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         context.stop();
     }
 
+    @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
         Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
         if (corsSequence != null) {

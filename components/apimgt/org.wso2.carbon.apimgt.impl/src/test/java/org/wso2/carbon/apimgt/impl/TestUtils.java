@@ -19,6 +19,9 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -38,6 +41,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.ConfigurationContextService;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -149,6 +153,8 @@ public class TestUtils {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        ConfigurationContextService configurationContextService = initConfigurationContextService(false);
+        PowerMockito.when(ServiceReferenceHolder.getContextService()).thenReturn(configurationContextService);
         return sh;
     }
 
@@ -207,5 +213,33 @@ public class TestUtils {
         PowerMockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         return tenantManager;
+    }
+
+    /**
+     * To initialize the (@link {@link ConfigurationContextService}} for testing.
+     *
+     * @return initialized configuration context service.
+     */
+    public static ConfigurationContextService initConfigurationContextService(boolean initAPIMConfigurationService) {
+        ConfigurationContextService configurationContextService = Mockito.mock(ConfigurationContextService.class);
+        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
+        AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
+        Mockito.doReturn(axisConfiguration).when(configurationContext).getAxisConfiguration();
+        TransportInDescription transportInDescription = Mockito.mock(TransportInDescription.class);
+        Mockito.doReturn(transportInDescription).when(axisConfiguration).getTransportIn(Mockito.anyString());
+        Mockito.doReturn(configurationContext).when(configurationContextService).getServerConfigContext();
+
+        if (initAPIMConfigurationService) {
+            APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                    .mock(APIManagerConfigurationService.class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            Mockito.doReturn("true").when(apiManagerConfiguration).getFirstProperty(APIConstants.ENABLE_MTLS_FOR_APIS);
+            Mockito.doReturn(apiManagerConfiguration).when(apiManagerConfigurationService).getAPIManagerConfiguration();
+            ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(apiManagerConfigurationService);
+        }
+        ServiceReferenceHolder.setContextService(configurationContextService);
+        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
+        System.setProperty("javax.net.ssl.trustStore", ".");
+        return configurationContextService;
     }
 }

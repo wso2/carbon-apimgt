@@ -115,6 +115,8 @@ public final class APIConstants {
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
+    public static final String API_TENANT_CONF_EXPOSE_ENDPOINT_PASSWORD = "ExposeEndpointPassword";
+
     public static final String API_CATEGORY_FREE = "Free";
 
     public static final String API_CATEGORY_FREEMIUM = "Freemium";
@@ -260,7 +262,11 @@ public final class APIConstants {
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
     public static final String API_OVERVIEW_FAULTSEQUENCE = "overview_faultSequence";
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
+    public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
+    public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
+    public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
+    public static final String CERTIFICATE_COMMON_NAME = "CN";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
@@ -342,6 +348,9 @@ public final class APIConstants {
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
+    public static final String API_SECURITY = "APISecurity";
+    public static final String API_LEVEL_POLICY = "APILevelPolicy";
+    public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
@@ -381,6 +390,7 @@ public final class APIConstants {
     public static final String RETIRED = "RETIRED";
     public static final String BLOCKED = "BLOCKED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
+    public static final String RESOURCE_AUTHENTICATION_SCHEME = "ResourceAuthenticationScheme";
 
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
@@ -586,7 +596,7 @@ public final class APIConstants {
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
     public static final String API_STORE_FORUM_ENABLED = API_STORE + "isStoreForumEnabled";
     public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
-
+    public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -615,6 +625,7 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_URL = AUTH_MANAGER + "ServerURL";
     public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
+    public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
 
     public static final String SELF_SIGN_UP = "SelfSignUp.";
     public static final String SELF_SIGN_UP_ENABLED = SELF_SIGN_UP + "Enabled";
@@ -808,6 +819,7 @@ public final class APIConstants {
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
     public static final String POLICY_CACHE_CONTEXT = "POLICY:";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
+    public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
@@ -1071,6 +1083,8 @@ public final class APIConstants {
     public static final String SWAGGER_SCOPE_KEY = "key";
     public static final String SWAGGER_NAME = "name";
     public static final String SWAGGER_DESCRIPTION = "description";
+    public static final String SWAGGER_SERVERS = "servers";
+    public static final String SWAGGER_SUMMARY = "summary";
     public static final String SWAGGER_ROLES = "roles";
     public static final String SWAGGER_TITLE = "title";
     public static final String SWAGGER_EMAIL = "email";
@@ -1153,6 +1167,8 @@ public final class APIConstants {
     }
 
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
+    public static final String DEPRECATE_CHECK_LIST_ITEM = "Deprecate old versions after publish the API";
+    public static final String RESUBSCRIBE_CHECK_LIST_ITEM = "Requires re-subscription when publish the API";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
 
@@ -1451,4 +1467,14 @@ public final class APIConstants {
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
+    public static final String MIGRATION_MODE = "migrationMode";
+
+    /**
+     * Constants for correlation logging
+     * */
+    public static final String CORRELATION_ID = "Correlation-ID";
+    public static final String ENABLE_CORRELATION_LOGS = "enableCorrelationLogs";
+    public static final String CORRELATION_LOGGER = "correlation";
+    public static final String LOG_ALL_METHODS = "logAllMethods";
+    public static final String AM_ACTIVITY_ID = "activityid";
 }

@@ -24,7 +24,11 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.tracing.TracingSpan;
+import org.wso2.carbon.apimgt.tracing.TracingTracer;
+import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
@@ -48,6 +52,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     private static final String DIRECTION_OUT = "Out";
     private static final Log log = LogFactory.getLog(APIManagerExtensionHandler.class);
 
+    @MethodStats
     public boolean mediate(MessageContext messageContext, String direction) {
         // In order to avoid a remote registry call occurring on each invocation, we
         // directly get the extension sequences from the local registry.
@@ -68,24 +73,59 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         return true;
     }
 
+    @MethodStats
     public boolean handleRequest(MessageContext messageContext) {
         Timer.Context context = startMetricTimer(DIRECTION_IN);
         long executionStartTime = System.nanoTime();
+        TracingSpan requestMediationSpan = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            requestMediationSpan = Util.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION, responseLatencySpan, tracer);
+        }
         try {
             return mediate(messageContext, DIRECTION_IN);
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && requestMediationSpan != null) {
+                Util.setTag(requestMediationSpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.REQUEST_MEDIATION_ERROR);
+            }
+            throw e;
         } finally {
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(requestMediationSpan);
+            }
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             stopMetricTimer(context);
         }
     }
 
+    @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
         Timer.Context context = startMetricTimer(DIRECTION_OUT);
         long executionStartTime = System.nanoTime();
+        TracingSpan responseMediationSpan = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            responseMediationSpan =
+                    Util.startSpan(APIMgtGatewayConstants.RESPONSE_MEDIATION, responseLatencySpan, tracer);
+        }
         try {
             return mediate(messageContext, DIRECTION_OUT);
+        } catch (Exception e) {
+            if (Util.tracingEnabled() && responseMediationSpan != null) {
+                Util.setTag(responseMediationSpan, APIMgtGatewayConstants.ERROR,
+                        APIMgtGatewayConstants.RESPONSE_MEDIATION_ERROR);
+            }
+            throw e;
         } finally {
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(responseMediationSpan);
+            }
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
             stopMetricTimer(context);

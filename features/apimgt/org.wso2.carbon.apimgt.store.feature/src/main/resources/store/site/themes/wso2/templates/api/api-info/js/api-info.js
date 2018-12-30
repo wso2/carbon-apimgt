@@ -21,8 +21,8 @@ function triggerSubscribe() {
     ).attr('disabled', 'disabled');
 
     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
-        action:"addSubscription",
-        applicationId:applicationId,
+        action:"addAPISubscriptionByAppId",
+        appId:applicationId,
         name:api.name,
         version:api.version,
         provider:api.provider,
@@ -40,6 +40,7 @@ function triggerSubscribe() {
                 $('#messageModal a.btn-primary').click(function() {
                     window.location.reload();
                 });
+                $('#messageModal').modal();
             } else {
                 var jsonPayload = result.status.workflowResponse.jsonPayload;
                 if(jsonPayload != null && jsonPayload != ""){
@@ -118,7 +119,7 @@ function triggerSubscribe() {
                     window.location.reload();
                 });
                 $('#messageModal a.btn-primary').click(function() {
-                    urlPrefix = "name=" + applicationName + "&" + urlPrefix;
+                    urlPrefix = "name=" + applicationName + "&appId=" + applicationId + "&" + urlPrefix;
                     location.href = "../site/pages/application.jag?" + urlPrefix+"#subscription";
                  });
                    $('#messageModal').modal();

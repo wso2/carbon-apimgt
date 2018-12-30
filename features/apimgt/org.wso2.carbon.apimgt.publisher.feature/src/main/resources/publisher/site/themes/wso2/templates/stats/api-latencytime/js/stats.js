@@ -48,6 +48,7 @@ $( document ).ready(function() {
       $('#mediationType').trigger('change');
     });
     $('#today-btn').on('click', function () {
+      currentDay = getDate();
       from = currentDay - 86400000;
       to = currentDay;
       renderGraph(from,to,"HOUR");
@@ -56,6 +57,7 @@ $( document ).ready(function() {
       btnActiveToggle(this);
     });
        $('#hour-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - 3600000;
         to = currentDay;
         depth = "MINUTES";
@@ -71,6 +73,7 @@ $( document ).ready(function() {
          $('#clear-btn-wrapper').css("display", "none");
          });
        $('#week-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - 604800000;
         to = currentDay;
         depth = "DAY";
@@ -79,6 +82,7 @@ $( document ).ready(function() {
         btnActiveToggle(this);
       });
        $('#month-btn').on('click', function () {
+        currentDay = getDate();
         from = currentDay - (604800000 * 4);
         to = currentDay;
         depth = "DAY";
@@ -209,8 +213,8 @@ var populateMediations = function(data){
                     .selectpicker('refresh');
 };
 function renderGraph(fromDate,toDate,drillDown){
-    var toDateString = convertTimeString(toDate);
-    var fromDateString = convertTimeString(fromDate);
+    var toDateString = convertTimeStringUTC(toDate);
+    var fromDateString = convertTimeStringUTC(fromDate);
     getDateTime(toDate,fromDate);
     if (statsEnabled) {
         jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : fromDateString , toDate : toDateString,drilldown:drillDown},
@@ -228,6 +232,9 @@ function renderGraph(fromDate,toDate,drillDown){
                     var securityLatencyData = (data1["Authentication"]) ? data1["Authentication"] : [];
                     var throttlingLatencyData = (data1["Throttling"])? data1["Throttling"] : [];
                     var d = new Date(json.usage[usage1].values.year, (json.usage[usage1].values.month -1), json.usage[usage1].values.day, json.usage[usage1].values.hour,json.usage[usage1].values.minutes,json.usage[usage1].values.seconds,"00");
+                    var now = new Date()
+                    now.setTime(d.getTime() - (now.getTimezoneOffset() * 60000))
+                    d = now;
                     apiResponseTimeData.push({x:d,y:json.usage[usage1].values.apiResponseTime});
                     backendLatencyData.push({x:d,y:json.usage[usage1].values.backendLatency});
                     otherLatencyData.push({x:d,y:json.usage[usage1].values.otherLatency});
@@ -271,8 +278,9 @@ function renderGraph(fromDate,toDate,drillDown){
     }
 }
 function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
-   var toDateString = convertTimeString(toDate);
-    var fromDateString = convertTimeString(fromDate);
+   var toDateString = convertTimeStringUTC(toDate);
+    var fromDateString = convertTimeStringUTC(fromDate);
+
     getDateTime(toDate,fromDate);
            jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getComparisonData" , apiName : apiName , fromDate : fromDateString , toDate : toDateString,drilldown:drillDown,versionArray:JSON.stringify(comparedVersion),mediationName:decodeURIComponent(mediationName)},
         function (json) {
