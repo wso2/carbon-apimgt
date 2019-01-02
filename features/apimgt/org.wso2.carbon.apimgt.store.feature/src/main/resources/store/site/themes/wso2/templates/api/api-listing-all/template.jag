@@ -318,18 +318,27 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                                     <%} else { %>
                                     	<p class="truncate"><%=encode.forHtml(api.provider)%></p>
                                     <% } %>
+                                    <% if ((api.resultType == null) || (api.resultType != null && api.resultType == "API")){ %>
+                                        <p>&nbsp</p>
+                                    <% } else {
+                                        var docContentPath;
+                                        if (api.docSourceType == "FILE") {
+                                            var tenant = request.getParameter("tenant");
+                                            if (tenant == null) {
+                                                tenant = "carbon.super";
+                                            }
+                                            docContentPath = jagg.url("/site/themes/wso2/templates/api/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + api.docFilePath);
+                                        } else {
+                                            docContentPath = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + "?docName=" + api.docName + "&name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
+                                        }
+                                    %>
+                                    <span>
+                                        <p class="truncate"><%=i18n.localize("Matched in Doc")%>&nbsp:&nbsp<a href="<%=docContentPath%>" title="<%=i18n.localize("View Content")%>"><%=api.docName%></a></p>
+                                    </span>
+                                    <% } %>
                                     <% if(isRatingActivated){ %>
                                         <input type="hidden" class="rating" disabled="disabled" value="<%=encode.forHtmlAttribute(api.rates)%>" />
                                     <% } %>
-				    <% if ((api.resultType == null) || (api.resultType != null && api.resultType == "API")){ %>
-					<p>&nbsp</p>
-				    <% } else {
-					var docContentPath = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + "?docName=" + api.docName + "&name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
-				    %>
-					<span>
-			                   <p><%=i18n.localize("Matched in Doc")%>&nbsp:&nbsp<a href="<%=docContentPath%>" title="<%=i18n.localize("View Content")%>"><%=api.docName%></a></p>
-                                        </span>
-				    <% } %>
 
                                 </div>
                             </div>
@@ -337,10 +346,10 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                 <%}%>
                 <% } %>
 
-            
-            
+
+
             <!-- Pagination Start -->
-            
+
             <%  if(numberOfPages > 1) { %>
                 <div class="col-sm-12">
                 <ul class="pagination ">

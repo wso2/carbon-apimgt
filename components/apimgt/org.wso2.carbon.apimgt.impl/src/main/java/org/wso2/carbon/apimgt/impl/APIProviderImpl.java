@@ -5975,7 +5975,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             docArtifact.setAttribute(APIConstants.DOC_ASSOCIATED_API_STATUS, api.getStatus());
             artifactManager.updateGenericArtifact(docArtifact);
         }
-
     }
 
 }

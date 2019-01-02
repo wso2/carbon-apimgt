@@ -1482,4 +1482,13 @@ public final class APIConstants {
     public static final String CORRELATION_LOGGER = "correlation";
     public static final String LOG_ALL_METHODS = "logAllMethods";
     public static final String AM_ACTIVITY_ID = "activityid";
+
+    public static final String PDF_EXTENSION = "pdf";
+    public static final String XLS_EXTENSION = "xls";
+    public static final String XLSX_EXTENSION = "xlsx";
+    public static final String PPT_EXTENSION = "ppt";
+    public static final String PPTX_EXTENSION = "pptx";
+    public static final String DOC_EXTENSION = "doc";
+    public static final String DOCX_EXTENSION = "docx";
+
 }

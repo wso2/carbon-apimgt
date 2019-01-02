@@ -1328,6 +1328,11 @@ public final class APIUtil {
                 documentation.setOtherTypeName(artifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME));
             }
 
+            String content = artifact.getAttribute(APIConstants.DOC_CONTENT);
+            if (content != null && !content.isEmpty()) {
+                documentation.setContent(content);
+            }
+
         } catch (GovernanceException e) {
             throw new APIManagementException("Failed to get documentation from artifact", e);
         }
@@ -1610,7 +1615,7 @@ public final class APIUtil {
             //set associated api status
             artifact.setAttribute(APIConstants.DOC_ASSOCIATED_API_STATUS, documentation.getApiStatus());
 
-            if (sourceType.equals(Documentation.DocumentSourceType.FILE) && documentation.getContent() != null && !documentation.getContent().isEmpty()) {
+            if (documentation.getContent() != null && !documentation.getContent().isEmpty()) {
                 artifact.setAttribute(APIConstants.DOC_CONTENT, documentation.getContent());
             }
         } catch (GovernanceException e) {

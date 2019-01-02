@@ -1179,6 +1179,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             currentApi.put("docName", currentApi, doc.getName());
                             currentApi.put("docSummary", currentApi, doc.getSummary());
                             currentApi.put("docSourceURL", currentApi, doc.getSourceUrl());
+                            currentApi.put("docSourceType", currentApi, doc.getSourceType().name());
                             currentApi.put("docFilePath", currentApi, doc.getFilePath());
                             currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
                             currentApi.put("resultType", currentApi, "Document");

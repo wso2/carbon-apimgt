@@ -44,6 +44,21 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.poi.hslf.extractor.PowerPointExtractor;
+import org.apache.poi.hssf.extractor.ExcelExtractor;
+import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.xslf.extractor.XSLFPowerPointExtractor;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.xmlbeans.XmlException;
 import org.jaggeryjs.hostobjects.file.FileHostObject;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONArray;
@@ -3520,14 +3535,46 @@ public class APIProviderHostObject extends ScriptableObject {
                         .addFileToDocumentation(apiId, doc, fileHostObject.getName(), fileHostObject.getInputStream(),
                                 contentType);
 
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileHostObject.getInputStream()));
-                String line;
-                StringBuilder fileContent = new StringBuilder();
+                String fileContent = null;
+                if (APIConstants.PDF_EXTENSION.equals(extension)) {
+                    PDDocument pdf = PDDocument.load(fileHostObject.getInputStream());
+                    PDFTextStripper stripper = new PDFTextStripper();
+                    fileContent = stripper.getText(pdf);
+                } else if (APIConstants.XLS_EXTENSION.equals(extension)) {
+                    POIFSFileSystem fs = new POIFSFileSystem(fileHostObject.getInputStream());
+                    ExcelExtractor extractor = new ExcelExtractor(fs);
+                    fileContent = extractor.getText();
+                } else if (APIConstants.XLSX_EXTENSION.equals(extension)) {
+                    OPCPackage opcPackage = OPCPackage.open(fileHostObject.getInputStream());
+                    XSSFExcelExtractor xssfExcelExtractor = new XSSFExcelExtractor(opcPackage);
+                    fileContent = xssfExcelExtractor.getText();
+                } else if (APIConstants.PPT_EXTENSION.equals(extension)) {
+                    POIFSFileSystem fs = new POIFSFileSystem(fileHostObject.getInputStream());
+                    PowerPointExtractor extractor = new PowerPointExtractor(fs);
+                    fileContent = extractor.getText();
+                } else if (APIConstants.PPTX_EXTENSION.equals(extension)) {
+                    XMLSlideShow xmlSlideShow = new XMLSlideShow(fileHostObject.getInputStream());
+                    XSLFPowerPointExtractor xslfPowerPointExtractor = new XSLFPowerPointExtractor(xmlSlideShow);
+                    fileContent = xslfPowerPointExtractor.getText();
+                }else if (APIConstants.DOC_EXTENSION.equals(extension)) {
+                    POIFSFileSystem fs = new POIFSFileSystem(fileHostObject.getInputStream());
+                    WordExtractor msWord2003Extractor = new WordExtractor(fs);
+                    fileContent = msWord2003Extractor.getText();
+                }else if (APIConstants.DOCX_EXTENSION.equals(extension)) {
+                    XWPFDocument docx = new XWPFDocument(fileHostObject.getInputStream());
+                    XWPFWordExtractor msWord2007Extractor = new XWPFWordExtractor(docx);
+                    fileContent = msWord2007Extractor.getText();
+                } else {
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileHostObject.getInputStream()));
+                    String line;
+                    StringBuilder content = new StringBuilder();
 
-                while ((line = bufferedReader.readLine()) != null) {
-                    fileContent.append(line);
+                    while ((line = bufferedReader.readLine()) != null) {
+                        content.append(line);
+                    }
+                    fileContent = content.toString();
                 }
-                doc.setContent(fileContent.toString());
+                doc.setContent(fileContent);
             } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
@@ -3539,6 +3586,12 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("The attachment cannot be found for document- " + docName, e);
         } catch (IOException e) {
             handleException("Error while reading the attached document - " + docName, e);
+        } catch (InvalidFormatException e) {
+            e.printStackTrace();
+        } catch (XmlException e) {
+            e.printStackTrace();
+        } catch (OpenXML4JException e) {
+            e.printStackTrace();
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -3879,6 +3932,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         if (providerName != null) {
                             row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
                         }
+                        row.put("resultType", row, "API");
                         apiArray.put(i, apiArray, row);
                         i++;
                     }
@@ -3908,7 +3962,8 @@ public class APIProviderHostObject extends ScriptableObject {
                         row.put("docSummary", row, doc.getSummary());
                         row.put("docSourceURL", row, doc.getSourceUrl());
                         row.put("docFilePath", row, doc.getFilePath());
-
+                        row.put("docSourceType", row, doc.getSourceType().name());
+                        row.put("resultType", row, "Document");
                         docArray.put(i, docArray, row);
                         i++;
                     }

@@ -446,6 +446,10 @@
                 <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/results</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
         </WhiteListedURIs>
         <ETagSkipList>
             <ETagSkipURI>

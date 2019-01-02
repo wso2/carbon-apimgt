@@ -26,7 +26,7 @@
    <script type="text/javascript">
    	var user = <%=jagg.getUser()%>;
 	var isPublishPermitted = <%=outputs.isPublishPermitted%>;
-	var username = user.username ; 
+	var username = user.username ;
 	var siteContext = "<%=jagg.getSiteContext()%>";
 
 	var enjoyhint_instance = null;
@@ -163,7 +163,6 @@
             to=0;
         }  %>
 
-
        <% if(apis || docs){
 	var resultArray = new Array();
 	var tempApi;
@@ -189,8 +188,8 @@
                     }
                     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider) + urlPostfix;
 
-        %>        
-        <%if(query != null && (query.indexOf("Doc:") == 0 || query.indexOf("doc:") == 0)) {%> 
+        %>
+        <%if(query != null && (query.indexOf("Doc:") == 0 || query.indexOf("doc:") == 0)) {%>
         	<div class="col-sm-12">
         		<div class="col-sm-5">
         			 <div class="add-padding-2x app-data ">
@@ -203,7 +202,7 @@
                                     <%} else if(api.docFilePath && api.docFilePath!="") { %>
                                     	<p><a href="<%=api.docFilePath%>" target="_blank" title="<%=i18n.localize("Download")%>"><%=i18n.localize("Download")%></a></p>
                                     <% } else { %>
-                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) 
+                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version)
                                     	+ "&provider=" + encode.forUriComponent(api.provider) + urlPostfix; %>
                                     	<p><a href="<%=docViewMappedUrl%>?<%=docUrl%>" target="_blank" title="<%=i18n.localize("View Content")%>"><%=i18n.localize("View Content")%></a></p>
                                     <% } %>
@@ -212,25 +211,25 @@
         		<div class="col-sm-4">
         			<div class="col-sm-6">
                             <div class="api-wrapper add-margin-bottom-4x">
-                                <div class="thumbnail icon">                                    
+                                <div class="thumbnail icon">
                                     <% if(api.thumb == null) { %>
                                     	<div class="square-element setbgcolor">
 											<div class="api-name-icon" onclick="location.href='<%=path%>'"></div>
 											<div style="display: none">
 												<a href="" class="api-name" title="<%=api.name%>"><%=api.name%></a>
 											</div>
-								</div> 
+								</div>
                                     <% } else { %>
 										<div class="square-element">
                                     		<img class="" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="api thumbnail url">
                                     	</div>
                                     <% } %>
                                     <a href="<%=path%>">
-	                                    <div class="after">                                        
+	                                    <div class="after">
 	                                            <span class="fw-stack fw-lg">
 	                                            <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                            <i class="fw fw-view fw-stack-1x"></i>
-	                                            </span>                                        
+	                                            </span>
 	                                    </div>
                                     </a>
                                 </div>
@@ -263,33 +262,33 @@
 			                       <%} %>
                                 </div>
                             </div>
-                        </div>  
-        		
-        		</div>        
+                        </div>
+
+        		</div>
            </div>
-                <%} else {%> 
-                
+                <%} else {%>
+
                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                             <div class="api-wrapper add-margin-bottom-4x">
-                                <div class="thumbnail icon">                                    
+                                <div class="thumbnail icon">
                                     <% if(api.thumb == null) { %>
                                     	<div class="square-element setbgcolor">
 											<div class="api-name-icon" onclick="location.href='<%=path%>'"></div>
 											<div style="display: none">
 												<a href="" class="api-name" title="<%=api.name%>"><%=api.name%></a>
 											</div>
-								</div> 
+								</div>
                                     <% } else { %>
 										<div class="square-element">
                                     		<img class="" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="api thumbnail url">
                                     	</div>
                                     <% } %>
-                                    <a href="<%=path%>" title="<%=i18n.localize("Browse API")%>"> 
-	                                    <div class="after">                                        
+                                    <a href="<%=path%>" title="<%=i18n.localize("Browse API")%>">
+	                                    <div class="after">
 	                                            <span class="fw-stack fw-lg" title="<%=i18n.localize("Browse API")%>">
 	                                            <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Browse API")%>"></i>
 	                                            <i class="fw fw-view fw-stack-1x" title="<%=i18n.localize("Browse API")%>"></i>
-	                                            </span>                                        
+	                                            </span>
 	                                    </div>
                                     </a>
                                 </div>
@@ -308,10 +307,16 @@
                                     <% if ((api.resultType == null) || (api.resultType != null && api.resultType == "API")) { %>
 			                            <p>&nbsp</p>
                                     <%} else {
-			                            var docContentPath = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + "?docName=" + api.docName + "&name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+urlPostfix;
+			                            var docContentPath;
+			                            if (api.docSourceType == "FILE") {
+			                                var tenant = jagg.getTenantDomain();
+			                                docContentPath = jagg.url("/site/themes/wso2/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + api.docFilePath)
+			                            } else {
+			                            	docContentPath = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + "?docName=" + api.docName + "&name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+urlPostfix;
+			                            }
                                     %>
                                     <span>
-			                            <p><%=i18n.localize("Matched in Doc")%>&nbsp:&nbsp<a href="<%=docContentPath%>" title="<%=i18n.localize("View Content")%>"><%=api.docName%></a></p>
+			                            <p class="truncate"><%=i18n.localize("Matched in Doc")%>&nbsp:&nbsp<a href="<%=docContentPath%>" title="<%=i18n.localize("View Content")%>"><%=api.docName%></a></p>
                                     </span>
                                     <%}%>
 		                            <%if(outputs.isCreatePermitted){ %>
@@ -330,7 +335,7 @@
 			                       <%} %>
                                 </div>
                             </div>
-                        </div>                
+                        </div>
         <% }} }%>
 
 </div>
