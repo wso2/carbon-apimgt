@@ -1737,6 +1737,19 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
+    /**
+     * This method helps to get all published APIs in paginated form  .
+     *
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return a method which gets list of APIs by status.
+     * @throws ScriptException
+     * @throws APIManagementException
+     */
     public static NativeObject jsFunction_getAllPaginatedPublishedLightWeightAPIs(Context cx, Scriptable thisObj,
                                                                                   Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
@@ -1761,6 +1774,16 @@ public class APIStoreHostObject extends ScriptableObject {
         return getPaginatedLightWeightAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, returnAPItags);
     }
 
+    /**
+     * This method helps to get all paginated APIs by status.
+     * @param apiConsumer
+     * @param tenantDomain
+     * @param start
+     * @param end
+     * @param status
+     * @param  returnAPItags
+     * @return this will return list of APIs by status.
+     */
     private static NativeObject getPaginatedLightWeightAPIsByStatus(APIConsumer apiConsumer, String tenantDomain,
                                                                     int start, int end, String[] status,
                                                                     boolean returnAPItags) {

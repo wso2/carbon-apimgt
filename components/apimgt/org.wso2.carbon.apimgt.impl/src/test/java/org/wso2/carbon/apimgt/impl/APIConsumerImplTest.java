@@ -300,6 +300,7 @@ public class APIConsumerImplTest {
         assertNotNull(apiConsumer.getAllPaginatedPublishedAPIs(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
     }
+
     @Test
     public void testGetAllPaginatedPublishedLightWeightAPIs() throws Exception {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
@@ -337,6 +338,7 @@ public class APIConsumerImplTest {
         assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
     }
+
     @Test
     public void testGetAllPaginatedAPIs() throws Exception {
         Registry userRegistry = Mockito.mock(Registry.class);

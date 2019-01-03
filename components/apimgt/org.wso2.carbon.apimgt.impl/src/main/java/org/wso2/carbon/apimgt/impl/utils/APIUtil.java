@@ -902,6 +902,12 @@ public final class APIUtil {
         return api;
     }
 
+    /**
+     * This method is used to get an API in the Light Weight manner.
+     * @param artifact
+     * @return this will return an API for the selected artifact.
+     * @throws APIManagementException
+     */
     public static API getLightWeightAPI(GovernanceArtifact artifact)
             throws APIManagementException {
 
