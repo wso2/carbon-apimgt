@@ -1776,12 +1776,12 @@ public class APIStoreHostObject extends ScriptableObject {
 
     /**
      * This method helps to get all paginated APIs by status.
-     * @param apiConsumer
-     * @param tenantDomain
-     * @param start
-     * @param end
-     * @param status
-     * @param  returnAPItags
+     * @param apiConsumer   ApiConsumer object to provide helper funcionality
+     * @param tenantDomain  Domain name of the tenant.
+     * @param start         The number to start the API Listing
+     * @param end           The number of end the API Listing
+     * @param status[]      Status of the API
+     * @param returnAPItags Optional parameter ,returns the tags of the API from registry if it is set to true
      * @return this will return list of APIs by status.
      */
     private static NativeObject getPaginatedLightWeightAPIsByStatus(APIConsumer apiConsumer, String tenantDomain,
