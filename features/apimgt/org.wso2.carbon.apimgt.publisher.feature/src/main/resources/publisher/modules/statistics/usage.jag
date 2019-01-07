@@ -1024,7 +1024,7 @@ function getAPIUsageByApplications(apiName, version, fromDate, toDate) {
     var usage;
     try {
         usage = usageClient.getAPIUsageByApplications(apiName, version, fromDate, toDate);
-        if (usage == null) {
+        if (!usage) {
             return {
                 error:true
             };

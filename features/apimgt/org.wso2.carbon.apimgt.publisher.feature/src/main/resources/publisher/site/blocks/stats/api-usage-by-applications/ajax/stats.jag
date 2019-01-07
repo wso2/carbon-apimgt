@@ -8,7 +8,7 @@ include("/jagg/jagg.jag");
             site = require("/site/conf/site.json"),
             msg = require("/site/conf/ui-messages.jag")
     allProviders = "__all_providers__";
-    if (jagg.getUser() == null) {
+    if (!jagg.getUser()) {
         print({
             error: true,
             message: 'timeout'

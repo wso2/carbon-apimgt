@@ -3,7 +3,7 @@
 <div id="apiUsageByApplication-stat-page" class="stat-page">
     <%
         //show content only if analytics enabled
-        if(org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
+        if (org.wso2.carbon.apimgt.impl.utils.APIUtil.isAnalyticsEnabled()) {
     %>
         <div class="row">
         <div class="form-group col-sm-12">
