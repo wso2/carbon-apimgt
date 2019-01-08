@@ -1737,6 +1737,154 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
+    /**
+     * This method helps to get all published APIs in paginated form  .
+     *
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return a method which gets list of APIs by status.
+     * @throws ScriptException
+     * @throws APIManagementException
+     */
+    public static NativeObject jsFunction_getAllPaginatedPublishedLightWeightAPIs(Context cx, Scriptable thisObj,
+                                                                                  Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+
+        APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        String tenantDomain;
+        boolean returnAPItags = false;
+        boolean lightWeight = false;
+        String [] statusList = {APIConstants.PUBLISHED};
+        if (args[0] != null) {
+            tenantDomain = (String) args[0];
+        } else {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        int start = Integer.parseInt((String) args[1]);
+        int end = Integer.parseInt((String) args[2]);
+
+        if (args.length > 3 && args[3] != null) {
+            returnAPItags = Boolean.parseBoolean((String) args[3]);
+        }
+        return getPaginatedLightWeightAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, returnAPItags);
+    }
+
+    /**
+     * This method helps to get all paginated APIs by status.
+     * @param apiConsumer   ApiConsumer object to provide helper funcionality
+     * @param tenantDomain  Domain name of the tenant.
+     * @param start         The number to start the API Listing
+     * @param end           The number of end the API Listing
+     * @param status[]      Status of the API
+     * @param returnAPItags Optional parameter ,returns the tags of the API from registry if it is set to true
+     * @return this will return list of APIs by status.
+     */
+    private static NativeObject getPaginatedLightWeightAPIsByStatus(APIConsumer apiConsumer, String tenantDomain,
+                                                                    int start, int end, String[] status,
+                                                                    boolean returnAPItags) {
+        Set<API> apiSet;
+        Map<String, Object> resultMap;
+        NativeArray myn = new NativeArray(0);
+        NativeObject result = new NativeObject();
+
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
+            resultMap = apiConsumer.getAllPaginatedLightWeightAPIsByStatus(tenantDomain, start, end, status,
+                    returnAPItags);
+
+        } catch (APIManagementException e) {
+            log.error("Error from Registry API while getting API Information", e);
+            return result;
+        } catch (Exception e) {
+            log.error("Error while getting API Information", e);
+            return result;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        if (resultMap != null) {
+            apiSet = (Set<API>) resultMap.get("apis");
+            if (apiSet != null) {
+                Iterator it = apiSet.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    NativeObject row = new NativeObject();
+                    Object apiObject = it.next();
+                    API api = (API) apiObject;
+                    APIIdentifier apiIdentifier = api.getId();
+                    row.put("name", row, apiIdentifier.getApiName());
+                    row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                    row.put("version", row, apiIdentifier.getVersion());
+                    row.put("context", row, api.getContext());
+                    row.put("status", row, api.getStatus());
+                    if (api.getThumbnailUrl() == null) {
+                        row.put("thumbnailurl", row, "images/api-default.png");
+                    } else {
+                        row.put("thumbnailurl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                    }
+                    row.put("visibility", row, api.getVisibility());
+                    row.put("visibleRoles", row, api.getVisibleRoles());
+                    row.put("description", row, api.getDescription());
+                    String apiOwner = APIUtil.replaceEmailDomainBack(api.getApiOwner());
+                    if (apiOwner == null) {
+                        apiOwner = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
+                    }
+                    row.put("apiOwner", row, apiOwner);
+                    row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                    row.put("apiBusinessOwner", row, api.getBusinessOwner());
+                    row.put("rates", row, api.getRating());
+
+                    NativeArray tierArr = new NativeArray(0);
+                    Set<Tier> tierSet = api.getAvailableTiers();
+                    if (tierSet != null) {
+                        Iterator tierIt = tierSet.iterator();
+                        int j = 0;
+                        while (tierIt.hasNext()) {
+                            Object tierObject = tierIt.next();
+                            Tier tier = (Tier) tierObject;
+                            tierArr.put(j, tierArr, tier.getName());
+                            j++;
+                        }
+                    }
+                    row.put("tiers", row, tierArr);
+                    row.put("monetizationCategory", row, api.getMonetizationCategory());
+
+                    if (returnAPItags) {
+                        StringBuilder tagsSet = new StringBuilder("");
+                        for (int k = 0; k < api.getTags().toArray().length; k++) {
+                            tagsSet.append(api.getTags().toArray()[k].toString());
+                            if (k != api.getTags().toArray().length - 1) {
+                                tagsSet.append(",");
+                            }
+                        }
+                        row.put("tags", row, tagsSet.toString());
+                    }
+
+                    NativeArray envArr = api.getEnvironmentList() != null ?
+                            new NativeArray(api.getEnvironmentList().toArray()) : new NativeArray(0);
+                    row.put("environmentList", row, envArr);
+                    myn.put(i, myn, row);
+                    i++;
+                }
+                result.put("apis", result, myn);
+                result.put("totalLength", result, resultMap.get("totalLength"));
+                result.put("isMore", result, resultMap.get("isMore"));
+            }
+        }
+        return result;
+    }
+
     private static NativeObject getPaginatedAPIsByStatus(APIConsumer apiConsumer, String tenantDomain, int start,
                                                          int end, String[] status, boolean returnAPItags) {
 
