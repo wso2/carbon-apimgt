@@ -27,6 +27,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
+import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheKey;
+
+import java.util.HashMap;
+import java.util.Map;
 //import org.wso2.carbon.apimgt.impl.utils.TokenGenUtil;
 
 
@@ -44,7 +48,12 @@ public class TokenGenTest {
 
     @Test
     public void testAbstractJWTGenerator() throws Exception {
-        JWTGenerator jwtGen = new JWTGenerator();
+        JWTGenerator jwtGen = new JWTGenerator() {
+            @Override
+            protected Map<String, String> getClaimsFromCache(AuthorizationGrantCacheKey cacheKey) {
+                return new HashMap<String, String>();
+            }
+        };
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
 
         TokenValidationContext validationContext = new TokenValidationContext();
@@ -100,7 +109,12 @@ public class TokenGenTest {
     //    TODO: Have to convert to work with new JWT generation and signing
     @Test
     public void testJWTGeneration() throws Exception {
-        JWTGenerator jwtGen = new JWTGenerator();
+        JWTGenerator jwtGen = new JWTGenerator() {
+            @Override
+            public Map<String, String> getClaimsFromCache(AuthorizationGrantCacheKey cacheKey) {
+                return new HashMap<String, String>();
+            }
+        };
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
         dto.setSubscriber("sastry");
         dto.setApplicationName("hubapp");
