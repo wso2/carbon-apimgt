@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
@@ -130,6 +131,8 @@ public class API implements Serializable {
     // API security at the gateway level.
     private String apiSecurity = "oauth2";
 
+    private static final String NULL_VALUE = "NULL";
+    
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
     }
@@ -754,10 +757,10 @@ public class API implements Serializable {
     }
 
     public void setType(String type) {
-        if (type != null && type != "") {
-            this.type = type.toUpperCase();
-        } else {
+        if (StringUtils.isEmpty(type) || NULL_VALUE.equalsIgnoreCase(StringUtils.trim(type))) {
             this.type = "HTTP";
+        } else {
+            this.type = StringUtils.trim(type).toUpperCase();
         }
     }
 
