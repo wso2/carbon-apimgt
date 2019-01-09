@@ -1328,11 +1328,6 @@ public final class APIUtil {
                 documentation.setOtherTypeName(artifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME));
             }
 
-            String content = artifact.getAttribute(APIConstants.DOC_CONTENT);
-            if (content != null && !content.isEmpty()) {
-                documentation.setContent(content);
-            }
-
         } catch (GovernanceException e) {
             throw new APIManagementException("Failed to get documentation from artifact", e);
         }
@@ -1611,13 +1606,6 @@ public final class APIUtil {
             String basePath = apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                     apiId.getApiName() + RegistryConstants.PATH_SEPARATOR + apiId.getVersion();
             artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
-
-            //set associated api status
-            artifact.setAttribute(APIConstants.DOC_ASSOCIATED_API_STATUS, documentation.getApiStatus());
-
-            if (documentation.getContent() != null && !documentation.getContent().isEmpty()) {
-                artifact.setAttribute(APIConstants.DOC_CONTENT, documentation.getContent());
-            }
         } catch (GovernanceException e) {
             String msg = "Failed to create doc artifact content from :" + documentation.getName();
             log.error(msg, e);
@@ -7852,4 +7840,30 @@ public final class APIUtil {
         rootCause = rootCause == null ? e : rootCause;
         return rootCause;
     }
+
+    /**
+     * Notify document artifacts if an api state change occured. This change is required to re-trigger the document
+     * indexer so that the documnet indexes will be updated with the new associated api status.
+     * @param apiArtifact
+     * @param registry
+     * @throws RegistryException
+     * @throws APIManagementException
+     */
+    public static void notifyAPIStateChangeToAssociatedDocuments(GenericArtifact apiArtifact, Registry registry)
+            throws RegistryException, APIManagementException {
+        Association[] docAssociations = registry
+                .getAssociations(apiArtifact.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
+        for (Association association : docAssociations) {
+            String documentResourcePath = association.getDestinationPath();
+            Resource docResource = registry.get(documentResourcePath);
+            String oldStateChangeIndicatorStatus = docResource.getProperty(APIConstants.API_STATE_CHANGE_INDICATOR);
+            String newStateChangeIndicatorStatus = "false";
+            if (oldStateChangeIndicatorStatus != null) {
+                newStateChangeIndicatorStatus = String.valueOf(!Boolean.parseBoolean(oldStateChangeIndicatorStatus));
+            }
+            docResource.setProperty(APIConstants.API_STATE_CHANGE_INDICATOR, newStateChangeIndicatorStatus);
+            registry.put(documentResourcePath, docResource);
+        }
+    }
+
 }

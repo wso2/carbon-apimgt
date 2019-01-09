@@ -56,12 +56,6 @@
 	    <field type="text" readonly="true">
                 <name>File Path</name>
             </field>
-            <field type="text">
-                <name>Content</name>
-            </field>
-            <field type="text">
-                <name>Status</name>
-            </field>
         </table>
     </content>
 

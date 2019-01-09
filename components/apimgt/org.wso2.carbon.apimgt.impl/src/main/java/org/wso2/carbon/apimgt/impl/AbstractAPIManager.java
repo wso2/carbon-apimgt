@@ -2593,30 +2593,39 @@ public abstract class AbstractAPIManager implements APIManager {
             String[] searchQueries = newSearchQuery.split("&");
 
             String apiState = "";
-            String searchTerm = "";
+            String publisherRoles = "";
             Map<String, String> attributes = new HashMap<String, String>();
             for (String searchCriterea : searchQueries) {
                 String[] keyVal = searchCriterea.split("=");
-                if (APIConstants.PUBLISHER_ROLES.equals(keyVal[0]) || APIConstants.STORE_VIEW_ROLES.equals(keyVal[0])) {
+                if (APIConstants.STORE_VIEW_ROLES.equals(keyVal[0])) {
                     attributes.put("propertyName", keyVal[0]);
                     attributes.put("rightPropertyValue", keyVal[1]);
                     attributes.put("rightOp", "eq");
+                } else if (APIConstants.PUBLISHER_ROLES.equals(keyVal[0])) {
+                    publisherRoles = keyVal[1];
                 } else {
                     if (APIConstants.LCSTATE_SEARCH_KEY.equals(keyVal[0])) {
                         apiState = keyVal[1];
                         continue;
                     }
-                    if (APIConstants.CONTENT_SEARCH_TYPE_PREFIX.equals(keyVal[0])) {
-                        searchTerm = keyVal[1];
-                    }
                     attributes.put(keyVal[0], keyVal[1]);
                 }
             }
 
-            attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD,
-                     ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR (" + APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD + "_s:" + ClientUtils
-                            .escapeQueryChars(APIConstants.DOC_RXT_MEDIA_TYPE) + " AND overview_content_s:" + searchTerm + ")");
-            attributes.put(APIConstants.DOC_ASSOCIATED_API_STATUS, apiState);
+            String complexAttribute = "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR " + ClientUtils
+                    .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + ")";
+
+            //construct query such that publisher roles is checked in properties for api artifacts and in fields for document artifacts
+            //this was designed this way so that content search can be fully functional if registry is re-indexed after engaging DocumentIndexer
+            if (!StringUtils.isEmpty(publisherRoles)) {
+                complexAttribute =
+                        "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
+                                + publisherRoles + ") OR mediaType_s:("  + ClientUtils
+                                .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
+            }
+
+            attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, complexAttribute);
+            attributes.put(APIConstants.API_OVERVIEW_STATUS, apiState);
             //this complex attribute is to impose lcState filter to api results only
             /*String complexMediaTypeLCStateAttribute = "";
             if (!apiState.isEmpty()) {
@@ -2655,13 +2664,14 @@ public abstract class AbstractAPIManager implements APIManager {
                 --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
             }
 
+            AuthorizationManager manager = ServiceReferenceHolder.getInstance().getRealmService()
+                    .getTenantUserRealm(tenantId).getAuthorizationManager();
             for (ResourceData data : resourceData) {
                 String resourcePath = data.getResourcePath();
                 int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
                 resourcePath = resourcePath.substring(index);
                 Resource resource = registry.get(resourcePath);
-                if (APIConstants.DOC_RXT_MEDIA_TYPE.equals(resource.getMediaType())) {
-                    //doc is authorized check is skipped for the moment
+                if (APIConstants.DOCUMENT_RXT_MEDIA_TYPE.equals(resource.getMediaType())) {
                     Resource docResource = registry.get(resourcePath);
                     String docArtifactId = docResource.getUUID();
                     GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
@@ -2701,6 +2711,8 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to search APIs by content", e);
         } catch (IndexerException e) {
             handleException("Failed to search APIs by content", e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Error while getting Authorization Manager");
         }
 
         result.put("apis", apiSet);

@@ -383,8 +383,6 @@ public final class APIConstants {
     public static final String DOC_FILE_PATH = "overview_filePath";
     public static final String DOC_SOURCE_TYPE = "overview_sourceType";
     public static final String DOC_OTHER_TYPE_NAME = "overview_otherTypeName";
-    public static final String DOC_CONTENT = "overview_content";
-    public static final String DOC_ASSOCIATED_API_STATUS = "overview_status";
     public static final String PUBLISHED = "PUBLISHED";
     public static final String CREATED = "CREATED";
     public static final String DEPRECATED = "DEPRECATED";
@@ -477,8 +475,7 @@ public final class APIConstants {
 
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
     public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
-    public static final String API_OR_DOC_RXT_MEDIA_TYPE = "application/vnd.wso2-*+xml";
-    public static final String DOC_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
+    public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
     public static final int TOP_TATE_MARGIN = 4;
 
     public static final class Permissions {
@@ -1490,5 +1487,10 @@ public final class APIConstants {
     public static final String PPTX_EXTENSION = "pptx";
     public static final String DOC_EXTENSION = "doc";
     public static final String DOCX_EXTENSION = "docx";
+    public static final String XML_DOC_EXTENSION = "xml";
+    public static final String TXT_EXTENSION = "txt";
+    public static final String WSDL_EXTENSION = "wsdl";
+
+    public static final String API_STATE_CHANGE_INDICATOR = "registry.api.state.change.indicator";
 
 }
