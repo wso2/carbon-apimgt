@@ -2535,6 +2535,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * Search api resources by their content
      *
      * @param registry
      * @param searchQuery
@@ -2626,20 +2627,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
             attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, complexAttribute);
             attributes.put(APIConstants.API_OVERVIEW_STATUS, apiState);
-            //this complex attribute is to impose lcState filter to api results only
-            /*String complexMediaTypeLCStateAttribute = "";
-            if (!apiState.isEmpty()) {
-                complexMediaTypeLCStateAttribute = "(" + APIConstants.API_RXT_MEDIA_TYPE
-                        + " AND lcState_s:" + apiState + ") OR mediaType_s:text/plain";
-                attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, complexMediaTypeLCStateAttribute);
-            } else {
-                attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) +
-                          " OR " + ClientUtils.escapeQueryChars(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE) + ")");
-            }*/
-
-            //attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) +
-              //  " OR " + ClientUtils.escapeQueryChars(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE) + ")");
-            //add media type attribute if required----
 
             SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(attributes, systemUserRegistry);
             String errorMsg = resultsBean.getErrorMessage();

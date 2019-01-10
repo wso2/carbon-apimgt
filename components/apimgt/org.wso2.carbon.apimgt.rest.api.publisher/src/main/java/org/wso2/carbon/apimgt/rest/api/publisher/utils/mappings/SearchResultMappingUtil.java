@@ -17,9 +17,7 @@ import java.util.Map;
 public class SearchResultMappingUtil {
     private static final Log log = LogFactory.getLog(SearchResultMappingUtil.class);
 
-
     /**
-     *
      * Get API result representation for content search
      * @param api API
      * @return
@@ -44,7 +42,7 @@ public class SearchResultMappingUtil {
     }
 
     /**
-     *
+     * Get Document result representation for content search
      * @param document
      * @return
      */

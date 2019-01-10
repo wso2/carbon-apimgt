@@ -93,7 +93,6 @@ public class DocumentIndexer extends RXTIndexer {
             }
         }
 
-        log.info("Running Document Indexer...");
         return newIndexDocument;
     }
 

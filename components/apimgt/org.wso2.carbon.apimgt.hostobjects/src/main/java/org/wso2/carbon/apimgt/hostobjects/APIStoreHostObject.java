@@ -1050,13 +1050,11 @@ public class APIStoreHostObject extends ScriptableObject {
             }
 
             String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
-
             if  (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 for (int i = 0; i<statusList.length; i++) {
                     statusList[i] = statusList[i].toLowerCase();
                 }
             }
-
             lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
 
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
