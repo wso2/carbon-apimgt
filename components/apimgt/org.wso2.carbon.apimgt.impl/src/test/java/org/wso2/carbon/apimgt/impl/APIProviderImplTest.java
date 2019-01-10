@@ -1193,9 +1193,6 @@ public class APIProviderImplTest {
         prepareForGetAPIsByProvider(artifactManager, apiProvider, "admin", api1, api2);
         prepareForChangeLifeCycleStatus(apiProvider, apimgtDAO, apiId, artifact);
 
-        Association[] associations = new Association[0];
-        Mockito.when(apiProvider.registry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
-
         boolean status = apiProvider.updateAPIStatus(api.getId(), "PUBLISHED", true, true, true);
         Assert.assertTrue(status);
 
@@ -2232,9 +2229,6 @@ public class APIProviderImplTest {
 
         Mockito.when(gatewayManager.isAPIPublished(api, "carbon.super")).thenReturn(false);
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
-        Association[] associations = new Association[0];
-        Mockito.when(apiProvider.registry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
-
         apiProvider.updateAPI(api);
         Assert.assertEquals(0, api.getEnvironments().size());
 
@@ -2369,9 +2363,6 @@ public class APIProviderImplTest {
         Mockito.when(gatewayManager.getAPIEndpointSecurityType(Matchers.any(API.class), Matchers.anyString()))
                 .thenReturn(APIConstants.APIEndpointSecurityConstants.BASIC_AUTH,
                         APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH);
-        Association[] associations = new Association[0];
-        Mockito.when(apiProvider.registry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
-
         apiProvider.updateAPI(api);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
@@ -2604,9 +2595,6 @@ public class APIProviderImplTest {
         Mockito.when(gatewayManager.publishToGateway(Matchers.any(API.class), Matchers.any(APITemplateBuilder.class),
                 Matchers.anyString())).thenReturn(failedToPubGWEnv);
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
-        Association[] associations = new Association[0];
-        Mockito.when(apiProvider.registry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
-
         apiProvider.updateAPI(api);
     }
 
@@ -3169,9 +3157,6 @@ public class APIProviderImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
-        Association[] associations = new Association[0];
-        Mockito.when(apiProvider.registry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
-
         apiProvider.updateAPIforStateChange(apiId, APIConstants.PUBLISHED, failedGWEnv);
         //From the 2 environments, only 1 was successful
         Assert.assertEquals(2, api.getEnvironments().size());
@@ -3212,9 +3197,6 @@ public class APIProviderImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
-        Association[] associations = new Association[0];
-        Mockito.when(apiProvider.registry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
-
         boolean status = apiProvider.updateAPIforStateChange(apiId, APIConstants.RETIRED, failedGWEnv);
 
         Assert.assertEquals(2, api.getEnvironments().size());
@@ -3258,9 +3240,6 @@ public class APIProviderImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
-        Association[] associations = new Association[0];
-        Mockito.when(apiProvider.registry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
-
         try {
             apiProvider.updateAPIforStateChange(apiId, APIConstants.PUBLISHED, failedGWEnv);
         } catch(FaultGatewaysException e) {
@@ -3306,9 +3285,6 @@ public class APIProviderImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
-        Association[] associations = new Association[0];
-        Mockito.when(apiProvider.registry.getAssociations(Mockito.anyString(), Mockito.anyString())).thenReturn(associations);
-
         try {
             apiProvider.updateAPIforStateChange(apiId, APIConstants.RETIRED, failedGWEnv);
         } catch(FaultGatewaysException e) {
