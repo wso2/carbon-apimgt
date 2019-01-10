@@ -3521,7 +3521,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 apiProvider
                         .addFileToDocumentation(apiId, doc, fileHostObject.getName(), fileHostObject.getInputStream(),
                                 contentType);
-
             } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
@@ -3853,7 +3852,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 NativeArray docArray = new NativeArray(0);
 
                 if (apiSet != null && apiSet.size() > 0) {
-                    //List<API> searchedList = apiProvider.searchAPIs(searchTerm, searchType, providerName);
                     Iterator it = apiSet.iterator();
                     int i = 0;
                     while (it.hasNext()) {
@@ -3875,7 +3873,6 @@ public class APIProviderHostObject extends ScriptableObject {
                         i++;
                     }
                 }
-
 
                 if (docSet != null && docSet.size() > 0) {
                     int i = 0;
