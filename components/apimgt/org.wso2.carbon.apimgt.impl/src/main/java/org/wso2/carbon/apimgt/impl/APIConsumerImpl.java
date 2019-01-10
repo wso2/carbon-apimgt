@@ -4890,4 +4890,182 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantId);
     }
 
+    /**
+     * Store specific implementation of search paginated apis
+     * Returns API Search result based on the provided query. This search method supports '&' based concatenate
+     * search in multiple fields.
+     *
+     * @param registry
+     * @param searchQuery Ex: provider=*admin*&version=*1*
+     * @return API result
+     * @throws APIManagementException
+     */
+
+    public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
+            boolean limitAttributes) throws APIManagementException {
+
+        Map<String, Object> resultApis = super.searchPaginatedAPIs(registry, searchQuery, start, end, limitAttributes);
+        return filterMultipleVersionedAPIs(resultApis);
+    }
+
+    /**
+     * Search Apis by Doc Content
+     *
+     * @param registry     - Registry which is searched
+     * @param tenantID     - Tenant id of logged in domain
+     * @param username     - Logged in username
+     * @param searchTerm   - Search value for doc
+     * @return - Documentation to APIs map
+     * @throws APIManagementException - If failed to get ArtifactManager for given tenant
+     */
+    public Map<Documentation, API> searchAPIDoc(Registry registry, int tenantID, String username,
+            String searchTerm) throws APIManagementException {
+        Map<Documentation, API> docMap = super.searchAPIDoc(registry, tenantID, username, searchTerm);
+        return filterDocumentResultsOfMultipleVersions(docMap);
+
+    }
+
+    /**
+     * Store specific implementation of search paginated apis by content
+     * @param registry
+     * @param searchQuery
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    public Map<String, Object> searchPaginatedAPIsByContent(Registry registry, int tenantId, String searchQuery,
+            int start, int end, boolean limitAttributes) throws APIManagementException {
+
+        Map<String, Object> searchResults = super
+                .searchPaginatedAPIsByContent(registry, tenantId, searchQuery, start, end, limitAttributes);
+        return filterMultipleVersionedAPIs(searchResults);
+    }
+
+    private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
+        SortedSet<API> apiSet = (SortedSet<API>) searchResults.get("apis");
+        Map<Documentation, API> docMap = (Map<Documentation, API>) searchResults.get("docs");
+
+        //filter store results if displayMultipleVersions is set to false
+        Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
+        if (!displayMultipleVersions) {
+            SortedSet<API> resultApis = new TreeSet<API>(new APINameComparator());
+            resultApis.addAll(apiSet);
+            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
+            Comparator<API> versionComparator = new APIVersionComparator();
+            String key;
+
+            //complement apiResultSet with apis under document match
+            if (docMap != null) {
+                for (Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
+                    API api = mapEntry.getValue();
+                    if (!resultApis.contains(api)) {
+                        resultApis.add(api);
+                    }
+                }
+            }
+
+            //Run the result api list through API version comparator and filter out multiple versions
+            for (API api : resultApis) {
+                key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
+                API existingAPI = latestPublishedAPIs.get(key);
+                if (existingAPI != null) {
+                    // If we have already seen an API with the same name, make sure
+                    // this one has a higher version number
+                    if (versionComparator.compare(api, existingAPI) > 0) {
+                        latestPublishedAPIs.put(key, api);
+                    }
+                } else {
+                    // We haven't seen this API before
+                    latestPublishedAPIs.put(key, api);
+                }
+            }
+
+            //filter apiSet
+            SortedSet<API> tempApiSet = new TreeSet<API>(new APINameComparator());
+            for (API api : apiSet) {
+                String mapKey = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
+                if (latestPublishedAPIs.containsKey(mapKey)) {
+                    API latestAPI = latestPublishedAPIs.get(mapKey);
+                    if (latestAPI.getId().equals(api.getId())) {
+                        tempApiSet.add(api);
+                    }
+                }
+            }
+            apiSet = tempApiSet;
+
+            //filter docMap
+            if (docMap != null) {
+                Map<Documentation, API> tempDocMap = new HashMap<Documentation, API>();
+                for (Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
+                    Documentation docKey = mapEntry.getKey();
+                    API apiValue = mapEntry.getValue();
+                    String mapKey = apiValue.getId().getProviderName() + COLON_CHAR + apiValue.getId().getApiName();
+
+                    if (latestPublishedAPIs.containsKey(mapKey)) {
+                        API latestAPI = latestPublishedAPIs.get(mapKey);
+                        if (latestAPI.getId().equals(apiValue.getId())) {
+                            tempDocMap.put(docKey, apiValue);
+                        }
+                    }
+                }
+                docMap = tempDocMap;
+            }
+
+            searchResults.put("apis", apiSet);
+            if (docMap != null) {
+                searchResults.put("docs", docMap);
+            }
+        }
+        return searchResults;
+    }
+
+    private Map<Documentation, API> filterDocumentResultsOfMultipleVersions(Map<Documentation, API> docMap) {
+        Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
+        if (!displayMultipleVersions) {
+            SortedSet<API> resultApis = new TreeSet<API>(new APINameComparator());
+            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
+            Comparator<API> versionComparator = new APIVersionComparator();
+            String key;
+
+            for(Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
+                resultApis.add(mapEntry.getValue());
+            }
+
+            //Run the result api list through API version comparator and filter out multiple versions
+            for (API api : resultApis) {
+                key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
+                API existingAPI = latestPublishedAPIs.get(key);
+                if (existingAPI != null) {
+                    // If we have already seen an API with the same name, make sure
+                    // this one has a higher version number
+                    if (versionComparator.compare(api, existingAPI) > 0) {
+                        latestPublishedAPIs.put(key, api);
+                    }
+                } else {
+                    // We haven't seen this API before
+                    latestPublishedAPIs.put(key, api);
+                }
+            }
+
+            //filter docMap
+            if (docMap != null) {
+                Map<Documentation, API> tempDocMap = new HashMap<Documentation, API>();
+                for (Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
+                    Documentation docKey = mapEntry.getKey();
+                    API apiValue = mapEntry.getValue();
+                    String mapKey = apiValue.getId().getProviderName() + COLON_CHAR + apiValue.getId().getApiName();
+
+                    if (latestPublishedAPIs.containsKey(mapKey)) {
+                        API latestAPI = latestPublishedAPIs.get(mapKey);
+                        if (latestAPI.getId().equals(apiValue.getId())) {
+                            tempDocMap.put(docKey, apiValue);
+                        }
+                    }
+                }
+                docMap = tempDocMap;
+            }
+        }
+        return docMap;
+    }
 }
