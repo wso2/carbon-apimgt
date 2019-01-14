@@ -1,0 +1,30 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("application-owner/get-applications", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+            return {
+
+            }
+        },
+        
+        getOutputs:function (inputs) {
+                   user = jagg.getUser();
+            var applications, result;
+            if (user) {
+                result = jagg.module("application-owner").getApplicationsByTenantIdWithPagination("0", "10","","", "1", "asc");
+                applications = result.applications;
+            }
+        return {
+            "applications":applications
+        };
+    }
+
+
+    
+});
+
+
+%>

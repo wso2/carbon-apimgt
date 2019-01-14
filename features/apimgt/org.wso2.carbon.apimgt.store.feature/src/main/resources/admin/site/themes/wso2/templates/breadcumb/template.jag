@@ -64,6 +64,9 @@
 
                 var reportsUrl = jagg.getAbsoluteUrl("/reports");
                 var reportsMappedUrl = jagg.getMappedUrl("/reports");
+
+                var applicationOwnerUrl = jagg.getAbsoluteUrl("/site/pages/applicationOwner.jag");
+                var applicationOwnerMappedUrl = jagg.getMappedUrl("/site/pages/applicationOwner.jag");
             %>
 
 
@@ -76,6 +79,14 @@
 		        </li>
 		        <li class="active">
 		        	<a href="<%=themeMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=themeMappedUrl%>',e:event})"><%=i18n.localize("Upload Tenant Theme")%></a>
+		        </li>
+		    <% } %>
+            <% if (reqUrl.indexOf(applicationOwnerUrl) >= 0 || reqUrl.indexOf(applicationOwnerMappedUrl) >= 0) { %>
+			 	<li>
+		        	<a href="#"><%=i18n.localize("settings")%> </a>
+		        </li>
+		        <li class="active">
+		        	<a href="<%=applicationOwnerMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=applicationOwnerMappedUrl%>',e:event})"><%=i18n.localize("Applications")%></a>
 		        </li>
 		    <% } %>
 		    <% if (reqUrl.indexOf(listUrl) >= 0 || reqUrl.indexOf(listMappedUrl) >= 0) {%>

@@ -1,0 +1,8 @@
+
+<%
+jagg.initializer("application-owner/change-owner", {
+    preInitialize:function () {
+        jagg.addHeaderJS("application-owner/change-owner", "jagg", "templates/application-owner/change-owner/js/change-owner.js");
+    }
+});
+%>

@@ -5800,6 +5800,19 @@ public final class APIUtil {
         return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId);
     }
 
+    /**
+     * Check whether the new user has an application
+     *
+     * @param subscriber      subscriber name
+     * @param applicationName application name
+     * @return true if application is available for the subscriber
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationOwnedBySubscriber(String subscriber, String applicationName)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().isApplicationOwnedBySubscriber(applicationName, subscriber);
+    }
+
     public static String getHostAddress() {
 
         if (hostAddress != null) {

@@ -2706,4 +2706,26 @@ public abstract class AbstractAPIManager implements APIManager {
     private String getScopeString(String[] scopes) {
         return StringUtils.join(scopes, " ");
     }
+
+    /**
+     * Returns the corresponding application given the subscriberId and application name.
+     *
+     * @param subscriberId subscriberId of the Application
+     * @param applicationName name of the Application
+     * @throws APIManagementException
+     */
+    public Application getApplicationBySubscriberIdAndName(int subscriberId, String applicationName) throws
+            APIManagementException {
+        Application application = apiMgtDAO.getApplicationBySubscriberIdAndName(subscriberId, applicationName);
+        if (application != null) {
+            Set<APIKey> keys = getApplicationKeys(application.getId());
+            for (APIKey key : keys) {
+                if (APIConstants.JWT.equals(application.getTokenType())) {
+                    key.setAccessToken("");
+                }
+                application.addKey(key);
+            }
+        }
+        return application;
+    }
 }
