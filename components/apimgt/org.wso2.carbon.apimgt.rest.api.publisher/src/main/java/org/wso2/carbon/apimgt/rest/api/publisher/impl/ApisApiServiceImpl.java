@@ -231,7 +231,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             if (body.getContext() == null) {
                 RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
-            } else if (StringUtils.endsWith(body.getContext(), "/")) {
+            } else if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
             if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
