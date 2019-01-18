@@ -173,10 +173,28 @@ public class OIDCRelyingPartyObject extends ScriptableObject {
 
         int argLength = args.length;
         if (argLength != 3 || !(args[0] instanceof String)) {
-            throw new ScriptException("Invalid argument. Authorization Code, Nonce value or session ID is missing.");
+            throw new ScriptException("Invalid argument. oidcTokenReponse, Nonce value or session ID is missing.");
         }
 
         return validateSignature(thisObj, args) != null;
+    }
+
+    public static String jsFunction_getIdTokenResponse(Context cx, Scriptable thisObj, Object[] args,
+                                                       Function funObj) throws Exception {
+
+        log.debug("Obtaining id_token");
+        OIDCRelyingPartyObject relyingPartyObject = (OIDCRelyingPartyObject) thisObj;
+
+        ServerConfiguration serverConfiguration = getServerConfiguration(relyingPartyObject);
+        AuthClient authClient = getClientConfiguration(relyingPartyObject);
+
+        int argLength = args.length;
+        if (argLength != 1 || !(args[0] instanceof String)) {
+            throw new ScriptException("Invalid argument. Authorization Code is missing.");
+        }
+
+        String authorizationCode = (String) args[0];
+        return getTokenFromTokenEP(serverConfiguration, authClient, authorizationCode);
     }
 
     /**
@@ -192,13 +210,11 @@ public class OIDCRelyingPartyObject extends ScriptableObject {
             log.debug("Validating OIDC signature");
         }
         boolean isSignatureValid;
-        String authorizationCode = (String) args[0];
         String storedNonce = (String) args[1];
         OIDCRelyingPartyObject relyingPartyObject = (OIDCRelyingPartyObject) oidcObject;
         ServerConfiguration serverConfiguration = getServerConfiguration(relyingPartyObject);
         AuthClient authClient = getClientConfiguration(relyingPartyObject);
-        String jsonResponse = getTokenFromTokenEP(serverConfiguration, authClient, authorizationCode);
-        AuthenticationToken oidcAuthenticationToken = getAuthenticationToken(jsonResponse);
+        AuthenticationToken oidcAuthenticationToken = getAuthenticationToken((String) args[0]);
         String userInfoJson = Util.getUserInfo(serverConfiguration, oidcAuthenticationToken);
         String userName = getUserName(userInfoJson, relyingPartyObject);
 
