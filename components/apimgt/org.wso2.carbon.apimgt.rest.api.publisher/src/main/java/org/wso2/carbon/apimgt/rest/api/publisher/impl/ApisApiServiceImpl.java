@@ -72,8 +72,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
@@ -97,8 +95,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
-import static org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil.getErrorDTO;
 
 /**
  * This is the service implementation class for Publisher API related operations
@@ -235,7 +231,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             if (body.getContext() == null) {
                 RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
-            } else if (StringUtils.endsWith(body.getContext(), "/")) {
+            } else if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
             if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {

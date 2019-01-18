@@ -66,6 +66,20 @@ public class APIMWSDLReaderTest {
     }
 
     @Test
+    public void endpointReferenceElementTest() throws Exception {
+        doMockStatics();
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(
+                Thread.currentThread().getContextClassLoader()
+                        .getResource("wsdls/wsdl-with-EndpointReference.wsdl").toExternalForm());
+        wsdlReader.validateBaseURI();
+        OMElement element = wsdlReader.readAndCleanWsdl(getAPIForTesting());
+        Assert.assertFalse("Endpoints are not properly replaced",
+                element.toString().contains("location=\"http://www.webservicex.net/stockquote.asmx\""));
+        Assert.assertTrue("Endpoints does not include GW endpoint",
+                element.toString().contains("https://localhost:8243/abc"));
+    }
+
+    @Test
     public void testReadAndCleanWsdl2() throws Exception {
         doMockStatics();
         
