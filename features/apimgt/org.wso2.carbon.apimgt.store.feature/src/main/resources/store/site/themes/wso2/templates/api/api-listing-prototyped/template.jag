@@ -67,7 +67,7 @@
                             }else{
                                 thumbURL = jagg.getRegistryPath(thumbURL);
                             }
-                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
+                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + urlPrefix;
                             
                         %>
                         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
