@@ -6486,7 +6486,6 @@ public class ApiMgtDAO {
      * @param apiName    API name
      * @param apiVersion API version
      * @param tenant     tenant domain
-     * @param connection database connection
      * @return API provider
      * @throws APIManagementException if failed to get the API provider by giving API name, API version, tenant domain
      */
