@@ -1245,6 +1245,35 @@ public class APIMgtDAOTest {
         Assert.assertTrue(result2.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
    }
 
+    @Test
+    public void testGetProviderByNameVersionTenant() throws APIManagementException, SQLException {
+        final String apiProviderSuperTenant = "testUser1";
+        final String apiProviderWSO2Tenant = "testUser1@wso2.test";
+
+        final String apiName = "testAPI1";
+        final String apiVersion = "1.0.0";
+        try {
+            apiMgtDAO.getAPIProviderByNameAndVersion(apiName, apiVersion, "");
+            assertFalse("Should throw an exception when tenant value is blank string", true);
+        } catch (APIManagementException ex){
+            assertTrue(ex.getMessage().contains("cannot be null when fetching provider"));
+        }
+
+        try {
+            apiMgtDAO.getAPIProviderByNameAndVersion(apiName, apiVersion, null);
+            assertFalse("Should throw an exception when tenant value is null", true);
+        } catch (APIManagementException ex){
+            assertTrue(ex.getMessage().contains("cannot be null when fetching provider"));
+        }
+
+        String apiProviderSuperTenantResult = apiMgtDAO.getAPIProviderByNameAndVersion(apiName, apiVersion, APIConstants.SUPER_TENANT_DOMAIN);
+        Assert.assertEquals(apiProviderSuperTenant, apiProviderSuperTenantResult);
+
+        String apiProviderWSO2TenantResult = apiMgtDAO.getAPIProviderByNameAndVersion(apiName, apiVersion, "wso2.test");
+        Assert.assertEquals(apiProviderWSO2Tenant, apiProviderWSO2TenantResult);
+
+    }
+
     private void deleteSubscriber(int subscriberId) throws APIManagementException {
         Connection conn = null;
         ResultSet rs = null;

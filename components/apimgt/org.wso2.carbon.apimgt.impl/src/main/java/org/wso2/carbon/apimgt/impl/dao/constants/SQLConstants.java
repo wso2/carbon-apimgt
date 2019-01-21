@@ -2669,6 +2669,14 @@ public class SQLConstants {
                     "NAME = ? AND " +
                     "TENANT_ID =?";
 
+    public static final String GET_API_PROVIDER_WITH_NAME_VERSION_FOR_SUPER_TENANT =
+            "SELECT API.API_PROVIDER FROM AM_API API WHERE API.API_NAME = ? AND API.API_VERSION = ? AND "
+                    + "CONTEXT NOT LIKE '%" + APIConstants.TENANT_PREFIX + "%' ";
+
+    public static final String GET_API_PROVIDER_WITH_NAME_VERSION_FOR_GIVEN_TENANT =
+            "SELECT API.API_PROVIDER FROM AM_API API WHERE API.API_NAME = ? AND "
+                    + "API.API_VERSION = ? AND API.CONTEXT LIKE ? ";
+
     public static final String GET_SUBSCRIPTION_POLICY_BY_UUID_SQL =
             "SELECT "+
                     "* " +

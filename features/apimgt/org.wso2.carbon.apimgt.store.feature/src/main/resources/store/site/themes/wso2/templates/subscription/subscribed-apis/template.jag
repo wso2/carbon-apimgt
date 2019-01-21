@@ -3,7 +3,7 @@
 //@todo api status should be displayed in
     var urlPrefix = jagg.getTenantURLPrefix("&");
     var path = jagg.getMappedUrl("/site/pages/item-info.jag") +
-        "?name={{ apiName }}&version={{ apiVersion }}&provider={{ apiProvider }}" + urlPrefix;
+        "?name={{ apiName }}&version={{ apiVersion }}" + urlPrefix;
 %>
 
     <script>

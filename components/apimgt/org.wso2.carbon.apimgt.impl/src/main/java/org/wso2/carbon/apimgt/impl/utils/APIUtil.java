@@ -6411,6 +6411,19 @@ public final class APIUtil {
     }
 
     /**
+     * Get the API Provider name by giving the api name version and the tenant which it belongs to
+     * @param apiName Name of the API
+     * @param apiVersion Version of the API
+     * @param tenant Tenant name
+     * @return Provider name who created the API
+     * @throws APIManagementException
+     */
+    public static String getAPIProviderFromAPINameVersionTenant(String apiName, String apiVersion, String tenant)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAPIProviderByNameAndVersion(apiName, apiVersion, tenant);
+    }
+
+    /**
      * Used to generate CORS Configuration object from CORS Configuration Json
      *
      * @param jsonString json representation of CORS configuration

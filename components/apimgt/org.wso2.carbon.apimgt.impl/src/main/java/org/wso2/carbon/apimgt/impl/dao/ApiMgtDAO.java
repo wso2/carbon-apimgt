@@ -6481,6 +6481,55 @@ public class ApiMgtDAO {
     }
 
     /**
+     * This method is used to get the API provider by giving API name, API version and tenant domain
+     *
+     * @param apiName    API name
+     * @param apiVersion API version
+     * @param tenant     tenant domain
+     * @return API provider
+     * @throws APIManagementException if failed to get the API provider by giving API name, API version, tenant domain
+     */
+    public String getAPIProviderByNameAndVersion(String apiName, String apiVersion, String tenant)
+            throws APIManagementException {
+        if (StringUtils.isBlank(apiName) || StringUtils.isBlank(apiVersion) || StringUtils.isBlank(tenant)) {
+            String msg = "API name, version, tenant cannot be null when fetching provider";
+            log.error(msg);
+            throw new APIManagementException(msg);
+        }
+
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String apiProvider = null;
+        String getAPIProviderQuery = null;
+
+        try(Connection connection = APIMgtDBUtil.getConnection()) {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenant)) {
+                //in this case, the API should be fetched from super tenant
+                getAPIProviderQuery = SQLConstants.GET_API_PROVIDER_WITH_NAME_VERSION_FOR_SUPER_TENANT;
+                prepStmt = connection.prepareStatement(getAPIProviderQuery);
+            } else {
+                //in this case, the API should be fetched from the respective tenant
+                getAPIProviderQuery = SQLConstants.GET_API_PROVIDER_WITH_NAME_VERSION_FOR_GIVEN_TENANT;
+                prepStmt = connection.prepareStatement(getAPIProviderQuery);
+                prepStmt.setString(3, "%" + tenant + "%");
+            }
+            prepStmt.setString(1, apiName);
+            prepStmt.setString(2, apiVersion);
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                apiProvider = rs.getString("API_PROVIDER");
+            }
+            if (StringUtils.isBlank(apiProvider)) {
+                String msg = "Unable to find provider for API: " + apiName + " in the database";
+                log.warn(msg);
+            }
+        } catch (SQLException e) {
+            handleException("Error while locating API: " + apiName + " from the database", e);
+        }
+        return apiProvider;
+    }
+
+    /**
      * Converts an {@code Pipeline} object into a {@code ConditionGroupDTO}.{@code ConditionGroupDTO} class tries to
      * contain the same information held by  {@code Pipeline}, but in a much lightweight fashion.
      *

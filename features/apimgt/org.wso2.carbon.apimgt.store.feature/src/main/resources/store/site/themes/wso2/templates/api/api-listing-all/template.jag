@@ -166,19 +166,17 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                              var uname=    encode.forUriComponent(request.getParameter('uname'));
                                        var name=     encode.forUriComponent(api.name);
                                        var version=  encode.forUriComponent(api.version);
-                                       var provider= encode.forUriComponent(api.provider);
 
                                        if(uname == 'null')uname = null;
                                        if(name == 'null')name = null;
                                        if(version == 'null')version = null;
-                                       if(provider == 'null')provider = null;
                             thumbURL = api.thumbnailurl;
                             if(thumbURL && thumbURL.indexOf("images/") == 0) {
                                 thumbURL = null;
                             }else{
                                 thumbURL = jagg.getRegistryPath(thumbURL);
                             }
-                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
+                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + urlPrefix;
                             if(tag != null){
                                 path+="&tag="+encode.forUriComponent(tag);
                             }
@@ -197,7 +195,7 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                                     <%} else if(api.docFilePath && api.docFilePath!="") { %>
                                     	<p><a href="<%=api.docFilePath%>" target="_blank" title="<%=i18n.localize("Download")%>"><%=i18n.localize("Download")%></a></p>
                                     <% } else { %>
-                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) + "&provider=" + encode.forUriComponent(api.provider) + urlPrefix; %>
+                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) + urlPrefix; %>
                                     	<p><a href="<%=docViewMappedUrl%>?<%=docUrl%>" target="_blank" title="<%=i18n.localize("View Content")%>"><%=i18n.localize("View Content")%></a></p>
                                     <% } %>
                					
