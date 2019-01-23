@@ -1497,6 +1497,11 @@
                 <artifactId>swagger-parser</artifactId>
                 <version>${openapitools.swagger.parser.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
+                <artifactId>json-path</artifactId>
+                <version>${com.jayway.jsonpath.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1703,6 +1708,7 @@
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
         <aspectj.version>1.9.4</aspectj.version>
         <wso2.securevault.version>1.1.2</wso2.securevault.version>
+        <com.jayway.jsonpath.version>2.4.0.wso2v2</com.jayway.jsonpath.version>
     </properties>
 </project>
 
