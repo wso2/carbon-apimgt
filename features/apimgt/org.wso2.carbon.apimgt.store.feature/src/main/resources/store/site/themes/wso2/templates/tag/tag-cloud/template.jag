@@ -2,7 +2,7 @@
 
 <div class="tags-wrapper hidden-xs hidden-sm" id="tagcloud" style="display:none">
   <div class="tag-title"><%=i18n.localize("Tags")%></div>
-  <div class="tag-content" id="tag-content" style="width:100%;">
+  <div class="tag-content" id="tag-content">
   </div>
 </div>
 
