@@ -100,5 +100,4 @@ public class MicroGatewayAPIUsageConstants {
     public static final String CORRELATION_DATA = "correlationData";
     public static final String PAYLOAD_DATA = "payLoadData";
     public static final String TIME_STAMP = "timestamp";
-    public static final String NEW_LINE = "\n";
 }
