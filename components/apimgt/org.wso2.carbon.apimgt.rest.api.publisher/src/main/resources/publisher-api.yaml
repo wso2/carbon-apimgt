@@ -3386,7 +3386,7 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
-            
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -3793,118 +3793,102 @@ definitions:
           apiLevelPolicy:
             description: The policy selected for the particular API
             type: string
-          example: ["http","https"]
-        tags:
-          type: array
-          description: Search keywords related to the API
-          items:
+            example: ["http","https"]
+          authorizationHeader:
             type: string
-          example: ["substract","add"]
-        tiers:
-          type: array
-          description: The subscription tiers selected for the particular API
-          items:
+            description: |
+              Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
+              in tenant or system level will be used.
+          apiSecurity:
             type: string
-          example: ["Unlimited"]
-        apiLevelPolicy:
-          description: The policy selected for the particular API
-          type: string
-          example: "Unlimited"
-        authorizationHeader:
-          type: string
-          description: |
-            Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
-            in tenant or system level will be used.
-        apiSecurity:
-          type: string
-          description: |
-            Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If
-            it is not set OAuth2 will be set as the security for the current API.
-        maxTps:
-          $ref: '#/definitions/APIMaxTps'
-        visibility:
-          type: string
-          description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
-          enum:
-          - PUBLIC
-          - PRIVATE
-          - RESTRICTED
-          - CONTROLLED
-          example: PUBLIC
-        visibleRoles:
-          type: array
-          description: The user roles that are able to access the API
-          items:
+            description: |
+              Type of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If
+              it is not set OAuth2 will be set as the security for the current API.
+          maxTps:
+            $ref: '#/definitions/APIMaxTps'
+          visibility:
             type: string
-          example: []
-        visibleTenants:
-          type: array
-          items:
+            description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
+            enum:
+            - PUBLIC
+            - PRIVATE
+            - RESTRICTED
+            - CONTROLLED
+            example: PUBLIC
+          visibleRoles:
+            type: array
+            description: The user roles that are able to access the API
+            items:
+              type: string
+            example: []
+          visibleTenants:
+            type: array
+            items:
+              type: string
+          endpointConfig:
             type: string
-        endpointConfig:
-          type: string
-          example: "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101000\",\"suspendDuration\":\"2000\",\"suspendMaxDuration\":\"3\",\"factor\":\"2\",\"retryErroCode\":\"101000\",\"retryTimeOut\":\"4\",\"retryDelay\":\"1000\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}"
-        endpointSecurity:
-          $ref: '#/definitions/APIEndpointSecurity'
-        gatewayEnvironments:
-          description: |
-            Comma separated list of gateway environments.
-          type: string
-          example: Production and Sandbox
-        labels:
-          description: |
-            Labels of micro-gateway environments attached to the API.
-          type: array
-          items:
-            $ref: '#/definitions/Label'
-        sequences:
-          type: array
-          items:
-            $ref: '#/definitions/Sequence'
-          example: "\"sequences\":
-            [
-              {\"name\": \"json_to_xml_in_message\",\"config\": null,\"type\": \"in\"},
-              {\"name\": \"xml_to_json_out_message\",\"config\": null,\"type\": \"out\"},
-              {\"name\": \"json_fault\",\"config\": null,\"type\": \"fault\"}
-            ],"
-        subscriptionAvailability:
-          type: string
-          description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
-          enum:
-          - current_tenant
-          - all_tenants
-          - specific_tenants
-          example: current_tenant
-        subscriptionAvailableTenants:
-          type: array
-          items:
+            example: "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101000\",\"suspendDuration\":\"2000\",\"suspendMaxDuration\":\"3\",\"factor\":\"2\",\"retryErroCode\":\"101000\",\"retryTimeOut\":\"4\",\"retryDelay\":\"1000\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}"
+          endpointSecurity:
+            $ref: '#/definitions/APIEndpointSecurity'
+          gatewayEnvironments:
+            description: |
+              Comma separated list of gateway environments.
             type: string
-          example: ["tenant1", "tenant2"]
-        additionalProperties:
-          type: object
+            example: Production and Sandbox
+          labels:
+            description: |
+              Labels of micro-gateway environments attached to the API.
+            type: array
+            items:
+              $ref: '#/definitions/Label'
+          sequences:
+            type: array
+            items:
+              $ref: '#/definitions/Sequence'
+            example: "\"sequences\":
+              [
+                {\"name\": \"json_to_xml_in_message\",\"config\": null,\"type\": \"in\"},
+                {\"name\": \"xml_to_json_out_message\",\"config\": null,\"type\": \"out\"},
+                {\"name\": \"json_fault\",\"config\": null,\"type\": \"fault\"}
+              ],"
+          subscriptionAvailability:
+            type: string
+            description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
+            enum:
+            - current_tenant
+            - all_tenants
+            - specific_tenants
+            example: current_tenant
+          subscriptionAvailableTenants:
+            type: array
+            items:
+              type: string
+            example: ["tenant1", "tenant2"]
           additionalProperties:
+            type: object
+            additionalProperties:
+              type: string
+            description : Map of custom properties of API
+          accessControl:
             type: string
-          description : Map of custom properties of API
-        accessControl:
-          type: string
-          description: |
-            Is the API is restricted to certain set of publishers or creators or is it visible to all the
-            publishers and creators. If the accessControl restriction is none, this API can be modified by all the
-            publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
-             based on the restriction.
-          enum:
-          - NONE
-          - RESTRICTED
-        accessControlRoles:
-          type: array
-          description: The user roles that are able to view/modify as API publisher or creator.
-          items:
-            type: string
-          example: [admin]
-        businessInformation:
-          $ref: '#/definitions/APIBusinessInformation'
-        corsConfiguration:
-          $ref: '#/definitions/APICorsConfiguration'
+            description: |
+              Is the API is restricted to certain set of publishers or creators or is it visible to all the
+              publishers and creators. If the accessControl restriction is none, this API can be modified by all the
+              publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
+               based on the restriction.
+            enum:
+            - NONE
+            - RESTRICTED
+          accessControlRoles:
+            type: array
+            description: The user roles that are able to view/modify as API publisher or creator.
+            items:
+              type: string
+            example: [admin]
+          businessInformation:
+            $ref: '#/definitions/APIBusinessInformation'
+          corsConfiguration:
+            $ref: '#/definitions/APICorsConfiguration'
 
   #-----------------------------------------------------
   # The Application resource
@@ -4575,34 +4559,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/CertMetadata'
-
-#-----------------------------------------------------
-# The Result List resource
-#-----------------------------------------------------
-  ResultList:
-    title: Result List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of results returned.
-        example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/apis?limit=1&offset=2&query="
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/apis?limit=1&offset=0&query="
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/Result'
       pagination:
         properties:
           offset:
@@ -4708,6 +4664,45 @@ definitions:
       tier:
         type: string
         example: Gold
+
+  #-----------------------------------------------------
+  # The Result List resource
+  #-----------------------------------------------------
+  ResultList:
+    title: Result List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of results returned.
+        example: 1
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+        example: "/apis?limit=1&offset=2&query="
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+        example: "/apis?limit=1&offset=0&query="
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Result'
+      pagination:
+        properties:
+          offset:
+            type: integer
+            example: 12
+          limit:
+            type: integer
+            example: 25
+          total:
+            type: integer
+            example: 1290
 
   Result:
     title: Result

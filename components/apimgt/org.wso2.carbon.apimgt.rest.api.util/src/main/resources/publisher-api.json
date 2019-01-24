@@ -123,7 +123,7 @@
                     {
                         "name": "tenantDomain",
                         "in": "query",
-                        "description": "Tenant domain, whose APIs should be retrieved. If not specified, the logged in user's tenant domain will be considered for this.\n",
+                        "description": "Tenant domain, whose APIs should be retrieved. If not specified, the logged in user's tenant domain will\nbe considered for this.\n",
                         "required": false,
                         "type": "string"
                     }
@@ -2673,270 +2673,6 @@
                         "required": false,
                         "type": "string",
                         "description": "UUID of the API"
-=======
-        },
-        "/results": {
-            "get": {
-                "x-scope": "apim:api_view",
-                "produces": [
-                    "application/json"
-                ],
-                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/results=query?sample",
-                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.13/results\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
-                "summary": "Retrieve/Search APIs and Inline Docs by content\n",
-                "description": "This operation provides you a list of available APIs and Inline Docs qualifying the given keyword match.\n",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/limit"
-                    },
-                    {
-                        "$ref": "#/parameters/offset"
-                    },
-                    {
-                        "name": "query",
-                        "in": "query",
-                        "description": "**Search**.\n\nYou can search by proving a keyword.\n",
-                        "type": "string"
-                    },
-                    {
-                        "$ref": "#/parameters/Accept"
-                    },
-                    {
-                        "$ref": "#/parameters/If-None-Match"
-                    }
-                ],
-                "tags": [
-                    "API (Collection)"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK.\nList of qualifying APIs and inline docs is returned.\n",
-                        "schema": {
-                            "$ref": "#/definitions/ResultList"
-                        },
-                        "headers": {
-                            "Content-Type": {
-                                "description": "The content type of the body.",
-                                "type": "string"
-                            },
-                            "ETag": {
-                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
-                    },
-                    "406": {
-                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "parameters": {
-        "apiId": {
-            "name": "apiId",
-            "in": "path",
-            "description": "**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",
-            "required": true,
-            "type": "string",
-            "x-encoded": true
-        },
-        "apiId-Q": {
-            "name": "apiId",
-            "in": "query",
-            "description": "**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
-            "required": true,
-            "type": "string",
-            "x-encoded": true
-        },
-        "documentId": {
-            "name": "documentId",
-            "in": "path",
-            "description": "Document Identifier\n",
-            "required": true,
-            "type": "string"
-        },
-        "applicationId": {
-            "name": "applicationId",
-            "in": "path",
-            "description": "**Application Identifier** consisting of the UUID of the Application.\n",
-            "required": true,
-            "type": "string"
-        },
-        "subscriptionId": {
-            "name": "subscriptionId",
-            "in": "path",
-            "description": "Subscription Id\n",
-            "required": true,
-            "type": "string"
-        },
-        "mediationPolicyId": {
-            "name": "mediationPolicyId",
-            "in": "path",
-            "description": "Mediation policy Id\n",
-            "required": true,
-            "type": "string"
-        },
-        "subscriptionId-Q": {
-            "name": "subscriptionId",
-            "in": "query",
-            "description": "Subscription Id\n",
-            "required": true,
-            "type": "string"
-        },
-        "tierName": {
-            "name": "tierName",
-            "in": "path",
-            "description": "Tier name\n",
-            "required": true,
-            "type": "string"
-        },
-        "tierName-Q": {
-            "name": "tierName",
-            "in": "query",
-            "description": "Name of the tier\n",
-            "required": true,
-            "type": "string"
-        },
-        "tierLevel": {
-            "name": "tierLevel",
-            "in": "path",
-            "description": "List API or Application or Resource type tiers.\n",
-            "type": "string",
-            "enum": [
-                "api",
-                "application",
-                "resource"
-            ],
-            "required": true
-        },
-        "tierLevel-A": {
-            "name": "tierLevel",
-            "in": "path",
-            "description": "List API or Application or Resource type tiers.\n",
-            "type": "string",
-            "enum": [
-                "api"
-            ],
-            "required": true
-        },
-        "tierLevel-Q": {
-            "name": "tierLevel",
-            "in": "query",
-            "description": "List API or Application or Resource type tiers.\n",
-            "type": "string",
-            "enum": [
-                "api",
-                "application",
-                "resource"
-            ],
-            "required": true
-        },
-        "limit": {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum size of resource array to return.\n",
-            "default": 25,
-            "type": "integer"
-        },
-        "offset": {
-            "name": "offset",
-            "in": "query",
-            "description": "Starting point within the complete list of items qualified.\n",
-            "default": 0,
-            "type": "integer"
-        },
-        "Accept": {
-            "name": "Accept",
-            "in": "header",
-            "description": "Media types acceptable for the response. Default is application/json.\n",
-            "default": "application/json",
-            "type": "string"
-        },
-        "Content-Type": {
-            "name": "Content-Type",
-            "in": "header",
-            "description": "Media type of the entity in the body. Default is application/json.\n",
-            "default": "application/json",
-            "required": true,
-            "type": "string"
-        },
-        "Authorization": {
-            "name": "Authorization",
-            "in": "header",
-            "description": "Holds the bearer token for apis that require authentication.\n",
-            "required": true,
-            "type": "string"
-        },
-        "If-None-Match": {
-            "name": "If-None-Match",
-            "in": "header",
-            "description": "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n",
-            "type": "string"
-        },
-        "If-Modified-Since": {
-            "name": "If-Modified-Since",
-            "in": "header",
-            "description": "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n",
-            "type": "string"
-        },
-        "If-Match": {
-            "name": "If-Match",
-            "in": "header",
-            "description": "Validator for conditional requests; based on ETag (Will be supported in future).\n",
-            "type": "string"
-        },
-        "If-Unmodified-Since": {
-            "name": "If-Unmodified-Since",
-            "in": "header",
-            "description": "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n",
-            "type": "string"
-        },
-        "workflowReferenceId-Q": {
-            "name": "workflowReferenceId",
-            "in": "query",
-            "description": "Workflow reference id\n",
-            "required": true,
-            "type": "string"
-        },
-        "expand": {
-            "name": "expand",
-            "in": "query",
-            "description": "Defines whether the returned response should contain full details of API\n",
-            "type": "boolean"
-        }
-    },
-    "definitions": {
-        "APIList": {
-            "title": "API List",
-            "properties": {
-                "count": {
-                    "type": "integer",
-                    "description": "Number of APIs returned.\n",
-                    "example": 1
-                },
-                "next": {
-                    "type": "string",
-                    "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n",
-                    "example": "/apis?limit=1&offset=2&query="
-                },
-                "previous": {
-                    "type": "string",
-                    "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n",
-                    "example": "/apis?limit=1&offset=0&query="
-                },
-                "list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/APIInfo"
->>>>>>> 8ae6f6f... Adding Improvements
                     }
                 ],
                 "responses": {
@@ -3626,6 +3362,69 @@
                     }
                 }
             }
+        },
+        "/results": {
+            "get": {
+                "x-scope": "apim:api_view",
+                "produces": [
+                    "application/json"
+                ],
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/results=query?sample",
+                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.13/results\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
+                "summary": "Retrieve/Search APIs and Inline Docs by content\n",
+                "description": "This operation provides you a list of available APIs and Inline Docs qualifying the given keyword match.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/limit"
+                    },
+                    {
+                        "$ref": "#/parameters/offset"
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "**Search**.\n\nYou can search by proving a keyword.\n",
+                        "type": "string"
+                    },
+                    {
+                        "$ref": "#/parameters/Accept"
+                    },
+                    {
+                        "$ref": "#/parameters/If-None-Match"
+                    }
+                ],
+                "tags": [
+                    "API (Collection)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nList of qualifying APIs and inline docs is returned.\n",
+                        "schema": {
+                            "$ref": "#/definitions/ResultList"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "parameters": {
@@ -3981,7 +3780,10 @@
                         "apiLevelPolicy": {
                             "description": "The policy selected for the particular API",
                             "type": "string",
-                            "example": "Unlimited"
+                            "example": [
+                                "http",
+                                "https"
+                            ]
                         },
                         "authorizationHeader": {
                             "type": "string",
@@ -4800,26 +4602,16 @@
                 }
             }
         },
-<<<<<<< HEAD
         "Certificates": {
             "title": "Certificates",
             "description": "Representation of a list of certificates",
             "properties": {
                 "count": {
                     "type": "integer",
-=======
-        "ResultList": {
-            "title": "Result List",
-            "properties": {
-                "count": {
-                    "type": "integer",
-                    "description": "Number of results returned.\n",
->>>>>>> 8ae6f6f... Adding Improvements
                     "example": 1
                 },
                 "next": {
                     "type": "string",
-<<<<<<< HEAD
                     "example": "/certificates?limit=1&offset=2"
                 },
                 "previous": {
@@ -4830,20 +4622,6 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/CertMetadata"
-=======
-                    "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n",
-                    "example": "/apis?limit=1&offset=2&query="
-                },
-                "previous": {
-                    "type": "string",
-                    "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n",
-                    "example": "/apis?limit=1&offset=0&query="
-                },
-                "list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Result"
->>>>>>> 8ae6f6f... Adding Improvements
                     }
                 },
                 "pagination": {
@@ -4864,7 +4642,6 @@
                 }
             }
         },
-<<<<<<< HEAD
         "CertMetadata": {
             "title": "Certificate",
             "description": "Representation of the details of a certificate",
@@ -4969,7 +4746,49 @@
                     "example": "Gold"
                 }
             }
-=======
+        },
+        "ResultList": {
+            "title": "Result List",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "description": "Number of results returned.\n",
+                    "example": 1
+                },
+                "next": {
+                    "type": "string",
+                    "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n",
+                    "example": "/apis?limit=1&offset=2&query="
+                },
+                "previous": {
+                    "type": "string",
+                    "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n",
+                    "example": "/apis?limit=1&offset=0&query="
+                },
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Result"
+                    }
+                },
+                "pagination": {
+                    "properties": {
+                        "offset": {
+                            "type": "integer",
+                            "example": 12
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "example": 25
+                        },
+                        "total": {
+                            "type": "integer",
+                            "example": 1290
+                        }
+                    }
+                }
+            }
+        },
         "Result": {
             "title": "Result",
             "properties": {
@@ -5100,7 +4919,6 @@
                     }
                 }
             ]
->>>>>>> 8ae6f6f... Adding Improvements
         }
     }
 }
