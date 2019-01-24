@@ -2631,8 +2631,10 @@ public abstract class AbstractAPIManager implements APIManager {
             Indexer documentIndexer = indexerMap.get(APIConstants.DOCUMENT_MEDIA_TYPE_KEY);
             String complexAttribute;
             if (documentIndexer != null && documentIndexer instanceof DocumentIndexer) {
-                complexAttribute = "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR " + ClientUtils
-                        .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + ")";
+                //field check on document_indexed was added to prevent unindexed(by new DocumentIndexer) from coming up as search results
+                //on indexed documents this property is always set to true
+                complexAttribute = ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR mediaType_s:("  + ClientUtils
+                        .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND document_indexed_s:true)";
 
                 //construct query such that publisher roles is checked in properties for api artifacts and in fields for document artifacts
                 //this was designed this way so that content search can be fully functional if registry is re-indexed after engaging DocumentIndexer

@@ -95,6 +95,7 @@ public class DocumentIndexer extends RXTIndexer {
                 fetchRequiredDetailsFromAssociatedAPI(registry, documentResource, fields);
                 String content = fetchDocumentContent(registry, documentResource);
                 newIndexDocument = new IndexDocument(fileData.path, "", content, indexDocument.getTenantId());
+                fields.put(APIConstants.DOCUMENT_INDEXER_INDICATOR, Arrays.asList("true"));
                 newIndexDocument.setFields(fields);
             } catch (APIManagementException e) {
                 //error occured while fetching details from API, but continuing document indexing

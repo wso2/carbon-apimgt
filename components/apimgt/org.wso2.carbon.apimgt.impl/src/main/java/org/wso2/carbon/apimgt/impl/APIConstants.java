@@ -1493,5 +1493,6 @@ public final class APIConstants {
 
     public static final String API_STATE_CHANGE_INDICATOR = "registry.api.state.change.indicator";
     public static final String DOCUMENT_MEDIA_TYPE_KEY = "application/vnd.wso2-document\\+xml";
+    public static final String DOCUMENT_INDEXER_INDICATOR = "document_indexed";
 
 }
