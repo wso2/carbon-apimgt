@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.ResultDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.SearchResultDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class DocumentResultDTO extends ResultDTO {
+public class DocumentSearchResultDTO extends SearchResultDTO {
   
   
   public enum DocTypeEnum {
@@ -56,7 +56,7 @@ public class DocumentResultDTO extends ResultDTO {
   private String createdTime = null;
 
   /**
-  * gets and sets the lastUpdatedTime for DocumentResultDTO
+  * gets and sets the lastUpdatedTime for DocumentSearchResultDTO
   **/
   @JsonIgnore
   public String getLastUpdatedTime(){
@@ -67,7 +67,7 @@ public class DocumentResultDTO extends ResultDTO {
   }
 
   /**
-  * gets and sets the createdTime for a DocumentResultDTO
+  * gets and sets the createdTime for a DocumentSearchResultDTO
   **/
 
   @JsonIgnore
@@ -193,7 +193,7 @@ public class DocumentResultDTO extends ResultDTO {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class DocumentResultDTO {\n");
+    sb.append("class DocumentSearchResultDTO {\n");
     sb.append("  " + super.toString()).append("\n");
     sb.append("  docType: ").append(docType).append("\n");
     sb.append("  summary: ").append(summary).append("\n");

@@ -69,7 +69,6 @@ jagg.block("api/api-listing-all", {
             }
             else{
                 apis = response.result.apis;
-                docs = response.result.docs;
                 error = response.result.error;
                 message = response.result.message;
             }
@@ -99,7 +98,6 @@ jagg.block("api/api-listing-all", {
 
         return {
             "apis":apis,
-            "docs":docs,
             "totalLength":response.result.totalLength,
             "isMore":response.result.isMore,
             "isMonetizationEnabled":isMonetizationEnabled,

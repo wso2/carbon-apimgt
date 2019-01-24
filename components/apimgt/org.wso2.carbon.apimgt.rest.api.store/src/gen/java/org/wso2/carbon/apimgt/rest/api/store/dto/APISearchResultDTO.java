@@ -1,6 +1,6 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.dto;
+package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResultDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.SearchResultDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class APIResultDTO extends ResultDTO {
+public class APISearchResultDTO extends SearchResultDTO {
   
   
   
@@ -32,6 +32,33 @@ public class APIResultDTO extends ResultDTO {
   
   
   private String thumbnailUri = null;
+
+  private String lastUpdatedTime = null;
+
+  private String createdTime = null;
+
+  /**
+  * gets and sets the lastUpdatedTime for APISearchResultDTO
+  **/
+  @JsonIgnore
+  public String getLastUpdatedTime(){
+    return lastUpdatedTime;
+  }
+  public void setLastUpdatedTime(String lastUpdatedTime){
+    this.lastUpdatedTime=lastUpdatedTime;
+  }
+
+  /**
+  * gets and sets the createdTime for a APISearchResultDTO
+  **/
+
+  @JsonIgnore
+  public String getCreatedTime(){
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime){
+    this.createdTime=createdTime;
+  }
 
   
   /**
@@ -115,7 +142,7 @@ public class APIResultDTO extends ResultDTO {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIResultDTO {\n");
+    sb.append("class APISearchResultDTO {\n");
     sb.append("  " + super.toString()).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  context: ").append(context).append("\n");

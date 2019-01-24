@@ -18,9 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.collections4.list.TreeList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -64,9 +67,11 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -82,6 +87,8 @@ import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.config.RegistryConfiguration;
+import org.wso2.carbon.registry.core.config.RegistryConfigurationProcessor;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -89,6 +96,8 @@ import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.registry.indexing.RegistryConfigLoader;
+import org.wso2.carbon.registry.indexing.indexer.Indexer;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.service.ContentBasedSearchService;
 import org.wso2.carbon.registry.indexing.service.SearchResultsBean;
@@ -2553,6 +2562,9 @@ public abstract class AbstractAPIManager implements APIManager {
         int totalLength = 0;
         boolean isMore = false;
 
+        //SortedSet<Object> compoundResult = new TreeSet<Object>(new ContentSearchResultNameComparator());
+        ArrayList<Object> compoundResult = new ArrayList<Object>();
+
         try {
             GenericArtifactManager apiArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             GenericArtifactManager docArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
@@ -2613,17 +2625,33 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
 
-            String complexAttribute = "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR " + ClientUtils
-                    .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + ")";
+            //check whether the new document indexer is engaged
+            RegistryConfigLoader registryConfig = RegistryConfigLoader.getInstance();
+            Map<String, Indexer> indexerMap = registryConfig.getIndexerMap();
+            Indexer documentIndexer = indexerMap.get(APIConstants.DOCUMENT_MEDIA_TYPE_KEY);
+            String complexAttribute;
+            if (documentIndexer != null && documentIndexer instanceof DocumentIndexer) {
+                complexAttribute = "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR " + ClientUtils
+                        .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + ")";
 
-            //construct query such that publisher roles is checked in properties for api artifacts and in fields for document artifacts
-            //this was designed this way so that content search can be fully functional if registry is re-indexed after engaging DocumentIndexer
-            if (!StringUtils.isEmpty(publisherRoles)) {
-                complexAttribute =
-                        "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
-                                + publisherRoles + ") OR mediaType_s:("  + ClientUtils
-                                .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
+                //construct query such that publisher roles is checked in properties for api artifacts and in fields for document artifacts
+                //this was designed this way so that content search can be fully functional if registry is re-indexed after engaging DocumentIndexer
+                if (!StringUtils.isEmpty(publisherRoles)) {
+                    complexAttribute =
+                            "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
+                                    + publisherRoles + ") OR mediaType_s:("  + ClientUtils
+                                    .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
+                }
+            } else {
+                //document indexer required for document content search is not engaged, therefore carry out the search only for api artifact contents
+                complexAttribute = ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE);
+                if (!StringUtils.isEmpty(publisherRoles)) {
+                    complexAttribute =
+                            "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
+                                    + publisherRoles + ")";
+                }
             }
+
 
             attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, complexAttribute);
             attributes.put(APIConstants.API_OVERVIEW_STATUS, apiState);
@@ -2637,8 +2665,7 @@ public abstract class AbstractAPIManager implements APIManager {
             ResourceData[] resourceData = resultsBean.getResourceDataList();
 
             if (resourceData == null || resourceData.length == 0) {
-                result.put("apis", apiSet);
-                result.put("docs", docMap);
+                result.put("apis", compoundResult);
                 result.put("length", 0);
                 result.put("isMore", isMore);
             }
@@ -2651,8 +2678,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
             }
 
-            AuthorizationManager manager = ServiceReferenceHolder.getInstance().getRealmService()
-                    .getTenantUserRealm(tenantId).getAuthorizationManager();
             for (ResourceData data : resourceData) {
                 String resourcePath = data.getResourcePath();
                 int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
@@ -2694,16 +2719,17 @@ public abstract class AbstractAPIManager implements APIManager {
                     }
                 }
             }
+
+            compoundResult.addAll(apiSet);
+            compoundResult.addAll(docMap.entrySet());
+            compoundResult.sort(new ContentSearchResultNameComparator());
         } catch (RegistryException e) {
             handleException("Failed to search APIs by content", e);
         } catch (IndexerException e) {
             handleException("Failed to search APIs by content", e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Error while getting Authorization Manager");
         }
 
-        result.put("apis", apiSet);
-        result.put("docs", docMap);
+        result.put("apis", compoundResult);
         result.put("length", totalLength);
         result.put("isMore", isMore);
         return result;

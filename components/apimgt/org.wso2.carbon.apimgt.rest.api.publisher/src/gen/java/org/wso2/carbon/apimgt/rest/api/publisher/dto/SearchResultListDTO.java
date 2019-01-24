@@ -1,9 +1,9 @@
-package org.wso2.carbon.apimgt.rest.api.store.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIListPaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SearchResultDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class ResultListDTO  {
+public class SearchResultListDTO  {
   
   
   
@@ -28,37 +28,10 @@ public class ResultListDTO  {
   private String previous = null;
   
   
-  private List<ResultDTO> list = new ArrayList<ResultDTO>();
+  private List<SearchResultDTO> list = new ArrayList<SearchResultDTO>();
   
   
   private APIListPaginationDTO pagination = null;
-
-  private String lastUpdatedTime = null;
-
-  private String createdTime = null;
-
-  /**
-  * gets and sets the lastUpdatedTime for ResultListDTO
-  **/
-  @JsonIgnore
-  public String getLastUpdatedTime(){
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime){
-    this.lastUpdatedTime=lastUpdatedTime;
-  }
-
-  /**
-  * gets and sets the createdTime for a ResultListDTO
-  **/
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
 
   
   /**
@@ -104,10 +77,10 @@ public class ResultListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<ResultDTO> getList() {
+  public List<SearchResultDTO> getList() {
     return list;
   }
-  public void setList(List<ResultDTO> list) {
+  public void setList(List<SearchResultDTO> list) {
     this.list = list;
   }
 
@@ -128,7 +101,7 @@ public class ResultListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ResultListDTO {\n");
+    sb.append("class SearchResultListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.indexing.indexer;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -63,16 +64,25 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This is the document indexer introduced to index document artifacts for unified content search.
+ */
 public class DocumentIndexer extends RXTIndexer {
     public static final Log log = LogFactory.getLog(DocumentIndexer.class);
 
     public IndexDocument getIndexedDocument(AsyncIndexer.File2Index fileData) throws SolrException, RegistryException {
+        log.info("Running Document Indexer...");
         IndexDocument indexDocument = super.getIndexedDocument(fileData);
         IndexDocument newIndexDocument = indexDocument;
 
         Registry registry = GovernanceUtils
                 .getGovernanceSystemRegistry(IndexingManager.getInstance().getRegistry(fileData.tenantId));
         String documentResourcePath = fileData.path.substring(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH.length());
+
+        if (log.isDebugEnabled()) {
+            log.debug("Executing document indexer for resource at " + documentResourcePath);
+        }
+
         Resource documentResource = null;
         Map<String, List<String>> fields = indexDocument.getFields();
 
@@ -87,8 +97,10 @@ public class DocumentIndexer extends RXTIndexer {
                 newIndexDocument = new IndexDocument(fileData.path, "", content, indexDocument.getTenantId());
                 newIndexDocument.setFields(fields);
             } catch (APIManagementException e) {
+                //error occured while fetching details from API, but continuing document indexing
                 log.error("Error while updating indexed document.", e);
             } catch (IOException e) {
+                //error occured while fetching document content, but continuing document indexing
                 log.error("Error while getting document content.", e);
             }
         }
@@ -96,6 +108,15 @@ public class DocumentIndexer extends RXTIndexer {
         return newIndexDocument;
     }
 
+    /**
+     * Fetch api status and access control details to document artifacts
+     *
+     * @param registry
+     * @param documentResource
+     * @param fields
+     * @throws RegistryException
+     * @throws APIManagementException
+     */
     private void fetchRequiredDetailsFromAssociatedAPI(Registry registry, Resource documentResource,
             Map<String, List<String>> fields) throws RegistryException, APIManagementException {
         Association apiAssociations[] = registry
@@ -114,12 +135,20 @@ public class DocumentIndexer extends RXTIndexer {
             fields.put(APIConstants.API_OVERVIEW_STATUS, Arrays.asList(apiStatus));
             fields.put(APIConstants.PUBLISHER_ROLES, Arrays.asList(publisherRoles));
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("API does not exist at " + apiPath);
-            }
+            log.warn("API does not exist at " + apiPath);
         }
     }
 
+    /**
+     * Write document content to document artifact as its raw content
+     *
+     * @param registry
+     * @param documentResource
+     * @return
+     * @throws RegistryException
+     * @throws IOException
+     * @throws APIManagementException
+     */
     private String fetchDocumentContent(Registry registry, Resource documentResource)
             throws RegistryException, IOException, APIManagementException {
         GenericArtifactManager docArtifactManager = APIUtil
@@ -133,60 +162,87 @@ public class DocumentIndexer extends RXTIndexer {
                     .getAssociations(documentResource.getPath(), APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             Association fileAssociation;
 
-            //a file document can have one file association
-            if (fileAssociations.length == 1) {
-                fileAssociation = fileAssociations[0];
-                String contentPath = fileAssociation.getDestinationPath();
-
-                if (registry.resourceExists(contentPath)) {
-                    Resource contentResource = registry.get(contentPath);
-
-                    String fileName = ((ResourceImpl) contentResource).getName();
-                    String extension = FilenameUtils.getExtension(fileName);
-                    InputStream inputStream = contentResource.getContentStream();
-
-                    if (APIConstants.PDF_EXTENSION.equals(extension)) {
-                        PDFParser pdfParser = new PDFParser(inputStream);
-                        pdfParser.parse();
-                        COSDocument cosDocument = pdfParser.getDocument();
-                        PDFTextStripper stripper = new PDFTextStripper();
-                        contentString = stripper.getText(new PDDocument(cosDocument));
-                    } else if (APIConstants.DOC_EXTENSION.equals(extension)) {
-                        POIFSFileSystem pfs = new POIFSFileSystem(inputStream);
-                        WordExtractor msWord2003Extractor = new WordExtractor(pfs);
-                        contentString = msWord2003Extractor.getText();
-                    } else if (APIConstants.DOCX_EXTENSION.equals(extension)) {
-                        XWPFDocument doc = new XWPFDocument(inputStream);
-                        XWPFWordExtractor msWord2007Extractor = new XWPFWordExtractor(doc);
-                        contentString = msWord2007Extractor.getText();
-                    } else if (APIConstants.XLS_EXTENSION.equals(extension)) {
-                        POIFSFileSystem pfs = new POIFSFileSystem(inputStream);
-                        ExcelExtractor extractor = new ExcelExtractor(pfs);
-                        contentString = extractor.getText();
-                    } else if (APIConstants.XLSX_EXTENSION.equals(extension)) {
-                        XSSFWorkbook xssfSheets = new XSSFWorkbook(inputStream);
-                        XSSFExcelExtractor xssfExcelExtractor = new XSSFExcelExtractor(xssfSheets);
-                        contentString = xssfExcelExtractor.getText();
-                    } else if (APIConstants.PPT_EXTENSION.equals(extension)) {
-                        POIFSFileSystem fs = new POIFSFileSystem(inputStream);
-                        PowerPointExtractor extractor = new PowerPointExtractor(fs);
-                        contentString = extractor.getText();
-                    } else if (APIConstants.PPTX_EXTENSION.equals(extension)) {
-                        XMLSlideShow xmlSlideShow = new XMLSlideShow(inputStream);
-                        XSLFPowerPointExtractor xslfPowerPointExtractor = new XSLFPowerPointExtractor(xmlSlideShow);
-                        contentString = xslfPowerPointExtractor.getText();
-                    } else if (APIConstants.TXT_EXTENSION.equals(extension) || APIConstants.WSDL_EXTENSION
-                            .equals(extension) || APIConstants.XML_DOC_EXTENSION.equals(extension)) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                        String line;
-                        StringBuilder contentBuilder = new StringBuilder();
-                        while ((line = reader.readLine()) != null) {
-                            contentBuilder.append(line);
-                        }
-                        contentString = contentBuilder.toString();
-                    }
-                }
+            if (fileAssociations.length < 1) {
+                String error = "No document associated to API";
+                log.error(error);
+                throw new APIManagementException(error);
             }
+
+            //a file document can have one file association
+            fileAssociation = fileAssociations[0];
+            String contentPath = fileAssociation.getDestinationPath();
+
+            if (!registry.resourceExists(contentPath)) {
+                String error = "API not found at " + contentPath;
+                log.error(error);
+                throw new APIManagementException(error);
+            }
+
+            Resource contentResource = registry.get(contentPath);
+
+            String fileName = ((ResourceImpl) contentResource).getName();
+            String extension = FilenameUtils.getExtension(fileName);
+            InputStream inputStream = null;
+            try {
+                inputStream = contentResource.getContentStream();
+                switch (extension) {
+                case APIConstants.PDF_EXTENSION:
+                    PDFParser pdfParser = new PDFParser(inputStream);
+                    pdfParser.parse();
+                    COSDocument cosDocument = pdfParser.getDocument();
+                    PDFTextStripper stripper = new PDFTextStripper();
+                    contentString = stripper.getText(new PDDocument(cosDocument));
+                    break;
+                case APIConstants.DOC_EXTENSION: {
+                    POIFSFileSystem pfs = new POIFSFileSystem(inputStream);
+                    WordExtractor msWord2003Extractor = new WordExtractor(pfs);
+                    contentString = msWord2003Extractor.getText();
+                    break;
+                }
+                case APIConstants.DOCX_EXTENSION:
+                    XWPFDocument doc = new XWPFDocument(inputStream);
+                    XWPFWordExtractor msWord2007Extractor = new XWPFWordExtractor(doc);
+                    contentString = msWord2007Extractor.getText();
+                    break;
+                case APIConstants.XLS_EXTENSION: {
+                    POIFSFileSystem pfs = new POIFSFileSystem(inputStream);
+                    ExcelExtractor extractor = new ExcelExtractor(pfs);
+                    contentString = extractor.getText();
+                    break;
+                }
+                case APIConstants.XLSX_EXTENSION:
+                    XSSFWorkbook xssfSheets = new XSSFWorkbook(inputStream);
+                    XSSFExcelExtractor xssfExcelExtractor = new XSSFExcelExtractor(xssfSheets);
+                    contentString = xssfExcelExtractor.getText();
+                    break;
+                case APIConstants.PPT_EXTENSION: {
+                    POIFSFileSystem fs = new POIFSFileSystem(inputStream);
+                    PowerPointExtractor extractor = new PowerPointExtractor(fs);
+                    contentString = extractor.getText();
+                    break;
+                }
+                case APIConstants.PPTX_EXTENSION:
+                    XMLSlideShow xmlSlideShow = new XMLSlideShow(inputStream);
+                    XSLFPowerPointExtractor xslfPowerPointExtractor = new XSLFPowerPointExtractor(xmlSlideShow);
+                    contentString = xslfPowerPointExtractor.getText();
+                    break;
+                case APIConstants.TXT_EXTENSION:
+                case APIConstants.WSDL_EXTENSION:
+                case APIConstants.XML_DOC_EXTENSION:
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                    String line;
+                    StringBuilder contentBuilder = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line);
+                    }
+                    contentString = contentBuilder.toString();
+                    break;
+                }
+            } finally {
+                IOUtils.closeQuietly(inputStream);
+            }
+
+
         } else if (Documentation.DocumentSourceType.INLINE.name().equals(sourceType)) {
             Association contentAssociations[] = registry
                     .getAssociations(documentResource.getPath(), APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
@@ -200,14 +256,22 @@ public class DocumentIndexer extends RXTIndexer {
                 if (registry.resourceExists(contentPath)) {
                     Resource contentResource = registry.get(contentPath);
 
-                    InputStream instream = contentResource.getContentStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(instream));
+                    InputStream instream = null;
+                    BufferedReader reader = null;
                     String line;
-                    StringBuilder contentBuilder = new StringBuilder();
-                    while ((line = reader.readLine()) != null) {
-                        contentBuilder.append(line);
+                    try {
+                        instream = contentResource.getContentStream();
+                        reader = new BufferedReader(new InputStreamReader(instream));
+                        StringBuilder contentBuilder = new StringBuilder();
+                        while ((line = reader.readLine()) != null) {
+                            contentBuilder.append(line);
+                        }
+                        contentString = contentBuilder.toString();
+                    } finally {
+                        if (reader != null) {
+                            IOUtils.closeQuietly(reader);
+                        }
                     }
-                    contentString = contentBuilder.toString();
                 }
             }
         }

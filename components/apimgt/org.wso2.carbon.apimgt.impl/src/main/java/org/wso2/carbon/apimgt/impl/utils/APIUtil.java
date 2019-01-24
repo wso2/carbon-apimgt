@@ -7865,7 +7865,7 @@ public final class APIUtil {
             if (oldStateChangeIndicatorStatus != null) {
                 newStateChangeIndicatorStatus = String.valueOf(!Boolean.parseBoolean(oldStateChangeIndicatorStatus));
             }
-            docResource.setProperty(APIConstants.API_STATE_CHANGE_INDICATOR, newStateChangeIndicatorStatus);
+            docResource.setProperty(APIConstants.API_STATE_CHANGE_INDICATOR, "false");
             registry.put(documentResourcePath, docResource);
         }
     }

@@ -3327,7 +3327,7 @@ paths:
 ######################################################
 # The "Content Search Results" resource APIs
 ######################################################
-  /results:
+  /search:
 
 #-----------------------------------------------------
 # Retrieve the matching results
@@ -3336,15 +3336,15 @@ paths:
       x-scope: apim:api_view
       produces:
         - application/json
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/results=query?sample"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/search=query?sample"
       x-wso2-request: |
-        GET https://localhost:9443/api/am/publisher/v0.13/results
+        GET https://localhost:9443/api/am/publisher/v0.13/search
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
       summary: |
-        Retrieve/Search APIs and Inline Docs by content
+        Retrieve/Search APIs and API Documents by content
       description: |
-        This operation provides you a list of available APIs and Inline Docs qualifying the given keyword match.
+        This operation provides you a list of available APIs and API Documents qualifying the given keyword match.
 
       parameters:
         - $ref : '#/parameters/limit'
@@ -3365,9 +3365,9 @@ paths:
         200:
           description: |
             OK.
-            List of qualifying APIs and inline docs is returned.
+            List of qualifying APIs and API documents is returned.
           schema:
-            $ref: '#/definitions/ResultList'
+            $ref: '#/definitions/SearchResultList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -4665,11 +4665,11 @@ definitions:
         type: string
         example: Gold
 
-  #-----------------------------------------------------
-  # The Result List resource
-  #-----------------------------------------------------
-  ResultList:
-    title: Result List
+#-----------------------------------------------------
+# The Result List resource
+#-----------------------------------------------------
+  SearchResultList:
+    title: Unified Search Result List
     properties:
       count:
         type: integer
@@ -4691,7 +4691,7 @@ definitions:
       list:
         type: array
         items:
-          $ref: '#/definitions/Result'
+          $ref: '#/definitions/SearchResult'
       pagination:
         properties:
           offset:
@@ -4704,8 +4704,8 @@ definitions:
             type: integer
             example: 1290
 
-  Result:
-    title: Result
+  SearchResult:
+    title: Search Result
     properties:
       id:
         type: string
@@ -4720,10 +4720,10 @@ definitions:
           - API
         example: API
 
-  APIResult:
+  APISearchResult:
     title: API Result
     allOf:
-      - $ref: '#/definitions/Result'
+      - $ref: '#/definitions/SearchResult'
       - properties:
           description:
             type: string
@@ -4750,10 +4750,10 @@ definitions:
             type: string
             example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
 
-  DocumentResult:
+  DocumentSearchResult:
     title: Document Result
     allOf:
-      - $ref: '#/definitions/Result'
+      - $ref: '#/definitions/SearchResult'
       - properties:
           docType:
             type: string

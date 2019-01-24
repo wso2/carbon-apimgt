@@ -41,7 +41,6 @@ jagg.block("listing", {
             apis = null;
             if (result.response != null) {
                 apis = result.response.apis;
-                docs = result.response.docs;
                 length = result.response.totalLength;
                 error = result.error;
                 message = result.message;
@@ -76,7 +75,6 @@ jagg.block("listing", {
 	var isPublishPermitted = jagg.getPublishPermitted().permitted;
         return {
             "apis":apis,
-            "docs":docs,
             "error":error,
             "message":message,
             "currentPage":currentPage,

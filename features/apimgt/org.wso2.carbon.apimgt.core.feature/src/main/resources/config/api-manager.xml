@@ -447,7 +447,7 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
-                <URI>/api/am/store/{version}/results</URI>
+                <URI>/api/am/store/{version}/search</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
         </WhiteListedURIs>

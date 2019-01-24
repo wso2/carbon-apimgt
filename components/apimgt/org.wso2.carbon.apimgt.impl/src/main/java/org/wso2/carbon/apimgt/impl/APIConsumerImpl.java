@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -4890,7 +4891,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantId);
     }
 
-    /**
+/*    *//**
      * Store specific implementation of search paginated apis
      * Returns API Search result based on the provided query. This search method supports '&' based concatenate
      * search in multiple fields.
@@ -4899,7 +4900,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param searchQuery Ex: provider=*admin*&version=*1*
      * @return API result
      * @throws APIManagementException
-     */
+     *//*
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
             boolean limitAttributes) throws APIManagementException {
@@ -4908,7 +4909,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return filterMultipleVersionedAPIs(resultApis);
     }
 
-    /**
+    *//**
      * Search Apis by Doc Content
      *
      * @param registry     - Registry which is searched
@@ -4917,13 +4918,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param searchTerm   - Search value for doc
      * @return - Documentation to APIs map
      * @throws APIManagementException - If failed to get ArtifactManager for given tenant
-     */
+     *//*
     public Map<Documentation, API> searchAPIDoc(Registry registry, int tenantID, String username,
             String searchTerm) throws APIManagementException {
         Map<Documentation, API> docMap = super.searchAPIDoc(registry, tenantID, username, searchTerm);
         return filterDocumentResultsOfMultipleVersions(docMap);
 
-    }
+    }*/
 
     /**
      * Store specific implementation of search paginated apis by content
@@ -4943,27 +4944,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
-        SortedSet<API> apiSet = (SortedSet<API>) searchResults.get("apis");
-        Map<Documentation, API> docMap = (Map<Documentation, API>) searchResults.get("docs");
+        ArrayList<Object> apiSet = (ArrayList<Object>) searchResults.get("apis");
 
         //filter store results if displayMultipleVersions is set to false
         Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
         if (!displayMultipleVersions) {
             SortedSet<API> resultApis = new TreeSet<API>(new APINameComparator());
-            resultApis.addAll(apiSet);
+
+            for (Object result : apiSet) {
+                if (result instanceof API) {
+                    resultApis.add((API)result);
+                } else if (result instanceof Map.Entry) {
+                    Map.Entry<Documentation, API> entry = (Map.Entry<Documentation, API>)result;
+                    resultApis.add(entry.getValue());
+                }
+            }
+
             Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
             Comparator<API> versionComparator = new APIVersionComparator();
             String key;
-
-            //complement apiResultSet with apis under document match
-            if (docMap != null) {
-                for (Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
-                    API api = mapEntry.getValue();
-                    if (!resultApis.contains(api)) {
-                        resultApis.add(api);
-                    }
-                }
-            }
 
             //Run the result api list through API version comparator and filter out multiple versions
             for (API api : resultApis) {
@@ -4982,40 +4981,35 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             //filter apiSet
-            SortedSet<API> tempApiSet = new TreeSet<API>(new APINameComparator());
-            for (API api : apiSet) {
-                String mapKey = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                if (latestPublishedAPIs.containsKey(mapKey)) {
-                    API latestAPI = latestPublishedAPIs.get(mapKey);
-                    if (latestAPI.getId().equals(api.getId())) {
-                        tempApiSet.add(api);
+            ArrayList<Object> tempApiSet = new ArrayList<Object>();
+            for (Object result : apiSet) {
+                API api = null;
+                String mapKey;
+                API latestAPI;
+                if (result instanceof API) {
+                    api = (API) result;
+                    mapKey = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
+                    if (latestPublishedAPIs.containsKey(mapKey)) {
+                        latestAPI = latestPublishedAPIs.get(mapKey);
+                        if (latestAPI.getId().equals(api.getId())) {
+                            tempApiSet.add(api);
+                        }
+                    }
+                } else if (result instanceof Map.Entry) {
+                    Map.Entry<Documentation, API> docEntry = (Map.Entry<Documentation, API>) result;
+                    api = docEntry.getValue();
+                    mapKey = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
+                    if (latestPublishedAPIs.containsKey(mapKey)) {
+                        latestAPI = latestPublishedAPIs.get(mapKey);
+                        if (latestAPI.getId().equals(api.getId())) {
+                            tempApiSet.add(docEntry);
+                        }
                     }
                 }
             }
             apiSet = tempApiSet;
-
-            //filter docMap
-            if (docMap != null) {
-                Map<Documentation, API> tempDocMap = new HashMap<Documentation, API>();
-                for (Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
-                    Documentation docKey = mapEntry.getKey();
-                    API apiValue = mapEntry.getValue();
-                    String mapKey = apiValue.getId().getProviderName() + COLON_CHAR + apiValue.getId().getApiName();
-
-                    if (latestPublishedAPIs.containsKey(mapKey)) {
-                        API latestAPI = latestPublishedAPIs.get(mapKey);
-                        if (latestAPI.getId().equals(apiValue.getId())) {
-                            tempDocMap.put(docKey, apiValue);
-                        }
-                    }
-                }
-                docMap = tempDocMap;
-            }
-
+            apiSet.sort(new ContentSearchResultNameComparator());
             searchResults.put("apis", apiSet);
-            if (docMap != null) {
-                searchResults.put("docs", docMap);
-            }
         }
         return searchResults;
     }

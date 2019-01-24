@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SearchResultDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class DocumentResultDTO extends ResultDTO {
+public class DocumentSearchResultDTO extends SearchResultDTO {
   
   
   public enum DocTypeEnum {
@@ -166,7 +166,7 @@ public class DocumentResultDTO extends ResultDTO {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class DocumentResultDTO {\n");
+    sb.append("class DocumentSearchResultDTO {\n");
     sb.append("  " + super.toString()).append("\n");
     sb.append("  docType: ").append(docType).append("\n");
     sb.append("  summary: ").append(summary).append("\n");

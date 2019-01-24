@@ -1104,56 +1104,50 @@ public class APIStoreHostObject extends ScriptableObject {
                     resultObj.put("totalLength", resultObj, result.get("length"));
                 }
             } else if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                apiSet = (Set<API>) result.get("apis");
-                Map<Documentation, API> docSet = (Map<Documentation, API>) result.get("docs");
+                ArrayList<Object> compoundResult = (result.get("apis") != null) ?
+                        (ArrayList<Object>) result.get("apis") : null;
 
-                if (apiSet != null && apiSet.size() > 0) {
-                    apiArray = new NativeArray(0);
-                    Iterator it = apiSet.iterator();
+                if (compoundResult != null && compoundResult.size() > 0) {
+                    Iterator it = compoundResult.iterator();
                     int i = 0;
                     while (it.hasNext()) {
-                        NativeObject currentApi = new NativeObject();
                         Object apiObject = it.next();
-                        API api = (API) apiObject;
-                        APIIdentifier apiIdentifier = api.getId();
-                        currentApi.put("name", currentApi, apiIdentifier.getApiName());
-                        currentApi.put("provider", currentApi,
-                                APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-                        currentApi.put("version", currentApi, apiIdentifier.getVersion());
-                        currentApi.put("description", currentApi, api.getDescription());
-                        currentApi.put("status", currentApi, api.getStatus());
-                        currentApi.put("rates", currentApi, api.getRating());
-                        currentApi.put("description", currentApi, api.getDescription());
-                        currentApi.put("endpoint", currentApi, api.getUrl());
-                        if (api.getThumbnailUrl() == null) {
-                            currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
-                        } else {
-                            currentApi.put("thumbnailurl", currentApi,
-                                    APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
-                        }
-                        currentApi.put("visibility", currentApi, api.getVisibility());
-                        currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
-                        currentApi.put("description", currentApi, api.getDescription());
-                        currentApi.put("isAdvertiseOnly", currentApi, api.isAdvertiseOnly());
-                        currentApi.put("apiOwner", currentApi, api.getApiOwner());
-                        currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
-                        currentApi.put("resultType", currentApi, "API");
-
-                        apiArray.put(i, apiArray, currentApi);
-                        i++;
-                    }
-                }
-
-                if (docSet != null && docSet.size() > 0) {
-                    docArray = new NativeArray(0);
-                    Map<Documentation, API> apiDocMap = (Map<Documentation, API>) result.get("docs");
-                    if (apiDocMap != null) {
-                        int i = 0;
-                        for (Map.Entry<Documentation, API> entry : apiDocMap.entrySet()) {
-                            Documentation doc = entry.getKey();
-                            API api = entry.getValue();
-                            APIIdentifier apiIdentifier = api.getId();
+                        if (apiObject instanceof API) {
                             NativeObject currentApi = new NativeObject();
+                            API api = (API) apiObject;
+                            APIIdentifier apiIdentifier = api.getId();
+                            currentApi.put("name", currentApi, apiIdentifier.getApiName());
+                            currentApi.put("provider", currentApi,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            currentApi.put("version", currentApi, apiIdentifier.getVersion());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("status", currentApi, api.getStatus());
+                            currentApi.put("rates", currentApi, api.getRating());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("endpoint", currentApi, api.getUrl());
+                            if (api.getThumbnailUrl() == null) {
+                                currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
+                            } else {
+                                currentApi.put("thumbnailurl", currentApi,
+                                        APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                            }
+                            currentApi.put("visibility", currentApi, api.getVisibility());
+                            currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("isAdvertiseOnly", currentApi, api.isAdvertiseOnly());
+                            currentApi.put("apiOwner", currentApi, api.getApiOwner());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
+                            currentApi.put("resultType", currentApi, "API");
+
+                            apiArray.put(i, apiArray, currentApi);
+                            i++;
+                        } else if (apiObject instanceof Map.Entry) {
+                            NativeObject currentApi = new NativeObject();
+                            Map.Entry<Documentation, API> docEntry = (Map.Entry<Documentation, API>) apiObject;
+
+                            Documentation doc = docEntry.getKey();
+                            API api = docEntry.getValue();
+                            APIIdentifier apiIdentifier = api.getId();
 
                             currentApi.put("name", currentApi, apiIdentifier.getApiName());
                             currentApi.put("provider", currentApi,
@@ -1181,13 +1175,12 @@ public class APIStoreHostObject extends ScriptableObject {
                             currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
                             currentApi.put("resultType", currentApi, "Document");
 
-                            docArray.put(i, docArray, currentApi);
+                            docArray.put(i, apiArray, currentApi);
                             i++;
                         }
                     }
                 }
                 resultObj.put("apis", resultObj, apiArray);
-                resultObj.put("docs", resultObj, docArray);
                 resultObj.put("totalLength", resultObj, result.get("length"));
                 resultObj.put("isMore", resultObj, result.get("isMore"));
             } else {

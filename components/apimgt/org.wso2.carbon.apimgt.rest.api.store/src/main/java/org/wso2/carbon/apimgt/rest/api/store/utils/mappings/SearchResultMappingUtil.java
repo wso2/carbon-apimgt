@@ -21,10 +21,9 @@ package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIResultDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentResultDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ResultDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ResultListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentSearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -37,8 +36,8 @@ public class SearchResultMappingUtil {
      * @param api API
      * @return
      */
-    public static APIResultDTO fromAPIToAPIResultDTO(API api) {
-        APIResultDTO apiResultDTO = new APIResultDTO();
+    public static APISearchResultDTO fromAPIToAPIResultDTO(API api) {
+        APISearchResultDTO apiResultDTO = new APISearchResultDTO();
         apiResultDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
         apiResultDTO.setName(apiId.getApiName());
@@ -49,7 +48,7 @@ public class SearchResultMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         apiResultDTO.setContext(context);
-        apiResultDTO.setType(ResultDTO.TypeEnum.API);
+        apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
@@ -61,15 +60,15 @@ public class SearchResultMappingUtil {
      * @param document
      * @return
      */
-    public static DocumentResultDTO fromDocumentationToDocumentResultDTO(Documentation document, API api) {
-        DocumentResultDTO docResultDTO = new DocumentResultDTO();
+    public static DocumentSearchResultDTO fromDocumentationToDocumentResultDTO(Documentation document, API api) {
+        DocumentSearchResultDTO docResultDTO = new DocumentSearchResultDTO();
         docResultDTO.setId(document.getId());
         docResultDTO.setName(document.getName());
-        docResultDTO.setDocType(DocumentResultDTO.DocTypeEnum.valueOf(document.getType().toString()));
-        docResultDTO.setType(ResultDTO.TypeEnum.DOC);
+        docResultDTO.setDocType(DocumentSearchResultDTO.DocTypeEnum.valueOf(document.getType().toString()));
+        docResultDTO.setType(SearchResultDTO.TypeEnum.DOC);
         docResultDTO.setSummary(document.getSummary());
-        docResultDTO.setVisibility(DocumentResultDTO.VisibilityEnum.valueOf(document.getVisibility().toString()));
-        docResultDTO.setSourceType(DocumentResultDTO.SourceTypeEnum.valueOf(document.getSourceType().toString()));
+        docResultDTO.setVisibility(DocumentSearchResultDTO.VisibilityEnum.valueOf(document.getVisibility().toString()));
+        docResultDTO.setSourceType(DocumentSearchResultDTO.SourceTypeEnum.valueOf(document.getSourceType().toString()));
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
         APIIdentifier apiId = api.getId();
         docResultDTO.setApiName(apiId.getApiName());
@@ -79,15 +78,15 @@ public class SearchResultMappingUtil {
     }
 
     /**
-     * Sets pagination urls for a ResultListDTO object given pagination parameters and url parameters
+     * Sets pagination urls for a SearchResultListDTO object given pagination parameters and url parameters
      *
-     * @param resultListDTO a ResultListDTO object
+     * @param resultListDTO a SearchResultListDTO object
      * @param query      search condition
      * @param limit      max number of objects returned
      * @param offset     starting index
      * @param size       max offset
      */
-    public static void setPaginationParams(ResultListDTO resultListDTO, String query, int offset, int limit, int size) {
+    public static void setPaginationParams(SearchResultListDTO resultListDTO, String query, int offset, int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);

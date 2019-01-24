@@ -3363,17 +3363,17 @@
                 }
             }
         },
-        "/results": {
+        "/search": {
             "get": {
                 "x-scope": "apim:api_view",
                 "produces": [
                     "application/json"
                 ],
-                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/results=query?sample",
-                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.13/results\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/search=query?sample",
+                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.13/search\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
-                "summary": "Retrieve/Search APIs and Inline Docs by content\n",
-                "description": "This operation provides you a list of available APIs and Inline Docs qualifying the given keyword match.\n",
+                "summary": "Retrieve/Search APIs and API Documents by content\n",
+                "description": "This operation provides you a list of available APIs and API Documents qualifying the given keyword match.\n",
                 "parameters": [
                     {
                         "$ref": "#/parameters/limit"
@@ -3399,9 +3399,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK.\nList of qualifying APIs and inline docs is returned.\n",
+                        "description": "OK.\nList of qualifying APIs and API documents is returned.\n",
                         "schema": {
-                            "$ref": "#/definitions/ResultList"
+                            "$ref": "#/definitions/SearchResultList"
                         },
                         "headers": {
                             "Content-Type": {
@@ -4747,8 +4747,8 @@
                 }
             }
         },
-        "ResultList": {
-            "title": "Result List",
+        "SearchResultList": {
+            "title": "Unified Search Result List",
             "properties": {
                 "count": {
                     "type": "integer",
@@ -4768,7 +4768,7 @@
                 "list": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Result"
+                        "$ref": "#/definitions/SearchResult"
                     }
                 },
                 "pagination": {
@@ -4789,8 +4789,8 @@
                 }
             }
         },
-        "Result": {
-            "title": "Result",
+        "SearchResult": {
+            "title": "Search Result",
             "properties": {
                 "id": {
                     "type": "string",
@@ -4810,11 +4810,11 @@
                 }
             }
         },
-        "APIResult": {
+        "APISearchResult": {
             "title": "API Result",
             "allOf": [
                 {
-                    "$ref": "#/definitions/Result"
+                    "$ref": "#/definitions/SearchResult"
                 },
                 {
                     "properties": {
@@ -4851,11 +4851,11 @@
                 }
             ]
         },
-        "DocumentResult": {
+        "DocumentSearchResult": {
             "title": "Document Result",
             "allOf": [
                 {
-                    "$ref": "#/definitions/Result"
+                    "$ref": "#/definitions/SearchResult"
                 },
                 {
                     "properties": {
