@@ -152,7 +152,7 @@
                 <version>2.2</version>
                 <configuration>
                     <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
-                    <warName>hybrid-gateway#v0.10</warName>
+                    <warName>hybrid-gateway#v0.11</warName>
                 </configuration>
             </plugin>
             <plugin>

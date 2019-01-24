@@ -50,7 +50,7 @@ public class MicroGatewayAPIUsageConstants {
     public static final String UPLOADED_FILE_SUFFIX = ".uploaded";
 
     public static final String USAGE_UPLOAD_SERVICE_URL = "usage.upload.service.url";
-    public static final String DEFAULT_UPLOAD_SERVICE_URL = "https://localhost:9443/micro-gateway/v0.9/upload-file";
+    public static final String DEFAULT_UPLOAD_SERVICE_URL = "https://localhost:9443/hybrid-gateway/v0.11/upload-file";
 
     public static final String STREAM_DEFINITIONS_DIRECTORY = "stream-definitions";
 
