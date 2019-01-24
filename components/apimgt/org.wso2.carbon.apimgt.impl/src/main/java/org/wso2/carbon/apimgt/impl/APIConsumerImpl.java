@@ -4891,41 +4891,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantId);
     }
 
-/*    *//**
-     * Store specific implementation of search paginated apis
-     * Returns API Search result based on the provided query. This search method supports '&' based concatenate
-     * search in multiple fields.
-     *
-     * @param registry
-     * @param searchQuery Ex: provider=*admin*&version=*1*
-     * @return API result
-     * @throws APIManagementException
-     *//*
-
-    public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
-            boolean limitAttributes) throws APIManagementException {
-
-        Map<String, Object> resultApis = super.searchPaginatedAPIs(registry, searchQuery, start, end, limitAttributes);
-        return filterMultipleVersionedAPIs(resultApis);
-    }
-
-    *//**
-     * Search Apis by Doc Content
-     *
-     * @param registry     - Registry which is searched
-     * @param tenantID     - Tenant id of logged in domain
-     * @param username     - Logged in username
-     * @param searchTerm   - Search value for doc
-     * @return - Documentation to APIs map
-     * @throws APIManagementException - If failed to get ArtifactManager for given tenant
-     *//*
-    public Map<Documentation, API> searchAPIDoc(Registry registry, int tenantID, String username,
-            String searchTerm) throws APIManagementException {
-        Map<Documentation, API> docMap = super.searchAPIDoc(registry, tenantID, username, searchTerm);
-        return filterDocumentResultsOfMultipleVersions(docMap);
-
-    }*/
-
     /**
      * Store specific implementation of search paginated apis by content
      * @param registry

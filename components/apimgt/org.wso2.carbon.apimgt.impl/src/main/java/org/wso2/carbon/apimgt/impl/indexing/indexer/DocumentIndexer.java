@@ -71,7 +71,6 @@ public class DocumentIndexer extends RXTIndexer {
     public static final Log log = LogFactory.getLog(DocumentIndexer.class);
 
     public IndexDocument getIndexedDocument(AsyncIndexer.File2Index fileData) throws SolrException, RegistryException {
-        log.info("Running Document Indexer...");
         IndexDocument indexDocument = super.getIndexedDocument(fileData);
         IndexDocument newIndexDocument = indexDocument;
 
