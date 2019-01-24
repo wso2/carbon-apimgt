@@ -176,7 +176,6 @@ public class FileDataPublisher {
                     .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append((event.getPayloadData() == null ? null :
                             StringUtils.join(event.getPayloadData(), MicroGatewayAPIUsageConstants.OBJECT_SEPARATOR)));
-            builder.append(MicroGatewayAPIUsageConstants.NEW_LINE);
             try {
                 UsageFileWriter.getInstance().writeToFile(builder.toString());
             } catch (UsagePublisherException e) {
