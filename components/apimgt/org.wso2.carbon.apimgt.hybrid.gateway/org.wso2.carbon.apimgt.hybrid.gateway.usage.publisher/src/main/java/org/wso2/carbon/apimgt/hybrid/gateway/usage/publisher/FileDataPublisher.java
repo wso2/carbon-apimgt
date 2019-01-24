@@ -154,29 +154,29 @@ public class FileDataPublisher {
         public void onEvent(WrappedEventFactory.WrappedEvent wrappedEvent, long sequence, boolean endOfBatch) {
             Event event = wrappedEvent.getEvent();
             StringBuilder builder = new StringBuilder();
-            builder.append(EBCommonsConstants.STREAM_ID)
+            builder.append(MicroGatewayAPIUsageConstants.STREAM_ID)
                     .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append(event.getStreamId())
                     .append(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
-            builder.append(EBCommonsConstants.TIME_STAMP)
+            builder.append(MicroGatewayAPIUsageConstants.TIME_STAMP)
                     .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append(event.getTimeStamp())
                     .append(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
-            builder.append(EBCommonsConstants.META_DATA)
+            builder.append(MicroGatewayAPIUsageConstants.META_DATA)
                     .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append((event.getMetaData() == null ? null :
                             StringUtils.join(event.getMetaData(), MicroGatewayAPIUsageConstants.OBJECT_SEPARATOR)))
                     .append(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
-            builder.append(EBCommonsConstants.CORRELATION_DATA)
+            builder.append(MicroGatewayAPIUsageConstants.CORRELATION_DATA)
                     .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
                     .append((event.getCorrelationData() == null ? null :
                             StringUtils.join(event.getCorrelationData(), MicroGatewayAPIUsageConstants.OBJECT_SEPARATOR)))
                     .append(MicroGatewayAPIUsageConstants.EVENT_SEPARATOR);
-            builder.append(EBCommonsConstants.PAYLOAD_DATA)
-                    .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR).
-                    append((event.getPayloadData() == null ? null :
+            builder.append(MicroGatewayAPIUsageConstants.PAYLOAD_DATA)
+                    .append(MicroGatewayAPIUsageConstants.KEY_VALUE_SEPARATOR)
+                    .append((event.getPayloadData() == null ? null :
                             StringUtils.join(event.getPayloadData(), MicroGatewayAPIUsageConstants.OBJECT_SEPARATOR)));
-
+            builder.append(MicroGatewayAPIUsageConstants.NEW_LINE);
             try {
                 UsageFileWriter.getInstance().writeToFile(builder.toString());
             } catch (UsagePublisherException e) {
@@ -184,5 +184,4 @@ public class FileDataPublisher {
             }
         }
     }
-
 }

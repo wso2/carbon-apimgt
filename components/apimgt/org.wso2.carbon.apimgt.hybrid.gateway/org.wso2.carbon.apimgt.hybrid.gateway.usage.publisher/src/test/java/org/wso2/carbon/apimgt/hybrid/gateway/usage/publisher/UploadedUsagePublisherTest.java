@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.constants.Constants
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.dao.UploadedUsageFileInfoDAO;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.dto.UploadedFileInfoDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsagePublisherUtils;
-import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.gzip.GZIPUtils;
+import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.zip.ZIPUtils;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 
 import java.io.ByteArrayInputStream;
@@ -43,11 +43,11 @@ import static org.mockito.Matchers.any;
  * UploadedUsagePublisher Test Class
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ UsagePublisherUtils.class, GZIPUtils.class,
+@PrepareForTest({ UsagePublisherUtils.class, ZIPUtils.class,
         UploadedUsageFileInfoDAO.class, FileUtils.class }) public class UploadedUsagePublisherTest {
 
     private final String tenantDomain = "ccc2222";
-    private final String compressedFileName = "api-usage-data.dat.1517296920006.gz";
+    private final String compressedFileName = "api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip";
 
     @Before
     public void setUp() throws Exception {
@@ -57,7 +57,7 @@ import static org.mockito.Matchers.any;
 
     @Test
     public void run() throws Exception {
-        PowerMockito.mockStatic(GZIPUtils.class);
+        PowerMockito.mockStatic(ZIPUtils.class);
         PowerMockito.mockStatic(FileUtils.class);
         PowerMockito.mockStatic(UsagePublisherUtils.class);
         DataPublisher dataPublisher = Mockito.mock(DataPublisher.class);
@@ -78,7 +78,7 @@ import static org.mockito.Matchers.any;
 
     @Test(expected = Exception.class)
     public void run_throwsExceptionWhileCreatingPayload() throws Exception {
-        PowerMockito.mockStatic(GZIPUtils.class);
+        PowerMockito.mockStatic(ZIPUtils.class);
         PowerMockito.mockStatic(FileUtils.class);
         PowerMockito.mockStatic(UsagePublisherUtils.class);
         PowerMockito.when(UsagePublisherUtils.getDataPublisher()).thenThrow(Exception.class);
@@ -92,7 +92,7 @@ import static org.mockito.Matchers.any;
 
     @Test
     public void run_throwsExceptionWhileDecompressingFile() throws Exception {
-        PowerMockito.mockStatic(GZIPUtils.class);
+        PowerMockito.mockStatic(ZIPUtils.class);
         PowerMockito.mockStatic(FileUtils.class);
         PowerMockito.mockStatic(UsagePublisherUtils.class);
         DataPublisher dataPublisher = Mockito.mock(DataPublisher.class);

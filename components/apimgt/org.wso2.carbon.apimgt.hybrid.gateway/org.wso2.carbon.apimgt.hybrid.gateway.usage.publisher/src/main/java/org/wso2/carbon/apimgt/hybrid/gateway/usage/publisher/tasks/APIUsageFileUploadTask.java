@@ -102,7 +102,7 @@ public class APIUsageFileUploadTask implements Task {
             for (File file : listOfFiles) {
                 String fileName = file.getName();
                 //Only get the files which have been rotated
-                if (fileName.endsWith(MicroGatewayAPIUsageConstants.GZIP_EXTENSION)) {
+                if (fileName.endsWith(MicroGatewayAPIUsageConstants.ZIP_EXTENSION)) {
                     try {
                         boolean uploadStatus = uploadCompressedFile(file.toPath(), fileName);
                         if (uploadStatus) {

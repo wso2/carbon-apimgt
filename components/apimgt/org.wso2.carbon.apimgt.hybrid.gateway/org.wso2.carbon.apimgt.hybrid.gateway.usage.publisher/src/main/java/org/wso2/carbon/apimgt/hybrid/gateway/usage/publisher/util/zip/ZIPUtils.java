@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.gzip;
+package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.zip;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -25,50 +25,52 @@ import org.apache.commons.logging.LogFactory;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
- * This class has methods for Compressing and De-Compressing files into and from GZIP format
+ * This class has methods for Compressing and De-Compressing files into and from ZIP format
  */
-public class GZIPUtils {
+public class ZIPUtils {
 
-    private static final Log log = LogFactory.getLog(GZIPUtils.class);
+    private static final Log log = LogFactory.getLog(ZIPUtils.class);
 
     private static final int BUFFER_SIZE = 1024;
 
     /**
-     * Compresses the given file into GZIP format
+     * Compresses the given file into ZIP format
      *
      * @param sourcePath source file path
      * @param destinationPath destination file path
-     * @throws GZIPException if there is an error while compressing
+     * @throws ZIPException if there is an error while compressing
      */
-    public static void compressFile(String sourcePath, String destinationPath) throws GZIPException {
+    public static void compressFile(String sourcePath, String destinationPath) throws ZIPException {
         if (log.isDebugEnabled()) {
             log.debug("Compressing file : " + sourcePath + " to : " + destinationPath);
         }
         byte[] buffer = new byte[BUFFER_SIZE];
-        GZIPOutputStream gzipOutputStream = null;
+        ZipOutputStream zipOutputStream = null;
         FileOutputStream fileOutputStream = null;
         FileInputStream fileInputStream = null;
 
         try {
             fileOutputStream = new FileOutputStream(destinationPath);
-            gzipOutputStream = new GZIPOutputStream(fileOutputStream);
+            zipOutputStream = new ZipOutputStream(fileOutputStream);
+            ZipEntry zipEntry = new ZipEntry(sourcePath);
+            zipOutputStream.putNextEntry(zipEntry);
             fileInputStream = new FileInputStream(sourcePath);
 
             int len;
             while ((len = fileInputStream.read(buffer)) > 0) {
-                gzipOutputStream.write(buffer, 0, len);
+                zipOutputStream.write(buffer, 0, len);
             }
-            gzipOutputStream.finish();
+            zipOutputStream.finish();
         } catch (IOException ex) {
-            throw new GZIPException("Error occurred while compressing the file : " + sourcePath, ex);
+            throw new ZIPException("Error occurred while compressing the file : " + sourcePath, ex);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
             IOUtils.closeQuietly(fileOutputStream);
-            IOUtils.closeQuietly(gzipOutputStream);
+            IOUtils.closeQuietly(zipOutputStream);
         }
     }
-
 }

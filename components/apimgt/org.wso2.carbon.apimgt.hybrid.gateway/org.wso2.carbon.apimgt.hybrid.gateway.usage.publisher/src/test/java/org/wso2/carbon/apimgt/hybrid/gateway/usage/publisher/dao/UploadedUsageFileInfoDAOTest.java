@@ -90,7 +90,7 @@ public class UploadedUsageFileInfoDAOTest {
 
         PowerMockito.mockStatic(MicroGatewayAPIUsageConstants.class);
         UploadedFileInfoDTO uploadedFileInfoDTO = new UploadedFileInfoDTO(tenantDomain,
-                "api-usage-data.dat.1517296920006.gz", 1213232);
+                "api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip", 1213232);
         InputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
         UploadedUsageFileInfoDAO.persistFileUpload(uploadedFileInfoDTO, anyInputStream);
         String getUploadedFilesQuery = "SELECT * FROM AM_USAGE_UPLOADED_FILES WHERE TENANT_DOMAIN = (?)";
@@ -160,13 +160,13 @@ public class UploadedUsageFileInfoDAOTest {
                 "(TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP) VALUES(?,?,?);";
         PreparedStatement st = connection.prepareStatement(insertQuery);
         st.setString(1, "ccc2222");
-        st.setString(2, "api-usage-data.dat.1517296920006.gz");
+        st.setString(2, "api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip");
         st.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
         st.executeUpdate();
 
         PowerMockito.mockStatic(MicroGatewayAPIUsageConstants.class);
         UploadedFileInfoDTO uploadedFileInfoDTO = new UploadedFileInfoDTO("ccc2222",
-                "api-usage-data.dat.1517296920006.gz", 1213232);
+                "api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip", 1213232);
         UploadedUsageFileInfoDAO.updateCompletion(uploadedFileInfoDTO);
 
         String getUploadedFilesQuery = "SELECT * FROM AM_USAGE_UPLOADED_FILES WHERE TENANT_DOMAIN = (?)";
@@ -190,7 +190,7 @@ public class UploadedUsageFileInfoDAOTest {
                 "(TENANT_DOMAIN,FILE_NAME,FILE_TIMESTAMP,FILE_PROCESSED) VALUES(?,?,?,?);";
         PreparedStatement st = connection.prepareStatement(insertQuery);
         st.setString(1, tenantDomain);
-        st.setString(2, "api-usage-data.dat.1517296920006.gz");
+        st.setString(2, "api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip");
         st.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
         st.setInt(4, 1);
         st.executeUpdate();

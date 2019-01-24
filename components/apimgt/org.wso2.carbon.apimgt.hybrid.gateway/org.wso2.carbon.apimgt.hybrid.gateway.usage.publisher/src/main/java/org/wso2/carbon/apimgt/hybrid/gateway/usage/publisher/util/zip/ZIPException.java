@@ -16,25 +16,25 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.gzip;
+package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.zip;
 
 /**
  * For exceptions thrown while compressing
  */
-public class GZIPException extends Exception {
+public class ZIPException extends Exception {
 
-    public GZIPException() {
+    public ZIPException() {
     }
 
-    public GZIPException(String s) {
+    public ZIPException(String s) {
         super(s);
     }
 
-    public GZIPException(String s, Throwable throwable) {
+    public ZIPException(String s, Throwable throwable) {
         super(s, throwable);
     }
 
-    public GZIPException(Throwable throwable) {
+    public ZIPException(Throwable throwable) {
         super(throwable);
     }
 }

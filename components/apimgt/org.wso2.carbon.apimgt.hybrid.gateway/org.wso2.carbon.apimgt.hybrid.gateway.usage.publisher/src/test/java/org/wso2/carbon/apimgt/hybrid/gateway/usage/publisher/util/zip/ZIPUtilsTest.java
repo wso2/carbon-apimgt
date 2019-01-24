@@ -15,7 +15,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.gzip;
+package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.zip;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,11 +31,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 /**
- * GZIPUtils Test Class
+ * ZIPUtils Test Class
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GZIPUtils.class})
-public class GZIPUtilsTest {
+@PrepareForTest({ZIPUtils.class})
+public class ZIPUtilsTest {
     @Before
     public void setUp() throws Exception {
         TestUtil util = new TestUtil();
@@ -45,21 +45,21 @@ public class GZIPUtilsTest {
     @Test
     public void compressFile() throws Exception {
         String destPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
-                "api-usage-data/compressed/api-usage-data.dat.1517296920006.gz";
+                "api-usage-data/compressed/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip";
         String srcPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
-                "api-usage-data/api-usage-data.dat.1517296920006";
-        GZIPUtils.compressFile(srcPath, destPath);
+                "api-usage-data/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91";
+        ZIPUtils.compressFile(srcPath, destPath);
     }
 
     @Test
     public void compressFile_throwsException() throws Exception {
         String destPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
-                "api-usage-data/compressed/api-usage-data.dat.1517296920006.gz";
+                "api-usage-data/compressed/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip";
         String srcPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
-                "api-usage-data/api-usage-data.dat.1517296920006";
+                "api-usage-data/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91";
         FileOutputStream fileOutputStream = Mockito.spy(new FileOutputStream(destPath));
         PowerMockito.whenNew(FileOutputStream.class).withAnyArguments().thenReturn(fileOutputStream);
-        GZIPUtils.compressFile(srcPath, destPath);
+        ZIPUtils.compressFile(srcPath, destPath);
     }
 
 }

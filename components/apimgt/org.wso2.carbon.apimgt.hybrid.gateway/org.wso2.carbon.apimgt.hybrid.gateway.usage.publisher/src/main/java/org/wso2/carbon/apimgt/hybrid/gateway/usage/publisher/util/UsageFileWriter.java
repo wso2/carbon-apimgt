@@ -23,8 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException;
-import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.gzip.GZIPException;
-import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.gzip.GZIPUtils;
+import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.zip.ZIPException;
+import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.zip.ZIPUtils;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.BufferedWriter;
@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 /**
  * This class writes the events to a file
@@ -137,7 +138,7 @@ public class UsageFileWriter {
     }
 
     /**
-     * Rotates the given file. This will compress the file into GZIP format and add a timestamp to file name
+     * Rotates the given file. This will compress the file into ZIP format and add a timestamp to file name
      *
      * @param fileToRotate ({@link String}) path value of the file to be rotated
      * @throws UsagePublisherException if there is an exception while compressing or creating the output streams to
@@ -147,18 +148,17 @@ public class UsageFileWriter {
         try {
             closeFileResources();
             Path currentPath = Paths.get(fileToRotate);
-
-            //api-usage-data.dat.1511772769858.gz
-            Path rotatedPath = Paths.get(fileToRotate + "." + System.currentTimeMillis()
-                    + MicroGatewayAPIUsageConstants.GZIP_EXTENSION);
-            GZIPUtils.compressFile(currentPath.toString(), rotatedPath.toString());
+            //api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip
+            Path rotatedPath = Paths.get(fileToRotate + "." + System.currentTimeMillis() + "." + UUID.randomUUID().toString()
+                    + MicroGatewayAPIUsageConstants.ZIP_EXTENSION);
+            ZIPUtils.compressFile(currentPath.toString(), rotatedPath.toString());
             Files.delete(currentPath);
 
             //ReCreate the streams
             fileOutputStream = new FileOutputStream(filePath.toFile(), true);
             outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
             bufferedWriter = new BufferedWriter(outputStreamWriter);
-        } catch (GZIPException | IOException e) {
+        } catch (ZIPException | IOException e) {
             throw new UsagePublisherException("Error occurred while rotating the file : " + fileToRotate, e);
         }
     }

@@ -1,3 +1,6 @@
-streamId--KVS--null:null--EVT--timeStamp--KVS--1548238878319--EVT--metaData--KVS----EVT--correlationData--KVS--null--EVT--payloadData--KVS----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ--0
-streamId--KVS--null:null--EVT--timeStamp--KVS--1548238878331--EVT--metaData--KVS----EVT--correlationData--KVS--null--EVT--payloadData--KVS----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ----OBJ--0--OBJ--
-streamId--KVS--null:null--EVT--timeStamp--KVS--1548238878346--EVT--metaData--KVS--null--EVT--correlationData--KVS--null--EVT--payloadData--KVS----OBJ----OBJ----OBJ--false--OBJ--false--OBJ--false
+streamId-KS-null:null-ES-timestamp-KS-1548322354089-ES-metadata-KS--ES-correlationData-KS-null-ES-payLoadData-KS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS-0
+
+streamId-KS-null:null-ES-timestamp-KS-1548322354103-ES-metadata-KS--ES-correlationData-KS-null-ES-payLoadData-KS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS--OS-0-OS-
+
+streamId-KS-null:null-ES-timestamp-KS-1548322354115-ES-metadata-KS-null-ES-correlationData-KS-null-ES-payLoadData-KS--OS--OS--OS-false-OS-false-OS-false
+

@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util;
  */
 public class MicroGatewayAPIUsageConstants {
 
-    public static final String GZIP_EXTENSION = ".gz";
+    public static final String ZIP_EXTENSION = ".zip";
 
     public static final String API_USAGE_OUTPUT_DIRECTORY = "api-usage-data";
 
@@ -90,9 +90,15 @@ public class MicroGatewayAPIUsageConstants {
     public static final int MAX_RETRY_COUNT = 3;
 
     // Separators used for persisting events
-    public static final String EVENT_SEPARATOR = "--EVT--";
+    public static final String EVENT_SEPARATOR = "-ES-";
+    public static final String KEY_VALUE_SEPARATOR = "-KS-";
+    public static final String OBJECT_SEPARATOR = "-OS-";
 
-    public static final String KEY_VALUE_SEPARATOR = "--KVS--";
-
-    public static final String OBJECT_SEPARATOR = "--OBJ--";
+    // Strings used for persisting events
+    public static final String STREAM_ID = "streamId";
+    public static final String META_DATA = "metadata";
+    public static final String CORRELATION_DATA = "correlationData";
+    public static final String PAYLOAD_DATA = "payLoadData";
+    public static final String TIME_STAMP = "timestamp";
+    public static final String NEW_LINE = "\n";
 }
