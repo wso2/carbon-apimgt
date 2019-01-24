@@ -15,7 +15,7 @@ jagg.block("listing", {
     },
 
     getOutputs:function () {
-        var apis, docsresult,query,error,message, mod,mode,length,user = jagg.getUser();
+        var apis, result,query,error,message, mod,mode,length,user = jagg.getUser();
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
         query = request.getParameter("query");
@@ -53,7 +53,6 @@ jagg.block("listing", {
             apis = null;
             if (result.response != null) {
                 apis = result.response.apis;
-                docs=null;
                 length = result.response.totalLength;
                 error = result.error;
                 message = result.message;
