@@ -2059,7 +2059,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                                     }
                                 } catch (IOException e) {
                                     String errorMsg = "An Error occurred while retrieving custom attributes for " +
-                                            "subscription policy with identifier: " + policy.getUuid();
+                                            "subscription policy with name: " + policy.getPolicyName();
                                     log.error(errorMsg, e);
                                     throw new APIMgtDAOException(errorMsg, e);
                                 }
