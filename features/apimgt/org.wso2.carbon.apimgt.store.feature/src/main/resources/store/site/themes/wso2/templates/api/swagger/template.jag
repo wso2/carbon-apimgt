@@ -163,7 +163,7 @@ var api = outputs.api;%>
 
   var load_swagger_ui = function(url) {
       window.swaggerUI = SwaggerUIBundle({
-          url: encodeURI(url),
+          url: url,
           dom_id: '#swagger-ui-container',
           deepLinking: true,
           presets: [
@@ -276,7 +276,7 @@ var show_environments = function(){
 var select_environment = function() {
     var selectedEnvironment = $("#environment_name");
     var gatewayType = $("#environment_name option:selected").attr('data-attr');
-    var name = selectedEnvironment.val();
+    var name = encodeURIComponent(selectedEnvironment.val());
 
     if(gatewayType == "microGW"){
          $("#sub_app_list").hide();
