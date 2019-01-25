@@ -2048,6 +2048,22 @@ public class PolicyDAOImpl implements PolicyDAO {
                                     .ThrottlePolicyConstants.COLUMN_NAME));
                             setCommonPolicyDetails(policy, resultSet);
                             setSubscriptionPolicyDetals((SubscriptionPolicy) policy, resultSet);
+                            InputStream binary = resultSet.getBinaryStream(APIMgtConstants.ThrottlePolicyConstants.
+                                    COLUMN_CUSTOM_ATTRIB);
+                            if (binary != null) {
+                                byte[] customAttrib;
+                                try {
+                                    customAttrib = IOUtils.toByteArray(binary);
+                                    if (customAttrib.length > 0) {
+                                        ((SubscriptionPolicy) policy).setCustomAttributes(customAttrib);
+                                    }
+                                } catch (IOException e) {
+                                    String errorMsg = "An Error occurred while retrieving custom attributes for " +
+                                            "subscription policy with identifier: " + policy.getUuid();
+                                    log.error(errorMsg, e);
+                                    throw new APIMgtDAOException(errorMsg, e);
+                                }
+                            }
                         }
                     }
                 }
