@@ -1665,7 +1665,7 @@
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <span.reporter.version>0.1.0</span.reporter.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
-        <aspectj.version>1.8.7</aspectj.version>
+        <aspectj.version>1.9.2</aspectj.version>
     </properties>
 </project>
 
