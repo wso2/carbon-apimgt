@@ -154,18 +154,19 @@ function APIDesigner(){
         if(this.soap_resource_created == undefined){
             var soapRestMapping = JSON.parse($('#sequenceMapping').val());
             var soapRestOutMapping = JSON.parse($('#sequenceOutMapping').val());
-            var resourceDetails = $.trim($(this).parent().text().replace(/[\t\n]+/g,''));
-            resourceDetails = resourceDetails.replace(/\s/g,'');
-            var method = resourceDetails.substring(0, resourceDetails.indexOf("/"));
-            var path = resourceDetails.substring(resourceDetails.indexOf("/") + 1, resourceDetails.indexOf("+"));
-            var key = path + "_" + method;
-            var inSeqContent = soapRestMapping[key].content;
-            var outSeqContent = soapRestOutMapping[key].content;
-            event.data.render_soap_to_rest_resource($(this).parent().next().find('.resource_body'), inSeqContent, outSeqContent, key);
-            this.soap_resource_created = true;
+            var resourceDetailsArr = $(this).parent().data("path").split(".");
+            if(resourceDetailsArr.length == 4) {
+                var method = resourceDetailsArr[3];
+                var path = resourceDetailsArr[2].substring(1);
+                var key = path + "_" + method;
+                var inSeqContent = soapRestMapping[key].content;
+                var outSeqContent = soapRestOutMapping[key].content;
+                event.data.render_soap_to_rest_resource($(this).parent().next().find('.resource_body'), inSeqContent,
+                outSeqContent, key);
+                this.soap_resource_created = true;
+            }
             $(this).parent().next().find('.resource_body').show();
-        }
-        else{
+        } else {
             $(this).parent().next().find('.resource_body').toggle();
         }
     });
