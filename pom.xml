@@ -971,7 +971,7 @@
         <velocity.version>1.7.0.wso2v1</velocity.version>
         <velocity.import.version.range>[1.7.0, 1.8.0)</velocity.import.version.range>
         <!-- Jacoco for code coverage -->
-        <jacoco.version>0.8.0</jacoco.version>
+        <jacoco.version>0.8.3</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
         <google.guava.version>20.0</google.guava.version>
         <guava.bundle.version>20.0.0</guava.bundle.version>
