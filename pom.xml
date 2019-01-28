@@ -1003,7 +1003,7 @@
         <carbon.utils.version>2.0.4</carbon.utils.version>
         <carbon.utils.package.import.version.range>[2.0.0, 3.0.0)</carbon.utils.package.import.version.range>
         <ballerina.version>0.89</ballerina.version>
-        <java-mail.version>1.5.2</java-mail.version>
+        <java-mail.version>1.6.2</java-mail.version>
         <swagger.codegen.version>2.2.3.wso2v1</swagger.codegen.version>
         <swagger.codegen.maven.plugin.version>2.2.3</swagger.codegen.maven.plugin.version>
         <samskivert.mustache.version>1.13</samskivert.mustache.version>
