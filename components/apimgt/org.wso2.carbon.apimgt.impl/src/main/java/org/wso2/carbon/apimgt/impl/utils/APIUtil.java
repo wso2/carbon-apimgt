@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -115,6 +116,8 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.soaptorest.WSDLSOAPOperationExtractor;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
@@ -217,6 +220,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -903,6 +907,136 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to get an API in the Light Weight manner.
+     * @param artifact  generic artfact
+     * @return this will return an API for the selected artifact.
+     * @throws APIManagementException , if invalid json config for the API or Api cannot be retrieved from the artifact
+     */
+    public static API getLightWeightAPI(GovernanceArtifact artifact)
+            throws APIManagementException {
+
+        API api;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            api = new API(apiIdentifier);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
+            if (apiId == -1) {
+                return null;
+            }
+            //set uuid
+            api.setUUID(artifact.getId());
+            api.setRating(getAverageRating(apiId));
+            api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+            api.setStatus(getLcStateFromArtifact(artifact));
+            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            api.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+            api.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+            api.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
+            api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
+            api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
+            api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
+            api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+            try {
+                cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
+            } catch (NumberFormatException e) {
+                //ignore
+            }
+            api.setCacheTimeout(cacheTimeout);
+
+            boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
+
+            if (isGlobalThrottlingEnabled) {
+                String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
+                api.setApiLevelPolicy(apiLevelTier);
+
+                Set<Tier> availablePolicy = new HashSet<Tier>();
+                String[] subscriptionPolicy = ApiMgtDAO.getInstance().getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB,
+                        replaceEmailDomainBack(providerName));
+                List<String> definedPolicyNames = Arrays.asList(subscriptionPolicy);
+                String policies = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                if (policies != null && !"".equals(policies)) {
+                    String[] policyNames = policies.split("\\|\\|");
+                    for (String policyName : policyNames) {
+                        if (definedPolicyNames.contains(policyName) || APIConstants.UNLIMITED_TIER.equals(policyName)) {
+                            Tier p = new Tier(policyName);
+                            availablePolicy.add(p);
+                        } else {
+                            log.warn("Unknown policy: " + policyName + " found on API: " + apiName);
+                        }
+                    }
+                }
+
+                api.addAvailableTiers(availablePolicy);
+                String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+                api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
+            } else {
+                //deprecated throttling method
+                Set<Tier> availableTier = new HashSet<Tier>();
+                String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+                if (tiers != null) {
+                    String[] tierNames = tiers.split("\\|\\|");
+                    for (String tierName : tierNames) {
+                        Tier tier = new Tier(tierName);
+                        availableTier.add(tier);
+
+                    }
+
+                    api.addAvailableTiers(availableTier);
+                    api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
+                } else {
+                    api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
+                }
+            }
+
+            api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+            api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
+            api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+
+            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
+
+            api.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+            api.setSubscriptionAvailableTenants(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+
+            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+            api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+            api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+
+            try {
+                api.setEnvironmentList(extractEnvironmentListForAPI(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
+            } catch (ParseException e) {
+                String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Invalid endpoint config JSON found in API: " + apiName + " " + apiVersion;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API from artifact ";
+            throw new APIManagementException(msg, e);
+        }
+        return api;
+    }
+    /**
      * This method used to get Provider from provider artifact
      *
      * @param artifact provider artifact
@@ -1345,6 +1479,18 @@ public final class APIUtil {
     }
 
     /**
+     * Utility method for get registry path for wsdl archive.
+     *
+     * @param identifier APIIdentifier
+     * @return wsdl archive path
+     */
+    public static String getWsdlArchivePath(APIIdentifier identifier) {
+        return APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION +
+                identifier.getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + identifier.getApiName() +
+                identifier.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+    }
+
+    /**
      * Utility method to generate the path for a file.
      *
      * @param identifier APIIdentifier
@@ -1670,6 +1816,65 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
+    }
+
+    /**
+     * Save the provided wsdl archive file to the registry for the api
+     *
+     * @param registry Governance Registry space to save the WSDL
+     * @param api      API instance
+     * @return
+     * @throws RegistryException
+     * @throws APIManagementException
+     */
+    public static String saveWSDLArchive(Registry registry, API api) throws RegistryException, APIManagementException {
+        String wsdlArchiveResourcePath =
+                APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
+                        .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
+                        api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+        String absoluteWSDLResourcePath = RegistryUtils
+                .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                + wsdlArchiveResourcePath;
+        try {
+            if (api.getWsdlArchive() != null) {
+                Resource wsdlResource = registry.newResource();
+                wsdlResource.setContentStream(api.getWsdlArchive().getContent());
+                wsdlResource.setMediaType(api.getWsdlArchive().getContentType());
+                registry.put(wsdlArchiveResourcePath, wsdlResource);
+                String[] visibleRoles = null;
+                if (api.getVisibleRoles() != null) {
+                    visibleRoles = api.getVisibleRoles().split(",");
+                }
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        wsdlArchiveResourcePath);
+                api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to add WSDL Archive " + api.getWsdlUrl() + " to the registry";
+            log.error(msg, e);
+            throw new RegistryException(msg, e);
+        } catch (APIManagementException e) {
+            String msg = "Failed to process the WSDL Archive: " + api.getWsdlUrl();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return wsdlArchiveResourcePath;
+    }
+
+    public static WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream) throws APIManagementException {
+        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
+                + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+        String archivePath = path + File.separator + APIConstants.WSDL_ARCHIVE_ZIP_FILE;
+        String extractedLocation = APIFileUtil
+                .extractUploadedArchive(inputStream, APIConstants.API_WSDL_EXTRACTED_DIRECTORY, archivePath, path);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully extracted WSDL archive. Location: " + extractedLocation);
+        }
+        WSDLSOAPOperationExtractor processor = SOAPOperationBindingUtils.getWSDLProcessor(extractedLocation);
+        if (!processor.canProcess()) {
+            throw new APIManagementException(processor.getClass().getName() + " was unable to process the WSDL");
+        }
+        return new WSDLArchiveInfo(path, APIConstants.WSDL_ARCHIVE_ZIP_FILE);
     }
 
     /**
@@ -5278,7 +5483,7 @@ public final class APIUtil {
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
         if (wsdlURL != null && !"".equals(wsdlURL)) {
             if (wsdlURL.startsWith("http:") || wsdlURL.startsWith("https:") ||
-                    wsdlURL.startsWith("file:") || wsdlURL.startsWith("/registry")) {
+                    wsdlURL.startsWith("file:") || (wsdlURL.startsWith("/registry") && !wsdlURL.endsWith(".zip"))) {
                 return true;
             }
         } else if (!required) {
@@ -5668,6 +5873,19 @@ public final class APIUtil {
     public static boolean isApplicationExist(String subscriber, String applicationName, String groupId)
             throws APIManagementException {
         return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId);
+    }
+
+    /**
+     * Check whether the new user has an application
+     *
+     * @param subscriber      subscriber name
+     * @param applicationName application name
+     * @return true if application is available for the subscriber
+     * @throws APIManagementException if failed to get applications for given subscriber
+     */
+    public static boolean isApplicationOwnedBySubscriber(String subscriber, String applicationName)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().isApplicationOwnedBySubscriber(applicationName, subscriber);
     }
 
     public static String getHostAddress() {
@@ -6265,6 +6483,19 @@ public final class APIUtil {
             return apiProvider;
         }
         return null;
+    }
+
+    /**
+     * Get the API Provider name by giving the api name version and the tenant which it belongs to
+     * @param apiName Name of the API
+     * @param apiVersion Version of the API
+     * @param tenant Tenant name
+     * @return Provider name who created the API
+     * @throws APIManagementException
+     */
+    public static String getAPIProviderFromAPINameVersionTenant(String apiName, String apiVersion, String tenant)
+            throws APIManagementException {
+        return ApiMgtDAO.getInstance().getAPIProviderByNameAndVersion(apiName, apiVersion, tenant);
     }
 
     /**

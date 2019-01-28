@@ -580,7 +580,7 @@
 				}
                 prodKey = api.prodKey;
                 clazz = (j%2) == 0 ? "even" : "odd";
-                path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ "&"+urlPrefix;
+                path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&"+urlPrefix;
                 var apiName = api.name;
                 if(api.name.length > 12){
                     apiName = api.name.substring(0,10)+ "..";

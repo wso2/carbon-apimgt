@@ -220,7 +220,31 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
             " ORDER BY $1 $2 ";
 
-
+    public static final String GET_APPLICATIONS_BY_TENANT_ID =
+            "select distinct x.* from (" +
+                    "SELECT * FROM (" +
+                    "   SELECT " +
+                    "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row," +
+                    "   APP.APPLICATION_ID as APPLICATION_ID, " +
+                    "   SUB.CREATED_BY AS CREATED_BY, " +
+                    "   APP.GROUP_ID AS GROUP_ID, " +
+                    "   SUB.TENANT_ID AS TENANT_ID, " +
+                    "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID, " +
+                    "   APP.UUID AS UUID," +
+                    "   cast(APP.NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME" +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND " +
+                    "    SUB.TENANT_ID = ?"+
+                    " And "+
+                    "    ( SUB.CREATED_BY like ?"+
+                    " OR APP.NAME like ?"+
+                    " )) a WHERE a.row > ? and a.row <= a.row + ?"+
+                    " )x"+
+                    " ORDER BY $1 $2 ";
 
 }
 

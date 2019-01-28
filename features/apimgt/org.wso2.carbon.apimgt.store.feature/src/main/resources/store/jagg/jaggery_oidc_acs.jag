@@ -38,8 +38,10 @@
         requestedURI = site.context;
     }
 
+    // obtain oidc token response to validate the signature and to obtain group ids
+    var oidcTokenReponse = oidcRelyingParty.getIdTokenResponse(authorizationCode);
     // Check OIDC signature valid and set session as a authenticated if success
-    var isSignatureValid = oidcRelyingParty.validateOIDCSignature(authorizationCode, session.get("NONCE"), sessionId);
+    var isSignatureValid = oidcRelyingParty.validateOIDCSignature(oidcTokenReponse, session.get("NONCE"), sessionId);
 
     if (!Boolean(isSignatureValid)) {
         log.error("OIDC signature is verification failed.");
@@ -57,8 +59,32 @@
     var oidcUser = oidcRelyingParty.getLoggedInUser(sessionId);
 
     
-    // Group ID feature not supported here
+var manager = jagg.module("manager");
+    var  store = manager.getAPIStoreObj();
+    var groupIdArray = store.getGroupIds(oidcTokenReponse);
+    //Store and empty string instead of null if no group Id is found. This is done so that when checking for a string array
+    //the null value returned would not cause any issue.
     var groupId="";
+    if(groupIdArray != null && groupIdArray.length != 0){
+        var length = groupIdArray.length;
+        for (i = 0; i < length; i++) {
+            if (groupIdArray[i] != null) {
+                if (i == (length - 1)) {
+                    groupId = groupId + groupIdArray[i].toString();
+                } else {
+                    groupId = groupId + groupIdArray[i].toString() + ",";
+                }
+            }
+        }
+    }
+
+    if(log.isDebugEnabled()){
+        log.debug("Setting Group ID :-" + groupId);
+    }
+    if(groupId == null || groupId == "null"){
+        //   Set group Id to empty string to avoid null value being passed to backend.
+        groupId="";
+    }
     session.put("groupId", groupId)
 
     //First check whether user is having sufficent permissions [create/publish]
@@ -112,8 +138,6 @@
         jagg.setUser({username: oidcUser, cookie: null, hasPublisherAccess: hasPublisherAccess});
         session.put("LOGGED_IN_USER", oidcUser);
         var username = oidcRelyingParty.getLoggedInUser(sessionId);
-        var manager = jagg.module("manager");
-        var store = manager.getAPIStoreObj();
         var subscriber = store.getSubscriber(username);
         if (!subscriber) {
             store.addSubscriber(username, groupId);

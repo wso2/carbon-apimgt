@@ -85,9 +85,9 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 		                			<a href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + doc.filePath))%>" class="doc-content" target="_blank" title="<%=i18n.localize("Download Document")%>" download><%=i18n.localize("Download")%></a>
 		                		<% } else { %>
 		                			<%if(reqUrl.indexOf(".jag")>=0)	{%>
-                     					<a title="<%=i18n.localize("Document Content")%>" href="doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name)%>&name=<%= encode.forUriComponent(name) %>&version=<%= encode.forUriComponent(version)%>&provider=<%= encode.forUriComponent(provider)%>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("View Content")%></a>
+                     					<a title="<%=i18n.localize("Document Content")%>" href="doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name)%>&name=<%= encode.forUriComponent(name) %>&version=<%= encode.forUriComponent(version)%>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("View Content")%></a>
                      				<%}else	{%>
-                     					<a title="<%=i18n.localize("Document Content")%>" href="../site/pages/doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name) %>&name=<%= name %>&version=<%= version %>&provider=<%= provider %>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("View Content")%></a>
+                     					<a title="<%=i18n.localize("Document Content")%>" href="../site/pages/doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name) %>&name=<%= name %>&version=<%= version %>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("View Content")%></a>
                      				<%}%>
 		                		<%} %>
 		                	</td>	                

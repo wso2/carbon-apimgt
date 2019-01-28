@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.4.99-SNAPSHOT</version>
+        <version>6.4.110-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -121,11 +121,11 @@
                                 <artifactItem>
                                     <groupId>net.sf.saxon</groupId>
                                     <artifactId>Saxon-HE</artifactId>
-                                    <version>9.4</version>
+                                    <version>9.5.1-8</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
-                                    <destFileName>Saxon-HE-9.4.jar</destFileName>
+                                    <destFileName>Saxon-HE-9.5.1-8.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/external/libs</outputDirectory>

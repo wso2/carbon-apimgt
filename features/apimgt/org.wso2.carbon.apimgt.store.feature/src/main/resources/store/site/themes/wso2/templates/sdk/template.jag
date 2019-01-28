@@ -20,7 +20,7 @@
                         <br><br>
                         <div class="col-md-12">
                             <% for (var i = 0; i < langsArray.length; i++) { %>
-                                <a href="<%=jagg.urlTenanted("/site/blocks/sdk/ajax/sdk-create.jag?action=generateSDK")%>&apiName=<%=inputs.api.name%>&apiVersion=<%=inputs.api.version%>&apiProvider=<%=inputs.api.provider%>&language=<%=langsArray[i]%>"
+                                <a href="<%=jagg.urlTenanted("/site/blocks/sdk/ajax/sdk-create.jag?action=generateSDK")%>&apiName=<%=inputs.api.name%>&apiVersion=<%=inputs.api.version%>&language=<%=langsArray[i]%>"
                                     class="btn btn-primary <% if(!user) { %>need-login<% } %>" type="button" title="sdk generation">
                                     <%=i18n.localize(langsArray[i], langsArray[i])%>&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
                                 </a>

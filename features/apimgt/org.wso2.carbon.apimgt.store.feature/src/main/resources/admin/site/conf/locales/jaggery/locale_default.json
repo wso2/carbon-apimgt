@@ -301,6 +301,10 @@
     "Reports": "Reports",
     "Usage Reports" : "Usage Reports",
     "Microgateway request summary report" : "Microgateway request summary report",
-    "Generate" : "Generate"
+    "Generate" : "Generate",
+    "Applications" : "Applications",
+    "Application Name" : "Application Name",
+    "Owner" : "Owner",
+    "Change Application Owner" : "Change Application Owner"
 
 }

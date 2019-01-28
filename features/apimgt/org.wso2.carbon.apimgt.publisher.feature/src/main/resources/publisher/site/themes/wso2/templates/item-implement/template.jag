@@ -763,7 +763,7 @@
 							                    <div class="form-actions" id="saveButtons">
 							                        <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="saveBtn" ><%=i18n.localize("Save")%></button>
 							                        <input type="hidden" id="hiddenGoToManage" value=""/>
-							                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner"><%=i18n.localize("Next: Manage")%></button>
+							                        <button type="button" id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner"><%=i18n.localize("Next: Manage")%></button>
 							                    </div>
 							                    </form>
 							                </div>
@@ -1196,7 +1196,7 @@
         });
 
         $('#goToStore-btn').click(function(){
-            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
+            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&tenant=<%=tenantDomain%>', '_blank');
             location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
         });
 

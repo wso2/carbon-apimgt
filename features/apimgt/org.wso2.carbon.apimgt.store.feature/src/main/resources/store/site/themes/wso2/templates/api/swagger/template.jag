@@ -126,6 +126,10 @@ var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 providerValUe = APIUtil.replaceEmailDomain(providerValUe);
 var authorizationHeader = outputs.authorizationHeader;
 
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(outputs.api.provider);
+
+
     if(providerValUe.indexOf("@") > -1){
         providerValUe = providerValUe.replace("@","%40");
     }
@@ -134,9 +138,9 @@ var authorizationHeader = outputs.authorizationHeader;
 
 var swaggerAPI ;
 if (providerValUe.indexOf("/") > -1 || apiName.indexOf("/") > -1) {
-    swaggerAPI = jagg.url("/api-docs" + "?provider=" + encodeURIComponent(providerValUe) + "&name=" + encodeURIComponent(apiName) + "&version=" + encodeURIComponent(version));
+    swaggerAPI = jagg.url("/api-docs" + "?tenant=" + encodeURIComponent(tenantDomain) + "&name=" + encodeURIComponent(apiName) + "&version=" + encodeURIComponent(version));
 } else {
-    swaggerAPI = jagg.url("/api-docs" + "/" + providerValUe + "/" + apiName + "/" + version);
+    swaggerAPI = jagg.url("/api-docs" + "/" + tenantDomain + "/" + apiName + "/" + version);
 }
 
 var api = outputs.api;%>
@@ -159,7 +163,7 @@ var api = outputs.api;%>
 
   var load_swagger_ui = function(url) {
       window.swaggerUI = SwaggerUIBundle({
-          url: encodeURI(url),
+          url: url,
           dom_id: '#swagger-ui-container',
           deepLinking: true,
           presets: [
@@ -272,7 +276,7 @@ var show_environments = function(){
 var select_environment = function() {
     var selectedEnvironment = $("#environment_name");
     var gatewayType = $("#environment_name option:selected").attr('data-attr');
-    var name = selectedEnvironment.val();
+    var name = encodeURIComponent(selectedEnvironment.val());
 
     if(gatewayType == "microGW"){
          $("#sub_app_list").hide();

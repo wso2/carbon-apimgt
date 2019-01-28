@@ -183,7 +183,7 @@ $(document).ready(function(){
     });
 
     var certificate_data = [];
-    if ($('#cert-data').val() != "") {
+    if ($('#cert-data').val() !== undefined && $('#cert-data').val() !== "") {
         certificate_data = jQuery.parseJSON($('#cert-data').val());
     }
     $("#cert-config").certUi({

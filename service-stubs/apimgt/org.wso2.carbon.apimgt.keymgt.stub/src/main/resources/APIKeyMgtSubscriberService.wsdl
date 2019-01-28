@@ -132,6 +132,25 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
+         <xs:element name="updateOAuthApplicationOwner">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="userId" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="ownerId" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="applicationName" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="callbackUrl" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="consumerKey" nillable="true" type="xs:string"/>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="grantTypes" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateOAuthApplicationOwnerResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax2106:OAuthApplicationInfo"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
          <xs:element name="retrieveOAuthApplication">
             <xs:complexType>
                <xs:sequence>
@@ -367,6 +386,12 @@
    <wsdl:message name="updateOAuthApplicationResponse">
       <wsdl:part name="parameters" element="ns1:updateOAuthApplicationResponse"/>
    </wsdl:message>
+   <wsdl:message name="updateOAuthApplicationOwnerRequest">
+      <wsdl:part name="parameters" element="ns1:updateOAuthApplicationOwner"/>
+   </wsdl:message>
+   <wsdl:message name="updateOAuthApplicationOwnerResponse">
+      <wsdl:part name="parameters" element="ns1:updateOAuthApplicationOwnerResponse"/>
+   </wsdl:message>
    <wsdl:portType name="APIKeyMgtSubscriberServicePortType">
       <wsdl:operation name="getSubscribedAPIsOfUser">
          <wsdl:input message="tns:getSubscribedAPIsOfUserRequest" wsaw:Action="urn:getSubscribedAPIsOfUser"/>
@@ -438,6 +463,13 @@
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIKeyMgtException" name="APIKeyMgtSubscriberServiceAPIKeyMgtException" wsaw:Action="urn:updateOAuthApplicationAPIKeyMgtSubscriberServiceAPIKeyMgtException"/>
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:updateOAuthApplicationAPIKeyMgtSubscriberServiceAPIManagementException"/>
          <wsdl:fault message="tns:APIKeyMgtSubscriberServiceIdentityException" name="APIKeyMgtSubscriberServiceIdentityException" wsaw:Action="urn:updateOAuthApplicationAPIKeyMgtSubscriberServiceIdentityException"/>
+      </wsdl:operation>
+      <wsdl:operation name="updateOAuthApplicationOwner">
+         <wsdl:input message="tns:updateOAuthApplicationOwnerRequest" wsaw:Action="urn:updateOAuthApplicationOwner"/>
+         <wsdl:output message="tns:updateOAuthApplicationOwnerResponse" wsaw:Action="urn:updateOAuthApplicationOwnerResponse"/>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIKeyMgtException" name="APIKeyMgtSubscriberServiceAPIKeyMgtException" wsaw:Action="urn:updateOAuthApplicationOwnerAPIKeyMgtSubscriberServiceAPIKeyMgtException"/>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceAPIManagementException" name="APIKeyMgtSubscriberServiceAPIManagementException" wsaw:Action="urn:updateOAuthApplicationOwnerAPIKeyMgtSubscriberServiceAPIManagementException"/>
+         <wsdl:fault message="tns:APIKeyMgtSubscriberServiceIdentityException" name="APIKeyMgtSubscriberServiceIdentityException" wsaw:Action="urn:updateOAuthApplicationOwnerAPIKeyMgtSubscriberServiceIdentityException"/>
       </wsdl:operation>
    </wsdl:portType>
    <wsdl:binding name="APIKeyMgtSubscriberServiceSoap11Binding" type="tns:APIKeyMgtSubscriberServicePortType">
@@ -597,6 +629,24 @@
       </wsdl:operation>
       <wsdl:operation name="updateOAuthApplication">
          <soap:operation soapAction="urn:updateOAuthApplication" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceIdentityException">
+            <soap:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"/>
+         </wsdl:fault>
+      </wsdl:operation>
+      <wsdl:operation name="updateOAuthApplicationOwner">
+         <soap:operation soapAction="urn:updateOAuthApplicationOwner" style="document"/>
          <wsdl:input>
             <soap:body use="literal"/>
          </wsdl:input>
@@ -787,6 +837,24 @@
             <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"/>
          </wsdl:fault>
       </wsdl:operation>
+      <wsdl:operation name="updateOAuthApplicationOwner">
+         <soap12:operation soapAction="urn:updateOAuthApplicationOwner" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIManagementException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIManagementException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceAPIKeyMgtException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyMgtSubscriberServiceIdentityException">
+            <soap12:fault use="literal" name="APIKeyMgtSubscriberServiceIdentityException"/>
+         </wsdl:fault>
+      </wsdl:operation>
    </wsdl:binding>
    <wsdl:binding name="APIKeyMgtSubscriberServiceHttpBinding" type="tns:APIKeyMgtSubscriberServicePortType">
       <http:binding verb="POST"/>
@@ -888,6 +956,15 @@
       </wsdl:operation>
       <wsdl:operation name="updateOAuthApplication">
          <http:operation location="updateOAuthApplication"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="updateOAuthApplicationOwner">
+         <http:operation location="updateOAuthApplicationOwner"/>
          <wsdl:input>
             <mime:content type="text/xml" part="parameters"/>
          </wsdl:input>

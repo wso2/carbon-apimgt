@@ -78,4 +78,37 @@ public class APIAdminImpl implements APIAdmin {
     public Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException{
         return apiMgtDAO.getAllApplicationsOfTenantForMigration(appTenantDomain);
     }
+
+    /**
+     * Get applications for the tenantId.
+     *
+     * @param tenantId             tenant Id
+     * @param start                content to start
+     * @param offset               content to limit number of pages
+     * @param searchOwner          content to search applications based on owners
+     * @param searchApplication    content to search applications based on application
+     * @param sortColumn           content to sort column
+     * @param sortOrder            content to sort in a order
+     * @throws APIManagementException if failed to get application
+     */
+    public List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start , int offset
+            , String searchOwner, String searchApplication, String sortColumn, String sortOrder)
+            throws APIManagementException {
+        return apiMgtDAO.getApplicationsByTenantIdWithPagination(tenantId, start, offset,
+                searchOwner, searchApplication, sortColumn, sortOrder);
+    }
+
+    /**
+     * Get count of the applications for the tenantId.
+     *
+     * @param tenantId             content to get application count based on tenant_id
+     * @param searchOwner          content to search applications based on owners
+     * @param searchApplication    content to search applications based on application
+     * @throws APIManagementException if failed to get application
+     */
+
+    public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication)
+            throws APIManagementException {
+        return apiMgtDAO.getApplicationsCount(tenantId, searchOwner, searchApplication);
+    }
 }

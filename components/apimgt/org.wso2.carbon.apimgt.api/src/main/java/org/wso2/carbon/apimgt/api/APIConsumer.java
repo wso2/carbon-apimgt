@@ -80,6 +80,19 @@ public interface APIConsumer extends APIManager {
     Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
 
     /**
+     * Returns a paginated list of all published APIs. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * Light weight implementation of getAllPaginatedPublishesAPIs.
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedPublishedLightWeightAPIs(String tenantDomain, int start, int end)
+            throws APIManagementException;
+
+    /**
      * Returns top rated APIs
      *
      * @param limit if -1, no limit. Return everything else, limit the return list to specified value.
@@ -733,7 +746,19 @@ public interface APIConsumer extends APIManager {
      */
     Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
                                                    boolean returnAPITags) throws APIManagementException;
-
+    /**
+     * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
+     * only the latest version will be included in this list.
+     * Light wieght implementation of getAllPaginatedAPIsByStatus
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending numbeer
+     * @param returnAPITags If true, tags of each API is returned
+     * @return set of API
+     * @throws APIManagementException if failed to API set
+     */
+    Map<String,Object> getAllPaginatedLightWeightAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
+                                                   boolean returnAPITags) throws APIManagementException;
     /**
      * Revokes the oldAccessToken generating a new one.
      *

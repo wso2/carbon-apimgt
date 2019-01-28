@@ -106,7 +106,36 @@ include("/jagg/jagg.jag");
 		  }
               }
               print(obj);
+    } else if (action == "getAllPaginatedPublishedLightWeightAPIs") {
+          if (!user) {
+             if (!ssoEnabled) {
+     			print({
+     			    error:true,
+     			     message:msg.error.loginRequired(action)
+     		    });
+     		 }
+     		 return;
           }
+          username = user.username;
+          tenant = jagg.getTenantDomain();
+          var start=request.getParameter("start");
+          var end=request.getParameter("end");
+          var returnAPITags = request.getParameter("returnAPITags");
+          mod = jagg.module("api");
+          result = mod.getAllPaginatedPublishedLightWeightAPIs(tenant, start, end, returnAPITags);
+          if (result.error) {
+              obj = {
+                  error:result.error,
+                  message:msg.error.authError(action, username)
+              };
+          } else {
+              obj = {
+     		      error : false,
+     		      apis : result.result.apis
+     		  }
+          }
+          print(obj);
+     }
     else {
         print({
             error:true,
