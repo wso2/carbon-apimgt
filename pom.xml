@@ -927,7 +927,7 @@
         <json-simple.export.version>1.1.1</json-simple.export.version>
         <json-simple.bundle.version>1.1.1</json-simple.bundle.version>
         <com.h2database.wso2.version>1.2.140.wso2v3</com.h2database.wso2.version>
-        <io.swagger.version>1.5.16</io.swagger.version>
+        <io.swagger.version>1.5.21</io.swagger.version>
         <io.swagger.import.version.range>[1.5.0, 1.6.0)</io.swagger.import.version.range>
         <org.hibernate.version>5.2.4.Final</org.hibernate.version>
 
