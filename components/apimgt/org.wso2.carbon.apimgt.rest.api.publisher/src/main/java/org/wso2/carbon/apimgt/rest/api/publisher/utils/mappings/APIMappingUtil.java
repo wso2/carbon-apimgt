@@ -719,19 +719,16 @@ public class APIMappingUtil {
                 }
             }
         } catch (UserStoreException e) {
-            String msg = "UserStoreException thrown when getting API tenant config from registry while reading " +
-                    "ExposeEndpointPassword config";
-            log.error(msg, e);
+            String msg = "UserStoreException thrown when getting API tenant config from registry while reading "
+                    + "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         } catch (RegistryException e) {
-            String msg = "RegistryException thrown when getting API tenant config from registry while reading " +
-                    "ExposeEndpointPassword config";
-            log.error(msg, e);
+            String msg = "RegistryException thrown when getting API tenant config from registry while reading "
+                    + "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         } catch (ParseException e) {
-            String msg = "ParseException thrown when parsing API tenant config from registry while reading " +
-                    "ExposeEndpointPassword config";
-            log.error(msg, e);
+            String msg = "ParseException thrown when parsing API tenant config from registry while reading "
+                    + "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         }
         return false;
