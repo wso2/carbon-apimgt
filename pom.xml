@@ -999,7 +999,7 @@
         <geronimo-jms.import.version.range>[1.1.0, 1.2.0)</geronimo-jms.import.version.range>
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
         <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
-        <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
+        <xmlschema.version>1.4.7.wso2v3</xmlschema.version>
         <carbon.utils.version>2.0.4</carbon.utils.version>
         <carbon.utils.package.import.version.range>[2.0.0, 3.0.0)</carbon.utils.package.import.version.range>
         <ballerina.version>0.89</ballerina.version>
