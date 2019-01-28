@@ -1007,7 +1007,7 @@
         <swagger.codegen.version>2.2.3.wso2v1</swagger.codegen.version>
         <swagger.codegen.maven.plugin.version>2.2.3</swagger.codegen.maven.plugin.version>
         <samskivert.mustache.version>1.13</samskivert.mustache.version>
-        <plexus.utils.version>1.5.7</plexus.utils.version>
+        <plexus.utils.version>3.1.1</plexus.utils.version>
         <wso2.carbon.config.version>2.1.5</wso2.carbon.config.version>
         <carbon.config.package.import.version.range>[2.0.0, 3.0.0)</carbon.config.package.import.version.range>
         <io.swagger.models.version>1.5.16</io.swagger.models.version>
