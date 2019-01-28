@@ -536,6 +536,79 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testGetSimplifiedPolicyByLevelAndName() throws Exception {
+        PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
+        //api policy
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        policyDAO.addApiPolicy(apiPolicy);
+        APIPolicy retrievedAPIPolicy = (APIPolicy) policyDAO
+                .getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, apiPolicy.getPolicyName());
+        Assert.assertEquals(retrievedAPIPolicy.getUuid(), apiPolicy.getUuid());
+        Assert.assertEquals(retrievedAPIPolicy.getPolicyName(), apiPolicy.getPolicyName());
+        Assert.assertEquals(retrievedAPIPolicy.getDefaultQuotaPolicy().getType(),
+                apiPolicy.getDefaultQuotaPolicy().getType());
+        Assert.assertEquals(retrievedAPIPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit(),
+                apiPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+        Assert.assertEquals(retrievedAPIPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                apiPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+        Assert.assertEquals(((RequestCountLimit) retrievedAPIPolicy.getDefaultQuotaPolicy().getLimit())
+                        .getRequestCount(),
+                ((RequestCountLimit) apiPolicy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
+        Assert.assertEquals(retrievedAPIPolicy.getDescription(), apiPolicy.getDescription());
+        Assert.assertEquals(retrievedAPIPolicy.getDisplayName(), apiPolicy.getDisplayName());
+        Assert.assertEquals(retrievedAPIPolicy.isDeployed(), apiPolicy.isDeployed());
+        Assert.assertEquals(retrievedAPIPolicy.getUserLevel(), apiPolicy.getUserLevel());
+
+        //application policy
+        ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        policyDAO.addApplicationPolicy(applicationPolicy);
+        ApplicationPolicy retrievedApplicationPolicy = (ApplicationPolicy) policyDAO
+                .getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
+                        applicationPolicy.getPolicyName());
+        Assert.assertEquals(retrievedApplicationPolicy.getUuid(), applicationPolicy.getUuid());
+        Assert.assertEquals(retrievedApplicationPolicy.getPolicyName(), applicationPolicy.getPolicyName());
+        Assert.assertEquals(retrievedApplicationPolicy.getDefaultQuotaPolicy().getType(),
+                applicationPolicy.getDefaultQuotaPolicy().getType());
+        Assert.assertEquals(retrievedApplicationPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit(),
+                applicationPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+        Assert.assertEquals(retrievedApplicationPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                applicationPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+        Assert.assertEquals(((RequestCountLimit) retrievedApplicationPolicy.getDefaultQuotaPolicy().getLimit())
+                        .getRequestCount(),
+                ((RequestCountLimit) applicationPolicy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
+        Assert.assertEquals(retrievedApplicationPolicy.getDescription(), applicationPolicy.getDescription());
+        Assert.assertEquals(retrievedApplicationPolicy.getDisplayName(), applicationPolicy.getDisplayName());
+        Assert.assertEquals(retrievedApplicationPolicy.isDeployed(), applicationPolicy.isDeployed());
+
+        //subscription policy
+        SubscriptionPolicy subscriptionPolicy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        policyDAO.addSubscriptionPolicy(subscriptionPolicy);
+        SubscriptionPolicy retrievedSubscriptionPolicy = (SubscriptionPolicy) policyDAO
+                .getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                        subscriptionPolicy.getPolicyName());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getPolicyName(), subscriptionPolicy.getPolicyName());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getDefaultQuotaPolicy().getType(),
+                subscriptionPolicy.getDefaultQuotaPolicy().getType());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit(),
+                subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+        Assert.assertEquals(((RequestCountLimit) retrievedSubscriptionPolicy.getDefaultQuotaPolicy().getLimit())
+                        .getRequestCount(),
+                ((RequestCountLimit) subscriptionPolicy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getDescription(), subscriptionPolicy.getDescription());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getDisplayName(), subscriptionPolicy.getDisplayName());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getCustomAttributes(),
+                subscriptionPolicy.getCustomAttributes());
+        Assert.assertEquals(retrievedSubscriptionPolicy.isDeployed(), subscriptionPolicy.isDeployed());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getRateLimitCount(), subscriptionPolicy.getRateLimitCount());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getRateLimitTimeUnit(),
+                subscriptionPolicy.getRateLimitTimeUnit());
+        Assert.assertEquals(retrievedSubscriptionPolicy.isStopOnQuotaReach(), subscriptionPolicy.isStopOnQuotaReach());
+        Assert.assertEquals(retrievedSubscriptionPolicy.getBillingPlan(), subscriptionPolicy.getBillingPlan());
+    }
+
+    @Test
     public void testGetPoliciesByLevel() throws Exception {
         PolicyDAO policyDAO = new DAOFactory().getPolicyDAO();
         int policySize;

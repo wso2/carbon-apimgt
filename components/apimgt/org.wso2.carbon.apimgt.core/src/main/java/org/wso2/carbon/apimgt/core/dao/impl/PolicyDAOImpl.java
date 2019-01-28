@@ -1998,9 +1998,18 @@ public class PolicyDAOImpl implements PolicyDAO {
     public Policy getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
             throws APIMgtDAOException, APIMgtResourceNotFoundException {
         Policy policy = null;
-        final String apiPolicyQuery = "SELECT UUID,NAME FROM AM_API_POLICY WHERE NAME = ?";
-        final String applicationPolicyQuery = "SELECT UUID,NAME FROM AM_APPLICATION_POLICY WHERE NAME = ?";
-        final String subscriptionPolicyQuery = "SELECT UUID,NAME FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+        final String apiPolicyQuery = "SELECT UUID, NAME, DEFAULT_QUOTA_TYPE, DEFAULT_TIME_UNIT, " +
+                "DEFAULT_UNIT_TIME, DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DESCRIPTION, DISPLAY_NAME, " +
+                "IS_DEPLOYED, APPLICABLE_LEVEL FROM AM_API_POLICY WHERE NAME = ?";
+
+        final String applicationPolicyQuery = "SELECT UUID, NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA," +
+                " QUOTA_UNIT, DESCRIPTION, DISPLAY_NAME, IS_DEPLOYED FROM AM_APPLICATION_POLICY WHERE NAME = ?";
+
+        final String subscriptionPolicyQuery = "SELECT UUID,NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, " +
+                "QUOTA_UNIT, DESCRIPTION, DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED,RATE_LIMIT_COUNT, " +
+                "RATE_LIMIT_TIME_UNIT," +
+                " STOP_ON_QUOTA_REACH, BILLING_PLAN FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+
         try (Connection connection = DAOUtil.getConnection()) {
             if (policyLevel.equals(APIMgtAdminService.PolicyLevel.api)) {
                 try (PreparedStatement statement = connection.prepareStatement(apiPolicyQuery)) {
@@ -2010,6 +2019,10 @@ public class PolicyDAOImpl implements PolicyDAO {
                             policy = new APIPolicy(resultSet.getString(APIMgtConstants
                                     .ThrottlePolicyConstants.COLUMN_UUID), resultSet.getString(APIMgtConstants
                                     .ThrottlePolicyConstants.COLUMN_NAME));
+                            setCommonPolicyDetails(policy, resultSet);
+                            ((APIPolicy) policy).setUserLevel(resultSet.getString(
+                                    APIMgtConstants.ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+                            ((APIPolicy) policy).setPipelines(getPipelines(policy.getUuid(), connection));
                         }
                     }
                 }
@@ -2021,6 +2034,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                             policy = new ApplicationPolicy(resultSet.getString(APIMgtConstants
                                     .ThrottlePolicyConstants.COLUMN_UUID), resultSet.getString(APIMgtConstants
                                     .ThrottlePolicyConstants.COLUMN_NAME));
+                            setCommonPolicyDetails(policy, resultSet);
                         }
                     }
                 }
@@ -2032,6 +2046,24 @@ public class PolicyDAOImpl implements PolicyDAO {
                             policy = new SubscriptionPolicy(resultSet.getString(APIMgtConstants
                                     .ThrottlePolicyConstants.COLUMN_UUID), resultSet.getString(APIMgtConstants
                                     .ThrottlePolicyConstants.COLUMN_NAME));
+                            setCommonPolicyDetails(policy, resultSet);
+                            setSubscriptionPolicyDetals((SubscriptionPolicy) policy, resultSet);
+                            InputStream binary = resultSet.getBinaryStream(APIMgtConstants.ThrottlePolicyConstants.
+                                    COLUMN_CUSTOM_ATTRIB);
+                            if (binary != null) {
+                                byte[] customAttrib;
+                                try {
+                                    customAttrib = IOUtils.toByteArray(binary);
+                                    if (customAttrib.length > 0) {
+                                        ((SubscriptionPolicy) policy).setCustomAttributes(customAttrib);
+                                    }
+                                } catch (IOException e) {
+                                    String errorMsg = "An Error occurred while retrieving custom attributes for " +
+                                            "subscription policy with name: " + policy.getPolicyName();
+                                    log.error(errorMsg, e);
+                                    throw new APIMgtDAOException(errorMsg, e);
+                                }
+                            }
                         }
                     }
                 }

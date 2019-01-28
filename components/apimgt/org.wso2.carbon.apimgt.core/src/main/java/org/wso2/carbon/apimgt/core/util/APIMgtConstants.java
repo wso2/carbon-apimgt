@@ -279,7 +279,7 @@ public class APIMgtConstants {
         public static final String COLUMN_BILLING_PLAN = "BILLING_PLAN";
 
         public static final String COLUMN_CUSTOM_ATTRIB = "CUSTOM_ATTRIBUTES";
-        public static final String API_LEVEL = "api";
+        public static final String API_LEVEL = "API";
         public static final String APPLICATION_LEVEL = "application";
         public static final String SUBSCRIPTION_LEVEL = "subscription";
         public static final String COLUMN_CONDITION_GROUP_ID = "CONDITION_GROUP_ID";
