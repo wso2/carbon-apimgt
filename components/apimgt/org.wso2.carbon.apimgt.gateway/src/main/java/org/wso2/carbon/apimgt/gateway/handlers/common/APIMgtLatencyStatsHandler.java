@@ -53,14 +53,13 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
         org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MC);
-        if (APIUtil.isAnalyticsEnabled()) {
-            if (messageContext.getProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME) == null) {
-
+        if (messageContext.getProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME) == null) {
+            messageContext.setProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME, System.currentTimeMillis());
+            if (APIUtil.isAnalyticsEnabled()) {
                 long executionStartTime = Long.parseLong((String) messageContext.getProperty(APIMgtGatewayConstants
                         .BACKEND_REQUEST_START_TIME));
                 messageContext.setProperty(APIMgtGatewayConstants.BACKEND_LATENCY, System.currentTimeMillis() -
                         executionStartTime);
-                messageContext.setProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME, System.currentTimeMillis());
             }
         }
         return true;
