@@ -31,78 +31,78 @@ import java.util.Map;
 
 @ApiModel(description = "")
 public class APIDTO  {
-  
-  
-  
+
+
+
   private String id = null;
-  
+
   @NotNull
   private String name = null;
-  
-  
+
+
   private String description = null;
-  
+
   @NotNull
   private String context = null;
-  
+
   @NotNull
   private String version = null;
-  
-  
+
+
   private String provider = null;
-  
-  
+
+
   private String apiDefinition = null;
-  
-  
+
+
   private String wsdlUri = null;
-  
-  
+
+
   private String status = null;
-  
-  
+
+
   private String responseCaching = null;
-  
-  
+
+
   private Integer cacheTimeout = null;
-  
-  
+
+
   private String destinationStatsEnabled = null;
-  
+
   @NotNull
   private Boolean isDefaultVersion = null;
-  
+
   public enum TypeEnum {
-     HTTP,  WS, 
+     HTTP,  WS,
   };
   @NotNull
   private TypeEnum type = TypeEnum.HTTP;
-  
+
   @NotNull
   private List<String> transport = new ArrayList<String>();
-  
-  
+
+
   private List<String> tags = new ArrayList<String>();
-  
+
   @NotNull
   private List<String> tiers = new ArrayList<String>();
-  
-  
+
+
   private String apiLevelPolicy = null;
-  
-  
+
+
   private APIMaxTpsDTO maxTps = null;
-  
-  
+
+
   private String thumbnailUri = null;
-  
+
   public enum VisibilityEnum {
-     PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
+     PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED,
   };
   @NotNull
   private VisibilityEnum visibility = null;
-  
-  
+
+
   private List<String> visibleRoles = new ArrayList<String>();
 
   public enum AccessControlEnum {
@@ -112,38 +112,42 @@ public class APIDTO  {
   private AccessControlEnum accessControl = null;
 
   private List<String> accessControlRoles = new ArrayList<String>();
-  
+
   private List<String> visibleTenants = new ArrayList<String>();
-  
+
   @NotNull
   private String endpointConfig = null;
-  
-  
+
+
   private APIEndpointSecurityDTO endpointSecurity = null;
-  
-  
+
+
   private String gatewayEnvironments = null;
-  
-  
+
+
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
-  
+
   public enum SubscriptionAvailabilityEnum {
-     current_tenant,  all_tenants,  specific_tenants, 
+     current_tenant,  all_tenants,  specific_tenants,
   };
-  
+
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
-  
-  
+
+
   private List<String> subscriptionAvailableTenants = new ArrayList<String>();
-  
-  
+
+
   private APIBusinessInformationDTO businessInformation = null;
-  
-  
+
+
   private APICorsConfigurationDTO corsConfiguration = null;
 
   private Map<String, String> additionalProperties = new HashMap<>();
-  
+
+  private String authorizationHeader = null;
+
+  private List<LabelDTO> labels = new ArrayList<LabelDTO>();
+
   /**
    * UUID of the api registry artifact\n
    **/
@@ -156,7 +160,7 @@ public class APIDTO  {
     this.id = id;
   }
 
-  
+
   /**
    * Name of the API
    **/
@@ -169,7 +173,7 @@ public class APIDTO  {
     this.name = name;
   }
 
-  
+
   /**
    * A brief description about the API
    **/
@@ -182,7 +186,7 @@ public class APIDTO  {
     this.description = description;
   }
 
-  
+
   /**
    * A string that represents the context of the user's request
    **/
@@ -195,7 +199,7 @@ public class APIDTO  {
     this.context = context;
   }
 
-  
+
   /**
    * The version of the API
    **/
@@ -208,7 +212,7 @@ public class APIDTO  {
     this.version = version;
   }
 
-  
+
   /**
    * If the provider value is not given user invoking the api will be used as the provider.\n
    **/
@@ -221,7 +225,7 @@ public class APIDTO  {
     this.provider = provider;
   }
 
-  
+
   /**
    * Swagger definition of the API which contains details about URI templates and scopes\n
    **/
@@ -234,7 +238,7 @@ public class APIDTO  {
     this.apiDefinition = apiDefinition;
   }
 
-  
+
   /**
    * WSDL URL if the API is based on a WSDL endpoint\n
    **/
@@ -247,7 +251,7 @@ public class APIDTO  {
     this.wsdlUri = wsdlUri;
   }
 
-  
+
   /**
    * This describes in which status of the lifecycle the API is
    **/
@@ -260,7 +264,7 @@ public class APIDTO  {
     this.status = status;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -272,7 +276,7 @@ public class APIDTO  {
     this.responseCaching = responseCaching;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -284,7 +288,7 @@ public class APIDTO  {
     this.cacheTimeout = cacheTimeout;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -296,7 +300,7 @@ public class APIDTO  {
     this.destinationStatsEnabled = destinationStatsEnabled;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -308,7 +312,7 @@ public class APIDTO  {
     this.isDefaultVersion = isDefaultVersion;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -320,7 +324,7 @@ public class APIDTO  {
     this.type = type;
   }
 
-  
+
   /**
    * Supported transports for the API (http and/or https).\n
    **/
@@ -333,7 +337,7 @@ public class APIDTO  {
     this.transport = transport;
   }
 
-  
+
   /**
    * Search keywords related to the API
    **/
@@ -346,7 +350,7 @@ public class APIDTO  {
     this.tags = tags;
   }
 
-  
+
   /**
    * The subscription tiers selected for the particular API
    **/
@@ -359,7 +363,7 @@ public class APIDTO  {
     this.tiers = tiers;
   }
 
-  
+
   /**
    * The policy selected for the particular API
    **/
@@ -372,7 +376,7 @@ public class APIDTO  {
     this.apiLevelPolicy = apiLevelPolicy;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -384,7 +388,7 @@ public class APIDTO  {
     this.maxTps = maxTps;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -396,7 +400,7 @@ public class APIDTO  {
     this.thumbnailUri = thumbnailUri;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -408,7 +412,7 @@ public class APIDTO  {
     this.visibility = visibility;
   }
 
-  
+
   /**
    * The user roles that are able to access the API
    **/
@@ -455,7 +459,7 @@ public class APIDTO  {
     this.visibleTenants = visibleTenants;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -467,7 +471,7 @@ public class APIDTO  {
     this.endpointConfig = endpointConfig;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -479,7 +483,7 @@ public class APIDTO  {
     this.endpointSecurity = endpointSecurity;
   }
 
-  
+
   /**
    * Comma separated list of gateway environments.\n
    **/
@@ -492,7 +496,7 @@ public class APIDTO  {
     this.gatewayEnvironments = gatewayEnvironments;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -504,7 +508,7 @@ public class APIDTO  {
     this.sequences = sequences;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -516,7 +520,7 @@ public class APIDTO  {
     this.subscriptionAvailability = subscriptionAvailability;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -528,7 +532,7 @@ public class APIDTO  {
     this.subscriptionAvailableTenants = subscriptionAvailableTenants;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -540,7 +544,7 @@ public class APIDTO  {
     this.businessInformation = businessInformation;
   }
 
-  
+
   /**
    **/
   @ApiModelProperty(value = "")
@@ -564,12 +568,35 @@ public class APIDTO  {
     this.additionalProperties = additionalProperties;
   }
 
+  /**
+   * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used.\n
+   **/
+  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used.\n")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() {
+    return authorizationHeader;
+  }
+  public void setAuthorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+  }
+
+  /**
+   * Labels of micro-gateway environments attached to the API.\n
+   **/
+  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API.\n")
+  @JsonProperty("labels")
+  public List<LabelDTO> getLabels() {
+    return labels;
+  }
+  public void setLabels(List<LabelDTO> labels) {
+    this.labels = labels;
+  }
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
-    
+
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
@@ -588,6 +615,7 @@ public class APIDTO  {
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
     sb.append("  apiLevelPolicy: ").append(apiLevelPolicy).append("\n");
+    sb.append("  authorizationHeader: ").append(authorizationHeader).append("\n");
     sb.append("  maxTps: ").append(maxTps).append("\n");
     sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
@@ -595,6 +623,7 @@ public class APIDTO  {
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
     sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
     sb.append("  endpointSecurity: ").append(endpointSecurity).append("\n");
+    sb.append("  labels: ").append(labels).append("\n");
     sb.append("  gatewayEnvironments: ").append(gatewayEnvironments).append("\n");
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");

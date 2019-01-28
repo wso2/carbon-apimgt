@@ -28,6 +28,6 @@
         </jaxrs:serviceBeans>
     </jaxrs:server>
 
-    <bean id="serviceBean" class="org.wso2.carbon.apimgt.micro.gateway.rest.api.MicroGatewayRestAPI"/>
+    <bean id="serviceBean" class="org.wso2.carbon.apimgt.hybrid.gateway.rest.api.MicroGatewayRestAPI"/>
 </beans>
 
