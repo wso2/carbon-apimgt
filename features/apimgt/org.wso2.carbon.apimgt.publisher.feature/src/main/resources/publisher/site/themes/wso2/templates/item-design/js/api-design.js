@@ -155,7 +155,7 @@ function APIDesigner(){
             var soapRestMapping = JSON.parse($('#sequenceMapping').val());
             var soapRestOutMapping = JSON.parse($('#sequenceOutMapping').val());
             var resourceDetailsArr = $(this).parent().data("path").split(".");
-            if(resourceDetailsArr.length == 4) {
+            if(resourceDetailsArr.length > 3) {
                 var method = resourceDetailsArr[3];
                 var path = resourceDetailsArr[2].substring(1);
                 var key = path + "_" + method;
