@@ -626,5 +626,6 @@
     "You must select a mediation policy to download": "You must select a mediation policy to download.",
     "Error while retrieving the selected mediation policy": "Error while retrieving the selected mediation policy.",
     "API swagger definition is invalid" : "API swagger definition is invalid",
-    "Error while updating API swagger definition" : "Error while updating API swagger definition"
+    "Error while updating API swagger definition" : "Error while updating API swagger definition",
+    "API Usage By Applications" : "API Usage By Applications"
 }
