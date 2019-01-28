@@ -989,7 +989,7 @@
         <wso2.okhttp-ws.version>3.4.2.wso2v2</wso2.okhttp-ws.version>
         <wso2.okhttp.version>3.8.0.wso2v2</wso2.okhttp.version>
         <wso2.dnsjava.version>2.1.7.wso2v1</wso2.dnsjava.version>
-        <org.json.version>20160212</org.json.version>
+        <org.json.version>20180813</org.json.version>
         <wso2.okio.version>1.13.0.wso2v1</wso2.okio.version>
         <wso2.kubernetes-client.version>2.5.2.wso2v3</wso2.kubernetes-client.version>
         <wso2.dnsjava.version>2.1.7.wso2v1</wso2.dnsjava.version>
