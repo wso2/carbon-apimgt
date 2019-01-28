@@ -762,11 +762,12 @@ public class APIProviderHostObject extends ScriptableObject {
                         (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             }
             OMElement seqElment = APIUtil.buildOMElement(seqFile.getInputStream());
+            String localName = seqElment.getLocalName();
             seqFileName = seqElment.getAttributeValue(new QName("name"));
-            if (seqFileName == null) {
-                throw new APIManagementException("Sequence is malformed");
-            } else {
+            if ("sequence".equals(localName) && seqFileName != null) {
                 apiProvider.addResourceFile(filePath + seqFileName, inSeq);
+            } else {
+                throw new APIManagementException("Sequence is malformed");
             }
         } catch (Exception e) {
             String errorMsg = "An Error has occurred while reading custom sequence file";
