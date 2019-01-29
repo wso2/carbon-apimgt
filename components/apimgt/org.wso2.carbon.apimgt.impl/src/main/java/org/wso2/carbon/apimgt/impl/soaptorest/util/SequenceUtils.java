@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.soaptorest.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,6 +26,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.template.SOAPToRESTAPIConfigContext;
@@ -158,6 +160,155 @@ public class SequenceUtils {
     }
 
     /**
+     * Updates resource policy resource for the given resource id from the registry.
+     *
+     * @param identifier API identifier
+     * @param resourceId Resource identifier
+     * @param content    resource policy content
+     * @throws APIManagementException
+     */
+    public static void updateResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId, String content)
+            throws APIManagementException {
+
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            APIUtil.loadTenantRegistry(tenantId);
+            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
+            String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName()
+                    + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
+                    + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
+            Collection collection = (Collection) registry.get(resourcePath);
+            String[] resources = collection.getChildren();
+
+            if (resources == null) {
+                handleException("Cannot find any resource policies at the path: " + resourcePath);
+            }
+            for (String path : resources) {
+                Collection resourcePolicyCollection = (Collection) registry.get(path);
+                String[] resourcePolicies = resourcePolicyCollection.getChildren();
+                if (resourcePolicies == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Cannot find resource policies under path: " + path);
+                    }
+                    continue;
+                }
+                for (String resourcePolicyPath : resourcePolicies) {
+                    Resource resource = registry.get(resourcePolicyPath);
+                    if (StringUtils.isNotEmpty(resourceId) && resourceId.equals(((ResourceImpl) resource).getUUID())) {
+                        resource.setContent(content);
+                        resource.setMediaType(SOAPToRESTConstants.TEXT_XML);
+                        registry.put(resourcePolicyPath, resource);
+                        break;
+                    }
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Number of REST resources for " + resourcePath + " is: " + resources.length);
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        } catch (RegistryException e) {
+            handleException("Error when create registry instance", e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            handleException("Error while setting the resource policy content for the registry resource", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    /**
+     * Gets resource policy resource for the given resource id from the registry.
+     *
+     * @param identifier API identifier
+     * @param resourceId Resource identifier
+     * @return resource policy string for the given resource id
+     * @throws APIManagementException
+     */
+    public static String getResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId)
+            throws APIManagementException {
+
+        boolean isTenantFlowStarted = false;
+        String response = null;
+        try {
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            APIUtil.loadTenantRegistry(tenantId);
+            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
+            String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName()
+                    + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
+                    + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
+            Collection collection = (Collection) registry.get(resourcePath);
+            String[] resources = collection.getChildren();
+
+            if (resources == null) {
+                handleException("Cannot find any resource policies at the path: " + resourcePath);
+            }
+            for (String path : resources) {
+                Collection resourcePolicyCollection = (Collection) registry.get(path);
+                String[] resourcePolicies = resourcePolicyCollection.getChildren();
+                if (resourcePolicies == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Cannot find resource policies under path: " + path);
+                    }
+                    continue;
+                }
+                for (String resourcePolicyPath : resourcePolicies) {
+                    Resource resource = registry.get(resourcePolicyPath);
+                    if (StringUtils.isNotEmpty(resourceId) && resourceId.equals(((ResourceImpl) resource).getUUID())) {
+                        JSONObject resultJson = new JSONObject();
+                        Resource resourcePolicyResource = registry.get(resourcePolicyPath);
+                        String content = new String((byte[]) resourcePolicyResource.getContent(),
+                                Charset.defaultCharset());
+                        String resourceName = ((ResourceImpl) resource).getName();
+                        resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
+                                SOAPToRESTConstants.EMPTY_STRING);
+                        String httpMethod = resource.getProperty(SOAPToRESTConstants.METHOD);
+                        Map<String, String> resourceMap = new HashMap<>();
+                        resourceMap.put(SOAPToRESTConstants.RESOURCE_ID, ((ResourceImpl) resource).getUUID());
+                        resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
+                        resourceMap.put(SOAPToRESTConstants.CONTENT, content);
+                        resultJson.put(resourceName, resourceMap);
+                        response = resultJson.toJSONString();
+                    }
+                }
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information.", e);
+        } catch (RegistryException e) {
+            handleException("Error when create registry instance.", e);
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            handleException("Error while retrieving resource policy resource content from the registry.", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return response;
+    }
+
+    /**
      * Gets soap to rest converted sequence from the registry
      * <p>
      * Note: this method is directly invoked from the jaggery layer
@@ -215,6 +366,7 @@ public class SequenceUtils {
                             SOAPToRESTConstants.EMPTY_STRING);
                     String httpMethod = resource.getProperty(SOAPToRESTConstants.METHOD);
                     Map<String, String> resourceMap = new HashMap<>();
+                    resourceMap.put(SOAPToRESTConstants.RESOURCE_ID, ((ResourceImpl) resource).getUUID());
                     resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
                     resourceMap.put(SOAPToRESTConstants.CONTENT, content);
                     resultJson.put(resourceName, resourceMap);
