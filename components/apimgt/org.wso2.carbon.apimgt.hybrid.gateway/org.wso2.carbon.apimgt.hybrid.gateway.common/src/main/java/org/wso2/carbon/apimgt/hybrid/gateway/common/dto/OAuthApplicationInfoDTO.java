@@ -53,32 +53,26 @@ public class OAuthApplicationInfoDTO {
     private String tokenType;
 
     public boolean isSaasApplication() {
-
         return isSaasApplication;
     }
 
     public void setSaasApplication(boolean saasApplication) {
-
         isSaasApplication = saasApplication;
     }
 
     public String getJsonAppAttribute() {
-
         return jsonAppAttribute;
     }
 
     public void setJsonAppAttribute(String jsonAppAttribute) {
-
         this.jsonAppAttribute = jsonAppAttribute;
     }
 
     public String getTokenType() {
-
         return tokenType;
     }
 
     public void setTokenType(String tokenType) {
-
         this.tokenType = tokenType;
     }
 

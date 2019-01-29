@@ -28,17 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @ApiModel(description = "")
 public class APIDTO  {
-
-
 
   private String id = null;
 
   @NotNull
   private String name = null;
-
 
   private String description = null;
 
@@ -48,24 +44,17 @@ public class APIDTO  {
   @NotNull
   private String version = null;
 
-
   private String provider = null;
-
 
   private String apiDefinition = null;
 
-
   private String wsdlUri = null;
-
 
   private String status = null;
 
-
   private String responseCaching = null;
 
-
   private Integer cacheTimeout = null;
-
 
   private String destinationStatsEnabled = null;
 
@@ -75,33 +64,30 @@ public class APIDTO  {
   public enum TypeEnum {
      HTTP,  WS,
   };
+
   @NotNull
   private TypeEnum type = TypeEnum.HTTP;
 
   @NotNull
   private List<String> transport = new ArrayList<String>();
 
-
   private List<String> tags = new ArrayList<String>();
 
   @NotNull
   private List<String> tiers = new ArrayList<String>();
 
-
   private String apiLevelPolicy = null;
 
-
   private APIMaxTpsDTO maxTps = null;
-
 
   private String thumbnailUri = null;
 
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED,
   };
+
   @NotNull
   private VisibilityEnum visibility = null;
-
 
   private List<String> visibleRoles = new ArrayList<String>();
 
@@ -118,12 +104,9 @@ public class APIDTO  {
   @NotNull
   private String endpointConfig = null;
 
-
   private APIEndpointSecurityDTO endpointSecurity = null;
 
-
   private String gatewayEnvironments = null;
-
 
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
 
@@ -133,12 +116,9 @@ public class APIDTO  {
 
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
 
-
   private List<String> subscriptionAvailableTenants = new ArrayList<String>();
 
-
   private APIBusinessInformationDTO businessInformation = null;
-
 
   private APICorsConfigurationDTO corsConfiguration = null;
 
@@ -156,10 +136,10 @@ public class APIDTO  {
   public String getId() {
     return id;
   }
+
   public void setId(String id) {
     this.id = id;
   }
-
 
   /**
    * Name of the API
@@ -173,7 +153,6 @@ public class APIDTO  {
     this.name = name;
   }
 
-
   /**
    * A brief description about the API
    **/
@@ -185,7 +164,6 @@ public class APIDTO  {
   public void setDescription(String description) {
     this.description = description;
   }
-
 
   /**
    * A string that represents the context of the user's request
@@ -199,7 +177,6 @@ public class APIDTO  {
     this.context = context;
   }
 
-
   /**
    * The version of the API
    **/
@@ -211,7 +188,6 @@ public class APIDTO  {
   public void setVersion(String version) {
     this.version = version;
   }
-
 
   /**
    * If the provider value is not given user invoking the api will be used as the provider.\n
@@ -225,7 +201,6 @@ public class APIDTO  {
     this.provider = provider;
   }
 
-
   /**
    * Swagger definition of the API which contains details about URI templates and scopes\n
    **/
@@ -237,7 +212,6 @@ public class APIDTO  {
   public void setApiDefinition(String apiDefinition) {
     this.apiDefinition = apiDefinition;
   }
-
 
   /**
    * WSDL URL if the API is based on a WSDL endpoint\n
@@ -251,7 +225,6 @@ public class APIDTO  {
     this.wsdlUri = wsdlUri;
   }
 
-
   /**
    * This describes in which status of the lifecycle the API is
    **/
@@ -264,7 +237,6 @@ public class APIDTO  {
     this.status = status;
   }
 
-
   /**
    **/
   @ApiModelProperty(value = "")
@@ -275,7 +247,6 @@ public class APIDTO  {
   public void setResponseCaching(String responseCaching) {
     this.responseCaching = responseCaching;
   }
-
 
   /**
    **/
@@ -288,7 +259,6 @@ public class APIDTO  {
     this.cacheTimeout = cacheTimeout;
   }
 
-
   /**
    **/
   @ApiModelProperty(value = "")
@@ -299,7 +269,6 @@ public class APIDTO  {
   public void setDestinationStatsEnabled(String destinationStatsEnabled) {
     this.destinationStatsEnabled = destinationStatsEnabled;
   }
-
 
   /**
    **/
@@ -312,7 +281,6 @@ public class APIDTO  {
     this.isDefaultVersion = isDefaultVersion;
   }
 
-
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -323,7 +291,6 @@ public class APIDTO  {
   public void setType(TypeEnum type) {
     this.type = type;
   }
-
 
   /**
    * Supported transports for the API (http and/or https).\n
@@ -337,7 +304,6 @@ public class APIDTO  {
     this.transport = transport;
   }
 
-
   /**
    * Search keywords related to the API
    **/
@@ -349,7 +315,6 @@ public class APIDTO  {
   public void setTags(List<String> tags) {
     this.tags = tags;
   }
-
 
   /**
    * The subscription tiers selected for the particular API
@@ -363,7 +328,6 @@ public class APIDTO  {
     this.tiers = tiers;
   }
 
-
   /**
    * The policy selected for the particular API
    **/
@@ -376,7 +340,6 @@ public class APIDTO  {
     this.apiLevelPolicy = apiLevelPolicy;
   }
 
-
   /**
    **/
   @ApiModelProperty(value = "")
@@ -387,7 +350,6 @@ public class APIDTO  {
   public void setMaxTps(APIMaxTpsDTO maxTps) {
     this.maxTps = maxTps;
   }
-
 
   /**
    **/
@@ -400,7 +362,6 @@ public class APIDTO  {
     this.thumbnailUri = thumbnailUri;
   }
 
-
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -411,7 +372,6 @@ public class APIDTO  {
   public void setVisibility(VisibilityEnum visibility) {
     this.visibility = visibility;
   }
-
 
   /**
    * The user roles that are able to access the API
@@ -434,7 +394,6 @@ public class APIDTO  {
   public AccessControlEnum getAccessControl() {
     return accessControl;
   }
-
   public void setAccessControl(AccessControlEnum accessControl) {
     this.accessControl = accessControl;
   }
@@ -459,7 +418,6 @@ public class APIDTO  {
     this.visibleTenants = visibleTenants;
   }
 
-
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -471,7 +429,6 @@ public class APIDTO  {
     this.endpointConfig = endpointConfig;
   }
 
-
   /**
    **/
   @ApiModelProperty(value = "")
@@ -482,7 +439,6 @@ public class APIDTO  {
   public void setEndpointSecurity(APIEndpointSecurityDTO endpointSecurity) {
     this.endpointSecurity = endpointSecurity;
   }
-
 
   /**
    * Comma separated list of gateway environments.\n
@@ -496,7 +452,6 @@ public class APIDTO  {
     this.gatewayEnvironments = gatewayEnvironments;
   }
 
-
   /**
    **/
   @ApiModelProperty(value = "")
@@ -507,7 +462,6 @@ public class APIDTO  {
   public void setSequences(List<SequenceDTO> sequences) {
     this.sequences = sequences;
   }
-
 
   /**
    **/
@@ -520,7 +474,6 @@ public class APIDTO  {
     this.subscriptionAvailability = subscriptionAvailability;
   }
 
-
   /**
    **/
   @ApiModelProperty(value = "")
@@ -532,7 +485,6 @@ public class APIDTO  {
     this.subscriptionAvailableTenants = subscriptionAvailableTenants;
   }
 
-
   /**
    **/
   @ApiModelProperty(value = "")
@@ -543,7 +495,6 @@ public class APIDTO  {
   public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
   }
-
 
   /**
    **/
@@ -596,7 +547,6 @@ public class APIDTO  {
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
-
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");

@@ -18,22 +18,16 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-
 @ApiModel(description = "")
 public class APIMaxTpsDTO  {
-  
-  
-  
+
   private Long production = null;
   
-  
   private Long sandbox = null;
-
   
   /**
    **/
@@ -45,7 +39,6 @@ public class APIMaxTpsDTO  {
   public void setProduction(Long production) {
     this.production = production;
   }
-
   
   /**
    **/
@@ -58,13 +51,10 @@ public class APIMaxTpsDTO  {
     this.sandbox = sandbox;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIMaxTpsDTO {\n");
-    
     sb.append("  production: ").append(production).append("\n");
     sb.append("  sandbox: ").append(sandbox).append("\n");
     sb.append("}\n");

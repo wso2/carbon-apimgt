@@ -18,29 +18,21 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-
 @ApiModel(description = "")
 public class APIBusinessInformationDTO  {
-  
-  
-  
+
   private String technicalOwnerEmail = null;
-  
-  
+
   private String businessOwnerEmail = null;
-  
-  
+
   private String businessOwner = null;
-  
-  
+
   private String technicalOwner = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -52,7 +44,6 @@ public class APIBusinessInformationDTO  {
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -63,7 +54,6 @@ public class APIBusinessInformationDTO  {
   public void setBusinessOwnerEmail(String businessOwnerEmail) {
     this.businessOwnerEmail = businessOwnerEmail;
   }
-
   
   /**
    **/
@@ -75,7 +65,6 @@ public class APIBusinessInformationDTO  {
   public void setBusinessOwner(String businessOwner) {
     this.businessOwner = businessOwner;
   }
-
   
   /**
    **/
@@ -88,13 +77,10 @@ public class APIBusinessInformationDTO  {
     this.technicalOwner = technicalOwner;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIBusinessInformationDTO {\n");
-    
     sb.append("  technicalOwnerEmail: ").append(technicalOwnerEmail).append("\n");
     sb.append("  businessOwnerEmail: ").append(businessOwnerEmail).append("\n");
     sb.append("  businessOwner: ").append(businessOwner).append("\n");

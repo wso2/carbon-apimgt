@@ -25,31 +25,21 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * CORS configuration for the API\n
  **/
-
-
 @ApiModel(description = "CORS configuration for the API\n")
 public class APICorsConfigurationDTO  {
-  
-  
-  
-  private List<String> accessControlAllowOrigins = new ArrayList<String>();
-  
-  
-  private Boolean accessControlAllowCredentials = false;
-  
-  
-  private Boolean corsConfigurationEnabled = false;
-  
-  
-  private List<String> accessControlAllowHeaders = new ArrayList<String>();
-  
-  
-  private List<String> accessControlAllowMethods = new ArrayList<String>();
 
+  private List<String> accessControlAllowOrigins = new ArrayList<String>();
+
+  private Boolean accessControlAllowCredentials = false;
+
+  private Boolean corsConfigurationEnabled = false;
+
+  private List<String> accessControlAllowHeaders = new ArrayList<String>();
+
+  private List<String> accessControlAllowMethods = new ArrayList<String>();
   
   /**
    **/
@@ -61,7 +51,6 @@ public class APICorsConfigurationDTO  {
   public void setAccessControlAllowOrigins(List<String> accessControlAllowOrigins) {
     this.accessControlAllowOrigins = accessControlAllowOrigins;
   }
-
   
   /**
    **/
@@ -74,7 +63,6 @@ public class APICorsConfigurationDTO  {
     this.accessControlAllowCredentials = accessControlAllowCredentials;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -85,7 +73,6 @@ public class APICorsConfigurationDTO  {
   public void setCorsConfigurationEnabled(Boolean corsConfigurationEnabled) {
     this.corsConfigurationEnabled = corsConfigurationEnabled;
   }
-
   
   /**
    **/
@@ -97,7 +84,6 @@ public class APICorsConfigurationDTO  {
   public void setAccessControlAllowHeaders(List<String> accessControlAllowHeaders) {
     this.accessControlAllowHeaders = accessControlAllowHeaders;
   }
-
   
   /**
    **/
@@ -110,13 +96,10 @@ public class APICorsConfigurationDTO  {
     this.accessControlAllowMethods = accessControlAllowMethods;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APICorsConfigurationDTO {\n");
-    
     sb.append("  accessControlAllowOrigins: ").append(accessControlAllowOrigins).append("\n");
     sb.append("  accessControlAllowCredentials: ").append(accessControlAllowCredentials).append("\n");
     sb.append("  corsConfigurationEnabled: ").append(corsConfigurationEnabled).append("\n");

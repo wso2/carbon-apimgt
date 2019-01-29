@@ -18,31 +18,24 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 
-
 @ApiModel(description = "")
 public class SequenceDTO  {
-  
   
   @NotNull
   private String name = null;
   
-  
   private String type = null;
-  
-  
+
   private String id = null;
-  
-  
+
   private Boolean shared = null;
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -54,7 +47,6 @@ public class SequenceDTO  {
     this.name = name;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -66,7 +58,6 @@ public class SequenceDTO  {
     this.type = type;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -78,7 +69,6 @@ public class SequenceDTO  {
     this.id = id;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -90,13 +80,10 @@ public class SequenceDTO  {
     this.shared = shared;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class SequenceDTO {\n");
-    
     sb.append("  name: ").append(name).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  id: ").append(id).append("\n");

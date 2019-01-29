@@ -25,23 +25,16 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @ApiModel(description = "")
 public class MediationListDTO  {
   
-  
-  
   private Integer count = null;
   
-  
   private String next = null;
-  
-  
-  private String previous = null;
-  
-  
-  private List<MediationInfoDTO> list = new ArrayList<MediationInfoDTO>();
 
+  private String previous = null;
+
+  private List<MediationInfoDTO> list = new ArrayList<MediationInfoDTO>();
   
   /**
    * Number of mediation sequences returned.\n
@@ -54,7 +47,6 @@ public class MediationListDTO  {
   public void setCount(Integer count) {
     this.count = count;
   }
-
   
   /**
    * Link to the next subset of sequences qualified.\nEmpty if no more sequences are to be returned.\n
@@ -67,7 +59,6 @@ public class MediationListDTO  {
   public void setNext(String next) {
     this.next = next;
   }
-
   
   /**
    * Link to the previous subset of sequences qualified.\nEmpty if current subset is the first subset returned.\n
@@ -80,7 +71,6 @@ public class MediationListDTO  {
   public void setPrevious(String previous) {
     this.previous = previous;
   }
-
   
   /**
    **/
@@ -93,13 +83,10 @@ public class MediationListDTO  {
     this.list = list;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class MediationListDTO {\n");
-    
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");
     sb.append("  previous: ").append(previous).append("\n");

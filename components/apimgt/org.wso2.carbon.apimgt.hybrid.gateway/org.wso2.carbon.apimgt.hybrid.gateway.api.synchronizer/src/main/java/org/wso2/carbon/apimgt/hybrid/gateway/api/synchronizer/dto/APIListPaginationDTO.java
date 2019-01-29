@@ -18,26 +18,19 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-
 @ApiModel(description = "")
 public class APIListPaginationDTO  {
-  
-  
-  
+
   private Integer total = null;
-  
-  
+
   private Integer offset = null;
-  
-  
+
   private Integer limit = null;
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -49,7 +42,6 @@ public class APIListPaginationDTO  {
     this.total = total;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -60,7 +52,6 @@ public class APIListPaginationDTO  {
   public void setOffset(Integer offset) {
     this.offset = offset;
   }
-
   
   /**
    **/
@@ -73,13 +64,10 @@ public class APIListPaginationDTO  {
     this.limit = limit;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIListPaginationDTO {\n");
-    
     sb.append("  total: ").append(total).append("\n");
     sb.append("  offset: ").append(offset).append("\n");
     sb.append("  limit: ").append(limit).append("\n");

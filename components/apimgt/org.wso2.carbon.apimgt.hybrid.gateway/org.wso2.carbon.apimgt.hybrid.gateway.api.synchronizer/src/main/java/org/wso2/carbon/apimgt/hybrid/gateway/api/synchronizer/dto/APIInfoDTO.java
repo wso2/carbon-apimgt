@@ -18,40 +18,28 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-
 @ApiModel(description = "")
 public class APIInfoDTO  {
-  
-  
-  
+
   private String id = null;
-  
   
   private String name = null;
   
-  
   private String description = null;
-  
-  
+
   private String context = null;
-  
-  
+
   private String version = null;
   
-  
   private String provider = null;
-  
-  
+
   private String status = null;
   
-  
   private String thumbnailUri = null;
-
   
   /**
    **/
@@ -63,7 +51,6 @@ public class APIInfoDTO  {
   public void setId(String id) {
     this.id = id;
   }
-
   
   /**
    **/
@@ -75,7 +62,6 @@ public class APIInfoDTO  {
   public void setName(String name) {
     this.name = name;
   }
-
   
   /**
    **/
@@ -87,7 +73,6 @@ public class APIInfoDTO  {
   public void setDescription(String description) {
     this.description = description;
   }
-
   
   /**
    **/
@@ -99,7 +84,6 @@ public class APIInfoDTO  {
   public void setContext(String context) {
     this.context = context;
   }
-
   
   /**
    **/
@@ -112,7 +96,6 @@ public class APIInfoDTO  {
     this.version = version;
   }
 
-  
   /**
    * If the provider value is not given, the user invoking the API will be used as the provider.\n
    **/
@@ -124,7 +107,6 @@ public class APIInfoDTO  {
   public void setProvider(String provider) {
     this.provider = provider;
   }
-
   
   /**
    **/
@@ -136,7 +118,6 @@ public class APIInfoDTO  {
   public void setStatus(String status) {
     this.status = status;
   }
-
   
   /**
    **/
@@ -149,13 +130,10 @@ public class APIInfoDTO  {
     this.thumbnailUri = thumbnailUri;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIInfoDTO {\n");
-    
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");

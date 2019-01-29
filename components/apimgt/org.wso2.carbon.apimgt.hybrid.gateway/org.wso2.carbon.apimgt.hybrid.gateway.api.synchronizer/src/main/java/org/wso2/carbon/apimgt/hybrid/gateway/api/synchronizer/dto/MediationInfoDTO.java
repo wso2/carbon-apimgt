@@ -18,18 +18,15 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 
-
 @ApiModel(description = "")
 public class MediationInfoDTO {
-  
-  
+
   @NotNull
   private String name = null;
   
@@ -41,7 +38,6 @@ public class MediationInfoDTO {
   };
   @NotNull
   private TypeEnum type = null;
-
   
   /**
    **/
@@ -54,7 +50,6 @@ public class MediationInfoDTO {
     this.name = name;
   }
 
-  
   /**
    **/
   @ApiModelProperty(required = true, value = "")
@@ -65,7 +60,6 @@ public class MediationInfoDTO {
   public void setId(String id) {
     this.id = id;
   }
-
   
   /**
    **/
@@ -78,13 +72,10 @@ public class MediationInfoDTO {
     this.type = type;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class MediationInfoDTO {\n");
-    
     sb.append("  name: ").append(name).append("\n");
     sb.append("  id: ").append(id).append("\n");
     sb.append("  type: ").append(type).append("\n");

@@ -18,16 +18,12 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-
 @ApiModel(description = "")
 public class APIEndpointSecurityDTO  {
-  
-  
   
   private String password = null;
   
@@ -37,9 +33,7 @@ public class APIEndpointSecurityDTO  {
   
   private TypeEnum type = null;
   
-  
   private String username = null;
-
   
   /**
    **/
@@ -51,7 +45,6 @@ public class APIEndpointSecurityDTO  {
   public void setPassword(String password) {
     this.password = password;
   }
-
   
   /**
    **/
@@ -63,7 +56,6 @@ public class APIEndpointSecurityDTO  {
   public void setType(TypeEnum type) {
     this.type = type;
   }
-
   
   /**
    **/
@@ -76,13 +68,10 @@ public class APIEndpointSecurityDTO  {
     this.username = username;
   }
 
-  
-
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIEndpointSecurityDTO {\n");
-    
     sb.append("  password: ").append(password).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  username: ").append(username).append("\n");
