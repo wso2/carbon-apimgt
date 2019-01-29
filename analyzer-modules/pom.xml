@@ -34,7 +34,7 @@
     </modules>
 
     <properties>
-        <siddhi.version>4.0.0-M9</siddhi.version>
+        <siddhi.version>4.4.0</siddhi.version>
         <siddhi.import.version.range>[4.0.0,4.1.0)</siddhi.import.version.range>
         <junit.version>4.12</junit.version>
         <siddhi.import.version.range>[4.0.0,4.1.0)</siddhi.import.version.range>
