@@ -126,6 +126,8 @@ public class APIDTO  {
 
   private String authorizationHeader = null;
 
+  private String apiSecurity = null;
+
   private List<LabelDTO> labels = new ArrayList<LabelDTO>();
 
   /**
@@ -136,7 +138,6 @@ public class APIDTO  {
   public String getId() {
     return id;
   }
-
   public void setId(String id) {
     this.id = id;
   }
@@ -543,6 +544,18 @@ public class APIDTO  {
     this.labels = labels;
   }
 
+  /**
+   * Supported API security for the API ( mutualssl and/or oauth2)\n
+   **/
+  @ApiModelProperty(value = "Supported API security for the API ( mutualssl and/or oauth2)\n")
+  @JsonProperty("apiSecurity")
+  public String getApiSecurity() {
+    return apiSecurity;
+  }
+  public void setApiSecurity(String apiSecurity) {
+    this.apiSecurity = apiSecurity;
+  }
+
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
@@ -566,6 +579,7 @@ public class APIDTO  {
     sb.append("  tiers: ").append(tiers).append("\n");
     sb.append("  apiLevelPolicy: ").append(apiLevelPolicy).append("\n");
     sb.append("  authorizationHeader: ").append(authorizationHeader).append("\n");
+    sb.append("  apiSecurity: ").append(apiSecurity).append("\n");
     sb.append("  maxTps: ").append(maxTps).append("\n");
     sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
