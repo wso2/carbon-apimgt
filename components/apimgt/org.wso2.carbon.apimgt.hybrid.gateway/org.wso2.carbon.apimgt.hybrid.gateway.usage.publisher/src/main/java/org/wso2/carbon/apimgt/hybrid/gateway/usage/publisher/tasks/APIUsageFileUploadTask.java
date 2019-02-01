@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -42,7 +44,10 @@ import org.wso2.carbon.ntask.core.Task;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -140,22 +145,26 @@ public class APIUsageFileUploadTask implements Task {
                     .getProtocol());
             HttpPost httppost = new HttpPost(uploadServiceUrl);
 
-            HttpEntity reqEntity = MultipartEntityBuilder.create()
-                    .addBinaryBody("file", compressedFilePath.toFile())
-                    .build();
+            InputStream zipStream = new FileInputStream(compressedFilePath.toString());
+            MultipartEntityBuilder mBuilder = MultipartEntityBuilder.create();
+            mBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            mBuilder.addBinaryBody("file", zipStream, ContentType.create("application/zip"), fileName);
+            HttpEntity entity = mBuilder.build();
             httppost.setHeader(MicroGatewayAPIUsageConstants.FILE_NAME_HEADER, fileName);
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+            /*APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
             String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
+            char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();*/
+            String username = "admin";
+            char[] password = "admin".toCharArray();
 
             String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, password);
             MicroGatewayCommonUtil.cleanPasswordCharArray(password);
             httppost.setHeader(MicroGatewayAPIUsageConstants.AUTHORIZATION_HEADER, authHeaderValue);
             httppost.setHeader(MicroGatewayAPIUsageConstants.ACCEPT_HEADER,
                     MicroGatewayAPIUsageConstants.ACCEPT_HEADER_APPLICATION_JSON);
-            httppost.setEntity(reqEntity);
+            httppost.setEntity(entity);
 
             response = HttpRequestUtil.executeHTTPMethodWithRetry(httpClient, httppost,
                     MicroGatewayAPIUsageConstants.MAX_RETRY_COUNT);
@@ -164,6 +173,8 @@ public class APIUsageFileUploadTask implements Task {
             return true;
         } catch (OnPremiseGatewayException e) {
             log.error("Error occurred while uploading API Usage file.", e);
+        } catch (FileNotFoundException e) {
+            log.error("Error occurred while reading API Usage file from the path.", e);
         }
         return false;
     }
