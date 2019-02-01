@@ -1,12 +1,29 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import qs from 'qs';
 import Log from 'log4javascript';
-import Utils from 'AppData/Utils';
 import ConfigManager from 'AppData/ConfigManager';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import { PageNotFound } from 'AppComponents/Base/Errors';
@@ -25,17 +42,6 @@ themes.push(createMuiTheme(Configurations.themes.light));
 themes.push(createMuiTheme(Configurations.themes.dark));
 
 /**
- * Language.
- * @type {string}
- */
-const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
-
-/**
- * Language without region code.
- */
-const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
-
-/**
  * Render protected application paths, Implements container presenter pattern
  */
 export default class Protected extends Component {
@@ -48,19 +54,9 @@ export default class Protected extends Component {
         super(props);
         this.state = {
             themeIndex: 1,
-            messages: {},
         };
         this.environments = [];
         this.toggleTheme = this.toggleTheme.bind(this);
-        this.loadLocale = this.loadLocale.bind(this);
-    }
-
-    /**
-     * Initialize i18n.
-     */
-    componentWillMount() {
-        const locale = languageWithoutRegionCode || language || 'en';
-        this.loadLocale(locale);
     }
 
     /**
@@ -79,21 +75,6 @@ export default class Protected extends Component {
             })
             .catch((error) => {
                 Log.error('Error while receiving environment configurations : ', error);
-            });
-    }
-
-    /**
-     * Load locale file.
-     *
-     * @param {string} locale Locale name
-     */
-    loadLocale(locale = 'en') {
-        fetch(`${Utils.CONST.CONTEXT_PATH}/public/app/locales/${locale}.json`)
-            .then(resp => resp.json())
-            .then((data) => {
-                // eslint-disable-next-line global-require, import/no-dynamic-require
-                addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages: defineMessages(data) });
             });
     }
 
@@ -125,20 +106,18 @@ export default class Protected extends Component {
             );
         }
         return (
-            <IntlProvider locale={language} messages={this.state.messages}>
-                <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
-                    <AppErrorBoundaryStyled>
-                        <Base header={header}>
-                            <Switch>
-                                <Redirect exact from='/' to='/apis' />
-                                <Route path='/apis' component={Apis} />
-                                <Route path='/endpoints' component={Endpoints} />
-                                <Route component={PageNotFound} />
-                            </Switch>
-                        </Base>
-                    </AppErrorBoundaryStyled>
-                </MuiThemeProvider>
-            </IntlProvider>
+            <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
+                <AppErrorBoundaryStyled>
+                    <Base header={header}>
+                        <Switch>
+                            <Redirect exact from='/' to='/apis' />
+                            <Route path='/apis' component={Apis} />
+                            <Route path='/endpoints' component={Endpoints} />
+                            <Route component={PageNotFound} />
+                        </Switch>
+                    </Base>
+                </AppErrorBoundaryStyled>
+            </MuiThemeProvider>
         );
     }
 }

@@ -36,6 +36,7 @@ import User from 'AppData/User';
 import ConfigManager from 'AppData/ConfigManager';
 import Utils from 'AppData/Utils';
 import { Redirecting, Progress } from 'AppComponents/Shared';
+import { FormattedMessage } from 'react-intl';
 
 import './login.css';
 
@@ -284,7 +285,7 @@ class Login extends Component {
                                         </Grid>
                                         <Grid item>
                                             <Typography type='subheading' align='right' gutterBottom>
-                                                API PUBLISHER
+                                                <FormattedMessage id='api.publisher' defaultMessage='API PUBLISHER' />
                                             </Typography>
                                         </Grid>
                                     </Grid>
@@ -296,13 +297,21 @@ class Login extends Component {
                                         <Paper elevation={1} square className='login-paper'>
                                             <form onSubmit={this.handleSubmit} className='login-form'>
                                                 <Typography type='body1' gutterBottom>
-                                                    Sign in to your account
+                                                    <FormattedMessage
+                                                        id='sign.in.account'
+                                                        defaultMessage='Sign in to your account'
+                                                    />
                                                 </Typography>
 
                                                 {/* Environments */}
                                                 {isMoreThanOneEnvironments && (
                                                     <FormControl style={{ width: '100%', marginTop: '2%' }}>
-                                                        <InputLabel htmlFor='environment'>Environment</InputLabel>
+                                                        <InputLabel htmlFor='environment'>
+                                                            <FormattedMessage
+                                                                id='environment'
+                                                                defaultMessage='Environment'
+                                                            />
+                                                        </InputLabel>
                                                         <Select
                                                             onChange={this.handleEnvironmentChange}
                                                             value={this.state.environmentId}
@@ -327,14 +336,17 @@ class Login extends Component {
                                                                     marginTop: '5%',
                                                                 }}
                                                             >
-                                                                Single Sign On is enabled.
+                                                                <FormattedMessage
+                                                                    id='single.sign.on.enabled'
+                                                                    defaultMessage='Single Sign On is enabled.'
+                                                                />
                                                             </FormControl>
                                                         ) : (
                                                             <FormControl style={{ width: '100%' }}>
                                                                 <TextField
                                                                     error={!this.state.username && this.state.validate}
                                                                     id='username'
-                                                                    label='Username'
+                                                                    label={<FormattedMessage id='username' defaultMessage='Username' />}
                                                                     type='text'
                                                                     autoComplete='username'
                                                                     margin='normal'
@@ -344,7 +356,7 @@ class Login extends Component {
                                                                 <TextField
                                                                     error={!this.state.password && this.state.validate}
                                                                     id='password'
-                                                                    label='Password'
+                                                                    label={<FormattedMessage id='password' defaultMessage='Password' />}
                                                                     type='password'
                                                                     autoComplete='current-password'
                                                                     margin='normal'
@@ -368,7 +380,9 @@ class Login extends Component {
                                                     className='login-form-submit'
                                                     disabled={!isSsoUpdated}
                                                 >
-                                                    {isSsoEnabled ? 'Visit Login Page' : 'Login'}
+                                                    {isSsoEnabled
+                                                        ? <FormattedMessage id='visit.login.page' defaultMessage='Visit Login Page' />
+                                                        : <FormattedMessage id='login' defaultMessage='Login' />}
                                                 </Button>
                                             </form>
                                         </Paper>
