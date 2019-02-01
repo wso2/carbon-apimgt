@@ -2348,40 +2348,52 @@ public class APIStoreHostObject extends ScriptableObject {
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
         JSONObject json = new JSONObject();
 
+        String productionUrl = "";
+        String sandboxUrl = "";
+        String hybridUrl = "";
+
+        // Set URL for a given default env
         for (Environment environment : environments.values()) {
-            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
-                json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
-                        APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
-                        APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                return json;
+            String environmentUrl = APIStoreHostObject.getHttpsEnvironmentUrl(environment);
+            String environmentType = environment.getType();
+            boolean isDefault = environment.isDefault();
+
+            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environmentType)) {
+                if (isDefault) {
+                    json.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, environmentUrl);
+                } else {
+                    hybridUrl = environmentUrl;
+                }
+            } else if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environmentType)) {
+                if (isDefault) {
+                    json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, environmentUrl);
+                } else {
+                    productionUrl = environmentUrl;
+                }
+            } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environmentType)) {
+                if (isDefault) {
+                    json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, environmentUrl);
+                } else {
+                    sandboxUrl = environmentUrl;
+                }
             } else {
-                String environmentType = APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
-                        ? APIConstants.GATEWAY_ENV_TYPE_PRODUCTION : APIConstants.GATEWAY_ENV_TYPE_SANDBOX;
-                if (environment.isDefault()) {
-                    json.put(environmentType,
-                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                }
+                log.warn("Invalid gateway environment type : " + environmentType +
+                        " has been configured in api-manager.xml");
             }
         }
 
-        if (json.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION) == null) {
-            for (Environment environment : environments.values()) {
-                if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
-                    json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
-                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                    break;
-                }
+        // If no default envs are specified, set URL from each of the configured env types at random
+        if (json.isEmpty()) {
+            if (!productionUrl.isEmpty()) {
+                json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionUrl);
             }
-        }
 
-        if (json.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX) == null) {
-            for (Environment environment : environments.values()) {
-                if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
-                    json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
-                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                    break;
-                }
+            if (!sandboxUrl.isEmpty()) {
+                json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxUrl);
+            }
+
+            if (!hybridUrl.isEmpty()) {
+                json.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridUrl);
             }
         }
 
