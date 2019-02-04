@@ -162,10 +162,10 @@ public final class APIConstants {
 
     // registry location for wsdl files
     public static final String API_WSDL_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/wsdls/";
-    public static final String API_GRAPHQL_SCHEMA_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/wsdls/";
+    public static final String API_GRAPHQL_SCHEMA_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/graphql/";
     public static final String API_WSDL_RESOURCE = API_APPLICATION_DATA_LOCATION+"/wsdls";
     public static final String WSDL_FILE_EXTENSION = ".wsdl";
-    public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".wsdl";
+    public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".graphql";
     public static final String WSDL_PROVIDER_SEPERATOR = "--";
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
     public static final String API_WSDL_ARCHIVE_LOCATION = "archives/";
@@ -175,7 +175,7 @@ public final class APIConstants {
     public static final String WSDL_FILE = "wsdlFile";
     public static final String UPDATED_WSDL_ZIP = "updated.zip";
     public static final String FILE_URI_PREFIX = "file://";
-    
+
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
@@ -343,7 +343,7 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_TIME_CREATED = "TIME_CREATED";
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
-    
+
     public static final String DOT = ".";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";

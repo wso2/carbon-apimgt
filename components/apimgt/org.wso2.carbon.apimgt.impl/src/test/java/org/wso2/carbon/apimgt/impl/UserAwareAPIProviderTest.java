@@ -289,6 +289,16 @@ public class UserAwareAPIProviderTest {
     }
 
     /**
+     * This method checks the behaviour of getGraphqlSchema method when there is no schema for the relevant API.
+     *
+     * @throws APIManagementException API Management Exception.
+     */
+    @Test
+    public void testGetGraphqlSchema() throws APIManagementException {
+        Assert.assertNull("Non-existing schema file was retrieved successfully",
+                userAwareAPIProvider.getGraphqlSchema(apiIdentifier));
+    }
+    /**
      * This methos checks the getLifecycleEvents method of a non-existing API.
      *
      * @throws APIManagementException API Management Exception.

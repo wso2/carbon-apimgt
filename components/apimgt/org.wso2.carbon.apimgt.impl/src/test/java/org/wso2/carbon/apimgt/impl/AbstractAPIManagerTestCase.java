@@ -722,6 +722,59 @@ public class AbstractAPIManagerTestCase {
     }
 
     @Test
+    public void testUploadGraphqlSchema() throws RegistryException, APIManagementException {
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
+        Resource resource = new ResourceImpl();
+        String resourcePath = "/test/graphql";
+        String schemaContent = "sample schema";
+        Resource resourceMock = Mockito.mock(Resource.class);
+        resourceMock.setContent(schemaContent);
+        resourceMock.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
+        Mockito.when(registry.newResource()).thenReturn(resource);
+        Mockito.doThrow(RegistryException.class).doReturn(resourcePath).when(registry).put(resourcePath, resource);
+        try {
+            abstractAPIManager.uploadGraphqlSchema(resourcePath, schemaContent);
+            Assert.fail("Exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error while uploading schema to from the registry"));
+        }
+        abstractAPIManager.uploadGraphqlSchema(resourcePath, schemaContent);
+        Mockito.verify(registry, Mockito.atLeastOnce()).put(resourcePath, resource);
+    }
+
+    @Test
+    public void testGetGraphqlSchema() throws APIManagementException, RegistryException, IOException {
+        Resource resourceMock = Mockito.mock(Resource.class);
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
+        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        String getGraphqlSchema =
+                identifier.getProviderName() + "--" + identifier.getApiName() + identifier.getVersion() + ".graphql";
+        String schemaResourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + getGraphqlSchema;
+        Resource resource = new ResourceImpl(schemaResourcePath, new ResourceDO());
+        Mockito.when(registry.get(schemaResourcePath)).thenThrow(RegistryException.class).thenReturn(resource);
+        Mockito.when(registry.resourceExists(schemaResourcePath)).thenReturn(true);
+        try {
+            abstractAPIManager.getGraphqlSchema(identifier);
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error while getting schema file from the registry"));
+        }
+        String schemaContent = "sample schema";
+        resource.setContent(schemaContent);
+        InputStream inputStream = new ArrayInputStream();
+        Mockito.when(resourceMock.getContentStream()).thenReturn(inputStream);
+        Assert.assertTrue(abstractAPIManager.getGraphqlSchema(identifier).contains(schemaContent));
+        PowerMockito.mockStatic(IOUtils.class);
+        PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
+                .thenThrow(IOException.class);
+        try {
+            abstractAPIManager.getGraphqlSchema(identifier).contains(schemaContent);
+            Assert.fail("Exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error occurred while getting the content of schema"));
+        }
+    }
+
+    @Test
     public void testGetSwagger20Definition() throws Exception {
         int tenantId = -1234;
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, registryService, tenantManager);
@@ -1601,7 +1654,7 @@ public class AbstractAPIManagerTestCase {
             Object[] args = invocation.getArguments();
             return (String) args[0];
         });
-        
+
         try {
             abstractAPIManager.searchPaginatedAPIs("search", API_PROVIDER, 0, 5, false);
             Assert.fail("Exception not thrown for error scenario");
