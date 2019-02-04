@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
@@ -31,6 +32,8 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String accept,String ifNoneMatch);
     public abstract Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String contentType);
     public abstract Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response apisApiIdGraphqlSchemaGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response apisApiIdGraphqlSchemaPost(String apiId,GraphQLSchemaDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdPoliciesMediationGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch);
     public abstract Response apisApiIdPoliciesMediationMediationPolicyIdDelete(String apiId,String mediationPolicyId,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdPoliciesMediationMediationPolicyIdGet(String apiId,String mediationPolicyId,String accept,String ifNoneMatch,String ifModifiedSince);

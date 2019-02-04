@@ -95,6 +95,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        return super.getGraphqlSchema(apiId);
+    }
+
+    @Override
     public boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway,
             boolean deprecateOldVersions, boolean makeKeysForwardCompatible)
             throws APIManagementException, FaultGatewaysException {

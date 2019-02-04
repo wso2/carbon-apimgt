@@ -1035,6 +1035,57 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * Returns the wsdl content in registry specified by the wsdl name
+     *
+     * @param apiId Api Identifier
+     * @return wsdl content matching name if exist else null
+     */
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        String schemaDoc = null;
+        String schemaName = apiId.getProviderName() + "--" + apiId.getApiName() +
+                apiId.getVersion() + ".graphql";
+        String schemaResourePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + schemaName;
+        try {
+            if (registry.resourceExists(schemaResourePath)) {
+                Resource schemaResource = registry.get(schemaResourePath);
+                schemaDoc = IOUtils.toString(schemaResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while getting schema file from the registry ";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (IOException e) {
+            String error = "Error occurred while getting the content of schema " + schemaName;
+            log.error(error);
+            throw new APIManagementException(error, e);
+        }
+        return schemaDoc;
+    }
+
+    /**
+     * Create a graphql schema in the path specified.
+     *
+     * @param resourcePath   Registry path of the resource
+     * @param schemaDefinition wsdl content
+     */
+    @Override
+    public void uploadGraphqlSchema(String resourcePath, String schemaDefinition)
+            throws APIManagementException {
+        try {
+            Resource resource = registry.newResource();
+            resource.setContent(schemaDefinition);
+            resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
+            registry.put(resourcePath, resource);
+        } catch (RegistryException e) {
+            String msg = "Error while uploading schema to from the registry ";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
      * Returns the swagger 2.0 definition of the given API
      *
      * @param apiId id of the APIIdentifier

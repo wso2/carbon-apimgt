@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
@@ -227,6 +228,51 @@ public class ApisApi  {
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
     return delegate.apisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince);
+    }
+    @GET
+    @Path("/{apiId}/graphqlSchema")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get the Schema of a GraphQL API", notes = "This operation can be used to retrieve the Schema definition of a GraphQL API.\n", response = GraphQLSchemaDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nRequested GraphQL Schema DTO object belongs to the API\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
+
+    public Response apisApiIdGraphqlSchemaGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",required=true ) @PathParam("apiId") @Encoded String apiId,
+    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    {
+    return delegate.apisApiIdGraphqlSchemaGet(apiId,accept,ifNoneMatch,ifModifiedSince);
+    }
+    @POST
+    @Path("/{apiId}/graphqlSchema")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Add a Schema to a GraphQL API", notes = "This operation can be used to add a GraphQL Schema definition to an existing GraphQL API.\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with updated schema definition\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 403, message = "Forbidden.\nThe request must be conditional but no condition has been specified.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
+
+    public Response apisApiIdGraphqlSchemaPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",required=true ) @PathParam("apiId") @Encoded String apiId,
+    @ApiParam(value = "JSON payload including Schema definition that needs to be added\n" ,required=true ) GraphQLSchemaDTO body,
+    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
+    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    {
+    return delegate.apisApiIdGraphqlSchemaPost(apiId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @GET
     @Path("/{apiId}/policies/mediation")

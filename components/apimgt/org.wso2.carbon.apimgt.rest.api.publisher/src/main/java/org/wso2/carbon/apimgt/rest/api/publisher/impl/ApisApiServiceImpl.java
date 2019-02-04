@@ -57,16 +57,7 @@ import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
@@ -486,6 +477,93 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the graphql schema correspond to the API specified by the identifier
+     *
+     * @param apiId           API id/uuid
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return ok with requested schema content , else null
+     */
+    @Override
+    public Response apisApiIdGraphqlSchemaGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+            GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
+            dto.setSchemaDefinition(schemaContent);
+            dto.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
+                    apiIdentifier.getVersion() + ".graphql");
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
+                                log);
+            } else {
+                String errorMessage = "Error while retrieving schema of API: " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param apiId API Id
+     * @param body GraphQL Schema DTO
+     * @param contentType content type of the payload
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return added schema
+     */
+    @Override
+    public Response apisApiIdGraphqlSchemaPost(String apiId, GraphQLSchemaDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
+                    tenantDomain);
+            String resourcePath = apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
+                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
+            if (apiProvider.checkIfResourceExists(resourcePath)) {
+                RestApiUtil.handleConflict("schema resource already exists for the API " + apiId, log);
+            }
+            apiProvider.uploadGraphqlSchema(resourcePath, body.getSchemaDefinition());
+
+            GraphQLSchemaDTO graphQLSchemaDTO = new GraphQLSchemaDTO();
+            graphQLSchemaDTO.setSchemaDefinition(apiProvider.getGraphqlSchema(apiIdentifier));
+            graphQLSchemaDTO.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
+                    apiIdentifier.getVersion() + ".graphql");
+            return Response.ok().entity(graphQLSchemaDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while uploading schema for API: " + apiId, e,
+                                log);
+            } else {
+                String errorMessage = "Error while uploading schema of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -1565,13 +1643,13 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * 
+     *
      * @param apiId API Id
      * @param body WSDL DTO
      * @param contentType content type of the payload
      * @param ifMatch If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return added wsdl 
+     * @return added wsdl
      */
     @Override
     public Response apisApiIdWsdlPost(String apiId, WsdlDTO body, String contentType, String ifMatch,
