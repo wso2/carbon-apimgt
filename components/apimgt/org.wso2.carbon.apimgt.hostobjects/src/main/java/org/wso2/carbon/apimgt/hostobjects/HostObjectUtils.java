@@ -48,6 +48,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.apache.commons.httpclient.ProxyHost;
 
 import javax.cache.Caching;
 
@@ -259,8 +260,15 @@ public class HostObjectUtils {
             }
             String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
             String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
-            clientnew.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-                    new HttpHost(proxyHost, Integer.parseInt(proxyPort)));
+
+            if (proxyHost != null && proxyPort != null) {
+                clientnew.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+                        new HttpHost(proxyHost, Integer.parseInt(proxyPort)));
+            }
+
+            ProxyHost newproxyHost = new ProxyHost(proxyHost, Integer.parseInt(proxyPort));
+            clientnew.getHostConfiguration().setProxyHost(newproxyHost);
+
         }
 
         try {
