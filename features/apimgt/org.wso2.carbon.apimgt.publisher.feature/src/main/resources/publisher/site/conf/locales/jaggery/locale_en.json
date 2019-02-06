@@ -553,7 +553,9 @@
     "Visible to my Domain": "Visible to my Domain",
     "WADL": "WADL",
     "WSDL": "WSDL",
+    "WSDL Archive/File": "WSDL Archive/File",
     "WSDL Endpoint": "WSDL Endpoint",
+    "WSDL Url" : "WSDL Url",
     "WSO2 API Manager uses HTTP Head to check the validity of the endpoint.": "WSO2 API Manager uses HTTP Head to check the validity of the endpoint.",
     "WSO2 API Publisher Home": "WSO2 API Publisher Home",
     "WSO2 copyright": "WSO2 copyright",
@@ -627,5 +629,6 @@
     "Error while updating API swagger definition" : "Error while updating API swagger definition",
     "Download Document" : "Download Document",
     "View Document" : "View Document",
-    "Document" : "Document"
+    "Document" : "Document",
+    "API Usage By Applications" : "API Usage By Applications"
 }

@@ -93,7 +93,7 @@ public class APIMWSDLReader {
 		this.baseURI = baseURI;
 	}
 
-	private static WSDLFactory getWsdlFactoryInstance() throws WSDLException {
+	public static WSDLFactory getWsdlFactoryInstance() throws WSDLException {
 		if (null == wsdlFactoryInstance) {
 			wsdlFactoryInstance = WSDLFactory.newInstance();
 		}

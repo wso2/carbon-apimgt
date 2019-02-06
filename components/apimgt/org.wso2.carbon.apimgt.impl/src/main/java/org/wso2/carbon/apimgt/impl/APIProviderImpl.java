@@ -91,11 +91,15 @@ import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
+import org.wso2.carbon.apimgt.impl.soaptorest.WSDLSOAPOperationExtractor;
+import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -860,6 +864,46 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private void updateWsdlArchive(API api) throws APIManagementException {
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when updating WSDL of API " + api.getId().getApiName();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            GenericArtifact apiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
+            if (api.getWsdlArchivePath() != null && api.getWsdlArchive() != null) {
+                String path = APIUtil.saveWSDLArchive(registry, api);
+                registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
+                artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
+                registry.commitTransaction();
+                transactionCommitted = true;
+            }
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException ex) {
+                handleException("Error occurred while rolling back the transaction.", ex);
+            }
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error occurred while rolling back the transaction.", ex);
+            }
+        }
+    }
+
     public boolean isAPIUpdateValid(API api) throws APIManagementException {
         String apiSourcePath = APIUtil.getAPIPath(api.getId());
         boolean isValid = false;
@@ -942,8 +986,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             //Update WSDL in the registry
-            if (api.getWsdlUrl() != null) {
+            if (api.getWsdlUrl() != null && StringUtils.isBlank(api.getWsdlArchivePath())) {
                 updateWsdl(api);
+            }
+
+            if (StringUtils.isNotBlank(api.getWsdlArchivePath())) {
+                updateWsdlArchive(api);
             }
 
             boolean updatePermissions = false;
@@ -2719,6 +2767,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
+            if (api.getWsdlArchive() != null) {
+                APIUtil.saveWSDLArchive(registry, api);
+            }
+
             //attaching micro-gateway labels to the API
             APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
@@ -2925,6 +2977,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String thumbPath = APIUtil.getIconPath(identifier);
             if (registry.resourceExists(thumbPath)) {
                 registry.delete(thumbPath);
+            }
+
+            String wsdlArchivePath = APIUtil.getWsdlArchivePath(identifier);
+            if (registry.resourceExists(wsdlArchivePath)) {
+                registry.delete(wsdlArchivePath);
             }
             
             /*Remove API Definition Resource - swagger*/

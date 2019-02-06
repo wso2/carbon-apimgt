@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.usage.client.bean.APIUsageByApplication;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
 import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
 import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchCountBean;
@@ -958,4 +959,15 @@ public abstract class APIUsageStatisticsClient {
     }
 
 
+    /**
+     * Method to get the api usage by application information.
+     *
+     * @param apiName : Name of the api.
+     * @param apiVersion : Version of the api.
+     * @param fromDate : Start date of the time span.
+     * @param toDate : End date of the time span
+     * @return List of ApiUsageByApplication objects.
+     */
+    public abstract List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
+                    String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException;
 }
