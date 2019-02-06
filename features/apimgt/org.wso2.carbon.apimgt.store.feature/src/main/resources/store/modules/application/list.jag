@@ -25,7 +25,6 @@ var getApplications = function (username) {
 
 };
 
-<<<<<<< HEAD
 var getApplicationsByOwner = function (username) {
     var allApps,
         userApps = [],
@@ -60,7 +59,8 @@ var getApplicationsByOwner = function (username) {
             applications:null
         };
     }
-=======
+};
+
 var getLightWeightApplications = function (username) {
 	var applications,
 		log = new Log(),
@@ -84,8 +84,6 @@ var getLightWeightApplications = function (username) {
 		};
 
 	}
-
->>>>>>> 0261cc6...  Fixing performance related issue on API Detail page in store
 };
 
 var getApplicationsWithPagination = function (username,start,offset,search,sortColumn,sortOrder) {
