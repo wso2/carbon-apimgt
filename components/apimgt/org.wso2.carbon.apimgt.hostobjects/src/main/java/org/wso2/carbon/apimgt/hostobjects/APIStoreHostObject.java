@@ -2978,7 +2978,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("application", row, api.getApplication().getName());
                     row.put("applicationId", row, api.getApplication().getId());
 
-                    if(APIUtil.isMultiGroupSharingEnabled()){
+                    if(APIUtil.isMultiGroupAppSharingEnabled()){
                         row.put("owner", row, api.getApplication().getOwner());
                     }
 

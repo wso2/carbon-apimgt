@@ -4123,12 +4123,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return applications;
     }
 
-    @Override
-    public Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws
-            APIManagementException {
-        return apiMgtDAO.getLightWeightApplications(subscriber, groupingId);
-    }
-
     /**
      * Returns all API keys associated with given application id.
      *
