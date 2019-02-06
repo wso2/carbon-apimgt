@@ -395,6 +395,7 @@
 
 										<% if(session.get("wsdl") || ( api && api.wsdl )) {
 											var wsdl = session.get("wsdl");
+                                            var wsdlFile = session.get("wsdl-file");
 											if(api && api.wsdl){
 												wsdl = api.wsdl;
 											}
@@ -416,10 +417,24 @@
 												</label>
 												<div class="col-sm-6">
 													<div class="input-append">
-														<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= encode.forHtmlAttribute(wsdl) %>" />
-														<div class="btn-group">
-															<button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("Test URI")%></button>
-														</div>
+                                                        <div id="wsdlurlInputSection">
+                                                            <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= encode.forHtmlAttribute(wsdl) %>" />
+                                                            <div class="btn-group" id="test-uri-section">
+                                                                 <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("Test URI")%></button>
+                                                             </div>
+                                                        </div>
+
+                                                        <div class="input-group input-wrap file-upload-control" id="fileUploadSection" style="display:none">
+                                                                    <input type="text" class="form-control validInput" id="wsdl-file-url" name="wsdl-file-url"  value="<%= encode.forHtmlAttribute(wsdl) %>" />
+                                                                            <input id="wsdl-file" name="wsdl-file" type="file" title="wsdl-file" class="form-control" multiple>
+                                                                            <label for="wsdl-file" class="error swaggerFileError" style="display:none"><%=i18n.localize("Please use a valid wsdl file")%></label>
+                                                                            <div class="input-group-btn" id="wsdlFileBrowseBtn">
+                                                                                <button class="btn btn-primary browse" type="button" title="Browse File">
+                                                                                    <i class="fw fw-file-browse" aria-hidden="true"></i> <span
+                                                                                        class="hidden-xs"><%=i18n.localize("Browse")%></span>
+                                                                                </button>
+                                                                            </div>
+                                                        </div>
 													</div>
 												</div>
 											</div>

@@ -195,5 +195,6 @@
     "Are you sure you want to block this API?" : "Are you sure you want to block this API?",
     "Are you sure you want to retire this API?" : "Are you sure you want to retire this API?",
     "Are you sure you want to deploy as a prototype this API?" : "Are you sure you want to deploy as a prototype this API?",
-    "Are you sure you want to re-publish this API?" : "Are you sure you want to re-publish this API?"
+    "Are you sure you want to re-publish this API?" : "Are you sure you want to re-publish this API?",
+    "API Usage By Applications" : "API Usage By Applications"
 }

@@ -289,8 +289,8 @@
                     config.production_endpoints = config.production_endpoints[0];
                 if(config.sandbox_endpoints)
                     config.sandbox_endpoints = config.sandbox_endpoints[0];
-            }else{
-                config.algoClassName = config.algoCombo ;                
+            } else if (config.endpoint_type === "load_balance" && config.algoCombo !== 'other') {
+                config.algoClassName = config.algoCombo;
             }
             return config;
         },
