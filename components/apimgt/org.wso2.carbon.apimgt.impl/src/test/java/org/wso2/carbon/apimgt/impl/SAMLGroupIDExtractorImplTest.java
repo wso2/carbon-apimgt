@@ -120,9 +120,15 @@ public class SAMLGroupIDExtractorImplTest {
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
+        APIManagerConfigurationService apiManagerConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfig = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigService);
+        Mockito.when(apiManagerConfigService.getAPIManagerConfiguration()).thenReturn(apiManagerConfig);
+        Mockito.when(apiManagerConfig.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI)).
+                thenReturn("http://wso2.org/claims/organization");
 
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(1234);
         Mockito.when(realmService.getTenantUserRealm(1234)).thenReturn(userRealm);
@@ -148,7 +154,8 @@ public class SAMLGroupIDExtractorImplTest {
         Mockito.when(documentBuilder.parse(samlGroupIDExtractor.getByteArrayInputStream("test"))).
                 thenReturn(document);
         Mockito.when(document.getDocumentElement()).thenReturn(element);
-
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(Configuration.class);
         Response response = Mockito.mock(Response.class);
         List<Assertion> assertion = new ArrayList();
@@ -164,6 +171,13 @@ public class SAMLGroupIDExtractorImplTest {
         Mockito.when(subject.getNameID()).thenReturn(nameID);
         Mockito.when(nameID.getValue()).thenReturn("user");
         System.setProperty(APIConstants.READ_ORGANIZATION_FROM_SAML_ASSERTION, "true");
+        APIManagerConfigurationService apiManagerConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigService);
+        APIManagerConfiguration apiManagerConfig = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigService.getAPIManagerConfiguration()).thenReturn(apiManagerConfig);
+        Mockito.when(apiManagerConfig.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI)).
+                thenReturn("http://wso2.org/claims/organization");
 
         System.setProperty("carbon.home", "");
         PrivilegedCarbonContext carbonContext;
