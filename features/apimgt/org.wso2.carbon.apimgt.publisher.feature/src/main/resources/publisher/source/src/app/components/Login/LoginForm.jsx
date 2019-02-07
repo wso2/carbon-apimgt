@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import { Switch, Redirect } from 'react-router-dom';
 import qs from 'qs';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 import AuthManager from 'AppData/AuthManager';
 
@@ -74,14 +75,16 @@ export default class LoginForm extends Component {
             return (
                 <div className='data-container'>
                     <form className='form-horizontal' method='post' id='loginForm' onSubmit={this.doLogin}>
-                        <h3>Sign in to your account</h3>
+                        <h3>
+                            <FormattedMessage id='sign.in.account' defaultMessage='Sign in to your account' />
+                        </h3>
                         <div className='form-group'>
                             <div className='col-xs-12 col-sm-12 col-md-5 col-lg-5'>
                                 <div className='input-group input-wrap'>
                                     <input
                                         className='form-control'
                                         name='username'
-                                        placeholder='Username'
+                                        placeholder={<FormattedMessage id='username' defaultMessage='Username' />}
                                         onChange={this.handleInputs}
                                         value={this.state.username}
                                         type='text'
@@ -95,7 +98,7 @@ export default class LoginForm extends Component {
                                     <input
                                         className='form-control'
                                         name='password'
-                                        placeholder='Password'
+                                        placeholder={<FormattedMessage id='password' defaultMessage='Password' />}
                                         onChange={this.handleInputs}
                                         value={this.state.password}
                                         type='password'
@@ -112,7 +115,9 @@ export default class LoginForm extends Component {
                                     checked={this.state.remember}
                                     type='checkbox'
                                 />
-                                <span className='checkbox-font'>Remember Me</span>
+                                <span className='checkbox-font'>
+                                    <FormattedMessage id='remember.me' defaultMessage='Remember Me' />
+                                </span>
                             </div>
                         </div>
                         <div className='form-group'>
@@ -120,13 +125,18 @@ export default class LoginForm extends Component {
                                 <input
                                     type='submit'
                                     className='btn btn-default btn-primary add-margin-right-2x'
-                                    value='Sign In'
+                                    value={<FormattedMessage id='sign.in' defaultMessage='Sign In' />}
                                 />
                             </div>
                         </div>
-                        <a className='add-margin-bottom-5x remove-margin-lg remove-margin-md'>Forgot Password</a>
+                        <a className='add-margin-bottom-5x remove-margin-lg remove-margin-md'>
+                            <FormattedMessage id='forgot.password' defaultMessage='Forgot Password' />
+                        </a>
                         <p className='hidden-xs hidden-sm'>
-                            {'Don\'t'} have an account? <a>Register Now</a>
+                            <FormattedMessage id='dont.have.account' defaultMessage="Don't have an account?" />
+                            <a>
+                                <FormattedMessage id='register.now' defaultMessage='Register Now' />
+                            </a>
                         </p>
                     </form>
                 </div>

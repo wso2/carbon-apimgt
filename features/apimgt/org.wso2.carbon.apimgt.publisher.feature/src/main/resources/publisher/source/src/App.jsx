@@ -26,6 +26,8 @@ import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import Progress from 'AppComponents/Shared/Progress';
+// Localization
+import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
 
 const LoadableProtectedApp = Loadable({
     loader: () =>
@@ -35,6 +37,19 @@ const LoadableProtectedApp = Loadable({
             './app/ProtectedApp'),
     loading: Progress,
 });
+
+/**
+ * Language.
+ * @type {string}
+ */
+const language = (navigator.languages && navigator.languages[0])
+    || navigator.language
+    || navigator.userLanguage;
+
+/**
+ * Language without region code.
+ */
+const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
 /**
  * Define base routes for the application
@@ -56,11 +71,21 @@ class Publisher extends React.Component {
 
         this.state = {
             user: AuthManager.getUser(environment),
+            messages: {},
         };
         this.updateUser = this.updateUser.bind(this);
+        this.loadLocale = this.loadLocale.bind(this);
         /* TODO: Do not need to preload if webpack magic comment `webpackPrefetch` working accordingly ,remove preload
         once it's fixed  */
         LoadableProtectedApp.preload();
+    }
+
+    /**
+     * Initialize i18n.
+     */
+    componentWillMount() {
+        const locale = languageWithoutRegionCode || language;
+        this.loadLocale(locale);
     }
 
     /**
@@ -71,6 +96,21 @@ class Publisher extends React.Component {
      */
     updateUser(user) {
         this.setState({ user });
+    }
+
+    /**
+     * Load locale file.
+     *
+     * @param {string} locale Locale name
+     */
+    loadLocale(locale = 'en') {
+        fetch(`${Utils.CONST.CONTEXT_PATH}/public/app/locales/${locale}.json`)
+            .then(resp => resp.json())
+            .then((data) => {
+                // eslint-disable-next-line global-require, import/no-dynamic-require
+                addLocaleData(require(`react-intl/locale-data/${locale}`));
+                this.setState({ messages: defineMessages(data) });
+            });
     }
 
     /**
@@ -86,16 +126,18 @@ class Publisher extends React.Component {
             referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
         });
         return (
-            <AppErrorBoundary appName='Publisher Application'>
-                <Router basename='/publisher'>
-                    <Switch>
-                        <Route path='/login' render={props => <Login {...props} updateUser={this.updateUser} />} />
-                        <Route path='/logout' component={Logout} />
-                        {!user && <Redirect to={{ pathname: '/login', search: params }} />}
-                        <Route render={() => <LoadableProtectedApp user={user} />} />
-                    </Switch>
-                </Router>
-            </AppErrorBoundary>
+            <IntlProvider locale={language} messages={this.state.messages}>
+                <AppErrorBoundary appName='Publisher Application'>
+                    <Router basename='/publisher'>
+                        <Switch>
+                            <Route path='/login' render={props => <Login {...props} updateUser={this.updateUser} />} />
+                            <Route path='/logout' component={Logout} />
+                            {!user && <Redirect to={{ pathname: '/login', search: params }} />}
+                            <Route render={() => <LoadableProtectedApp user={user} />} />
+                        </Switch>
+                    </Router>
+                </AppErrorBoundary>
+            </IntlProvider>
         );
     }
 }
