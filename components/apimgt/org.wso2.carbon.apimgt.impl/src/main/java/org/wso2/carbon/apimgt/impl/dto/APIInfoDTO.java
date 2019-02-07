@@ -26,6 +26,8 @@ import java.util.Set;
  */
 public class APIInfoDTO implements Serializable{
 
+    private static final long serialVersionUID = 1L;
+
    private String providerId;
    private String apiName;
    private String version;

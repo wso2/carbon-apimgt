@@ -27,6 +27,9 @@ import java.util.Date;
  */
 @SuppressWarnings("unused")
 public class Documentation implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private DocumentationType type;
     private String name;

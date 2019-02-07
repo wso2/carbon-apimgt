@@ -22,6 +22,9 @@ package org.wso2.carbon.apimgt.api.model.policy;
 import java.io.Serializable;
 
 public abstract class Condition implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private String type;       //type of each condition: eg:IP, DATE, DATE RANGE etc.
     protected String queryAttributeName;   // needed in making condition for sidhdhi query (eg: properties.verb=='POST')
     protected String nullFilterQueryString;   // needed in making condition for sidhdhi query (eg: properties.verb=='POST')

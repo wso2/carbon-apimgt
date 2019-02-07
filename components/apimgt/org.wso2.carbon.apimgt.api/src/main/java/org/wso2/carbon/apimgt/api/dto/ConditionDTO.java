@@ -27,6 +27,9 @@ import java.io.Serializable;
  * object.
  */
 public class ConditionDTO implements Serializable{
+
+    private static final long serialVersionUID = 1L;
+
     private String conditionType;
     private String conditionName;
     private String conditionValue;
