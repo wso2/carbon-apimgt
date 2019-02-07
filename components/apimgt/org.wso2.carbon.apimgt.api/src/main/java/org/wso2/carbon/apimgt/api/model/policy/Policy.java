@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Policy implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private int policyId;
     private String uuid;
     private String policyName;

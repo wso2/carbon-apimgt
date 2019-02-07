@@ -25,6 +25,8 @@ import java.util.*;
 
 public class URITemplate implements Serializable{
 
+    private static final long serialVersionUID = 1L;
+
     private String uriTemplate;
     private String resourceURI;
     private String resourceSandboxURI;

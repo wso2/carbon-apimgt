@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.impl.dto;
 import java.io.Serializable;
 
 public class TierPermissionDTO implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	
 	private String tierName;
 	private String permissionType;

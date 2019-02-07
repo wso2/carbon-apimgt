@@ -37,7 +37,7 @@
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+    var tenantDomain = String(MultitenantUtils.getTenantDomain(jagg.getUser().username));
 %>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];

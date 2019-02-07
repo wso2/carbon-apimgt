@@ -45,6 +45,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TenantWorkflowConfigHolder implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private static final Log log = LogFactory.getLog(TenantWorkflowConfigHolder.class);
 
     private static final QName PROP_Q = new QName("Property");

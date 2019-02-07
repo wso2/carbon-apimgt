@@ -26,6 +26,8 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class Tier implements Serializable, Comparable<Tier>{
 
+    private static final long serialVersionUID = 1L;
+
     private String name;
     private String displayName;
     private String description;
