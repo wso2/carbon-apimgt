@@ -2528,7 +2528,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-
     private Set<SubscribedAPI> getLightWeightSubscribedAPIs(Subscriber subscriber, String groupingId) throws
             APIManagementException {
         Set<SubscribedAPI> originalSubscribedAPIs;
