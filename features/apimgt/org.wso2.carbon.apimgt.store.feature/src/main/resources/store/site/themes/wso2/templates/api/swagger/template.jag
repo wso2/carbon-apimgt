@@ -220,27 +220,57 @@ var api = outputs.api;%>
 <% if(api.status != "PROTOTYPED"){ %>
 
 <script language="javascript">
+var loadTokens = function () {
+  var selected_app = $('#sub_app_list').find(":selected").text();
+  var subscriptions = <%= subscriptions%>;
+  var application_id;
+  $.each(subscriptions, function(i, app) {
+        if (app.application == selected_app.trim()) {
+            application_id = app.applicationId;
+            return false;
+        }
+  });
+  var selected_type = $("#key_type").val();
+    jagg.post("/site/blocks/subscription/subscription-list/ajax/subscription-list.jag", {
+        action:"getApplicationKeysByAppId",
+        applicationId:application_id
+        }, function (result) {
+            if (result.error == false) {
+	       console.log(result);
+	       if (selected_type == "production") {
+		     if (result.apikeys.length > 0) {
+			token = result.apikeys[0].PRODUCTION_KEY;
+		        $("#access_token").val(token);
+		     } else {
+			$("#access_token").val("");
+		     }
+	       } else if (selected_type == "sandbox") {
+		     if (result.apikeys.length > 1) {
+			token = result.apikeys[1].SANDBOX_KEY;
+		        $("#access_token").val(token);
+		     } else {
+			$("#access_token").val("");
+		     }
+	       }
+	       if(token && token.trim() != "") {
+                swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ token, "header"));
+	       }else{
+                swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
+	       }
+            } else {
+		console.log("eror ...");
+                jagg.message({content:result.message,type:"error"});
+            }
+        },
+    "json");
+};
+
 $(document).ready(function(){
 
 	$('.env_name').selectpicker();
-  var change_token = function(){
-    $(".notoken").hide();
-    var gatewayType = $("#environment_name option:selected").attr('data-attr');
-    if(gatewayType == "apiGW"){
-        var option = $("#sub_app_list option:selected");
-        var type = $("#key_type").val();
-        var key = option.attr("data-"+type);
-        if(key == "null"){
-            $(".notoken").show("slow");
-            $("#access_token").val("");
-        } else {
-            $("#access_token").val(key);
-        }
-    } else {
-        $("#access_token").val("");
-    }
-    $("#access_token").trigger("change");
-  };
+	var change_token = function(){
+		loadTokens();
+	};
 
 var show_environments = function(){
     var type = $(".keytype option:selected").val();
@@ -342,7 +372,7 @@ function checkOnKeyPress(e) {
                     }
 
             %>
-                <option value="" data-sandbox="<%=subscriptions[i].SANDBOX_KEY%>" data-production="<%=subscriptions[i].PRODUCTION_KEY%>">
+                <option value="">
                      <%= applicationTxt%>
                 </option>
               <% }  %>
