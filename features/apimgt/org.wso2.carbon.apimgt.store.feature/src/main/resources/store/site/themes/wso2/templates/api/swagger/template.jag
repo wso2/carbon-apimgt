@@ -224,8 +224,14 @@ var loadTokens = function () {
   var selected_app = $('#sub_app_list').find(":selected").text();
   var subscriptions = <%= subscriptions%>;
   var application_id;
+  var app_name;
   $.each(subscriptions, function(i, app) {
-        if (app.application == selected_app.trim()) {
+        if (app.owner) {
+            app_name = app.application + ' (' + app.owner + ')'
+        } else {
+            app_name = app.application
+        }
+        if (app_name == selected_app.trim()) {
             application_id = app.applicationId;
             return false;
         }
