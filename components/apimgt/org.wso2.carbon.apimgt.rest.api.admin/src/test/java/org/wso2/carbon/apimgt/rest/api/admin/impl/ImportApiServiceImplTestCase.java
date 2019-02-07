@@ -35,6 +35,9 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.rest.api.admin.ImportApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -50,16 +53,26 @@ import java.util.TreeSet;
 import javax.ws.rs.core.Response;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RestApiUtil.class)
+@PrepareForTest({RestApiUtil.class, ServiceReferenceHolder.class})
 public class ImportApiServiceImplTestCase {
     private final String USER = "admin";
     private ImportApiService importApiService;
     private APIConsumer apiConsumer;
+    private ServiceReferenceHolder serviceReferenceHolder;
+    private APIManagerConfigurationService apiManagerConfigurationService;
+    private APIManagerConfiguration apimConfig;
 
     @Before
     public void init() throws Exception {
         importApiService = new ImportApiServiceImpl();
         apiConsumer = Mockito.mock(APIConsumer.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        apimConfig = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apimConfig);
     }
 
     /**

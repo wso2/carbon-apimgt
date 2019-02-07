@@ -391,7 +391,9 @@
     "Mutual SSL" : "Mutual SSL",
     "Enabled API Security Protocols" : "Enabled API Security Protocols",
     "This API is protected only with Mutual SSL. Use the client certificate to access the API." : "This API is protected only with Mutual SSL. Use the client certificate to access the API.",
-    "Application subscription is not permitted for this API, as it is only protected with Mutual SSL." : "Application subscription is not permitted for this API, as it is only protected with Mutual SSL."
-
+    "Application subscription is not permitted for this API, as it is only protected with Mutual SSL." : "Application subscription is not permitted for this API, as it is only protected with Mutual SSL.",
+    "View Document" : "View Document",
+    "Document Name" : "Document Name",
+    "Document" : "Document"
 
 }

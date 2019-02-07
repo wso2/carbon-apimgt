@@ -668,5 +668,8 @@
     "OAuth2" : "OAuth2",
     "Mutual SSL" : "Mutual SSL",
     "Subscription tiers are not applicable for this API, as it is only protected with mutual SSL." : "Subscription are not applicable for this API, as it is only protected with mutual SSL.",
+    "Download Document" : "Download Document",
+    "View Document" : "View Document",
+    "Document" : "Document",
     "API Usage By Applications" : "API Usage By Applications"
 }

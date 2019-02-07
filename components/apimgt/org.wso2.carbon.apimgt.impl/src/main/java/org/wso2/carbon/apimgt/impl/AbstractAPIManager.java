@@ -18,14 +18,18 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.collections4.list.TreeList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.entity.ContentType;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.JSONException;
 import org.json.XML;
 import org.json.simple.JSONObject;
@@ -63,22 +67,28 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.config.RegistryConfiguration;
+import org.wso2.carbon.registry.core.config.RegistryConfigurationProcessor;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -86,6 +96,11 @@ import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.registry.indexing.RegistryConfigLoader;
+import org.wso2.carbon.registry.indexing.indexer.Indexer;
+import org.wso2.carbon.registry.indexing.indexer.IndexerException;
+import org.wso2.carbon.registry.indexing.service.ContentBasedSearchService;
+import org.wso2.carbon.registry.indexing.service.SearchResultsBean;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -1996,6 +2011,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             } else if (subQuery != null && subQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
                 result = searchAPIsByURLPattern(userRegistry, subQuery.split("=")[1], start, end);
+            } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
             } else {
                 result = searchPaginatedAPIs(userRegistry, searchQuery, start, end, isLazyLoad);
             }
@@ -2521,6 +2538,200 @@ public abstract class AbstractAPIManager implements APIManager {
             PaginationContext.destroy();
         }
         result.put("apis", apiSet);
+        result.put("length", totalLength);
+        result.put("isMore", isMore);
+        return result;
+    }
+
+    /**
+     * Search api resources by their content
+     *
+     * @param registry
+     * @param searchQuery
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    public Map<String, Object> searchPaginatedAPIsByContent(Registry registry, int tenantId, String searchQuery, int start, int end,
+            boolean limitAttributes) throws APIManagementException {
+
+        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        Map<Documentation, API> docMap = new HashMap<Documentation, API>();
+        Map<String, Object> result = new HashMap<String, Object>();
+        int totalLength = 0;
+        boolean isMore = false;
+
+        //SortedSet<Object> compoundResult = new TreeSet<Object>(new ContentSearchResultNameComparator());
+        ArrayList<Object> compoundResult = new ArrayList<Object>();
+
+        try {
+            GenericArtifactManager apiArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifactManager docArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
+
+            String paginationLimit = getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
+
+            // If the Config exists use it to set the pagination limit
+            final int maxPaginationLimit;
+            if (paginationLimit != null) {
+                // The additional 1 added to the maxPaginationLimit is to help us determine if more
+                // APIs may exist so that we know that we are unable to determine the actual total
+                // API count. We will subtract this 1 later on so that it does not interfere with
+                // the logic of the rest of the application
+                int pagination = Integer.parseInt(paginationLimit);
+
+                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
+                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
+                // leading to some of the APIs not being displayed
+                if (pagination < 11) {
+                    pagination = 11;
+                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
+                }
+                maxPaginationLimit = start + pagination + 1;
+            }
+            // Else if the config is not specified we go with default functionality and load all
+            else {
+                maxPaginationLimit = Integer.MAX_VALUE;
+            }
+            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+
+            if (tenantId == -1) {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            }
+
+            UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
+            ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
+            String newSearchQuery = getSearchQuery(searchQuery);
+            String[] searchQueries = newSearchQuery.split("&");
+
+            String apiState = "";
+            String publisherRoles = "";
+            Map<String, String> attributes = new HashMap<String, String>();
+            for (String searchCriterea : searchQueries) {
+                String[] keyVal = searchCriterea.split("=");
+                if (APIConstants.STORE_VIEW_ROLES.equals(keyVal[0])) {
+                    attributes.put("propertyName", keyVal[0]);
+                    attributes.put("rightPropertyValue", keyVal[1]);
+                    attributes.put("rightOp", "eq");
+                } else if (APIConstants.PUBLISHER_ROLES.equals(keyVal[0])) {
+                    publisherRoles = keyVal[1];
+                } else {
+                    if (APIConstants.LCSTATE_SEARCH_KEY.equals(keyVal[0])) {
+                        apiState = keyVal[1];
+                        continue;
+                    }
+                    attributes.put(keyVal[0], keyVal[1]);
+                }
+            }
+
+            //check whether the new document indexer is engaged
+            RegistryConfigLoader registryConfig = RegistryConfigLoader.getInstance();
+            Map<String, Indexer> indexerMap = registryConfig.getIndexerMap();
+            Indexer documentIndexer = indexerMap.get(APIConstants.DOCUMENT_MEDIA_TYPE_KEY);
+            String complexAttribute;
+            if (documentIndexer != null && documentIndexer instanceof DocumentIndexer) {
+                //field check on document_indexed was added to prevent unindexed(by new DocumentIndexer) from coming up as search results
+                //on indexed documents this property is always set to true
+                complexAttribute = ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR mediaType_s:("  + ClientUtils
+                        .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND document_indexed_s:true)";
+
+                //construct query such that publisher roles is checked in properties for api artifacts and in fields for document artifacts
+                //this was designed this way so that content search can be fully functional if registry is re-indexed after engaging DocumentIndexer
+                if (!StringUtils.isEmpty(publisherRoles)) {
+                    complexAttribute =
+                            "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
+                                    + publisherRoles + ") OR mediaType_s:("  + ClientUtils
+                                    .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
+                }
+            } else {
+                //document indexer required for document content search is not engaged, therefore carry out the search only for api artifact contents
+                complexAttribute = ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE);
+                if (!StringUtils.isEmpty(publisherRoles)) {
+                    complexAttribute =
+                            "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
+                                    + publisherRoles + ")";
+                }
+            }
+
+
+            attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, complexAttribute);
+            attributes.put(APIConstants.API_OVERVIEW_STATUS, apiState);
+
+            SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(attributes, systemUserRegistry);
+            String errorMsg = resultsBean.getErrorMessage();
+            if (errorMsg != null) {
+                handleException(errorMsg);
+            }
+
+            ResourceData[] resourceData = resultsBean.getResourceDataList();
+
+            if (resourceData == null || resourceData.length == 0) {
+                result.put("apis", compoundResult);
+                result.put("length", 0);
+                result.put("isMore", isMore);
+            }
+
+            totalLength = PaginationContext.getInstance().getLength();
+
+            // Check to see if we can speculate that there are more APIs to be loaded
+            if (maxPaginationLimit == totalLength) {
+                isMore = true;  // More APIs exist, cannot determine total API count without incurring perf hit
+                --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
+            }
+
+            for (ResourceData data : resourceData) {
+                String resourcePath = data.getResourcePath();
+                int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
+                resourcePath = resourcePath.substring(index);
+                Resource resource = registry.get(resourcePath);
+                if (APIConstants.DOCUMENT_RXT_MEDIA_TYPE.equals(resource.getMediaType())) {
+                    Resource docResource = registry.get(resourcePath);
+                    String docArtifactId = docResource.getUUID();
+                    GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
+                    Documentation doc = APIUtil.getDocumentation(docArtifact);
+                    Association[] docAssociations = registry
+                            .getAssociations(resourcePath, APIConstants.DOCUMENTATION_ASSOCIATION);
+                    API associatedAPI = null;
+                    if (docAssociations.length > 0) { // a content can have one api association at most
+                        String apiPath = docAssociations[0].getSourcePath();
+
+                        Resource apiResource = registry.get(apiPath);
+                        String apiArtifactId = apiResource.getUUID();
+                        if (apiArtifactId != null) {
+                            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                            associatedAPI = APIUtil.getAPI(apiArtifact, registry);
+                        } else {
+                            throw new GovernanceException("artifact id is null for " + apiPath);
+                        }
+
+                        if (associatedAPI != null && doc != null) {
+                            docMap.put(doc, associatedAPI);
+                        }
+                    }
+                } else {
+                    String apiArtifactId = resource.getUUID();
+                    API api;
+                    if (apiArtifactId != null) {
+                        GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                         api = APIUtil.getAPI(apiArtifact, registry);
+                         apiSet.add(api);
+                    } else {
+                        throw new GovernanceException("artifact id is null for " + resourcePath);
+                    }
+                }
+            }
+
+            compoundResult.addAll(apiSet);
+            compoundResult.addAll(docMap.entrySet());
+            compoundResult.sort(new ContentSearchResultNameComparator());
+        } catch (RegistryException e) {
+            handleException("Failed to search APIs by content", e);
+        } catch (IndexerException e) {
+            handleException("Failed to search APIs by content", e);
+        }
+
+        result.put("apis", compoundResult);
         result.put("length", totalLength);
         result.put("isMore", isMore);
         return result;

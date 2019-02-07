@@ -1207,6 +1207,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
+            String oldStatus = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+            Resource apiResource = registry.get(artifact.getPath());
+            String oldAccessControlRoles = api.getAccessControlRoles();
+            if (apiResource != null) {
+                oldAccessControlRoles = registry.get(artifact.getPath()).getProperty(APIConstants.PUBLISHER_ROLES);
+            }
             GenericArtifact updateApiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiArtifact.getId());
             org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
@@ -1250,6 +1256,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             artifactManager.updateGenericArtifact(updateApiArtifact);
+
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance
             String apiStatus = api.getStatus().toUpperCase();
@@ -1259,6 +1266,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
+
+            //propagate api status change and access control roles change to document artifact
+            String newStatus = updateApiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+            if (!StringUtils.equals(oldStatus, newStatus) || !StringUtils.equals(oldAccessControlRoles, publisherAccessControlRoles)) {
+                APIUtil.notifyAPIStateChangeToAssociatedDocuments(artifact, registry);
+            }
 
             if (updatePermissions) {
                 APIUtil.clearResourcePermissions(artifactPath, api.getId(), ((UserRegistry) registry).getTenantId());
@@ -1303,6 +1316,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 } else {
                     APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                             docRootPath, registry);
+                }
+            } else {
+                //In order to support content search feature - we need to update resource permissions of document resources
+                //if their visibility is set to API level.
+                List<Documentation> docs = getAllDocumentation(api.getId());
+                if (docs != null) {
+                    for (Documentation doc : docs) {
+                        if ((APIConstants.DOC_API_BASED_VISIBILITY).equalsIgnoreCase(doc.getVisibility().name())) {
+                            String documentationPath = APIUtil.getAPIDocPath(api.getId()) + doc.getName();
+                            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                    visibleRoles, documentationPath, registry);
+                        }
+                    }
                 }
             }
         } catch (Exception e) {

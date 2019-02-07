@@ -26,7 +26,7 @@
    <script type="text/javascript">
    	var user = <%=jagg.getUser()%>;
 	var isPublishPermitted = <%=outputs.isPublishPermitted%>;
-	var username = user.username ; 
+	var username = user.username ;
 	var siteContext = "<%=jagg.getSiteContext()%>";
 
 	var enjoyhint_instance = null;
@@ -122,7 +122,7 @@
         <div class="page-content">
         <div class="row">
 		<%
-        var i, api,path,mode=outputs.mode,apis = outputs.apis,length;
+        var i, api,path,docPath,tooltip,mode=outputs.mode,apis = outputs.apis,docs = outputs.docs, length;
         var reqUrl = request.getRequestURI();
         var docViewMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -163,9 +163,21 @@
         }  %>
 
        <% if(apis){
-        for(var apiInfo in apis) {
+	    for(var apiInfo in apis) {
                     api = apis[apiInfo];
                     path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+urlPostfix;
+                    tooltip = "Browse API";
+                    if (api.resultType != null && api.resultType == "Document") {
+                        if (api.docSourceType == "FILE") {
+                            var tenant = jagg.getTenantDomain();
+                            docPath = jagg.url("/site/themes/wso2/templates/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + api.docFilePath)
+                            tooltip = "Download Document";
+                        } else {
+                            docPath = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + "?docName=" + api.docName + "&name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+urlPostfix;
+                            tooltip = "View Document";
+                        }
+                    }
+
 
                     var nameSubstring = api.name;
                     if (api.name.length > 15) {
@@ -173,8 +185,8 @@
                     }
                     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider) + urlPostfix;
 
-        %>        
-        <%if(query != null && (query.indexOf("Doc:") == 0 || query.indexOf("doc:") == 0)) {%> 
+        %>
+        <%if(query != null && (query.indexOf("Doc:") == 0 || query.indexOf("doc:") == 0)) {%>
         	<div class="col-sm-12">
         		<div class="col-sm-5">
         			 <div class="add-padding-2x app-data ">
@@ -187,7 +199,7 @@
                                     <%} else if(api.docFilePath && api.docFilePath!="") { %>
                                     	<p><a href="<%=api.docFilePath%>" target="_blank" title="<%=i18n.localize("Download")%>"><%=i18n.localize("Download")%></a></p>
                                     <% } else { %>
-                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) 
+                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version)
                                     	+ "&provider=" + encode.forUriComponent(api.provider) + urlPostfix; %>
                                     	<p><a href="<%=docViewMappedUrl%>?<%=docUrl%>" target="_blank" title="<%=i18n.localize("View Content")%>"><%=i18n.localize("View Content")%></a></p>
                                     <% } %>
@@ -196,25 +208,25 @@
         		<div class="col-sm-4">
         			<div class="col-sm-6">
                             <div class="api-wrapper add-margin-bottom-4x">
-                                <div class="thumbnail icon">                                    
+                                <div class="thumbnail icon">
                                     <% if(api.thumb == null) { %>
                                     	<div class="square-element setbgcolor">
 											<div class="api-name-icon" onclick="location.href='<%=path%>'"></div>
 											<div style="display: none">
 												<a href="" class="api-name" title="<%=api.name%>"><%=api.name%></a>
 											</div>
-								</div> 
+								</div>
                                     <% } else { %>
 										<div class="square-element">
                                     		<img class="" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="api thumbnail url">
                                     	</div>
                                     <% } %>
                                     <a href="<%=path%>">
-	                                    <div class="after">                                        
+	                                    <div class="after">
 	                                            <span class="fw-stack fw-lg">
 	                                            <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                            <i class="fw fw-view fw-stack-1x"></i>
-	                                            </span>                                        
+	                                            </span>
 	                                    </div>
                                     </a>
                                 </div>
@@ -247,65 +259,90 @@
 			                       <%} %>
                                 </div>
                             </div>
-                        </div>  
-        		
-        		</div>        
+                        </div>
+
+        		</div>
            </div>
-                <%} else {%> 
-                
+                <%} else {%>
+                <script>
+                query = "<%=query%>";
+                if (query != null && query != "null" && (query.indexOf(":") == -1)) {
+                    $("#listing-title h2").html("Search Results");
+                }
+                </script>
+
                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                             <div class="api-wrapper add-margin-bottom-4x">
-                                <div class="thumbnail icon">                                    
+                                <div class="thumbnail icon">
                                     <% if(api.thumb == null) { %>
                                     	<div class="square-element setbgcolor">
+                                    	    <%if(api.resultType != null && api.resultType == "Document"){%>
+                                                <span class="document-match-icon"><i class="fw fw-document"></i></span>
+                                            <%}%>
 											<div class="api-name-icon" onclick="location.href='<%=path%>'"></div>
 											<div style="display: none">
 												<a href="" class="api-name" title="<%=api.name%>"><%=api.name%></a>
 											</div>
-								</div> 
+								</div>
                                     <% } else { %>
 										<div class="square-element">
                                     		<img class="" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="api thumbnail url">
+                                    		<%if(api.resultType != null && api.resultType == "Document"){%>
+                                                <span class="document-match-icon"><i class="fw fw-document"></i></span>
+                                            <%}%>
                                     	</div>
                                     <% } %>
-                                    <a href="<%=path%>" title="<%=i18n.localize("Browse API")%>"> 
-	                                    <div class="after">                                        
-	                                            <span class="fw-stack fw-lg" title="<%=i18n.localize("Browse API")%>">
-	                                            <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Browse API")%>"></i>
-	                                            <i class="fw fw-view fw-stack-1x" title="<%=i18n.localize("Browse API")%>"></i>
-	                                            </span>                                        
+                                    <%if(api.resultType != null && api.resultType == "Document"){%>
+                                        <a href="<%=docPath%>" title="<%=i18n.localize(tooltip)%>">
+                                     <%} else {%>
+                                        <a href="<%=path%>" title="<%=i18n.localize(tooltip)%>">
+                                     <%}%>
+	                                    <div class="after">
+	                                            <span class="fw-stack fw-lg" title="<%=i18n.localize(tooltip)%>">
+	                                            <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize(tooltip)%>"></i>
+	                                            <i class="fw fw-view fw-stack-1x" title="<%=i18n.localize(tooltip)%>"></i>
+	                                            </span>
 	                                    </div>
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("API Name")%>: <%=api.name%>"><%=api.name%></a></h4>
-                                    <h5><%=api.version%></h5>
-                                    <p class="truncate"><%=api.provider%></p>
-                                    <p>
-                                    	<a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("Users")%>">
-			                                <span id="noOfUsers">
-			                                    <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("User")%> <% } else { %><%=api.subs%> <%=i18n.localize("Users")%><% } %>
-			                                </span>
-			                            </a>
-                                    </p>
-                                    <h5><%=api.status%></h5>
-		                            <%if(outputs.isCreatePermitted){ %>
-			                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("Edit")%>">
-				                         <span class="fw-stack" style="font-size:10px" >
-				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Edit")%>"></i>
-				                                <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("Edit")%>"></i>
-				                            </span>
-			                            </a>
-			                            <a onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;" title="<%=i18n.localize("DELETE")%>">
-				                           <span class="fw-stack" style="font-size:10px">
-				                                <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("DELETE")%>" ></i>
-				                                <i class="fw fw-delete fw-stack-1x" title="<%=i18n.localize("DELETE")%>"></i>
-				                            </span>
-			                            </a>
-			                       <%} %>
+                                    <%if(api.resultType == null || api.resultType == "API"){%>
+                                        <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("API Name")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                        <h5><%=api.version%></h5>
+                                        <p class="truncate"><%=api.provider%></p>
+                                        <p>
+                                            <a href="<%=path%>" onclick="jagg.sessionAwareJS({callback:selectUserTab('<%=path%>')})" title="<%=i18n.localize("Users")%>">
+                                                <span id="noOfUsers">
+                                                    <% if (api.subs == "1") { %><%=api.subs%> <%=i18n.localize("User")%> <% } else { %><%=api.subs%> <%=i18n.localize("Users")%><% } %>
+                                                </span>
+                                            </a>
+                                        </p>
+                                        <h5><%=api.status%></h5>
+                                        <%if(outputs.isCreatePermitted){ %>
+                                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>" title="<%=i18n.localize("Edit")%>">
+                                             <span class="fw-stack" style="font-size:10px" >
+                                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Edit")%>"></i>
+                                                    <i class="fw fw-edit fw-stack-1x" title="<%=i18n.localize("Edit")%>"></i>
+                                                </span>
+                                            </a>
+                                            <a onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;" title="<%=i18n.localize("DELETE")%>">
+                                               <span class="fw-stack" style="font-size:10px">
+                                                    <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("DELETE")%>" ></i>
+                                                    <i class="fw fw-delete fw-stack-1x" title="<%=i18n.localize("DELETE")%>"></i>
+                                                </span>
+                                            </a>
+                                       <%} %>
+                                    <%}else if(api.resultType != null && api.resultType == "Document"){%>
+                                        <h4 id="doc-name" class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=docPath%>'})" title="<%=i18n.localize(tooltip)%>: <%=api.docName%>"><%=api.docName%></a></h4>
+                                        <h5 id="document-type-label"><%=api.docSourceType.toLowerCase()%> <%=i18n.localize("Document")%></h5>
+                                        <p>&nbsp</p>
+                                        <h4 class="truncate"><a class ="fade-out" class="" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=i18n.localize("API Name")%>: <%=api.name%>"><%=api.name%></a></h4>
+                                        <h5><%=api.version%></h5>
+                                        <p class="truncate" id="document-match"><%=api.provider%></p>
+                                    <%}%>
                                 </div>
                             </div>
-                        </div>                
+                        </div>
         <% }} }%>
 
 </div>

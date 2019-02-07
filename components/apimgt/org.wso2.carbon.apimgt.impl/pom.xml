@@ -322,6 +322,11 @@
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons.collections4.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -424,7 +429,8 @@
                         <Export-Package>
                             !org.apache.commons.codec.*,
                             !org.wso2.carbon.apimgt.impl.dto.xsd;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}",
+                            !org.apache.commons.collections4.*
                         </Export-Package>
                         <Import-Package>
                             !org.wso2.carbon.apimgt.api.model.xsd.*,

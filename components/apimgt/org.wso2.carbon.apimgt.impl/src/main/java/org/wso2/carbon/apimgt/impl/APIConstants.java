@@ -482,6 +482,7 @@ public final class APIConstants {
 
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
     public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
+    public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
     public static final int TOP_TATE_MARGIN = 4;
 
     public static final class Permissions {
@@ -1297,6 +1298,7 @@ public final class APIConstants {
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+    public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1446,7 +1448,7 @@ public final class APIConstants {
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAG_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
-            API_STATUS.toLowerCase() };
+            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
     /**
@@ -1484,6 +1486,21 @@ public final class APIConstants {
     public static final String CORRELATION_LOGGER = "correlation";
     public static final String LOG_ALL_METHODS = "logAllMethods";
     public static final String AM_ACTIVITY_ID = "activityid";
+
+    public static final String PDF_EXTENSION = "pdf";
+    public static final String XLS_EXTENSION = "xls";
+    public static final String XLSX_EXTENSION = "xlsx";
+    public static final String PPT_EXTENSION = "ppt";
+    public static final String PPTX_EXTENSION = "pptx";
+    public static final String DOC_EXTENSION = "doc";
+    public static final String DOCX_EXTENSION = "docx";
+    public static final String XML_DOC_EXTENSION = "xml";
+    public static final String TXT_EXTENSION = "txt";
+    public static final String WSDL_EXTENSION = "wsdl";
+
+    public static final String API_STATE_CHANGE_INDICATOR = "registry.api.state.change.indicator";
+    public static final String DOCUMENT_MEDIA_TYPE_KEY = "application/vnd.wso2-document\\+xml";
+    public static final String DOCUMENT_INDEXER_INDICATOR = "document_indexed";
 
     public static final String KEY_SUFFIX = "_KEY";
 }

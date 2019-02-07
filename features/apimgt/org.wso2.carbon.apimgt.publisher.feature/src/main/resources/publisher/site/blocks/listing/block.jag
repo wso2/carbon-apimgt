@@ -33,6 +33,9 @@ jagg.block("listing", {
         var currentPage = page;
         var start = itemsPerPage*(page-1);
         if (query) {
+            if (query.indexOf(':') == -1) {
+                query = "content:" + query;
+            }
             mod = jagg.module("search");
             result = mod.searchAPIs(null,query,String(start),String(itemsPerPage));
             apis = null;

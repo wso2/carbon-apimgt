@@ -970,16 +970,15 @@ public class APIStoreHostObject extends ScriptableObject {
         return apiArray;
     }
 
-
     public static NativeObject jsFunction_searchPaginatedAPIs(Context cx, Scriptable thisObj, Object[] args,
-                                                              Function funObj) throws ScriptException,
-                                                                              APIManagementException {
+            Function funObj) throws ScriptException, APIManagementException {
 
         if (args == null || args.length < 4) {
             handleException("Invalid number of parameters.");
         }
 
         NativeArray apiArray = new NativeArray(0);
+        NativeArray docArray = new NativeArray(0);
         NativeObject resultObj = new NativeObject();
         Map<String, Object> result = new HashMap<String, Object>();
         Set<API> apiSet = null;
@@ -1008,18 +1007,19 @@ public class APIStoreHostObject extends ScriptableObject {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {
                     if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
-                        if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0]) ||
-                            APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
+                        if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX
+                                .equalsIgnoreCase(searchCriterias[i].split(":")[0])
+                                || APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX
+                                .equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
                             throw new APIManagementException("Invalid query. AND based search is not supported for "
-                                                             + "doc and subcontext prefixes");
+                                    + "doc and subcontext prefixes");
                         }
                     }
                     if (i == 0) {
                         newSearchQuery = APIUtil.getSingleSearchCriteria(searchCriterias[i]);
                     } else {
-                        newSearchQuery =
-                                         newSearchQuery + APIConstants.SEARCH_AND_TAG +
-                                                 APIUtil.getSingleSearchCriteria(searchCriterias[i]);
+                        newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + APIUtil
+                                .getSingleSearchCriteria(searchCriterias[i]);
                     }
                 }
             }
@@ -1029,27 +1029,32 @@ public class APIStoreHostObject extends ScriptableObject {
 
         // Append LC state query criteria if the search is not doc or subcontext
         // based
-        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery) &&
-            !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
+        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery)
+                && !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
             boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
-            String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED};
+            String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
             if (displayAPIsWithMultipleStatus) {
-                statusList = new String[]{APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED};
+                statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED };
             }
 
             // The following condition is used to support API category in store
-            if(null != state){
-                if(state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
-                    statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
-                }else if(state == APIConstants.PUBLISHED ){
-                    statusList = new String[]{APIConstants.PUBLISHED};
-                }else if(state == APIConstants.PROTOTYPED){
-                    statusList = new String[]{APIConstants.PROTOTYPED};
+            if (null != state) {
+                if (state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
+                    statusList = new String[] { APIConstants.PUBLISHED, APIConstants.DEPRECATED };
+                } else if (state == APIConstants.PUBLISHED) {
+                    statusList = new String[] { APIConstants.PUBLISHED };
+                } else if (state == APIConstants.PROTOTYPED) {
+                    statusList = new String[] { APIConstants.PROTOTYPED };
                 }
             }
 
             String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
+            if  (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                for (int i = 0; i<statusList.length; i++) {
+                    statusList[i] = statusList[i].toLowerCase();
+                }
+            }
             lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
 
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
@@ -1070,7 +1075,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                         currentApi.put("name", currentApi, apiIdentifier.getApiName());
                         currentApi.put("provider", currentApi,
-                                       APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                                APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi, apiIdentifier.getVersion());
                         currentApi.put("description", currentApi, api.getDescription());
                         currentApi.put("status", currentApi, api.getStatus());
@@ -1081,7 +1086,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
                         } else {
                             currentApi.put("thumbnailurl", currentApi,
-                                           APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                                    APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
                         }
                         currentApi.put("visibility", currentApi, api.getVisibility());
                         currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
@@ -1098,6 +1103,86 @@ public class APIStoreHostObject extends ScriptableObject {
                     resultObj.put("apis", resultObj, apiArray);
                     resultObj.put("totalLength", resultObj, result.get("length"));
                 }
+            } else if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                ArrayList<Object> compoundResult = (result.get("apis") != null) ?
+                        (ArrayList<Object>) result.get("apis") : null;
+
+                if (compoundResult != null && compoundResult.size() > 0) {
+                    Iterator it = compoundResult.iterator();
+                    int i = 0;
+                    while (it.hasNext()) {
+                        Object apiObject = it.next();
+                        if (apiObject instanceof API) {
+                            NativeObject currentApi = new NativeObject();
+                            API api = (API) apiObject;
+                            APIIdentifier apiIdentifier = api.getId();
+                            currentApi.put("name", currentApi, apiIdentifier.getApiName());
+                            currentApi.put("provider", currentApi,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            currentApi.put("version", currentApi, apiIdentifier.getVersion());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("status", currentApi, api.getStatus());
+                            currentApi.put("rates", currentApi, api.getRating());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("endpoint", currentApi, api.getUrl());
+                            if (api.getThumbnailUrl() == null) {
+                                currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
+                            } else {
+                                currentApi.put("thumbnailurl", currentApi,
+                                        APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                            }
+                            currentApi.put("visibility", currentApi, api.getVisibility());
+                            currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("isAdvertiseOnly", currentApi, api.isAdvertiseOnly());
+                            currentApi.put("apiOwner", currentApi, api.getApiOwner());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
+                            currentApi.put("resultType", currentApi, "API");
+
+                            apiArray.put(i, apiArray, currentApi);
+                            i++;
+                        } else if (apiObject instanceof Map.Entry) {
+                            NativeObject currentApi = new NativeObject();
+                            Map.Entry<Documentation, API> docEntry = (Map.Entry<Documentation, API>) apiObject;
+
+                            Documentation doc = docEntry.getKey();
+                            API api = docEntry.getValue();
+                            APIIdentifier apiIdentifier = api.getId();
+
+                            currentApi.put("name", currentApi, apiIdentifier.getApiName());
+                            currentApi.put("provider", currentApi,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            currentApi.put("version", currentApi, apiIdentifier.getVersion());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("status", currentApi, api.getStatus());
+                            currentApi.put("rates", currentApi, api.getRating());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("endpoint", currentApi, api.getUrl());
+                            if (api.getThumbnailUrl() == null) {
+                                currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
+                            } else {
+                                currentApi.put("thumbnailurl", currentApi,
+                                        APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                            }
+                            currentApi.put("visibility", currentApi, api.getVisibility());
+                            currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("docName", currentApi, doc.getName());
+                            currentApi.put("docSummary", currentApi, doc.getSummary());
+                            currentApi.put("docSourceURL", currentApi, doc.getSourceUrl());
+                            currentApi.put("docSourceType", currentApi, doc.getSourceType().name());
+                            currentApi.put("docFilePath", currentApi, doc.getFilePath());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
+                            currentApi.put("resultType", currentApi, "Document");
+
+                            docArray.put(i, apiArray, currentApi);
+                            i++;
+                        }
+                    }
+                }
+                resultObj.put("apis", resultObj, apiArray);
+                resultObj.put("totalLength", resultObj, result.get("length"));
+                resultObj.put("isMore", resultObj, result.get("isMore"));
             } else {
                 apiSet = (Set<API>) result.get("apis");
                 if (apiSet != null) {

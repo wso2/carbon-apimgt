@@ -121,8 +121,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3884,6 +3884,65 @@ public class APIProviderHostObject extends ScriptableObject {
                     resultObj.put("totalLength", resultObj, result.get("length"));
                 }
 
+            } else if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                ArrayList<Object> compoundResult = (result.get("apis") != null) ?
+                        (ArrayList<Object>) result.get("apis") : null;
+                NativeArray apiArray = new NativeArray(0);
+
+                if (compoundResult != null && compoundResult.size() > 0) {
+                    Iterator it = compoundResult.iterator();
+                    int i = 0;
+                    while (it.hasNext()) {
+                        Object apiObject = it.next();
+                        if (apiObject instanceof API) {
+                            API api = (API) apiObject;
+                            APIIdentifier apiIdentifier = api.getId();
+                            NativeObject row = new NativeObject();
+                            row.put("name", row, apiIdentifier.getApiName());
+                            row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            row.put("version", row, apiIdentifier.getVersion());
+                            row.put("status", row, checkValue(api.getStatus()));
+                            row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
+                            row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
+                            if (providerName != null) {
+                                row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
+                            }
+                            row.put("resultType", row, "API");
+                            apiArray.put(i, apiArray, row);
+                            i++;
+                        } else if (apiObject instanceof Map.Entry) {
+                            Map.Entry<Documentation, API> docEntry = (Map.Entry<Documentation, API>) apiObject;
+                            NativeObject row = new NativeObject();
+                            Documentation doc = docEntry.getKey();
+                            API api = docEntry.getValue();
+                            APIIdentifier apiIdentifier = api.getId();
+
+                            row.put("name", row, apiIdentifier.getApiName());
+                            row.put("provider", row,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            row.put("version", row, apiIdentifier.getVersion());
+                            row.put("status", row, checkValue(api.getStatus()));
+                            row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
+                            row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
+                            if (providerName != null) {
+                                row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
+                            }
+
+                            row.put("docName", row, doc.getName());
+                            row.put("docSummary", row, doc.getSummary());
+                            row.put("docSourceURL", row, doc.getSourceUrl());
+                            row.put("docFilePath", row, doc.getFilePath());
+                            row.put("docSourceType", row, doc.getSourceType().name());
+                            row.put("resultType", row, "Document");
+                            apiArray.put(i, apiArray, row);
+                            i++;
+                        }
+                    }
+                }
+
+                resultObj.put("apis", resultObj, apiArray);
+                resultObj.put("totalLength", resultObj, result.get("length"));
+                resultObj.put("isMore", resultObj, result.get("isMore"));
             } else {
                 Set<API> apiSet = (Set<API>) result.get("apis");
                 //List<API> searchedList = apiProvider.searchAPIs(searchTerm, searchType, providerName);
