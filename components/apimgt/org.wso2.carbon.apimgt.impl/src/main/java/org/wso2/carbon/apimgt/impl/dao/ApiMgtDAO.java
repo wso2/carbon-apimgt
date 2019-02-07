@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
@@ -8042,11 +8041,9 @@ public class ApiMgtDAO {
                         //Adding scope bindings
                         List<String> roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
                         for (String role : roleList) {
-                            if (StringUtils.isNotBlank(role)) {
-                                ps3.setInt(1, uriTemplate.getScope().getId());
-                                ps3.setString(2, role);
-                                ps3.addBatch();
-                            }
+                            ps3.setInt(1, uriTemplate.getScope().getId());
+                            ps3.setString(2, role);
+                            ps3.addBatch();
                         }
                         ps3.executeBatch();
 
@@ -8075,11 +8072,9 @@ public class ApiMgtDAO {
                         //Adding scope bindings
                         List<String> roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
                         for (String role : roleList) {
-                            if (StringUtils.isNotBlank(role)) {
-                                ps3.setInt(1, scope.getId());
-                                ps3.setString(2, role);
-                                ps3.addBatch();
-                            }
+                            ps3.setInt(1, scope.getId());
+                            ps3.setString(2, role);
+                            ps3.addBatch();
                         }
                         ps3.executeBatch();
                         ps2.setInt(1, apiID);
