@@ -2967,9 +2967,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static NativeArray jsFunction_getLightWeightAPISubscriptions(Context cx, Scriptable thisObj,
-            Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
-
+            Object[] args, Function funObj) throws ScriptException, APIManagementException {
         NativeArray myn = new NativeArray(0);
         if (args != null && 5 <= args.length) {
             String providerName = (String) args[0];
@@ -2990,7 +2988,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("application", row, api.getApplication().getName());
                     row.put("applicationId", row, api.getApplication().getId());
 
-                    if(APIUtil.isMultiGroupAppSharingEnabled()){
+                    if (APIUtil.isMultiGroupAppSharingEnabled())  {
                         row.put("owner", row, api.getApplication().getOwner());
                     }
 
@@ -3012,13 +3010,12 @@ public class APIStoreHostObject extends ScriptableObject {
             int i = 0;
             for(APIKey key : keys){
                 NativeObject row = new NativeObject();
-                row.put(key.getType()+APIConstants.KEY_SUFFIX, row, key.getAccessToken());
+                row.put(key.getType() + APIConstants.KEY_SUFFIX, row, key.getAccessToken());
                 myn.put(i++, myn, row);
             }
         }
         return myn;
     }
-
 
     private static APIKey getKey(SubscribedAPI api, String keyType) {
         List<APIKey> apiKeys = api.getKeys();
@@ -3903,9 +3900,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static NativeArray jsFunction_getLightWeightApplications(Context cx, Scriptable thisObj, Object[] args,
-            Function funObj)
-            throws ScriptException, APIManagementException {
-
+            Function funObj) throws ScriptException, APIManagementException {
         NativeArray myn = new NativeArray(0);
         if (args != null && isStringArray(args)) {
             String username = args[0].toString();
