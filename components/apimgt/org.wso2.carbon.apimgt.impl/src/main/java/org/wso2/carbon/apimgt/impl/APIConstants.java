@@ -1379,8 +1379,10 @@ public final class APIConstants {
         public static final String VERSION = "version";
         public static final String CONTEXT = "context";
         public static final String PROVIDER = "provider";
+        public static final String OWNER = "owner";
         public static final String TIER = "tier";
         public static final String CALLBACK = "callbackURL";
+        public static final String GROUPS = "groups";
         public static final String STATUS = "status";
         public static final String API_NAME = "api_name";
         public static final String APPLICATION_NAME = "application_name";
