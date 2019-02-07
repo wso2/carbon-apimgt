@@ -72,10 +72,10 @@ jagg.block("api/api-info", {
 
         if (user) {
             username = user.username;
-            result = jagg.module("application").getApplications(username);
+            result = jagg.module("application").getLightWeightApplications(username);
             applications = result.applications;
 
-            result = jagg.module("subscription").getAPISubscriptions(api, username);
+            result = jagg.module("subscription").getLightWeightAPISubscriptions(api, username);
             subscriptions = result.subscriptions;
             if (applications != null) {
                 lenI = applications.length;

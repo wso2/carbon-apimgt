@@ -321,7 +321,34 @@ include("/jagg/jagg.jag");
         }
         print(obj);
 
-    } else {
+    } else if(action == "getApplicationKeysByAppId") {
+          if (!user) {
+              if(!ssoEnabled){
+                  print({
+                      error:true,
+                      message:msg.error.loginRequired(action)
+                  });
+              }
+              return;
+          }
+
+          var applicationId = request.getParameter("applicationId");
+          mod = jagg.module("subscription");
+          result = mod.getApplicationKeysOfApplication(applicationId);
+          if (result.error) {
+              obj = {
+                  error:result.error,
+                  message:result.message
+              };
+          } else {
+              obj = {
+                  error:false,
+                  apikeys:result.apikeys
+              }
+          }
+          print(obj);
+    }
+    else {
         print({
             error:true,
             message:msg.error.invalidAction(action)
