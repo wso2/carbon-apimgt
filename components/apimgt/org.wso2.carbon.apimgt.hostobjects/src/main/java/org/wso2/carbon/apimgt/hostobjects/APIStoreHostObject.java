@@ -3936,7 +3936,6 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-
     /**
      * This method helps to get an APIM application by given name.
      * @param cx      will be used to store information about the executing of the script.
