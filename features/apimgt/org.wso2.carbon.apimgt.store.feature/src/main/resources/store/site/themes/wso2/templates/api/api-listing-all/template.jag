@@ -184,7 +184,7 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                                 docPath = jagg.url("/site/themes/wso2/templates/api/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + api.docFilePath);
                                 thumbTooltip = "Download Document";
                             } else {
-                                docPath = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + "?docName=" + api.docName + "&name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
+                                docPath = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + "?docName=" + api.docName + "&name=" + name+ "&version=" + version + urlPrefix;
                                 thumbTooltip = "View Document";
                             }
                             if(tag != null){
