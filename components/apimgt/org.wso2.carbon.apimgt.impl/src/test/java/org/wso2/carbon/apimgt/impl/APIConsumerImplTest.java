@@ -873,6 +873,7 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Application application = Mockito.mock(Application.class);
         Mockito.when(application.getName()).thenReturn("app");
+        PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
                 thenReturn(false);
         Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
