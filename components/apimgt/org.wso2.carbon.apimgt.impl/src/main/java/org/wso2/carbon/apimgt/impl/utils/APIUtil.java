@@ -4296,6 +4296,14 @@ public final class APIUtil {
         return Boolean.parseBoolean(displayMultiVersions);
     }
 
+    public static boolean updateNullThrottlingTierAtStartup() {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String isNullThrottlingTierUpdateEnabled = configuration
+                .getFirstProperty("StartupConfiguration.UpdateNullThrottlingTier");
+        return isNullThrottlingTierUpdateEnabled == null || Boolean.parseBoolean(isNullThrottlingTierUpdateEnabled);
+    }
+
     public static Set<APIStore> getExternalAPIStores(Set<APIStore> inputStores, int tenantId)
             throws APIManagementException {
         SortedSet<APIStore> apiStores = new TreeSet<APIStore>(new APIStoreNameComparator());
