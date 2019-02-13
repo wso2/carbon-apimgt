@@ -152,12 +152,10 @@ public class APIUsageFileUploadTask implements Task {
             HttpEntity entity = mBuilder.build();
             httppost.setHeader(MicroGatewayAPIUsageConstants.FILE_NAME_HEADER, fileName);
 
-            /*APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
             String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-            char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();*/
-            String username = "admin";
-            char[] password = "admin".toCharArray();
+            char[] password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD).toCharArray();
 
             String authHeaderValue = TokenUtil.getBasicAuthHeaderValue(username, password);
             MicroGatewayCommonUtil.cleanPasswordCharArray(password);
