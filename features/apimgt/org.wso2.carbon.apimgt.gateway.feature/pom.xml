@@ -199,6 +199,7 @@
                                 <bundleDef>org.apache.commons:commons-pool2:${apache.commons.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.re2j:re2j:${re2j.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.jayway.jsonpath:json-path:${com.jayway.jsonpath.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.commons-text:commons-text:${org.wso2.orbit.commons-text.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</importBundleDef>

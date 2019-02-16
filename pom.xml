@@ -1463,6 +1463,11 @@
                 <artifactId>json-path</artifactId>
                 <version>${com.jayway.jsonpath.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.commons-text</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${org.wso2.orbit.commons-text.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1672,6 +1677,7 @@
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
         <aspectj.version>1.8.7</aspectj.version>
         <com.jayway.jsonpath.version>2.4.0.wso2v2</com.jayway.jsonpath.version>
+        <org.wso2.orbit.commons-text.version>1.6.wso2v1</org.wso2.orbit.commons-text.version>
     </properties>
 </project>
 
