@@ -34,6 +34,8 @@ public class SOAPToRESTConstants {
     public static final String MAX_OCCURS_ATTRIBUTE = "maxOccurs";
     public static final String UNBOUNDED = "unbounded";
     public static final String METHOD = "method";
+    public static final String RESOURCE_ID = "id";
+    public static final String RESOURCE_PATH = "path";
     public static final String PARAM_TYPE = "type";
     public static final String CONTENT = "content";
     public static final String EMPTY_STRING = "";
@@ -41,6 +43,7 @@ public class SOAPToRESTConstants {
     public static final String SOAP_VERSION_12 = "1.2";
     public static final String SOAP11_NAMESPACE = "http://schemas.xmlsoap.org/soap/envelope/";
     public static final String SOAP12_NAMSPACE = "http://www.w3.org/2003/05/soap-envelope";
+    public static final String TEXT_XML = "text/xml";
 
     public final class Swagger {
         public static final String DEFINITIONS = "definitions";
@@ -79,8 +82,8 @@ public class SOAPToRESTConstants {
         public static final String INDENT_PROPERTY = "{http://xml.apache.org/xslt}indent-amount";
         public static final String INDENT_VALUE = "2";
 
-        public static final String SOAP_TO_REST_IN_RESOURCE = "/soap_to_rest/in";
-        public static final String SOAP_TO_REST_OUT_RESOURCE = "/soap_to_rest/out";
+        public static final String SOAP_TO_REST_IN_RESOURCE = "soap_to_rest/in";
+        public static final String SOAP_TO_REST_OUT_RESOURCE = "soap_to_rest/out";
         public static final String XML_FILE_EXTENSION = ".xml";
         public static final String XML_FILE_RESOURCE_PREFIX = "\\.xml";
         public static final String RESOURCE_METHOD_SEPERATOR = "_";

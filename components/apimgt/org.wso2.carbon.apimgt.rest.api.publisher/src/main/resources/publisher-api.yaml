@@ -571,6 +571,238 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+  ################################################################
+  # The resource policy definitions of "Individual API" resource APIs
+  ################################################################
+
+  /apis/{apiId}/resource-policies:
+    #-----------------------------------------------------
+    # Retrieve the resource policy definition
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/resource-policies"
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/resource-policies
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n    \"list\": [\r\n        {\r\n            \"id\": \"1990b54c-6685-4058-a08c-8fd5353056a6\",\r\n            \"httpVerb\": \"get\",\r\n            \"resourcePath\": \"checkPhoneNumbers\",\r\n            \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"\r\n        }\r\n    ],\r\n    \"count\": 1\r\n}"
+      summary: Get the resource policy (inflow/outflow) definitions
+      description: |
+        This operation can be used to retrieve conversion policy resource definitions of an API.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - in: query
+        name: resourcePath
+        description: Resource path of the resource policy definition
+        type: string
+        required: false
+      - in: query
+        name: verb
+        description: HTTP verb of the resource path of the resource policy definition
+        type: string
+        required: false
+      - in: query
+        name: sequenceType
+        description: sequence type of the resource policy resource definition
+        type: string
+        required: true
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
+      tags:
+      - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            List of resource policy definitions of the API is returned
+          schema:
+            $ref: '#/definitions/ResourcePolicyList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  ################################################################
+  # The "Individual Resource Policy" APIs
+  ################################################################
+
+  /apis/{apiId}/resource-policies/{resourceId}:
+    #--------------------------------------------------------------------------
+    # Retrieve the resource policy definition of a certain resource given by id
+    #---------------------------------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n            \"id\": \"6c735e1d-8041-4f1e-b246-d28edaa650b0\",\r\n            \"httpVerb\": \"post\",\r\n            \"resourcePath\": \"checkPhoneNumbers\",\r\n            \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"\r\n}"
+      summary: Get the resource policy (inflow/outflow) definition for a given resource identifier.
+      description: |
+        This operation can be used to retrieve conversion policy resource definitions of an API given the resource identifier.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/resourceId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/If-Modified-Since'
+      tags:
+      - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested resource policy definition of the API is returned for the given resource identifier.
+          schema:
+            $ref: '#/definitions/ResourcePolicyInfo'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+    #------------------------------------------------------------------------
+    # Update the resource policy definition for the given resource identifier
+    #------------------------------------------------------------------------
+    put:
+      consumes:
+      - application/json
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\""
+      x-wso2-request: |
+        PUT https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5
+        Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013
+        Content-Length: 477
+        Content-Type: application/json; boundary=------------------------4f51e636c0003d99
+        --------------------------4f51e636c0003d99
+        { "content": "<header description=\"SOAPAction\" name=\"SOAPAction\" scope=\"transport\" value=\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\"/>"}
+        --------------------------4f51e636c0003d99--
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n            \"id\": \"6c735e1d-8041-4f1e-b246-d28edaa650b0\",\r\n            \"httpVerb\": \"post\",\r\n            \"resourcePath\": \"checkPhoneNumbers\",\r\n            \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"\r\n}"
+      summary: Update the resource policy(inflow/outflow) definition for the given resource identifier
+      description: |
+        This operation can be used to update the resource policy(inflow/outflow) definition for the given resource identifier of an existing API. resource policy definition to be updated is passed as a body parameter `content`.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/resourceId'
+      - in: body
+        name: body
+        description: Content of the resource policy definition that needs to be updated
+        schema:
+          $ref: '#/definitions/ResourcePolicyInfo'
+        required: true
+      - $ref: '#/parameters/Content-Type'
+      - $ref: '#/parameters/If-Match'
+      - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+      - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated the resource policy definition
+          schema:
+            $ref: '#/definitions/ResourcePolicyInfo'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
 
   ################################################################
   # The thumbnail resource of "Individual API" resource APIs
@@ -3459,7 +3691,15 @@ parameters:
     required: true
     type: string
 
-
+  # Resource policy identifier
+  # Specified as part of the path expression
+  resourceId:
+    name: resourceId
+    in: path
+    description: |
+      registry resource Id
+    required: true
+    type: string
 
   # Subscription Identifier
   # Specified as part of the query string
@@ -4801,3 +5041,42 @@ definitions:
           apiProvider:
             type: string
             example: admin
+  #-----------------------------------------------------
+  # The Resource policy List resource
+  #-----------------------------------------------------
+  ResourcePolicyList:
+    title: Resource policy List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ResourcePolicyInfo'
+      count:
+        type: integer
+        description: |
+          Number of policy resources returned.
+        example: 1
+
+  #-----------------------------------------------------
+  # The Resource Policy Info resource
+  #-----------------------------------------------------
+  ResourcePolicyInfo:
+    title: Resource policy Info object with conversion policy resource details.
+    properties:
+      id:
+        type: string
+        description: |
+          UUID of the resource policy registry artifact
+        example: 01234567-0123-0123-0123-012345678901
+      httpVerb:
+        type: string
+        description: HTTP verb used for the resource path
+        example: get
+      resourcePath:
+        type: string
+        description: A string that represents the resource path of the api for the related resource policy
+        example: CalculatorAPI
+      content:
+        type: string
+        description: The resource policy content
+        example: "<header description=\"SOAPAction\" name=\"SOAPAction\" scope=\"transport\" value=\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\"/>"
