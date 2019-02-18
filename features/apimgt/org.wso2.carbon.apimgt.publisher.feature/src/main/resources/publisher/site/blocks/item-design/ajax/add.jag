@@ -403,12 +403,9 @@ if(jagg.isCSRFTokenValid())
                 if(swag.paths["/*"]) {
                     isSoapToRestApi = false;
                 }
-                if(isSoapToRestApi) {
-                    mappingJson = session.get("mappingJson");
-                    if (mappingJson) {
-                        var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-                        sequenceGenerator.generateSequencesFromSwagger(apiData.swagger,stringify(apiData));
-                    }
+                if (isSoapToRestApi) {
+                    var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
+                    sequenceGenerator.generateSequencesFromSwagger(apiData.swagger, stringify(apiData));
                 }
             }
             if (result.error == true) {
