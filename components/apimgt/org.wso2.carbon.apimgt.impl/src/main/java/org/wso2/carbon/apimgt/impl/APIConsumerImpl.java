@@ -4904,7 +4904,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         }
                         updatedWSDLContent = apimwsdlReader.getWSDL(definition);
                     } catch (APIManagementException e) {
-                        handleException("Error occurred while processing the wsdl for api: " + api.getId());
+                        handleException("Error occurred while processing the wsdl for api: [" + api.getId() + "]", e);
                     }
                 } else {
                     handleException("Error while getting API object for wsdl artifact");
