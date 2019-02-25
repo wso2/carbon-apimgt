@@ -353,7 +353,7 @@ if (<%=isEnabledTutorialForThisTenant%>) {
             <!-- Pagination Start -->
 
             <%  if(numberOfPages > 1) { %>
-                <div class="col-sm-12">
+                <div class="row paginationFix">
                 <ul class="pagination ">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a title="pagination"
