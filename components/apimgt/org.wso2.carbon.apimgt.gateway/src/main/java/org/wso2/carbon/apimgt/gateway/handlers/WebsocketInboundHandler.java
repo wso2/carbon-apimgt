@@ -52,6 +52,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -88,7 +89,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 synchronized (this) {
                     if (usageDataPublisher == null) {
                         try {
-                            log.debug("Instantiating Web Socket Data Publisher");
+                            if (log.isDebugEnabled()) {
+                                log.debug("Instantiating Web Socket Data Publisher");
+                            }
                             usageDataPublisher =
                                     (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
                             usageDataPublisher.init();
@@ -136,6 +139,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
             uri = req.getUri();
+            if (log.isDebugEnabled()) {
+                log.debug("Websocket-API URI invoked: " + uri);
+            }
             URI uriTemp = new URI(uri);
             apiContextUri = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(),
                      null, uriTemp.getFragment()).toString();
@@ -155,6 +161,47 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             useragent = useragent != null ? useragent : "-";
             headers.add(HttpHeaders.AUTHORIZATION, authorization);
             headers.add(HttpHeaders.USER_AGENT, useragent);
+
+            /* The ignoreUriAttributes logic was introduced to cater the users who needs to pass a unique URI to the
+             * backend for each request. Since the APIM uses the websocket URI to identify the api, the user can define
+             * the number of attributes that needs to be ignored from the end of the URI for identifying the relevant
+             * API. These ignored attributes will be added to the backend URI later.
+             */
+
+            String removedAttributes;
+            // Attempt to derive the ignoreUriAttributes value from the headers
+            String ignoreUriAttributes =  ((FullHttpRequest) msg).headers().get("ignoreUriAttributes");
+            // If the ignoreUriAttributes value is not defined in the headers, the system properties are checked
+            if(StringUtils.isEmpty(ignoreUriAttributes)){
+                ignoreUriAttributes = System.getProperty("ignoreUriAttributes");
+            }
+            if(StringUtils.isNotEmpty(ignoreUriAttributes)){
+                int ignoreUriAttributesInt = Integer.parseInt(ignoreUriAttributes);
+                if (log.isDebugEnabled()) {
+                    log.debug("Removing " + ignoreUriAttributesInt + " attributes from the websocket URI");
+                }
+                String[] uriSplit = uri.split("/");
+                uriSplit = Arrays.copyOf(uriSplit, uriSplit.length - ignoreUriAttributesInt);
+                StringBuilder sb = new StringBuilder();
+                for(String element : uriSplit) {
+                    sb.append(element);
+                    sb.append("/");
+                }
+                uri = sb.toString();
+                // remove the final "/" added to the string builder
+                if (StringUtils.lastIndexOf(uri,"/") == (uri.length() -1)) {
+                    uri = uri.substring(0, uri.length() - 1);
+                }
+                // add the removed attributes as a header, so that it can be identified and appended to the backend URI
+                removedAttributes = req.getUri().replace(uri, "");
+                apiContextUri = uri;
+                ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_APPENDED_PATH, removedAttributes);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("URI used to identify the API: " + apiContextUri);
+                    log.debug("Ignored attributes of the URI: " + removedAttributes);
+                }
+            }
 
             if (validateOAuthHeader(req)) {
                 if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
