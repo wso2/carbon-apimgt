@@ -3534,7 +3534,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 fileHostObject = (FileHostObject) args[8];
             } else if (Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+            } else if (Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
             } else {
+
                 throw new APIManagementException("Invalid Source Type.");
             }
 
@@ -4293,6 +4296,8 @@ public class APIProviderHostObject extends ScriptableObject {
             } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.FILE);
                 fileHostObject = (FileHostObject) args[8];
+            } else if (Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
             } else {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
             }

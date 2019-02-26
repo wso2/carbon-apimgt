@@ -1436,7 +1436,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
                         .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
                         .build();
-            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
                 String content = apiProvider.getDocumentationContent(apiIdentifier, documentation.getName());
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
@@ -1505,6 +1505,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE", log);
+                }
+                apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not MARKDOWN", log);
                 }
                 apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
             } else {

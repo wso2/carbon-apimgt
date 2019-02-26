@@ -6,16 +6,18 @@
 </h4> <code>GET https://apis.wso2.com/api/am/store/v0.14/apis/{apiId}/documents/{documentId}/content</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to retrive the content of an API&#39;s document.
+            <p class="marked">This operation can be used to retrieve the content of an API&#39;s document.
 
 The document can be of 3 types. In each cases responses are different.
 
-1. **Inline type**:
+1. **Inline HTML type**:
    The content of the document will be retrieved in &#x60;text/plain&#x60; content type
-2. **FILE type**:
+2. **Markdown type**:
+   The content of the document will be retrieved in &#x60;text/plain&#x60; content type
+3. **FILE type**:
    The file will be downloaded with the related content type (eg. &#x60;application/pdf&#x60;)
-3. **URL type**:
-    The client will recieve the URL of the document as the Location header with the response with - &#x60;303 See Other&#x60;
+4. **URL type**:
+    The client will receive the URL of the document as the Location header with the response with - &#x60;303 See Other&#x60;
 
 &#x60;X-WSO2-Tenant&#x60; header can be used to retrive the content of a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
 

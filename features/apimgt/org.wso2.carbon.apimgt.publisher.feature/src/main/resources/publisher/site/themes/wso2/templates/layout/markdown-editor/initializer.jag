@@ -1,0 +1,8 @@
+<%
+jagg.initializer("layout/markdown-editor", {
+
+    preInitialize:function () {
+
+    }
+});
+%>

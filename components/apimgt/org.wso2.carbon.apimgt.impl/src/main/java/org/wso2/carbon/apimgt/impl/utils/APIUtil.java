@@ -1330,6 +1330,8 @@ public final class APIUtil {
             } else if (Documentation.DocumentSourceType.FILE.name().equals(artifactAttribute)) {
                 docSourceType = Documentation.DocumentSourceType.FILE;
                 documentation.setFilePath(prependWebContextRoot(artifact.getAttribute(APIConstants.DOC_FILE_PATH)));
+            } else if (Documentation.DocumentSourceType.MARKDOWN.name().equals(artifactAttribute)) {
+                docSourceType = Documentation.DocumentSourceType.MARKDOWN;
             }
             documentation.setSourceType(docSourceType);
             if (documentation.getType() == DocumentationType.OTHER) {
@@ -1391,7 +1393,9 @@ public final class APIUtil {
             Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
             String artifactAttribute = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE);
 
-            if (artifactAttribute.equals(Documentation.DocumentSourceType.URL.name())) {
+            if (artifactAttribute.equals(Documentation.DocumentSourceType.MARKDOWN.name())) {
+                docSourceType = Documentation.DocumentSourceType.MARKDOWN;
+            } else if (artifactAttribute.equals(Documentation.DocumentSourceType.URL.name())) {
                 docSourceType = Documentation.DocumentSourceType.URL;
             } else if (artifactAttribute.equals(Documentation.DocumentSourceType.FILE.name())) {
                 docSourceType = Documentation.DocumentSourceType.FILE;
@@ -1412,7 +1416,7 @@ public final class APIUtil {
             }
 
         } catch (GovernanceException e) {
-            throw new APIManagementException("Failed to get documentation from artifact", e);
+            throw new APIManagementException("Failed to get documentation from artifact: " + e);
         }
         return documentation;
     }
@@ -1603,6 +1607,9 @@ public final class APIUtil {
             switch (sourceType) {
                 case INLINE:
                     sourceType = Documentation.DocumentSourceType.INLINE;
+                    break;
+                case MARKDOWN:
+                    sourceType = Documentation.DocumentSourceType.MARKDOWN;
                     break;
                 case URL:
                     sourceType = Documentation.DocumentSourceType.URL;
