@@ -22,10 +22,13 @@ function loadDefaultMarkdownContent(provider,apiName, version, docName) {
                 var docName = json.doc.provider.docName;
                 var docContent = json.doc.provider.content;
 
-
                 $('#apiDeatils').empty().html('<p><h1> ' + docName + '</h1></p>');
                 if (docContent != null) {
                     $('#editor').keyup(function () {
+                        var content = $('#editor').val();
+                        var startPattern = /<script.*?>/g;
+                        var endPattern = /<\/script>/g;
+                        content = content.replace(startPattern, "&lt;script&gt;").replace(endPattern, "&lt;\/script&gt;");
                         showdown.setOption('strikethrough', true);
                         showdown.setOption('tables', true);
                         showdown.setOption('smoothLivePreview', true);
@@ -33,11 +36,13 @@ function loadDefaultMarkdownContent(provider,apiName, version, docName) {
                         showdown.setOption('openLinksInNewWindow', true);
                         showdown.setOption('simpleLineBreaks', true);
                         converter = converter ? converter : new showdown.Converter();
-                        var html = converter.makeHtml($('#editor').val());
+                        var html = converter.makeHtml(content);
 
                         $('#preview').empty().append(html);
                     });
-
+                    var startPattern = /<script.*?>/g;
+                    var endPattern = /<\/script>/g;
+                    docContent = docContent.replace(startPattern, "&lt;script&gt;").replace(endPattern, "&lt;\/script&gt;");
 
                     showdown.setOption('strikethrough', true);
                     showdown.setOption('tables', true);
@@ -62,7 +67,7 @@ function loadDefaultMarkdownContent(provider,apiName, version, docName) {
 
 function saveContent(provider, apiName, apiVersion, docName, mode) {
 
-    var contentDoc =  document.getElementById("editor").value;
+    var contentDoc =  $('#editor').val();
     //remove extra white spaces
     contentDoc = contentDoc.replace(/(^\s*)|(\s*$)/gi,"");
     contentDoc = contentDoc.replace(/[ ]{2,}/gi," ");
