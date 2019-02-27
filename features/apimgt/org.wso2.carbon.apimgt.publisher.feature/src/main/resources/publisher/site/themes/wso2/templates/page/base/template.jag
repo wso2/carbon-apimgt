@@ -74,7 +74,7 @@ var user = jagg.getUser();
 			<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>" title="<%=i18n.localize("apiPublisherHomePage")%>"
 				onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>',e:event})" > <img
 				src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>"
-				alt="<%=i18n.localize("WSO2 API Publisher Home")%>" class="logo"><h1><%=i18n.localize("API Publisher")%></h1>
+				alt="<%=i18n.localize("WSO2 API Publisher Home")%>" class="logo"><h1 id="heading1"><%=i18n.localize("API Publisher")%></h1>
 			</a>
 		</div>
 		<%if(user) { %>

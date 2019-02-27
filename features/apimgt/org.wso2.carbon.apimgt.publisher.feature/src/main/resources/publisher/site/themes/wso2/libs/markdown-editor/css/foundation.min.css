@@ -51,6 +51,42 @@ meta.foundation-data-attribute-namespace {
     font-family: false
 }
 
+.footer {
+    position: fixed !important;
+}
+
+.footer, .breadcrumb-wrapper {
+    font-size: 14px !important;
+    font-weight: 300 !important;
+}
+
+#heading1 {
+    color: #fff !important;
+    font-family: "Roboto", Arial, Helvetica, sans-serif !important;
+}
+
+.breadcrumb-wrapper {
+    font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif !important;
+}
+
+.breadcrumb {
+    font-size: 14px !important;
+    min-height: 30px !important;
+    font-weight: 300 !important;
+    font-family: "Roboto", Arial, Helvetica, sans-serif !important;
+    line-height: 1.42857 !important;
+}
+
+#apimFooter {
+    line-height: 40px !important;
+    color: #cbcbcb !important;
+    font-weight: 300 !important;
+    font-family: "Roboto", Arial, Helvetica, sans-serif !important;
+    font-size: 14px !important;
+    line-height: 40px !important;
+    margin-bottom: 0 !important;
+}
+
 html, body {
     height: 100%
 }
@@ -79,7 +115,8 @@ body {
     line-height: 1.5;
     margin: 0;
     padding: 0;
-    position: relative
+    position: relative;
+    overflow: auto;
 }
 
 a:hover {
@@ -144,9 +181,9 @@ select {
 }
 
 /*.row {*/
-    /*margin: 0 auto;*/
-    /*max-width: 62.5rem;*/
-    /*width: 100%*/
+/*margin: 0 auto;*/
+/*max-width: 62.5rem;*/
+/*width: 100%*/
 /*}*/
 
 .row:before, .row:after {
@@ -5136,7 +5173,7 @@ h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
 }
 
 h1 {
-    font-size: 2.125rem
+    font-size: 36px;
 }
 
 h2 {
