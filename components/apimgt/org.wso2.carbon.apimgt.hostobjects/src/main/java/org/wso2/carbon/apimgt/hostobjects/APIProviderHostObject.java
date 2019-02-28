@@ -3537,7 +3537,6 @@ public class APIProviderHostObject extends ScriptableObject {
             } else if (Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
             } else {
-
                 throw new APIManagementException("Invalid Source Type.");
             }
 

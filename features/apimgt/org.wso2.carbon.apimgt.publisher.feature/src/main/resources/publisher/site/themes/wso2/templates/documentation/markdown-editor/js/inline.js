@@ -1,7 +1,6 @@
 var converter = null;
 
 $(document).ready(function() {
-
 });
 
 $(document).unbind('keypress');
@@ -9,7 +8,6 @@ $(document).unbind('keypress');
 function loadDefaultMarkdownContent(provider,apiName, version, docName) {
 
     mdEditor();
-
     jagg.post("/site/blocks/documentation/ajax/docs.jag", {
             action: "getInlineContent",
             provider: provider,
@@ -21,7 +19,6 @@ function loadDefaultMarkdownContent(provider,apiName, version, docName) {
             if (!json.error) {
                 var docName = json.doc.provider.docName;
                 var docContent = json.doc.provider.content;
-
                 $('#apiDeatils').empty().html('<p><h1> ' + docName + '</h1></p>');
                 if (docContent != null) {
                     $('#editor').keyup(function () {
@@ -37,7 +34,6 @@ function loadDefaultMarkdownContent(provider,apiName, version, docName) {
                         showdown.setOption('simpleLineBreaks', true);
                         converter = converter ? converter : new showdown.Converter();
                         var html = converter.makeHtml(content);
-
                         $('#preview').empty().append(html);
                     });
                     var startPattern = /<script.*?>/g;
@@ -53,10 +49,8 @@ function loadDefaultMarkdownContent(provider,apiName, version, docName) {
 
                     converter = converter ? converter : new showdown.Converter();
                     var html = converter.makeHtml(docContent);
-
                     $('#editor').val(docContent);
                     $('#preview').empty().append(html);
-
                 }
             } else {
                 $('#inlineError').show('fast');
@@ -71,8 +65,6 @@ function saveContent(provider, apiName, apiVersion, docName, mode) {
     //remove extra white spaces
     contentDoc = contentDoc.replace(/(^\s*)|(\s*$)/gi,"");
     contentDoc = contentDoc.replace(/[ ]{2,}/gi," ");
-    //remove extra line breaks
-    //contentDoc = contentDoc.replace(/[\r\n]+/g, '\n');
 
     if (docName == "Swagger API Definition") {
         /* Remove html tags */

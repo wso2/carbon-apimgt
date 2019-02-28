@@ -1227,7 +1227,6 @@ public abstract class AbstractAPIManager implements APIManager {
                         } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
                             //do nothing. Permission not allowed to access the doc.
                         }
-
                     } else {
                         doc.setLastUpdated(docLastModifiedDate);
                     }

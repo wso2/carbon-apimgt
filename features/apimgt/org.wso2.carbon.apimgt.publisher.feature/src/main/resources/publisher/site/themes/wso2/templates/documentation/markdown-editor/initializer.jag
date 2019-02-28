@@ -4,7 +4,6 @@ jagg.initializer("documentation/markdown-editor", {
     preInitialize:function () {
 
         jagg.addHeaderJS("documentation/markdown-editor", "inline", "templates/documentation/markdown-editor/js/inline.js");
-
         jagg.addHeaderCSS("documentation/markdown-editor", "dist1", "libs/markdown-editor/css/style.css");
         jagg.addHeaderCSS("documentation/markdown-editor", "dist2", "libs/markdown-editor/css/foundation.min.css");
 

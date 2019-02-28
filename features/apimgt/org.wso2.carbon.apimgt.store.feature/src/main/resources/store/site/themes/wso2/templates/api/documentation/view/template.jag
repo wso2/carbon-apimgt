@@ -2,7 +2,7 @@
 <%
     var source = request.getParameter("source");
     var i, length, doc = outputs.doc;
-    %>
+%>
 
 <h2><%=encode.forHtml(doc.docName)%></h2>
 <br/>
@@ -15,7 +15,6 @@
             var endPattern = /<\/script>/g;
             doc.content = doc.content.replace(startPattern, "&lt;script &gt;").replace(endPattern, "&lt;\/script &gt;");
             doc.content = doc.content.replace(/[\r\n]+/g, '\\n');
-
             var quote = /"/g;
             doc.content = doc.content.replace(quote, "\'");
             %>

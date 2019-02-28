@@ -213,7 +213,6 @@ var editMarkdownContent = function (provider, apiName, version, docName, mode,te
     } else {
         window.open("site/pages/markdown-editor.jag?docName=" + docName + "&apiName=" + apiName + "&version=" + version + "&provider=" + provider + "&mode=" + mode+tenantDomain);
     }
-
 };
 
 var clearDocs = function () {
@@ -390,7 +389,7 @@ var isAvailableDoc = function(id) {
     if (docEntry != "") {
         return true;
     }
-}   ;
+};
 
 var validInput = function(divId, message, condition) {
     if (condition) {

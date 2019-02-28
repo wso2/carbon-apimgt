@@ -2,7 +2,6 @@
 jagg.block("layout/markdown-editor", {
 
     initialize:function (data) {
-
     },
 
     getInputs:function () {
@@ -10,7 +9,6 @@ jagg.block("layout/markdown-editor", {
             title:null,
             top:null,
             middle:null
-
         };
     },
 
@@ -22,7 +20,6 @@ jagg.block("layout/markdown-editor", {
         return [
             "top",
             "middle"
-
         ];
     }
 });
