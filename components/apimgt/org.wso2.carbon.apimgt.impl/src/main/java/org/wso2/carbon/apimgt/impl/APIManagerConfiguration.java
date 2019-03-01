@@ -995,9 +995,18 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
                     blockConditionRetrieverConfiguration.setEnabled(JavaUtils.isTrueExplicitly
                             (blockingConditionEnabledElement.getText()));
-                    String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" + System
-                            .getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
-                    blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);
+                    OMElement blockConditionRetrieverServiceUrlElement = blockConditionRetrieverElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.SERVICE_URL));
+                    if (blockConditionRetrieverServiceUrlElement != null) {
+                        blockConditionRetrieverConfiguration.setServiceUrl(APIUtil
+                                .replaceSystemProperty(blockConditionRetrieverServiceUrlElement
+                                        .getText()));
+                    } else {
+                        String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                                System.getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
+                        blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);
+                    }
+
                     blockConditionRetrieverConfiguration.setUsername(getFirstProperty(APIConstants
                             .API_KEY_VALIDATOR_USERNAME));
                     OMElement blockConditionRetrieverThreadPoolSizeElement = blockConditionRetrieverElement
