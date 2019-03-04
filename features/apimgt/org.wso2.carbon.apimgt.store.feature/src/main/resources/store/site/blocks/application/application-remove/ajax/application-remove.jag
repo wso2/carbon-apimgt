@@ -72,7 +72,7 @@ include("/jagg/jagg.jag");
         var consumer = jagg.module("manager").getAPIConsumerObj();
         var application = consumer.getApplicationById(applicationId);
         var subscriber = application.getSubscriber().getName();
-        if (subscriber != username) {
+        if (!subscriber.equalsIgnoreCase(username)) {
             print({
                 error: true,
                 message: "Only application owner can delete the application"

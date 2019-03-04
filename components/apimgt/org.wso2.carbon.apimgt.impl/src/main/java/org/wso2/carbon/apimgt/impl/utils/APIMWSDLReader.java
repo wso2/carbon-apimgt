@@ -606,32 +606,39 @@ public class APIMWSDLReader {
             throws APIManagementException {
         Map serviceMap = definition.getAllServices();
         URL addressURI;
-        try {
-            for (Object entry : serviceMap.entrySet()) {
-                Map.Entry svcEntry = (Map.Entry) entry;
-                Service svc = (Service) svcEntry.getValue();
-                Map portMap = svc.getPorts();
-                for (Object o : portMap.entrySet()) {
-                    Map.Entry portEntry = (Map.Entry) o;
-                    Port port = (Port) portEntry.getValue();
+        for (Object entry : serviceMap.entrySet()) {
+            Map.Entry svcEntry = (Map.Entry) entry;
+            Service svc = (Service) svcEntry.getValue();
+            Map portMap = svc.getPorts();
+            for (Object o : portMap.entrySet()) {
+                Map.Entry portEntry = (Map.Entry) o;
+                Port port = (Port) portEntry.getValue();
 
-                    List<ExtensibilityElement> extensibilityElementList = port.getExtensibilityElements();
-                    for (ExtensibilityElement extensibilityElement : extensibilityElementList) {
+                List<ExtensibilityElement> extensibilityElementList = port.getExtensibilityElements();
+                String endpointTransport;
+                for (ExtensibilityElement extensibilityElement : extensibilityElementList) {
+                    endpointTransport = null;
+                    try {
                         addressURI = new URL(getAddressUrl(extensibilityElement));
+                        endpointTransport = determineURLTransport(addressURI.getProtocol(), api.getTransports());
                         if (log.isDebugEnabled()) {
                             log.debug("Address URI for the port:" + port.getName() + " is " + addressURI.toString());
                         }
-                        String endpointTransport = determineURLTransport(addressURI.getProtocol(), api.getTransports());
-                        setAddressUrl(extensibilityElement, endpointTransport, api.getContext(), environmentName,
-                                environmentType);
+                    } catch (MalformedURLException e) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Error occurred while getting the wsdl address location [" +
+                                    getAddressUrl(extensibilityElement) + "]");
+                        }
+                        endpointTransport = determineURLTransport("https", api.getTransports());
+                        // This string to URL conversion done in order to identify URL transport eg - http or https.
+                        // Here if there is a conversion failure , consider "https" as default protocol
                     }
+                    setAddressUrl(extensibilityElement, endpointTransport, api.getContext(), environmentName,
+                            environmentType);
                 }
             }
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Error occurred while getting the wsdl address location", e);
         }
     }
-
 	/**
 	 * Get the addressURl from the Extensibility element
 	 * @param exElement - {@link ExtensibilityElement}
