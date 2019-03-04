@@ -50,7 +50,6 @@ public class ApplicationDTO  {
   
   private String owner = null;
   
-  
   private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
   
   
@@ -205,7 +204,6 @@ public class ApplicationDTO  {
     this.owner = owner;
   }
 
-  
   /**
    **/
   @ApiModelProperty(value = "")

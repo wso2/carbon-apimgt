@@ -7957,9 +7957,9 @@ public final class APIUtil {
     /**
      * This method is used to extact group ids from Extractor.
      *
-     * @param response               login response String.
-     * @param groupingExtractorClass extractor class.
-     * @return
+     * @param response  login response String.
+     * @param groupingExtractorClass    extractor class.
+     * @return  group ids
      * @throws APIManagementException Throws is an error occured when stractoing group Ids
      */
     public static String[] getGroupIdsFromExtractor(String response, String groupingExtractorClass)
