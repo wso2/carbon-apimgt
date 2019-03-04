@@ -7954,4 +7954,47 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * This method is used to extact group ids from Extractor.
+     *
+     * @param response               login response String.
+     * @param groupingExtractorClass extractor class.
+     * @return
+     * @throws APIManagementException Throws is an error occured when stractoing group Ids
+     */
+    public static String[] getGroupIdsFromExtractor(String response, String groupingExtractorClass)
+            throws APIManagementException {
+        if (groupingExtractorClass != null) {
+            try {
+                LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
+                        (groupingExtractorClass).newInstance();
+                //switching 2.1.0 and 2.2.0
+                if (APIUtil.isMultiGroupAppSharingEnabled()) {
+                    NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor) groupingExtractor;
+                    return newGroupIdListExtractor.getGroupingIdentifierList(response);
+                } else {
+                    String groupId = groupingExtractor.getGroupingIdentifiers(response);
+                    return new String[]{groupId};
+                }
+
+            } catch (ClassNotFoundException e) {
+                String msg = groupingExtractorClass + " is not found in runtime";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Cannot cast " + groupingExtractorClass + " NewPostLoginExecutor";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (IllegalAccessException e) {
+                String msg = "Error occurred while invocation of getGroupingIdentifier method";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (InstantiationException e) {
+                String msg = "Error occurred while instantiating " + groupingExtractorClass + " class";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return null;
+    }
 }
