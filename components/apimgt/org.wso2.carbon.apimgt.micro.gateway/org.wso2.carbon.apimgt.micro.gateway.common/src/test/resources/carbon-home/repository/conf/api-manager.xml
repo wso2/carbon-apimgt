@@ -297,6 +297,8 @@
     <!-- API Store Related Configurations -->
     <APIStore>
         <!--GroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</GroupingExtractor-->
+        <!--This is used to define the group Id Extractor for REST API. Default value for this is DefaultGroupIDExtractorImpl-->
+        <!--RESTApiGroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</RESTApiGroupingExtractor-->
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>true</CompareCaseInsensitively>
         <DisplayURL>false</DisplayURL>
