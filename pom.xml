@@ -1637,7 +1637,7 @@
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>1.7.7</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
-        <jacoco.version>0.7.9</jacoco.version>
+        <jacoco.version>0.8.3</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
         <wiremock.version>2.5.0</wiremock.version>
         <mockito.version>2.10.0</mockito.version>
