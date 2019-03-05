@@ -5858,6 +5858,22 @@ public final class APIUtil {
     }
 
     /**
+     * Read the REST API group id extractor class reference from api-manager.xml.
+     *
+     * @return REST API group id extractor class reference.
+     */
+    public static String getRESTApiGroupingExtractorImplementation() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String restApiGroupingExtractor = config
+                .getFirstProperty(APIConstants.API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION);
+        if (StringUtils.isEmpty(restApiGroupingExtractor)) {
+            restApiGroupingExtractor = getGroupingExtractorImplementation();
+        }
+        return restApiGroupingExtractor;
+    }
+
+    /**
      * This method will update the permission cache of the tenant which is related to the given usename
      *
      * @param username User name to find the relevant tenant
