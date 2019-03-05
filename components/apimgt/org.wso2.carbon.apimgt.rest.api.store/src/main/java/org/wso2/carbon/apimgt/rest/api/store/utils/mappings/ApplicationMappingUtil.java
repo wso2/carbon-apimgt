@@ -149,6 +149,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         applicationInfoDTO.setAttributes(application.getApplicationAttributes());
+        applicationInfoDTO.setOwner(application.getOwner());
         return applicationInfoDTO;
     }
 }
