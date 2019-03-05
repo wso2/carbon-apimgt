@@ -30,7 +30,7 @@ const Configurations = {
             custom: {
                 starColor: '#f2c73a',
                 disableColor: '#D3D3D3',
-                leftMenuWidth: 120,
+                leftMenuWidth: 220,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
                 logo: '/store/public/app/images/logo.png',
@@ -38,13 +38,23 @@ const Configurations = {
                 title: 'WSO2 Developer Portal',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
-                leftMenu: 'icon top', //  other values ('icon top', 'icon left', 'no icon', 'no text')
+                leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
                 leftMenuIconSize: 32,
                 leftMenuIconMainSize: 52,
                 leftMenuTextStyle: 'uppercase',
                 adminRole: 'admin',
                 commentsLimit: 5,
                 maxCommentLength: 1300,
+                overviewBox1 :{
+                    backColorBottom: '#6a4eb1',
+                    backColorTop: '#ffffff',
+                    borderStyle: 'solid 1px #cccccc',
+                },
+                overviewBox2 :{
+                    backColorBottom: '#15b8cf',
+                    backColorTop: '#ffffff',
+                    borderStyle: 'solid 1px #cccccc',
+                },
             },
         },
         dark: {
@@ -85,7 +95,7 @@ const Configurations = {
                 title: 'WSO2 Developer Portal',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
-                leftMenu: 'icon top', //  other values ('icon top', 'icon left', 'no icon', 'no text')
+                leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
                 leftMenuIconSize: 32,
                 leftMenuIconMainSize: 52,
                 leftMenuTextStyle: 'uppercase',

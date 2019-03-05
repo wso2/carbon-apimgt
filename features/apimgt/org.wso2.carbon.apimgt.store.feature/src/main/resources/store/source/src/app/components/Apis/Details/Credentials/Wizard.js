@@ -17,7 +17,7 @@ import Tab from '@material-ui/core/Tab';
 
 import ApplicationCreate from "../../../Shared/AppsAndKeys/ApplicationCreate"
 import SubscribeToApi from "../../../Shared/AppsAndKeys/SubscribeToApi"
-import Keys from "../../../Shared/AppsAndKeys/Keys"
+import Keys from "../../../Shared/AppsAndKeys/KeyConfiguration"
 import Tokens from "../../../Shared/AppsAndKeys/Tokens"
 import ViewToken from "../../../Shared/AppsAndKeys/ViewToken"
 
@@ -49,7 +49,10 @@ const styles = theme => ({
   button: {
     marginTop: theme.spacing.unit*2,
     marginRight: theme.spacing.unit,
-  }
+  },
+  wizardButtons: {
+    paddingLeft: theme.spacing.unit*2,
+  },
 });
 
 class Wizard extends React.Component {
@@ -225,74 +228,57 @@ class Wizard extends React.Component {
     const { activeStep } = this.state;
     return (
       <ApiContext.Consumer>
-          { ({api, applicationsAvailable}) => (
-      <div className={classes.root}>
-        <Typography variant="body1">
-          Follow these steps to generate credentials
-        </Typography>
-        <RadioGroup
-          aria-label="Gender"
-          name="gender1"
-          className={classes.group}
-          value={this.state.value}
-          onChange={this.handleChange}
-        >
-          <FormControlLabel value="wizard" control={<Radio />} label="Wizard" />
-          <FormControlLabel
-            value="express"
-            control={<Radio />}
-            label="Express Mode"
-          />
-        </RadioGroup>
-        <div>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => {
-              const props = {};
-              const labelProps = {};
-              return (
-                <Step key={label} {...props}>
-                  <StepLabel {...labelProps}>{label}</StepLabel>
-                </Step>
-              );
-            })}
-          </Stepper>
-          <div>
-            {activeStep === steps.length ? (
+        { ({api, applicationsAvailable}) => (
+          <div className={classes.root}>
+            <div>
+              <Stepper activeStep={activeStep}>
+                {steps.map((label, index) => {
+                  const props = {};
+                  const labelProps = {};
+                  return (
+                    <Step key={label} {...props}>
+                      <StepLabel {...labelProps}>{label}</StepLabel>
+                    </Step>
+                  );
+                })}
+              </Stepper>
               <div>
-                <Typography className={classes.instructions}>
-                  All steps completed - you&quot;re finished
-                </Typography>
-                <Button onClick={this.handleReset} className={classes.button}>
-                  Reset
-                </Button>
-              </div>
-            ) : (
-              <div className={classes.wizardContent}>
-                {this.getStepContent(activeStep, api, applicationsAvailable)}
-                <div>
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={this.handleBack}
-                    className={classes.button}
-                    variant="outlined"
-                  >
-                    Back
-                  </Button>
+                {activeStep === steps.length ? (
+                  <div>
+                    <Typography className={classes.instructions}>
+                      All steps completed - you&quot;re finished
+                    </Typography>
+                    <Button onClick={this.handleReset} className={classes.button}>
+                      Reset
+                    </Button>
+                  </div>
+                ) : (
+                  <div className={classes.wizardContent}>
+                    {this.getStepContent(activeStep, api, applicationsAvailable)}
+                    <div className={classes.wizardButtons}>
+                      <Button
+                        disabled={activeStep === 0}
+                        onClick={this.handleBack}
+                        className={classes.button}
+                        variant="outlined"
+                      >
+                        Back
+                      </Button>
 
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => this.handleNext()}
-                    className={classes.button}
-                  >
-                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
-                  </Button>
-                </div>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => this.handleNext()}
+                        className={classes.button}
+                      >
+                        {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      </div>
        )}
        </ApiContext.Consumer>
     );

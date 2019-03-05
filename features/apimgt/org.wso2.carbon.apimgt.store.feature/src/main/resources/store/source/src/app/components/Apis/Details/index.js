@@ -16,18 +16,19 @@ import { ApiContext } from './ApiContext';
 import Credentials from './Credentials/Credentials';
 import Api from '../../../data/api';
 import Comments from './Comments/Comments';
-
+import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
         width: theme.custom.leftMenuWidth,
-        textAlign: 'center',
+        textAlign: 'left',
         fontFamily: theme.typography.fontFamily,
         position: 'absolute',
         bottom: 0,
         left: 0,
         top: 0,
+        boxShadow: '11px -1px 15px -8px rgba(115,115,115,1)',
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
@@ -37,6 +38,15 @@ const styles = theme => ({
         backgroundColor: theme.palette.background.leftMenuActive,
         color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
         textDecoration: 'none',
+        alignItems: 'center',
+        paddingLeft: theme.spacing.unit*2,
+        display: 'flex',
+    },
+    leftLInkMainText: {
+        fontSize: 18,
+        color: theme.palette.grey[500],
+        textDecoration: 'none',
+        paddingLeft: theme.spacing.unit*2,
     },
     detailsContent: {
         display: 'flex',
@@ -48,6 +58,9 @@ const styles = theme => ({
         flexDirection: 'column',
         marginLeft: theme.custom.leftMenuWidth,
         paddingBottom:  theme.spacing.unit*3,
+      },
+      leftLInkMainWrapper: {
+          textDecoration: 'none',
       }
 });
 class Details extends React.Component {
@@ -161,13 +174,17 @@ class Details extends React.Component {
     const { api } = this.state;
     let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
     const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
-
+    const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
     return (
         <ApiContext.Provider value={this.state}>
+            <style>
+                {globalStyle}
+            </style>
              <div className={classes.LeftMenu}>
-                <Link to={"/apis"}>
+                <Link to={"/apis"} className={classes.leftLInkMainWrapper}>
                     <div className={classes.leftLInkMain}>
                         <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon="api" />
+                        <Typography className={classes.leftLInkMainText}>ALL APIs</Typography>
                     </div>
                 </Link>
                 <LeftMenuItem text="overview" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />

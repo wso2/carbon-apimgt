@@ -5,17 +5,17 @@ import { KeyboardArrowLeft, StarRate, FileCopy, ArrowDropDownOutlined, ArrowDrop
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import HighlightOff from "@material-ui/icons/HighlightOff";
-
 import { Link } from "react-router-dom";
 import Loading from "../../Base/Loading/Loading";
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from "../../../data/api";
-
 import ImageGenerator from "../Listing/ImageGenerator";
 import CopyToClipboard from "react-copy-to-clipboard";
 import Tooltip from "@material-ui/core/Tooltip";
 import Collapse from '@material-ui/core/Collapse';
 import VerticalDivider from '../../Shared/VerticalDivider';
+import Switch from '@material-ui/core/Switch';
+import Paper from '@material-ui/core/Paper';
 
 
 const styles = theme => ({
@@ -63,9 +63,9 @@ const styles = theme => ({
     padding: theme.spacing.unit * 3
   },
   infoContentBottom: {
-    background: theme.palette.background.paper,
+    background: theme.palette.grey["200"],
     borderBottom: "solid 1px " + theme.palette.grey["A200"],
-    paddingBottom: theme.spacing.unit,
+    color: theme.palette.grey["600"],
   },
   infoItem: {
     marginRight: theme.spacing.unit * 4
@@ -156,14 +156,34 @@ const styles = theme => ({
     width: "100%"
   },
   buttonView: {
-    textAlign: "center",
-    justifyContent: 'center',
+    textAlign: "left",
+    justifyContent: 'left',
     display: 'flex',
+    paddingLeft: theme.spacing.unit*2,
+    cursor: 'pointer',
   },
   buttonOverviewText: {
     display: 'inline-block',
     paddingTop: 3,
-  }
+  },
+  rootx: {
+    height: 180,
+  },
+  container: {
+    display: 'flex',
+  },
+  paper: {
+    margin: theme.spacing.unit,
+  },
+  svg: {
+    width: 100,
+    height: 100,
+  },
+  polygon: {
+    fill: theme.palette.common.white,
+    stroke: theme.palette.divider,
+    strokeWidth: 1,
+  },
 });
 
 class StarRatingBar extends React.Component {
@@ -347,7 +367,8 @@ class InfoBar extends React.Component {
       commentList: null,
       prodUrlCopied: false,
       sandboxUrlCopied: false,
-      showOverview: true
+      showOverview: true,
+      checked: false,
     };
     this.api_uuid = this.props.api_uuid;
   }
@@ -411,13 +432,12 @@ class InfoBar extends React.Component {
   };
   toggleOverview = (todo) => {
     if(typeof(todo) === "boolean"){
-      this.setState({ showOverview: todo });
+      this.setState(state => ({ showOverview: todo }));
     } else{
-      this.setState({ showOverview: !this.state.showOverview });
+      console.info('setting the bool');
+      this.setState(state => ({ showOverview: !state.showOverview }));
     }
   };
-  
-
   render() {
     const { classes, theme } = this.props;
     const api = this.state.api;
@@ -450,7 +470,7 @@ class InfoBar extends React.Component {
         </div>
 
         {this.state.showOverview && 
-        <Collapse in={this.state.showOverview} timeout="auto" unmountOnExit>
+        <Collapse in={this.state.showOverview}>
           <div className={classes.infoContent}>
             <div className={classes.contentWrapper}>
               <div className={classes.topBar}>
@@ -560,7 +580,7 @@ class InfoBar extends React.Component {
         <div className={classes.infoContentBottom}>
           <div className={classes.contentWrapper} onClick={this.toggleOverview}>
             <div className={classes.buttonView}>
-            {this.state.showOverview ? <Typography className={classes.buttonOverviewText}>HIDE</Typography>: <Typography className={classes.buttonOverviewText}>SHOW</Typography>}
+            {this.state.showOverview ? <Typography className={classes.buttonOverviewText}>LESS</Typography>: <Typography className={classes.buttonOverviewText}>MORE</Typography>}
               {this.state.showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined /> }
               </div>
           </div>

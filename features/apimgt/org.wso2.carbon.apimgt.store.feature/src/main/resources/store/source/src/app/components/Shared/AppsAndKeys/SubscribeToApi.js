@@ -136,15 +136,13 @@ class SubscribeToApi extends Component {
         }
     }
     render() {
-        const { classes , applicationsAvailable, newApp } = this.props;
+        const { classes , applicationsAvailable, newApp, rootClass } = this.props;
         if(newApp) {
             applicationsAvailable.push(newApp); // Add the new app to the applications available
         }
         
         return (
-     
-                
-            <Grid container spacing={24} className={classes.root}>
+            <Grid container spacing={24} className={rootClass}>
                 <Grid item xs={12} md={6}>
                     {this.state.appSelected &&
                     <FormControl className={classes.FormControl} disabled={this.props.newApp? true : false}>
@@ -183,7 +181,12 @@ class SubscribeToApi extends Component {
                                 <MenuItem value={tier.value}  key={tier.value}>{tier.label}</MenuItem>
                             )}
                             </Select>
-                            <FormHelperText>Label + placeholder</FormHelperText>
+                            <FormHelperText>Available Tiers - { this.state.tiers.map((tier, index) => 
+                                <span key={tier.value}>
+                                    {tier.label} 
+                                    { (index != (this.state.tiers.length-1) ) && <span>,</span> } 
+                                </span>
+                            )}</FormHelperText>
                         </FormControl> }
                      
                     </Grid>
