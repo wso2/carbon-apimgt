@@ -2,7 +2,7 @@ language: java
 sudo: false
 
 # Using -q Quiet output which only show errors, to overcome TravisCI log limit issue
-script: mvn clean install -q -B -V | grep -v DEBUG; echo "${PIPESTATUS[0]}";
+script: mvn clean install -q -B -V | grep -v DEBUG; exit "${PIPESTATUS[0]}";
 
 cache:
   directories:
