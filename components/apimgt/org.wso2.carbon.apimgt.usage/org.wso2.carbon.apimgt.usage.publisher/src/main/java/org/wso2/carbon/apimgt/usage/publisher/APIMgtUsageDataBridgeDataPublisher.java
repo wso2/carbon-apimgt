@@ -29,6 +29,7 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublisher{
 
@@ -53,7 +54,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
     public void publishEvent(FaultPublisherDTO faultPublisherDTO) {
         DataBridgeFaultPublisherDTO dataBridgeFaultPublisherDTO = new DataBridgeFaultPublisherDTO(faultPublisherDTO);
-        ArrayList<String> missingMandatoryValues = dataBridgeFaultPublisherDTO.getMissingMandatoryValues();
+        List<String> missingMandatoryValues = dataBridgeFaultPublisherDTO.getMissingMandatoryValues();
         if (missingMandatoryValues.isEmpty()) {
             try {
                 String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + ":"
@@ -76,7 +77,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     public void publishEvent(ThrottlePublisherDTO throttPublisherDTO) {
         DataBridgeThrottlePublisherDTO dataBridgeThrottlePublisherDTO = new
                 DataBridgeThrottlePublisherDTO(throttPublisherDTO);
-        ArrayList<String> missingMandatoryValues = dataBridgeThrottlePublisherDTO.getMissingMandatoryValues();
+        List<String> missingMandatoryValues = dataBridgeThrottlePublisherDTO.getMissingMandatoryValues();
         if (missingMandatoryValues.isEmpty()) {
             try {
                 String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() + ":" +
@@ -158,7 +159,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     @Override
     public void publishEvent(RequestResponseStreamDTO requestStream) {
         DataBridgeRequestResponseStreamPublisherDTO dataBridgeRequestStreamPublisherDTO = new DataBridgeRequestResponseStreamPublisherDTO(requestStream);
-        ArrayList<String> missingMandatoryValues = dataBridgeRequestStreamPublisherDTO.getMissingMandatoryValues();
+        List<String> missingMandatoryValues = dataBridgeRequestStreamPublisherDTO.getMissingMandatoryValues();
         if (missingMandatoryValues.isEmpty()) {
             try {
                 String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + ":"

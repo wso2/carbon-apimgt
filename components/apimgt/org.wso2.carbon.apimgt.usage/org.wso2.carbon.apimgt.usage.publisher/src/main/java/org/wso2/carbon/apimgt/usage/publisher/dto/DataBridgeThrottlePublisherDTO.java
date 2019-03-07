@@ -18,9 +18,8 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
-import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-
 import java.util.ArrayList;
+import java.util.List;
 
 public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
 
@@ -62,9 +61,9 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
      *  @return Alist of mandatory values which are null
      *
      * */
-    public ArrayList<String> getMissingMandatoryValues() {
+    public List<String> getMissingMandatoryValues() {
 
-        ArrayList<String> missingMandatoryValues = new ArrayList<String>();
+        List<String> missingMandatoryValues = new ArrayList<String>();
         if (getApiname() == null) {
             missingMandatoryValues.add("API name");
         }

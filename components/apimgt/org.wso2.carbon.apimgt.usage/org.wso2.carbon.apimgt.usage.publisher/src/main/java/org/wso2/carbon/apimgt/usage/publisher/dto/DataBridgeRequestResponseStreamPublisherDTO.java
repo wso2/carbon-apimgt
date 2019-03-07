@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.usage.publisher.dto;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponseStreamDTO {
 
@@ -83,9 +84,9 @@ public class DataBridgeRequestResponseStreamPublisherDTO extends RequestResponse
      *  @return Alist of mandatory values which are null
      *
      * */
-    public ArrayList<String> getMissingMandatoryValues() {
+    public List<String> getMissingMandatoryValues() {
 
-        ArrayList<String> missingMandatoryValues = new ArrayList<String>();
+        List<String> missingMandatoryValues = new ArrayList<String>();
         if (getApplicationConsumerKey() == null) {
             missingMandatoryValues.add("Application consumer key");
         }
