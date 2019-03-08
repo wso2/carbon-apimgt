@@ -398,6 +398,10 @@ public class APIManagerConfiguration {
                     if (isRequired != null) {
                         jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, Boolean.parseBoolean(isRequired));
                     }
+                    String isHidden = omElement.getAttributeValue(new QName("hidden"));
+                    if (isHidden != null) {
+                        jsonObject.put(APIConstants.ApplicationAttributes.HIDDEN, Boolean.parseBoolean(isHidden));
+                    }
                     applicationAttributes.add(jsonObject);
                 }
             }
