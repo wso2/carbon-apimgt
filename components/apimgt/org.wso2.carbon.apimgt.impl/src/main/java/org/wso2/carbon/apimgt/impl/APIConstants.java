@@ -1373,6 +1373,7 @@ public final class APIConstants {
         public static final String ATTRIBUTES = "Attributes";
         public static final String ATTRIBUTE = "Attribute";
         public static final String REQUIRED = "Required";
+        public static final String HIDDEN = "Hidden";
         public static final String DESCRIPTION = "Description";
     }
 
