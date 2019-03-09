@@ -13,12 +13,17 @@ var environmentName = request.getParameter(ENVIRONMENT_NAME);
 var environmentType = request.getParameter(ENVIRONMENT_TYPE);
 
 if (resourceUrl.indexOf("/documentation/files") != -1 ||
-    resourceUrl.indexOf("/apimgt/applicationdata/wsdls/") != -1 ) {
+    resourceUrl.indexOf("/apimgt/applicationdata/wsdls") != -1 ) {
 
     if (environmentType != null && environmentName != null) {
         var apiName = request.getParameter(API_NAME);
         var apiVersion = request.getParameter(API_VERSION);
-        var apiProvider = request.getParameter(API_PROVIDER);
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var apiProvider = String(APIUtil.getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, tenantDomain));
+        var isWSDLDownload = request.getParameter("isWSDLDownload");
+        if (isWSDLDownload == "true" && apiName != null && apiVersion != null) {
+            resourceUrl = resourceUrl + "/" + apiProvider + "--" + apiName + apiVersion + ".wsdl";
+        }
         if (jagg.getUser()) {
             var username = jagg.getUser().username;
         }
