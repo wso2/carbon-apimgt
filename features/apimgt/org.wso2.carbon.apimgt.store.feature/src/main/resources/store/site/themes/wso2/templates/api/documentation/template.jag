@@ -82,7 +82,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 		                					<%=i18n.localize("View Content")%>
 		                				<%} %></a>
 		                		<%} else if(doc.filePath && doc.filePath!="") {%>
-		                			<a href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + doc.filePath))%>" class="doc-content" target="_blank" title="<%=i18n.localize("Download Document")%>" download><%=i18n.localize("Download")%></a>
+		                		    <%
+                                        var documentFilePath = doc.filePath;
+                                        var relativeFilePathWithProvider = documentFilePath.split(org.wso2.carbon.apimgt.impl.APIConstants.REGISTRY_RESOURCE_URL_PREFIX)[1];
+                                        var providerIndex = relativeFilePathWithProvider.indexOf("/");
+                                        var relativeResourceUrl = relativeFilePathWithProvider.substring(providerIndex);
+                                     %>
+		                			<a href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + relativeResourceUrl + "&isFileDownload=true"))%>" class="doc-content" target="_blank" title="<%=i18n.localize("Download Document")%>" download><%=i18n.localize("Download")%></a>
 		                		<% } else { %>
 		                			<%if(reqUrl.indexOf(".jag")>=0)	{%>
                      					<a title="<%=i18n.localize("Document Content")%>" href="doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name)%>&source=<%= encode.forUriComponent(doc.sourceType)%>&name=<%= encode.forUriComponent(name) %>&version=<%= encode.forUriComponent(version)%>&provider=<%= encode.forUriComponent(provider)%>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("View Content")%></a>

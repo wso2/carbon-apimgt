@@ -1170,6 +1170,7 @@ public final class APIConstants {
     public static final long MAX_FILE_SIZE = 1024L;
 
     public static final String REGISTRY_RESOURCE_PREFIX = "/registry/resource";
+    public static final String REGISTRY_RESOURCE_URL_PREFIX = "/registry/resource/_system/governance/apimgt/applicationdata/provider/";
 
     public enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
