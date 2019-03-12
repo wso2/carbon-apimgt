@@ -165,7 +165,7 @@ class BasicInfo extends Component {
                     <Divider />
                 </Grid>
                 <Grid item xs={12} className={classes.imageWrapper}>
-                    <ImageGenerator apiName={api.name} />
+                    <ImageGenerator api={api} />
                     <div className={classes.imageSideContent}>
                         <Typography variant="headline" >
                             {api.version} {api.isDefaultVersion ? <span>( Default )</span> : <span></span>}
