@@ -6,7 +6,9 @@
   "scripts": {
     "test": "jest",
     "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
-    "build:dev": "NODE_ENV=development webpack -d --watch "
+    "build:dev": "NODE_ENV=development webpack -d --watch ",
+    "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
+    "lint": "eslint source"
   },
   "repository": {
     "type": "git",
@@ -37,6 +39,7 @@
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.4.2",
     "react-intl": "^2.4.0",
+    "react-loadable": "^5.5.0",
     "react-notification-system": "^0.2.16",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.4.0-alpha.1",
@@ -46,10 +49,12 @@
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
-    "babel-eslint": "^8.2.6",
+    "babel-eslint": "^8.2.2",
     "babel-loader": "^7.0.0",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-register": "^6.24.1",
