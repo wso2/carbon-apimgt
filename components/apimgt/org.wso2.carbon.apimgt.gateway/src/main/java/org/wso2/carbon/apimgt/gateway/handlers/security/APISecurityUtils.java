@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class APISecurityUtils {
 
-    private static final String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
+    public static final String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
 
     private static String keyValidatorClientType;
 

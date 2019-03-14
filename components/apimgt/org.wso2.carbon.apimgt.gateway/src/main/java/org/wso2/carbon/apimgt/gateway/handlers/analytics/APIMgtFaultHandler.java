@@ -20,6 +20,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -37,7 +39,13 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
     }
 
     public boolean mediate(MessageContext messageContext) {
-        
+        //to avoid data publishing when when the gateway is unable to find a matching resource for an API call
+        //https://github.com/wso2/product-apim/issues/3968
+        AuthenticationContext authContext = (AuthenticationContext)
+                messageContext.getProperty(APISecurityUtils.API_AUTH_CONTEXT);
+        if (authContext == null) {
+            return true;
+        }
         if (publisher == null) {
             initDataPublisher();
         }
