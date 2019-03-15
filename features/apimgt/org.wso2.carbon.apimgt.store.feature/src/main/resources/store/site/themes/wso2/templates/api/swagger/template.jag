@@ -242,27 +242,28 @@ var loadTokens = function () {
         applicationId:application_id
         }, function (result) {
             if (result.error == false) {
-	       console.log(result);
-	       if (selected_type == "production") {
-		     if (result.apikeys.length > 0) {
-			token = result.apikeys[0].PRODUCTION_KEY;
-		        $("#access_token").val(token);
-		     } else {
-			$("#access_token").val("");
-		     }
-	       } else if (selected_type == "sandbox") {
-		     if (result.apikeys.length > 1) {
-			token = result.apikeys[1].SANDBOX_KEY;
-		        $("#access_token").val(token);
-		     } else {
-			$("#access_token").val("");
-		     }
-	       }
-	       if(token && token.trim() != "") {
+            if (selected_type == "production") {
+                for (var key : result.apikeys) {
+                    token = key.PRODUCTION_KEY;
+                    if (typeof token != 'undefined' && token){
+                        break;
+                    }
+                }
+                $("#access_token").val(token);
+            } else if (selected_type == "sandbox") {
+                for (var key : result.apikeys) {
+                    token = key.SANDBOX_KEY;
+                    if (typeof token != 'undefined' && token){
+                        break;
+                    }
+                }
+                $("#access_token").val(token);
+            }
+	        if(token && token.trim() != "") {
                 swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ token, "header"));
-	       }else{
+	        }else{
                 swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
-	       }
+	        }
             } else {
 		console.log("eror ...");
                 jagg.message({content:result.message,type:"error"});
