@@ -1655,7 +1655,7 @@
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <ballerina.lang.version>0.970.0</ballerina.lang.version>
         <re2j.version>1.2.wso2v1</re2j.version>
-        <maven-site-plugin.version>3.3</maven-site-plugin.version>
+        <maven-site-plugin.version>3.7.1</maven-site-plugin.version>
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
         <jaeger.core.version>0.30.0</jaeger.core.version>
