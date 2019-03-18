@@ -14,11 +14,23 @@ import CopyToClipboard from "react-copy-to-clipboard";
 import Tooltip from "@material-ui/core/Tooltip";
 import Collapse from '@material-ui/core/Collapse';
 import VerticalDivider from '../../Shared/VerticalDivider';
-import Switch from '@material-ui/core/Switch';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-
+import CalendarViewDay from '@material-ui/icons/CalendarViewDay';
+import AccountBalanceWallet from '@material-ui/icons/AccountBalanceWallet';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+import Update from '@material-ui/icons/Update';
+import LinkIcon from '@material-ui/icons/Link';
+import Button from '@material-ui/core/Button';
 
 const styles = theme => ({
+  table: {
+    minWidth: '100%',
+  },
   root: {
     height: 70,
     background: theme.palette.background.paper,
@@ -184,6 +196,29 @@ const styles = theme => ({
     stroke: theme.palette.divider,
     strokeWidth: 1,
   },
+  leftCol: {
+    width: 200,
+  },
+  iconAligner: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  iconTextWrapper: {
+    display: 'inline-block',
+    paddingLeft: 20,
+  },
+  iconEven: {
+    color: theme.palette.secondary.light,
+    width: theme.spacing.unit*3,
+  },
+  iconOdd: {
+    color: theme.palette.secondary.main,
+    width: theme.spacing.unit*3,
+  },
+  margin: {
+    marginLeft: 30,
+  }
 });
 
 class StarRatingBar extends React.Component {
@@ -473,97 +508,7 @@ class InfoBar extends React.Component {
         <Collapse in={this.state.showOverview}>
           <div className={classes.infoContent}>
             <div className={classes.contentWrapper}>
-              <div className={classes.topBar}>
-                <div className={classes.infoItem}>
-                  <Typography variant="subheading" gutterBottom>
-                    {api.version}
-                  </Typography>
-                  <Typography variant="caption" gutterBottom align="left">
-                    Version
-                  </Typography>
-                </div>
-                <div className={classes.infoItem}>
-                  <Typography variant="subheading" gutterBottom>
-                    {api.context}
-                  </Typography>
-                  <Typography variant="caption" gutterBottom align="left">
-                    Context
-                  </Typography>
-                </div>
-                <div>
-                  <div className={classes.epWrapper}>
-                    <Typography className={classes.prodLabel}>
-                      Production URL
-                    </Typography>
-                    <TextField
-                      defaultValue="http://192.168.1.2:8282/SwaggerPetstore/1.0.0"
-                      id="bootstrap-input"
-                      InputProps={{
-                        disableUnderline: true,
-                        classes: {
-                          root: classes.bootstrapRoot,
-                          input: classes.bootstrapInput
-                        }
-                      }}
-                      InputLabelProps={{
-                        shrink: true,
-                        className: classes.bootstrapFormLabel
-                      }}
-                    />
-                    <Tooltip
-                      title={
-                        this.state.prodUrlCopied
-                          ? "Copied"
-                          : "Copy to clipboard"
-                      }
-                      placement="right"
-                    >
-                      <CopyToClipboard
-                        text="http://192.168.1.2:8282/SwaggerPetstore/1.0.0"
-                        onCopy={this.onCopy("prodUrlCopied")}
-                      >
-                        <FileCopy color="secondary" />
-                      </CopyToClipboard>
-                    </Tooltip>
-                  </div>
-                  <div className={classes.epWrapper}>
-                    <Typography className={classes.prodLabel}>
-                      Sandbox URL
-                    </Typography>
-                    <TextField
-                      defaultValue="http://192.168.1.2:8282/SwaggerPetstore/1.0.0"
-                      id="bootstrap-input"
-                      InputProps={{
-                        disableUnderline: true,
-                        classes: {
-                          root: classes.bootstrapRoot,
-                          input: classes.bootstrapInput
-                        }
-                      }}
-                      InputLabelProps={{
-                        shrink: true,
-                        className: classes.bootstrapFormLabel
-                      }}
-                    />
-                    <Tooltip
-                      title={
-                        this.state.sandboxUrlCopied
-                          ? "Copied"
-                          : "Copy to clipboard"
-                      }
-                      placement="right"
-                    >
-                      <CopyToClipboard
-                        text="http://192.168.1.2:8282/SwaggerPetstore/1.0.0"
-                        onCopy={this.onCopy("sandboxUrlCopied")}
-                      >
-                        <FileCopy color="secondary" />
-                      </CopyToClipboard>
-                    </Tooltip>
-                  </div>
-                </div>
-              </div>
-              <Typography>
+            <Typography>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut
                 dolor dui, fermentum in ipsum a, pharetra feugiat orci.
                 Suspendisse at sem nunc. Integer in eros eget orci sollicitudin
@@ -573,6 +518,134 @@ class InfoBar extends React.Component {
                 vel sollicitudin velit. Aenean facilisis vitae elit vitae
                 iaculis. Nam vel tincidunt arcu.
               </Typography>
+              <Table className={classes.table}>
+                <TableBody>
+                    <TableRow>
+                      <TableCell component="th" scope="row" className={classes.leftCol}>
+                        <div className={classes.iconAligner}>
+                          <CalendarViewDay className={classes.iconOdd} /> 
+                          <span className={classes.iconTextWrapper}>Version</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{api.version}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row">
+                        <div className={classes.iconAligner}>
+                          <AccountBalanceWallet className={classes.iconEven} />
+                          <span className={classes.iconTextWrapper}>Context</span>
+                        </div>
+                        </TableCell>
+                      <TableCell>{api.context}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row">
+                        <div className={classes.iconAligner}>
+                          <AccountCircle className={classes.iconOdd} />
+                          <span className={classes.iconTextWrapper}>Provider</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{api.provider}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row">
+                        <div className={classes.iconAligner}>
+                          <Update className={classes.iconEven} />
+                          <span className={classes.iconTextWrapper}>Last updated</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>21 May 2018</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row">
+                          <div className={classes.iconAligner}>
+                            <LinkIcon className={classes.iconOdd} />
+                            <span className={classes.iconTextWrapper}>Production URL</span>
+                          </div>
+                      </TableCell>
+                      <TableCell>
+                        <TextField
+                            defaultValue="http://192.168.1.2:8282/SwaggerPetstore/1.0.0"
+                            id="bootstrap-input"
+                            InputProps={{
+                              disableUnderline: true,
+                              classes: {
+                                root: classes.bootstrapRoot,
+                                input: classes.bootstrapInput
+                              }
+                            }}
+                            InputLabelProps={{
+                              shrink: true,
+                              className: classes.bootstrapFormLabel
+                            }}
+                        />
+                        <Tooltip
+                            title={
+                              this.state.prodUrlCopied
+                                ? "Copied"
+                                : "Copy to clipboard"
+                            }
+                            placement="right"
+                          >
+                          <CopyToClipboard
+                            text="http://192.168.1.2:8282/SwaggerPetstore/1.0.0"
+                            onCopy={this.onCopy("prodUrlCopied")}
+                          >
+                            <FileCopy color="secondary" />
+                          </CopyToClipboard>
+                        </Tooltip>
+                        <Button variant="contained" size="small" color="primary" className={classes.margin}>
+                          Test Endpoint
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row">
+                          <div className={classes.iconAligner}>
+                            <LinkIcon className={classes.iconEven} />
+                            <span className={classes.iconTextWrapper}>Sandbox URL</span>
+                          </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className={classes.iconAligner}>
+                          <TextField
+                                defaultValue="http://192.168.1.2:8282/SwaggerPetstore/1.0.0"
+                                id="bootstrap-input"
+                                InputProps={{
+                                  disableUnderline: true,
+                                  classes: {
+                                    root: classes.bootstrapRoot,
+                                    input: classes.bootstrapInput
+                                  }
+                                }}
+                                InputLabelProps={{
+                                  shrink: true,
+                                  className: classes.bootstrapFormLabel
+                                }}
+                            />
+                          <Tooltip
+                              title={
+                                this.state.sandboxUrlCopied
+                                  ? "Copied"
+                                  : "Copy to clipboard"
+                              }
+                              placement="right"
+                              >
+                              <CopyToClipboard
+                                text="http://192.168.1.2:8282/SwaggerPetstore/1.0.0"
+                                onCopy={this.onCopy("sandboxUrlCopied")}
+                              >
+                                <FileCopy color="secondary" />
+                            </CopyToClipboard>
+                          </Tooltip>
+                          <Button variant="contained" size="small" color="primary" className={classes.margin}>
+                            Test Endpoint
+                          </Button>
+                          </div>
+                      </TableCell>
+                    </TableRow>
+                </TableBody>
+              </Table>
             </div>
           </div>
           </Collapse>

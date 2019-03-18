@@ -1,85 +1,79 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
-import classnames from "classnames";
 import { ApiContext } from "./ApiContext";
 import CustomIcon from "../../Shared/CustomIcon";
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import MuiExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import { Link } from 'react-router-dom';
+import Divider from '@material-ui/core/Divider';
+import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
+import Button from '@material-ui/core/Button';
+import Resources from './Resources';
+import Comments from './Comments/Comments';
+import Sdk from './Sdk';
 
 const styles = theme => ({
   root: {
     padding: theme.spacing.unit * 3,
     width: theme.custom.contentAreaWidth
   },
-  boxTop1: {
-    borderTop: theme.custom.overviewBox1.borderStyle,
-    borderLeft: theme.custom.overviewBox1.borderStyle,
-    borderRight: theme.custom.overviewBox1.borderStyle,
-    padding: theme.spacing.unit * 2,
-    backgroundColor: theme.custom.overviewBox1.backColorTop,
-    color: theme.palette.getContrastText(theme.custom.overviewBox1.backColorTop)
-  },
-  boxBottom1: {
-    border: theme.custom.overviewBox1.borderStyle,
-    backgroundColor: theme.custom.overviewBox1.backColorBottom,
-    color: theme.palette.getContrastText(
-      theme.custom.overviewBox1.backColorBottom
-    ),
-    padding: theme.spacing.unit * 2,
-    paddingTop: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit
-  },
-  boxBottom1Link: {
-    color: theme.palette.getContrastText(
-      theme.custom.overviewBox1.backColorBottom
-    ),
-    textDecoration: "none"
-  },
-  boxTop2: {
-    borderTop: theme.custom.overviewBox2.borderStyle,
-    borderLeft: theme.custom.overviewBox2.borderStyle,
-    borderRight: theme.custom.overviewBox2.borderStyle,
-    padding: theme.spacing.unit * 2,
-    backgroundColor: theme.custom.overviewBox2.backColorTop,
-    color: theme.palette.getContrastText(theme.custom.overviewBox2.backColorTop)
-  },
-  boxBottom2: {
-    border: theme.custom.overviewBox2.borderStyle,
-    backgroundColor: theme.custom.overviewBox2.backColorBottom,
-    color: theme.palette.getContrastText(
-      theme.custom.overviewBox2.backColorBottom
-    ),
-    padding: theme.spacing.unit * 2,
-    paddingTop: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit
-  },
-  boxBottom2Link: {
-    color: theme.palette.getContrastText(
-      theme.custom.overviewBox2.backColorBottom
-    ),
-    textDecoration: "none"
-  },
   iconClass: {
-    marginRight: 10
+    marginRight: 10,
+    color: theme.palette.secondary.main,
   },
-  boxWrapper: {
-    marginLeft: 10
+  boxBadge: {
+    background: theme.palette.grey["A400"],
+    color: theme.palette.getContrastText(theme.palette.grey["A400"]),
+    fontSize: theme.typography.h5.fontSize,
+    padding: theme.spacing.unit,
+    width: 30,
+    height: 30,
+    marginRight: 20,
+    textAlign: 'center',
   },
-  veryBigText: {
-    fontSize: 60
+  subscriptionBox: {
+    paddingLeft: theme.spacing.unit*2,
   },
-  LinkToSomething1: {
-    color: theme.palette.getContrastText(
-      theme.custom.overviewBox1.backColorTop
-    ),
-    fontSize: 11
+  linkStyle: {
+    color: theme.palette.getContrastText(theme.palette.background.default),
+    fontSize: theme.typography.fontSize,
   },
-  boxTopSize: {
-    minHeight: 115
+  subscriptionTop: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  resourceWrapper: {
+    height: 192,
+    overflow: 'auto',
+  },
+  actionPanel: {
+    justifyContent: 'flex-start',
   }
 });
+const ExpansionPanelSummary = withStyles({
+  root: {
+    borderBottom: '1px solid rgba(0,0,0,.125)',
+    marginBottom: -1,
+    minHeight: 56,
+    '&$expanded': {
+      minHeight: 56,
+    },
+  },
+  content: {
+    '&$expanded': {
+      margin: '12px 0',
+    },
+    alignItems: 'center',
+  },
+  expanded: {},
+})(props => <MuiExpansionPanelSummary {...props} />);
+
+ExpansionPanelSummary.muiName = 'ExpansionPanelSummary';
 
 class Overview extends React.Component {
   state = {
@@ -91,276 +85,206 @@ class Overview extends React.Component {
   };
 
   render() {
-    const { classes, api } = this.props;
+    const { classes, theme } = this.props;
     const { value } = this.state;
     const apiId = this.props.match.params.api_uuid;
     return (
       <ApiContext.Consumer>
         {({ api, applicationsAvailable, subscribedApplications }) => (
           <Grid container className={classes.root} spacing={16}>
-            <Grid item xs={subscribedApplications.length === 0 ? 6 : 12}>
-              <Typography variant="h4" gutterBottom>
-                <CustomIcon
-                  strokeColor="#919191"
-                  className={classes.iconClass}
-                  width={30}
-                  height={30}
-                  icon="credentials"
-                />
-                Credentials
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                API Credentials are grouped in to applications. An application
-                is primarily used to decouple the consumer from the APIs. It
-                allows you to Generate and use a single key for multiple APIs
-                and subscribe multiple times to a single API with different SLA
-                levels.
-              </Typography>
-              <Grid container spacing={16}>
-                {subscribedApplications.length > 0 && (
-                  <Grid item xs={6}>
-                    <div
-                      className={classnames(
-                        classes.boxTop1,
-                        classes.boxTopSize
-                      )}
-                    >
-                      <Typography variant="h6" gutterBottom>
-                        Subscribed Applications
-                      </Typography>
-                      <Typography
-                        component="h2"
-                        variant="h1"
-                        className={classes.veryBigText}
-                      >
-                        {subscribedApplications.length}
-                      </Typography>
-                    </div>
-                    <div className={classes.boxBottom1}>
-                      <Link to="/" className={classes.boxBottom1Link}>
-                        View Subscriptions >
-                      </Link>
-                    </div>
-                  </Grid>
-                )}
-                <Grid item xs={subscribedApplications.length > 0 ? 6 : 12}>
-                  <div
-                    className={classnames(classes.boxTop1, classes.boxTopSize)}
-                  >
-                    <Typography variant="h6" gutterBottom>
-                      Subscribe to an Application
-                    </Typography>
-                    {applicationsAvailable.length > 0 && (
-                      <React.Fragment>
-                        <Link to="/" className={classes.LinkToSomething1}>
-                          With an Existing Application
-                        </Link>
-                        <Typography variant="caption" gutterBottom>
-                          {applicationsAvailable.length} Available
-                        </Typography>
-                      </React.Fragment>
-                    )}
-                    <Link to="/" className={classes.LinkToSomething1}>
-                      With a New Application
-                    </Link>
-                  </div>
-                  <div className={classes.boxBottom1}>
-                    <Link to="/" className={classes.boxBottom1Link}>
-                      Subscribe >
-                    </Link>
-                  </div>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={subscribedApplications.length === 0 ? 6 : 12}>
-              <Typography variant="h4" gutterBottom style={{ marginTop: 10 }}>
-                <CustomIcon
-                  strokeColor="#919191"
-                  className={classes.iconClass}
-                  width={30}
-                  height={30}
-                  icon="test"
-                />
-                Test
-              </Typography>
-              <div
-                className={classes.boxTop2}
-                style={{
-                  marginTop: subscribedApplications.length === 0 ? 55 : 0,
-                  minHeight: subscribedApplications.length === 0 ? 115 : 0
-                }}
-              >
-                <Typography variant="body1" gutterBottom>
-                  You can use the embedded swagger console to test this API.
-                </Typography>
-              </div>
-              <div className={classes.boxBottom2}>
-                <Link to="/" className={classes.boxBottom2Link}>
-                  Go to Swagger Console >
-                </Link>
-              </div>
-            </Grid>
-            {/* Docs */}
-
-            <Grid item xs={subscribedApplications.length === 0 ? 6 : 12}>
-              <Typography variant="h4" gutterBottom>
-                <CustomIcon
-                  strokeColor="#919191"
-                  className={classes.iconClass}
-                  width={30}
-                  height={30}
-                  icon="docs"
-                />
-                Docs
-              </Typography>
-              <Grid container spacing={16}>
-                {subscribedApplications.length > 0 && (
-                  <Grid item xs={6}>
-                    <div
-                      className={classnames(
-                        classes.boxTop1,
-                        classes.boxTopSize
-                      )}
-                    >
-                      <Typography variant="h6" gutterBottom>
-                        Latest Update
-                      </Typography>
-                      <Link to="/" className={classes.LinkToSomething1}>
-                        aboutmyApi.pdf
-                      </Link>
-                      <Typography variant="caption" gutterBottom>
-                        Last updated 23min ago.
-                      </Typography>
-                    </div>
-                    <div className={classes.boxBottom1}>
-                      <Link to="/" className={classes.boxBottom1Link}>
-                        View All DOCS >
-                      </Link>
-                    </div>
-                  </Grid>
-                )}
-                <Grid item xs={subscribedApplications.length > 0 ? 6 : 12}>
-                  <div
-                    className={classnames(classes.boxTop1, classes.boxTopSize)}
-                  >
-                    <Typography variant="h6" gutterBottom>
-                      Docs for this API
-                    </Typography>
-                    <Typography
-                        component="h2"
-                        variant="h1"
-                        className={classes.veryBigText}
-                        >
-                        2
-                    </Typography>
-                  </div>
-                  <div className={classes.boxBottom1}>
-                    <Link to="/" className={classes.boxBottom1Link}>
-                      View All Docs >
-                    </Link>
-                  </div>
-                </Grid>
-              </Grid>
-            </Grid>
-
-            {/* Comments */}
-
             <Grid item xs={6}>
-              <Typography variant="h4" gutterBottom style={{ marginTop: 10 }}>
-                <CustomIcon
-                  strokeColor="#919191"
-                  className={classes.iconClass}
-                  width={30}
-                  height={30}
-                  icon="comments"
-                />
-                Comments
-              </Typography>
-
-              <div className={classnames(classes.boxTop2, classes.boxTopSize)}>
-                <Typography variant="h6" gutterBottom>
-                  Comments For This API
-                </Typography>
-                <Typography
-                  component="h2"
-                  variant="h1"
-                  className={classes.veryBigText}
-                >
-                  21
-                </Typography>
-              </div>
-              <div className={classes.boxBottom2}>
-                <Link to="/" className={classes.boxBottom2Link}>
-                  Go To Comments >
-                </Link>
-              </div>
+              <ExpansionPanel defaultExpanded={true}>
+                <ExpansionPanelSummary>
+                  <CustomIcon
+                    strokeColor={theme.palette.secondary.main}
+                    className={classes.iconClass}
+                    width={24}
+                    height={24}
+                    icon="credentials"
+                  />
+                  
+                  <Typography className={classes.heading} variant="h6">API Credentials</Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                  <Grid container className={classes.root} spacing={16}>
+                    <Grid item xs={12}>
+                      <div className={classes.subscriptionTop}>
+                        <div className={classes.boxBadge}>
+                          2
+                        </div>
+                        <Link to="/" className={classes.linkStyle}>Subscriptions</Link>
+                      </div>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2">Subscribe to an Application</Typography>
+                      <div className={classes.subscriptionBox}>
+                        <Link to="/" className={classes.linkStyle}>With an Existing Application</Link>
+                        <Typography variant="caption">Subscribe to an Application</Typography>
+                        <Link to="/" className={classes.linkStyle}>With a New Application</Link>
+                      </div>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography>
+                        API Credentials are grouped in to applications. An application is primarily
+                         used to decouple the consumer from the APIs. It allows you to Generate and use 
+                         a single key for multiple APIs and subscribe multiple times to a single API with different SLA levels.
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
             </Grid>
-            {/* Forum */}
             <Grid item xs={6}>
-              <Typography variant="h4" gutterBottom style={{ marginTop: 10 }}>
-                <CustomIcon
-                  strokeColor="#919191"
-                  className={classes.iconClass}
-                  width={30}
-                  height={30}
-                  icon="comments"
-                />
-                Forum
-              </Typography>
-
-              <div className={classnames(classes.boxTop2, classes.boxTopSize)}>
-                <Typography variant="h6" gutterBottom>
-                  Forum Topics For This API
-                </Typography>
-                <Typography
-                  component="h2"
-                  variant="h1"
-                  className={classes.veryBigText}
-                >
-                  2
-                </Typography>
-              </div>
-              <div className={classes.boxBottom2}>
-                <Link to="/" className={classes.boxBottom1Link}>
-                  View Forum >
-                </Link>
-              </div>
+              <ExpansionPanel defaultExpanded={true}>
+                <ExpansionPanelSummary>
+                  <CustomIcon
+                    strokeColor={theme.palette.secondary.main}
+                    className={classes.iconClass}
+                    width={24}
+                    height={24}
+                    icon="credentials"
+                  />
+                  
+                  <Typography className={classes.heading} variant="h6">Resources</Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails className={classes.resourceWrapper}>
+                    {api && <Resources api={api}/>}
+                </ExpansionPanelDetails>
+                <Divider />
+                <ExpansionPanelActions className={classes.actionPanel}>
+                  <Button size="small" color="primary">
+                    Show More >> 
+                  </Button>
+                </ExpansionPanelActions>
+              </ExpansionPanel>
             </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h4" gutterBottom style={{ marginTop: 10 }}>
-                <CustomIcon
-                  strokeColor="#919191"
-                  className={classes.iconClass}
-                  width={30}
-                  height={30}
-                  icon="sdk"
-                />
-                SDK Generation
-              </Typography>
-              <div
-                className={classes.boxTop1}
-                style={{
-                  marginTop: subscribedApplications.length === 0 ? 55 : 0,
-                  minHeight: subscribedApplications.length === 0 ? 115 : 0
-                }}
-              >
-                <Typography variant="body1" gutterBottom>
-                    If you wants to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.                
-                </Typography>
-                <Link to="/" className={classes.LinkToSomething1}>
-                    PYTHON, ANDROID, JAVA
-                </Link>
-                <Typography variant="caption" gutterBottom>
-                    Supported lanuage/frameworks
-                </Typography>
-
-              </div>
-              <div className={classes.boxBottom1}>
-                <Link to="/" className={classes.boxBottom1Link}>
-                    Download SDKs >
-                </Link>
-              </div>
+            <Grid item xs={6}>
+              <ExpansionPanel defaultExpanded={true}>
+                <ExpansionPanelSummary>
+                  <CustomIcon
+                    strokeColor={theme.palette.secondary.main}
+                    className={classes.iconClass}
+                    width={24}
+                    height={24}
+                    icon="comments"
+                  />
+                  
+                  <Typography className={classes.heading} variant="h6">Comments</Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails className={classes.resourceWrapper}>
+                    {api && <Comments apiId={api.id} showLatest={true} />}
+                </ExpansionPanelDetails>
+                <Divider />
+                <ExpansionPanelActions className={classes.actionPanel}>
+                  <Button size="small" color="primary">
+                    Show More >> 
+                  </Button>
+                </ExpansionPanelActions>
+              </ExpansionPanel>
             </Grid>
+            <Grid item xs={6}>
+              <ExpansionPanel defaultExpanded={true}>
+                <ExpansionPanelSummary>
+                  <CustomIcon
+                    strokeColor={theme.palette.secondary.main}
+                    className={classes.iconClass}
+                    width={24}
+                    height={24}
+                    icon="sdk"
+                  />
+                  
+                  <Typography className={classes.heading} variant="h6">SDK Generation</Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails className={classes.resourceWrapper}>
+                    
+
+                <Grid container className={classes.root} spacing={16}>
+                    {api && <Sdk apiId={api.id} onlyIcons={true}  />}
+                    <Grid item xs={12}>
+                      <Typography>
+                      If you wants to create a software application to consume the subscribed APIs, 
+                      you can generate client side SDK for a supported language/framework and use 
+                      it as a start point to write the software application.
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </ExpansionPanelDetails>
+                <Divider />
+                <ExpansionPanelActions className={classes.actionPanel}>
+                  <Button size="small" color="primary">
+                    Show More >> 
+                  </Button>
+                </ExpansionPanelActions>
+              </ExpansionPanel>
+            </Grid>
+            <Grid item xs={6}>
+              <ExpansionPanel defaultExpanded={true}>
+                  <ExpansionPanelSummary>
+                    <CustomIcon
+                      strokeColor={theme.palette.secondary.main}
+                      className={classes.iconClass}
+                      width={24}
+                      height={24}
+                      icon="docs"
+                    />
+                    
+                    <Typography className={classes.heading} variant="h6">Documents</Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Grid container className={classes.root} spacing={16}>
+                      <Grid item xs={12}>
+                        <div className={classes.subscriptionTop}>
+                          <div className={classes.boxBadge}>
+                            3
+                          </div>
+                          <Link to="/" className={classes.linkStyle}>Documents</Link>
+                        </div>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2">Last Updated</Typography>
+                        <div className={classes.subscriptionBox}>
+                          <Link to="/" className={classes.linkStyle}>AboutmyApi.pdf</Link>
+                          <Typography variant="caption">Last updated 21 minutes ago</Typography>
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+              </Grid>
+              <Grid item xs={6}>
+              <ExpansionPanel defaultExpanded={true}>
+                  <ExpansionPanelSummary>
+                    <CustomIcon
+                      strokeColor={theme.palette.secondary.main}
+                      className={classes.iconClass}
+                      width={24}
+                      height={24}
+                      icon="docs"
+                    />
+                    
+                    <Typography className={classes.heading} variant="h6">Forum</Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails>
+                    <Grid container className={classes.root} spacing={16}>
+                      <Grid item xs={12}>
+                        <div className={classes.subscriptionTop}>
+                          <div className={classes.boxBadge}>
+                            1
+                          </div>
+                          <Link to="/" className={classes.linkStyle}>Topic</Link>
+                        </div>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2">Last Updated</Typography>
+                        <div className={classes.subscriptionBox}>
+                          <Link to="/" className={classes.linkStyle}>Find pets fast</Link>
+                          <Typography variant="caption">Last updated 2 days ago</Typography>
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+              </Grid>
           </Grid>
         )}
       </ApiContext.Consumer>
@@ -369,7 +293,8 @@ class Overview extends React.Component {
 }
 
 Overview.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(Overview);
+export default withStyles(styles, {withTheme: true})(Overview);

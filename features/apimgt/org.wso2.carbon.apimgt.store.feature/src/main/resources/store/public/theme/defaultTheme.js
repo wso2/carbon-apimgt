@@ -10,7 +10,7 @@ const Configurations = {
                 },
                 secondary: {
                     light: '#0066ff',
-                    main: '#a2ecf5',
+                    main: '#99c573',
                     // dark: will be calculated from palette.secondary.main,
                     contrastText: '#ffcc00',
                 },
@@ -45,16 +45,7 @@ const Configurations = {
                 adminRole: 'admin',
                 commentsLimit: 5,
                 maxCommentLength: 1300,
-                overviewBox1 :{
-                    backColorBottom: '#6a4eb1',
-                    backColorTop: '#ffffff',
-                    borderStyle: 'solid 1px #cccccc',
-                },
-                overviewBox2 :{
-                    backColorBottom: '#15b8cf',
-                    backColorTop: '#ffffff',
-                    borderStyle: 'solid 1px #cccccc',
-                },
+                resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
             },
         },
         dark: {
