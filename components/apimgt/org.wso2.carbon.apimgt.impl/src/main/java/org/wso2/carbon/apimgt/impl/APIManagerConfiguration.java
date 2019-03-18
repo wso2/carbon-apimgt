@@ -386,21 +386,26 @@ public class APIManagerConfiguration {
                     OMElement omElement = (OMElement) iterator.next();
                     Iterator attributes = omElement.getChildElements();
                     JSONObject jsonObject = new JSONObject();
-                    while (attributes.hasNext()) {
-                        OMElement attribute = (OMElement) attributes.next();
-                        if (attribute.getLocalName().equals("Name")) {
-                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE, attribute.getText());
-                        } else if (attribute.getLocalName().equals("Description")) {
-                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION, attribute.getText());
-                        }
-                    }
-                    String isRequired = omElement.getAttributeValue(new QName("required"));
-                    if (isRequired != null) {
-                        jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, Boolean.parseBoolean(isRequired));
-                    }
                     String isHidden = omElement.getAttributeValue(new QName("hidden"));
+                    String isRequired = omElement.getAttributeValue(new QName("required"));
                     if (isHidden != null) {
                         jsonObject.put(APIConstants.ApplicationAttributes.HIDDEN, Boolean.parseBoolean(isHidden));
+                    }
+                    while(attributes.hasNext()) {
+                        OMElement attribute = (OMElement) attributes.next();
+                        if(attribute.getLocalName().equals("Name")) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE, attribute.getText());
+                        }
+                        else if(attribute.getLocalName().equals("Description")) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION, attribute.getText());
+                        }
+                        else if(attribute.getLocalName().equals("Default") && Boolean.parseBoolean(isRequired)) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.DEFAULT, attribute.getText());
+                        }
+
+                    }
+                    if (isRequired != null) {
+                        jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, Boolean.parseBoolean(isRequired));
                     }
                     applicationAttributes.add(jsonObject);
                 }
