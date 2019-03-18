@@ -1152,7 +1152,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 Documentation doc = APIUtil.getDocumentation(docArtifact);
                 Date contentLastModifiedDate;
                 Date docLastModifiedDate = docResource.getLastModified();
-                if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
+                if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType()) || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
                     String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
                     contentLastModifiedDate = registry.get(contentPath).getLastModified();
                     doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
@@ -1218,6 +1218,15 @@ public abstract class AbstractAPIManager implements APIManager {
                             //do nothing. Permission not allowed to access the doc.
                         }
 
+                    } else if (Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
+                        String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                        try {
+                            contentLastModifiedDate = registryType.get(contentPath).getLastModified();
+                            doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
+                                    contentLastModifiedDate : docLastModifiedDate));
+                        } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
+                            //do nothing. Permission not allowed to access the doc.
+                        }
                     } else {
                         doc.setLastUpdated(docLastModifiedDate);
                     }

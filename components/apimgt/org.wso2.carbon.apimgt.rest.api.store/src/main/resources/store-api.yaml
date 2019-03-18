@@ -2519,6 +2519,7 @@ definitions:
         type: string
         enum:
           - INLINE
+          - MARKDOWN
           - URL
           - FILE
         example: INLINE

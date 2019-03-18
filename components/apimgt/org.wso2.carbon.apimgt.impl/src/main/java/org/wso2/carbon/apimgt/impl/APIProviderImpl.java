@@ -1088,6 +1088,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                                                 .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
                             }
+                            if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
+                                api.setEnvironments(
+                                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                            }
                             Map<String, String> failedToPublishEnvironments = publishToGateway(api);
                             if (!failedToPublishEnvironments.isEmpty()) {
                                 Set<String> publishedEnvironments =
@@ -1299,7 +1304,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             String documentationPath = APIUtil.getAPIDocPath(api.getId()) + doc.getName();
                             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                                     visibleRoles, documentationPath, registry);
-                            if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
+                            if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType()) || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
 
                                 String contentPath = APIUtil.getAPIDocContentPath(api.getId(), doc.getName());
                                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),

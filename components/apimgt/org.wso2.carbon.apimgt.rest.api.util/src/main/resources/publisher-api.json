@@ -4254,6 +4254,7 @@
                     "type": "string",
                     "enum": [
                         "INLINE",
+                        "MARKDOWN",
                         "URL",
                         "FILE"
                     ],

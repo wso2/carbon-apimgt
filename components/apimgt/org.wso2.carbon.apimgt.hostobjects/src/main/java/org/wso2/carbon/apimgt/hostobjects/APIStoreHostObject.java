@@ -2564,7 +2564,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("sourceType", row, strSourceType);
                     row.put("summary", row, documentation.getSummary());
                     String content;
-                    if (strSourceType.equals("INLINE")) {
+                    if (strSourceType.equals("INLINE") || strSourceType.equals("MARKDOWN")) {
                         content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
                         row.put("content", row, content);
                     }

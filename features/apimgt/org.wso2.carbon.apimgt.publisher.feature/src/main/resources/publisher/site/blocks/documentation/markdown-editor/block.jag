@@ -1,0 +1,6 @@
+<%
+jagg.block("documentation/markdown-editor", {
+    initializer:function (data) {
+    }
+});
+%>

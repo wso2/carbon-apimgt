@@ -301,7 +301,7 @@ public class APIGatewayManager {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
-                            if ("INLINE".equals(api.getImplementation())) {
+                            if ("INLINE".equals(api.getImplementation()) || "MARKDOWN".equals(api.getImplementation())) {
                                 client.deleteApi(tenantDomain, api.getId());
                                 undeployCustomSequences(client, api, tenantDomain, environment);
                             } else {

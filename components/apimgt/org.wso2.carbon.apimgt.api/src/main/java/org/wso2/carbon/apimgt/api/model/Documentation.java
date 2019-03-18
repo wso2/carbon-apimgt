@@ -133,7 +133,7 @@ public class Documentation implements Serializable {
     }
 
     public enum DocumentSourceType {
-        INLINE("In line"), URL("URL"), FILE("File");
+        INLINE("In line"), MARKDOWN("Markdown"), URL("URL"), FILE("File");
 
         private String type;
 
