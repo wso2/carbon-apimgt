@@ -24,6 +24,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -122,6 +123,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -3019,6 +3021,44 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleApplicationNameContainSpacesException("Application name " +
                                                             "cannot contain leading or trailing white spaces");
         }
+
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
+        Map<String, String> applicationAttributes = application.getApplicationAttributes();
+        if (applicationAttributes == null) {
+            applicationAttributes = new HashMap<String, String>();
+        }
+        Set<String> keySet = new HashSet<>();
+
+        if (applicationAttributesFromConfig != null) {
+
+            for (Object object : applicationAttributesFromConfig) {
+                JSONObject attribute = (JSONObject) object;
+                Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
+                Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
+                String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+                String defaultAttr = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
+                keySet.add(attributeName);
+                if (BooleanUtils.isTrue(required)) {
+                    if (BooleanUtils.isTrue(hidden)) {
+                        String oldValue = applicationAttributes.put(attributeName, defaultAttr);
+                        if (StringUtils.isNotEmpty(oldValue)) {
+                            log.info("Replace old value: " + oldValue + " and with default value: " + defaultAttr +
+                                    " for the hidden application attribute: " + attributeName);
+                        }
+                    } else if (!applicationAttributes.keySet().contains(attributeName)) {
+                        if (StringUtils.isNotEmpty(defaultAttr)) {
+                            applicationAttributes.put(attributeName, defaultAttr);
+                        } else {
+                            handleException("Bad Request");
+                        }
+                    }
+                }
+            }
+            application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+        } else {
+            application.setApplicationAttributes(null);
+        }
+
         String regex = "^[a-zA-Z0-9 ._-]*$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(application.getName());
@@ -3141,6 +3181,46 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Matcher matcher = pattern.matcher(application.getName());
         if (!matcher.find()) {
             handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
+        }
+
+        String userId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
+        Map<String, String> applicationAttributes = application.getApplicationAttributes();
+        Map<String, String> existingApplicationAttributes = existingApp.getApplicationAttributes();
+        Set<String> keySet = new HashSet<>();
+
+        if (applicationAttributesFromConfig != null) {
+
+            for (Object object : applicationAttributesFromConfig) {
+                JSONObject attribute = (JSONObject) object;
+                Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
+                Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
+                String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+                String defaultAttr = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
+                keySet.add(attributeName);
+                if (existingApplicationAttributes.containsKey(attributeName)) {
+                    defaultAttr = existingApplicationAttributes.get(attributeName);
+                }
+                if (BooleanUtils.isTrue(required)) {
+                    if (BooleanUtils.isTrue(hidden)) {
+                        String oldValue = applicationAttributes.put(attributeName, defaultAttr);
+                        if (StringUtils.isNotEmpty(oldValue)) {
+                            log.info("Replace old value: " + oldValue + " and with default value: " + defaultAttr +
+                                    " for the hidden application attribute: " + attributeName);
+                        }
+                    } else if (!applicationAttributes.keySet().contains(attributeName)) {
+                        if (StringUtils.isNotEmpty(defaultAttr)) {
+                            applicationAttributes.put(attributeName, defaultAttr);
+                        } else {
+                            handleException("Bad Request");
+                        }
+                    }
+                }
+            }
+            application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+        } else {
+            application.setApplicationAttributes(null);
         }
 
         apiMgtDAO.updateApplication(application);
@@ -5277,5 +5357,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return docMap;
+    }
+
+    private Map<String, String> validateApplicationAttributes(Map<String, String> applicationAttributes, Set keys) {
+
+        Iterator iterator = applicationAttributes.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = (String) iterator.next();
+            if (!keys.contains(key)) {
+                iterator.remove();
+                applicationAttributes.remove(key);
+            }
+        }
+        return applicationAttributes;
     }
 }
