@@ -40,7 +40,7 @@ include("/jagg/jagg.jag");
         result = mod.login(username, request.getParameter("password"),tenant);
         if (result.error) {
             obj = {
-                error:result.error,
+                error:true,
                 message:result.message
             };
         } else {
