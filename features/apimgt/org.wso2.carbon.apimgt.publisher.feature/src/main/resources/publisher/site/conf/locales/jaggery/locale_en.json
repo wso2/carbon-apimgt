@@ -115,7 +115,7 @@
     "By Status [Syntax - status:xxxx ] or ": "By Status [Syntax - status:xxxx ] or ",
     "By Subcontext [Syntax - subcontext:xxxx ] ": "By Subcontext [Syntax - subcontext:xxxx ] ",
     "CORS configuration": "CORS configuration",
-    "Cache Timeout (seconds)": "Cache Cache Timeout (seconds)",
+    "Cache Timeout (seconds)": "Cache Timeout (seconds)",
     "Cancel all the unsaved changes and close this tab": "Cancel all the unsaved changes and close this tab",
     "Cancel": "Cancel",
     "Certificate deleted successfully": "Certificate deleted successfully",
