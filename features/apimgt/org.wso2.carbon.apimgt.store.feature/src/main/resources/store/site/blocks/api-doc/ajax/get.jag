@@ -186,7 +186,7 @@ var log = new Log();
                 var re = /\/$/g
                 host = domains[key].replace(re, "");
                 //remove tenant context
-                basePath = jsonObj.basePath.replace("/t/"+String(tenantDomain),"");
+                basePath = basePath.replace("/t/"+String(tenantDomain),"");
             }
         }
     	else if (urlArr.length > 0 ) { //assign default value to host with first environment address
