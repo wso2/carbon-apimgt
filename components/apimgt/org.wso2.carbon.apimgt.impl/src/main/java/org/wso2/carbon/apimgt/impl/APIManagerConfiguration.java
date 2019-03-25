@@ -380,33 +380,33 @@ public class APIManagerConfiguration {
                 setThrottleProperties(serverConfig);
             } else if (APIConstants.WorkflowConfigConstants.WORKFLOW.equals(localName)){
                 setWorkflowProperties(serverConfig);
-            } else if (APIConstants.ApplicationAttributes.APPLICATION_ATTRIBUTES.equals(localName)) {
+            } else if (APIConstants.ApplicationAttributes.APPLICATION_ATTRIBUTES.equals(localName)){
                 Iterator iterator = element.getChildrenWithLocalName(APIConstants.ApplicationAttributes.ATTRIBUTE);
                 while (iterator.hasNext()) {
                     OMElement omElement = (OMElement) iterator.next();
                     Iterator attributes = omElement.getChildElements();
                     JSONObject jsonObject = new JSONObject();
-                    String isHidden = omElement.getAttributeValue(new QName("hidden"));
-                    String isRequired = omElement.getAttributeValue(new QName("required"));
-                    if (isHidden != null) {
-                        jsonObject.put(APIConstants.ApplicationAttributes.HIDDEN, Boolean.parseBoolean(isHidden));
-                    }
-                    while(attributes.hasNext()) {
+                    boolean isHidden = Boolean.parseBoolean(omElement.getAttributeValue(new QName("hidden")));
+                    boolean isRequired = Boolean.parseBoolean(omElement.getAttributeValue(new QName("required")));
+                    jsonObject.put(APIConstants.ApplicationAttributes.HIDDEN, isHidden);
+                    while(attributes.hasNext()){
                         OMElement attribute = (OMElement) attributes.next();
-                        if(attribute.getLocalName().equals("Name")) {
-                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE, attribute.getText());
+                        if(attribute.getLocalName().equals("Name")){
+                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE,attribute.getText());
                         }
-                        else if(attribute.getLocalName().equals("Description")) {
-                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION, attribute.getText());
+                        else if(attribute.getLocalName().equals("Description")){
+                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION,attribute.getText());
                         }
-                        else if(attribute.getLocalName().equals("Default") && Boolean.parseBoolean(isRequired)) {
-                            jsonObject.put(APIConstants.ApplicationAttributes.DEFAULT, attribute.getText());
+                        else if(attribute.getLocalName().equals("Default") && isRequired){
+                            jsonObject.put(APIConstants.ApplicationAttributes.DEFAULT,attribute.getText());
                         }
 
                     }
-                    if (isRequired != null) {
-                        jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, Boolean.parseBoolean(isRequired));
+                    if (isHidden && isRequired && !jsonObject.containsKey(APIConstants.ApplicationAttributes.DEFAULT)) {
+                        throw new APIManagementException("A default value should be given for required, hidden" +
+                                " application attributes.");
                     }
+                    jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, isRequired);
                     applicationAttributes.add(jsonObject);
                 }
             }
