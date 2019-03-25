@@ -49,7 +49,7 @@ public class ConfiguratorTest {
     private String carbonConfigDirPath;
     private String gatewayConfigPath;
     private String args[] = { "test-email@test.com", "TestTenant", "TestPassword" };
-    private static final String TOKEN = "token";
+    private static final String TOKEN = "$token";
 
     @Before
     public void setUp() throws Exception {
