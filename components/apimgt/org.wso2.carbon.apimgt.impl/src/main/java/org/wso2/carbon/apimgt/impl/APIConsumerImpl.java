@@ -3048,6 +3048,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             handleException("Bad Request");
                         }
                     }
+                } else if (hidden) {
+                    applicationAttributes.remove(attributeName);
                 }
             }
             application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, keySet));
@@ -3189,6 +3191,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (applicationAttributesFromConfig != null) {
 
             for (Object object : applicationAttributesFromConfig) {
+                boolean isExistingValue = false;
                 JSONObject attribute = (JSONObject) object;
                 Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
                 Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
@@ -3196,14 +3199,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String defaultAttr = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
                 keySet.add(attributeName);
                 if (existingApplicationAttributes.containsKey(attributeName)) {
+                    isExistingValue = true;
                     defaultAttr = existingApplicationAttributes.get(attributeName);
                 }
                 if (BooleanUtils.isTrue(required)) {
                     if (BooleanUtils.isTrue(hidden)) {
                         String oldValue = applicationAttributes.put(attributeName, defaultAttr);
                         if (StringUtils.isNotEmpty(oldValue)) {
-                            log.info("Replace old value: " + oldValue + " and with default value: " + defaultAttr +
-                                    " for the hidden application attribute: " + attributeName);
+                            if (isExistingValue) {
+                                log.info("Replace old value: " + oldValue + " and with existing value: " +
+                                        defaultAttr + " for the hidden application attribute: " + attributeName);
+                            } else {
+                                log.info("Replace old value: " + oldValue + " and with default value: " +
+                                        defaultAttr + " for the hidden application attribute: " + attributeName);
+                            }
                         }
                     } else if (!applicationAttributes.keySet().contains(attributeName)) {
                         if (StringUtils.isNotEmpty(defaultAttr)) {
@@ -3211,6 +3220,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         } else {
                             handleException("Bad Request");
                         }
+                    }
+                } else if (hidden) {
+                    if (isExistingValue) {
+                        applicationAttributes.put(attributeName, defaultAttr);
+                    } else {
+                        applicationAttributes.remove(attributeName);
                     }
                 }
             }
