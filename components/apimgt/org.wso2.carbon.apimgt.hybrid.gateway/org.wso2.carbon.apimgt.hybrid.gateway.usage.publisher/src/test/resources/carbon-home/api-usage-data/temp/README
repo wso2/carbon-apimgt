@@ -1,0 +1,2 @@
+A folder to keep generated zip files while running the tests.
+The generated zip files will get deleted once the tests are completed.

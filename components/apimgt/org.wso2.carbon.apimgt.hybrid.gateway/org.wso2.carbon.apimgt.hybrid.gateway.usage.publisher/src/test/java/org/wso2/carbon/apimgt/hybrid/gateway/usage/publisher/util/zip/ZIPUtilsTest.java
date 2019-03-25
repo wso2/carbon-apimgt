@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.zip;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,9 @@ import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.constants.Constants
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * ZIPUtils Test Class
@@ -45,7 +49,7 @@ public class ZIPUtilsTest {
     @Test
     public void compressFile() throws Exception {
         String destPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
-                "api-usage-data/compressed/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip";
+                "api-usage-data/temp/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip";
         String srcPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
                 "api-usage-data/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91";
         ZIPUtils.compressFile(srcPath, destPath);
@@ -54,7 +58,7 @@ public class ZIPUtilsTest {
     @Test
     public void compressFile_throwsException() throws Exception {
         String destPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
-                "api-usage-data/compressed/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip";
+                "api-usage-data/temp/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip";
         String srcPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
                 "api-usage-data/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91";
         FileOutputStream fileOutputStream = Mockito.spy(new FileOutputStream(destPath));
@@ -62,4 +66,12 @@ public class ZIPUtilsTest {
         ZIPUtils.compressFile(srcPath, destPath);
     }
 
+    @AfterClass
+    public static void cleanUp() throws Exception {
+        //Deleting the file
+        String destPath = System.getProperty(Constants.CARBON_HOME) + File.separator +
+                "api-usage-data/temp/api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip";
+        Path filePath = Paths.get(destPath);
+        Files.delete(filePath);
+    }
 }
