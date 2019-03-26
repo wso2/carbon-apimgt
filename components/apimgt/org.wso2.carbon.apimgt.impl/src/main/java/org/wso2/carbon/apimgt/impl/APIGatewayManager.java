@@ -92,7 +92,14 @@ public class APIGatewayManager {
         if (api.getEnvironments() == null) {
             return failedEnvironmentsMap;
         }
+        long startTime;
+        long endTime;
+        if (debugEnabled) {
+            log.debug("API to be published: " + api.getId());
+            log.debug("Number of environments to be published to: " + api.getEnvironments().size());
+        }
         for (String environmentName : api.getEnvironments()) {
+            long startTimePublishToGateway = System.currentTimeMillis();
             Environment environment = environments.get(environmentName);
             //If the environment is removed from the configuration, continue without publishing
             if (environment == null) {
@@ -101,92 +108,55 @@ public class APIGatewayManager {
             APIGatewayAdminClient client;
             try {
                 client = new APIGatewayAdminClient(api.getId(), environment);
-			String operation;
-			// If the API exists in the Gateway
-			if (client.getApi(tenantDomain, api.getId()) != null) {
-
-				// If the Gateway type is 'production' and the production url
-				// has been removed
-				// Or if the Gateway type is 'sandbox' and the sandbox url has
-				// been removed.
-				if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil.isProductionEndpointsExists(api)) ||
-				    (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil.isSandboxEndpointsExists(api))) {
-					if (debugEnabled) {
-						log.debug("Removing API " + api.getId().getApiName() +
-						          " from Environment " + environment.getName() +
-						          " since its relevant URL has been removed.");
-					}
-					client.deleteApi(tenantDomain, api.getId());
-                    if(api.isPublishedDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
-                            client.deleteDefaultApi(tenantDomain, api.getId());
+                String operation;
+                long apiGetStartTime = System.currentTimeMillis();
+                APIData apiData = client.getApi(tenantDomain, api.getId());
+                endTime = System.currentTimeMillis();
+                if (debugEnabled) {
+                    log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
+                }
+                // If the API exists in the Gateway
+                if (apiData != null) {
+                    startTime = System.currentTimeMillis();
+                    // If the Gateway type is 'production' and the production url
+                    // has been removed
+                    // Or if the Gateway type is 'sandbox' and the sandbox url has
+                    // been removed.
+                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil.isProductionEndpointsExists(api)) ||
+                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil.isSandboxEndpointsExists(api))) {
+                        if (debugEnabled) {
+                            log.debug("Removing API " + api.getId().getApiName() +
+                                    " from Environment " + environment.getName() +
+                                    " since its relevant URL has been removed.");
                         }
-                    }
-					setSecureVaultProperty(client, api, tenantDomain, environment);
-					undeployCustomSequences(client, api,tenantDomain, environment);
-					unDeployClientCertificates(client, api, tenantDomain);
-				} else {
-					if (debugEnabled) {
-						log.debug("API exists, updating existing API " + api.getId().getApiName() +
-						          " in environment " + environment.getName());
-					}
-                    //Deploy the fault sequence first since it has to be available by the time the API is deployed.
-                    deployAPIFaultSequence(client, api, tenantDomain, environment);
-
-                    operation ="update";
-
-                    //Update the API
-                    if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
-                        client.updateApiForInlineScript(builder, tenantDomain, api.getId());
-                    }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
-                        client.updateApi(builder, tenantDomain, api.getId());
-                        client.saveEndpoint(api, builder, tenantDomain);
-                    }
-
-                    if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
-                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
-                            client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
-                        }else{
-                            client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                        client.deleteApi(tenantDomain, api.getId());
+                        if (api.isPublishedDefaultVersion()) {
+                            if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                                client.deleteDefaultApi(tenantDomain, api.getId());
+                            }
                         }
-                    }
-					setSecureVaultProperty(client, api, tenantDomain, environment);
+                        setSecureVaultProperty(client, api, tenantDomain, environment);
+                        undeployCustomSequences(client, api, tenantDomain, environment);
+                        unDeployClientCertificates(client, api, tenantDomain);
+                    } else {
+                        if (debugEnabled) {
+                            log.debug("API exists, updating existing API " + api.getId().getApiName() +
+                                    " in environment " + environment.getName());
+                        }
+                        //Deploy the fault sequence first since it has to be available by the time the API is deployed.
+                        deployAPIFaultSequence(client, api, tenantDomain, environment);
 
-                    //Update the custom sequences of the API
-					updateCustomSequences(client, api, tenantDomain, environment);
-                    updateClientCertificates(client, api, tenantDomain);
-				}
-			} else {
-				// If the Gateway type is 'production' and a production url has
-				// not been specified
-				// Or if the Gateway type is 'sandbox' and a sandbox url has not
-				// been specified
-				if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil.isProductionEndpointsExists(api)) ||
-				    (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil.isSandboxEndpointsExists(api))) {
+                        operation = "update";
 
-					if (debugEnabled) {
-						log.debug("Not adding API to environment " + environment.getName() +
-						          " since its endpoint URL " + "cannot be found");
-					}
-				} else {
-					if (debugEnabled) {
-						log.debug("API does not exist, adding new API " + api.getId().getApiName() +
-						          " in environment " + environment.getName());
-					}
-                    //Deploy the fault sequence first since it has to be available by the time the API is deployed.
-                    deployAPIFaultSequence(client, api, tenantDomain, environment);
-                    deployClientCertificates(client, api, tenantDomain);
-                    if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
-                        //Add the API
-                        if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
-                            client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
-                        } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
-                                .equalsIgnoreCase(api.getImplementation())) {
-                            client.addApi(builder, tenantDomain, api.getId());
-                            client.addEndpoint(api, builder, tenantDomain);
+                        //Update the API
+                        if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)) {
+                            client.updateApiForInlineScript(builder, tenantDomain, api.getId());
+                        } else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)) {
+                            client.updateApi(builder, tenantDomain, api.getId());
+                            client.saveEndpoint(api, builder, tenantDomain);
                         }
 
-                        if (api.isDefaultVersion()) {
+                        if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) {//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
                             if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
                                 client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
                             } else {
@@ -195,14 +165,74 @@ public class APIGatewayManager {
                         }
                         setSecureVaultProperty(client, api, tenantDomain, environment);
 
-                        //Deploy the custom sequences of the API.
-                        deployCustomSequences(client, api, tenantDomain, environment);
-                    } else {
-                        deployWebsocketAPI(api,client);
+                        long customSeqStartTime = System.currentTimeMillis();
+                        //Update the custom sequences of the API
+                        updateCustomSequences(client, api, tenantDomain, environment);
+                        endTime = System.currentTimeMillis();
+                        if (debugEnabled) {
+                            log.debug("Time taken to deploy custom Sequences: " +
+                                    (endTime - customSeqStartTime) / 1000 + "  seconds");
+                        }
+                        updateClientCertificates(client, api, tenantDomain);
                     }
+                    endTime = System.currentTimeMillis();
+                    if (debugEnabled) {
+                        log.debug("Publishing API (if the API exists in the Gateway) took " +
+                                (endTime - startTime) / 1000 + "  seconds");
+                    }
+                } else {
+                    // If the Gateway type is 'production' and a production url has
+                    // not been specified
+                    // Or if the Gateway type is 'sandbox' and a sandbox url has not
+                    // been specified
+                    startTime = System.currentTimeMillis();
+                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil.isProductionEndpointsExists(api)) ||
+                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil.isSandboxEndpointsExists(api))) {
 
-				}
-			}
+                        if (debugEnabled) {
+                            log.debug("Not adding API to environment " + environment.getName() +
+                                    " since its endpoint URL " + "cannot be found");
+                        }
+                    } else {
+                        if (debugEnabled) {
+                            log.debug("API does not exist, adding new API " + api.getId().getApiName() +
+                                    " in environment " + environment.getName());
+                        }
+                        //Deploy the fault sequence first since it has to be available by the time the API is deployed.
+                        deployAPIFaultSequence(client, api, tenantDomain, environment);
+                        deployClientCertificates(client, api, tenantDomain);
+                        if (!APIConstants.APIType.WS.toString().equals(api.getType())) {
+                            //Add the API
+                            if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+                                client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
+                            } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
+                                    .equalsIgnoreCase(api.getImplementation())) {
+                                client.addApi(builder, tenantDomain, api.getId());
+                                client.addEndpoint(api, builder, tenantDomain);
+                            }
+
+                            if (api.isDefaultVersion()) {
+                                if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                                    client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                                } else {
+                                    client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                                }
+                            }
+                            setSecureVaultProperty(client, api, tenantDomain, environment);
+
+                            //Deploy the custom sequences of the API.
+                            deployCustomSequences(client, api, tenantDomain, environment);
+                        } else {
+                            deployWebsocketAPI(api, client);
+                        }
+
+                    }
+                    endTime = System.currentTimeMillis();
+                    if (debugEnabled) {
+                        log.debug("Publishing API (if the API does not exist in the Gateway) took " +
+                                (endTime - startTime) / 1000 + "  seconds");
+                    }
+                }
             } catch (AxisFault axisFault) {
                 /*
                 didn't throw this exception to handle multiple gateway publishing
@@ -233,6 +263,11 @@ public class APIGatewayManager {
             } catch (CertificateManagementException ex) {
                 log.error("Error occurred while adding/updating client certificate in " + environmentName, ex);
                 failedEnvironmentsMap.put(environmentName, ex.getMessage());
+            }
+            long endTimePublishToGateway = System.currentTimeMillis();
+            if (debugEnabled) {
+                log.debug("Publishing to gateway : " + environmentName + " total time taken : " +
+                        (endTimePublishToGateway - startTimePublishToGateway) / 1000 + "  seconds");
             }
         }
         updateRemovedClientCertificates(api, tenantDomain);
@@ -266,7 +301,7 @@ public class APIGatewayManager {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
-                            if ("INLINE".equals(api.getImplementation())) {
+                            if ("INLINE".equals(api.getImplementation()) || "MARKDOWN".equals(api.getImplementation())) {
                                 client.deleteApi(tenantDomain, api.getId());
                                 undeployCustomSequences(client, api, tenantDomain, environment);
                             } else {

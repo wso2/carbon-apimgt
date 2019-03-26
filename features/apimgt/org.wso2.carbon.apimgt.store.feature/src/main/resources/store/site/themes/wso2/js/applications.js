@@ -478,7 +478,7 @@ $("#subscription-actions").each(function(){
         "ajax": {
             "url": jagg.getBaseUrl()+ "/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=getSubscriptionForApplicationById&app=" +
                 $("#subscription-table").attr('data-app') + "&appId=" + $("#subscription-table").attr('data-appid') +
-                "&groupId=" + $("#subscription-table").attr('data-grp'),
+                "&groupId=" + encodeURIComponent($("#subscription-table").attr('data-grp')),
             "dataSrc": function ( json ) {
             	if(json.apis.length > 0){
             		$('#subscription-table-wrap').removeClass("hide");            		

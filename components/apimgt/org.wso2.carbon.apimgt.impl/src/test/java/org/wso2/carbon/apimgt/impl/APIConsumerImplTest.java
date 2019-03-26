@@ -1103,35 +1103,14 @@ public class APIConsumerImplTest {
     @Test
     public void testGetGroupIds()
             throws APIManagementException, IllegalAccessException, InstantiationException, ClassNotFoundException {
-        PowerMockito.when(APIUtil.getGroupingExtractorImplementation())
-                .thenReturn(null, "org.wso2.carbon.apimgt.impl.SampleLoginPostExecutor");
+        PowerMockito.when(APIUtil.getGroupingExtractorImplementation()).thenReturn(null);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         Assert.assertNull(apiConsumer.getGroupIds("login"));
 
-        PowerMockito.when(APIUtil.getClassForName(Mockito.anyString())).thenThrow(ClassNotFoundException.class)
-                .thenThrow(IllegalAccessException.class).thenThrow(InstantiationException.class)
-                .thenReturn(SampleLoginPostExecutor.class);
-
-        try {
-            apiConsumer.getGroupIds("login");
-            Assert.fail("Class cast exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("is not found in runtime"));
-        }
-        try {
-            apiConsumer.getGroupIds("login");
-            Assert.fail("Illegal access exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(
-                    e.getMessage().contains("Error occurred while invocation of getGroupingIdentifier method"));
-        }
-        try {
-            apiConsumer.getGroupIds("login");
-            Assert.fail("Instantiation exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error occurred while instantiating"));
-        }
-        Assert.assertEquals(apiConsumer.getGroupIds("login")[0], "success");
+        String groupIdExtractorClass = "org.wso2.carbon.apimgt.impl.SampleLoginPostExecutor";
+        String[] array = new String[]{"a", "b", "c"};
+        PowerMockito.when(APIUtil.getGroupIdsFromExtractor("login", groupIdExtractorClass)).thenReturn(array);
+        apiConsumer.getGroupIds("login");
     }
 
     @Test

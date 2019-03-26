@@ -1131,10 +1131,6 @@ public class APIProviderHostObject extends ScriptableObject {
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
-        APIProvider apiProvider = getAPIProvider(thisObj);
-        if (apiProvider.getAPI(apiId) == null) {
-            return null;
-        }
 
         boolean isTenantFlowStarted = false;
         String apiJSON = null;
@@ -1144,6 +1140,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            if (apiProvider.getAPI(apiId) == null) {
+                return null;
             }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             int tenantId;
@@ -3534,6 +3534,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 fileHostObject = (FileHostObject) args[8];
             } else if (Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+            } else if (Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
             } else {
                 throw new APIManagementException("Invalid Source Type.");
             }
@@ -4293,6 +4295,8 @@ public class APIProviderHostObject extends ScriptableObject {
             } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.FILE);
                 fileHostObject = (FileHostObject) args[8];
+            } else if (Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
             } else {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
             }

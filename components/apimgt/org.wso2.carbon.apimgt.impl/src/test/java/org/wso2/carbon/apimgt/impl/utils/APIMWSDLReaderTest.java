@@ -156,6 +156,26 @@ public class APIMWSDLReaderTest {
         }
     }
 
+    @Test
+    public void testSetServiceDefinitionWithInvalidAPIGatewayEndpoints() throws Exception {
+        PowerMockito.mockStatic(APIUtil.class);
+        API api = getAPIForTesting();
+        String environmentName = "Production and Sandbox";
+        String environmentType = "hybrid";
+
+        APIMWSDLReader wsdlReader = new APIMWSDLReader("");
+        byte[] content = IOUtils.toByteArray(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("wsdls/invalidEndpointURL.wsdl"));
+        Definition definition = wsdlReader.getWSDLDefinitionFromByteContent(content, false);
+        try {
+            wsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);
+            wsdlReader.getWSDL(definition);
+            Assert.assertNotNull(definition.getServices());
+        } catch (APIManagementException e) {
+            Assert.fail("Unexpected exception occurred while updating service endpoint address");
+        }
+    }
+
     public static void doMockStatics() {
         Map<String, Environment> gatewayEnvironments = new HashMap<String, Environment>();
         Environment env1 = new Environment();

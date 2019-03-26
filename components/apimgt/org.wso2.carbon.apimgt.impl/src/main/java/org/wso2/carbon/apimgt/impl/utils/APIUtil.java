@@ -1330,6 +1330,8 @@ public final class APIUtil {
             } else if (Documentation.DocumentSourceType.FILE.name().equals(artifactAttribute)) {
                 docSourceType = Documentation.DocumentSourceType.FILE;
                 documentation.setFilePath(prependWebContextRoot(artifact.getAttribute(APIConstants.DOC_FILE_PATH)));
+            } else if (Documentation.DocumentSourceType.MARKDOWN.name().equals(artifactAttribute)) {
+                docSourceType = Documentation.DocumentSourceType.MARKDOWN;
             }
             documentation.setSourceType(docSourceType);
             if (documentation.getType() == DocumentationType.OTHER) {
@@ -1391,7 +1393,9 @@ public final class APIUtil {
             Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
             String artifactAttribute = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE);
 
-            if (artifactAttribute.equals(Documentation.DocumentSourceType.URL.name())) {
+            if (artifactAttribute.equals(Documentation.DocumentSourceType.MARKDOWN.name())) {
+                docSourceType = Documentation.DocumentSourceType.MARKDOWN;
+            } else if (artifactAttribute.equals(Documentation.DocumentSourceType.URL.name())) {
                 docSourceType = Documentation.DocumentSourceType.URL;
             } else if (artifactAttribute.equals(Documentation.DocumentSourceType.FILE.name())) {
                 docSourceType = Documentation.DocumentSourceType.FILE;
@@ -1412,7 +1416,7 @@ public final class APIUtil {
             }
 
         } catch (GovernanceException e) {
-            throw new APIManagementException("Failed to get documentation from artifact", e);
+            throw new APIManagementException("Failed to get documentation from artifact: " + e);
         }
         return documentation;
     }
@@ -1603,6 +1607,9 @@ public final class APIUtil {
             switch (sourceType) {
                 case INLINE:
                     sourceType = Documentation.DocumentSourceType.INLINE;
+                    break;
+                case MARKDOWN:
+                    sourceType = Documentation.DocumentSourceType.MARKDOWN;
                     break;
                 case URL:
                     sourceType = Documentation.DocumentSourceType.URL;
@@ -5858,6 +5865,22 @@ public final class APIUtil {
     }
 
     /**
+     * Read the REST API group id extractor class reference from api-manager.xml.
+     *
+     * @return REST API group id extractor class reference.
+     */
+    public static String getRESTApiGroupingExtractorImplementation() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String restApiGroupingExtractor = config
+                .getFirstProperty(APIConstants.API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION);
+        if (StringUtils.isEmpty(restApiGroupingExtractor)) {
+            restApiGroupingExtractor = getGroupingExtractorImplementation();
+        }
+        return restApiGroupingExtractor;
+    }
+
+    /**
      * This method will update the permission cache of the tenant which is related to the given usename
      *
      * @param username User name to find the relevant tenant
@@ -7954,4 +7977,47 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * This method is used to extact group ids from Extractor.
+     *
+     * @param response  login response String.
+     * @param groupingExtractorClass    extractor class.
+     * @return  group ids
+     * @throws APIManagementException Throws is an error occured when stractoing group Ids
+     */
+    public static String[] getGroupIdsFromExtractor(String response, String groupingExtractorClass)
+            throws APIManagementException {
+        if (groupingExtractorClass != null) {
+            try {
+                LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
+                        (groupingExtractorClass).newInstance();
+                //switching 2.1.0 and 2.2.0
+                if (APIUtil.isMultiGroupAppSharingEnabled()) {
+                    NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor) groupingExtractor;
+                    return newGroupIdListExtractor.getGroupingIdentifierList(response);
+                } else {
+                    String groupId = groupingExtractor.getGroupingIdentifiers(response);
+                    return new String[]{groupId};
+                }
+
+            } catch (ClassNotFoundException e) {
+                String msg = groupingExtractorClass + " is not found in runtime";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (ClassCastException e) {
+                String msg = "Cannot cast " + groupingExtractorClass + " NewPostLoginExecutor";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (IllegalAccessException e) {
+                String msg = "Error occurred while invocation of getGroupingIdentifier method";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            } catch (InstantiationException e) {
+                String msg = "Error occurred while instantiating " + groupingExtractorClass + " class";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }
+        }
+        return null;
+    }
 }

@@ -1,26 +1,26 @@
 <% jagg.template("documentation", function(inputs, outputs, jagg) { %>
 <div class="row-fluid">
      <% var api = outputs.api;
-        var user = jagg.getUser();
-        var mod = jagg.module("documentation");
-        var modAPI = jagg.module("api");
-        var apiData={};
-        apiData.provider= api.provider;
-        apiData.name= api.name;
-        apiData.version= api.version;
-        var result = mod.getAllDocumentation(apiData);
-        var showDocVisibilityResult=modAPI.showAPIDocVisibility();
-        var docs = result.docs;
-        var createPermitted = outputs.isCreatePermitted;
-        var tenant= tenantDomain;
-        var urlPrefix;
-        var urlPostfix;
-        if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
-        if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
-     %>
-        <div class="row-fluid">
-            <div class="control-group">
-                <input type="hidden" id="docAPIVersion" value="<%=api.version%>"/>
+    var user = jagg.getUser();
+    var mod = jagg.module("documentation");
+    var modAPI = jagg.module("api");
+    var apiData={};
+    apiData.provider= api.provider;
+    apiData.name= api.name;
+    apiData.version= api.version;
+    var result = mod.getAllDocumentation(apiData);
+    var showDocVisibilityResult=modAPI.showAPIDocVisibility();
+    var docs = result.docs;
+    var createPermitted = outputs.isCreatePermitted;
+    var tenant= tenantDomain;
+    var urlPrefix;
+    var urlPostfix;
+    if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
+    if(tenant!='null') {urlPostfix="&tenant="+tenant;}else{urlPostfix='';}
+    %>
+       <div class="row-fluid">
+           <div class="control-group">
+               <input type="hidden" id="docAPIVersion" value="<%=api.version%>"/>
                 <input type="hidden" id="docAPIName" value="<%=api.name%>"/>
                 <%if(createPermitted){%>
                 <div id="addDoc">
@@ -125,25 +125,36 @@
 <li>
 		                    <label>
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="inline" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked=""><%=i18n.localize("Inline")%>
-		                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help""></a>
+		                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help"></a>
            				        <p id="inlineDoc_help" class="hide">
            				            <%=i18n.localize("Documentation that is hosted in the system and can be edited directly from the UI")%>
                                 </p>
 		                      </label>
 		               </li>
-		               <li>      
+
+		               <li>
+		                    <label>
+		                        <input type="radio" name="optionsRadios1" id="optionsRadios9" value="markdown" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("Markdown")%>
+		                        <a class="icon-question-sign help_popup" help_data="markdownDoc_help" title="MarkdownDoc_help"></a>
+           				        <p id="markdownDoc_help" class="hide">
+           				            <%=i18n.localize("Documentation that is hosted in the system and can be edited directly from the UI")%>
+                                </p>
+		                      </label>
+		               </li>
+
+		               <li>
 		                    <label>
 		                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="url" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')"><%=i18n.localize("URL")%>
-		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
+		                        <a class="icon-question-sign help_popup" help_data="urlDoc_help" title="urlDoc_help"></a>
            				        <p id="urlDoc_help" class="hide">
            				            <%=i18n.localize("Link to documentation is managed by an external configuration management system")%>
                                 </p>
 		                      </label>
-		                  
+
 		                    <div id="sourceUrlDoc" class="controls" style="display:none;">
 		                     <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" title="docUrl" id="docUrl">
 		                    </div>
-</li>  
+</li>
 <li>
                             <label>
                                         <input type="radio" name="optionsRadios1" id="optionsRadios8" value="file" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')"><%=i18n.localize("File")%>
@@ -162,10 +173,10 @@
 												<span class="hidden-xs">Browse</span>
 											</button>
 										</div>
-																
+
 									</div>
 	                                <p id="fileType_help"><%=i18n.localize("eg : pdf, xml, txt, wsdl, ms-word, ms-powerpoint, ms-excel")%></p>
-                                </div>                         
+                                </div>
 		                    </li>
 		                    </ul>
 		            </div>
@@ -180,7 +191,7 @@
 		        </div>
 		    </div>
 
-		</div><!-- Enod of row -->
+		</div><!-- End of row -->
 	  </div>
         </div>
         </form>
@@ -201,17 +212,17 @@
                 </thead>
                 <tbody id="listDocs">
                 <%
-                var i, doc, length = docs.length;
-		
-                for(i = 0; i < length; i++) {
-                    doc= docs[i];var log=new Log(); 
-		    if (doc.docType == "Swagger API Definition") {
-			//Swagger API definition is not shown in docs and only can be modified from 'Edit Swagger Definition' buttion in the 'Edit' view
-			length--;
-			continue;
-		    }
-                %>
-                <tr id="<%=api.name%>-<%=doc.docName.replace(/ /g,'__')%>">
+        var i, doc, length = docs.length;
+
+        for(i = 0; i < length; i++) {
+            doc= docs[i];var log=new Log();
+            if (doc.docType == "Swagger API Definition") {
+                //Swagger API definition is not shown in docs and only can be modified from 'Edit Swagger Definition' button in the 'Edit' view
+                length--;
+                continue;
+            }
+            %>
+            <tr id="<%=api.name%>-<%=doc.docName.replace(/ /g,'__')%>">
                     <td><%= encode.forHtml(doc.docName)%></td>
                     <td><%= encode.forHtml(doc.docType)%></td>
                       <%if((showDocVisibilityResult!=null) && showDocVisibilityResult.permitted){%>
@@ -225,6 +236,22 @@
                     <td id="buttonTd">
 			<% if(doc.sourceType == "INLINE") {%>
 				<a title="<%=i18n.localize("Edit Content")%>" href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')" title="<%=i18n.localize("Edit Content")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+				      <span class="fw-stack">
+				          <i class="fw fw-circle-outline fw-stack-2x"></i>
+				          <i class="fw fw-edit fw-stack-1x"></i>
+				      </span>
+				      <span class="hidden-xs"><%=i18n.localize("Edit Content")%></span>
+				  </a>
+            <% }else if (doc.sourceType == "MARKDOWN"){%>
+                <a title="<%=i18n.localize("Edit Content")%>" href="javascript:editMarkdownContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')" title="<%=i18n.localize("Edit Content")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+				      <span class="fw-stack">
+				          <i class="fw fw-circle-outline fw-stack-2x"></i>
+				          <i class="fw fw-edit fw-stack-1x"></i>
+				      </span>
+				      <span class="hidden-xs"><%=i18n.localize("Edit Content")%></span>
+				  </a>
+            <% }else if (doc.sourceType == "Invalid Source Type"){%>
+                <a title="<%=i18n.localize("Edit Content")%>" href="javascript:editInlineContent('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','edit','<%=urlPostfix%>')" title="<%=i18n.localize("Edit Content")%>" class="btn  btn-sm padding-reduce-on-grid-view">
 				      <span class="fw-stack">
 				          <i class="fw fw-circle-outline fw-stack-2x"></i>
 				          <i class="fw fw-edit fw-stack-1x"></i>
@@ -248,7 +275,7 @@
 				      <span class="hidden-xs"><%=i18n.localize("Open")%></span>
 				  </a>
 			<%}%>
-			
+
 						<a title="<%=i18n.localize("Update")%>" onclick="updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forJavaScriptAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=encode.forJavaScriptAttribute(doc.otherTypeName)%>','<%=doc.visibility%>')" target="_blank" title="<%=i18n.localize("Edit Content")%>" class="btn  btn-sm padding-reduce-on-grid-view">
 					      <span class="fw-stack">
 					          <i class="fw fw-circle-outline fw-stack-2x"></i>
@@ -266,7 +293,7 @@
 			</td>
                     <%}%>
                 </tr>
-                <% } %>               
+                <% } %>
                 </tbody>
             </table>
             <%} else { %>
@@ -278,3 +305,4 @@
 
 </div>
 <%});%>
+

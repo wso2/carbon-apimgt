@@ -5368,7 +5368,8 @@ public class ApiMgtDAO {
             getAppSt.setString(2, apiName);
             getAppSt.setString(3, oldVersion);
             rs = getAppSt.executeQuery();
-            while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS")))) {
+
+            while (rs.next()) {
                 int applicationId = rs.getInt("APPLICATION_ID");
                 if (!subscribedApplications.contains(applicationId)) {
                     apiId.setTier(rs.getString("TIER_ID"));

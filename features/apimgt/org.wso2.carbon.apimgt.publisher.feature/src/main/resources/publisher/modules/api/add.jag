@@ -894,7 +894,7 @@ var isScopeExist = function (scope, username, roleName) {
     } catch (e) {
         log.error(e.message);
         return {
-            error:e
+            error:true
         };
     }
 };

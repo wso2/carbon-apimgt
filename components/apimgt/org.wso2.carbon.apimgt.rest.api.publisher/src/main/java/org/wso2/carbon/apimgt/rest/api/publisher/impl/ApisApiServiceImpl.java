@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
@@ -66,6 +67,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
@@ -922,6 +925,165 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Get the resource policies(inflow/outflow).
+     *
+     * @param apiId           API ID
+     * @param sequenceType    sequence type('in' or 'out')
+     * @param resourcePath    api resource path
+     * @param verb            http verb
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return json response of the resource policies according to the resource path
+     */
+    @Override
+    public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath,
+            String verb, String accept, String ifNoneMatch, String ifModifiedSince) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
+                        || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
+                    String errorMessage = "Sequence type should be either of the values from 'in' or 'out'";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                String resourcePolicy = SequenceUtils
+                        .getRestToSoapConvertedSequence(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                                apiIdentifier.getProviderName(), sequenceType);
+                if (StringUtils.isEmpty(resourcePath) && StringUtils.isEmpty(verb)) {
+                    ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
+                            .fromResourcePolicyStrToDTO(resourcePolicy);
+                    return Response.ok().entity(resourcePolicyListDTO).build();
+                }
+                if (StringUtils.isNotEmpty(resourcePath) && StringUtils.isNotEmpty(verb)) {
+                    JSONObject sequenceObj = (JSONObject) new JSONParser().parse(resourcePolicy);
+                    JSONObject resultJson = new JSONObject();
+                    String key = resourcePath + "_" + verb;
+                    JSONObject sequenceContent = (JSONObject) sequenceObj.get(key);
+                    if (sequenceContent == null) {
+                        String errorMessage = "Cannot find any resource policy for Resource path : " + resourcePath +
+                                " with type: " + verb;
+                        RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+                    }
+                    resultJson.put(key, sequenceObj.get(key));
+                    ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
+                            .fromResourcePolicyStrToDTO(resultJson.toJSONString());
+                    return Response.ok().entity(resourcePolicyListDTO).build();
+                } else if (StringUtils.isEmpty(resourcePath)) {
+                    String errorMessage = "Resource path cannot be empty for the defined verb: " + verb;
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                } else if (StringUtils.isEmpty(verb)) {
+                    String errorMessage = "HTTP verb cannot be empty for the defined resource path: " + resourcePath;
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e) {
+            String errorMessage = "Error while retrieving the resource policies for the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Get the resource policy given the resource id.
+     *
+     * @param apiId           API ID
+     * @param resourceId      resource id
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return json response of the resource policy for the resource id given
+     */
+    @Override
+    public Response apisApiIdResourcePoliciesResourceIdGet(String apiId, String resourceId, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(resourceId)) {
+                    String errorMessage = "Resource id should not be empty to update a resource policy.";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                String policyContent = SequenceUtils
+                        .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourceId);
+                ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
+                        .fromResourcePolicyStrToInfoDTO(policyContent);
+                return Response.ok().entity(resourcePolicyInfoDTO).build();
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Update the resource policies(inflow/outflow) given the resource id.
+     *
+     * @param apiId  API ID
+     * @param resourceId resource id
+     * @param body resource policy content
+     * @param contentType Request content type
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return json response of the updated sequence content
+     */
+    @Override
+    public Response apisApiIdResourcePoliciesResourceIdPut(String apiId, String resourceId,
+            ResourcePolicyInfoDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(resourceId)) {
+                    String errorMessage = "Resource id should not be empty to update a resource policy.";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                boolean isValidSchema = RestApiPublisherUtils.validateXMLSchema(body.getContent());
+                if (isValidSchema) {
+                    SequenceUtils
+                            .updateResourcePolicyFromRegistryResourceId(apiIdentifier, resourceId, body.getContent());
+                    String updatedPolicyContent = SequenceUtils
+                            .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourceId);
+                    ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
+                            .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
+                    return Response.ok().entity(resourcePolicyInfoDTO).build();
+                } else {
+                    String errorMessage =
+                            "Error while validating the resource policy xml content for the API : " + apiId;
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
 
     /**
      * This method is used to assign micro gateway labels to the DTO
@@ -1274,7 +1436,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
                         .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
                         .build();
-            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
                 String content = apiProvider.getDocumentationContent(apiIdentifier, documentation.getName());
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
@@ -1343,6 +1505,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE", log);
+                }
+                apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not MARKDOWN", log);
                 }
                 apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
             } else {

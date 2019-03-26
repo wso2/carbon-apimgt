@@ -42,6 +42,8 @@ public class ApplicationInfoDTO  {
 
   private String createdTime = null;
 
+  private String owner = null;
+
   /**
   * gets and sets the lastUpdatedTime for ApplicationInfoDTO
   **/
@@ -161,6 +163,14 @@ public class ApplicationInfoDTO  {
     this.attributes = attributes;
   }
 
+  @JsonProperty("owner")
+  public String getOwner() {
+    return owner;
+  }
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
   
 
   @Override
@@ -176,6 +186,7 @@ public class ApplicationInfoDTO  {
     sb.append("  status: ").append(status).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
     sb.append("  attributes: ").append(attributes).append("\n");
+    sb.append("  owner: ").append(owner).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

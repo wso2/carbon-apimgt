@@ -29,7 +29,7 @@ include("/jagg/jagg.jag");
         result = mod.getRecentlyAddedAPIs(limit,tenant);
         if (result.error) {
             obj = {
-                error:result.error,
+                error: true,
                 message:msg.error.authError(action)
             };
         } else {

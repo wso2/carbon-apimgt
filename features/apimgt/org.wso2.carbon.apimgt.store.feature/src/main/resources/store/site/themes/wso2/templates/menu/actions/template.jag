@@ -23,7 +23,7 @@
 	                        <a title="Components" href="#">Components</a>
 	                    </div -->
 	                </div>
-	                <div id="navbar" class="collapse navbar-collapse">
+	                <div id="navbar">
 	                    <ul class="nav navbar-nav">
 	                    <% if(inputs.page == "application/application-list"){%>
 	                        <li>
