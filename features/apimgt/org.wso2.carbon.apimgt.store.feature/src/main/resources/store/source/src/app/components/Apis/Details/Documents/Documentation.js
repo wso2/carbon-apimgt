@@ -176,7 +176,6 @@ class Documentation extends React.Component {
                                         <List>
                                             {item.docs.map( doc =>
                                                     <ListItem key={doc.documentId} className={classes.listItem}>
-                                                        {console.info(doc)}
                                                         {doc.sourceType === "INLINE" && 
                                                             <DocumentView doc={doc} truncateSummary={this.truncateSummary(doc.summary)} />
                                                         }

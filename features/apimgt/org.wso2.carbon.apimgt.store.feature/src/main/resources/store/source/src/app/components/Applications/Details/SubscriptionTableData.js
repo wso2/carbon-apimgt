@@ -54,7 +54,7 @@ class SubscriptionTableData extends React.Component {
         } = this.props.subscription;
         return (
             <TableRow hover>
-                <TableCell>
+                <TableCell style={{paddingLeft: 0}}>
                     <Link to={'/apis/' + apiIdentifier}>{apiName}</Link>
                 </TableCell>
                 <TableCell>{policy}</TableCell>

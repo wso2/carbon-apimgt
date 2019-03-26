@@ -30,6 +30,7 @@ import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import CustomIcon from '../../Shared/CustomIcon';
 import InfoBar from './InfoBar';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
+import TokenManager from '../../Shared/AppsAndKeys/TokenManager';
 
 const styles = theme => ({
     LeftMenu: {
@@ -61,6 +62,9 @@ const styles = theme => ({
         flexDirection: 'column',
         marginLeft: theme.custom.leftMenuWidth,
         paddingBottom:  theme.spacing.unit*3,  
+      },
+      contentDown: {
+        width: theme.custom.contentAreaWidth,
       }
 });
 
@@ -114,7 +118,6 @@ class Details extends Component {
         } else if (!this.state.application) {
             return <Loading/>
         }
-
         return (
             <React.Fragment>
                 <div className={classes.LeftMenu}>
@@ -129,13 +132,21 @@ class Details extends Component {
                 </div>
             <div className={classes.content}>
               <InfoBar applicationId={this.props.match.params.application_uuid} innerRef={node => this.infoBar = node}/>
+                <div className={classes.contentDown}>
                 <Switch>
                     <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
-                    <Route path="/applications/:applicationId/productionkeys" component={ProductionKey}/>
-                    <Route path="/applications/:applicationId/sandBoxkeys" component={SandboxKey}/>
+                    <Route path="/applications/:applicationId/productionkeys" render={ () => 
+                        <TokenManager keyType="PRODUCTION" 
+                        selectedApp={{appId: this.state.application.applicationId, label: this.state.application.name}} />
+                    }/>
+                    <Route path="/applications/:applicationId/sandBoxkeys" render={ () => 
+                        <TokenManager keyType="SANDBOX" 
+                        selectedApp={{appId: this.state.application.applicationId, label: this.state.application.name}} />
+                    }/>
                     <Route path="/applications/:applicationId/subscriptions" component={Subscriptions}/>
                     <Route component={PageNotFound}/>
                 </Switch>
+                </div>
               </div>
             </React.Fragment>
             

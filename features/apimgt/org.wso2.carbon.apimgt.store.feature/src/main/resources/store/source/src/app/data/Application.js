@@ -134,7 +134,7 @@ export default class Application extends Resource {
                 supportedGrantTypes: supportedGrantTypes,
                 callbackUrl: callbackUrl,
                 keyType: key_type,
-                tokenType: token
+                tokenType: tokenType
               }
             let payload = { applicationId: this.id, keyType: key_type, body: request_content };
             return client.apis["Application (Individual)"].put_applications__applicationId__keys__keyType_(payload);

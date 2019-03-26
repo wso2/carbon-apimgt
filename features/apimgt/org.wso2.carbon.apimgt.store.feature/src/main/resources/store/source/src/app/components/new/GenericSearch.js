@@ -132,6 +132,9 @@ const styles = theme => ({
   inputRoot: {
     flexWrap: 'wrap',
     paddingLeft: 10,
+    '&:before': {
+      borderBottom: 'none',
+    },
   },
   divider: {
     height: theme.spacing.unit * 2,
@@ -143,6 +146,11 @@ const styles = theme => ({
   },
   searchIcon: {
     paddingLeft: 5,
+    position: 'absolute',
+    right: 0,
+    top: 5,
+    right: 12,
+    cursor: 'pointer',
   }
 });
 class GenericSearch extends React.Component {
@@ -198,7 +206,7 @@ class GenericSearch extends React.Component {
                 fullWidth: true,
                 classes,
                 InputProps: getInputProps({
-                    placeholder: 'Search a country (start with a)',
+                    placeholder: 'Search APIs',
                 }),
                 })}
                 {isOpen ? (

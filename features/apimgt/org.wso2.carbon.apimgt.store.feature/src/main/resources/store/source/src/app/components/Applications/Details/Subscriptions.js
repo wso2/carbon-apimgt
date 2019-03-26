@@ -16,106 +16,163 @@
  * under the License.
  */
 
-import React from 'react'
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
+import React from "react";
+import Grid from "@material-ui/core/Grid";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import PropTypes from "prop-types";
+import { withStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
+import SubscriptionTableData from "./SubscriptionTableData";
+import Alert from "../../Shared/Alert";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
+import APIList from './../../Apis/Listing/APIList';
+import Subscription from "../../../data/Subscription";
 
-import SubscriptionTableData from './SubscriptionTableData'
-import Alert from '../../Shared/Alert';
+const styles = theme => ({
+  root: {
+    padding: theme.spacing.unit * 3,
+  },
+  keyTitle: {
+    textTransform: "uppercase",
+    marginBottom: theme.spacing.unit * 2,
+  },
+  firstCell: {
+      paddingLeft: 0,
+  },
+  cardTitle: {
+      paddingLeft: theme.spacing.unit * 2,
+  },
+  cardContent: {
+      minHeight: 200,
+  }
 
-import Subscription from '../../../data/Subscription';
+});
 
 class Subscriptions extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            subscriptions: null
+  constructor(props) {
+    super(props);
+    this.state = {
+      subscriptions: null
+    };
+    this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
+    this.updateSubscriptions = this.updateSubscriptions.bind(this);
+  }
+  updateSubscriptions(applicationId) {
+    const client = new Subscription();
+    let promisedSubscriptions = client.getSubscriptions(null, applicationId);
+    promisedSubscriptions
+      .then(response => {
+        this.setState({ subscriptions: response.body.list });
+      })
+      .catch(error => {
+        const { status } = error;
+        if (status === 404) {
+          this.setState({ notFound: true });
         }
-        this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
-    }
+      });
+  }
+  componentDidMount() {
+    let { applicationId } = this.props.match.params;
+    this.updateSubscriptions(applicationId);
+  }
 
-    componentDidMount() {
-        const client = new Subscription();
-        const {applicationId} = this.props.match.params;
-        let promisedSubscriptions = client.getSubscriptions(null, applicationId);
-        promisedSubscriptions.then((response) => {
-            this.setState({ subscriptions: response.body.list });
+  handleSubscriptionDelete(subscriptionId) {
+    const client = new Subscription();
+    const promisedDelete = client.deleteSubscription(subscriptionId);
+    promisedDelete.then(response => {
+      if (response.status !== 200) {
+        console.log(response);
+        Alert.info("Something went wrong while deleting the Subscription!");
+        return;
+      }
+      Alert.info("Subscription deleted successfully!");
+      const { subscriptions } = this.state;
+      for (const endpointIndex in subscriptions) {
+        if (
+          Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex) &&
+          subscriptions[endpointIndex].subscriptionId === subscriptionId
+        ) {
+          subscriptions.splice(endpointIndex, 1);
+          break;
         }
-        ).catch(
-            error => {
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
+      }
+    });
+  }
 
-    handleSubscriptionDelete(subscriptionId) {
-        const client = new Subscription();
-        const promisedDelete = client.deleteSubscription(subscriptionId);
-        promisedDelete.then((response) => {
-            if (response.status !== 200) {
-                console.log(response);
-                Alert.info('Something went wrong while deleting the Subscription!');
-                return;
-            }
-            Alert.info('Subscription deleted successfully!');
-            const { subscriptions } = this.state;
-            for (const endpointIndex in subscriptions) {
-                if (
-                    Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex) &&
-                    subscriptions[endpointIndex].subscriptionId === subscriptionId
-                ) {
-                    subscriptions.splice(endpointIndex, 1);
-                    break;
-                }
-            }
-        });
-    }
+  render() {
+    const { subscriptions } = this.state;
+    const { applicationId } = this.props.match.params;
+    const { classes } = this.props;
+    if (subscriptions) {
+      return (
+        <div className={classes.root}>
+          <Typography variant="headline" className={classes.keyTitle}>
+            Subscription Management
+          </Typography>
 
-    render() {
-        const { subscriptions } = this.state;
-        if (subscriptions) {
-            return (
-                <Paper>
-                    <Grid container className="tab-grid" spacing={0} >
-                        <Grid item xs={12}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>API Name</TableCell>
-                                        <TableCell>Subscription Tier</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell>Action</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {subscriptions &&
-                                        subscriptions.map((subscription) => {
-                                            return (
-                                                <SubscriptionTableData
-                                                    subscription={subscription}
-                                                    key={subscription.subscriptionId}
-                                                    handleSubscriptionDelete={this.handleSubscriptionDelete}
-                                                />
-                                            );
-                                        })}
-                                </TableBody>
-                            </Table>
-                        </Grid>
-                    </Grid>
-                </Paper>
-            );
-        } else {
-            return ("Loading . . . ");
-        }
-
+          <Grid container className="tab-grid" spacing={16}>
+            <Grid item xs={6}>
+              <Card className={classes.card}>
+                <CardActions>
+                    <Typography
+                        variant="h6"
+                        gutterBottom
+                        className={classes.cardTitle}
+                    >
+                    Subscriptions
+                  </Typography>
+                </CardActions>
+                <Divider />
+                <CardContent className={classes.cardContent}>
+                  
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell className={classes.firstCell}>API Name</TableCell>
+                        <TableCell>Subscription Tier</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Action</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {subscriptions &&
+                        subscriptions.map(subscription => {
+                          return (
+                            <SubscriptionTableData
+                              subscription={subscription}
+                              key={subscription.subscriptionId}
+                              handleSubscriptionDelete={
+                                this.handleSubscriptionDelete
+                              }
+                            />
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={6} className={classes.cardGrid}>
+                <APIList subscriptions={subscriptions} applicationId={applicationId} updateSubscriptions={this.updateSubscriptions} />
+            </Grid>
+          </Grid>
+        </div>
+      );
+    } else {
+      return "Loading . . . ";
     }
+  }
 }
-export default Subscriptions
+Subscriptions.propTypes = {
+  classes: PropTypes.object
+};
 
+export default withStyles(styles)(Subscriptions);

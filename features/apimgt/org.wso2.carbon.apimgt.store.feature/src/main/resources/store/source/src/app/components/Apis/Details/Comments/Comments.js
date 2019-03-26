@@ -167,13 +167,13 @@ class Comments extends Component {
    * @memberof Comments
    */
     render() {
-        const { classes, apiId } = this.props;
+        const { classes, apiId, showLatest } = this.props;
         const {
             comments, expanded, allComments, startCommentsToDisplay, totalComments,
         } = this.state;
         return (
             <div className={classes.contentWrapper}>
-                <div className={classes.root}>
+                {!showLatest && <div className={classes.root}>
                     <ArrowDropDownCircleOutlined
                         onClick={this.handleExpandClick}
                         aria-expanded={expanded}
@@ -183,41 +183,39 @@ class Comments extends Component {
                         variant='display1'
                         className={classes.titleSub}
                     >
-                Comments
+                    Comments
                     </Typography>
-                </div>
-                <Collapse in={expanded} timeout='auto' unmountOnExit>
-                    <CommentAdd apiId={apiId} commentsUpdate={this.updateCommentList} allComments={allComments} parentCommentId={null} cancelButton={false} />
-                    <Comment comments={comments} apiId={apiId} commentsUpdate={this.updateCommentList} allComments={allComments} />
-                    { startCommentsToDisplay !== 0
-                            && (
-                                <div className={classes.contentWrapper}>
-                                    <Grid container spacing={32} className={classes.root}>
-                                        <Grid item>
-                                            <Typography className={classes.verticalSpace} variant='body2'>
-                                                <a className={classes.link + ' ' + classes.loadMoreLink} onClick={this.handleLoadMoreComments}>
-                                                    Load Previous Comments
-                                                </a>
-                                            </Typography>
-                                        </Grid>
-                                        <Grid>
-                                            <ArrowDropDown
-                                                onClick={this.handleLoadMoreComments}
-                                                className={classes.link + ' ' + classes.verticalSpace}
-                                            />
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography className={classes.verticalSpace} variant='body2'>
-                                                Showing comments
-                                                {' '}
-                                                { totalComments - startCommentsToDisplay + ' of ' + totalComments }
-                                            </Typography>
-                                        </Grid>
+                </div>}
+                {!showLatest && <CommentAdd apiId={apiId} commentsUpdate={this.updateCommentList} allComments={allComments} parentCommentId={null} cancelButton={false} />}
+                <Comment comments={comments} apiId={apiId} commentsUpdate={this.updateCommentList} allComments={allComments} />
+                { startCommentsToDisplay !== 0
+                        && (
+                            <div className={classes.contentWrapper}>
+                                <Grid container spacing={32} className={classes.root}>
+                                    <Grid item>
+                                        <Typography className={classes.verticalSpace} variant='body2'>
+                                            <a className={classes.link + ' ' + classes.loadMoreLink} onClick={this.handleLoadMoreComments}>
+                                                Load Previous Comments
+                                            </a>
+                                        </Typography>
                                     </Grid>
-                                </div>
-                            )
-                    }
-                </Collapse>
+                                    <Grid>
+                                        <ArrowDropDown
+                                            onClick={this.handleLoadMoreComments}
+                                            className={classes.link + ' ' + classes.verticalSpace}
+                                        />
+                                    </Grid>
+                                    <Grid item>
+                                        <Typography className={classes.verticalSpace} variant='body2'>
+                                            Showing comments
+                                            {' '}
+                                            { totalComments - startCommentsToDisplay + ' of ' + totalComments }
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            </div>
+                        )
+                }
             </div>
         );
     }
