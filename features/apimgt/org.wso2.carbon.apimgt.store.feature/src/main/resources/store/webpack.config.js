@@ -80,16 +80,16 @@ if (process.env.NODE_ENV === 'development') {
     config.watch = true;
 } else if (process.env.NODE_ENV === 'production') {
     /* ESLint will only un in production build to increase the continues build(watch) time in the development mode */
-    const esLintLoader = {
+    /*const esLintLoader = {
         enforce: 'pre',
         test: /\.(js|jsx)$/,
         loader: 'eslint-loader',
         options: {
-            failOnError: true,
+            failOnError: false,
             quiet: true,
         },
     };
-    config.module.rules.push(esLintLoader);
+    config.module.rules.push(esLintLoader);*/
 }
 
 module.exports = function (env) {
