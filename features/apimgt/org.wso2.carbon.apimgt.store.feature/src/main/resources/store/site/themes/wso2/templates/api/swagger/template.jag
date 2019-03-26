@@ -242,30 +242,31 @@ var loadTokens = function () {
         applicationId:application_id
         }, function (result) {
             if (result.error == false) {
-            if (selected_type == "production") {
-                for (var key : result.apikeys) {
-                    token = key.PRODUCTION_KEY;
-                    if (typeof token != 'undefined' && token){
-                        break;
+                var token = "";
+                if (selected_type == "production") {
+                    for (var i = 0; i < result.apikeys.length; i++) {
+                        token = result.apikeys[i].PRODUCTION_KEY;
+                        if (typeof token != 'undefined' && token){
+                            break;
+                        }
                     }
-                }
-                $("#access_token").val(token);
-            } else if (selected_type == "sandbox") {
-                for (var key : result.apikeys) {
-                    token = key.SANDBOX_KEY;
-                    if (typeof token != 'undefined' && token){
-                        break;
+                    $("#access_token").val(token);
+                } else if (selected_type == "sandbox") {
+                    for (var i = 0; i < result.apikeys.length; i++) {
+                        token = result.apikeys[i].SANDBOX_KEY;
+                        if (typeof token != 'undefined' && token){
+                            break;
+                        }
                     }
+                    $("#access_token").val(token);
                 }
-                $("#access_token").val(token);
-            }
-	        if(token && token.trim() != "") {
-                swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ token, "header"));
-	        }else{
-                swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
-	        }
+                if (token && token.trim() != "") {
+                    swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ token, "header"));
+                } else {
+                    swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
+                }
             } else {
-		console.log("eror ...");
+		        console.log("eror ...");
                 jagg.message({content:result.message,type:"error"});
             }
         },
