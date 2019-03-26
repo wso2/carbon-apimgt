@@ -40,7 +40,7 @@ var getBPMNTasks = function (taskName) {
         log.warn("No Authentication header set")
     }
 
-    var taskUrl = serverUrl + "/runtime/tasks?name=" + taskName+ "&tenantId=" + tenantId + "&candidateOrAssigned=" + username;
+    var taskUrl = serverUrl + "/runtime/tasks?name=" + taskName+ "&tenantId=" + tenantId + "&candidateOrAssigned=" + username + "&size=" + 50;
     var taskList = [];
     try{
         var response = get(taskUrl, {}, headers);
