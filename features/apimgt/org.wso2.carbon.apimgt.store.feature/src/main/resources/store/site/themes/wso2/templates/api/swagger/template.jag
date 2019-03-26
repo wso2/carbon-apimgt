@@ -266,7 +266,7 @@ var loadTokens = function () {
                     swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
                 }
             } else {
-		        console.log("eror ...");
+                console.log("eror ...");
                 jagg.message({content:result.message,type:"error"});
             }
         },
