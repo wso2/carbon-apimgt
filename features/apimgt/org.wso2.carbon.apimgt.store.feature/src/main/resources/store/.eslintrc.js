@@ -66,5 +66,5 @@ module.exports = {
         'no-else-return': 'off',
         'no-unused-vars': ['error'],
     },
-    plugins: ["transform-class-properties","syntax-dynamic-import", "transform-object-rest-spread"],
+    plugins: ["react"],
 };
