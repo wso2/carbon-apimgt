@@ -469,7 +469,6 @@ class InfoBar extends React.Component {
     if(typeof(todo) === "boolean"){
       this.setState(state => ({ showOverview: todo }));
     } else{
-      console.info('setting the bool');
       this.setState(state => ({ showOverview: !state.showOverview }));
     }
   };

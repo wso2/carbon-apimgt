@@ -59,7 +59,7 @@ class Tokens extends React.Component {
             scopesSelected: [],
             timout: 3600, // Timeout for token in miliseconds
         };
-        this.appId = this.props.selectedApp.appId;
+        this.appId = this.props.selectedApp.appId || this.props.selectedApp.value;
         this.key_type = this.props.keyType;
         this.handleShowToken = this.handleShowToken.bind(this);
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);

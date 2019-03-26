@@ -68,9 +68,6 @@ class TokenManager extends React.Component {
   handleChange = (event, value) => {
     this.setState({ value });
   };
-  componentDidMount = () => {
-    console.info(this.keys.getKeyStatus());
-  };
   render() {
     const { classes, selectedApp, keyType } = this.props;
     const { value, response } = this.state;

@@ -118,7 +118,6 @@ class Details extends Component {
         } else if (!this.state.application) {
             return <Loading/>
         }
-        console.info(this.state.application);
         return (
             <React.Fragment>
                 <div className={classes.LeftMenu}>

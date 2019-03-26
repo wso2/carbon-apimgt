@@ -164,7 +164,6 @@ class Details extends React.Component {
         if( currentLink && currentLink.length > 0){
             this.setState({ active: currentLink[0] });
         }
-        console.info(this.state.active);
         this.updateSubscriptionData();
     }
 

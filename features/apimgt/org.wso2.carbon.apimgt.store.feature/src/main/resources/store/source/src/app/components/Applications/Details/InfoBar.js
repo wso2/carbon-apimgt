@@ -81,9 +81,9 @@ const styles = theme => ({
     padding: theme.spacing.unit * 3
   },
   infoContentBottom: {
-    background: theme.palette.background.paper,
+    background: theme.palette.grey["200"],
     borderBottom: "solid 1px " + theme.palette.grey["A200"],
-    paddingBottom: theme.spacing.unit,
+    color: theme.palette.grey["600"],
   },
   infoItem: {
     marginRight: theme.spacing.unit * 4
@@ -174,9 +174,10 @@ const styles = theme => ({
     width: "100%"
   },
   buttonView: {
-    textAlign: "center",
-    justifyContent: 'center',
+    textAlign: "left",
+    justifyContent: 'left',
     display: 'flex',
+    paddingLeft: theme.spacing.unit*2,
     cursor: 'pointer',
   },
   buttonOverviewText: {
@@ -307,7 +308,7 @@ class InfoBar extends React.Component {
         <div className={classes.infoContentBottom}>
           <div className={classes.contentWrapper} onClick={this.toggleOverview}>
             <div className={classes.buttonView}>
-            {this.state.showOverview ? <Typography className={classes.buttonOverviewText}>HIDE</Typography>: <Typography className={classes.buttonOverviewText}>SHOW</Typography>}
+            {this.state.showOverview ? <Typography className={classes.buttonOverviewText}>LESS</Typography>: <Typography className={classes.buttonOverviewText}>MORE</Typography>}
               {this.state.showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined /> }
               </div>
           </div>

@@ -19,6 +19,7 @@ import CustomIcon from '../../../Shared/CustomIcon';
 import Keys from "../../../Shared/AppsAndKeys/TokenManager"
 import TokenManager from "../../../Shared/AppsAndKeys/TokenManager";
 import classNames from 'classnames';
+import Express from './Express';
 
 const styles = theme => ({
   contentWrapper: {
@@ -119,8 +120,9 @@ class Credentials extends React.Component {
     value: 0,
     expanded: true,
     wizardOn: false,
-    openSubscribeToAvailable: false,
-    openSubscribeToNew: false,
+    openAvailable: false,
+    openNew: false,
+    openExpress: false,
     selectedAppId: false,
     selectedKeyType: false,
   };
@@ -149,22 +151,25 @@ class Credentials extends React.Component {
         });
     }
   };
-  handleClickOpenNew = () => {
-    this.setState({ openSubscribeToNew: true });
-  };
+  handleClickToggle = name => event =>  {
+    this.setState({ [name]:  !this.state[name]});
+  }
+  // handleClickOpenNew = () => {
+  //   this.setState({ openSubscribeToNew: true });
+  // };
 
-  handleCloseNew = () => {
-    this.setState({ openSubscribeToNew: false });
-  };
+  // handleCloseNew = () => {
+  //   this.setState({ openSubscribeToNew: false });
+  // };
 
-  handleClickOpenAvailable = () => {
-    debugger;
-    this.setState({ openSubscribeToAvailable: true });
-  };
+  // handleClickOpenAvailable = () => {
+  //   debugger;
+  //   this.setState({ openSubscribeToAvailable: true });
+  // };
 
-  handleCloseAvailable = () => {
-    this.setState({ openSubscribeToAvailable: false });
-  };
+  // handleCloseAvailable = () => {
+  //   this.setState({ openSubscribeToAvailable: false });
+  // };
   loadInfo = (selectedKeyType, selectedAppId) => {
     this.setState({selectedKeyType, selectedAppId})
   }
@@ -232,7 +237,7 @@ class Credentials extends React.Component {
                         size="small"
                         color="primary"
                         className={classes.buttonElm}
-                        onClick={this.handleClickOpenAvailable}
+                        onClick={this.handleClickToggle("openAvailable")}
                       >
                         Subscribe to Available App
                       </Button>
@@ -250,7 +255,7 @@ class Credentials extends React.Component {
                     size="small"
                     color="primary"
                     className={classes.buttonElm}
-                    onClick={this.handleClickOpenNew}
+                    onClick={this.handleClickToggle("openNew")}
                   >
                     Subscribe to New App
                   </Button>
@@ -259,7 +264,7 @@ class Credentials extends React.Component {
                     size="small"
                     color="primary"
                     className={classes.buttonElm}
-                    onClick={this.handleClickOpenNew}
+                    onClick={this.handleClickToggle("openExpress")}
                   >
                     Express Mode
                   </Button>
@@ -330,14 +335,14 @@ class Credentials extends React.Component {
                 {applicationsAvailable.length > 0 && (
                   <Dialog
                     fullScreen
-                    open={this.state.openSubscribeToAvailable}
-                    onClose={this.handleCloseAvailable}
+                    open={this.state.openAvailable}
+                    onClose={this.handleClickToggle("openAvailable")}
                     TransitionComponent={Transition}
                   > <AppBar className={classes.appBar}>
                       <Grid container spacing={0}>
                         <Grid item xs={6}>
                           <Toolbar className={classes.toolbar}>
-                            <IconButton color="inherit" onClick={this.handleCloseAvailable} aria-label="Close">
+                            <IconButton color="inherit" onClick={this.handleClickToggle("openAvailable")} aria-label="Close">
                               <CloseIcon />
                             </IconButton>
                             <div className={classes.subscribeTitle}>
@@ -376,19 +381,19 @@ class Credentials extends React.Component {
                 )}
                 {/* 
                 ***************************************
-                Subscribe to new apps or express Mode 
+                Subscribe with new Mode 
                 ***************************************
                 */}
                 <Dialog
                     fullScreen
-                    open={this.state.openSubscribeToNew}
-                    onClose={this.handleCloseNew}
+                    open={this.state.openNew}
+                    onClose={this.handleClickToggle("openNew")}
                     TransitionComponent={Transition}
                   > <AppBar className={classes.appBar}>
                       <Grid container spacing={0}>
                         <Grid item xs={6}>
                           <Toolbar className={classes.toolbar}>
-                            <IconButton color="inherit" onClick={this.handleCloseNew} aria-label="Close">
+                            <IconButton color="inherit" onClick={this.handleClickToggle("openNew")} aria-label="Close">
                               <CloseIcon />
                             </IconButton>
                             <div className={classes.subscribeTitle}>
@@ -402,6 +407,37 @@ class Credentials extends React.Component {
                     </AppBar>
                     <div className={classes.plainContent}>
                       <Wizard />
+                    </div>
+                  </Dialog>
+
+                  {/* 
+                ***************************************
+                Subscribe with express Mode 
+                ***************************************
+                */}
+                <Dialog
+                    fullScreen
+                    open={this.state.openExpress}
+                    onClose={this.handleClickToggle("openExpress")}
+                    TransitionComponent={Transition}
+                  > <AppBar className={classes.appBar}>
+                      <Grid container spacing={0}>
+                        <Grid item xs={6}>
+                          <Toolbar className={classes.toolbar}>
+                            <IconButton color="inherit" onClick={this.handleClickToggle("openExpress")} aria-label="Close">
+                              <CloseIcon />
+                            </IconButton>
+                            <div className={classes.subscribeTitle}>
+                              <Typography variant="h6">
+                                Express Mode
+                              </Typography>
+                            </div>
+                          </Toolbar>
+                        </Grid>
+                      </Grid>
+                    </AppBar>
+                    <div className={classes.plainContent}>
+                      <Express />
                     </div>
                   </Dialog>
               </React.Fragment>

@@ -21,7 +21,6 @@ import ProductionKeys from "./ProductionKeys";
 import Application from '../../../data/Application';
 
 const ProductionKey = (props) => {
-    console.info(props);
     return (
         <div>
             {/* <TokenManager keyType="PRODUCTION" selectedApp={{appId: app.value, label: app.label}} />  */}

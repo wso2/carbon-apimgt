@@ -50,7 +50,7 @@ class KeyConfiguration extends React.Component {
       application: null,
       tokenType: "OAUTH"
     };
-    this.appId = this.props.selectedApp.appId;
+    this.appId = this.props.selectedApp.appId || this.props.selectedApp.value;
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
     this.handleTextChange = this.handleTextChange.bind(this);
     this.handleTokenTypeChange = this.handleTokenTypeChange.bind(this);
@@ -120,7 +120,6 @@ class KeyConfiguration extends React.Component {
     if (!keys.callbackUrl) {
       keys.callbackUrl = "https://wso2.am.com";
     }
-    debugger;
     let keyPromiss = application.generateKeys(
       this.key_type,
       keys.supportedGrantTypes,
