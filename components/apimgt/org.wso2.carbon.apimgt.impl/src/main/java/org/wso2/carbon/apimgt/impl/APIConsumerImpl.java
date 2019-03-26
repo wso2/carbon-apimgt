@@ -3042,14 +3042,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (BooleanUtils.isTrue(hidden)) {
                         String oldValue = applicationAttributes.put(attributeName, defaultAttr);
                         if (StringUtils.isNotEmpty(oldValue)) {
-                            log.info("Replace old value: " + oldValue + " and with default value: " + defaultAttr +
+                            log.info("Replace provided value: " + oldValue + " with default value: " + defaultAttr +
                                     " for the hidden application attribute: " + attributeName);
                         }
                     } else if (!applicationAttributes.keySet().contains(attributeName)) {
                         if (StringUtils.isNotEmpty(defaultAttr)) {
                             applicationAttributes.put(attributeName, defaultAttr);
+                            log.info("Added default value: " + defaultAttr +
+                                    " as required attribute: " + attributeName + "is not provided");
                         } else {
-                            handleException("Bad Request");
+                            handleException("Bad Request. Required application attribute not provided");
                         }
                     }
                 } else if (hidden) {
@@ -3211,7 +3213,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         String oldValue = applicationAttributes.put(attributeName, defaultAttr);
                         if (StringUtils.isNotEmpty(oldValue)) {
                             if (isExistingValue) {
-                                log.info("Replace old value: " + oldValue + " and with existing value: " +
+                                log.info("Replace provided value: " + oldValue + " with existing value: " +
                                         defaultAttr + " for the hidden application attribute: " + attributeName);
                             } else {
                                 log.info("Replace old value: " + oldValue + " and with default value: " +
@@ -3222,7 +3224,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         if (StringUtils.isNotEmpty(defaultAttr)) {
                             applicationAttributes.put(attributeName, defaultAttr);
                         } else {
-                            handleException("Bad Request");
+                            handleException("Bad Request. Required application attribute not provided");
                         }
                     }
                 } else if (hidden) {
