@@ -403,8 +403,7 @@ public class APIManagerConfiguration {
 
                     }
                     if (isHidden && isRequired && !jsonObject.containsKey(APIConstants.ApplicationAttributes.DEFAULT)) {
-                        throw new APIManagementException("A default value should be given for required, hidden" +
-                                " application attributes.");
+                        log.error("A default value needs to be given for required, hidden application attributes.");
                     }
                     jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, isRequired);
                     applicationAttributes.add(jsonObject);

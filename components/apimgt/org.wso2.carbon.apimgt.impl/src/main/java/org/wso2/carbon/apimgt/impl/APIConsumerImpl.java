@@ -3025,9 +3025,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         if (applicationAttributes == null) {
+            /*
+             * This empty Hashmap is set to avoid throwing a null pointer exception, in case no application attributes
+             * are set when creating an application
+             */
             applicationAttributes = new HashMap<String, String>();
         }
-        Set<String> keySet = new HashSet<>();
+        Set<String> configAttributes = new HashSet<>();
 
         if (applicationAttributesFromConfig != null) {
 
@@ -3036,19 +3040,27 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
                 Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
                 String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
-                String defaultAttr = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
-                keySet.add(attributeName);
+                String defaultValue = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
+                if (hidden && required && StringUtils.isEmpty(defaultValue)) {
+                    /*
+                     * In case a default value is not provided for a required hidden attribute, an exception is thrown,
+                     * we don't do this validation in server startup to support multi tenancy scenarios
+                     */
+                    handleException("Default value not provided for hidden required attribute. Please check the " +
+                            "configuration");
+                }
+                configAttributes.add(attributeName);
                 if (BooleanUtils.isTrue(required)) {
                     if (BooleanUtils.isTrue(hidden)) {
-                        String oldValue = applicationAttributes.put(attributeName, defaultAttr);
+                        String oldValue = applicationAttributes.put(attributeName, defaultValue);
                         if (StringUtils.isNotEmpty(oldValue)) {
-                            log.info("Replace provided value: " + oldValue + " with default value: " + defaultAttr +
+                            log.info("Replace provided value: " + oldValue + " with default value: " + defaultValue +
                                     " for the hidden application attribute: " + attributeName);
                         }
                     } else if (!applicationAttributes.keySet().contains(attributeName)) {
-                        if (StringUtils.isNotEmpty(defaultAttr)) {
-                            applicationAttributes.put(attributeName, defaultAttr);
-                            log.info("Added default value: " + defaultAttr +
+                        if (StringUtils.isNotEmpty(defaultValue)) {
+                            applicationAttributes.put(attributeName, defaultValue);
+                            log.info("Added default value: " + defaultValue +
                                     " as required attribute: " + attributeName + "is not provided");
                         } else {
                             handleException("Bad Request. Required application attribute not provided");
@@ -3058,7 +3070,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     applicationAttributes.remove(attributeName);
                 }
             }
-            application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+            application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, configAttributes));
         } else {
             application.setApplicationAttributes(null);
         }
@@ -3192,7 +3204,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         Map<String, String> existingApplicationAttributes = existingApp.getApplicationAttributes();
-        Set<String> keySet = new HashSet<>();
+        if (applicationAttributes == null) {
+            /*
+             * This empty Hashmap is set to avoid throwing a null pointer exception, in case no application attributes
+             * are set when updating an application
+             */
+            applicationAttributes = new HashMap<String, String>();
+        }
+        Set<String> configAttributes = new HashSet<>();
 
         if (applicationAttributesFromConfig != null) {
 
@@ -3202,40 +3221,48 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
                 Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
                 String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
-                String defaultAttr = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
-                keySet.add(attributeName);
+                String defaultValue = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
+                if (hidden && required && StringUtils.isEmpty(defaultValue)) {
+                    /*
+                     * In case a default value is not provided for a required hidden attribute, an exception is thrown,
+                     * we don't do this validation in server startup to support multi tenancy scenarios
+                     */
+                    handleException("Default value not provided for hidden required attribute. Please check the " +
+                            "configuration");
+                }
+                configAttributes.add(attributeName);
                 if (existingApplicationAttributes.containsKey(attributeName)) {
                     isExistingValue = true;
-                    defaultAttr = existingApplicationAttributes.get(attributeName);
+                    defaultValue = existingApplicationAttributes.get(attributeName);
                 }
                 if (BooleanUtils.isTrue(required)) {
                     if (BooleanUtils.isTrue(hidden)) {
-                        String oldValue = applicationAttributes.put(attributeName, defaultAttr);
+                        String oldValue = applicationAttributes.put(attributeName, defaultValue);
                         if (StringUtils.isNotEmpty(oldValue)) {
                             if (isExistingValue) {
                                 log.info("Replace provided value: " + oldValue + " with existing value: " +
-                                        defaultAttr + " for the hidden application attribute: " + attributeName);
+                                        defaultValue + " for the hidden application attribute: " + attributeName);
                             } else {
                                 log.info("Replace old value: " + oldValue + " and with default value: " +
-                                        defaultAttr + " for the hidden application attribute: " + attributeName);
+                                        defaultValue + " for the hidden application attribute: " + attributeName);
                             }
                         }
                     } else if (!applicationAttributes.keySet().contains(attributeName)) {
-                        if (StringUtils.isNotEmpty(defaultAttr)) {
-                            applicationAttributes.put(attributeName, defaultAttr);
+                        if (StringUtils.isNotEmpty(defaultValue)) {
+                            applicationAttributes.put(attributeName, defaultValue);
                         } else {
                             handleException("Bad Request. Required application attribute not provided");
                         }
                     }
                 } else if (hidden) {
                     if (isExistingValue) {
-                        applicationAttributes.put(attributeName, defaultAttr);
+                        applicationAttributes.put(attributeName, defaultValue);
                     } else {
                         applicationAttributes.remove(attributeName);
                     }
                 }
             }
-            application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+            application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, configAttributes));
         } else {
             application.setApplicationAttributes(null);
         }
