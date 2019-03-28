@@ -48,7 +48,6 @@ module.exports = {
         'no-restricted-syntax': ['off'],
         'no-restricted-globals': ["off"],
         'no-plusplus': ['off'],
-        "no-param-reassign": 0,
         'class-methods-use-this': ['off'],
         'arrow-body-style': 'off',
         'prefer-template': 'off',
