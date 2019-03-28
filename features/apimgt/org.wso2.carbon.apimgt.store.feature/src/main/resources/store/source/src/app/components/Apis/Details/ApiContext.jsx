@@ -15,20 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
-    return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
-    );
-};
 
-export default Progress;
+export const ApiContext = React.createContext({
+    active: 'overview',
+    handleMenuSelect: () => {},
+    api: null,
+    applications: null,
+    subscribedApplications: [],
+    applicationsAvailable: [],
+    updateSubscriptionData: () => {},
+});

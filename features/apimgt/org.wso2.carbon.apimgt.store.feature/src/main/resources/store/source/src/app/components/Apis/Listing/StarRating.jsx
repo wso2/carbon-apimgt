@@ -17,18 +17,32 @@
  */
 
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
 /**
- * Progress animation
  *
- * @returns { JSX }
+ *
+ * @param {*} props
+ * @returns
  */
-const Progress = () => {
+function Star(props) {
+    return props.isRated ? <span style={{ color: 'gold' }}>★</span> : <span style={{ color: 'gold' }}>☆</span>;
+}
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
+function StarRatingBar(props) {
+    const { rating } = props;
     return (
         <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
+            <Star name={1} isRated={rating >= 1} />
+            <Star name={2} isRated={rating >= 2} />
+            <Star name={3} isRated={rating >= 3} />
+            <Star name={4} isRated={rating >= 4} />
+            <Star name={5} isRated={rating >= 5} />
         </div>
     );
-};
+}
 
-export default Progress;
+export default StarRatingBar;

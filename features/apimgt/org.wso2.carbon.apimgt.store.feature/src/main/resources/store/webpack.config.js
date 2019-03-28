@@ -22,7 +22,7 @@ var path = require('path');
 
 const config = {
     entry: {
-        index: './source/index.js',
+        index: './source/index.jsx',
     },
     output: {
         path: path.resolve(__dirname, 'public/dist'),

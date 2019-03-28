@@ -16,19 +16,19 @@
  * under the License.
  */
 
+import ReactDOM from 'react-dom';
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
-    return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
-    );
-};
+// import 'typeface./src/App.jsx
+import 'material-design-icons';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import Config from 'Config';
+import Store from './src/App';
 
-export default Progress;
+const theme = createMuiTheme(Config);
+
+ReactDOM.render(
+    <MuiThemeProvider theme={theme}>
+        <Store />
+    </MuiThemeProvider>,
+    document.getElementById('react-root'),
+);

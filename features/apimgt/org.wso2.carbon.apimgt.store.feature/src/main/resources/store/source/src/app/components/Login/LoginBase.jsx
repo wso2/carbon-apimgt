@@ -16,19 +16,30 @@
  * under the License.
  */
 
-import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
+import React from 'react'
+import Footer from '../Footer/Footer'
+
+const LoginBase = (props) => {
     return (
         <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
+            <header className="header header-default">
+                <div className="container-fluid">
+                    <div className="pull-left brand float-remove-xs text-center-xs">
+                        <a href="/store/">
+                            <img
+                                src="/store/public/app/images/logo.svg"
+
+                                className="logo"/>
+                              <h1>API Store</h1>
+                        </a>
+                    </div>
+                </div>
+            </header>
+            {props.children}
+            <Footer/>
         </div>
+
     );
 };
 
-export default Progress;
+export default LoginBase

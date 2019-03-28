@@ -28,6 +28,7 @@ module.exports = {
             'warn',
             {
                 requireReturn: false,
+                requireReturnDescription: false,
             },
         ],
         indent: ['error', 4, { SwitchCase: 1 }],
@@ -43,17 +44,15 @@ module.exports = {
         'import/extensions': ['off'],
         'import/no-named-as-default': ['off'],
         'import/no-named-as-default-member': ['off'],
-        'no-underscore-dangle': [
-            'error',
-            {
-                allowAfterThis: true,
-            },
-        ],
+        'no-underscore-dangle': 0,
         'no-restricted-syntax': ['off'],
+        'no-restricted-globals': ["off"],
         'no-plusplus': ['off'],
+        "no-param-reassign": 0,
         'class-methods-use-this': ['off'],
         'arrow-body-style': 'off',
         'prefer-template': 'off',
+        "react/prop-types": 0,
         'jsx-a11y/no-static-element-interactions': 'off',
         'jsx-a11y/no-noninteractive-element-interactions': 'off',
         'jsx-a11y/anchor-is-valid': 'off', // Due to using React-Router Link components

@@ -16,19 +16,15 @@
  * under the License.
  */
 
-import React from 'react';
+import React from 'react'
 import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
+
+const LoadingAnimation = (props) => {
     return (
         <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
+            <CircularProgress style={{margin: "auto", display: "block"}}/>
         </div>
     );
 };
 
-export default Progress;
+export default LoadingAnimation

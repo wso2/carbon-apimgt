@@ -16,19 +16,12 @@
  * under the License.
  */
 
-import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
-    return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
-    );
-};
+import Base from './Base/index';
+import Apis from './Apis/Apis';
+import Login from './Login/Login';
+import Logout from './Logout';
+import Applications from './Applications/Applications';
 
-export default Progress;
+export {
+    Base, Apis, Login, Logout, Applications,
+};

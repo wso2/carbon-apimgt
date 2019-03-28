@@ -15,20 +15,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
-    return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
-    );
-};
+import Enzyme, { shallow, render, mount } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+import TestRenderer from 'react-test-renderer';
 
-export default Progress;
+// React 16 Enzyme adapter
+Enzyme.configure({ adapter: new Adapter() });
+
+// Make Enzyme functions available in all test files without importing
+global.React = React;
+global.shallow = shallow;
+global.render = render;
+global.mount = mount;
+global.testRenderer = TestRenderer;
