@@ -16,19 +16,25 @@
  * under the License.
  */
 
-import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
-    return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
-    );
-};
+import React from 'react'
+import {Route, Switch} from 'react-router-dom'
 
-export default Progress;
+import Listing from './Listing/Listing'
+import Details from './Details/index'
+import {PageNotFound} from '../Base/Errors'
+
+
+class Apis extends React.Component {
+    render() {
+        return (
+            <Switch>
+                <Route exact path={"/apis"} component={Listing}/>
+                <Route path={"/apis/:api_uuid/"} render={ props => (
+                    <Details {...props} />)}/>
+                <Route component={PageNotFound}/>
+            </Switch>
+        );
+    }
+}
+
+export default Apis;

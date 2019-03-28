@@ -16,19 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
-    return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
-    );
-};
+import PageNotFound from './PageNotfound'
+import ResourceNotFound from './ResourceNotFound'
 
-export default Progress;
+export {PageNotFound, ResourceNotFound}

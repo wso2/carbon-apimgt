@@ -16,19 +16,22 @@
  * under the License.
  */
 
-import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-/**
- * Progress animation
- *
- * @returns { JSX }
- */
-const Progress = () => {
+import React, {Component} from 'react';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+
+const ResourceNotFound = (props) => {
     return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
+        <Paper elevation={4}>
+            <Typography type="headline" component="h3">
+                404 Resource Not Found!
+            </Typography>
+            <Typography type="body1" component="p">
+                Can't find the resource you are looking for
+                <span style={{color: 'green'}}> {props.response ? props.response.statusText : ""} </span>
+            </Typography>
+        </Paper>
     );
 };
 
-export default Progress;
+export default ResourceNotFound
