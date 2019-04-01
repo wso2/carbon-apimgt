@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.hybrid.gateway.common.util.HttpRequestUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.OnPremiseGatewayConstants;
 import org.wso2.carbon.apimgt.hybrid.gateway.common.util.TokenUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.configurator.dto.MicroGatewayInitializationDTO;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,9 +46,13 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.Properties;
 
 /**
@@ -58,13 +63,18 @@ public class Configurator {
     private static final Log log = LogFactory.getLog(Configurator.class);
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
+    /** Path to Carbon Home */
+    private static String carbonHome;
+    /** Path to 'repository/conf' directory */
+    private static String carbonConfigDirPath;
+
     /**
      * Main method to handle Micro Gateway Configuration
      *
      * @param args String[]
      */
     public static void main(String[] args) {
-        String carbonHome = System.getProperty(ConfigConstants.CARBON_HOME);
+        carbonHome = CarbonUtils.getCarbonHome();
         if (carbonHome == null || carbonHome.isEmpty()) {
             log.error("Carbon Home has not been set. Startup will be cancelled.");
             Runtime.getRuntime().exit(1);
@@ -77,8 +87,7 @@ public class Configurator {
                               "\t(3) Organization Key\n");
             Runtime.getRuntime().exit(1);
         }
-        String carbonConfigDirPath = carbonHome + File.separator + ConfigConstants.REPOSITORY_DIR + File.separator
-                                             + ConfigConstants.CONF_DIR;
+        carbonConfigDirPath = CarbonUtils.getCarbonConfigDirPath();
         //Update Gateway properties file with API cloud related configs
         String cloudConfigsPath = carbonHome + File.separator + ConfigConstants.RESOURCES_DIR + File.separator
                 + ConfigConstants.CLOUD_CONFIG_DIR + File.separator + ConfigConstants.CLOUD_CONFIG_FILE_NAME;
@@ -99,8 +108,7 @@ public class Configurator {
         log4JConfigurator.configure(carbonConfigDirPath);
         writeConfiguredLock(carbonHome);
         try {
-            initializeOnPremGateway(gatewayProperties.getProperty(ConfigConstants.INITIALIZATION_API_URL),
-                                    carbonConfigDirPath, args);
+            initializeOnPremGateway(gatewayProperties, carbonConfigDirPath, args);
         } catch (OnPremiseGatewayException | IOException e) {
             log.error("Error while initializing gateway.", e);
             Runtime.getRuntime().exit(1);
@@ -138,20 +146,21 @@ public class Configurator {
     /**
      * Initialize the Micro Gateway in Cloud
      *
-     * @param initApiUrl String
      * @param carbonConfigDirPath String
      * @param args String[]
      * @throws OnPremiseGatewayException
      * @throws IOException
      */
-    private static void initializeOnPremGateway(String initApiUrl, String carbonConfigDirPath, String[] args)
+    private static void initializeOnPremGateway(Properties gatewayProperties, String carbonConfigDirPath, String[] args)
             throws OnPremiseGatewayException, IOException {
+        log.info("Initializing on-premises gateway.");
+        String initApiUrl = gatewayProperties.getProperty(ConfigConstants.INITIALIZATION_API_URL);
         //Collect device details
         Map<String, String> deviceDetails = getDeviceDetails();
         String carbonFilePath = carbonConfigDirPath + File.separator + ConfigConstants.GATEWAY_CARBON_FILE_NAME;
         int port = getGatewayPort(carbonFilePath);
         deviceDetails.put(ConfigConstants.PORT, Integer.toString(port));
-        String payload = getInitializationPayload(deviceDetails, args);
+        String payload = getInitializationPayload(gatewayProperties, deviceDetails, args);
         String authHeader = createAuthHeader(args);
         String token = callInitializationAPI(initApiUrl, authHeader, payload);
         //Update token in gateway properties file
@@ -240,12 +249,13 @@ public class Configurator {
     /**
      * Get a JSON String with the details required to initialize Micro Gateway
      *
-     * @param deviceDetails Map<String, String>
-     * @param args String[]
+     * @param gatewayProperties gateway properties
+     * @param deviceDetails     Map<String, String>
+     * @param args              String[]
      * @return details String
      * @throws IOException
      */
-    protected static String getInitializationPayload(Map<String, String> deviceDetails,
+    protected static String getInitializationPayload(Properties gatewayProperties, Map<String, String> deviceDetails,
                                                      String[] args) throws IOException {
         //Create object
         MicroGatewayInitializationDTO microGatewayInitializationDTO = new MicroGatewayInitializationDTO();
@@ -254,9 +264,17 @@ public class Configurator {
         microGatewayInitializationDTO.setMacAddress(deviceDetails.get(ConfigConstants.MAC_ADDRESS));
         microGatewayInitializationDTO.setPort(deviceDetails.get(ConfigConstants.PORT));
         microGatewayInitializationDTO.setHostName(deviceDetails.get(ConfigConstants.HOST_NAME));
+        // Set the GW URL, Label and Metadata
+        microGatewayInitializationDTO
+                .setLabel(gatewayProperties.getProperty(ConfigConstants.HYBRID_GATEWAY_LABEL_PROPERTY));
+        microGatewayInitializationDTO.setEnvMetadataMap(getEnvMetadataFromPropertiesFile(gatewayProperties));
+        microGatewayInitializationDTO.setCustomMetadataMap(getCustomMetadataFromPropertiesFile(gatewayProperties));
         //Convert to JSON string
         ObjectMapper mapper = new ObjectMapper();
         String details = mapper.writeValueAsString(microGatewayInitializationDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieved details required to initialize on-premises gateway: " + details);
+        }
         return details;
     }
 
@@ -431,5 +449,114 @@ public class Configurator {
             Runtime.getRuntime().exit(1);
         }
         return port;
+    }
+
+    /**
+     * Retrieves environment metadata keys from properties file and maps with system property values accordingly
+     * Adds last wum update date also to the metadata map
+     *
+     * @param gatewayProperties
+     * @return environment metadata map
+     */
+    private static Map<String, String> getEnvMetadataFromPropertiesFile(Properties gatewayProperties) {
+        Map<String, String> properties =
+                getAllPropertiesForPrefix(gatewayProperties, ConfigConstants.HYBRID_GATEWAY_ENV_METADATA);
+        Map<String, String> envMetadata = new HashMap<>();
+
+        // Check whether the configured environment key has a system property value,
+        // If true, add it to the envMetadata map
+        for (String key : properties.keySet()) {
+            String substringMetadataKey = key.substring(ConfigConstants.HYBRID_GATEWAY_ENV_METADATA.length());
+            String systemPropertyVal = System.getProperty(substringMetadataKey);
+            if (StringUtils.isNotBlank(systemPropertyVal)) {
+                envMetadata.put(substringMetadataKey, systemPropertyVal);
+            } else {
+                log.warn("Unknown environment metadata key: " + key + ". Hence Ignoring.");
+            }
+        }
+        // Put carbon home and last wum update timestamp as mandatory entries to the environment data map
+        envMetadata.put(ConfigConstants.CARBON_HOME, carbonHome);
+        envMetadata.put(ConfigConstants.LAST_WUM_UPDATE, getLastWumUpdatedTimestamp());
+        if (log.isDebugEnabled()) {
+            log.debug("System property metadata and wum updated timestamp retrieved as per the configurations is: " +
+                      envMetadata);
+        }
+        return envMetadata;
+    }
+
+    /**
+     * Retrieves custom metadata keys and values from properties file
+     *
+     * @param gatewayProperties
+     * @return custom metadata map
+     */
+    private static Map<String, String> getCustomMetadataFromPropertiesFile(Properties gatewayProperties) {
+        Map<String, String> allPropertiesForPrefix =
+                getAllPropertiesForPrefix(gatewayProperties, ConfigConstants.HYBRID_GATEWAY_CUSTOM_METADATA);
+        Map<String, String> modifiedPropertyMap = new HashMap<>();
+        for (String key : allPropertiesForPrefix.keySet()) {
+            String modifiedKey = key.substring(ConfigConstants.HYBRID_GATEWAY_CUSTOM_METADATA.length());
+            // Check if the custom key actually has a value defined
+            if (StringUtils.isNotBlank(allPropertiesForPrefix.get(key))) {
+                modifiedPropertyMap.put(modifiedKey, allPropertiesForPrefix.get(key));
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Custom metadata retrieved as per the configurations is: " + modifiedPropertyMap);
+        }
+        return modifiedPropertyMap;
+    }
+
+    /**
+     * Retrieves all the properties from property file
+     *
+     * @param gatewayProperties
+     * @param propertyKeyPrefix
+     * @return all property keys and values in a map
+     */
+    private static Map<String, String> getAllPropertiesForPrefix(Properties gatewayProperties,
+                                                                 String propertyKeyPrefix) {
+        Map<String, String> allPropertyKeyValueMap = new HashMap<>();
+        for (String key : gatewayProperties.stringPropertyNames()) {
+            if (key.startsWith(propertyKeyPrefix)) {
+                allPropertyKeyValueMap.put(key, gatewayProperties.getProperty(key));
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving all the properties for the prefix: " + propertyKeyPrefix + ". Found key," +
+                      "value map: " + allPropertyKeyValueMap);
+        }
+        return allPropertyKeyValueMap;
+    }
+
+    /**
+     * Gets the last WUM updated timestamp from the wum summary file in the 'wumDir' path
+     *
+     * @return last WUM updated timestamp
+     */
+    private static String getLastWumUpdatedTimestamp() {
+        String lastWumUpdateTimestamp = "-1";
+        Path wumDir = Paths.get(carbonHome, ConfigConstants.UPDATES_DIR, ConfigConstants.WUM_DIR);
+        if (Files.exists(wumDir)) {
+            OptionalLong max = OptionalLong.empty();
+            try {
+                // List files in WUM directory, filter file names for numbers and get the
+                // timestamps from file names, then get the maximum timestamp as the
+                // the last wum updated timestamp.
+                max = Files.list(wumDir).filter(path -> !Files.isDirectory(path))
+                           .map(path -> path.getFileName().toString()).filter(StringUtils::isNumeric)
+                           .mapToLong(Long::parseLong).max();
+            } catch (IOException e) {
+                log.error("An error occurred when retrieving last wum update time.", e);
+            }
+            if (max.isPresent()) {
+                lastWumUpdateTimestamp = String.valueOf(max.getAsLong());
+            } else {
+                log.warn("No WUM update information found in the file path: " + wumDir.toString());
+            }
+        } else {
+            log.warn("WUM directory not found in the file path: " + wumDir.toString());
+        }
+        return lastWumUpdateTimestamp;
     }
 }

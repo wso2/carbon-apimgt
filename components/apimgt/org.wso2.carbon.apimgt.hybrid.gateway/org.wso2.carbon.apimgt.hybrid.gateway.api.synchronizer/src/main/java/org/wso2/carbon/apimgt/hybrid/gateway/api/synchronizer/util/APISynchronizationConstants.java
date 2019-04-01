@@ -38,4 +38,11 @@ public class APISynchronizationConstants {
     public static final String API_DEFAULT_VERSION = "v0.14";
     public static final String URL_PATH_SEPARATOR = "/";
     public static final String CLOUD_API = "cloud";
+    public static final String QUESTION_MARK = "?";
+    public static final String OFFSET_PREFIX = "offset=";
+    public static final String API_SEARCH_LABEL_QUERY_PREFIX = "query=label:";
+    public static final String AMPERSAND = "&";
+    public static final String PAGINATION_LIMIT_PREFIX = "limit=";
+    public static final String PAGINATION_LIMIT = "500";
+    public static final String CHARSET_UTF8 = "UTF-8";
 }

@@ -86,7 +86,7 @@ public class ConfiguratorTest {
         String carbonFilePath = carbonConfigDirPath + File.separator + ConfigConstants.GATEWAY_CARBON_FILE_NAME;
         int port = Configurator.getGatewayPort(carbonFilePath);
         deviceDetails.put(ConfigConstants.PORT, Integer.toString(port));
-        String payload = Configurator.getInitializationPayload(deviceDetails, args);
+        String payload = Configurator.getInitializationPayload(gatewayProperties, deviceDetails, args);
         String authHeader = Configurator.createAuthHeader(args);
         //Set initialization endpoint
         String initApiUrl = gatewayProperties.getProperty(ConfigConstants.INITIALIZATION_API_URL);

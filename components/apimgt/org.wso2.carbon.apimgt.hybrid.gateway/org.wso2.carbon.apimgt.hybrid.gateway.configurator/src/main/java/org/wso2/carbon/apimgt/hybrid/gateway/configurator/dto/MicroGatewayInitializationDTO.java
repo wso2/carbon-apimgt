@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.hybrid.gateway.configurator.dto;
 
+import java.util.Map;
+
 /**
  *  DTO to store micro gateway details
  */
@@ -26,6 +28,10 @@ public class MicroGatewayInitializationDTO {
     private String macAddress = null;
     private String port = null;
     private String hostName = null;
+    private String gwUrl = null;
+    private String label = null;
+    private Map<String, String> envMetadataMap = null;
+    private Map<String, String> customMetadataMap = null;
 
     /**
      * Retrieve tenant domain
@@ -99,4 +105,58 @@ public class MicroGatewayInitializationDTO {
         this.hostName = hostName;
     }
 
+    /**
+     * Get the label configured for this micro GW instance. Can be null if no label
+     * is configured.
+     *
+     * @return label
+     */
+    public String getLabel() {
+        return label;
+    }
+
+    /**
+     * Set the label configured for this GW.
+     *
+     * @param label configured label
+     */
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    /**
+     * Get system environment specific metadata
+     *
+     * @return envMetadataMap environment metadata
+     */
+    public Map<String, String> getEnvMetadataMap() {
+        return envMetadataMap;
+    }
+
+    /**
+     * Set the system environment specific metadata
+     *
+     * @param envMetadataMap environment metadata
+     */
+    public void setEnvMetadataMap(Map<String, String> envMetadataMap) {
+        this.envMetadataMap = envMetadataMap;
+    }
+
+    /**
+     * Get the custom configured metadata (which are not related to system environments)
+     *
+     * @return customMetadataMap custom metadata
+     */
+    public Map<String, String> getCustomMetadataMap() {
+        return customMetadataMap;
+    }
+
+    /**
+     * Set the custom configured metadata (which are not related to system environments)
+     *
+     * @param customMetadataMap custom metadata
+     */
+    public void setCustomMetadataMap(Map<String, String> customMetadataMap) {
+        this.customMetadataMap = customMetadataMap;
+    }
 }
