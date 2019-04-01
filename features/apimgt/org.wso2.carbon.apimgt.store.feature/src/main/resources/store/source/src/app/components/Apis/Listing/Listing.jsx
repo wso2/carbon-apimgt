@@ -276,14 +276,6 @@ API
                             ) : (
                                 <React.Fragment>
                                     <ApiTableView apis={apis.list} />
-                                    {/* <Table>
-                                        <EnhancedAPITableHead order={order} orderBy={orderBy} onRequestSort={this.handleRequestSort} />
-                                        <TableBody>
-                                            {this.state.apis.list.sort(getSorting(order, orderBy)).map(api => (
-                                                <APiTableRow api={api} key={api.id} />
-                                            ))}
-                                        </TableBody>
-                                    </Table> */}
                                 </React.Fragment>
                             )
                         ) : (

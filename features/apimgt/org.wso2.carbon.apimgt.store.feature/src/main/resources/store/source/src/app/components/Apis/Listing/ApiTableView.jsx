@@ -46,18 +46,6 @@ class StarRatingColumn extends React.Component {
     }
 }
 
-
-const styles = {
-    avatar: {
-        margin: 10,
-    },
-    bigAvatar: {
-        margin: 10,
-        width: 60,
-        height: 60,
-    },
-};
-
 class ApiTableView extends React.Component {
     constructor(props) {
         super(props);
@@ -141,8 +129,4 @@ class ApiTableView extends React.Component {
     }
 }
 
-ApiTableView.propTypes = {
-    classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(ApiTableView);
+export default ApiTableView;
