@@ -24,7 +24,7 @@ import React from 'react';
  * @returns
  */
 function Star(props) {
-    return props.isRated ? <span style={{ color: 'gold' }}>★</span> : <span style={{ color: 'gold' }}>☆</span>;
+    return props.isRated ? <span style={{ color: props.starColor }}>★</span> : <span style={{ color: props.starColor }}>☆</span>;
 }
 /**
  *
@@ -33,14 +33,14 @@ function Star(props) {
  * @returns
  */
 function StarRatingBar(props) {
-    const { rating } = props;
+    const { rating, starColor } = props;
     return (
         <div>
-            <Star name={1} isRated={rating >= 1} />
-            <Star name={2} isRated={rating >= 2} />
-            <Star name={3} isRated={rating >= 3} />
-            <Star name={4} isRated={rating >= 4} />
-            <Star name={5} isRated={rating >= 5} />
+            <Star name={1} isRated={rating >= 1} starColor={starColor} />
+            <Star name={2} isRated={rating >= 2} starColor={starColor}  />
+            <Star name={3} isRated={rating >= 3} starColor={starColor}  />
+            <Star name={4} isRated={rating >= 4} starColor={starColor}  />
+            <Star name={5} isRated={rating >= 5} starColor={starColor}  />
         </div>
     );
 }
