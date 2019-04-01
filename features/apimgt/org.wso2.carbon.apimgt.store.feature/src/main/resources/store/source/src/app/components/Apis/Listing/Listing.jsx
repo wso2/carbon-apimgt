@@ -40,6 +40,7 @@ import API from '../../../data/api';
 import APiTableRow from './ApiTableRow';
 import ApiThumb from './ApiThumb';
 import CustomIcon from '../../Shared/CustomIcon';
+import ApiTableView from './ApiTableView';
 
 /**
  *
@@ -61,6 +62,7 @@ const styles = theme => ({
     ListingWrapper: {
         paddingTop: 10,
         paddingLeft: 35,
+        width: theme.custom.contentAreaWidth,
     },
     root: {
         height: 70,
@@ -228,7 +230,7 @@ class Listing extends React.Component {
             return <ResourceNotFound />;
         }
 
-        const { order, orderBy } = this.state;
+        const { order, orderBy, apis } = this.state;
         const { theme, classes } = this.props;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
@@ -272,14 +274,9 @@ API
                                     ))}
                                 </Grid>
                             ) : (
-                                <Table>
-                                    <EnhancedAPITableHead order={order} orderBy={orderBy} onRequestSort={this.handleRequestSort} />
-                                    <TableBody>
-                                        {this.state.apis.list.sort(getSorting(order, orderBy)).map(api => (
-                                            <APiTableRow api={api} key={api.id} />
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                <React.Fragment>
+                                    <ApiTableView apis={apis.list} />
+                                </React.Fragment>
                             )
                         ) : (
                             <Loading />

@@ -22,35 +22,21 @@ import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import Api from '../../../data/api';
+
 /**
  *
  *
  * @param {*} theme
  */
 const styles = theme => ({
-    lifeCycleState: {
-        width: '1.5em',
-        height: '1.5em',
-        borderRadius: '50%',
-        marginRight: '0.5em',
-    },
-    lifeCycleDisplay: {
-        width: 95,
-        height: 30,
-        marginTop: -15,
-        marginLeft: 10,
-        color: '#fff',
-        textAlign: 'center',
-        lineHeight: '30px',
-        position: 'absolute',
-    },
     thumbContent: {
-        width: 250,
+        width: theme.custom.imageThumbnail.width - theme.spacing.unit,
         backgroundColor: theme.palette.background.paper,
-        padding: 10,
+        padding: theme.spacing.unit,
     },
     thumbLeft: {
         alignSelf: 'flex-start',
@@ -63,7 +49,7 @@ const styles = theme => ({
         display: 'flex',
     },
     thumbHeader: {
-        width: 250,
+        width: theme.custom.imageThumbnail.width,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -71,7 +57,7 @@ const styles = theme => ({
         margin: 0,
     },
     contextBox: {
-        width: 140,
+        width: parseInt((theme.custom.imageThumbnail.width - theme.spacing.unit) / 2),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -79,29 +65,6 @@ const styles = theme => ({
         margin: 0,
         display: 'inline-block',
         lineHeight: '1em',
-    },
-    descriptionOverlay: {
-        content: '',
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        background: 'linear-gradient(transparent 25px, theme.palette.background.paper)',
-    },
-    descriptionWrapper: {
-        color: theme.palette.text.secondary,
-        position: 'relative',
-        height: 50,
-        overflow: 'hidden',
-    },
-    thumbDelete: {
-        cursor: 'pointer',
-        backgroundColor: '#ffffff9a',
-        display: 'inline-block',
-        position: 'absolute',
-        top: 20,
-        left: 224,
     },
     thumbWrapper: {
         position: 'relative',
@@ -113,6 +76,11 @@ const styles = theme => ({
     imageWrapper: {
         color: theme.palette.text.secondary,
         textDecoration: 'none',
+    },
+    imageOverlap: {
+        position: 'absolute',
+        bottom: 1,
+        backgroundColor: theme.custom.imageThumbnail.contentBackgroundColor,
     },
 });
 /**
@@ -156,20 +124,26 @@ class ApiThumb extends React.Component {
      */
     render() {
         const details_link = '/apis/' + this.props.api.id;
-        const { api, classes } = this.props;
+        const { api, classes, theme } = this.props;
+        const { imageThumbnail } = theme.custom;
 
-        const {
-            name, lifeCycleStatus, version, context, description,
-        } = this.props.api;
+        const { name, version, context } = this.props.api;
         const { rating } = this.state;
-
+        const starColor = theme.palette.getContrastText(theme.custom.imageThumbnail.contentBackgroundColor);
+        const imageWidth = theme.custom.imageThumbnail.width;
+        const defaultImage = theme.custom.imageThumbnail.defaultApiImage;
         return (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.thumbWrapper}>
                 <Link to={details_link} className={classes.imageWrapper}>
-                    <ImageGenerator api={api} />
+                    {!defaultImage && <ImageGenerator api={api} width={imageWidth} />}
+                    {defaultImage && <img src={defaultImage} />}
                 </Link>
 
-                <div className={classes.thumbContent}>
+                <div
+                    className={classNames(classes.thumbContent, {
+                        [classes.imageOverlap]: imageThumbnail.contentPictureOverlap,
+                    })}
+                >
                     <Link to={details_link} className={classes.imageWrapper}>
                         <Typography className={classes.thumbHeader} variant='display1' gutterBottom onClick={this.handleRedirectToAPIOverview} title={name}>
                             {name}
@@ -196,12 +170,8 @@ class ApiThumb extends React.Component {
                     </div>
                     <div className={classes.thumbInfo}>
                         <Typography variant='subheading' gutterBottom align='left'>
-                            <StarRatingBar rating={rating} />
+                            <StarRatingBar rating={rating} starColor={starColor} />
                         </Typography>
-                    </div>
-                    <div className={classes.descriptionWrapper}>
-                        {description}
-                        <div className={classes.descriptionOverlay} />
                     </div>
                 </div>
             </Grid>

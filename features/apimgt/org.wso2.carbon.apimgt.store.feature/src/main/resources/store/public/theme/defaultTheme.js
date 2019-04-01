@@ -46,6 +46,13 @@ const Configurations = {
                 commentsLimit: 5,
                 maxCommentLength: 1300,
                 resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
+                imageThumbnail: {
+                    width: 240, 
+                    contentPictureOverlap: false, 
+                    contentBackgroundColor: 'rgba(239, 239, 239, 0.5)',
+                    defaultApiImage: false, //put false to render the system generated and user provided image.
+                    //And put a string to render a custom image
+                }
             },
         },
         dark: {
