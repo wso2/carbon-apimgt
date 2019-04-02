@@ -99,11 +99,79 @@ class Details extends React.Component {
      */
     constructor(props) {
         super(props);
+        /**
+         *
+         *
+         * @memberof Details
+         */
+        this.updateSubscriptionData = () => {
+            const api = new Api();
+            const promised_api = api.getAPIById(this.api_uuid);
+            const existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
+            const promised_applications = api.getAllApplications();
 
+            Promise.all([promised_api, existing_subscriptions, promised_applications])
+                .then((response) => {
+                    const [api, subscriptions, applications] = response.map(data => data.obj);
+                    // Getting the policies from api details
+                    this.setState({ api });
+                    if (api && api.policies) {
+                        const apiTiers = api.policies;
+                        const tiers = [];
+                        for (let i = 0; i < apiTiers.length; i++) {
+                            const tierName = apiTiers[i];
+                            tiers.push({ value: tierName, label: tierName });
+                        }
+                        this.setState({ tiers });
+                        if (tiers.length > 0) {
+                            this.setState({ policyName: tiers[0].value });
+                        }
+                    }
+
+                    const subscribedApplications = [];
+                    // get the application IDs of existing subscriptions
+                    subscriptions.list.map(element => subscribedApplications.push({ value: element.applicationId, 
+                        policy: element.policy, 
+                        subscriptionId: element.subscriptionId }));
+                    this.setState({ subscribedApplications });
+
+                    // Removing subscribed applications from all the applications and get the available applications to subscribe
+                    const applicationsAvailable = [];
+                    for (let i = 0; i < applications.list.length; i++) {
+                        const applicationId = applications.list[i].applicationId;
+                        const applicationName = applications.list[i].name;
+                        // include the application only if it does not has an existing subscriptions
+                        let applicationSubscribed = false;
+                        for (let j = 0; j < subscribedApplications.length; j++) {
+                            if (subscribedApplications[j].value === applicationId) {
+                                applicationSubscribed = true;
+                                subscribedApplications[j].label = applicationName;
+                            }
+                        }
+                        if (!applicationSubscribed) {
+                            applicationsAvailable.push({ value: applicationId, label: applicationName });
+                        }
+                    }
+                    this.setState({ applicationsAvailable });
+                    if (applicationsAvailable && applicationsAvailable.length > 0) {
+                        this.setState({ applicationId: applicationsAvailable[0].value });
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const status = error.status;
+                    if (status === 404) {
+                        this.setState({ notFound: true });
+                    }
+                });
+        };
         this.state = {
             active: 'overview',
             overviewHiden: false,
             handleMenuSelect: this.handleMenuSelect,
+            updateSubscriptionData: this.updateSubscriptionData,
             api: null,
             applications: null,
             subscribedApplications: [],
@@ -133,73 +201,6 @@ class Details extends React.Component {
      */
     setDetailsAPI(api) {
         this.setState({ api });
-    }
-
-    /**
-     *
-     *
-     * @memberof Details
-     */
-    updateSubscriptionData() {
-        const api = new Api();
-        const promised_api = api.getAPIById(this.api_uuid);
-        const existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
-        const promised_applications = api.getAllApplications();
-
-        Promise.all([promised_api, existing_subscriptions, promised_applications])
-            .then((response) => {
-                const [api, subscriptions, applications] = response.map(data => data.obj);
-                // Getting the policies from api details
-                this.setState({ api });
-                if (api && api.policies) {
-                    const apiTiers = api.policies;
-                    const tiers = [];
-                    for (let i = 0; i < apiTiers.length; i++) {
-                        const tierName = apiTiers[i];
-                        tiers.push({ value: tierName, label: tierName });
-                    }
-                    this.setState({ tiers });
-                    if (tiers.length > 0) {
-                        this.setState({ policyName: tiers[0].value });
-                    }
-                }
-
-                const subscribedApplications = [];
-                // get the application IDs of existing subscriptions
-                subscriptions.list.map(element => subscribedApplications.push({ value: element.applicationId, policy: element.policy }));
-                this.setState({ subscribedApplications });
-
-                // Removing subscribed applications from all the applications and get the available applications to subscribe
-                const applicationsAvailable = [];
-                for (let i = 0; i < applications.list.length; i++) {
-                    const applicationId = applications.list[i].applicationId;
-                    const applicationName = applications.list[i].name;
-                    // include the application only if it does not has an existing subscriptions
-                    let applicationSubscribed = false;
-                    for (let j = 0; j < subscribedApplications.length; j++) {
-                        if (subscribedApplications[j].value === applicationId) {
-                            applicationSubscribed = true;
-                            subscribedApplications[j].label = applicationName;
-                        }
-                    }
-                    if (!applicationSubscribed) {
-                        applicationsAvailable.push({ value: applicationId, label: applicationName });
-                    }
-                }
-                this.setState({ applicationsAvailable });
-                if (applicationsAvailable && applicationsAvailable.length > 0) {
-                    this.setState({ applicationId: applicationsAvailable[0].value });
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
     }
 
     /**

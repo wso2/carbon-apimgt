@@ -67,7 +67,6 @@ const styles = theme => ({
 class KeyConfiguration extends React.Component {
     constructor(props) {
         super(props);
-        this.key_type = props.type;
         this.state = {
             application: null,
             tokenType: 'OAUTH',
@@ -76,7 +75,6 @@ class KeyConfiguration extends React.Component {
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
         this.handleTextChange = this.handleTextChange.bind(this);
         this.handleTokenTypeChange = this.handleTokenTypeChange.bind(this);
-        this.key_type = this.props.keyType;
     }
 
     /**
@@ -88,13 +86,14 @@ class KeyConfiguration extends React.Component {
     handleTextChange(event) {
         const { application } = this.state;
         const { currentTarget } = event;
-        const keys = application.keys.get(this.key_type) || {
+        const { keyType } = this.props;
+        const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
-            keyType: this.key_type,
+            keyType,
             tokenType: this.state.tokenType,
         };
         keys.callbackUrl = currentTarget.value;
-        application.keys.set(this.key_type, keys);
+        application.keys.set(keyType, keys);
         this.setState({ application });
     }
 
@@ -106,10 +105,11 @@ class KeyConfiguration extends React.Component {
      */
     handleCheckboxChange(event) {
         const { application } = this.state;
+        const { keyType } = this.props;
         const { currentTarget } = event;
-        const keys = application.keys.get(this.key_type) || {
+        const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
-            keyType: this.key_type,
+            keyType,
             tokenType: this.state.tokenType,
         };
         let index;
@@ -120,7 +120,7 @@ class KeyConfiguration extends React.Component {
             index = keys.supportedGrantTypes.indexOf(currentTarget.id);
             keys.supportedGrantTypes.splice(index, 1);
         }
-        application.keys.set(this.key_type, keys);
+        application.keys.set(keyType, keys);
         // update the state with the new array of options
         this.setState({ application });
     }
@@ -133,13 +133,14 @@ class KeyConfiguration extends React.Component {
      */
     handleTokenTypeChange(event) {
         const { application } = this.state;
-        const keys = application.keys.get(this.key_type) || {
+        const { keyType } = this.props;
+        const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
-            keyType: this.key_type,
+            keyType: keyType,
             tokenType: this.state.tokenType,
         };
         keys.tokenType = event.target.value;
-        application.keys.set(this.key_type, keys);
+        application.keys.set(keyType, keys);
         // update the state with the new array of options
         this.setState({ application, tokenType: event.target.value });
     }
@@ -176,13 +177,14 @@ class KeyConfiguration extends React.Component {
      */
     generateKeys() {
         const { application } = this.state;
-        const keys = application.keys.get(this.key_type) || {
+        const { keyType } = this.props;
+        const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
         };
         if (!keys.callbackUrl) {
             keys.callbackUrl = 'https://wso2.am.com';
         }
-        const keyPromiss = application.generateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.tokenType);
+        const keyPromiss = application.generateKeys(keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.tokenType);
         return keyPromiss;
     }
 
@@ -194,8 +196,9 @@ class KeyConfiguration extends React.Component {
      */
     updateKeys() {
         const { application } = this.state;
-        const keys = application.keys.get(this.key_type);
-        const updatePromiss = application.updateKeys(keys.tokenType, this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
+        const { keyType } = this.props;
+        const keys = application.keys.get(keyType);
+        const updatePromiss = application.updateKeys(keys.tokenType, keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
         return updatePromiss;
     }
 
@@ -229,6 +232,7 @@ class KeyConfiguration extends React.Component {
      */
     render() {
         const { notFound } = this.state;
+        const { keyType } = this.props;
         if (notFound) {
             return <ResourceNotFound />;
         }
@@ -236,7 +240,7 @@ class KeyConfiguration extends React.Component {
             return <Loading />;
         }
         const { classes } = this.props;
-        const cs_ck_keys = this.state.application.keys.get(this.key_type);
+        const cs_ck_keys = this.state.application.keys.get(keyType);
         const consumerKey = cs_ck_keys && cs_ck_keys.consumerKey;
         const consumerSecret = cs_ck_keys && cs_ck_keys.consumerSecret;
         let supportedGrantTypes = cs_ck_keys && cs_ck_keys.supportedGrantTypes;
