@@ -171,9 +171,9 @@ public class OAuthApplicationInfo {
         this.jsonAppAttribute = jsonAppAttribute;
     }
 
-    public String getJsonAppAttribute () {
+    public String getJsonAppAttribute() {
 
-        if(jsonAppAttribute != null){
+        if (jsonAppAttribute != null) {
             return jsonAppAttribute;
         } else {
             return JSONObject.toJSONString(appAttributes);

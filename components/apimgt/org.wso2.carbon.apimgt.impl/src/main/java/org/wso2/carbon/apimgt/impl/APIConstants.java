@@ -1351,7 +1351,7 @@ public final class APIConstants {
     /**
      * Parameter for adding custom attributes against application in API Store
      */
-    public static class ApplicationAttributes{
+    public static class ApplicationAttributes {
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigs";
         public static final String APPLICATION_ATTRIBUTES = "ApplicationAttributes";
         public static final String ATTRIBUTES = "Attributes";
