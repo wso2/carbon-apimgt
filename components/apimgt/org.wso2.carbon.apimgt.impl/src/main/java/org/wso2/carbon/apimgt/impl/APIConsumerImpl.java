@@ -3018,7 +3018,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                             "cannot contain leading or trailing white spaces");
         }
 
-        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
+        JSONArray applicationAttributesFromConfig =
+                getAppAttributesFromConfig(MultitenantUtils.getTenantDomain(userId));
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         if (applicationAttributes == null) {
             /*
@@ -3037,7 +3038,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
                 String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
                 String defaultValue = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
-                if (hidden && required && StringUtils.isEmpty(defaultValue)) {
+                if (BooleanUtils.isTrue(hidden) && BooleanUtils.isTrue(required) && StringUtils.isEmpty(defaultValue)) {
                     /*
                      * In case a default value is not provided for a required hidden attribute, an exception is thrown,
                      * we don't do this validation in server startup to support multi tenancy scenarios
@@ -3062,7 +3063,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             handleException("Bad Request. Required application attribute not provided");
                         }
                     }
-                } else if (hidden) {
+                } else if (BooleanUtils.isTrue(hidden)) {
                     applicationAttributes.remove(attributeName);
                 }
             }
@@ -3195,9 +3196,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
         }
 
-        String userId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        Subscriber subscriber = application.getSubscriber();
+        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
 
-        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(tenantDomain);
         Map<String, String> applicationAttributes = application.getApplicationAttributes();
         Map<String, String> existingApplicationAttributes = existingApp.getApplicationAttributes();
         if (applicationAttributes == null) {
@@ -3218,7 +3220,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
                 String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
                 String defaultValue = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
-                if (hidden && required && StringUtils.isEmpty(defaultValue)) {
+                if (BooleanUtils.isTrue(hidden) && BooleanUtils.isTrue(required) && StringUtils.isEmpty(defaultValue)) {
                     /*
                      * In case a default value is not provided for a required hidden attribute, an exception is thrown,
                      * we don't do this validation in server startup to support multi tenancy scenarios
@@ -3250,7 +3252,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             handleException("Bad Request. Required application attribute not provided");
                         }
                     }
-                } else if (hidden) {
+                } else if (BooleanUtils.isTrue(hidden)) {
                     if (isExistingValue) {
                         applicationAttributes.put(attributeName, defaultValue);
                     } else {
@@ -3960,9 +3962,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIManagementException {
 
         Application application = apiMgtDAO.getApplicationByName(ApplicationName, userId,groupingId);
-        if (application != null) {
-            checkAppAttributes(application, userId);
-        }
         application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
 
         if (application != null) {
@@ -3973,7 +3972,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
-        return application;
+        return (application == null) ? null : removeHiddenAttributes(application, userId);
     }
 
     /**
@@ -3992,7 +3991,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 application.addKey(key);
             }
         }
-        return application;
+        return (application == null) ? null : removeHiddenAttributes(application, null);
     }
 
     /*
@@ -4002,13 +4001,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Application getApplicationById(int id, String userId, String groupId) throws APIManagementException {
         Application application = apiMgtDAO.getApplicationById(id, userId, groupId);
         if (application != null) {
-            checkAppAttributes(application, userId);
             Set<APIKey> keys = getApplicationKeys(application.getId());
             for (APIKey key : keys) {
                 application.addKey(key);
             }
         }
-        return application;
+        return (application == null) ? null : removeHiddenAttributes(application, userId);
     }
 
     /** get the status of the Application creation process given the application Id
@@ -5046,16 +5044,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     /**
      * This method is used to get keys of custom attributes, configured by user
      *
-     * @param userId user name of logged in user
+     * @param tenantDomain Tenant domain logged in
      * @return Array of JSONObject, contains keys of attributes
      * @throws APIManagementException
      */
-    public JSONArray getAppAttributesFromConfig(String userId) throws APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+    public JSONArray getAppAttributesFromConfig(String tenantDomain) throws APIManagementException {
         int tenantId = 0;
         try {
-            tenantId = getTenantId(tenantDomain);
+            if (StringUtils.isNotEmpty(tenantDomain)) {
+                tenantId = getTenantId(tenantDomain);
+            } else {
+                handleException("Error in fetching application attributes from config: Tenant domain not found");
+            }
         } catch (UserStoreException e) {
             handleException("Error in getting tenantId of " + tenantDomain, e);
         }
@@ -5068,50 +5068,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             applicationAttributes = configuration.getApplicationAttributes();
         }
         return applicationAttributes;
-    }
-
-    /**
-     * This method is used to validate keys of custom attributes, configured by user
-     *
-     * @param application
-     * @param userId user name of logged in user
-     * @throws APIManagementException
-     */
-    public void checkAppAttributes(Application application, String userId) throws APIManagementException {
-
-        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(userId);
-        Map<String, String> applicationAttributes = application.getApplicationAttributes();
-        List attributeKeys = new ArrayList<String>();
-        int applicationId = application.getId();
-        int tenantId = 0;
-        Map<String, String> newApplicationAttributes = new HashMap<>();
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
-        try {
-            tenantId = getTenantId(tenantDomain);
-        } catch (UserStoreException e) {
-            handleException("Error in getting tenantId of " + tenantDomain, e);
-        }
-
-        for (Object object : applicationAttributesFromConfig) {
-            JSONObject attribute = (JSONObject) object;
-            attributeKeys.add(attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE));
-        }
-
-        for (Object key : applicationAttributes.keySet()) {
-            if (!attributeKeys.contains(key)) {
-                apiMgtDAO.deleteApplicationAttributes((String) key, applicationId);
-                if (log.isDebugEnabled()) {
-                    log.debug("Removing " + key + "from application - " + application.getName());
-                }
-            }
-        }
-
-        for (Object key : attributeKeys) {
-            if (!applicationAttributes.keySet().contains(key)) {
-                newApplicationAttributes.put((String) key, "");
-            }
-        }
-        apiMgtDAO.addApplicationAttributes(newApplicationAttributes, applicationId, tenantId);
     }
 
     /**
@@ -5258,6 +5214,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return docMap;
     }
 
+    /**
+     * Validate application attributes and remove attributes that does not exist in the config
+     *
+     * @param applicationAttributes Application attributes provided
+     * @param keys Application attribute keys in config
+     * @return Validated application attributes
+     */
     private Map<String, String> validateApplicationAttributes(Map<String, String> applicationAttributes, Set keys) {
 
         Iterator iterator = applicationAttributes.keySet().iterator();
@@ -5269,5 +5232,44 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return applicationAttributes;
+    }
+
+    /**
+     * Remove all hidden application attributes from Application object
+     *
+     * @param application The application object that needs to be processed
+     * @param userId The userId of user
+     * @return Resulting Application object after removing hidden attributes
+     * @throws APIManagementException
+     */
+    private Application removeHiddenAttributes(Application application, String userId) throws APIManagementException {
+        String tenantDomain;
+        if (userId == null) {
+            Subscriber subscriber = application.getSubscriber();
+            tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+        } else {
+            tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        }
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(tenantDomain);
+        Map<String, String> existingapplicationAttributes = application.getApplicationAttributes();
+        Map<String, String> applicationAttributes = new HashMap<>();
+        if (existingapplicationAttributes != null && applicationAttributesFromConfig != null) {
+            for (Object object : applicationAttributesFromConfig) {
+                JSONObject attribute = (JSONObject) object;
+                Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
+                String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+
+                if (!BooleanUtils.isTrue(hidden)) {
+                    String attributeVal = existingapplicationAttributes.get(attributeName);
+                    if (attributeVal != null) {
+                        applicationAttributes.put(attributeName, attributeVal);
+                    } else {
+                        applicationAttributes.put(attributeName, "");
+                    }
+                }
+            }
+        }
+        application.setApplicationAttributes(applicationAttributes);
+        return application;
     }
 }

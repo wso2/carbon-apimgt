@@ -4492,8 +4492,6 @@ public class ApiMgtDAO {
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
-                applicationAttributes = getApplicationAttributes(connection, applicationId);
-                application.setApplicationAttributes(applicationAttributes);
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
