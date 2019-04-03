@@ -1653,7 +1653,7 @@
         <maven.findbugsplugin.version>3.0.4</maven.findbugsplugin.version>
         <httpcore.version>4.3.3.wso2v1</httpcore.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
-        <ballerina.lang.version>0.970.0</ballerina.lang.version>
+        <ballerina.lang.version>0.990.3</ballerina.lang.version>
         <re2j.version>1.2.wso2v1</re2j.version>
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
