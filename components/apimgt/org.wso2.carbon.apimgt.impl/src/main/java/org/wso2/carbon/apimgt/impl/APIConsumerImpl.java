@@ -3049,21 +3049,37 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 configAttributes.add(attributeName);
                 if (BooleanUtils.isTrue(required)) {
                     if (BooleanUtils.isTrue(hidden)) {
+                        /*
+                         * If a required hidden attribute is attempted to be populated, we replace it with
+                         * the default value.
+                         */
                         String oldValue = applicationAttributes.put(attributeName, defaultValue);
                         if (StringUtils.isNotEmpty(oldValue)) {
-                            log.info("Replace provided value: " + oldValue + " with default value: " + defaultValue +
+                            log.info("Replaced provided value: " + oldValue + " with default the value" +
                                     " for the hidden application attribute: " + attributeName);
                         }
                     } else if (!applicationAttributes.keySet().contains(attributeName)) {
                         if (StringUtils.isNotEmpty(defaultValue)) {
+                            /*
+                             * If a required attribute is not provided and a default value is given, we replace it with
+                             * the default value.
+                             */
                             applicationAttributes.put(attributeName, defaultValue);
                             log.info("Added default value: " + defaultValue +
                                     " as required attribute: " + attributeName + "is not provided");
                         } else {
+                            /*
+                             * If a required attribute is not provided but a default value not given, we throw a bad
+                             * request exception.
+                             */
                             handleException("Bad Request. Required application attribute not provided");
                         }
                     }
                 } else if (BooleanUtils.isTrue(hidden)) {
+                    /*
+                     * If an optional hidden attribute is provided, we remove it and leave it blank, and leave it for
+                     * an extension to populate it.
+                     */
                     applicationAttributes.remove(attributeName);
                 }
             }
@@ -3230,6 +3246,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
                 configAttributes.add(attributeName);
                 if (existingApplicationAttributes.containsKey(attributeName)) {
+                    /*
+                     * If a there is an existing attribute value, that is used as the default value.
+                     */
                     isExistingValue = true;
                     defaultValue = existingApplicationAttributes.get(attributeName);
                 }
@@ -3237,13 +3256,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (BooleanUtils.isTrue(hidden)) {
                         String oldValue = applicationAttributes.put(attributeName, defaultValue);
                         if (StringUtils.isNotEmpty(oldValue)) {
-                            if (isExistingValue) {
-                                log.info("Replace provided value: " + oldValue + " with existing value: " +
-                                        defaultValue + " for the hidden application attribute: " + attributeName);
-                            } else {
-                                log.info("Replace old value: " + oldValue + " and with default value: " +
-                                        defaultValue + " for the hidden application attribute: " + attributeName);
-                            }
+                            log.info("Replaced provided value: " + oldValue + " with the default/existing value for" +
+                                    " the hidden application attribute: " + attributeName);
                         }
                     } else if (!applicationAttributes.keySet().contains(attributeName)) {
                         if (StringUtils.isNotEmpty(defaultValue)) {
