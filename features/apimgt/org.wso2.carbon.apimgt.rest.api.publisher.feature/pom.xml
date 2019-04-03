@@ -73,7 +73,7 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
