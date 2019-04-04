@@ -1465,7 +1465,7 @@
 
         <carbon.commons.version>4.6.60</carbon.commons.version>
         <carbon.registry.version>4.6.43</carbon.registry.version>
-        <carbon.mediation.version>4.6.115</carbon.mediation.version>
+        <carbon.mediation.version>4.6.123</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.12.330</carbon.identity.version>
