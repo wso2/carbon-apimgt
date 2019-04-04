@@ -150,7 +150,7 @@ var log = new Log();
                     var accessURLs = labels[i].accessURLs.split(",");
                     var accessURL = "";
                     for(var j = 0 ; j < accessURLs.length ; j++){
-                        if(accessURLs[j].indexOf("https://") > 0){
+                        if (accessURLs[j].trim().indexOf("https://") == 0) {
                             urlArr[count] = accessURLs[j];
                             break;
                         }
