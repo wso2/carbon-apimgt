@@ -427,7 +427,7 @@ function checkOnKeyPress(e) {
                     var gatewayLabels = api.labels;
                     for (var i = 0; i < gatewayLabels.length; i++) {
                         var label = gatewayLabels[i];
-                        if(label.labelName && label.accessURLs.indexOf("https://") > 0) {
+                        if (label.labelName && label.accessURLs.trim().indexOf("https://") == 0) {
                             %>
                               <option value="<%=encode.forHtmlAttribute(label.labelName)%>" class="microgw-label" data-attr="microGW"><%=encode.forHtmlAttribute(label.labelName)%></option>
                             <%
