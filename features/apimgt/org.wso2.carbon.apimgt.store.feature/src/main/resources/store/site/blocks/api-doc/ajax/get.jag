@@ -195,11 +195,16 @@ var log = new Log();
 
         //handle schems IMPORTANT: order of https and http is important to make sure https is targeted first.
         var schemes = []
-        if(api.transports.search("https") != -1){
-            schemes.push("https");
+        if(api.transports === "https") {
+            jsonObj.schemes.push("https");
         }
-        if(api.transports.search("http") != -1){
-            schemes.push("http");
+        if(api.transports === "http") {
+            jsonObj.schemes.push("http");
+        }
+
+        if(api.transports === "http,https") {
+            jsonObj.schemes.push("https");
+            jsonObj.schemes.push("http");
         }
 
         var paths = {}; //fix for /*, {url-template}*
