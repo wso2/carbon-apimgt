@@ -2,10 +2,10 @@
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var apiPath = "";
     var goBack = "";
-    if (session.get('apiPath') != null) {
+    if (session.get('apiPath')) {
         apiPath = session.get('apiPath');
     }
-    if (request.getParameter('goBack') != null) {
+    if (request.getParameter('goBack')) {
         goBack = request.getParameter('goBack');
     }
     var mod = jagg.module("manager");
