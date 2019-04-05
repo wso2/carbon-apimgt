@@ -1088,5 +1088,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
+    
 
 }

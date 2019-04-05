@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -6038,4 +6039,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private Map<String, APIProduct> productDB = new HashMap<String, APIProduct>();
+    public boolean createAPIProduct(APIProduct product) {
+        // create
+        productDB.put(product.getUuid(), product);
+        return true;
+    }
+
+    public APIProduct getAPIProduct(String uuid, String apiProvider) {
+        APIProduct product = productDB.get(uuid);
+        return product;
+    }
+
+    public List<APIProduct> getAPIProducts(String apiProvider) {
+        List<APIProduct> products = new ArrayList<APIProduct>(productDB.values());
+        return products;
+
+    }
+    
 }
