@@ -148,9 +148,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
             Object applicationAttributesFromUser = body.getAttributes();
             Map<String, String> applicationAttributes =
-                    new ObjectMapper().convertValue(applicationAttributesFromUser,Map.class);
+                    new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
 
-            if (applicationAttributes!=null) {
+            if (applicationAttributes != null) {
                 JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
                 Set<String> keySet = new HashSet<>();
                 Set attributeKeysFromUSer = applicationAttributes.keySet();

@@ -3663,7 +3663,7 @@ public class ApiMgtDAO {
             }
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
-            if( application.getApplicationAttributes() != null) {
+            if (application.getApplicationAttributes() != null) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
             }
         } catch (SQLException e) {
@@ -3734,7 +3734,7 @@ public class ApiMgtDAO {
             handleException("Failed to update OAuth Consumer Application", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
-            APIMgtDBUtil.closeAllConnections(preparedStatement,conn,null);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, conn, null);
         }
     }
 
@@ -12583,7 +12583,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            if(attributes != null) {
+            if (attributes != null) {
                 ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
                 for (String key : attributes.keySet()) {
                     ps.setInt(1, applicationId);

@@ -76,7 +76,7 @@ public class ApplicationMappingUtil {
             application.setTokenType(applicationDTO.getTokenType().toString());
         }
         Object applicationAttributes = applicationDTO.getAttributes();
-        Map appAttributes = new ObjectMapper().convertValue(applicationAttributes,Map.class);
+        Map appAttributes = new ObjectMapper().convertValue(applicationAttributes, Map.class);
         application.setApplicationAttributes(appAttributes);
         application.setGroupId(applicationDTO.getGroupId());
         return application;

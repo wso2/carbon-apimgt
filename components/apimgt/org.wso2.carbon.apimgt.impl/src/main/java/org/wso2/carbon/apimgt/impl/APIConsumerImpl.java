@@ -4909,15 +4909,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         JSONArray applicationAttributes = null;
         JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
-        try {
-            if (applicationConfig != null) {
-                applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
-            } else {
-                APIManagerConfiguration configuration = getAPIManagerConfiguration();
-                applicationAttributes = configuration.getApplicationAttributes();
-            }
-        } catch (NullPointerException e){
-            handleException("Error in reading configuration " + e.getMessage(), e);
+        if (applicationConfig != null) {
+            applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
+        } else {
+            APIManagerConfiguration configuration = getAPIManagerConfiguration();
+            applicationAttributes = configuration.getApplicationAttributes();
         }
         return applicationAttributes;
     }
