@@ -40,6 +40,21 @@ import java.util.Set;
 public interface APIProvider extends APIManager {
 
     /**
+     * Method to create a Local Entry by adding the swagger content.
+     *
+     * @param api    API
+     * @param jsonText json text to be saved in the registry
+     */
+    void addSwaggerToLocalEntry(API api, String jsonText);
+
+    /**
+     * Method to remove the Local Entry from the synapse local entries.
+     *
+     * @param apiId API Identifier to be deleted the Local Entry
+     */
+    void deleteSwaggerLocalEntry(APIIdentifier apiId);
+
+    /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>

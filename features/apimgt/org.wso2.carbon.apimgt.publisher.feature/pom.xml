@@ -101,6 +101,10 @@
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-codegen</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.localentry.stub</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -148,6 +152,7 @@
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
@@ -157,6 +162,7 @@
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.localentry.stub:${carbon.mediation.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:jempbox:${pdfbox.version}</importBundleDef>

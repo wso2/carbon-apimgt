@@ -579,6 +579,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
             //Save swagger in the registry
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+            apiProvider.addSwaggerToLocalEntry(api, (String) apiData.get("swagger", apiData));
         }
 
         //get new key manager instance for  resource registration.
@@ -4227,6 +4228,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
+            // delete the local Entry for given API ID
+            apiProvider.deleteSwaggerLocalEntry(apiId);
             apiProvider.deleteAPI(apiId);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
