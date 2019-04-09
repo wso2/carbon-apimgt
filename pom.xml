@@ -1598,7 +1598,7 @@
         <!-- apache cxf version -->
         <cxf.version>3.2.2</cxf.version>
 
-        <carbon.metrics.version>1.2.3</carbon.metrics.version>
+        <carbon.metrics.version>1.2.4</carbon.metrics.version>
         <!-- apache pdfbox version -->
         <pdfbox.version>1.8.16</pdfbox.version>
 
