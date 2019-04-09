@@ -1473,7 +1473,7 @@
         <carbon.identity-inbound-auth-oauth.version>6.0.135</carbon.identity-inbound-auth-oauth.version>
         <carbon.identity-user-ws.version>5.1.11</carbon.identity-user-ws.version>
         <carbon.identity-inbound-auth-saml2.version>5.4.26</carbon.identity-inbound-auth-saml2.version>
-        <carbon.identity-inbound-auth-openid.version>5.2.6</carbon.identity-inbound-auth-openid.version>
+        <carbon.identity-inbound-auth-openid.version>5.2.12</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>6.0.7</carbon.identity-local-auth-basicauth.version>
         <carbon.identity-outbound-auth-samlsso.version>5.1.19</carbon.identity-outbound-auth-samlsso.version>
 
