@@ -1640,7 +1640,7 @@
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <re2j.version>1.2.wso2v1</re2j.version>
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
-        <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
+        <maven-project-info-reports-plugin.version>3.0.0</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
         <jaeger.core.version>0.30.0</jaeger.core.version>
         <jaeger.thrift.version>0.30.4</jaeger.thrift.version>
