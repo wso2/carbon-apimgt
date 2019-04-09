@@ -383,6 +383,19 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     if ($(this).attr('data-attr-type') == "comma_seperated") {
         newValue = $.map(newValue.split(","), $.trim);
     }
+
+    var roles_updated = false;
+    for (var i = 0; i < API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].length; i++) {
+        if (API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].key === newValue) {
+            obj["x-roles"] = API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].roles;
+            roles_updated = true;
+            break;
+        }
+    }
+    if (!roles_updated) {
+        obj["x-roles"] = "";
+    }
+
     API_DESIGNER.openAPIDefinition.update_element(this, obj, newValue);
     API_DESIGNER.load_swagger_editor_content();
 };
