@@ -212,7 +212,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addSwaggerToLocalEntry(API api, String jsonText) {
         if (log.isDebugEnabled()) {
-            log.debug("Adding a new Local Entry");
+            log.debug("Adding a new Local Entry for the API: " + api.getId().toString());
         }
         Map<String, Environment> environments;
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
@@ -230,7 +230,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         jsonText.replaceAll("&(?!amp;)", "&amp;").
                                 replaceAll("<","&lt;").replaceAll(">","&gt;") + "</localEntry>");
             } catch (AxisFault e) {
-                log.error("Error occurred while Deleting the local entry ", e);
+                log.error("Error occurred while Deleting the local entry for the API: " + api.getId().toString(), e);
             }
         }
     }
@@ -238,7 +238,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void deleteSwaggerLocalEntry(APIIdentifier apiId) {
         if (log.isDebugEnabled()) {
-            log.debug("Deleting the local entry: " + apiId);
+            log.debug("Deleting the local entry for API: " + apiId.toString());
         }
         API api = new API(apiId);
         Map<String, Environment> environments;

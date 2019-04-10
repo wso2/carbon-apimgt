@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.gateway.utils;
 
 import org.apache.axis2.AxisFault;
@@ -27,19 +45,16 @@ public class LocalEntryClient {
      * @return Status of the add operation
      * @throws AxisFault
      */
-
     public Boolean addLocalEntry(String content) throws AxisFault {
-
         Boolean value;
         try {
             value = localEntryAdminServiceStub.addEntry(content);
         } catch (RemoteException e) {
-            throw new AxisFault("Error occurred while generating the response ", e.getMessage(), e);
+            throw new AxisFault("Error occurred while generating the response ", e);
         } catch (LocalEntryAdminException e) {
-            throw new AxisFault("Error occurred while adding the local entry", e.getMessage(), e);
+            throw new AxisFault("Error occurred while adding the local entry", e);
         }
         return value;
-
     }
 
     /**
@@ -54,9 +69,9 @@ public class LocalEntryClient {
         try {
             object = localEntryAdminServiceStub.getEntry(key);
         } catch (RemoteException e) {
-            throw new AxisFault("Error occurred while retrieving the local entry", e.getMessage(), e);
+            throw new AxisFault("Error occurred while retrieving the local entry", e);
         } catch (LocalEntryAdminException e) {
-            throw new AxisFault("Error occurred while create the admin client", e.getMessage(), e);
+            throw new AxisFault("Error occurred while create the admin client", e);
         }
         return object;
     }
@@ -68,14 +83,13 @@ public class LocalEntryClient {
      * @return Stataus of the delete operation
      * @throws AxisFault
      */
-
     public boolean deleteEntry(String key) throws AxisFault {
         try {
             return localEntryAdminServiceStub.deleteEntry(key);
         } catch (RemoteException e) {
-            throw new AxisFault("Error occurred while create the admin client", e.getMessage(), e);
+            throw new AxisFault("Error occurred while create the admin client", e);
         } catch (LocalEntryAdminException e) {
-            throw new AxisFault("Error occurred while deleting the local entry", e.getMessage(), e);
+            throw new AxisFault("Error occurred while deleting the local entry", e);
         }
     }
 }
