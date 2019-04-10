@@ -4229,7 +4229,8 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
             // delete the local Entry for given API ID
-            apiProvider.deleteSwaggerLocalEntry(apiId);
+            API api = apiProvider.getAPI(apiId);
+            apiProvider.deleteSwaggerLocalEntry(api);
             apiProvider.deleteAPI(apiId);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 

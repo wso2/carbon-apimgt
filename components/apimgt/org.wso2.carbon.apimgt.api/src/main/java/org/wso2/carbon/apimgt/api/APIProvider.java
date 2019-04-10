@@ -50,9 +50,9 @@ public interface APIProvider extends APIManager {
     /**
      * Method to remove the Local Entry from the synapse local entries.
      *
-     * @param apiId API Identifier to be deleted the Local Entry
+     * @param api    API
      */
-    void deleteSwaggerLocalEntry(APIIdentifier apiId);
+    void deleteSwaggerLocalEntry(API api);
 
     /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.

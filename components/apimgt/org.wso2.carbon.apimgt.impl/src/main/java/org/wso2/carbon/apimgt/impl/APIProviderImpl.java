@@ -236,11 +236,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void deleteSwaggerLocalEntry(APIIdentifier apiId) {
+    public void deleteSwaggerLocalEntry(API api) {
         if (log.isDebugEnabled()) {
-            log.debug("Deleting the local entry for API: " + apiId.toString());
+            log.debug("Deleting the local entry for API: " + api.getId().toString());
         }
-        API api = new API(apiId);
         Map<String, Environment> environments;
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
@@ -248,9 +247,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         LocalEntryAdminClient localEntryAdminClient;
         for (String environmentName : api.getEnvironments()) {
             Environment environment = environments.get(environmentName);
-            api.getEnvironments();
             try {
-                localEntryAdminClient = new LocalEntryAdminClient(apiId, environment);
+                localEntryAdminClient = new LocalEntryAdminClient(api.getId(), environment);
                 localEntryAdminClient.deleteEntry(api.getId().toString());
             } catch (AxisFault e) {
                 log.error("Error occurred while Deleting the local entry ", e);
