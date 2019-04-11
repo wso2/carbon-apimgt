@@ -1,0 +1,42 @@
+<%
+(function () {
+    var log = new Log("Sample log");
+    var url = request.getRequestURL();
+    log.info(url);
+
+    if (url.indexOf("images") > -1) {
+        log.info(url.indexOf("images"));
+        var imagepath = url.split("images/")[1];
+        var extension = getExtension(imagepath);
+        var contentType = "application/" + extension;
+        response.contentType = String(contentType);
+        var location =  "../images/" + imagepath;
+    } else if (url.indexOf("css") > -1) {
+        var filePath = url.split("css/")[1];
+        response.contentType = "text/css";
+        var location = "../css/" + filePath;
+        log.info(location);
+    } else if (url.indexOf("js") > -1) {
+        var filePath = url.split("js/")[1];
+        response.contentType = "text/javascript";
+        var location = "../js/" + filePath;
+        log.info(location);
+    }
+
+    var file = new File(location);
+    file.getPath();
+    file.open("r");
+    print(file.getStream());
+    file.close();
+
+}());
+
+function getExtension(file){
+    var log = new Log("Sample log");
+    var baseNameComponents = file.split('.');
+    var extension = baseNameComponents[baseNameComponents.length - 1];
+    log.info(extension);
+    return extension;
+}
+
+%>
