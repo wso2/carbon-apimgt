@@ -78,8 +78,6 @@ public class APIKeyValidator {
 
     private static boolean gatewayTokenCacheInit = false;
 
-    private static boolean gatewayInvalidTokenCacheInit = false;
-
     private static boolean resourceCacheInit = false;
 
     protected Log log = LogFactory.getLog(getClass());
@@ -155,8 +153,8 @@ public class APIKeyValidator {
         String apimGWCacheExpiry = getApiManagerConfiguration().
                 getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
 
-        if (!gatewayInvalidTokenCacheInit) {
-            gatewayInvalidTokenCacheInit = true;
+        if (!gatewayTokenCacheInit) {
+            gatewayTokenCacheInit = true;
             if (apimGWCacheExpiry != null) {
                 return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME,
                         Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
