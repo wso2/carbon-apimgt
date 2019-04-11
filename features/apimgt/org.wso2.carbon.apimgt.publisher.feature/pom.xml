@@ -193,7 +193,6 @@
                                 </advice>
                             </adviceFileContents>
                             <bundles>
-
                             </bundles>
                         </configuration>
                     </execution>
@@ -239,7 +238,6 @@
                     <workingDirectory>${npm.working.dir}</workingDirectory>
                 </configuration>
             </plugin>
-
         </plugins>
         <resources>
             <resource>
