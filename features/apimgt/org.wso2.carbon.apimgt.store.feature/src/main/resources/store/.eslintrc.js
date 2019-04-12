@@ -13,7 +13,7 @@ module.exports = {
     },
     extends: 'airbnb',
     rules: {
-        'max-len': ['error', 5000],
+        'max-len': ['error', 120],
         'require-jsdoc': [
             'warn',
             {
@@ -48,6 +48,7 @@ module.exports = {
         'no-restricted-syntax': ['off'],
         'no-restricted-globals': ["off"],
         'no-plusplus': ['off'],
+        "no-param-reassign": 0,
         'class-methods-use-this': ['off'],
         'arrow-body-style': 'off',
         'prefer-template': 'off',

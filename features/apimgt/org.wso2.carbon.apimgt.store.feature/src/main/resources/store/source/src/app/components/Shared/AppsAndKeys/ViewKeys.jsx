@@ -180,11 +180,7 @@ class ViewKeys extends React.Component {
     handleMouseDownGeneric = (event) => {
         event.preventDefault();
     };
-
-    /**
-     * Fetch Application object by ID coming from URL path params and fetch related keys to display
-     */
-    componentDidMount() {
+    updateUI = () => {
         const promised_app = Application.get(this.props.selectedApp.appId);
         promised_app
             .then((application) => {
@@ -201,6 +197,12 @@ class ViewKeys extends React.Component {
                     this.setState({ notFound: true });
                 }
             });
+    }
+    /**
+     * Fetch Application object by ID coming from URL path params and fetch related keys to display
+     */
+    componentDidMount() {
+        this.updateUI();    
     }
 
     handleShowCS = () => {
@@ -376,4 +378,4 @@ ViewKeys.propTypes = {
     fullScreen: PropTypes.bool.isRequired,
 };
 
-export default withMobileDialog()(withStyles(styles)(ViewKeys));
+export default withStyles(styles)(ViewKeys);

@@ -67,16 +67,16 @@ const styles = theme => ({
 class KeyConfiguration extends React.Component {
     constructor(props) {
         super(props);
-        this.key_type = props.type;
         this.state = {
             application: null,
             tokenType: 'OAUTH',
         };
-        this.appId = this.props.selectedApp.appId || this.props.selectedApp.value;
+        if(this.props.selectedApp){
+            this.appId = this.props.selectedApp.appId || this.props.selectedApp.value;
+        }
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
         this.handleTextChange = this.handleTextChange.bind(this);
         this.handleTokenTypeChange = this.handleTokenTypeChange.bind(this);
-        this.key_type = this.props.keyType;
     }
 
     /**
@@ -88,13 +88,14 @@ class KeyConfiguration extends React.Component {
     handleTextChange(event) {
         const { application } = this.state;
         const { currentTarget } = event;
-        const keys = application.keys.get(this.key_type) || {
+        const { keyType } = this.props;
+        const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
-            keyType: this.key_type,
+            keyType,
             tokenType: this.state.tokenType,
         };
         keys.callbackUrl = currentTarget.value;
-        application.keys.set(this.key_type, keys);
+        application.keys.set(keyType, keys);
         this.setState({ application });
     }
 
@@ -106,10 +107,11 @@ class KeyConfiguration extends React.Component {
      */
     handleCheckboxChange(event) {
         const { application } = this.state;
+        const { keyType } = this.props;
         const { currentTarget } = event;
-        const keys = application.keys.get(this.key_type) || {
+        const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
-            keyType: this.key_type,
+            keyType,
             tokenType: this.state.tokenType,
         };
         let index;
@@ -120,7 +122,7 @@ class KeyConfiguration extends React.Component {
             index = keys.supportedGrantTypes.indexOf(currentTarget.id);
             keys.supportedGrantTypes.splice(index, 1);
         }
-        application.keys.set(this.key_type, keys);
+        application.keys.set(keyType, keys);
         // update the state with the new array of options
         this.setState({ application });
     }
@@ -133,13 +135,14 @@ class KeyConfiguration extends React.Component {
      */
     handleTokenTypeChange(event) {
         const { application } = this.state;
-        const keys = application.keys.get(this.key_type) || {
+        const { keyType } = this.props;
+        const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
-            keyType: this.key_type,
+            keyType: keyType,
             tokenType: this.state.tokenType,
         };
         keys.tokenType = event.target.value;
-        application.keys.set(this.key_type, keys);
+        application.keys.set(keyType, keys);
         // update the state with the new array of options
         this.setState({ application, tokenType: event.target.value });
     }
@@ -176,13 +179,14 @@ class KeyConfiguration extends React.Component {
      */
     generateKeys() {
         const { application } = this.state;
-        const keys = application.keys.get(this.key_type) || {
+        const { keyType } = this.props;
+        const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
         };
         if (!keys.callbackUrl) {
             keys.callbackUrl = 'https://wso2.am.com';
         }
-        const keyPromiss = application.generateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.tokenType);
+        const keyPromiss = application.generateKeys(keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.tokenType);
         return keyPromiss;
     }
 
@@ -194,8 +198,9 @@ class KeyConfiguration extends React.Component {
      */
     updateKeys() {
         const { application } = this.state;
-        const keys = application.keys.get(this.key_type);
-        const updatePromiss = application.updateKeys(keys.tokenType, this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
+        const { keyType } = this.props;
+        const keys = application.keys.get(keyType);
+        const updatePromiss = application.updateKeys(keys.tokenType, keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
         return updatePromiss;
     }
 
@@ -205,20 +210,22 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     componentDidMount() {
-        const promised_app = Application.get(this.appId);
-        promised_app
-            .then((application) => {
-                application.getKeys().then(() => this.setState({ application }));
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
+        if(this.appId) {
+            const promised_app = Application.get(this.appId);
+            promised_app
+                .then((application) => {
+                    application.getKeys().then(() => this.setState({ application }));
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const status = error.status;
+                    if (status === 404) {
+                        this.setState({ notFound: true });
+                    }
+                });
+        }
     }
 
     /**
@@ -228,25 +235,28 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     render() {
-        const { notFound } = this.state;
+        const { notFound, application } = this.state;
+        const { keyType, classes } = this.props;
         if (notFound) {
             return <ResourceNotFound />;
         }
-        if (!this.state.application) {
-            return <Loading />;
+        // if (!this.state.application) {
+        //     return <Loading />;
+        // }
+        let csCkKeys, consumerKey, supportedGrantTypes, callbackUrl;
+        if(application){
+            csCkKeys = this.state.application.keys.get(keyType);
+            consumerKey = csCkKeys && csCkKeys.consumerKey;
+            supportedGrantTypes = csCkKeys && csCkKeys.supportedGrantTypes;
+            callbackUrl = csCkKeys && csCkKeys.callbackUrl;
+            supportedGrantTypes = supportedGrantTypes || false;
+            if (consumerKey) {
+                this.hasKeys = true;
+            } else {
+                this.hasKeys = false;
+            }
         }
-        const { classes } = this.props;
-        const cs_ck_keys = this.state.application.keys.get(this.key_type);
-        const consumerKey = cs_ck_keys && cs_ck_keys.consumerKey;
-        const consumerSecret = cs_ck_keys && cs_ck_keys.consumerSecret;
-        let supportedGrantTypes = cs_ck_keys && cs_ck_keys.supportedGrantTypes;
-        const callbackUrl = cs_ck_keys && cs_ck_keys.callbackUrl;
-        supportedGrantTypes = supportedGrantTypes || false;
-        if (consumerKey) {
-            this.hasKeys = true;
-        } else {
-            this.hasKeys = false;
-        }
+        
         return (
             <React.Fragment>
                 <FormControl className={classes.FormControl} component='fieldset'>
