@@ -58,19 +58,14 @@ const styles = theme => ({
 });
 
 class TokenManager extends React.Component {
-  state = {
-    value: 0,
-    response: null
-  };
   generateKeys = () => {
     let that = this;
     let promiseGenerate = this.keys.keygenWrapper();
     promiseGenerate
       .then(response => {
         console.log("Keys generated successfully with ID : " + response);
-        that.setState({
-          response
-        });
+        if(that.props.updateSubscriptionData) that.props.updateSubscriptionData();
+        that.viewKeys.updateUI();
       })
       .catch(error => {
         if (process.env.NODE_ENV !== "production") {
@@ -87,12 +82,10 @@ class TokenManager extends React.Component {
   };
   render() {
     const { classes, selectedApp, keyType } = this.props;
-    const { value, response } = this.state;
     return (
       <div className={classes.root}>
         <Typography variant="headline" className={classes.keyTitle}>{keyType} Key and Secret</Typography>
-
-        <ViewKeys selectedApp={selectedApp} keyType={keyType} />
+        <ViewKeys selectedApp={selectedApp} keyType={keyType} innerRef={node => (this.viewKeys = node)}  />
        
         <ExpansionPanel>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -118,12 +111,6 @@ class TokenManager extends React.Component {
                 Generate Keys
           </Button>
         </div>
-        
-        {/* <Tokens
-          innerRef={node => (this.tokens = node)}
-          selectedApp={selectedApp}
-          keyType={keyType}
-        /> */}
       </div>
     );
   }

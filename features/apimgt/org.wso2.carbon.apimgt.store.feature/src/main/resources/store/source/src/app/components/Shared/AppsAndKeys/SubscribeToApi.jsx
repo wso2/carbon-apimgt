@@ -188,7 +188,7 @@ class SubscribeToApi extends Component {
             <Grid container spacing={24} className={rootClass}>
                 <Grid item xs={12} md={6}>
                     {this.state.appSelected && (
-                        <FormControl className={classes.FormControl} disabled={!!this.props.newApp}>
+                        <FormControl className={classes.FormControl} disabled={this.props.newApp}>
                             <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
                                 Application
                             </InputLabel>

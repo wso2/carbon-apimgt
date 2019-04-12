@@ -18,7 +18,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Collapse from '@material-ui/core/Collapse';
 import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleOutlined';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { Typography } from '@material-ui/core';
@@ -27,6 +26,7 @@ import Alert from '../../../Shared/Alert';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 import API from '../../../../data/api';
+import { ApiContext } from '../ApiContext';
 
 const styles = theme => ({
     root: {
@@ -61,6 +61,7 @@ const styles = theme => ({
    * @extends {React.Component}
    */
 class Comments extends Component {
+    static contextType = ApiContext;
     /**
      * Creates an instance of Comments
      * @param {*} props properies passed by the parent element
@@ -85,9 +86,10 @@ class Comments extends Component {
     * @memberof Comments
     */
     componentDidMount() {
-        const { apiId, theme } = this.props;
-        const api = new API();
-        api.getAllComments(apiId)
+        let { apiId, theme, match } = this.props;
+        if( match ) apiId = match.params.api_uuid;
+        const restApi = new API();
+        restApi.getAllComments(apiId)
             .then((result) => {
                 const commentList = result.body.list;
                 this.setState({ allComments: commentList, totalComments: commentList.length });
@@ -167,11 +169,13 @@ class Comments extends Component {
    * @memberof Comments
    */
     render() {
-        const { classes, apiId, showLatest } = this.props;
+        const { classes, showLatest } = this.props;
         const {
             comments, expanded, allComments, startCommentsToDisplay, totalComments,
         } = this.state;
         return (
+            <ApiContext.Consumer>
+            {({ api }) => (
             <div className={classes.contentWrapper}>
                 {!showLatest && <div className={classes.root}>
                     <ArrowDropDownCircleOutlined
@@ -186,8 +190,8 @@ class Comments extends Component {
                     Comments
                     </Typography>
                 </div>}
-                {!showLatest && <CommentAdd apiId={apiId} commentsUpdate={this.updateCommentList} allComments={allComments} parentCommentId={null} cancelButton={false} />}
-                <Comment comments={comments} apiId={apiId} commentsUpdate={this.updateCommentList} allComments={allComments} />
+                {!showLatest && <CommentAdd apiId={api.id} commentsUpdate={this.updateCommentList} allComments={allComments} parentCommentId={null} cancelButton={false} />}
+                <Comment comments={comments} apiId={api.id} commentsUpdate={this.updateCommentList} allComments={allComments} />
                 { startCommentsToDisplay !== 0
                         && (
                             <div className={classes.contentWrapper}>
@@ -217,13 +221,14 @@ class Comments extends Component {
                         )
                 }
             </div>
+            )}
+            </ApiContext.Consumer>
         );
     }
 }
 
 Comments.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
-    apiId: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Comments);

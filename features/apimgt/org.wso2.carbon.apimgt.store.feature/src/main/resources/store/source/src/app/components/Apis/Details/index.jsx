@@ -22,19 +22,72 @@ import {
     Route, Switch, Redirect, Link,
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
+import Loadable from 'react-loadable';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
-import Overview from './Overview';
-import ApiConsole from './ApiConsole/ApiConsole';
-import Documentation from './Documents/Documentation';
-import Sdk from './Sdk';
 import { PageNotFound } from '../../Base/Errors/index';
 import InfoBar from './InfoBar';
 import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
-import Credentials from './Credentials/Credentials';
 import Api from '../../../data/api';
-import Comments from './Comments/Comments';
+import Progress from '../../Shared/Progress';
+
+const LoadableSwitch = Loadable.Map({
+    loader: { 
+        ApiConsole: () => import(// eslint-disable-line function-paren-newline
+        /* webpackChunkName: "ApiConsole" */
+        /* webpackPrefetch: true */
+        './ApiConsole/ApiConsole'),
+        Overview: () => import(// eslint-disable-line function-paren-newline
+            /* webpackChunkName: "Overview" */
+            /* webpackPrefetch: true */
+            './Overview'),
+        Documentation: () => import(// eslint-disable-line function-paren-newline
+            /* webpackChunkName: "Documentation" */
+            /* webpackPrefetch: true */
+            './Documents/Documentation',
+        ),
+        Credentials: () => import(// eslint-disable-line function-paren-newline
+            /* webpackChunkName: "Credentials" */
+            /* webpackPrefetch: true */
+            './Credentials/Credentials',
+        ),
+        Comments: () => import(// eslint-disable-line function-paren-newline
+            /* webpackChunkName: "Comments" */
+            /* webpackPrefetch: true */
+            './Comments/Comments',
+        ),
+        Sdk: () => import(// eslint-disable-line function-paren-newline
+            /* webpackChunkName: "Sdk" */
+            /* webpackPrefetch: true */
+            './Sdk',
+        )
+    },
+    render(loaded, props) {
+        let ApiConsole = loaded.ApiConsole.default;
+        let Overview = loaded.Overview.default;
+        let Documentation = loaded.Documentation.default;
+        let Credentials = loaded.Credentials.default;
+        let Comments = loaded.Comments.default;
+        let Sdk = loaded.Sdk.default;
+        const redirect_url = '/apis/' + props.api_uuid + '/overview';
+
+        return <Switch>
+            <Redirect exact from='/apis/:api_uuid' to={redirect_url} />
+            <Route path='/apis/:api_uuid/overview' component={Overview} />
+            <Route path='/apis/:api_uuid/credentials' component={Credentials} />
+            <Route path='/apis/:api_uuid/comments' component={Comments} />
+            <Route path='/apis/:api_uuid/test' component={ApiConsole} />
+            <Route path='/apis/:api_uuid/docs' component={Documentation} />
+            <Route path='/apis/:api_uuid/sdk' component={Sdk} />
+            <Route component={PageNotFound} />
+        </Switch>;
+    },
+    loading() {
+        return <Progress />
+    }
+});
+
 /**
  *
  *
@@ -99,11 +152,79 @@ class Details extends React.Component {
      */
     constructor(props) {
         super(props);
+        /**
+         *
+         *
+         * @memberof Details
+         */
+        this.updateSubscriptionData = () => {
+            const api = new Api();
+            const promised_api = api.getAPIById(this.api_uuid);
+            const existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
+            const promised_applications = api.getAllApplications();
 
+            Promise.all([promised_api, existing_subscriptions, promised_applications])
+                .then((response) => {
+                    const [api, subscriptions, applications] = response.map(data => data.obj);
+                    // Getting the policies from api details
+                    this.setState({ api });
+                    if (api && api.policies) {
+                        const apiTiers = api.policies;
+                        const tiers = [];
+                        for (let i = 0; i < apiTiers.length; i++) {
+                            const tierName = apiTiers[i];
+                            tiers.push({ value: tierName, label: tierName });
+                        }
+                        this.setState({ tiers });
+                        if (tiers.length > 0) {
+                            this.setState({ policyName: tiers[0].value });
+                        }
+                    }
+
+                    const subscribedApplications = [];
+                    // get the application IDs of existing subscriptions
+                    subscriptions.list.map(element => subscribedApplications.push({ value: element.applicationId, 
+                        policy: element.policy, 
+                        subscriptionId: element.subscriptionId }));
+                    this.setState({ subscribedApplications });
+
+                    // Removing subscribed applications from all the applications and get the available applications to subscribe
+                    const applicationsAvailable = [];
+                    for (let i = 0; i < applications.list.length; i++) {
+                        const applicationId = applications.list[i].applicationId;
+                        const applicationName = applications.list[i].name;
+                        // include the application only if it does not has an existing subscriptions
+                        let applicationSubscribed = false;
+                        for (let j = 0; j < subscribedApplications.length; j++) {
+                            if (subscribedApplications[j].value === applicationId) {
+                                applicationSubscribed = true;
+                                subscribedApplications[j].label = applicationName;
+                            }
+                        }
+                        if (!applicationSubscribed) {
+                            applicationsAvailable.push({ value: applicationId, label: applicationName });
+                        }
+                    }
+                    this.setState({ applicationsAvailable });
+                    if (applicationsAvailable && applicationsAvailable.length > 0) {
+                        this.setState({ applicationId: applicationsAvailable[0].value });
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const status = error.status;
+                    if (status === 404) {
+                        this.setState({ notFound: true });
+                    }
+                });
+        };
         this.state = {
             active: 'overview',
             overviewHiden: false,
             handleMenuSelect: this.handleMenuSelect,
+            updateSubscriptionData: this.updateSubscriptionData,
             api: null,
             applications: null,
             subscribedApplications: [],
@@ -133,73 +254,6 @@ class Details extends React.Component {
      */
     setDetailsAPI(api) {
         this.setState({ api });
-    }
-
-    /**
-     *
-     *
-     * @memberof Details
-     */
-    updateSubscriptionData() {
-        const api = new Api();
-        const promised_api = api.getAPIById(this.api_uuid);
-        const existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
-        const promised_applications = api.getAllApplications();
-
-        Promise.all([promised_api, existing_subscriptions, promised_applications])
-            .then((response) => {
-                const [api, subscriptions, applications] = response.map(data => data.obj);
-                // Getting the policies from api details
-                this.setState({ api });
-                if (api && api.policies) {
-                    const apiTiers = api.policies;
-                    const tiers = [];
-                    for (let i = 0; i < apiTiers.length; i++) {
-                        const tierName = apiTiers[i];
-                        tiers.push({ value: tierName, label: tierName });
-                    }
-                    this.setState({ tiers });
-                    if (tiers.length > 0) {
-                        this.setState({ policyName: tiers[0].value });
-                    }
-                }
-
-                const subscribedApplications = [];
-                // get the application IDs of existing subscriptions
-                subscriptions.list.map(element => subscribedApplications.push({ value: element.applicationId, policy: element.policy }));
-                this.setState({ subscribedApplications });
-
-                // Removing subscribed applications from all the applications and get the available applications to subscribe
-                const applicationsAvailable = [];
-                for (let i = 0; i < applications.list.length; i++) {
-                    const applicationId = applications.list[i].applicationId;
-                    const applicationName = applications.list[i].name;
-                    // include the application only if it does not has an existing subscriptions
-                    let applicationSubscribed = false;
-                    for (let j = 0; j < subscribedApplications.length; j++) {
-                        if (subscribedApplications[j].value === applicationId) {
-                            applicationSubscribed = true;
-                            subscribedApplications[j].label = applicationName;
-                        }
-                    }
-                    if (!applicationSubscribed) {
-                        applicationsAvailable.push({ value: applicationId, label: applicationName });
-                    }
-                }
-                this.setState({ applicationsAvailable });
-                if (applicationsAvailable && applicationsAvailable.length > 0) {
-                    this.setState({ applicationId: applicationsAvailable[0].value });
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
     }
 
     /**
@@ -246,16 +300,7 @@ class Details extends React.Component {
                 </div>
                 <div className={classes.content}>
                     <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
-                    <Switch>
-                        <Redirect exact from='/apis/:api_uuid' to={redirect_url} />
-                        <Route path='/apis/:api_uuid/overview' component={Overview} />
-                        <Route path='/apis/:api_uuid/credentials' component={Credentials} />
-                        <Route path='/apis/:api_uuid/comments' component={() => <Comments api={api} apiId={this.props.match.params.api_uuid} />} />
-                        <Route path='/apis/:api_uuid/test' component={ApiConsole} />
-                        <Route path='/apis/:api_uuid/docs' component={Documentation} />
-                        <Route path='/apis/:api_uuid/sdk' component={Sdk} />
-                        <Route component={PageNotFound} />
-                    </Switch>
+                    <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
             </ApiContext.Provider>

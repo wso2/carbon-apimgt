@@ -35,6 +35,7 @@ const LoadableProtectedApp = Loadable({
     loading: Progress,
 });
 
+
 /**
  *Root Store component
  *
