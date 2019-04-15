@@ -323,13 +323,12 @@ var getDataFromTable = function (tableName, tenantDomain, startIndex,count, sort
 
     } else if(tableName == "ApimApiAvailabilityInfo") {
 
-        var appName = "apim_health_availability_alert_0";
+        var appName = "APIM_API_AVAILABILITY";
         var query = "from ApimApiAvailabilityInfo " +
-                        "SELECT * " +  // use the commented select query below once https://github.com/wso2/product-sp/issues/753 fixed
-                        //"SELECT apiName, apiVersion, apiCreator, tenantDomain, status " +
-                        "having tenantDomain=='" + tenantDomain + "' " + 
-                        "order by " + sortableColumn + " " + isAscending + " " + 
-                        "limit " + count + " offset " + startIndex + " ;";
+            "on tenantDomain=='" + tenantDomain + "' " +
+            "SELECT apiName, apiVersion, apiCreator, tenantDomain, status " +
+            "order by " + sortableColumn + " " + isAscending + " " +
+            "limit " + count + " offset " + startIndex + " ;";
                         
         var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
         var objArr = [];
