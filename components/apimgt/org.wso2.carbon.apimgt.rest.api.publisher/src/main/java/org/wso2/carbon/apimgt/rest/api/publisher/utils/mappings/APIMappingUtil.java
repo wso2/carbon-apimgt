@@ -949,4 +949,30 @@ public class APIMappingUtil {
         product.setProductResources(productResources);
         return product;
     }
+
+    public static APIProductDetailedDTO fromAPIProducttoDTO(APIProduct product) {
+        APIProductDetailedDTO productDto = new APIProductDetailedDTO();
+        productDto.setName(product.getName());
+        productDto.setProvider(product.getProvider());
+        productDto.setId(product.getUuid());
+        List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
+        
+        List<APIProductResource> resources = product.getProductResources();
+        for (APIProductResource apiProductResource : resources) {
+            ProductAPIDTO productAPI = new ProductAPIDTO();
+            productAPI.setName(apiProductResource.getApiName());
+            productAPI.setApiId(apiProductResource.getApiId());
+            List<String> resourcesOfAPI = new ArrayList<String>();
+            
+            List<URITemplate> templates = apiProductResource.getResources();
+            for (URITemplate template : templates) {
+                resourcesOfAPI.add(template.getHTTPVerb() + ":" + template.getResourceURI());
+            }
+            productAPI.setResources(resourcesOfAPI);
+            apis.add(productAPI);
+            
+        }
+        productDto.setApis(apis);
+        return productDto;
+    }
 }

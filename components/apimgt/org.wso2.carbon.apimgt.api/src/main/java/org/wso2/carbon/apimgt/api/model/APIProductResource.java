@@ -47,6 +47,10 @@ public class APIProductResource {
         return resources;
     }
 
+    public void setResources(List<URITemplate> resources) {
+        this.resources = resources;
+    }
+
     public void setResource(URITemplate resource) {
         this.resources.add(resource);
     }

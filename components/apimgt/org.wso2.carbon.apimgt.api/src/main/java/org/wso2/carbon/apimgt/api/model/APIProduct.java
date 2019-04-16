@@ -25,6 +25,16 @@ public class APIProduct {
     private String name;
     private String uuid;
     private String provider;
+    private String description;
+    private String productTier;
+    private String visibility;
+    private String subscriptionAvailability;
+    private String state;
+    private String businessOwner;
+    private String businessOwnerEmail;
+    
+    //private String thumbnailImage
+    
     private List<APIProductResource> productResources = new ArrayList<>();
     public String getName() {
         return name;
@@ -50,7 +60,47 @@ public class APIProduct {
     public void setProductResources(List<APIProductResource> productResources) {
         this.productResources = productResources;
     }
-    
-    
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public String getProductTier() {
+        return productTier;
+    }
+    public void setProductTier(String productTier) {
+        this.productTier = productTier;
+    }
+    public String getVisibility() {
+        return visibility;
+    }
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+    public String getSubscriptionAvailability() {
+        return subscriptionAvailability;
+    }
+    public void setSubscriptionAvailability(String subscriptionAvailability) {
+        this.subscriptionAvailability = subscriptionAvailability;
+    }
+    public String getState() {
+        return state;
+    }
+    public void setState(String state) {
+        this.state = state;
+    }
+    public String getBusinessOwner() {
+        return businessOwner;
+    }
+    public void setBusinessOwner(String businessOwner) {
+        this.businessOwner = businessOwner;
+    }
+    public String getBusinessOwnerEmail() {
+        return businessOwnerEmail;
+    }
+    public void setBusinessOwnerEmail(String businessOwnerEmail) {
+        this.businessOwnerEmail = businessOwnerEmail;
+    }
 
 }

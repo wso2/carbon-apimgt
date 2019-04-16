@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductListDTO;
@@ -18,6 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductListDTO;
 import java.util.List;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,8 +39,19 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
     }
     @Override
     public Response apiProductsApiProductIdGet(String apiProductId,String accept,String ifNoneMatch,String ifModifiedSince){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
+           
+            APIProduct createdProduct = apiProvider.getAPIProduct(apiProductId, username);
+
+            APIProductDetailedDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
+            return Response.ok().entity(createdApiProductDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId ;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
     @Override
     public Response apiProductsGet(Integer limit,Integer offset,String query,String accept,String ifNoneMatch,Boolean expand,String tenantDomain){
@@ -46,11 +59,12 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apiProductsPost(APIProductDetailedDTO body,String contentType){
+    public Response apiProductsPost(APIProductDetailedDTO body, String contentType) {
         // do some magic!
         // Check if product exists
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             String username = RestApiUtil.getLoggedInUsername();
             // if not add product
             String provider = body.getProvider();
@@ -69,12 +83,21 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             }
 
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
-            
-            return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+            String uuid = apiProvider.createAPIProduct(product, tenantDomain);
+            APIProduct createdProduct = apiProvider.getAPIProduct(uuid, provider);
+
+            APIProductDetailedDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
+            URI createdApiProductUri = new URI(
+                    RestApiConstants.RESOURCE_PATH_API_PRODUCTS + "/" + createdApiProductDTO.getId());
+            return Response.created(createdApiProductUri).entity(createdApiProductDTO).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API Product : " + body.getProvider() + "-" + body.getName()
                     + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API Product location : " + body.getProvider() + "-"
+                    + body.getName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

@@ -1089,5 +1089,8 @@ public interface APIProvider extends APIManager {
      */
     String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
     
+    String createAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException;
+    APIProduct getAPIProduct(String uuid, String apiProvider) throws APIManagementException;
+    List<APIProduct> getAPIProducts(String apiProvider) throws APIManagementException;
 
 }
