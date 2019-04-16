@@ -50,6 +50,8 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -6038,4 +6040,58 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public String createAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException {
+        
+        //TODO check if product already exists
+        
+        List<APIProductResource> resources = product.getProductResources();
+        for (APIProductResource apiProductResource : resources) {
+            API api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
+            // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
+
+            List<URITemplate> apiResources = apiProductResource.getResources();
+
+            Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
+            if (apiResources == null) {
+                // TODO handle if no resource is defined. either throw an error or add all the resources of that API
+                // to the product
+            } else {
+                for (URITemplate resourceTemplate : apiResources) {
+                    String key = resourceTemplate.getHTTPVerb() + ":" + resourceTemplate.getResourceURI();
+                    if (templateMap.containsKey(key)) {
+                        
+                        //Since the template ID is not set from the request, we manually set it.
+                        resourceTemplate.setId(templateMap.get(key).getId());
+
+                    } else {
+                        throw new APIManagementException("API with id " + apiProductResource.getApiId()
+                                + " does not have a resource " + resourceTemplate.getResourceURI()
+                                + " with http method " + resourceTemplate.getHTTPVerb());
+                    }
+                }
+            }
+        }
+           
+        //now we have validated APIs and it's resources inside the API product. Add it to database
+
+        String uuid = UUID.randomUUID().toString();
+        product.setUuid(uuid);
+        apiMgtDAO.addAPIProduct(product);
+        return uuid;
+    }
+
+    @Override
+    public APIProduct getAPIProduct(String uuid, String apiProvider) throws APIManagementException {
+        APIProduct product = apiMgtDAO.getAPIProduct(uuid);
+        return product;
+    }
+
+    @Override
+    public List<APIProduct> getAPIProducts(String apiProvider) throws APIManagementException {
+        List<APIProduct> products = new ArrayList<APIProduct>();
+        return products;
+
+    }
+    
 }

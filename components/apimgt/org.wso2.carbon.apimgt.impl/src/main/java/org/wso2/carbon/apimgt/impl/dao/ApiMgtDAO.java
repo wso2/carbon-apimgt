@@ -33,6 +33,8 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
@@ -12777,5 +12779,209 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return application;
+    }
+    
+    /**
+     * Retrieve URI Templates for the given API
+     * @param api API
+     * @return Map of URITemplate with key as Method:resourcepath
+     * @throws APIManagementException exception
+     */
+    public Map<String, URITemplate> getURITemplatesForAPI(API api) throws APIManagementException {
+        Map<String, URITemplate> templatesMap = new HashMap<String, URITemplate>();
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            //TODO move to constant
+            String query = "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
+                    + "WHERE API.API_ID = URL.API_ID AND API.API_NAME =? "
+                    + "AND API.API_VERSION=? AND API.API_PROVIDER=?";
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, api.getId().getApiName());
+            prepStmt.setString(2, api.getId().getVersion());
+            prepStmt.setString(3, api.getId().getProviderName());
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                URITemplate template = new URITemplate();
+                String urlPattern = rs.getString("URL_PATTERN");
+                String httpMethod = rs.getString("HTTP_METHOD");
+                
+                template.setHTTPVerb(httpMethod);
+                template.setResourceURI(urlPattern);
+                template.setId(rs.getInt("URL_MAPPING_ID"));
+
+                //TODO populate others if needed
+                
+                templatesMap.put(httpMethod + ":" + urlPattern, template);
+            }
+           
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the URI Template for api " + api.getId() , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        
+        return templatesMap;
+    }
+    
+    public void addAPIProduct(APIProduct apiproduct) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmtAddAPIProduct = null;
+        PreparedStatement prepStmtGetAPIProduct = null;
+        PreparedStatement prepStmtAddResourceMapping = null;
+        ResultSet rs = null;
+        int productId = 0;
+        try {
+            connection = APIMgtDBUtil.getConnection();   
+            connection.setAutoCommit(false);
+            //TODO move to constant
+            String queryAddAPIProduct = "INSERT INTO "
+                    + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
+                    + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
+                    + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID) " 
+                    + "VALUES (?,?,?,?,?,?,?,?);";
+            prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct);
+            prepStmtAddAPIProduct.setString(1, apiproduct.getProvider());
+            prepStmtAddAPIProduct.setString(2, apiproduct.getName());
+            prepStmtAddAPIProduct.setString(3, apiproduct.getDescription());
+            prepStmtAddAPIProduct.setString(4, apiproduct.getProductTier());
+            prepStmtAddAPIProduct.setString(5, apiproduct.getProvider()); //TODO get the created user
+            prepStmtAddAPIProduct.setString(6, apiproduct.getVisibility());
+            prepStmtAddAPIProduct.setString(7, apiproduct.getSubscriptionAvailability());
+            prepStmtAddAPIProduct.setString(8, apiproduct.getUuid());
+            prepStmtAddAPIProduct.execute();
+            connection.commit(); //TODO check this///////
+            
+            //Get the product id related to the product
+            //TODO check this
+            //TODO move to constant
+            String queryGetAPIProduct = "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE UUID = ?";
+            
+            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
+            prepStmtGetAPIProduct.setString(1, apiproduct.getUuid());
+            rs = prepStmtGetAPIProduct.executeQuery();
+            if (rs.next()) {
+                productId = rs.getInt("API_PRODUCT_ID");
+            }
+            //breaks the flow if product is not added to the db correctly
+            if(productId == 0) {
+                throw new APIManagementException("Error while retrieving API product " + apiproduct.getUuid()
+                        + " after inserting it to the database");
+            }
+            //TODO move to constant
+            String queryAddResourceMapping = "INSERT INTO AM_API_PRODUCT_MAPPING (API_PRODUCT_ID,URL_MAPPING_ID) "
+                                                + "VALUES (?, ?)";
+            prepStmtAddResourceMapping = connection.prepareStatement(queryAddResourceMapping);
+            
+            //add the resources in each API in the API product. Add the resource_ma
+            List<APIProductResource> productApis = apiproduct.getProductResources();
+            for (APIProductResource apiProductResource : productApis) {
+
+                List<URITemplate> uriTemplates = apiProductResource.getResources();
+                for (URITemplate uriTemplate : uriTemplates) {
+                    prepStmtAddResourceMapping.setInt(1, productId);
+                    prepStmtAddResourceMapping.setInt(2, uriTemplate.getId());
+                    prepStmtAddResourceMapping.addBatch();
+                }
+            }
+            
+            prepStmtAddResourceMapping.executeBatch();
+            prepStmtAddResourceMapping.clearBatch();
+            
+            connection.commit();
+            
+        } catch (SQLException e) {
+            handleException("Error while adding API product " + apiproduct.getName() + " of provider "
+                    + apiproduct.getProvider(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtAddAPIProduct, null, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, null, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, connection, null);
+        }
+        
+    }
+    
+    public APIProduct getAPIProduct(String uuid) throws APIManagementException {
+        APIProduct product = new APIProduct();
+        Connection connection = null;
+        PreparedStatement prepStmtGetAPIProduct = null;
+        PreparedStatement prepStmtGetAPIProductResource = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();   
+            
+            //TODO check this
+            //TODO move to constant
+            String queryGetAPIProduct = "SELECT API_PRODUCT_ID,UUID,DESCRIPTION,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_TIER,VISIBILITY,BUSINESS_OWNER,BUSINESS_OWNER_EMAIL,SUBSCRIPTION_AVAILABILITY FROM AM_API_PRODUCT WHERE UUID = ?";
+            int productId = 0;
+            
+            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
+            prepStmtGetAPIProduct.setString(1, uuid);
+            rs = prepStmtGetAPIProduct.executeQuery();
+            if (rs.next()) {
+                product.setUuid(rs.getString("UUID"));
+                product.setDescription(rs.getString("DESCRIPTION"));
+                product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
+                product.setName(rs.getString("API_PRODUCT_NAME"));
+                product.setProductTier(rs.getString("API_PRODUCT_TIER"));
+                product.setVisibility(rs.getString("VISIBILITY"));
+                product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
+                product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
+                product.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
+                productId = rs.getInt("API_PRODUCT_ID");
+            }
+            //get api resources related to api product
+            //TODO move to constant
+            String queryListProductResourceMapping = 
+                    "SELECT API_NAME, API_PROVIDER , API_VERSION ,T1.API_ID ,API_PRODUCT_ID, HTTP_METHOD, URL_PATTERN " + 
+                    "FROM " + 
+                    "(SELECT API_NAME ,API_PROVIDER, API_VERSION, API.API_ID,URL.URL_MAPPING_ID "
+                    + "FROM AM_API_URL_MAPPING URL, AM_API API "
+                    + "WHERE API.API_ID = URL.API_ID) T1 " + 
+                    "INNER JOIN " + 
+                    "(SELECT API_PRODUCT_ID, HTTP_METHOD, URL_PATTERN, URL.URL_MAPPING_ID "
+                    + "FROM AM_API_PRODUCT_MAPPING PRODUCT, AM_API_URL_MAPPING URL "
+                    + "WHERE URL.URL_MAPPING_ID  = PRODUCT.URL_MAPPING_ID  AND API_PRODUCT_ID =? ) T2 " + 
+                    "ON " + 
+                    "(T1.URL_MAPPING_ID =T2.URL_MAPPING_ID )";
+                    
+            prepStmtGetAPIProductResource = connection.prepareStatement(queryListProductResourceMapping);
+            prepStmtGetAPIProductResource.setInt(1, productId);
+
+            //keep a temporary map for each resources for each api in the product
+            Map<String, APIProductResource> resourceMap = new HashMap<String, APIProductResource>();
+            String apiId = "";
+            rs2 = prepStmtGetAPIProductResource.executeQuery();
+            while (rs2.next()) {
+                apiId = rs2.getString("API_ID");
+                APIProductResource resource;
+                if (resourceMap.containsKey(apiId)) {
+                    resource = resourceMap.get(apiId);
+                } else {
+                    resource = new APIProductResource();
+                    resource.setApiName(rs2.getString("API_NAME"));
+                    APIIdentifier identifier = new APIIdentifier(rs2.getString("API_PROVIDER"),
+                            rs2.getString("API_NAME"), rs2.getString("API_VERSION"));
+                    resource.setApiId(identifier.toString()); // TODO set API UUID
+                }
+                URITemplate template = new URITemplate();
+                template.setHTTPVerb(rs2.getString("HTTP_METHOD"));
+                template.setResourceURI(rs2.getString("URL_PATTERN"));
+                resource.setResource(template);
+                resourceMap.put(apiId, resource);
+            }
+            product.setProductResources(new ArrayList<APIProductResource>(resourceMap.values()));
+        } catch (SQLException e) {
+            handleException("Error while retrieving api product for UUID " + uuid , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, null, rs);
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProductResource, connection, rs2);
+        }
+        return product;
     }
 }

@@ -29,11 +29,14 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
@@ -46,7 +49,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
@@ -916,5 +921,58 @@ public class APIMappingUtil {
 
     private static String getThumbnailUri (String uuid) {
         return RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, uuid);
+    }
+    
+    public static APIProduct fromDTOtoAPIProduct(APIProductDetailedDTO dto, String provider)
+            throws APIManagementException {
+        APIProduct product = new APIProduct();
+        product.setName(dto.getName());
+        product.setProvider(provider);
+        product.setUuid(dto.getId());
+        List<APIProductResource> productResources = new ArrayList<APIProductResource>();
+
+        for (int i = 0; i < dto.getApis().size(); i++) {
+            ProductAPIDTO res = dto.getApis().get(i);
+            APIProductResource resource = new APIProductResource();
+            resource.setApiId(res.getApiId());
+            resource.setApiName(res.getName());
+            List<String> productResourcesDto = res.getResources();
+            for (String resourceItem : productResourcesDto) {
+                String[] resourceItemSplit = resourceItem.split(":");
+                URITemplate template = new URITemplate();
+                template.setHTTPVerb(resourceItemSplit[0]);
+                template.setResourceURI(resourceItemSplit[1]);
+                resource.setResource(template);
+            }
+            productResources.add(resource);
+        }
+        product.setProductResources(productResources);
+        return product;
+    }
+
+    public static APIProductDetailedDTO fromAPIProducttoDTO(APIProduct product) {
+        APIProductDetailedDTO productDto = new APIProductDetailedDTO();
+        productDto.setName(product.getName());
+        productDto.setProvider(product.getProvider());
+        productDto.setId(product.getUuid());
+        List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
+        
+        List<APIProductResource> resources = product.getProductResources();
+        for (APIProductResource apiProductResource : resources) {
+            ProductAPIDTO productAPI = new ProductAPIDTO();
+            productAPI.setName(apiProductResource.getApiName());
+            productAPI.setApiId(apiProductResource.getApiId());
+            List<String> resourcesOfAPI = new ArrayList<String>();
+            
+            List<URITemplate> templates = apiProductResource.getResources();
+            for (URITemplate template : templates) {
+                resourcesOfAPI.add(template.getHTTPVerb() + ":" + template.getResourceURI());
+            }
+            productAPI.setResources(resourcesOfAPI);
+            apis.add(productAPI);
+            
+        }
+        productDto.setApis(apis);
+        return productDto;
     }
 }
