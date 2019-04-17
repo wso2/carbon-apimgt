@@ -226,7 +226,71 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>npm install (initialize)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>${basedir}/src/main/resources/store-new</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>install</argument>
+                                <argument>--silent</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm run build (compile)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <workingDirectory>${basedir}/src/main/resources/store-new</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>${npm.build.command}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <workingDirectory>${npm.working.dir}</workingDirectory>
+                </configuration>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>store-new/public/**</include>
+                    <include>store-new/pages/**</include>
+                    <include>store-new/source/**</include>
+                    <include>store-new/.babelrc</include>
+                    <include>store-new/jaggery.conf</include>
+                    <include>store-new/package.json</include>
+                    <include>store-new/package-lock.json</include>
+                    <include>store-new/webpack.config.js</include>
+                    <include>p2.inf</include>
+                    <include>admin/**</include>
+                </includes>
+            </resource>
+        </resources>
+
     </build>
+    <properties>
+        <maven.test.skip>false</maven.test.skip>
+        <npm.executable>npm</npm.executable>
+        <npm.build.command>build:prod</npm.build.command>
+        <npm.working.dir>./src/main/</npm.working.dir>
+    </properties>
 
 </project>
