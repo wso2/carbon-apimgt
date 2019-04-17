@@ -44,8 +44,9 @@ public class SettingsApiServiceImpl extends SettingsApiService {
     @Override
     public Response settingsGet(){
         try {
+            String username = RestApiUtil.getLoggedInUsername();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            PublisherSettings publisherSettings = apiProvider.getPublisherSettings();
+            PublisherSettings publisherSettings = apiProvider.getPublisherSettings(username);
             return Response.ok().entity(publisherSettings).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Settings";

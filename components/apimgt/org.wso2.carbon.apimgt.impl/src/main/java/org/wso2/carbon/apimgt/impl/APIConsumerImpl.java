@@ -4682,7 +4682,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public StoreSettings getStoreSettings() throws APIManagementException {
+    public StoreSettings getStoreSettings(String username) throws APIManagementException {
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -4690,8 +4690,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String apiStoreUrl = config.getFirstProperty(APIConstants.API_STORE_URL);
 
         StoreSettings storeSettings = new StoreSettings();
-        storeSettings.setServerUrl(serverUrl);
-        storeSettings.setApiStoreUrl(apiStoreUrl);
+        // Retrieve store settings from anonymous user.
+        if (username.equalsIgnoreCase(APIConstants.WSO2_ANONYMOUS_USER)) {
+            storeSettings.setServerUrl(serverUrl);
+            storeSettings.setApiStoreUrl(apiStoreUrl);
+        } else {
+            // Retrieve store settings from logged in user.
+            storeSettings.setServerUrl(serverUrl);
+            storeSettings.setApiStoreUrl(apiStoreUrl);
+        }
         return storeSettings;
     }
 
