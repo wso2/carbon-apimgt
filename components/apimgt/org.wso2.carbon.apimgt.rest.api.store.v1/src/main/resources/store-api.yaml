@@ -2232,6 +2232,36 @@ paths:
             Error while retrieving the list.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "SDK Generation Languages" list resource APIs
+######################################################
+  /settings:
+#-----------------------------------------------------
+# Retrieve store settings
+#-----------------------------------------------------
+    get:
+      summary: Retreive store settings
+      security:
+        - OAuth2Security:
+          - apim:store_setting
+      x-scope: apim:store_setting
+      description: |
+        Retreive store settings
+      responses:
+        200:
+          description: |
+            OK.
+            Settings returned
+          schema:
+            $ref: '#/definitions/Settings'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -3336,6 +3366,17 @@ definitions:
           This attribute declares whether an API should have a dedicated Gateway or not.
         type: boolean
         example: true
+
+#-----------------------------------------------------
+# The Settings resource
+#-----------------------------------------------------
+  Settings:
+    title: Settings
+    properties:
+      serverUrl:
+        type: string
+      apiStoreUrl:
+        type: string
        
 #-----------------------------------------------------
 # END-OF-FILE
