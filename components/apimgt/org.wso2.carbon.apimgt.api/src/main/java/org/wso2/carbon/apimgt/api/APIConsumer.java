@@ -859,6 +859,6 @@ public interface APIConsumer extends APIManager {
      * @return set of settings.
      * @throws APIManagementException
      */
-    StoreSettings getStoreSettings() throws APIManagementException;
+    StoreSettings getStoreSettings(String username) throws APIManagementException;
 
 }

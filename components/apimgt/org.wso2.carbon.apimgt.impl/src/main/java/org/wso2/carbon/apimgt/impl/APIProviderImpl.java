@@ -5880,15 +5880,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public PublisherSettings getPublisherSettings() throws APIManagementException {
+    public PublisherSettings getPublisherSettings(String username) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String apiStoreUrl = config.getFirstProperty(APIConstants.API_STORE_URL);
 
         PublisherSettings publisherSettings = new PublisherSettings();
-        publisherSettings.setApiPublisherUrl(apiStoreUrl);
+        // Retrieve publisher settings from anonymous user.
+        if (username.equalsIgnoreCase(APIConstants.WSO2_ANONYMOUS_USER)) {
+            publisherSettings.setApiPublisherUrl(apiStoreUrl);
+        } else {
+            // Retrieve publisher settings from logged in user.
+            publisherSettings.setApiPublisherUrl(apiStoreUrl);
+        }
         return publisherSettings;
-
     }
 
     /**

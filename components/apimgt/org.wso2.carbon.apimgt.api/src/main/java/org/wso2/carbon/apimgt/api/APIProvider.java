@@ -1110,7 +1110,7 @@ public interface APIProvider extends APIManager {
      * @return set of settings.
      * @throws APIManagementException
      */
-    PublisherSettings getPublisherSettings() throws APIManagementException;
+    PublisherSettings getPublisherSettings(String username) throws APIManagementException;
 
 
 }

@@ -37,8 +37,9 @@ public class SettingsApiServiceImpl extends SettingsApiService {
     @Override
     public Response settingsGet(){
         try {
+            String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            StoreSettings storeSettings = apiConsumer.getStoreSettings();
+            StoreSettings storeSettings = apiConsumer.getStoreSettings(username);
             return Response.ok().entity(storeSettings).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Settings";

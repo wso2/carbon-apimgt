@@ -476,6 +476,10 @@
                 <URI>/api/am/store/{version}/search</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
         </WhiteListedURIs>
         <ETagSkipList>
             <ETagSkipURI>
