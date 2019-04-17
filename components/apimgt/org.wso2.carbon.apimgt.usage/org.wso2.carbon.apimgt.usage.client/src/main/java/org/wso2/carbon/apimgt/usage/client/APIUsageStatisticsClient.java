@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.usage.client;
 
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
