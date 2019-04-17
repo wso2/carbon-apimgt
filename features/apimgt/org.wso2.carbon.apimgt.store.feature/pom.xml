@@ -284,7 +284,6 @@
                 </includes>
             </resource>
         </resources>
-
     </build>
     <properties>
         <maven.test.skip>false</maven.test.skip>
