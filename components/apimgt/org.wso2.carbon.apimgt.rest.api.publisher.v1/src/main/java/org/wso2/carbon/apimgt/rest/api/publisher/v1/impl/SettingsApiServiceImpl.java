@@ -15,17 +15,24 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
-
-
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.StoreSettings;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.PublisherSettings;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApiService;
+
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+
+import java.util.List;
+
+import java.io.InputStream;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -37,9 +44,9 @@ public class SettingsApiServiceImpl extends SettingsApiService {
     @Override
     public Response settingsGet(){
         try {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            StoreSettings storeSettings = apiConsumer.getStoreSettings();
-            return Response.ok().entity(storeSettings).build();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            PublisherSettings publisherSettings = apiProvider.getPublisherSettings();
+            return Response.ok().entity(publisherSettings).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Settings";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);

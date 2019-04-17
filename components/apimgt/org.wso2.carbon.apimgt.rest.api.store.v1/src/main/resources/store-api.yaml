@@ -2234,7 +2234,7 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The "SDK Generation Languages" list resource APIs
+# The Store settings List
 ######################################################
   /settings:
 #-----------------------------------------------------

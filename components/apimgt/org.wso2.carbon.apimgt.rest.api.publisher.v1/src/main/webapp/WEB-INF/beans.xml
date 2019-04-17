@@ -18,6 +18,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ImportApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.PoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ThreatProtectionPoliciesApi"/>
             

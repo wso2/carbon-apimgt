@@ -3510,6 +3510,35 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+######################################################
+# The Publisher settings List
+######################################################
+  /settings:
+#-----------------------------------------------------
+# Retrieve Publisher settings
+#-----------------------------------------------------
+    get:
+      summary: Retreive publisher settings
+      security:
+        - OAuth2Security:
+          - apim:publisher_setting
+      x-scope: apim:publisher_setting
+      description: |
+        Retreive publisher settings
+      responses:
+        200:
+          description: |
+            OK.
+            Settings returned
+          schema:
+            $ref: '#/definitions/Settings'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -4825,3 +4854,16 @@ definitions:
           This attribute declares whether an API should have a dedicated Gateway or not.
         type: boolean
         example: true
+
+#-----------------------------------------------------
+# The Settings resource
+#-----------------------------------------------------
+  Settings:
+    title: Settings
+    properties:
+      apiPublisherUrl:
+        type: string
+
+#-----------------------------------------------------
+# END-OF-FILE
+#-----------------------------------------------------
