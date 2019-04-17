@@ -1104,4 +1104,13 @@ public interface APIProvider extends APIManager {
      */
     String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
 
+    /**
+     * Returns a set of settings associated with a API Publisher.
+     *
+     * @return set of settings.
+     * @throws APIManagementException
+     */
+    PublisherSettings getPublisherSettings() throws APIManagementException;
+
+
 }
