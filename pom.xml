@@ -1596,7 +1596,7 @@
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 
         <!-- apache cxf version -->
-        <cxf.version>3.2.8</cxf.version>
+        <cxf.version>3.3.1</cxf.version>
 
         <carbon.metrics.version>1.2.4</carbon.metrics.version>
         <!-- apache pdfbox version -->
