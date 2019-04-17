@@ -1630,7 +1630,7 @@
         <mockito.all.version>1.10.19</mockito.all.version>
         <reflection.version>0.9.11</reflection.version>
         <woodstox-core.version>5.2.0</woodstox-core.version>
-        <apache.commons.version>2.4.2</apache.commons.version>
+        <apache.commons.version>2.6.1</apache.commons.version>
         <io.swagger.codegen.version>2.3.1</io.swagger.codegen.version>
         <commons.collections4.version>4.1</commons.collections4.version>
 
