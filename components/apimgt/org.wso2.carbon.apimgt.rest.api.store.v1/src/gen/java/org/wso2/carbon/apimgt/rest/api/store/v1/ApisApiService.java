@@ -29,13 +29,13 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdDocumentsDocumentIdContentGet(String apiId,String documentId,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String ifNoneMatch);
-    public abstract Response apisApiIdGet(String apiId,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response apisApiIdGet(String apiId,String xWSO2Tenant,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdRatingsGet(String apiId,Integer limit,Integer offset);
     public abstract Response apisApiIdRatingsRatingIdGet(String apiId,String ratingId,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdSdksLanguageGet(String apiId,String language);
     public abstract Response apisApiIdSwaggerGet(String apiId,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdUserRatingPut(String apiId,RatingDTO body);
     public abstract Response apisApiIdWsdlGet(String apiId,String label,String ifNoneMatch,String ifModifiedSince);
-    public abstract Response apisGet(Integer limit,Integer offset,String labels,String query,String ifNoneMatch);
+    public abstract Response apisGet(Integer limit,Integer offset,String labels,String xWSO2Tenant,String query,String ifNoneMatch);
 }
 
