@@ -98,7 +98,7 @@
             <artifactId>org.wso2.carbon.event.template.manager.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.apache.commons</groupId>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
@@ -214,7 +214,7 @@
                             <importBundles>
                                 <importBundleDef>commons-io.wso2:commons-io:${commons-io.version}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
-                                <importBundleDef>org.wso2.orbit.org.apache.commons:commons-lang3:${commons-lang3.version}</importBundleDef>
+                                <importBundleDef>org.apache.commons:commons-lang3:${apache.commons.lang3.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>

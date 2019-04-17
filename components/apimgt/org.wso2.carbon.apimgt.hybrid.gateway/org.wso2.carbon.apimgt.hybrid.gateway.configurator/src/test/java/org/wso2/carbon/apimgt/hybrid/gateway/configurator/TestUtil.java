@@ -17,7 +17,7 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.configurator;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 
