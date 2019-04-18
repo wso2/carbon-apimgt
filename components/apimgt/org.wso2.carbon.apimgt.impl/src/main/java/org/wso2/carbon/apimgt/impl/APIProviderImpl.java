@@ -6050,6 +6050,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             API api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
 
+            apiProductResource.setApiIdentifier(api.getId());
             List<URITemplate> apiResources = apiProductResource.getResources();
 
             Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
@@ -6077,7 +6078,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         String uuid = UUID.randomUUID().toString();
         product.setUuid(uuid);
-        apiMgtDAO.addAPIProduct(product);
+        apiMgtDAO.addAPIProduct(product, tenantId);
         return uuid;
     }
 

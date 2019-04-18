@@ -25,6 +25,7 @@ public class APIProductResource {
 
     private String apiName;
     private String apiId;
+    private APIIdentifier apiIdentifier;
     private List<URITemplate> resources = new ArrayList<>();
 
     public String getApiName() {
@@ -55,4 +56,11 @@ public class APIProductResource {
         this.resources.add(resource);
     }
 
+    public void setApiIdentifier(APIIdentifier apiIdentifier) {
+        this.apiIdentifier = apiIdentifier;
+    }
+
+    public APIIdentifier getApiIdentifier() {
+        return apiIdentifier;
+    }
 }
