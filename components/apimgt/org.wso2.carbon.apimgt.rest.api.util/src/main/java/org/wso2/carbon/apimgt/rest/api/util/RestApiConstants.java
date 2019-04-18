@@ -145,8 +145,7 @@ public final class RestApiConstants {
     public static final String SORT_BY_NAME = "name";
     public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
     public static final String SORT_BY_STATUS = "status";
-
-
+    
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
     public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";

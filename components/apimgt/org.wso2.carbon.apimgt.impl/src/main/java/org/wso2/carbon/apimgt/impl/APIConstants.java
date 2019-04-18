@@ -1507,6 +1507,4 @@ public final class APIConstants {
     public static final String DOCUMENT_INDEXER_INDICATOR = "document_indexed";
 
     public static final String KEY_SUFFIX = "_KEY";
-
-
 }
