@@ -32,11 +32,11 @@ public class SubscriptionDTO  {
   @NotNull
   private String policy = null;
   
-  public enum LifeCycleStatusEnum {
+  public enum StatusEnum {
      BLOCKED,  PROD_ONLY_BLOCKED,  ACTIVE,  ON_HOLD,  REJECTED, 
   };
   
-  private LifeCycleStatusEnum lifeCycleStatus = null;
+  private StatusEnum status = null;
 
   
   /**
@@ -114,12 +114,12 @@ public class SubscriptionDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("lifeCycleStatus")
-  public LifeCycleStatusEnum getLifeCycleStatus() {
-    return lifeCycleStatus;
+  @JsonProperty("status")
+  public StatusEnum getStatus() {
+    return status;
   }
-  public void setLifeCycleStatus(LifeCycleStatusEnum lifeCycleStatus) {
-    this.lifeCycleStatus = lifeCycleStatus;
+  public void setStatus(StatusEnum status) {
+    this.status = status;
   }
 
   
@@ -135,7 +135,7 @@ public class SubscriptionDTO  {
     sb.append("  apiName: ").append(apiName).append("\n");
     sb.append("  apiVersion: ").append(apiVersion).append("\n");
     sb.append("  policy: ").append(policy).append("\n");
-    sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
+    sb.append("  status: ").append(status).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

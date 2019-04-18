@@ -111,6 +111,7 @@ public final class RestApiConstants {
     public static final String PAGINATION_NEXT_LIMIT = "next_limit";
     public static final String PAGINATION_PREVIOUS_OFFSET = "previous_offset";
     public static final String PAGINATION_PREVIOUS_LIMIT = "previous_limit";
+    public static final String DEFAULT_SORT_ORDER = "asc";
 
     public static final String APIS_GET_PAGINATION_URL =
             RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
@@ -140,6 +141,11 @@ public final class RestApiConstants {
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
 
+    //Constants for application sortBy
+    public static final String SORT_BY_NAME = "name";
+    public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
+    public static final String SORT_BY_STATUS = "status";
+    
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
     public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";

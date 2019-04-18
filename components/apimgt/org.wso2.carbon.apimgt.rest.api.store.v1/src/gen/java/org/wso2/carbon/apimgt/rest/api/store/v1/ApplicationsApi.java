@@ -226,11 +226,13 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
     public Response applicationsGet(@ApiParam(value = "**Search condition**.\n\nYou can search for an application by specifying the name as \"query\" attribute.\n\nEg.\n\"app1\" will match an application if the name is exactly \"app1\".\n\nCurrently this does not support wildcards. Given name must exactly match the application name.\n") @QueryParam("query")  String query,
+    @ApiParam(value = "", allowableValues="{values=[name, throttlingTier, status]}") @QueryParam("sortBy")  String sortBy,
+    @ApiParam(value = "", allowableValues="{values=[asc, desc]}") @QueryParam("sortOrder")  String sortOrder,
     @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.applicationsGet(query,limit,offset,ifNoneMatch);
+    return delegate.applicationsGet(query,sortBy,sortOrder,limit,offset,ifNoneMatch);
     }
     @POST
     

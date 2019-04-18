@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 
 import java.util.ArrayList;
@@ -103,7 +103,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (totalLength != null) {
                 length = (Integer) totalLength;
             }
-            APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
+            PaginationDTO paginationDTO = new PaginationDTO();
             paginationDTO.setOffset(offset);
             paginationDTO.setLimit(limit);
             paginationDTO.setTotal(length);

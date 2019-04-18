@@ -31,19 +31,34 @@ public class ApplicationDTO  {
   private String throttlingTier = null;
   
   
+  private String callbackUrl = null;
+  
+  
   private String permission = null;
   
   
   private String description = null;
   
   
-  private String lifeCycleStatus = null;
+  private String status = "";
+  
+  
+  private String groupId = null;
+  
+  public enum TokenTypeEnum {
+     OAUTH,  JWT, 
+  };
+  
+  private TokenTypeEnum tokenType = null;
   
   
   private ApplicationTokenDTO token = null;
   
   
   private List<ApplicationKeysDTO> keys = new ArrayList<ApplicationKeysDTO>();
+  
+  
+  private Object attributes = null;
 
   
   /**
@@ -98,6 +113,18 @@ public class ApplicationDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("callbackUrl")
+  public String getCallbackUrl() {
+    return callbackUrl;
+  }
+  public void setCallbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("permission")
   public String getPermission() {
     return permission;
@@ -122,12 +149,36 @@ public class ApplicationDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("lifeCycleStatus")
-  public String getLifeCycleStatus() {
-    return lifeCycleStatus;
+  @JsonProperty("status")
+  public String getStatus() {
+    return status;
   }
-  public void setLifeCycleStatus(String lifeCycleStatus) {
-    this.lifeCycleStatus = lifeCycleStatus;
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("groupId")
+  public String getGroupId() {
+    return groupId;
+  }
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("tokenType")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
   }
 
   
@@ -155,6 +206,18 @@ public class ApplicationDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("attributes")
+  public Object getAttributes() {
+    return attributes;
+  }
+  public void setAttributes(Object attributes) {
+    this.attributes = attributes;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -165,11 +228,15 @@ public class ApplicationDTO  {
     sb.append("  name: ").append(name).append("\n");
     sb.append("  subscriber: ").append(subscriber).append("\n");
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
+    sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  permission: ").append(permission).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
+    sb.append("  status: ").append(status).append("\n");
+    sb.append("  groupId: ").append(groupId).append("\n");
+    sb.append("  tokenType: ").append(tokenType).append("\n");
     sb.append("  token: ").append(token).append("\n");
     sb.append("  keys: ").append(keys).append("\n");
+    sb.append("  attributes: ").append(attributes).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

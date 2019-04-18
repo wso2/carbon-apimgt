@@ -11,29 +11,17 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class APIListPaginationDTO  {
+public class PaginationDTO  {
   
-  
-  
-  private Integer total = null;
   
   
   private Integer offset = null;
   
   
   private Integer limit = null;
-
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("total")
-  public Integer getTotal() {
-    return total;
-  }
-  public void setTotal(Integer total) {
-    this.total = total;
-  }
+  
+  private Integer total = null;
 
   
   /**
@@ -60,15 +48,27 @@ public class APIListPaginationDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("total")
+  public Integer getTotal() {
+    return total;
+  }
+  public void setTotal(Integer total) {
+    this.total = total;
+  }
+
+  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIListPaginationDTO {\n");
+    sb.append("class PaginationDTO {\n");
     
-    sb.append("  total: ").append(total).append("\n");
     sb.append("  offset: ").append(offset).append("\n");
     sb.append("  limit: ").append(limit).append("\n");
+    sb.append("  total: ").append(total).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
