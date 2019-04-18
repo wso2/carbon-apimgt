@@ -976,9 +976,23 @@ paths:
 
             Currently this does not support wildcards. Given name must exactly match the application name.
           type: string
+        - name: sortBy
+          in: query
+          type: string
+          enum:
+            - name
+            - throttlingTier
+            - status
+        - name: sortOrder
+          in: query
+          type: string
+          enum:
+            - asc
+            - desc
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
+
       tags:
         - Application (Collection)
       responses:
@@ -2511,16 +2525,7 @@ definitions:
         items:
           $ref: '#/definitions/APIInfo'
       pagination:
-        properties:
-          offset:
-            type: integer
-            example: 12
-          limit:
-            type: integer
-            example: 25
-          total:
-            type: integer
-            example: 1290
+        $ref: '#/definitions/Pagination'
 
 #-----------------------------------------------------
 # The Standard API Info resource
@@ -2641,6 +2646,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApplicationInfo'
+      pagination:
+          $ref: '#/definitions/Pagination'
 
 #-----------------------------------------------------
 # The Application resource
@@ -2661,19 +2668,35 @@ definitions:
         type: string
       throttlingTier:
         type: string
+      callbackUrl:
+        type: string
+        example: ""
       permission:
         type: string
         example: "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
       description:
         type: string
-      lifeCycleStatus:
+      status:
         type: string
+        example: APPROVED
+        default: ""
+      groupId:
+        type: string
+        example: ""
+      tokenType:
+        type: string
+        enum:
+          - OAUTH
+          - JWT
       token:
         $ref: '#/definitions/ApplicationToken'
       keys:
         type: array
         items:
           $ref: '#/definitions/ApplicationKeys'
+      attributes:
+        type: object
+        example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -2691,8 +2714,21 @@ definitions:
         type: string
       description:
         type: string
-      lifeCycleStatus:
+      status:
         type: string
+        example: APPROVED
+        default: ""
+      subscriptionCount:
+        type: integer
+      groupId:
+        type: string
+        example: ""
+      attributes:
+        type: object
+        example: External Reference ID, Billing Tier
+      owner:
+        type: string
+        example: ""
 
 #-----------------------------------------------------
 # The Document List resource
@@ -2896,7 +2932,7 @@ definitions:
         type: string
       policy:
         type: string
-      lifeCycleStatus:
+      status:
         type: string
         enum:
           - BLOCKED
@@ -3336,7 +3372,22 @@ definitions:
           This attribute declares whether an API should have a dedicated Gateway or not.
         type: boolean
         example: true
-       
+
+#-----------------------------------------------------
+# The pagination resource
+#-----------------------------------------------------
+  Pagination:
+    title: Pagination
+    properties:
+      offset:
+        type: integer
+        example: 12
+      limit:
+        type: integer
+        example: 25
+      total:
+        type: integer
+        example: 1290
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

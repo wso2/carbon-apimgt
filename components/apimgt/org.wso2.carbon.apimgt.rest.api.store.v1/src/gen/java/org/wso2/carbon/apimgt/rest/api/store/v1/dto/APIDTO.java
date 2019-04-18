@@ -44,9 +44,6 @@ public class APIDTO  {
   
   private List<String> labels = new ArrayList<String>();
   
-  
-  private Boolean hasOwnGateway = null;
-  
   @NotNull
   private String lifeCycleStatus = null;
   
@@ -67,9 +64,8 @@ public class APIDTO  {
 
   
   /**
-   * UUID of the api registry artifact\n
    **/
-  @ApiModelProperty(value = "UUID of the api registry artifact\n")
+  @ApiModelProperty(value = "")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -179,18 +175,6 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("hasOwnGateway")
-  public Boolean getHasOwnGateway() {
-    return hasOwnGateway;
-  }
-  public void setHasOwnGateway(Boolean hasOwnGateway) {
-    this.hasOwnGateway = hasOwnGateway;
-  }
-
-  
-  /**
-   **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("lifeCycleStatus")
   public String getLifeCycleStatus() {
@@ -276,7 +260,6 @@ public class APIDTO  {
     sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  labels: ").append(labels).append("\n");
-    sb.append("  hasOwnGateway: ").append(hasOwnGateway).append("\n");
     sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
     sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
     sb.append("  tags: ").append(tags).append("\n");

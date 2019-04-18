@@ -29,9 +29,6 @@ public class APIInfoDTO  {
   @NotNull
   private String version = null;
   
-  
-  private Boolean hasOwnGateway = null;
-  
   @NotNull
   private String provider = null;
   
@@ -100,18 +97,6 @@ public class APIInfoDTO  {
 
   
   /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("hasOwnGateway")
-  public Boolean getHasOwnGateway() {
-    return hasOwnGateway;
-  }
-  public void setHasOwnGateway(Boolean hasOwnGateway) {
-    this.hasOwnGateway = hasOwnGateway;
-  }
-
-  
-  /**
    * If the provider value is not given, the user invoking the API will be used as the provider.\n
    **/
   @ApiModelProperty(required = true, value = "If the provider value is not given, the user invoking the API will be used as the provider.\n")
@@ -147,7 +132,6 @@ public class APIInfoDTO  {
     sb.append("  description: ").append(description).append("\n");
     sb.append("  context: ").append(context).append("\n");
     sb.append("  version: ").append(version).append("\n");
-    sb.append("  hasOwnGateway: ").append(hasOwnGateway).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
     sb.append("}\n");

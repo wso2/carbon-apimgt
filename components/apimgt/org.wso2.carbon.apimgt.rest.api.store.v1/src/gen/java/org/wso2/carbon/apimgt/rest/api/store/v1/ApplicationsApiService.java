@@ -31,7 +31,7 @@ public abstract class ApplicationsApiService {
     public abstract Response applicationsApplicationIdKeysKeyTypePut(String applicationId,String keyType,ApplicationKeysDTO body);
     public abstract Response applicationsApplicationIdMapKeysPost(String applicationId,ApplicationKeyMappingRequestDTO body);
     public abstract Response applicationsApplicationIdPut(String applicationId,ApplicationDTO body,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response applicationsGet(String query,Integer limit,Integer offset,String ifNoneMatch);
+    public abstract Response applicationsGet(String query,String sortBy,String sortOrder,Integer limit,Integer offset,String ifNoneMatch);
     public abstract Response applicationsPost(ApplicationDTO body);
 }
 

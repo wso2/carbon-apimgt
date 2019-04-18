@@ -332,6 +332,7 @@ public final class APIConstants {
     public static final String APPLICATION_NAME = "NAME";
     public static final String APPLICATION_SUBSCRIBER_ID = "SUBSCRIBER_ID";
     public static final String APPLICATION_TIER = "APPLICATION_TIER";
+    public static final String APPLICATION_STATUS = "APPLICATION_STATUS";
 
     //IDENTITY OAUTH2 table
     public static final String IDENTITY_OAUTH2_FIELD_TOKEN_STATE = "TOKEN_STATE";
@@ -1506,4 +1507,6 @@ public final class APIConstants {
     public static final String DOCUMENT_INDEXER_INDICATOR = "document_indexed";
 
     public static final String KEY_SUFFIX = "_KEY";
+
+
 }

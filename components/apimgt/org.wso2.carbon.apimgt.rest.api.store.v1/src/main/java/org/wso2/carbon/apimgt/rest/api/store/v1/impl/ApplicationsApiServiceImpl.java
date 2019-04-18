@@ -1,28 +1,29 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.*;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
-
-
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeysDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeysListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
-
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
+    private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
     @Override
     public Response applicationsApplicationIdDelete(String applicationId,String ifMatch,String ifUnmodifiedSince){
         // do some magic!
@@ -68,10 +69,57 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
     @Override
-    public Response applicationsGet(String query,Integer limit,Integer offset,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response applicationsGet(String query, String sortBy, String sortOrder, Integer limit,
+            Integer offset, String ifNoneMatch) {
+
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
+        sortBy = sortBy != null ?
+                ApplicationMappingUtil.getApplicationSortByField(sortBy) :
+                RestApiConstants.SORT_BY_NAME;
+        query = query == null ? "" : query;
+        ApplicationListDTO applicationListDTO = new ApplicationListDTO();
+
+        String username = RestApiUtil.getLoggedInUsername();
+        String groupId = RestApiUtil.getLoggedInUserGroupId();
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            Subscriber subscriber = new Subscriber(username);
+            Application[] applications;
+            applications = apiConsumer
+                    .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
+                            sortOrder);
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
+
+            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications, apiConsumer);
+            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
+                    applications.length);
+
+            PaginationDTO paginationDTO = new PaginationDTO();
+            paginationDTO.setOffset(offset);
+            paginationDTO.setLimit(limit);
+            paginationDTO.setTotal(applicationCount);
+            applicationListDTO.setPagination(paginationDTO);
+
+            return Response.ok().entity(applicationListDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
+                //this is not an error of the user as he does not know the total number of applications available.
+                // Thus sends an empty response
+                applicationListDTO.setCount(0);
+                applicationListDTO.setNext("");
+                applicationListDTO.setPrevious("");
+                return Response.ok().entity(applicationListDTO).build();
+            } else {
+                String errorMessage = "Error while retrieving Applications";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
     @Override
     public Response applicationsPost(ApplicationDTO body){
