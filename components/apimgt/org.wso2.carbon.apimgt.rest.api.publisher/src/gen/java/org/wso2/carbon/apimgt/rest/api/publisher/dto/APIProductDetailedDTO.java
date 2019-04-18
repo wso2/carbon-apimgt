@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ProductAPIDTO;
 
 import io.swagger.annotations.*;
@@ -36,9 +35,6 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
   
   
   private List<String> visibleTenants = new ArrayList<String>();
-  
-  
-  private List<LabelDTO> labels = new ArrayList<LabelDTO>();
   
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
@@ -107,19 +103,6 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
   }
   public void setVisibleTenants(List<String> visibleTenants) {
     this.visibleTenants = visibleTenants;
-  }
-
-  
-  /**
-   * Labels of micro-gateway environments attached to the API.\n
-   **/
-  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API.\n")
-  @JsonProperty("labels")
-  public List<LabelDTO> getLabels() {
-    return labels;
-  }
-  public void setLabels(List<LabelDTO> labels) {
-    this.labels = labels;
   }
 
   
@@ -196,7 +179,6 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
-    sb.append("  labels: ").append(labels).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
     sb.append("  additionalProperties: ").append(additionalProperties).append("\n");

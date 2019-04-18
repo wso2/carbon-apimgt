@@ -28,6 +28,12 @@ public class APIProductInfoDTO  {
   
   
   private String thumbnailUri = null;
+  
+  public enum StateEnum {
+     CREATED,  PUBLISHED, 
+  };
+  
+  private StateEnum state = null;
 
   
   /**
@@ -94,6 +100,19 @@ public class APIProductInfoDTO  {
   }
 
   
+  /**
+   * State of the API product. Only published api products are visible on the store\n
+   **/
+  @ApiModelProperty(value = "State of the API product. Only published api products are visible on the store\n")
+  @JsonProperty("state")
+  public StateEnum getState() {
+    return state;
+  }
+  public void setState(StateEnum state) {
+    this.state = state;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -105,6 +124,7 @@ public class APIProductInfoDTO  {
     sb.append("  description: ").append(description).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
+    sb.append("  state: ").append(state).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

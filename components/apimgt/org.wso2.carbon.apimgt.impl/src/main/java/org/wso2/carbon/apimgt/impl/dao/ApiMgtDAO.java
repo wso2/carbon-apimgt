@@ -12827,7 +12827,7 @@ public class ApiMgtDAO {
         return templatesMap;
     }
     
-    public void addAPIProduct(APIProduct apiproduct) throws APIManagementException {
+    public void addAPIProduct(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmtAddAPIProduct = null;
         PreparedStatement prepStmtGetAPIProduct = null;
@@ -12841,17 +12841,21 @@ public class ApiMgtDAO {
             String queryAddAPIProduct = "INSERT INTO "
                     + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
                     + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
-                    + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID) " 
-                    + "VALUES (?,?,?,?,?,?,?,?);";
+                    + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION) " 
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct);
-            prepStmtAddAPIProduct.setString(1, apiproduct.getProvider());
-            prepStmtAddAPIProduct.setString(2, apiproduct.getName());
-            prepStmtAddAPIProduct.setString(3, apiproduct.getDescription());
-            prepStmtAddAPIProduct.setString(4, apiproduct.getProductTier());
-            prepStmtAddAPIProduct.setString(5, apiproduct.getProvider()); //TODO get the created user
-            prepStmtAddAPIProduct.setString(6, apiproduct.getVisibility());
-            prepStmtAddAPIProduct.setString(7, apiproduct.getSubscriptionAvailability());
-            prepStmtAddAPIProduct.setString(8, apiproduct.getUuid());
+            prepStmtAddAPIProduct.setString(1, apiProduct.getProvider());
+            prepStmtAddAPIProduct.setString(2, apiProduct.getName());
+            prepStmtAddAPIProduct.setString(3, apiProduct.getDescription());
+            prepStmtAddAPIProduct.setString(4, apiProduct.getProductTier());
+            prepStmtAddAPIProduct.setString(5, apiProduct.getProvider()); 
+            prepStmtAddAPIProduct.setString(6, apiProduct.getVisibility());
+            prepStmtAddAPIProduct.setString(7, apiProduct.getSubscriptionAvailability());
+            prepStmtAddAPIProduct.setString(8, apiProduct.getUuid());
+            prepStmtAddAPIProduct.setString(9, tenantDomain);
+            prepStmtAddAPIProduct.setString(10, apiProduct.getState() == null? "CREATED" :apiProduct.getState()); //TODO move to constant
+            prepStmtAddAPIProduct.setString(11, "0"); //TODO move to constant
+            
             prepStmtAddAPIProduct.execute();
             connection.commit(); //TODO check this///////
             
@@ -12861,14 +12865,14 @@ public class ApiMgtDAO {
             String queryGetAPIProduct = "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE UUID = ?";
             
             prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
-            prepStmtGetAPIProduct.setString(1, apiproduct.getUuid());
+            prepStmtGetAPIProduct.setString(1, apiProduct.getUuid());
             rs = prepStmtGetAPIProduct.executeQuery();
             if (rs.next()) {
                 productId = rs.getInt("API_PRODUCT_ID");
             }
             //breaks the flow if product is not added to the db correctly
             if(productId == 0) {
-                throw new APIManagementException("Error while retrieving API product " + apiproduct.getUuid()
+                throw new APIManagementException("Error while retrieving API product " + apiProduct.getUuid()
                         + " after inserting it to the database");
             }
             //TODO move to constant
@@ -12877,7 +12881,7 @@ public class ApiMgtDAO {
             prepStmtAddResourceMapping = connection.prepareStatement(queryAddResourceMapping);
             
             //add the resources in each API in the API product. Add the resource_ma
-            List<APIProductResource> productApis = apiproduct.getProductResources();
+            List<APIProductResource> productApis = apiProduct.getProductResources();
             for (APIProductResource apiProductResource : productApis) {
 
                 List<URITemplate> uriTemplates = apiProductResource.getResources();
@@ -12894,8 +12898,8 @@ public class ApiMgtDAO {
             connection.commit();
             
         } catch (SQLException e) {
-            handleException("Error while adding API product " + apiproduct.getName() + " of provider "
-                    + apiproduct.getProvider(), e);
+            handleException("Error while adding API product " + apiProduct.getName() + " of provider "
+                    + apiProduct.getProvider(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddAPIProduct, null, null);
             APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, null, null);
@@ -12917,7 +12921,7 @@ public class ApiMgtDAO {
             
             //TODO check this
             //TODO move to constant
-            String queryGetAPIProduct = "SELECT API_PRODUCT_ID,UUID,DESCRIPTION,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_TIER,VISIBILITY,BUSINESS_OWNER,BUSINESS_OWNER_EMAIL,SUBSCRIPTION_AVAILABILITY FROM AM_API_PRODUCT WHERE UUID = ?";
+            String queryGetAPIProduct = "SELECT API_PRODUCT_ID,UUID,DESCRIPTION,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_TIER,VISIBILITY,BUSINESS_OWNER,BUSINESS_OWNER_EMAIL,SUBSCRIPTION_AVAILABILITY,STATE FROM AM_API_PRODUCT WHERE UUID = ?";
             int productId = 0;
             
             prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
@@ -12933,6 +12937,7 @@ public class ApiMgtDAO {
                 product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
                 product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
                 product.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
+                product.setState(rs.getString("STATE"));
                 productId = rs.getInt("API_PRODUCT_ID");
             }
             //get api resources related to api product
@@ -12984,4 +12989,61 @@ public class ApiMgtDAO {
         }
         return product;
     }
+    
+    public List<APIProduct> getAPIProductsForTenantDomain(String tenantDomain) throws APIManagementException {
+        List<APIProduct> productList = new ArrayList<APIProduct>();
+        Connection connection = null;
+        PreparedStatement prepStmtGetAPIProduct = null;
+        
+        ResultSet rs = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();   
+
+            //TODO move to constant
+            String queryGetAPIProduct = "SELECT API_PRODUCT_ID,UUID,DESCRIPTION,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_TIER,VISIBILITY,BUSINESS_OWNER,BUSINESS_OWNER_EMAIL,SUBSCRIPTION_AVAILABILITY,TENANT_DOMAIN,STATE FROM AM_API_PRODUCT WHERE TENANT_DOMAIN = ?";
+            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
+            prepStmtGetAPIProduct.setString(1, tenantDomain);
+            rs = prepStmtGetAPIProduct.executeQuery();
+
+            while (rs.next()) {
+                APIProduct product = new APIProduct();
+                //only send a 
+                product.setName(rs.getString("API_PRODUCT_NAME"));
+                product.setUuid(rs.getString("UUID"));
+                product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
+                product.setState(rs.getString("STATE"));
+                productList.add(product);
+               
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while retrieving api product for tenant " + tenantDomain , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
+        }
+        
+        return productList;
+        
+    }
+
+    public void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
+        String deleteQuery = "DELETE FROM AM_API_PRODUCT WHERE UUID = ? AND TENANT_DOMAIN = ?";
+        PreparedStatement ps = null;
+        Connection connection = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();  
+            connection.setAutoCommit(false);
+            ps = connection.prepareStatement(deleteQuery);
+            ps.setString(1, uuid);
+            ps.setString(2, tenantDomain);
+            ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting api product " + uuid + " tenant " + tenantDomain , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, null);
+        }
+    }
+    
 }

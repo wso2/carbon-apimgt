@@ -1089,8 +1089,38 @@ public interface APIProvider extends APIManager {
      */
     String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
     
+    /**
+     * Create API product
+     * @param product product object containing details of the prouct
+     * @param tenantDomain tenant domain of the product
+     * @return UUID of the api product
+     * @throws APIManagementException exception
+     */
     String createAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException;
+    
+    /**
+     * Return the API product based on the UUID and the provider's accessibility restrictions
+     * @param uuid uuid of the api p
+     * @param apiProvider
+     * @return APIproduct object
+     * @throws APIManagementException
+     */
     APIProduct getAPIProduct(String uuid, String apiProvider) throws APIManagementException;
-    List<APIProduct> getAPIProducts(String apiProvider) throws APIManagementException;
+    
+    /**
+     * Return the API product list based on the tenant domain and the requesting user's accessibility restrictions
+     * @param tenantDomain
+     * @param apiProvider
+     * @return
+     * @throws APIManagementException
+     */
+    List<APIProduct> getAPIProducts(String tenantDomain, String apiProvider) throws APIManagementException;
 
+    /**
+     * Delete API product
+     * @param uuid uuid of the api product
+     * @param tenantDomain tenant domain.
+     * @throws APIManagementException
+     */
+    void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException;
 }
