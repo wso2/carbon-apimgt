@@ -25,7 +25,7 @@ public class SubscriptionDTO  {
   private String policy = null;
   
   public enum SubscriptionStatusEnum {
-     BLOCKED,  PROD_ONLY_BLOCKED,  SANDBOX_ONLY_BLOCKED,  ACTIVE,  ON_HOLD,  REJECTED, 
+     BLOCKED,  PROD_ONLY_BLOCKED,  UNBLOCKED,  ON_HOLD,  REJECTED, 
   };
   @NotNull
   private SubscriptionStatusEnum subscriptionStatus = null;

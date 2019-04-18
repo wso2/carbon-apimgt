@@ -42,10 +42,9 @@ public class EndpointsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response endpointsEndpointIdDelete(@ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**.\n",required=true ) @PathParam("endpointId")  String endpointId,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.endpointsEndpointIdDelete(endpointId,ifMatch,ifUnmodifiedSince);
+    return delegate.endpointsEndpointIdDelete(endpointId,ifMatch);
     }
     @GET
     @Path("/{endpointId}")
@@ -60,10 +59,9 @@ public class EndpointsApi  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n") })
 
     public Response endpointsEndpointIdGet(@ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**.\n",required=true ) @PathParam("endpointId")  String endpointId,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.endpointsEndpointIdGet(endpointId,ifMatch,ifUnmodifiedSince);
+    return delegate.endpointsEndpointIdGet(endpointId,ifMatch);
     }
     @PUT
     @Path("/{endpointId}")
@@ -81,10 +79,9 @@ public class EndpointsApi  {
 
     public Response endpointsEndpointIdPut(@ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**.\n",required=true ) @PathParam("endpointId")  String endpointId,
     @ApiParam(value = "Tier object that needs to be modified\n" ,required=true ) EndPointDTO body,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.endpointsEndpointIdPut(endpointId,body,ifMatch,ifUnmodifiedSince);
+    return delegate.endpointsEndpointIdPut(endpointId,body,ifMatch);
     }
     @GET
     
@@ -98,10 +95,9 @@ public class EndpointsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n") })
 
-    public Response endpointsGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    public Response endpointsGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.endpointsGet(ifNoneMatch,ifModifiedSince);
+    return delegate.endpointsGet(ifNoneMatch);
     }
     @HEAD
     
@@ -118,7 +114,7 @@ public class EndpointsApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
     public Response endpointsHead(@ApiParam(value = "") @QueryParam("name")  String name,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
     return delegate.endpointsHead(name,ifNoneMatch);
     }
@@ -135,10 +131,9 @@ public class EndpointsApi  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
     public Response endpointsPost(@ApiParam(value = "EndPoint object that needs to be added\n" ,required=true ) EndPointDTO body,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.endpointsPost(body,ifNoneMatch,ifModifiedSince);
+    return delegate.endpointsPost(body,ifNoneMatch);
     }
 }
 

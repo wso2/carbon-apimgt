@@ -23,11 +23,11 @@ public class TierDTO  {
   
   private String description = null;
   
-  public enum TierLevelEnum {
+  public enum PolicyLevelEnum {
      api,  application,  resource, 
   };
   
-  private TierLevelEnum tierLevel = null;
+  private PolicyLevelEnum policyLevel = null;
   
   
   private Map<String, String> attributes = new HashMap<String, String>();
@@ -78,12 +78,12 @@ public class TierDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("tierLevel")
-  public TierLevelEnum getTierLevel() {
-    return tierLevel;
+  @JsonProperty("policyLevel")
+  public PolicyLevelEnum getPolicyLevel() {
+    return policyLevel;
   }
-  public void setTierLevel(TierLevelEnum tierLevel) {
-    this.tierLevel = tierLevel;
+  public void setPolicyLevel(PolicyLevelEnum policyLevel) {
+    this.policyLevel = policyLevel;
   }
 
   
@@ -171,7 +171,7 @@ public class TierDTO  {
     
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  tierLevel: ").append(tierLevel).append("\n");
+    sb.append("  policyLevel: ").append(policyLevel).append("\n");
     sb.append("  attributes: ").append(attributes).append("\n");
     sb.append("  requestCount: ").append(requestCount).append("\n");
     sb.append("  unitTime: ").append(unitTime).append("\n");

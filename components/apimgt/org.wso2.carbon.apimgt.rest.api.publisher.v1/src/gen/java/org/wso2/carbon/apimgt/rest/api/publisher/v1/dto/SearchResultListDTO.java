@@ -2,8 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListPaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class APIListDTO  {
+public class SearchResultListDTO  {
   
   
   
@@ -28,16 +28,16 @@ public class APIListDTO  {
   private String previous = null;
   
   
-  private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
+  private List<SearchResultDTO> list = new ArrayList<SearchResultDTO>();
   
   
   private APIListPaginationDTO pagination = null;
 
   
   /**
-   * Number of APIs returned.\n
+   * Number of results returned.\n
    **/
-  @ApiModelProperty(value = "Number of APIs returned.\n")
+  @ApiModelProperty(value = "Number of results returned.\n")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -77,10 +77,10 @@ public class APIListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<APIInfoDTO> getList() {
+  public List<SearchResultDTO> getList() {
     return list;
   }
-  public void setList(List<APIInfoDTO> list) {
+  public void setList(List<SearchResultDTO> list) {
     this.list = list;
   }
 
@@ -101,7 +101,7 @@ public class APIListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIListDTO {\n");
+    sb.append("class SearchResultListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");

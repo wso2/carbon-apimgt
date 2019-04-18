@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     @Override
-    public Response subscriptionsBlockSubscriptionPost(String subscriptionId,String blockState,String ifMatch,String ifUnmodifiedSince){
+    public Response subscriptionsBlockSubscriptionPost(String subscriptionId,String blockState,String ifMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
@@ -27,12 +27,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId,String ifNoneMatch,String ifModifiedSince){
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId,String ifMatch,String ifUnmodifiedSince){
+    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId,String ifMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

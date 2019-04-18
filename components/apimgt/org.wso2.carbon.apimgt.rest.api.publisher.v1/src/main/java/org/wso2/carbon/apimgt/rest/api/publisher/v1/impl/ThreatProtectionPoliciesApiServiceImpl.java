@@ -20,6 +20,7 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+    
     @Override
     public Response threatProtectionPoliciesPolicyIdGet(String policyId){
         // do some magic!

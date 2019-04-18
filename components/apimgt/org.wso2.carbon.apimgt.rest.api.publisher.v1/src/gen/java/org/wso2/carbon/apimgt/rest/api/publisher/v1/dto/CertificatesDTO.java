@@ -1,9 +1,10 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import io.swagger.annotations.ApiModel;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListPaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -12,10 +13,13 @@ import javax.validation.constraints.NotNull;
 
 
 
+/**
+ * Representation of a list of certificates
+ **/
 
 
-@ApiModel(description = "")
-public class APIListDTO  {
+@ApiModel(description = "Representation of a list of certificates")
+public class CertificatesDTO  {
   
   
   
@@ -28,16 +32,15 @@ public class APIListDTO  {
   private String previous = null;
   
   
-  private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
+  private List<CertMetadataDTO> certificates = new ArrayList<CertMetadataDTO>();
   
   
   private APIListPaginationDTO pagination = null;
 
   
   /**
-   * Number of APIs returned.\n
    **/
-  @ApiModelProperty(value = "Number of APIs returned.\n")
+  @ApiModelProperty(value = "")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -48,9 +51,8 @@ public class APIListDTO  {
 
   
   /**
-   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n
    **/
-  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n")
+  @ApiModelProperty(value = "")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -61,9 +63,8 @@ public class APIListDTO  {
 
   
   /**
-   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n
    **/
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n")
+  @ApiModelProperty(value = "")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;
@@ -76,12 +77,12 @@ public class APIListDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("list")
-  public List<APIInfoDTO> getList() {
-    return list;
+  @JsonProperty("certificates")
+  public List<CertMetadataDTO> getCertificates() {
+    return certificates;
   }
-  public void setList(List<APIInfoDTO> list) {
-    this.list = list;
+  public void setCertificates(List<CertMetadataDTO> certificates) {
+    this.certificates = certificates;
   }
 
   
@@ -101,12 +102,12 @@ public class APIListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIListDTO {\n");
+    sb.append("class CertificatesDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");
     sb.append("  previous: ").append(previous).append("\n");
-    sb.append("  list: ").append(list).append("\n");
+    sb.append("  certificates: ").append(certificates).append("\n");
     sb.append("  pagination: ").append(pagination).append("\n");
     sb.append("}\n");
     return sb.toString();
