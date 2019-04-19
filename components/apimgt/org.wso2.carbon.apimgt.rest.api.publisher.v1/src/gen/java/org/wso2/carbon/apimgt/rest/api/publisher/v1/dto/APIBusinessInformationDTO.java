@@ -15,27 +15,27 @@ public class APIBusinessInformationDTO  {
   
   
   
-  private String technicalOwnerEmail = null;
+  private String businessOwner = null;
   
   
   private String businessOwnerEmail = null;
   
   
-  private String businessOwner = null;
-  
-  
   private String technicalOwner = null;
+  
+  
+  private String technicalOwnerEmail = null;
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("technicalOwnerEmail")
-  public String getTechnicalOwnerEmail() {
-    return technicalOwnerEmail;
+  @JsonProperty("businessOwner")
+  public String getBusinessOwner() {
+    return businessOwner;
   }
-  public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
-    this.technicalOwnerEmail = technicalOwnerEmail;
+  public void setBusinessOwner(String businessOwner) {
+    this.businessOwner = businessOwner;
   }
 
   
@@ -54,18 +54,6 @@ public class APIBusinessInformationDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("businessOwner")
-  public String getBusinessOwner() {
-    return businessOwner;
-  }
-  public void setBusinessOwner(String businessOwner) {
-    this.businessOwner = businessOwner;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("technicalOwner")
   public String getTechnicalOwner() {
     return technicalOwner;
@@ -75,16 +63,28 @@ public class APIBusinessInformationDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("technicalOwnerEmail")
+  public String getTechnicalOwnerEmail() {
+    return technicalOwnerEmail;
+  }
+  public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+    this.technicalOwnerEmail = technicalOwnerEmail;
+  }
+
+  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIBusinessInformationDTO {\n");
     
-    sb.append("  technicalOwnerEmail: ").append(technicalOwnerEmail).append("\n");
-    sb.append("  businessOwnerEmail: ").append(businessOwnerEmail).append("\n");
     sb.append("  businessOwner: ").append(businessOwner).append("\n");
+    sb.append("  businessOwnerEmail: ").append(businessOwnerEmail).append("\n");
     sb.append("  technicalOwner: ").append(technicalOwner).append("\n");
+    sb.append("  technicalOwnerEmail: ").append(technicalOwnerEmail).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

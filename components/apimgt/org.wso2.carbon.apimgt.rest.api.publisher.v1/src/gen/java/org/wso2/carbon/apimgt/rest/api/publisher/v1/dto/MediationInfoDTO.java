@@ -11,17 +11,20 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class SequenceDTO  {
+public class MediationInfoDTO  {
   
   
   @NotNull
   private String name = null;
   
+  @NotNull
+  private String id = null;
   
-  private String config = null;
-  
-  
-  private String type = null;
+  public enum TypeEnum {
+     in,  out,  fault, 
+  };
+  @NotNull
+  private TypeEnum type = null;
 
   
   /**
@@ -38,24 +41,24 @@ public class SequenceDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("config")
-  public String getConfig() {
-    return config;
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
-  public void setConfig(String config) {
-    this.config = config;
+  public void setId(String id) {
+    this.id = id;
   }
 
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("type")
-  public String getType() {
+  public TypeEnum getType() {
     return type;
   }
-  public void setType(String type) {
+  public void setType(TypeEnum type) {
     this.type = type;
   }
 
@@ -64,10 +67,10 @@ public class SequenceDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SequenceDTO {\n");
+    sb.append("class MediationInfoDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  config: ").append(config).append("\n");
+    sb.append("  id: ").append(id).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("}\n");
     return sb.toString();

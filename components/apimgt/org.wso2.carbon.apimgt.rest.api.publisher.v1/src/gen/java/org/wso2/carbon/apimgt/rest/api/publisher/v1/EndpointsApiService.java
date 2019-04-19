@@ -15,11 +15,11 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.Response;
 
 public abstract class EndpointsApiService {
-    public abstract Response endpointsEndpointIdDelete(String endpointId,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response endpointsEndpointIdGet(String endpointId,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response endpointsEndpointIdPut(String endpointId,EndPointDTO body,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response endpointsGet(String ifNoneMatch,String ifModifiedSince);
+    public abstract Response endpointsEndpointIdDelete(String endpointId,String ifMatch);
+    public abstract Response endpointsEndpointIdGet(String endpointId,String ifMatch);
+    public abstract Response endpointsEndpointIdPut(String endpointId,EndPointDTO body,String ifMatch);
+    public abstract Response endpointsGet(String ifNoneMatch);
     public abstract Response endpointsHead(String name,String ifNoneMatch);
-    public abstract Response endpointsPost(EndPointDTO body,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response endpointsPost(EndPointDTO body,String ifNoneMatch);
 }
 
