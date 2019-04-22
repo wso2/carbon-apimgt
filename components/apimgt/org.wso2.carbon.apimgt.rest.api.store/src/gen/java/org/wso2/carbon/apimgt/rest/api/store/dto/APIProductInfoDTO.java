@@ -1,5 +1,8 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.dto;
+package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeInfoDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -29,17 +32,13 @@ public class APIProductInfoDTO  {
   
   private String thumbnailUri = null;
   
-  public enum StateEnum {
-     CREATED,  PUBLISHED, 
-  };
   
-  private StateEnum state = null;
+  private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
 
   
   /**
-   * UUID of the api registry artifact\n
    **/
-  @ApiModelProperty(value = "UUID of the api registry artifact\n")
+  @ApiModelProperty(value = "")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -50,9 +49,8 @@ public class APIProductInfoDTO  {
 
   
   /**
-   * Name of the API Product
    **/
-  @ApiModelProperty(value = "Name of the API Product")
+  @ApiModelProperty(value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -63,9 +61,8 @@ public class APIProductInfoDTO  {
 
   
   /**
-   * A brief description about the API
    **/
-  @ApiModelProperty(value = "A brief description about the API")
+  @ApiModelProperty(value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -101,15 +98,14 @@ public class APIProductInfoDTO  {
 
   
   /**
-   * State of the API product. Only published api products are visible on the store\n
    **/
-  @ApiModelProperty(value = "State of the API product. Only published api products are visible on the store\n")
-  @JsonProperty("state")
-  public StateEnum getState() {
-    return state;
+  @ApiModelProperty(value = "")
+  @JsonProperty("scopes")
+  public List<ScopeInfoDTO> getScopes() {
+    return scopes;
   }
-  public void setState(StateEnum state) {
-    this.state = state;
+  public void setScopes(List<ScopeInfoDTO> scopes) {
+    this.scopes = scopes;
   }
 
   
@@ -124,7 +120,7 @@ public class APIProductInfoDTO  {
     sb.append("  description: ").append(description).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
-    sb.append("  state: ").append(state).append("\n");
+    sb.append("  scopes: ").append(scopes).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

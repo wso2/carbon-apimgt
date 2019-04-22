@@ -15,6 +15,7 @@
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.SwaggerJsonApi"/>
+	    <bean class="org.wso2.carbon.apimgt.rest.api.store.ApiProductsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.TagsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.ApisApi"/>

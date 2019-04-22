@@ -32,10 +32,8 @@ public class APIProduct {
     private String state;
     private String businessOwner;
     private String businessOwnerEmail;
-    
-    //private String thumbnailImage
-    
     private List<APIProductResource> productResources = new ArrayList<>();
+    
     public String getName() {
         return name;
     }

@@ -48,8 +48,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductDetailedDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyInfoDTO;
@@ -955,6 +958,8 @@ public class APIMappingUtil {
         productDto.setName(product.getName());
         productDto.setProvider(product.getProvider());
         productDto.setId(product.getUuid());
+        productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
         List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
         
         List<APIProductResource> resources = product.getProductResources();
@@ -974,5 +979,23 @@ public class APIMappingUtil {
         }
         productDto.setApis(apis);
         return productDto;
+    }
+
+    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList) {
+        APIProductListDTO listDto = new APIProductListDTO();
+        List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
+        for (APIProduct apiProduct : productList) {
+            APIProductInfoDTO productDto = new APIProductInfoDTO();
+            productDto.setName(apiProduct.getName());
+            productDto.setProvider(apiProduct.getProvider());
+            productDto.setId(apiProduct.getUuid());
+            productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                    .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+            list.add(productDto);
+        }
+        
+        listDto.setList(list);
+       
+        return listDto;
     }
 }

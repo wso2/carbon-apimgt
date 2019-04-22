@@ -23,6 +23,9 @@ public class SubscriptionDTO  {
   @NotNull
   private String apiIdentifier = null;
   
+  
+  private String apiProductIdentifier = null;
+  
   @NotNull
   private String tier = null;
   
@@ -100,6 +103,19 @@ public class SubscriptionDTO  {
 
   
   /**
+   * The unique identifier of the API prodduct.
+   **/
+  @ApiModelProperty(value = "The unique identifier of the API prodduct.")
+  @JsonProperty("apiProductIdentifier")
+  public String getApiProductIdentifier() {
+    return apiProductIdentifier;
+  }
+  public void setApiProductIdentifier(String apiProductIdentifier) {
+    this.apiProductIdentifier = apiProductIdentifier;
+  }
+
+  
+  /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("tier")
@@ -132,6 +148,7 @@ public class SubscriptionDTO  {
     sb.append("  subscriptionId: ").append(subscriptionId).append("\n");
     sb.append("  applicationId: ").append(applicationId).append("\n");
     sb.append("  apiIdentifier: ").append(apiIdentifier).append("\n");
+    sb.append("  apiProductIdentifier: ").append(apiProductIdentifier).append("\n");
     sb.append("  tier: ").append(tier).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("}\n");

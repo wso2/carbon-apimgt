@@ -6078,21 +6078,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         String uuid = UUID.randomUUID().toString();
         product.setUuid(uuid);
-        apiMgtDAO.addAPIProduct(product, tenantId);
+        apiMgtDAO.addAPIProduct(product, tenantDomain);
         return uuid;
     }
 
     @Override
     public APIProduct getAPIProduct(String uuid, String apiProvider) throws APIManagementException {
+        //TODO add validation for tenant and publisher visibility. currently no domain or user check is set
         APIProduct product = apiMgtDAO.getAPIProduct(uuid);
         return product;
     }
 
     @Override
-    public List<APIProduct> getAPIProducts(String apiProvider) throws APIManagementException {
-        List<APIProduct> products = new ArrayList<APIProduct>();
+    public List<APIProduct> getAPIProducts(String tenantDomain, String apiProvider) throws APIManagementException {
+        //TODO add validation for user and publisher visibility. currently no domain or user check is set
+        List<APIProduct> products = apiMgtDAO.getAPIProductsForTenantDomain(tenantDomain);
         return products;
 
     }
     
+    public void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
+      //TODO add validation for tenant and publisher visibility. currently no domain or user check is set
+        apiMgtDAO.deleteAPIProduct(uuid, tenantDomain);
+    }
+
 }
