@@ -28,6 +28,11 @@ const Configurations = {
                 fontSize: 12,
             },
             custom: {
+                overviewImage: {
+                    comments: '/store/public/app/images/overview/comments.png',
+                    docs: '/store/public/app/images/overview/docs.png',
+                    forum: '/store/public/app/images/overview/forum.png',
+                },
                 starColor: '#f2c73a',
                 disableColor: '#D3D3D3',
                 leftMenuWidth: 220,

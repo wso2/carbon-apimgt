@@ -108,7 +108,7 @@ class Comments extends Component {
                 }
             });
     }
-
+    
     /**
      * Handles loading the previous comments
      * @memberof Comments

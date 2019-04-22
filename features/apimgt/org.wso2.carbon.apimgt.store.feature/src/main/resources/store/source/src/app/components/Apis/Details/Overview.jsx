@@ -32,6 +32,7 @@ import { ApiContext } from './ApiContext';
 import Resources from './Resources';
 import Comments from './Comments/Comments';
 import Sdk from './Sdk';
+import API from '../../../data/api';
 /**
  *
  *
@@ -69,12 +70,43 @@ const styles = theme => ({
         alignItems: 'center',
     },
     resourceWrapper: {
+        height: 158,
+        overflow: 'auto',
+    },
+    sdkWrapper: {
         height: 192,
         overflow: 'auto',
     },
     actionPanel: {
         justifyContent: 'flex-start',
     },
+    noCommentsBack: {
+        background: 'url(' + theme.custom.overviewImage.comments + ') no-repeat left top',
+        width: 'auto',
+        height:192,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+    },
+    noDocsBack: {
+        background: 'url(' + theme.custom.overviewImage.docs + ') no-repeat left top',
+        width: 'auto',
+        height:192,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+    },
+    noForumBack: {
+        background: 'url(' + theme.custom.overviewImage.forum + ') no-repeat left top',
+        width: 'auto',
+        height:192,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+    },
+    noContentText: {
+        fontSize: '0.9rem'
+    }
 });
 const ExpansionPanelSummary = withStyles({
     root: {
@@ -99,6 +131,9 @@ ExpansionPanelSummary.muiName = 'ExpansionPanelSummary';
 class Overview extends React.Component {
     state = {
         value: 0,
+        hasComments: false,
+        hasDocs: false,
+        hasForum: false,
     };
 
     /**
@@ -107,7 +142,29 @@ class Overview extends React.Component {
      * @memberof Overview
      */
     handleExpandClick = () => {
-        this.setState(state => ({ expanded: !state.expanded }));
+        //this.setState(state => ({ expanded: !state.expanded }));
+    };
+
+    /**
+     *
+     *
+     * @memberof Overview
+     */
+    componentDidMount() {
+        const apiId = this.props.match.params.api_uuid;
+        const restApi = new API();
+        restApi.getAllComments(apiId)
+            .then((result) => {
+                if( result.body.list > 0 ) this.setState({hasComments: true});
+            })
+            .catch((error) => {
+                console.error(error);
+                if (error.response) {
+                    Alert.error(error.response.body.message);
+                } else {
+                    Alert.error('Something went wrong while retrieving comments');
+                }
+            });
     };
 
     /**
@@ -118,6 +175,8 @@ class Overview extends React.Component {
      */
     render() {
         const { classes, theme } = this.props;
+        const { hasComments, hasDocs, hasForum } = this.state;
+        const apiId = this.props.match.params.api_uuid;
         return (
             <ApiContext.Consumer>
                 {({ api, applicationsAvailable, subscribedApplications }) => (
@@ -135,20 +194,24 @@ class Overview extends React.Component {
                                     <Grid container className={classes.root} spacing={16}>
                                         <Grid item xs={12}>
                                             <div className={classes.subscriptionTop}>
-                                                <div className={classes.boxBadge}>2</div>
-                                                <Link to='/' className={classes.linkStyle}>
-                                                    Subscriptions
+                                                <div className={classes.boxBadge}>{subscribedApplications.length}</div>
+                                                <Link to={'/apis/'+ apiId + '/credentials'} className={classes.linkStyle}>
+                                                    {subscribedApplications.length === 1 ? 'Subscription' : 'Subscriptions'}
                                                 </Link>
                                             </div>
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Typography variant='subtitle2'>Subscribe to an Application</Typography>
                                             <div className={classes.subscriptionBox}>
-                                                <Link to='/' className={classes.linkStyle}>
-                                                    With an Existing Application
-                                                </Link>
-                                                <Typography variant='caption'>Subscribe to an Application</Typography>
-                                                <Link to='/' className={classes.linkStyle}>
+                                                {applicationsAvailable.length > 0 && (
+                                                <React.Fragment>
+                                                    <Link to={{ pathname: '/apis/'+ apiId + '/credentials', state: {popup: 'openAvailable'}}} className={classes.linkStyle}>
+                                                        With an Existing Application
+                                                    </Link>
+                                                    <Typography variant='caption'>{subscribedApplications.length} {subscribedApplications.length === 1 ? 'subscription' : 'subscriptions'}</Typography>
+                                                </React.Fragment>
+                                                )}
+                                                <Link to={{ pathname: '/apis/'+ apiId + '/credentials', state: {popup: 'openNew'}}} className={classes.linkStyle}>
                                                     With a New Application
                                                 </Link>
                                             </div>
@@ -172,9 +235,11 @@ class Overview extends React.Component {
                                 <ExpansionPanelDetails className={classes.resourceWrapper}>{api && <Resources api={api} />}</ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
-                                    <Button size='small' color='primary'>
-                                        Show More >>
-                                    </Button>
+                                    <Link to={'/apis/'+ apiId + '/test'} className={classes.linkStyle}>
+                                        <Button size='small' color='primary'>
+                                            Test Resources >>
+                                        </Button>
+                                    </Link>
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
                         </Grid>
@@ -187,13 +252,12 @@ class Overview extends React.Component {
                                         Comments
                                     </Typography>
                                 </ExpansionPanelSummary>
-                                <ExpansionPanelDetails className={classes.resourceWrapper}>{api && <Comments apiId={api.id} showLatest />}</ExpansionPanelDetails>
-                                <Divider />
-                                <ExpansionPanelActions className={classes.actionPanel}>
-                                    <Button size='small' color='primary'>
-                                        Show More >>
-                                    </Button>
-                                </ExpansionPanelActions>
+                                { hasComments && <ExpansionPanelDetails className={classes.resourceWrapper}>{ api &&  <Comments innerRef={node => (this.comments = node)} apiId={api.id} showLatest /> }</ExpansionPanelDetails> }
+                                { !hasComments && <ExpansionPanelDetails className={classes.noCommentsBack}>
+                                    <Typography variant="caption" className={classes.noContentText}>
+                                            Use the comments feature to initiate conversations and share your opinions with other users.
+                                    </Typography>
+                                </ExpansionPanelDetails> }
                             </ExpansionPanel>
                         </Grid>
                         <Grid item xs={6}>
@@ -205,7 +269,7 @@ class Overview extends React.Component {
                                         SDK Generation
                                     </Typography>
                                 </ExpansionPanelSummary>
-                                <ExpansionPanelDetails className={classes.resourceWrapper}>
+                                <ExpansionPanelDetails className={classes.sdkWrapper}>
                                     <Grid container className={classes.root} spacing={16}>
                                         {api && <Sdk apiId={api.id} onlyIcons />}
                                         <Grid item xs={12}>
@@ -213,12 +277,6 @@ class Overview extends React.Component {
                                         </Grid>
                                     </Grid>
                                 </ExpansionPanelDetails>
-                                <Divider />
-                                <ExpansionPanelActions className={classes.actionPanel}>
-                                    <Button size='small' color='primary'>
-                                        Show More >>
-                                    </Button>
-                                </ExpansionPanelActions>
                             </ExpansionPanel>
                         </Grid>
                         <Grid item xs={6}>
@@ -230,7 +288,7 @@ class Overview extends React.Component {
                                         Documents
                                     </Typography>
                                 </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
+                                { hasDocs && <ExpansionPanelDetails>
                                     <Grid container className={classes.root} spacing={16}>
                                         <Grid item xs={12}>
                                             <div className={classes.subscriptionTop}>
@@ -250,7 +308,12 @@ class Overview extends React.Component {
                                             </div>
                                         </Grid>
                                     </Grid>
-                                </ExpansionPanelDetails>
+                                </ExpansionPanelDetails> }
+                                { !hasDocs && <ExpansionPanelDetails className={classes.noDocsBack}>
+                                    <Typography variant="caption"  className={classes.noContentText}>
+                                            Documents are not available for this API.
+                                    </Typography>
+                                </ExpansionPanelDetails> }
                             </ExpansionPanel>
                         </Grid>
                         <Grid item xs={6}>
@@ -262,7 +325,7 @@ class Overview extends React.Component {
                                         Forum
                                     </Typography>
                                 </ExpansionPanelSummary>
-                                <ExpansionPanelDetails>
+                                { hasForum && <ExpansionPanelDetails>
                                     <Grid container className={classes.root} spacing={16}>
                                         <Grid item xs={12}>
                                             <div className={classes.subscriptionTop}>
@@ -282,7 +345,12 @@ class Overview extends React.Component {
                                             </div>
                                         </Grid>
                                     </Grid>
-                                </ExpansionPanelDetails>
+                                </ExpansionPanelDetails> }
+                                { !hasForum && <ExpansionPanelDetails className={classes.noForumBack}>
+                                    <Typography variant="caption"  className={classes.noContentText}>
+                                        Use the forum feature to initiate conversations and share your opinions with other users.
+                                    </Typography>
+                                </ExpansionPanelDetails> }
                             </ExpansionPanel>
                         </Grid>
                     </Grid>

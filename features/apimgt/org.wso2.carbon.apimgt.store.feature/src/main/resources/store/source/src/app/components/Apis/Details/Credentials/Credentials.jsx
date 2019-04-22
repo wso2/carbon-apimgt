@@ -238,6 +238,14 @@ class Credentials extends React.Component {
             if( updateSubscriptionData ) updateSubscriptionData();
         });
     }
+
+    componentDidMount() {
+        let popup;
+        if(this.props.location && this.props.location.state){
+            popup = this.props.location.state.popup;
+        }
+        if(popup) this.setState({[popup]: true});
+    }
     /**
      *
      *
@@ -247,6 +255,8 @@ class Credentials extends React.Component {
     render() {
         const { classes, theme } = this.props;
         const { selectedKeyType, selectedAppId } = this.state;
+        
+        
         return (
             <ApiContext.Consumer>
                 {({ api, applicationsAvailable, subscribedApplications, updateSubscriptionData }) => (
@@ -275,13 +285,8 @@ class Credentials extends React.Component {
                                     <div>
                                         <Typography variant='headline'>Subscribed Applications</Typography>
                                         <Typography variant='caption'>
-                                            (
-                                            {' '}
-                                            {subscribedApplications.length}
-                                            {' '}
-                                            {subscribedApplications.length === 1 ? 'subscription' : 'subscriptions'}
-                                            {' '}
-                                            )
+                                            ( {subscribedApplications.length}
+                                            {subscribedApplications.length === 1 ? 'subscription' : 'subscriptions'} )
                                         </Typography>
                                     </div>
                                     {applicationsAvailable.length > 0 && (
@@ -290,9 +295,7 @@ class Credentials extends React.Component {
                                                 Subscribe to Available App
                                             </Button>
                                             <Typography variant='caption' component='p' className={classes.buttonElmText}>
-                                                {applicationsAvailable.length}
-                                                {' '}
-Available
+                                                {applicationsAvailable.length} Available
                                             </Typography>
                                         </div>
                                     )}

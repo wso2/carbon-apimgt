@@ -661,9 +661,11 @@ class InfoBar extends React.Component {
                                                         <FileCopy color='secondary' />
                                                     </CopyToClipboard>
                                                 </Tooltip>
-                                                <Button variant='contained' size='small' color='primary' className={classes.margin}>
-                                                    Test Endpoint
-                                                </Button>
+                                                <Link to={'/apis/'+ api.id + '/test'}>
+                                                    <Button variant='contained' size='small' color='primary' className={classes.margin}>
+                                                        Test Endpoint
+                                                    </Button>
+                                                </Link>
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>
@@ -695,9 +697,11 @@ class InfoBar extends React.Component {
                                                             <FileCopy color='secondary' />
                                                         </CopyToClipboard>
                                                     </Tooltip>
-                                                    <Button variant='contained' size='small' color='primary' className={classes.margin}>
-                                                        Test Endpoint
-                                                    </Button>
+                                                    <Link to={'/apis/'+ api.id + '/test'}>
+                                                        <Button variant='contained' size='small' color='primary' className={classes.margin}>
+                                                            Test Endpoint
+                                                        </Button>
+                                                    </Link>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
