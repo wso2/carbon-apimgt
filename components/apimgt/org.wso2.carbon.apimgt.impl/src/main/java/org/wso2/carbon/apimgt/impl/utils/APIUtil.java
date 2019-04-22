@@ -69,6 +69,7 @@ import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
@@ -113,6 +114,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -170,6 +172,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
@@ -1682,6 +1685,16 @@ public final class APIUtil {
         throw new APIManagementException(msg, t);
     }
 
+    public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {
+        log.error(msg, t);
+        throw new APIMgtInternalException(msg, t);
+    }
+
+    public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
+        log.error(msg);
+        throw new APIMgtAuthorizationFailedException(msg);
+    }
+    
     public static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
 
         KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
@@ -4419,6 +4432,26 @@ public final class APIUtil {
             return new String[0];
 
         }
+    }
+
+    /**
+     * Check whether the user has the given role
+     *
+     * @throws UserStoreException
+     * @throws APIManagementException
+     */
+    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
+        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
+        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+        return abstractManager.isUserInRole(tenantAwareUserName, role);
     }
 
     /**
@@ -7556,6 +7589,55 @@ public final class APIUtil {
             apiSwagger = apiSwagger.replace(matcher.group(), "");
         }
         return apiSwagger;
+    }
+
+    /**
+     * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
+     * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
+     * started with the system property 'migrationMode=true' if a migration related exports are to be done.
+     *
+     * @param targetTenantDomain Tenant domain of which resources are requested
+     * @param username           Logged in user name
+     * @throws APIMgtInternalException  When internal error occurred
+     */
+    public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
+            throws APIMgtInternalException {
+        String superAdminRole = null;
+        
+        //Accessing the same tenant as the user's tenant
+        if (targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username))) {
+            return true;
+        }
+
+        try {
+            superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting super admin role name", e);
+        }
+
+        //check whether logged in user is a super tenant user
+        String superTenantDomain = null;
+        try {
+            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getSuperTenantDomain();
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting the super tenant domain", e);
+        }
+        boolean isSuperTenantUser = MultitenantUtils.getTenantDomain(username).equals(superTenantDomain);
+        if (!isSuperTenantUser) {
+            return false;
+        }
+
+        //check whether the user has super tenant admin role
+        boolean isSuperAdminRoleNameExistInUser = false;
+        try {
+            isSuperAdminRoleNameExistInUser = isUserInRole(username, superAdminRole);
+        } catch (UserStoreException | APIManagementException e) {
+            handleInternalException("Error in checking whether the user has admin role", e);
+        }
+
+        return isSuperAdminRoleNameExistInUser;
     }
 
     /**
