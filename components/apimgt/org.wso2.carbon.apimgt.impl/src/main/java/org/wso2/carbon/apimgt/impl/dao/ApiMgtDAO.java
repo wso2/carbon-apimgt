@@ -12932,7 +12932,7 @@ public class ApiMgtDAO {
                     //add scope uri temaplate mapping
                     String resourceKey = APIUtil
                             .getResourceKey(getAPIContext(apiIdentifier), apiIdentifier.getVersion(),
-                                    uriTemplate.getUriTemplate(), uriTemplate.getHTTPVerb());
+                                    uriTemplate.getResourceURI(), uriTemplate.getHTTPVerb());
                     prepStmtAddScopeResourceMapping.setString(1, resourceKey);
                     prepStmtAddScopeResourceMapping.setInt(2, scopeId);
                     prepStmtAddScopeResourceMapping.setInt(3, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
