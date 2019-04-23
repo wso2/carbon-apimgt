@@ -87,6 +87,25 @@ public class APIManagerConfiguration {
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
+    public  static Map<String, Properties> tokenRevocationNotifiers = new LinkedHashMap<String, Properties>();
+
+    public static  Map<String, Properties> getTokenRevocationNotifiers() {
+        return tokenRevocationNotifiers;
+    }
+
+    public static String getTokenRevocationClassName() {
+        return tokenRevocationClassName;
+    }
+
+    public static boolean getTokenRevocationEnabled() {
+        if(tokenRevocationNotifiers.isEmpty()){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public static String tokenRevocationClassName;
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -179,7 +198,39 @@ public class APIManagerConfiguration {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
-            if (elementHasText(element)) {
+            if ("TokenRevocationNotifiers".equals(localName)) {
+                tokenRevocationClassName = element.getAttributeValue(new QName("class"));
+                tokenRevocationNotifiers = new LinkedHashMap<>();
+            } else if ("RealtimeNotifier".equals(localName)) {
+                Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
+                Properties properties = new Properties();
+                while (revocationPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) revocationPropertiesIterator.next();
+
+                    properties.setProperty(propertyElem.getAttributeValue(new QName("name")), propertyElem.getText());
+                }
+                tokenRevocationNotifiers.put(localName, properties);
+            } else if ("PersistentNotifier".equals(localName)) {
+                Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
+                Properties properties = new Properties();
+                while (revocationPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) revocationPropertiesIterator.next();
+                    if (propertyElem.getAttributeValue(new QName("name")).equalsIgnoreCase("password")) {
+                        if (secretResolver.isInitialized() && secretResolver
+                                .isTokenProtected("TokenRevocationNotifiers.Notifier.Password")) {
+                            properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                    secretResolver.resolve("TokenRevocationNotifiers.Notifier.Password"));
+                        } else {
+                            properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                    propertyElem.getText());
+                        }
+                    } else {
+                        properties
+                                .setProperty(propertyElem.getAttributeValue(new QName("name")), propertyElem.getText());
+                    }
+                }
+                tokenRevocationNotifiers.put(localName, properties);
+            } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = element.getText();
                 if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
@@ -403,7 +454,6 @@ public class APIManagerConfiguration {
 
         return key.toString();
     }
-
     private boolean elementHasText(OMElement element) {
         String text = element.getText();
         return text != null && text.trim().length() != 0;
