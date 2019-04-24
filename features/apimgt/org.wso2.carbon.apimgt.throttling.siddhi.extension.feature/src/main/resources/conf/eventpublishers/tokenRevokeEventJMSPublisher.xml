@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<eventPublisher name="jwtRevocationPublisher" statistics="disable"
-  trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
-  <from streamName="org.wso2.token.revocation.stream" version="1.0.0"/>
+<eventPublisher name="tokenRevocationJMSPublisher" statistics="disable"
+                trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
+  <from streamName="org.wso2.apimgt.token.revocation.stream" version="1.0.0"/>
   <mapping customMapping="disable" type="map"/>
   <to eventAdapterType="jms">
     <property name="java.naming.factory.initial">org.wso2.andes.jndi.PropertiesFileInitialContextFactory</property>

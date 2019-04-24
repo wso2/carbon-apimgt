@@ -429,7 +429,7 @@ public final class APIConstants {
     public static final String PUBLISHING_TIME_OUT = "publishTimeout";
     public static final String NON_BLOCKING = "non-blocking";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
-    public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.token.revocation.stream:1.0.0";
+    public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
 
     //Property for enabling scope sharing between APIs

@@ -65,17 +65,14 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     private Map<String, Properties> tokenRevocationNotifiers;
 
     public TokenRevocationNotifierImpl(Map<String, Properties> tokenRevocationNotifiers) {
-
         this.tokenRevocationNotifiers = tokenRevocationNotifiers;
         extractNotifiers();
-
     }
 
     /**
      * Method to extract the config properties of revoke token notifiers
      */
     private void extractNotifiers() {
-
         //Default Constant Values
         final String DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME = "https://localhost:2379/v2/keys/jti/";
         final String DEFAULT_TTL = "3600";
@@ -102,9 +99,8 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
      *
      * @param revokedToken requested revoked token
      */
-    @Override public void
-    sendMessageOnRealtime(String revokedToken) {
-
+    @Override
+    public void sendMessageOnRealtime(String revokedToken) {
         Object[] objects = new Object[] { revokedToken, realtimeNotifierTTL };
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
@@ -118,8 +114,8 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
      *
      * @param revokedToken token to be revoked
      */
-    @Override public void
-    sendMessageToPersistentStorage(String revokedToken) {
+    @Override
+    public void sendMessageToPersistentStorage(String revokedToken) {
         String etcdEndpoint = persistentNotifierHostname + revokedToken;
         URL etcdEndpointURL = new URL(etcdEndpoint);
         String etcdEndpointProtocol = etcdEndpointURL.getProtocol();
@@ -150,7 +146,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                         .getStatusLine().getStatusCode());
             }
         } catch (IOException e) {
-            log.error("Error while sending PUT request to persistent storage :", e);
+            log.error("Error while sending revoked token to the persistent storage :", e);
         }
     }
 }

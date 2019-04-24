@@ -5,5 +5,5 @@
         <property name="events.duplicated.in.cluster">false</property>
     </from>
     <mapping customMapping="disable" type="wso2event"/>
-    <to streamName="org.wso2.token.revocation.stream" version="1.0.0"/>
+    <to streamName="org.wso2.apimgt.token.revocation.stream" version="1.0.0"/>
 </eventReceiver>

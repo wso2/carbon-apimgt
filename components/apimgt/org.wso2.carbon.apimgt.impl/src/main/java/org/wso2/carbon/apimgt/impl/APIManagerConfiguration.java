@@ -22,7 +22,6 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -87,9 +86,9 @@ public class APIManagerConfiguration {
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
-    public  static Map<String, Properties> tokenRevocationNotifiers = new LinkedHashMap<String, Properties>();
+    public static Map<String, Properties> tokenRevocationNotifiers = new LinkedHashMap<String, Properties>();
 
-    public static  Map<String, Properties> getTokenRevocationNotifiers() {
+    public static Map<String, Properties> getTokenRevocationNotifiers() {
         return tokenRevocationNotifiers;
     }
 
@@ -97,10 +96,10 @@ public class APIManagerConfiguration {
         return tokenRevocationClassName;
     }
 
-    public static boolean getTokenRevocationEnabled() {
-        if(tokenRevocationNotifiers.isEmpty()){
+    public static boolean isTokenRevocationEnabled() {
+        if (tokenRevocationNotifiers.isEmpty()) {
             return false;
-        }else{
+        } else {
             return true;
         }
     }
@@ -206,8 +205,8 @@ public class APIManagerConfiguration {
                 Properties properties = new Properties();
                 while (revocationPropertiesIterator.hasNext()) {
                     OMElement propertyElem = (OMElement) revocationPropertiesIterator.next();
-
-                    properties.setProperty(propertyElem.getAttributeValue(new QName("name")), propertyElem.getText());
+                    properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                            propertyElem.getText());
                 }
                 tokenRevocationNotifiers.put(localName, properties);
             } else if ("PersistentNotifier".equals(localName)) {
@@ -215,18 +214,21 @@ public class APIManagerConfiguration {
                 Properties properties = new Properties();
                 while (revocationPropertiesIterator.hasNext()) {
                     OMElement propertyElem = (OMElement) revocationPropertiesIterator.next();
-                    if (propertyElem.getAttributeValue(new QName("name")).equalsIgnoreCase("password")) {
+                    if (propertyElem.getAttributeValue(new QName("name")).
+                            equalsIgnoreCase("password")) {
                         if (secretResolver.isInitialized() && secretResolver
                                 .isTokenProtected("TokenRevocationNotifiers.Notifier.Password")) {
                             properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
-                                    secretResolver.resolve("TokenRevocationNotifiers.Notifier.Password"));
+                                    secretResolver.
+                                            resolve("TokenRevocationNotifiers.Notifier.Password"));
                         } else {
                             properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
                                     propertyElem.getText());
                         }
                     } else {
                         properties
-                                .setProperty(propertyElem.getAttributeValue(new QName("name")), propertyElem.getText());
+                                .setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                        propertyElem.getText());
                     }
                 }
                 tokenRevocationNotifiers.put(localName, properties);

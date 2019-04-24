@@ -119,7 +119,7 @@ public class APIKeyMgtServiceComponent {
             log.debug("Key Manager User Operation Listener is enabled.");
 
             //Checking token revocation feature enabled config
-            tokenRevocationEnabled = APIManagerConfiguration.getTokenRevocationEnabled();
+            tokenRevocationEnabled = APIManagerConfiguration.isTokenRevocationEnabled();
             if (tokenRevocationEnabled) {
 
                 //object creation for implemented OAuthEventInterceptor interface in IS

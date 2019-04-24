@@ -1,5 +1,5 @@
 {
-  "name": "org.wso2.token.revocation.stream",
+  "name": "org.wso2.apimgt.token.revocation.stream",
   "version": "1.0.0",
   "nickName": "",
   "description": "",
