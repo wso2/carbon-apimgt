@@ -86,10 +86,16 @@ public class APIManagerConfiguration {
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
-    public static Map<String, Properties> tokenRevocationNotifiers = new LinkedHashMap<String, Properties>();
+    private static Properties realtimeNotifier;
+    private static Properties persistentNotifier;
+    private static String tokenRevocationClassName;
 
-    public static Map<String, Properties> getTokenRevocationNotifiers() {
-        return tokenRevocationNotifiers;
+    public static Properties getRealtimeTokenRevocationNotifier() {
+        return realtimeNotifier;
+    }
+
+    public static Properties getPersistentTokenRevocationNotifiers() {
+        return persistentNotifier;
     }
 
     public static String getTokenRevocationClassName() {
@@ -97,14 +103,9 @@ public class APIManagerConfiguration {
     }
 
     public static boolean isTokenRevocationEnabled() {
-        if (tokenRevocationNotifiers.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
+        return !tokenRevocationClassName.isEmpty();
     }
 
-    public static String tokenRevocationClassName;
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -199,7 +200,6 @@ public class APIManagerConfiguration {
             nameStack.push(localName);
             if ("TokenRevocationNotifiers".equals(localName)) {
                 tokenRevocationClassName = element.getAttributeValue(new QName("class"));
-                tokenRevocationNotifiers = new LinkedHashMap<>();
             } else if ("RealtimeNotifier".equals(localName)) {
                 Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
                 Properties properties = new Properties();
@@ -208,7 +208,7 @@ public class APIManagerConfiguration {
                     properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
                             propertyElem.getText());
                 }
-                tokenRevocationNotifiers.put(localName, properties);
+                realtimeNotifier = properties;
             } else if ("PersistentNotifier".equals(localName)) {
                 Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
                 Properties properties = new Properties();
@@ -231,7 +231,7 @@ public class APIManagerConfiguration {
                                         propertyElem.getText());
                     }
                 }
-                tokenRevocationNotifiers.put(localName, properties);
+                persistentNotifier = properties;
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = element.getText();

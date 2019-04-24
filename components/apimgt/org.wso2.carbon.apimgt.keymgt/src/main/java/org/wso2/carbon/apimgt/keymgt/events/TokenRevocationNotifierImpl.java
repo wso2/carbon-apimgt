@@ -41,7 +41,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -52,55 +51,22 @@ import java.util.Properties;
 public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
 
     private static final Log log = LogFactory.getLog(APIMOAuthEventInterceptor.class);
+    private final String DEFAULT_TTL = "3600";
 
-    //Variables related to Realtime Notifier
-    private static String realtimeNotifierTTL;
+    public TokenRevocationNotifierImpl() {
 
-    //Variables related to Persistent Notifier
-    private static String persistentNotifierHostname;
-    private static String persistentNotifierTTL;
-    private static String persistentNotifierUsername;
-    private static String persistentNotifierPassword;
-
-    private Map<String, Properties> tokenRevocationNotifiers;
-
-    public TokenRevocationNotifierImpl(Map<String, Properties> tokenRevocationNotifiers) {
-        this.tokenRevocationNotifiers = tokenRevocationNotifiers;
-        extractNotifiers();
-    }
-
-    /**
-     * Method to extract the config properties of revoke token notifiers
-     */
-    private void extractNotifiers() {
-        //Default Constant Values
-        final String DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME = "https://localhost:2379/v2/keys/jti/";
-        final String DEFAULT_TTL = "3600";
-        final String DEFAULT_PERSISTENT_NOTIFIER_USERNAME = "root";
-        final String DEFAULT_PERSISTENT_NOTIFIER_PASSWORD = "root";
-
-        for (Map.Entry<String, Properties> entry : tokenRevocationNotifiers.entrySet()) {
-            if (entry.getKey().equalsIgnoreCase("RealtimeNotifier")) {
-                Properties properties = entry.getValue();
-                realtimeNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
-            }
-            if (entry.getKey().equalsIgnoreCase("PersistentNotifier")) {
-                Properties properties = entry.getValue();
-                persistentNotifierHostname = properties.getProperty("hostname", DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME);
-                persistentNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
-                persistentNotifierUsername = properties.getProperty("username", DEFAULT_PERSISTENT_NOTIFIER_USERNAME);
-                persistentNotifierPassword = properties.getProperty("password", DEFAULT_PERSISTENT_NOTIFIER_PASSWORD);
-            }
-        }
     }
 
     /**
      * Method to publish the revoked token on to the realtime message broker
      *
      * @param revokedToken requested revoked token
+     * @param realtimeNotifier realtime notifier properties read from the config
      */
     @Override
-    public void sendMessageOnRealtime(String revokedToken) {
+    public void sendMessageOnRealtime(String revokedToken, Properties realtimeNotifier) {
+        //Variables related to Realtime Notifier
+        String realtimeNotifierTTL = realtimeNotifier.getProperty("ttl", DEFAULT_TTL);
         Object[] objects = new Object[] { revokedToken, realtimeNotifierTTL };
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
@@ -113,9 +79,21 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
      * Method to send the revoked token to the persistent storage
      *
      * @param revokedToken token to be revoked
+     * @param persistentNotifier persistent notifier properties read from the config
      */
     @Override
-    public void sendMessageToPersistentStorage(String revokedToken) {
+    public void sendMessageToPersistentStorage(String revokedToken, Properties persistentNotifier) {
+        //Variables related to Persistent Notifier
+        String DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME = "https://localhost:2379/v2/keys/jti/";
+        String persistentNotifierHostname = persistentNotifier
+                .getProperty("hostname", DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME);
+        String persistentNotifierTTL = persistentNotifier.getProperty("ttl", DEFAULT_TTL);
+        String DEFAULT_PERSISTENT_NOTIFIER_USERNAME = "root";
+        String persistentNotifierUsername = persistentNotifier
+                .getProperty("username", DEFAULT_PERSISTENT_NOTIFIER_USERNAME);
+        String DEFAULT_PERSISTENT_NOTIFIER_PASSWORD = "root";
+        String persistentNotifierPassword = persistentNotifier
+                .getProperty("password", DEFAULT_PERSISTENT_NOTIFIER_PASSWORD);
         String etcdEndpoint = persistentNotifierHostname + revokedToken;
         URL etcdEndpointURL = new URL(etcdEndpoint);
         String etcdEndpointProtocol = etcdEndpointURL.getProtocol();
@@ -123,7 +101,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
         HttpClient etcdEPClient = APIUtil.getHttpClient(etcdEndpointPort, etcdEndpointProtocol);
         HttpPut httpETCDPut = new HttpPut(etcdEndpoint);
         byte[] encodedAuth = Base64.encodeBase64((persistentNotifierUsername + ":" + persistentNotifierPassword).
-                getBytes(StandardCharsets.ISO_8859_1));
+                getBytes(StandardCharsets.UTF_8));
         String authHeader = "Basic " + new String(encodedAuth, StandardCharsets.UTF_8);
         httpETCDPut.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
         List<NameValuePair> etcdParams = new ArrayList<>(2);

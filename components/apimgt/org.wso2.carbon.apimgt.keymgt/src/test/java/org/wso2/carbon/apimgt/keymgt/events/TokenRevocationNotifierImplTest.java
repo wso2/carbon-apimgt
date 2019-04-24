@@ -38,8 +38,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
-
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -51,7 +49,7 @@ public class TokenRevocationNotifierImplTest {
     private static final Log log = LogFactory.getLog(TokenRevocationNotifierImplTest.class);
     private TokenRevocationNotifierImpl tokenRevocationNotifierImpl;
     private HttpPut httpETCDPut;
-    private Map<String, Properties> input;
+    private final String DEFAULT_TTL = "3600";
 
     @Before
     public void Init() throws Exception {
@@ -64,11 +62,7 @@ public class TokenRevocationNotifierImplTest {
         StatusLine statusLine;
         HttpClient etcdEPClient;
         String etcdUrl = "https://localhost:2379/v2/keys/jti/";
-        final String ENABLED = "true";
-        final String DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME = "https://localhost:2379/v2/keys/jti/";
-        final String DEFAULT_TTL = "3600";
-        final String DEFAULT_PERSISTENT_NOTIFIER_USERNAME = "root";
-        final String DEFAULT_PERSISTENT_NOTIFIER_PASSWORD = "root";
+
 
         serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
         outputEventAdapterService = Mockito.mock(OutputEventAdapterService.class);
@@ -83,17 +77,6 @@ public class TokenRevocationNotifierImplTest {
         PowerMockito.mockStatic(APIUtil.class);
 
         statusLine = PowerMockito.mock(StatusLine.class);
-
-        Properties properties = new Properties();
-        input = new HashMap<>();
-        properties.setProperty("enabled", ENABLED);
-        input.put("realtime", properties);
-        properties.setProperty("hostname", DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME);
-        properties.setProperty("ttl", DEFAULT_TTL);
-        properties.setProperty("username", DEFAULT_PERSISTENT_NOTIFIER_USERNAME);
-        properties.setProperty("password", DEFAULT_PERSISTENT_NOTIFIER_PASSWORD);
-        input.put("persistent", properties);
-
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         PowerMockito.when(serviceReferenceHolder.getOutputEventAdapterService()).
                 thenReturn(outputEventAdapterService);
@@ -113,23 +96,23 @@ public class TokenRevocationNotifierImplTest {
         PowerMockito.when(statusLine.getStatusCode()).thenReturn(200);
     }
 
-    @Test
-    public void testExtractNotifiers() {
-
-        log.info("Running the test case to check the return string of the extract notifier method.");
-        tokenRevocationNotifierImpl = new TokenRevocationNotifierImpl(input);
-        log.info("Finished the test case to check the return string of the extract notifier method.");
-
-    }
 
     @Test
     public void testSendMessageToPersistentStorage() {
 
         log.info("Running the test case to check SendMessageToPersistentStorage method.");
+        Properties properties = new Properties();
+        String DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME = "https://localhost:2379/v2/keys/jti/";
+        properties.setProperty("hostname", DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME);
+        properties.setProperty("ttl", DEFAULT_TTL);
+        String DEFAULT_PERSISTENT_NOTIFIER_USERNAME = "root";
+        properties.setProperty("username", DEFAULT_PERSISTENT_NOTIFIER_USERNAME);
+        String DEFAULT_PERSISTENT_NOTIFIER_PASSWORD = "root";
+        properties.setProperty("password", DEFAULT_PERSISTENT_NOTIFIER_PASSWORD);
         try {
             PowerMockito.whenNew(HttpPut.class).withAnyArguments().thenReturn(httpETCDPut);
-            tokenRevocationNotifierImpl = new TokenRevocationNotifierImpl(input);
-            tokenRevocationNotifierImpl.sendMessageToPersistentStorage("1234");
+            tokenRevocationNotifierImpl = new TokenRevocationNotifierImpl();
+            tokenRevocationNotifierImpl.sendMessageToPersistentStorage("1234",properties);
         } catch (Exception e) {
             Assert.fail("Should not throw any exceptions");
         }
@@ -138,11 +121,12 @@ public class TokenRevocationNotifierImplTest {
 
     @Test
     public void testSendMessageOnRealTime() {
-
+        Properties properties = new Properties();
+        properties.setProperty("ttl", DEFAULT_TTL);
         log.info("Running the test case to check the sendMessageOnRealTime method.");
         try{
-            tokenRevocationNotifierImpl = new TokenRevocationNotifierImpl(input);
-            tokenRevocationNotifierImpl.sendMessageOnRealtime("1234");
+            tokenRevocationNotifierImpl = new TokenRevocationNotifierImpl();
+            tokenRevocationNotifierImpl.sendMessageOnRealtime("1234",properties);
         }catch (Exception e) {
             Assert.fail("Should not throw any exceptions");
         }
