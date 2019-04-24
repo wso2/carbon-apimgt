@@ -631,7 +631,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 wsdlOperation = new WSDLSOAPOperation();
                 wsdlOperation.setName(bindingOperation.getName());
                 wsdlOperation.setSoapAction(soapOperation.getSoapActionURI());
-                wsdlOperation.setTargetNamespace(targetNamespace);
+                wsdlOperation.setTargetNamespace(getTargetNamespace(bindingOperation));
                 wsdlOperation.setStyle(soapOperation.getStyle());
 
                 wsdlOperation.setInputParameterModel(getSoapInputParameterModel(bindingOperation));
@@ -639,6 +639,38 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
             }
         }
         return wsdlOperation;
+    }
+
+    /**
+     * Gets the target namespace given the soap binding operation
+     *
+     * @param bindingOperation soap operation
+     * @return target name space
+     */
+    private String getTargetNamespace(BindingOperation bindingOperation) {
+
+        Operation operation = bindingOperation.getOperation();
+        if (operation != null) {
+            Input input = operation.getInput();
+
+            if (input != null) {
+                Message message = input.getMessage();
+                if (message != null) {
+                    Map partMap = message.getParts();
+
+                    for (Object obj : partMap.entrySet()) {
+                        Map.Entry entry = (Map.Entry) obj;
+                        Part part = (Part) entry.getValue();
+                        if (part != null) {
+                            if (part.getElementName() != null) {
+                                return part.getElementName().getNamespaceURI();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return targetNamespace;
     }
 
     /**
