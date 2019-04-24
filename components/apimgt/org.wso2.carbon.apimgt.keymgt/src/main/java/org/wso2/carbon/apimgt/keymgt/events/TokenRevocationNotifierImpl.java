@@ -53,20 +53,16 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
     private static final Log log = LogFactory.getLog(APIMOAuthEventInterceptor.class);
     private final String DEFAULT_TTL = "3600";
 
-    public TokenRevocationNotifierImpl() {
-
-    }
-
     /**
      * Method to publish the revoked token on to the realtime message broker
      *
      * @param revokedToken requested revoked token
-     * @param realtimeNotifier realtime notifier properties read from the config
+     * @param properties realtime notifier properties read from the config
      */
     @Override
-    public void sendMessageOnRealtime(String revokedToken, Properties realtimeNotifier) {
+    public void sendMessageOnRealtime(String revokedToken, Properties properties) {
         //Variables related to Realtime Notifier
-        String realtimeNotifierTTL = realtimeNotifier.getProperty("ttl", DEFAULT_TTL);
+        String realtimeNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
         Object[] objects = new Object[] { revokedToken, realtimeNotifierTTL };
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
@@ -79,20 +75,20 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
      * Method to send the revoked token to the persistent storage
      *
      * @param revokedToken token to be revoked
-     * @param persistentNotifier persistent notifier properties read from the config
+     * @param properties persistent notifier properties read from the config
      */
     @Override
-    public void sendMessageToPersistentStorage(String revokedToken, Properties persistentNotifier) {
+    public void sendMessageToPersistentStorage(String revokedToken, Properties properties) {
         //Variables related to Persistent Notifier
         String DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME = "https://localhost:2379/v2/keys/jti/";
-        String persistentNotifierHostname = persistentNotifier
+        String persistentNotifierHostname = properties
                 .getProperty("hostname", DEFAULT_PERSISTENT_NOTIFIER_HOSTNAME);
-        String persistentNotifierTTL = persistentNotifier.getProperty("ttl", DEFAULT_TTL);
+        String persistentNotifierTTL = properties.getProperty("ttl", DEFAULT_TTL);
         String DEFAULT_PERSISTENT_NOTIFIER_USERNAME = "root";
-        String persistentNotifierUsername = persistentNotifier
+        String persistentNotifierUsername = properties
                 .getProperty("username", DEFAULT_PERSISTENT_NOTIFIER_USERNAME);
         String DEFAULT_PERSISTENT_NOTIFIER_PASSWORD = "root";
-        String persistentNotifierPassword = persistentNotifier
+        String persistentNotifierPassword = properties
                 .getProperty("password", DEFAULT_PERSISTENT_NOTIFIER_PASSWORD);
         String etcdEndpoint = persistentNotifierHostname + revokedToken;
         URL etcdEndpointURL = new URL(etcdEndpoint);

@@ -42,8 +42,8 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
     private TokenRevocationNotifier tokenRevocationNotifier;
     private boolean realtimeNotifierEnabled;
     private boolean persistentNotifierEnabled;
-    private Properties realtimeNotifier;
-    private Properties persistentNotifier;
+    private Properties realtimeNotifierProperties;
+    private Properties persistentNotifierProperties;
 
     /**
      * Default Constructor
@@ -51,16 +51,17 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
     public APIMOAuthEventInterceptor() {
 
         log.debug("Initializing OAuth interceptor");
-        realtimeNotifier = APIManagerConfiguration.getRealtimeTokenRevocationNotifier();
-        persistentNotifier = APIManagerConfiguration.getPersistentTokenRevocationNotifiers();
-        realtimeNotifierEnabled = !realtimeNotifier.isEmpty();
-        persistentNotifierEnabled = !persistentNotifier.isEmpty();
+        realtimeNotifierProperties = APIManagerConfiguration.getRealtimeTokenRevocationNotifierProperties();
+        persistentNotifierProperties = APIManagerConfiguration.getPersistentTokenRevocationNotifiersProperties();
+        realtimeNotifierEnabled = !realtimeNotifierProperties.isEmpty();
+        persistentNotifierEnabled = !persistentNotifierProperties.isEmpty();
         String className = APIManagerConfiguration.getTokenRevocationClassName();
         try {
-            tokenRevocationNotifier = (TokenRevocationNotifier) Class.forName(className).getConstructor(Map.class)
+            tokenRevocationNotifier = (TokenRevocationNotifier) Class.forName(className).getConstructor()
                     .newInstance();
             log.debug("Oauth interceptor initialized");
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException
+                | ClassNotFoundException e) {
             log.error("Oauth interceptor object creation error", e);
         }
     }
@@ -82,13 +83,13 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
 
         if (realtimeNotifierEnabled) {
             log.debug("Realtime message sending is enabled");
-            tokenRevocationNotifier.sendMessageOnRealtime(revokeRequestDTO.getToken(),realtimeNotifier);
+            tokenRevocationNotifier.sendMessageOnRealtime(revokeRequestDTO.getToken(), realtimeNotifierProperties);
         } else {
             log.debug("Realtime message sending isn't enabled or configured properly");
         }
         if (persistentNotifierEnabled) {
             log.debug("Persistent message sending is enabled");
-            tokenRevocationNotifier.sendMessageToPersistentStorage(revokeRequestDTO.getToken(),persistentNotifier);
+            tokenRevocationNotifier.sendMessageToPersistentStorage(revokeRequestDTO.getToken(), persistentNotifierProperties);
         } else {
             log.debug("Persistent message sending isn't enabled or configured properly");
         }
@@ -110,13 +111,13 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
 
         if (realtimeNotifierEnabled) {
             log.debug("Realtime message sending is enabled");
-            tokenRevocationNotifier.sendMessageOnRealtime(accessTokenDO.getTokenId(),realtimeNotifier);
+            tokenRevocationNotifier.sendMessageOnRealtime(accessTokenDO.getTokenId(), realtimeNotifierProperties);
         } else {
             log.debug("Realtime message sending isn't enabled or configured properly");
         }
         if (persistentNotifierEnabled) {
             log.debug("Persistent message sending is enabled");
-            tokenRevocationNotifier.sendMessageToPersistentStorage(accessTokenDO.getTokenId(),persistentNotifier);
+            tokenRevocationNotifier.sendMessageToPersistentStorage(accessTokenDO.getTokenId(), persistentNotifierProperties);
         } else {
             log.debug("Persistent message sending isn't enabled or configured properly");
         }

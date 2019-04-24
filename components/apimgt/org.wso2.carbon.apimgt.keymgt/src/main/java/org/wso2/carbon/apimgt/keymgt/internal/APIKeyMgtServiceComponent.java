@@ -133,7 +133,7 @@ public class APIKeyMgtServiceComponent {
                 log.debug("Key Manager OAuth Event Interceptor is enabled.");
 
             } else {
-                log.debug("Token Revocation Feature is disabled.");
+                log.debug("Token Revocation Notifier Feature is disabled.");
             }
 
             // loading white listed scopes

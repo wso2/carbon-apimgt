@@ -86,16 +86,16 @@ public class APIManagerConfiguration {
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
-    private static Properties realtimeNotifier;
-    private static Properties persistentNotifier;
+    private static Properties realtimeNotifierProperties;
+    private static Properties persistentNotifierProperties;
     private static String tokenRevocationClassName;
 
-    public static Properties getRealtimeTokenRevocationNotifier() {
-        return realtimeNotifier;
+    public static Properties getRealtimeTokenRevocationNotifierProperties() {
+        return realtimeNotifierProperties;
     }
 
-    public static Properties getPersistentTokenRevocationNotifiers() {
-        return persistentNotifier;
+    public static Properties getPersistentTokenRevocationNotifiersProperties() {
+        return persistentNotifierProperties;
     }
 
     public static String getTokenRevocationClassName() {
@@ -208,7 +208,7 @@ public class APIManagerConfiguration {
                     properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
                             propertyElem.getText());
                 }
-                realtimeNotifier = properties;
+                realtimeNotifierProperties = properties;
             } else if ("PersistentNotifier".equals(localName)) {
                 Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
                 Properties properties = new Properties();
@@ -231,7 +231,7 @@ public class APIManagerConfiguration {
                                         propertyElem.getText());
                     }
                 }
-                persistentNotifier = properties;
+                persistentNotifierProperties = properties;
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = element.getText();
