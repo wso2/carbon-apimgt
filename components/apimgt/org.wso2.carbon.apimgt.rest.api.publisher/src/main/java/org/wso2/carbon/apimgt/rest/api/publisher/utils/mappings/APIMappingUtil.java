@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductInfoDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ProductAPIDTO;
@@ -932,6 +933,7 @@ public class APIMappingUtil {
         product.setName(dto.getName());
         product.setProvider(provider);
         product.setUuid(dto.getId());
+        product.setState(dto.getState().toString());
         List<APIProductResource> productResources = new ArrayList<APIProductResource>();
 
         for (int i = 0; i < dto.getApis().size(); i++) {
@@ -958,6 +960,7 @@ public class APIMappingUtil {
         productDto.setName(product.getName());
         productDto.setProvider(product.getProvider());
         productDto.setId(product.getUuid());
+        productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
         List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
