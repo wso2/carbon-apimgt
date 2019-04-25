@@ -50,8 +50,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     @Override
-    public Response apisGet(Integer limit, Integer offset, String labels, String xWSO2Tenant, String query,
-            String ifNoneMatch) {
+    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
@@ -130,8 +129,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
-            String ifModifiedSince) {
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
         APIDTO apiToReturn;
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
@@ -161,22 +159,19 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
-            String ifUnmodifiedSince) {
+    public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch,
-            String ifModifiedSince) {
+    public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body, String ifMatch,
-            String ifUnmodifiedSince) {
+    public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
@@ -208,7 +203,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch) {
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
+            String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
@@ -220,8 +216,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch,
-            String ifModifiedSince) {
+    public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch
+    ) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
@@ -238,6 +234,11 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
+    @Override public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
+
     @Override
     public Response apisApiIdUserRatingPut(String apiId, RatingDTO body) {
         // do some magic!
@@ -245,7 +246,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdWsdlGet(String apiId, String label, String ifNoneMatch, String ifModifiedSince) {
+    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

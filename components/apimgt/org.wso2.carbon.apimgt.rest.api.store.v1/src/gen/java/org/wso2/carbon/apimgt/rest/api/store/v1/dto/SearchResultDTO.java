@@ -1,7 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -13,19 +11,37 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class LabelDTO  {
+public class SearchResultDTO  {
   
   
-  @NotNull
+  
+  private String id = null;
+  
+  
   private String name = null;
   
+  public enum TypeEnum {
+     DOC, 
+  };
   
-  private List<String> accessUrls = new ArrayList<String>();
+  private TypeEnum type = null;
 
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
+  @JsonProperty("id")
+  public String getId() {
+    return id;
+  }
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -38,12 +54,12 @@ public class LabelDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("accessUrls")
-  public List<String> getAccessUrls() {
-    return accessUrls;
+  @JsonProperty("type")
+  public TypeEnum getType() {
+    return type;
   }
-  public void setAccessUrls(List<String> accessUrls) {
-    this.accessUrls = accessUrls;
+  public void setType(TypeEnum type) {
+    this.type = type;
   }
 
   
@@ -51,10 +67,11 @@ public class LabelDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LabelDTO {\n");
+    sb.append("class SearchResultDTO {\n");
     
+    sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  accessUrls: ").append(accessUrls).append("\n");
+    sb.append("  type: ").append(type).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

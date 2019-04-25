@@ -44,7 +44,6 @@ public class ApplicationMappingUtil {
         applicationDTO.setDescription(application.getDescription());
         Map<String,String> applicationAttributes = application.getApplicationAttributes();
         applicationDTO.setAttributes(applicationAttributes);
-        applicationDTO.setCallbackUrl(application.getCallbackUrl());
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
         applicationDTO.setGroupId(application.getGroupId());
@@ -71,7 +70,6 @@ public class ApplicationMappingUtil {
         Application application = new Application(applicationDTO.getName(), subscriber);
         application.setTier(applicationDTO.getThrottlingTier());
         application.setDescription(applicationDTO.getDescription());
-        application.setCallbackUrl(applicationDTO.getCallbackUrl());
         application.setUUID(applicationDTO.getApplicationId());
         application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
         if (applicationDTO.getTokenType() != null && !ApplicationDTO.TokenTypeEnum.OAUTH
@@ -180,7 +178,6 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setName(application.getName());
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
-        applicationInfoDTO.setAttributes(application.getApplicationAttributes());
         applicationInfoDTO.setOwner(application.getOwner());
         return applicationInfoDTO;
     }

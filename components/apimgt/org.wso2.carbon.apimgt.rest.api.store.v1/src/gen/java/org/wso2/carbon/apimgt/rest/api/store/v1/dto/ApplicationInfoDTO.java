@@ -33,16 +33,13 @@ public class ApplicationInfoDTO  {
   private String status = "";
   
   
-  private Integer subscriptionCount = null;
-  
-  
   private String groupId = null;
   
   
-  private Object attributes = null;
-  
-  
   private String owner = null;
+  
+  
+  private Integer subscriptionCount = null;
 
   
   /**
@@ -120,36 +117,12 @@ public class ApplicationInfoDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("subscriptionCount")
-  public Integer getSubscriptionCount() {
-    return subscriptionCount;
-  }
-  public void setSubscriptionCount(Integer subscriptionCount) {
-    this.subscriptionCount = subscriptionCount;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("groupId")
   public String getGroupId() {
     return groupId;
   }
   public void setGroupId(String groupId) {
     this.groupId = groupId;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("attributes")
-  public Object getAttributes() {
-    return attributes;
-  }
-  public void setAttributes(Object attributes) {
-    this.attributes = attributes;
   }
 
   
@@ -165,6 +138,18 @@ public class ApplicationInfoDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscriptionCount")
+  public Integer getSubscriptionCount() {
+    return subscriptionCount;
+  }
+  public void setSubscriptionCount(Integer subscriptionCount) {
+    this.subscriptionCount = subscriptionCount;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -177,10 +162,9 @@ public class ApplicationInfoDTO  {
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  status: ").append(status).append("\n");
-    sb.append("  subscriptionCount: ").append(subscriptionCount).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
-    sb.append("  attributes: ").append(attributes).append("\n");
     sb.append("  owner: ").append(owner).append("\n");
+    sb.append("  subscriptionCount: ").append(subscriptionCount).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

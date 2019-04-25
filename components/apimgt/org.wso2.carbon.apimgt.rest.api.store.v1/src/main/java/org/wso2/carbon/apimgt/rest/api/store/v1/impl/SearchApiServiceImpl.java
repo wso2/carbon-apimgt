@@ -19,14 +19,13 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
-import org.wso2.carbon.apimgt.rest.api.store.v1.TagsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.SearchApiService;
 
 import javax.ws.rs.core.Response;
 
-public class TagsApiServiceImpl extends TagsApiService {
-
+public class SearchApiServiceImpl extends SearchApiService {
     @Override
-    public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch) {
+    public Response searchGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

@@ -38,9 +38,9 @@ public class ApplicationTokenDTO  {
 
   
   /**
-   * Valid scopes for the access token
+   * Valid comma seperated scopes for the access token
    **/
-  @ApiModelProperty(value = "Valid scopes for the access token")
+  @ApiModelProperty(value = "Valid comma seperated scopes for the access token")
   @JsonProperty("tokenScopes")
   public String getTokenScopes() {
     return tokenScopes;
