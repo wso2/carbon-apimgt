@@ -102,15 +102,15 @@ public class SOAPOperationBindingUtils {
                 List<ModelImpl> outputParameterModel = operation.getOutputParameterModel();
                 if (HTTPConstants.HTTP_METHOD_GET.equals(operation.getHttpVerb())) {
                     for (ModelImpl input : inputParameterModel) {
-                        if (operation.getName().equals(input.getName())) {
+                        if (input != null && operation.getName().equalsIgnoreCase(input.getName())) {
                             Map<String, Property> properties = input.getProperties();
                             if (properties != null) {
-                                QueryParameter param = new QueryParameter();
-                                param.setName(operation.getName());
                                 for (String property : properties.keySet()) {
+                                    QueryParameter param = new QueryParameter();
+                                    param.setName(property);
                                     param.setType(properties.get(property).getType());
+                                    op.addParameter(param);
                                 }
-                                op.addParameter(param);
                             }
                             inputParameterModel.remove(input);
                             break;
@@ -283,7 +283,8 @@ public class SOAPOperationBindingUtils {
                         && operation.getInputParameterModel().size() <= 1) {
 
                     Map<String, Property> properties = null;
-                    if (operation.getInputParameterModel().size() > 0) {
+                    if (operation.getInputParameterModel().size() > 0
+                            && operation.getInputParameterModel().get(0) != null) {
                         properties = operation.getInputParameterModel().get(0).getProperties();
                     }
                     if (properties == null) {
