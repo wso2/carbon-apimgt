@@ -139,7 +139,6 @@ public class SubscribedAPI {
         return uuid;
     }
     
-
     public APIProductIdentifier getProductId() {
         return productId;
     }

@@ -3285,7 +3285,6 @@ definitions:
     title: Subscription
     required:
       - applicationId
-      - apiIdentifier
       - tier
     properties:
       subscriptionId:
