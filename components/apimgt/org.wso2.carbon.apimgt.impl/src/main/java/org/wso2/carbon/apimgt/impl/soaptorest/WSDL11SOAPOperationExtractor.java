@@ -49,6 +49,8 @@ import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SwaggerFieldsExcludeStrategy;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
+import javax.wsdl.extensions.schema.SchemaImport;
+import javax.wsdl.extensions.soap12.SOAP12Operation;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingOperation;
@@ -74,6 +76,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME;
 import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants.SIMPLE_TYPE_NODE_NAME;
@@ -130,9 +133,40 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 for (Object ext : typeList) {
                     if (ext instanceof Schema) {
                         Schema schema = (Schema) ext;
+                        Map importedSchemas = schema.getImports();
                         Element schemaElement = schema.getElement();
                         NodeList schemaNodes = schemaElement.getChildNodes();
                         schemaNodeList.addAll(SOAPOperationBindingUtils.list(schemaNodes));
+                        //gets types from imported schemas from the parent wsdl. Nested schemas will not be imported.
+                        if (importedSchemas != null) {
+                            for (Object importedSchemaObj : importedSchemas.keySet()) {
+                                String schemaUrl = (String) importedSchemaObj;
+                                if (importedSchemas.get(schemaUrl) != null) {
+                                    Vector vector = (Vector) importedSchemas.get(schemaUrl);
+                                    for (Object schemaVector : vector) {
+                                        if (schemaVector instanceof SchemaImport) {
+                                            Schema referencedSchema = ((SchemaImport) schemaVector)
+                                                    .getReferencedSchema();
+                                            if (referencedSchema != null && referencedSchema.getElement() != null) {
+                                                if (referencedSchema.getElement().hasChildNodes()) {
+                                                    schemaNodeList.addAll(SOAPOperationBindingUtils
+                                                            .list(referencedSchema.getElement().getChildNodes()));
+                                                } else {
+                                                    log.warn("The referenced schema : " + schemaUrl
+                                                            + " doesn't have any defined types");
+                                                }
+                                            } else {
+                                                log.warn("Cannot access referenced schema for the schema defined at: "
+                                                        + schemaUrl);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            log.info("No any imported schemas found in the given wsdl.");
+                        }
+
                         if (log.isDebugEnabled()) {
                             Gson gson = new GsonBuilder().setExclusionStrategies(new SwaggerFieldsExcludeStrategy())
                                     .create();
@@ -602,12 +636,18 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     private Set<WSDLSOAPOperation> getSOAPBindingOperations(Binding binding) throws APIMgtWSDLException {
         Set<WSDLSOAPOperation> allBindingOperations = new HashSet<>();
         if (binding.getExtensibilityElements() != null && binding.getExtensibilityElements().size() > 0) {
-            if (binding.getExtensibilityElements().get(0) instanceof SOAPBinding) {
-                for (Object opObj : binding.getBindingOperations()) {
-                    BindingOperation bindingOperation = (BindingOperation) opObj;
-                    WSDLSOAPOperation wsdlSoapOperation = getSOAPOperation(bindingOperation);
-                    if (wsdlSoapOperation != null) {
-                        allBindingOperations.add(wsdlSoapOperation);
+            List extensibilityElements = binding.getExtensibilityElements();
+            for (Object extensibilityElement : extensibilityElements) {
+                if (extensibilityElement instanceof SOAPBinding || extensibilityElement instanceof SOAP12Binding) {
+                    for (Object opObj : binding.getBindingOperations()) {
+                        BindingOperation bindingOperation = (BindingOperation) opObj;
+                        WSDLSOAPOperation wsdlSoapOperation = getSOAPOperation(bindingOperation);
+                        if (wsdlSoapOperation != null) {
+                            allBindingOperations.add(wsdlSoapOperation);
+                        } else {
+                            log.warn("Unable to get soap operation details from binding operation: " + bindingOperation
+                                    .getName());
+                        }
                     }
                 }
             }
@@ -633,7 +673,15 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 wsdlOperation.setSoapAction(soapOperation.getSoapActionURI());
                 wsdlOperation.setTargetNamespace(getTargetNamespace(bindingOperation));
                 wsdlOperation.setStyle(soapOperation.getStyle());
-
+                wsdlOperation.setInputParameterModel(getSoapInputParameterModel(bindingOperation));
+                wsdlOperation.setOutputParameterModel(getSoapOutputParameterModel(bindingOperation));
+            } else if (boExtElement instanceof SOAP12Operation) {
+                SOAP12Operation soapOperation = (SOAP12Operation) boExtElement;
+                wsdlOperation = new WSDLSOAPOperation();
+                wsdlOperation.setName(bindingOperation.getName());
+                wsdlOperation.setSoapAction(soapOperation.getSoapActionURI());
+                wsdlOperation.setTargetNamespace(getTargetNamespace(bindingOperation));
+                wsdlOperation.setStyle(soapOperation.getStyle());
                 wsdlOperation.setInputParameterModel(getSoapInputParameterModel(bindingOperation));
                 wsdlOperation.setOutputParameterModel(getSoapOutputParameterModel(bindingOperation));
             }
