@@ -13024,7 +13024,7 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, api.getId().getApiName());
             prepStmt.setString(2, api.getId().getVersion());
-            prepStmt.setString(3, api.getId().getProviderName());
+            prepStmt.setString(3, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             rs = prepStmt.executeQuery();
             while (rs.next()) {
                 URITemplate template = new URITemplate();
