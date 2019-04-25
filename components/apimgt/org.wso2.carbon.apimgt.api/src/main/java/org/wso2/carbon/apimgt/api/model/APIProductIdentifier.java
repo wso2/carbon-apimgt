@@ -24,7 +24,7 @@ import java.io.Serializable;
  * API Product identifier. 
  *
  */
-public class APIProductIdentifier implements Serializable {
+public class APIProductIdentifier implements Serializable, Identifier {
 
     private static final long serialVersionUID = 1L;
     
@@ -33,6 +33,7 @@ public class APIProductIdentifier implements Serializable {
     private String tier;
     private String applicationId;
     private String uuid;
+    private int productId;
     
     public APIProductIdentifier(String providerName, String apiProductName){
         this.apiProductName = apiProductName;
@@ -70,6 +71,15 @@ public class APIProductIdentifier implements Serializable {
     public String getApiProductName() {
         return apiProductName;
     }
+    
+    public int getProductId() {
+        return productId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -91,5 +101,4 @@ public class APIProductIdentifier implements Serializable {
     public String toString() {
         return this.getProviderName() + '-' + this.getApiProductName();
     }
-
 }

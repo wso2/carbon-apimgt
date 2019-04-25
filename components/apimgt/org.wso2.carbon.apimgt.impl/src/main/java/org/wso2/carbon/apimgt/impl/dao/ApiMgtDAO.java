@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -972,26 +973,30 @@ public class ApiMgtDAO {
     /**
      * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
      *
-     * @param identifier    APIIdentifier
+     * @param identifier    Identifier
      * @param applicationId ID of the application which has the subscription
      * @throws APIManagementException
      */
-    public void removeSubscription(APIIdentifier identifier, int applicationId)
+    public void removeSubscription(Identifier identifier, int applicationId)
             throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        int apiId = -1;
+        int id = -1;
         String uuid;
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            apiId = getAPIID(identifier, conn);
-
             String subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_SQL;
+            if(identifier instanceof APIIdentifier) {
+                id = getAPIID((APIIdentifier) identifier, conn);
+            } else if (identifier instanceof APIProductIdentifier) {
+                id = ((APIProductIdentifier) identifier).getProductId();
+                subscriptionUUIDQuery = SQLConstants.GET_SUBSCRIPTION_UUID_PRODUCT_SQL;
+            }
 
             ps = conn.prepareStatement(subscriptionUUIDQuery);
-            ps.setInt(1, apiId);
+            ps.setInt(1, id);
             ps.setInt(2, applicationId);
             resultSet = ps.executeQuery();
 
@@ -1000,7 +1005,7 @@ public class ApiMgtDAO {
                 SubscribedAPI subscribedAPI = new SubscribedAPI(uuid);
                 removeSubscription(subscribedAPI, conn);
             } else {
-                throw new APIManagementException("UUID does not exist for the given apiId:" + apiId + " and " +
+                throw new APIManagementException("UUID does not exist for the given apiId:" + id + " and " +
                         "application id:" + applicationId);
             }
 
@@ -1189,6 +1194,7 @@ public class ApiMgtDAO {
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PRODUCT_PROVIDER")),
                             resultSet.getString("API_PRODUCT_NAME"));
                     apiProductIdentifier.setUuid(resultSet.getString("PRODUCT_UUID"));
+                    apiProductIdentifier.setProductId(resultSet.getInt("API_PRODUCT_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 }
 
@@ -1241,6 +1247,7 @@ public class ApiMgtDAO {
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PRODUCT_PROVIDER")),
                             resultSet.getString("API_PRODUCT_NAME"));
                     apiProductIdentifier.setUuid(resultSet.getString("PRODUCT_UUID"));
+                    apiProductIdentifier.setProductId(resultSet.getInt("API_PRODUCT_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 }
                 
@@ -7576,30 +7583,38 @@ public class ApiMgtDAO {
     /**
      * Retries the WorkflowExternalReference for a subscription.
      *
-     * @param identifier APIIdentifier to find the subscribed api
+     * @param identifier Identifier to find the subscribed api
      * @param appID      ID of the application which has the subscription
      * @return External workflow reference for the subscription identified
      * @throws APIManagementException
      */
-    public String getExternalWorkflowReferenceForSubscription(APIIdentifier identifier, int appID)
+    public String getExternalWorkflowReferenceForSubscription(Identifier identifier, int appID)
             throws APIManagementException {
         String workflowExtRef = null;
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        int apiID;
+        int id = -1;
         int subscriptionID = -1;
 
         String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL;
         String postgreSQL = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_SQL;
         try {
-            apiID = getAPIID(identifier, conn);
+            if (identifier instanceof APIIdentifier) {
+                id = getAPIID((APIIdentifier) identifier, conn);
+
+            } else if (identifier instanceof APIProductIdentifier) {
+                sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_PRODUCT_SQL;
+                postgreSQL = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_PRODUCT_SQL;
+                id = ((APIProductIdentifier) identifier).getProductId();
+            }
+            
             conn = APIMgtDBUtil.getConnection();
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
                 sqlQuery = postgreSQL;
             }
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, apiID);
+            ps.setInt(1, id);
             ps.setInt(2, appID);
             ps.setString(3, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             rs = ps.executeQuery();
@@ -7760,23 +7775,29 @@ public class ApiMgtDAO {
     /**
      * Retrives subscription status for APIIdentifier and applicationId
      *
-     * @param identifier    api identifier subscribed
+     * @param identifier    identifier subscribed
      * @param applicationId application with subscription
      * @return subscription status
      * @throws APIManagementException
      */
-    public String getSubscriptionStatus(APIIdentifier identifier, int applicationId) throws APIManagementException {
+    public String getSubscriptionStatus(Identifier identifier, int applicationId) throws APIManagementException {
         String status = null;
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        int id = -1;
 
-        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_STATUS_SQL;
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_STATUS_SQL;;
         try {
             conn = APIMgtDBUtil.getConnection();
-            int apiId = getAPIID(identifier, conn);
+            if (identifier instanceof APIIdentifier) {
+                id = getAPIID((APIIdentifier) identifier, conn);
+            } else if (identifier instanceof APIProductIdentifier) {
+                sqlQuery = SQLConstants.GET_SUBSCRIPTION_STATUS_PRODUCT_SQL;
+                id = ((APIProductIdentifier) identifier).getProductId();
+            }
             ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, apiId);
+            ps.setInt(1, id);
             ps.setInt(2, applicationId);
             rs = ps.executeQuery();
 

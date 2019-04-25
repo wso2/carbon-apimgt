@@ -343,12 +343,12 @@ public interface APIConsumer extends APIManager {
     /**
      * Unsubscribe the specified user from the specified API in the given application
      *
-     * @param identifier    APIIdentifier
+     * @param identifier    Identifier
      * @param userId        id of the user
      * @param applicationId Application Id
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(APIIdentifier identifier, String userId, int applicationId) throws APIManagementException;
+    void removeSubscription(Identifier identifier, String userId, int applicationId) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application with GroupId

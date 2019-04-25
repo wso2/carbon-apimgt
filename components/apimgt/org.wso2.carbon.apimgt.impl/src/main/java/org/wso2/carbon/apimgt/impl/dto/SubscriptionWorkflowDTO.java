@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+
 public class SubscriptionWorkflowDTO extends WorkflowDTO{
 
     private String apiName;
@@ -36,7 +38,7 @@ public class SubscriptionWorkflowDTO extends WorkflowDTO{
 
     private String tierName;
     
-    private String productName;
+    private APIProductIdentifier productIdentifier;
 
     public String getApiName() {
         return apiName;
@@ -102,12 +104,12 @@ public class SubscriptionWorkflowDTO extends WorkflowDTO{
         this.applicationId = applicationId;
     }
 
-    public String getProductName() {
-        return productName;
+    public APIProductIdentifier getProductIdentifier() {
+        return productIdentifier;
     }
 
-    public void setProductName(String productName) {
-        this.productName = productName;
+    public void setProductIdentifier(APIProductIdentifier productName) {
+        this.productIdentifier = productName;
     }
     
 }
