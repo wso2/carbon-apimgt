@@ -86,7 +86,7 @@ public class APIMappingUtil {
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
             tiersToReturn.add(tier.getName());
         }
-        dto.setPolicies(tiersToReturn);
+        dto.setTiers(tiersToReturn);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 

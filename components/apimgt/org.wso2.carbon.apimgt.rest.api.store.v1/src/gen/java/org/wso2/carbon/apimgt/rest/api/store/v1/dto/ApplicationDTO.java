@@ -2,8 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeysDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -31,13 +30,13 @@ public class ApplicationDTO  {
   private String throttlingTier = null;
   
   
-  private String callbackUrl = null;
-  
-  
-  private String permission = null;
-  
-  
   private String description = null;
+  
+  public enum TokenTypeEnum {
+     OAUTH,  JWT, 
+  };
+  
+  private TokenTypeEnum tokenType = TokenTypeEnum.OAUTH;
   
   
   private String status = "";
@@ -45,17 +44,14 @@ public class ApplicationDTO  {
   
   private String groupId = null;
   
-  public enum TokenTypeEnum {
-     OAUTH,  JWT, 
-  };
   
-  private TokenTypeEnum tokenType = null;
+  private String owner = null;
   
   
-  private ApplicationTokenDTO token = null;
+  private Integer subscriptionCount = null;
   
   
-  private List<ApplicationKeysDTO> keys = new ArrayList<ApplicationKeysDTO>();
+  private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
   
   
   private Object attributes = null;
@@ -113,36 +109,25 @@ public class ApplicationDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("callbackUrl")
-  public String getCallbackUrl() {
-    return callbackUrl;
-  }
-  public void setCallbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("permission")
-  public String getPermission() {
-    return permission;
-  }
-  public void setPermission(String permission) {
-    this.permission = permission;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  
+  /**
+   * Type of the access token generated for this application.\n\n**OAUTH:** A UUID based access token which is issued by default.\n**JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.\n
+   **/
+  @ApiModelProperty(value = "Type of the access token generated for this application.\n\n**OAUTH:** A UUID based access token which is issued by default.\n**JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.\n")
+  @JsonProperty("tokenType")
+  public TokenTypeEnum getTokenType() {
+    return tokenType;
+  }
+  public void setTokenType(TokenTypeEnum tokenType) {
+    this.tokenType = tokenType;
   }
 
   
@@ -173,24 +158,24 @@ public class ApplicationDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("tokenType")
-  public TokenTypeEnum getTokenType() {
-    return tokenType;
+  @JsonProperty("owner")
+  public String getOwner() {
+    return owner;
   }
-  public void setTokenType(TokenTypeEnum tokenType) {
-    this.tokenType = tokenType;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("token")
-  public ApplicationTokenDTO getToken() {
-    return token;
+  @JsonProperty("subscriptionCount")
+  public Integer getSubscriptionCount() {
+    return subscriptionCount;
   }
-  public void setToken(ApplicationTokenDTO token) {
-    this.token = token;
+  public void setSubscriptionCount(Integer subscriptionCount) {
+    this.subscriptionCount = subscriptionCount;
   }
 
   
@@ -198,10 +183,10 @@ public class ApplicationDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("keys")
-  public List<ApplicationKeysDTO> getKeys() {
+  public List<ApplicationKeyDTO> getKeys() {
     return keys;
   }
-  public void setKeys(List<ApplicationKeysDTO> keys) {
+  public void setKeys(List<ApplicationKeyDTO> keys) {
     this.keys = keys;
   }
 
@@ -228,13 +213,12 @@ public class ApplicationDTO  {
     sb.append("  name: ").append(name).append("\n");
     sb.append("  subscriber: ").append(subscriber).append("\n");
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
-    sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
-    sb.append("  permission: ").append(permission).append("\n");
     sb.append("  description: ").append(description).append("\n");
+    sb.append("  tokenType: ").append(tokenType).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
-    sb.append("  tokenType: ").append(tokenType).append("\n");
-    sb.append("  token: ").append(token).append("\n");
+    sb.append("  owner: ").append(owner).append("\n");
+    sb.append("  subscriptionCount: ").append(subscriptionCount).append("\n");
     sb.append("  keys: ").append(keys).append("\n");
     sb.append("  attributes: ").append(attributes).append("\n");
     sb.append("}\n");

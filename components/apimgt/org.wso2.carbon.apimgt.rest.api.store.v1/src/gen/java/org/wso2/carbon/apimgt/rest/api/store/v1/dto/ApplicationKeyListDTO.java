@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,14 +14,14 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class ApplicationKeysListDTO  {
+public class ApplicationKeyListDTO  {
   
   
   
   private Integer count = null;
   
   
-  private List<ApplicationKeysDTO> list = new ArrayList<ApplicationKeysDTO>();
+  private List<ApplicationKeyDTO> list = new ArrayList<ApplicationKeyDTO>();
 
   
   /**
@@ -41,10 +41,10 @@ public class ApplicationKeysListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<ApplicationKeysDTO> getList() {
+  public List<ApplicationKeyDTO> getList() {
     return list;
   }
-  public void setList(List<ApplicationKeysDTO> list) {
+  public void setList(List<ApplicationKeyDTO> list) {
     this.list = list;
   }
 
@@ -53,7 +53,7 @@ public class ApplicationKeysListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationKeysListDTO {\n");
+    sb.append("class ApplicationKeyListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  list: ").append(list).append("\n");

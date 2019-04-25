@@ -2,7 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultListPaginationDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,7 +15,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class LabelListDTO  {
+public class SearchResultListDTO  {
   
   
   
@@ -27,13 +28,16 @@ public class LabelListDTO  {
   private String previous = null;
   
   
-  private List<LabelDTO> list = new ArrayList<LabelDTO>();
+  private List<SearchResultDTO> list = new ArrayList<SearchResultDTO>();
+  
+  
+  private SearchResultListPaginationDTO pagination = null;
 
   
   /**
-   * Number of Labels returned.\n
+   * Number of results returned.\n
    **/
-  @ApiModelProperty(value = "Number of Labels returned.\n")
+  @ApiModelProperty(value = "Number of results returned.\n")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -73,11 +77,23 @@ public class LabelListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<LabelDTO> getList() {
+  public List<SearchResultDTO> getList() {
     return list;
   }
-  public void setList(List<LabelDTO> list) {
+  public void setList(List<SearchResultDTO> list) {
     this.list = list;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("pagination")
+  public SearchResultListPaginationDTO getPagination() {
+    return pagination;
+  }
+  public void setPagination(SearchResultListPaginationDTO pagination) {
+    this.pagination = pagination;
   }
 
   
@@ -85,12 +101,13 @@ public class LabelListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LabelListDTO {\n");
+    sb.append("class SearchResultListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");
     sb.append("  previous: ").append(previous).append("\n");
     sb.append("  list: ").append(list).append("\n");
+    sb.append("  pagination: ").append(pagination).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

@@ -19,14 +19,18 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
-import org.wso2.carbon.apimgt.rest.api.store.v1.TagsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.TiersApiService;
 
 import javax.ws.rs.core.Response;
 
-public class TagsApiServiceImpl extends TagsApiService {
-
+public class TiersApiServiceImpl extends TiersApiService {
     @Override
-    public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch) {
+    public Response tiersTierLevelGet(String tierLevel,Integer limit,Integer offset,String ifNoneMatch){
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
+    @Override
+    public Response tiersTierLevelTierIdGet(String tierId,String tierLevel,String xWSO2Tenant,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
