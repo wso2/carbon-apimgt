@@ -423,7 +423,7 @@ public class SQLConstants {
             " WHERE " +
             "   SUBSCRIBER_ID=?";
 
-    public static final String CHECK_EXISTING_SUBSCRIPTION_SQL =
+    public static final String CHECK_EXISTING_SUBSCRIPTION_API_SQL =
             " SELECT " +
             "   SUB_STATUS, SUBS_CREATE_STATE " +
             " FROM " +
@@ -432,9 +432,24 @@ public class SQLConstants {
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
 
+    public static final String CHECK_EXISTING_SUBSCRIPTION_PRODUCT_SQL =
+            " SELECT " +
+            "   SUB_STATUS, SUBS_CREATE_STATE " +
+            " FROM " +
+            "   AM_SUBSCRIPTION " +
+            " WHERE " +
+            "   API_PRODUCT_ID = ? " +
+            "   AND APPLICATION_ID = ?";
+
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
             "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
+                    "UPDATED_TIME, UUID) " +
+            " VALUES (?,?,?,?,?,?,?,?,?)";
+    
+    public static final String ADD_PRODUCT_SUBSCRIPTION_SQL =
+            " INSERT INTO " +
+            "   AM_SUBSCRIPTION (TIER_ID,API_PRODUCT_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
                     "UPDATED_TIME, UUID) " +
             " VALUES (?,?,?,?,?,?,?,?,?)";
 
@@ -468,42 +483,47 @@ public class SQLConstants {
             " SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE SUBSCRIPTION_ID = ?";
 
     public static final String GET_SUBSCRIPTION_BY_ID_SQL =
-            " SELECT " +
-            "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
-            "   API.API_PROVIDER AS API_PROVIDER, " +
-            "   API.API_NAME AS API_NAME, " +
-            "   API.API_VERSION AS API_VERSION, " +
-            "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
-            "   SUBS.TIER_ID AS TIER_ID, " +
-            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-            "   SUBS.UUID AS UUID " +
-            " FROM " +
-            "   AM_SUBSCRIPTION SUBS," +
-            "   AM_API API " +
-            " WHERE " +
-            "   API.API_ID = SUBS.API_ID " +
-            "   AND SUBSCRIPTION_ID = ?";
-
+            "SELECT " +
+            "  T.SUBSCRIPTION_ID, T.API_PRODUCT_PROVIDER, T.API_PRODUCT_NAME, T.APPLICATION_ID, T.TIER_ID, " +
+            "  T.SUB_STATUS, T.SUBS_CREATE_STATE, T.UUID, T.API_PROVIDER, T.API_NAME, T.API_VERSION, T.PRODUCT_UUID " + 
+            "FROM " +
+            " (" + 
+            "   SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID,SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, " +
+            "     SUBS.API_ID ,SUBS.API_PRODUCT_ID,SUBS.UUID, NULL AS API_PRODUCT_NAME, NULL AS API_PRODUCT_PROVIDER, " +
+            "     NULL AS PRODUCT_UUID, API.API_NAME, API.API_PROVIDER,  API.API_VERSION " + 
+            "   FROM AM_SUBSCRIPTION SUBS , AM_API API " + 
+            "   WHERE SUBS.API_ID = API.API_ID " + 
+            "   UNION " + 
+            "   SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID, SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, " +
+            "     SUBS.API_ID ,SUBS.API_PRODUCT_ID,SUBS.UUID, PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER, " +
+            "     PRODUCT.UUID AS PRODUCT_UUID, NULL AS API_NAME, NULL AS API_PROVIDER,  NULL AS API_VERSION " + 
+            "   FROM AM_SUBSCRIPTION SUBS , AM_API_PRODUCT PRODUCT " + 
+            "   WHERE SUBS.API_PRODUCT_ID = PRODUCT.API_PRODUCT_ID " + 
+            "  ) T " +
+            "WHERE T.SUBSCRIPTION_ID  = ?";
+    
     public static final String GET_SUBSCRIPTION_BY_UUID_SQL =
-            " SELECT " +
-            "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
-            "   API.API_PROVIDER AS API_PROVIDER, " +
-            "   API.API_NAME AS API_NAME, " +
-            "   API.API_VERSION AS API_VERSION, " +
-            "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
-            "   SUBS.TIER_ID AS TIER_ID, " +
-            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-            "   SUBS.CREATED_TIME AS CREATED_TIME, "+
-            "   SUBS.UPDATED_TIME AS UPDATED_TIME, "+
-            "   SUBS.UUID AS UUID " +
-            " FROM " +
-            "   AM_SUBSCRIPTION SUBS," +
-            "   AM_API API " +
-            " WHERE " +
-            "   API.API_ID = SUBS.API_ID " +
-            "   AND UUID = ?";
+            "SELECT " +
+            "  T.SUBSCRIPTION_ID, T.API_PRODUCT_PROVIDER, T.API_PRODUCT_NAME, T.APPLICATION_ID, T.TIER_ID, T.SUB_STATUS," +
+            "  T.SUBS_CREATE_STATE, T.CREATED_TIME, T.UPDATED_TIME, T.UUID, T.API_PROVIDER, T.API_NAME, T.API_VERSION, " +
+            "  T.PRODUCT_UUID " + 
+            "FROM " +
+            " (" + 
+            "    SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID,SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, " +
+            "      SUBS.CREATED_TIME AS CREATED_TIME, SUBS.UPDATED_TIME AS UPDATED_TIME, SUBS.API_ID ,SUBS.API_PRODUCT_ID," +
+            "      SUBS.UUID, NULL AS API_PRODUCT_NAME, NULL AS API_PRODUCT_PROVIDER, NULL AS PRODUCT_UUID, API.API_NAME, " +
+            "      API.API_PROVIDER,  API.API_VERSION " + 
+            "    FROM AM_SUBSCRIPTION SUBS , AM_API API " + 
+            "    WHERE SUBS.API_ID = API.API_ID " + 
+            "    UNION " + 
+            "    SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID, SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, " +
+            "      SUBS.CREATED_TIME AS CREATED_TIME, SUBS.UPDATED_TIME AS UPDATED_TIME, SUBS.API_ID ,SUBS.API_PRODUCT_ID," +
+            "      SUBS.UUID, PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER, PRODUCT.UUID AS PRODUCT_UUID, " +
+            "      NULL AS API_NAME, NULL AS API_PROVIDER,  NULL AS API_VERSION " + 
+            "    FROM AM_SUBSCRIPTION SUBS , AM_API_PRODUCT PRODUCT " + 
+            "    WHERE SUBS.API_PRODUCT_ID = PRODUCT.API_PRODUCT_ID " + 
+            "  ) T " +
+            "WHERE T.UUID  = ?";
 
     public static final String GET_TENANT_SUBSCRIBER_SQL =
             " SELECT " +
@@ -1659,6 +1679,8 @@ public class SQLConstants {
 
     public static final String GET_API_ID_SQL =
             "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ?";
+    public static final String GET_API_PRODUCT_ID_SQL =
+            "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? AND API_PRODUCT_NAME = ?";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
@@ -2375,6 +2397,9 @@ public class SQLConstants {
 
     public static final String REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ? ";
+    
+    public static final String REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_AND_PRODUCT_SQL =
+            "DELETE FROM AM_SUBSCRIPTION WHERE API_PRODUCT_ID = ? AND APPLICATION_ID = ? ";
 
     public static final String GET_API_NAME_NOT_MATCHING_CONTEXT_SQL =
             "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ?";

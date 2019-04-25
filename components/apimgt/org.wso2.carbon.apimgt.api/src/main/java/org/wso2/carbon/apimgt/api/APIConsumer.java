@@ -306,6 +306,18 @@ public interface APIConsumer extends APIManager {
      */
     SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException;
+    /**
+     * Add new Subscriber for API Product
+     *
+     * @param identifier    APIProductIdentifier
+     * @param userId        id of the user
+     * @param applicationId Application Id
+     * @return SubscriptionResponse subscription response object
+     * @throws APIManagementException if failed to add subscription details to database
+     */
+    SubscriptionResponse addSubscription(APIProductIdentifier identifier, String userId, int applicationId)
+            throws APIManagementException;
+
 
     /**
      * Add new Subscriber with GroupId
@@ -852,4 +864,6 @@ public interface APIConsumer extends APIManager {
     Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
+    
+    APIProduct getAPIProduct(String uuid, String user) throws APIManagementException;
 }

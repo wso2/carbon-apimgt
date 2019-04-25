@@ -20,7 +20,7 @@ public class SubscriptionDTO  {
   @NotNull
   private String applicationId = null;
   
-  @NotNull
+  
   private String apiIdentifier = null;
   
   
@@ -61,7 +61,6 @@ public class SubscriptionDTO  {
   public void setCreatedTime(String createdTime){
     this.createdTime=createdTime;
   }
-
   
   /**
    * The UUID of the subscription
@@ -92,7 +91,7 @@ public class SubscriptionDTO  {
   /**
    * The unique identifier of the API.
    **/
-  @ApiModelProperty(required = true, value = "The unique identifier of the API.")
+  @ApiModelProperty(value = "The unique identifier of the API.")
   @JsonProperty("apiIdentifier")
   public String getApiIdentifier() {
     return apiIdentifier;
