@@ -1386,6 +1386,7 @@ public final class APIConstants {
         public static final String GROUPS = "groups";
         public static final String STATUS = "status";
         public static final String API_NAME = "api_name";
+        public static final String API_PRODUCR_NAME = "api_product_name";
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
     }

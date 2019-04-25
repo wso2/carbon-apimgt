@@ -26,6 +26,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -250,34 +252,55 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         try {
             apiConsumer = RestApiUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
-
-            //check whether user is permitted to access the API. If the API does not exist, 
-            // this will throw a APIMgtResourceNotFoundException
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiIdentifier(), tenantDomain)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiIdentifier(), log);
-            }
-            APIIdentifier apiIdentifier = APIMappingUtil
-                    .getAPIIdentifierFromApiIdOrUUID(body.getApiIdentifier(), tenantDomain);
-
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application == null) {
                 //required application not found
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 return null;
             }
+            SubscriptionResponse subscriptionResponse = null;
+            if(!StringUtils.isEmpty(body.getApiProductIdentifier())) {
+                String uuid = body.getApiProductIdentifier();
+                APIProduct product = apiConsumer.getAPIProduct(uuid, username); //TODO pass additional param (tenant etc.)
+                if(product == null) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
+                    return null;
+                }
+                //TODO add api Product related subscription allowed validation
+                
+                APIProductIdentifier identifier = new  APIProductIdentifier(product.getProvider(), product.getName());
+                identifier.setUuid(uuid);
+                identifier.setTier(body.getTier());
+                //product related subscription
 
-            if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                //application access failure occurred
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                subscriptionResponse = apiConsumer.addSubscription(identifier, username, application.getId());
+            } else if (!StringUtils.isEmpty(body.getApiIdentifier())){
+                //check whether user is permitted to access the API. If the API does not exist, 
+                // this will throw a APIMgtResourceNotFoundException
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiIdentifier(), tenantDomain)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiIdentifier(), log);
+                }
+                APIIdentifier apiIdentifier = APIMappingUtil
+                        .getAPIIdentifierFromApiIdOrUUID(body.getApiIdentifier(), tenantDomain);
+
+                
+
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    //application access failure occurred
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+
+                //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
+                //  throw an APIMgtAuthorizationFailedException with the reason as the message
+                RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, body.getTier());
+
+                apiIdentifier.setTier(body.getTier());
+                subscriptionResponse = apiConsumer
+                        .addSubscription(apiIdentifier, username, application.getId());
+            } else {
+                RestApiUtil.handleBadRequest("Request must contain either apiIdentifier or apiProductIdentifier", log);
+                return null;
             }
-
-            //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
-            //  throw an APIMgtAuthorizationFailedException with the reason as the message
-            RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, body.getTier());
-
-            apiIdentifier.setTier(body.getTier());
-            SubscriptionResponse subscriptionResponse = apiConsumer
-                    .addSubscription(apiIdentifier, username, application.getId());
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);

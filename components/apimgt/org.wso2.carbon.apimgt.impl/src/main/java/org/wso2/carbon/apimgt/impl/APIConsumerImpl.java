@@ -39,6 +39,8 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
@@ -2787,6 +2789,113 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     api.getStatus());
         }
     }
+    
+    @Override //TODO refactor this with addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public SubscriptionResponse addSubscription(APIProductIdentifier identifier, String userId, int applicationId)
+            throws APIManagementException {
+
+        APIProduct product = apiMgtDAO.getAPIProduct(identifier.getUuid());
+        if(product == null) {
+            throw new APIMgtResourceNotFoundException("API Product for " + identifier.getUuid() + " not found.");
+        }
+        WorkflowResponse workflowResponse = null;
+        int subscriptionId;
+        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
+        if (APIConstants.PUBLISHED.equalsIgnoreCase(product.getState())) {
+            subscriptionId = apiMgtDAO.addSubscription(identifier, applicationId,
+                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
+
+            boolean isTenantFlowStarted = false;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
+            }
+
+            String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
+
+            try {
+                WorkflowExecutor addSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+
+                SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+                workflowDTO.setStatus(WorkflowStatus.CREATED);
+                workflowDTO.setCreatedTime(System.currentTimeMillis());
+                workflowDTO.setTenantDomain(tenantDomain);
+                workflowDTO.setTenantId(tenantId);
+                workflowDTO.setExternalWorkflowReference(addSubscriptionWFExecutor.generateUUID());
+                workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
+                workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+                workflowDTO.setCallbackUrl(addSubscriptionWFExecutor.getCallbackURL());
+                workflowDTO.setProductName(product.getName());
+                workflowDTO.setApiProvider(identifier.getProviderName());
+                workflowDTO.setTierName(identifier.getTier());
+                workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+                workflowDTO.setApplicationId(applicationId);
+                workflowDTO.setSubscriber(userId);
+                workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
+            } catch (WorkflowException e) {
+                //If the workflow execution fails, roll back transaction by removing the subscription entry.
+                apiMgtDAO.removeSubscriptionById(subscriptionId);
+                log.error("Could not execute Workflow", e);
+                throw new APIManagementException("Could not execute Workflow", e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    endTenantFlow();
+                }
+            }
+
+            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
+                invalidateCachedKeys(applicationId);
+            }
+
+            //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
+            //the response should have {"Status":"REJECTED"} in the json payload for this to work.
+            boolean subscriptionRejected = false;
+            String subscriptionStatus = null;
+            String subscriptionUUID = "";
+
+            if (workflowResponse != null && workflowResponse.getJSONPayload() != null
+                    && !workflowResponse.getJSONPayload().isEmpty()) {
+                try {
+                    JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
+                    if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
+                        subscriptionRejected = true;
+                        subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                    }
+                } catch (ParseException e) {
+                    log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
+                }
+            }
+
+            if (!subscriptionRejected) {
+                SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
+                subscriptionStatus = addedSubscription.getSubStatus();
+                subscriptionUUID = addedSubscription.getUUID();
+
+                JSONObject subsLogObject = new JSONObject();
+                subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCR_NAME, identifier.getApiProductName());
+                subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
+                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
+                subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
+
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
+                        APIConstants.AuditLogConstants.CREATED, this.username);
+
+                workflowResponse = new GeneralWorkflowResponse();
+            }
+
+            if (log.isDebugEnabled()) {
+                String logMessage = "API Product Name: " + identifier.getApiProductName() + ", API provider "
+                        + identifier.getProviderName() + ", Subscription Status: " + subscriptionStatus
+                        + " subscribe by " + userId + " for app " + applicationName;
+                log.debug(logMessage);
+            }
+
+            return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
+        } else {
+            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on API product in the state: " +
+                    product.getState());
+        }
+    }
 
     @Override
     public SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId,
@@ -5101,5 +5210,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return docMap;
+    }
+    
+    @Override
+    public APIProduct getAPIProduct(String uuid, String user) throws APIManagementException {
+        //TODO add validation for tenant and  visibility. currently no domain or user check is set
+        APIProduct product = apiMgtDAO.getAPIProduct(uuid);
+        return product;
     }
 }
