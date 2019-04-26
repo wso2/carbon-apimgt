@@ -459,7 +459,13 @@ public class SQLConstants {
             " WHERE " +
             "   API_ID = ? " +
             "   AND APPLICATION_ID = ?";
-
+    public static final String GET_SUBSCRIPTION_UUID_PRODUCT_SQL =
+            " SELECT UUID " +
+            " FROM AM_SUBSCRIPTION " +
+            " WHERE " +
+            "   API_PRODUCT_ID = ? " +
+            "   AND APPLICATION_ID = ?";
+    
     public static final String GET_SUBSCRIPTION_STATUS_BY_UUID_SQL =
             " SELECT SUB_STATUS " +
             " FROM AM_SUBSCRIPTION " +
@@ -485,7 +491,8 @@ public class SQLConstants {
     public static final String GET_SUBSCRIPTION_BY_ID_SQL =
             "SELECT " +
             "  T.SUBSCRIPTION_ID, T.API_PRODUCT_PROVIDER, T.API_PRODUCT_NAME, T.APPLICATION_ID, T.TIER_ID, " +
-            "  T.SUB_STATUS, T.SUBS_CREATE_STATE, T.UUID, T.API_PROVIDER, T.API_NAME, T.API_VERSION, T.PRODUCT_UUID " + 
+            "  T.SUB_STATUS, T.SUBS_CREATE_STATE, T.UUID, T.API_PROVIDER, T.API_NAME, T.API_VERSION, T.PRODUCT_UUID, " +
+            "  T.API_PRODUCT_ID " + 
             "FROM " +
             " (" + 
             "   SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID,SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, " +
@@ -506,7 +513,7 @@ public class SQLConstants {
             "SELECT " +
             "  T.SUBSCRIPTION_ID, T.API_PRODUCT_PROVIDER, T.API_PRODUCT_NAME, T.APPLICATION_ID, T.TIER_ID, T.SUB_STATUS," +
             "  T.SUBS_CREATE_STATE, T.CREATED_TIME, T.UPDATED_TIME, T.UUID, T.API_PROVIDER, T.API_NAME, T.API_VERSION, " +
-            "  T.PRODUCT_UUID " + 
+            "  T.PRODUCT_UUID, T.API_PRODUCT_ID " + 
             "FROM " +
             " (" + 
             "    SELECT SUBS.SUBSCRIPTION_ID , SUBS.APPLICATION_ID, SUBS.TIER_ID,SUBS.SUB_STATUS, SUBS.SUBS_CREATE_STATE, " +
@@ -2131,6 +2138,17 @@ public class SQLConstants {
             "   AND ASUB.APPLICATION_ID=? " +
             "   AND AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID " +
             "   AND AW.WF_TYPE=?";
+    public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_PRODUCT_SQL =
+            "SELECT " +
+            "   AW.WF_EXTERNAL_REFERENCE " +
+            " FROM" +
+            "   AM_WORKFLOWS AW, " +
+            "   AM_SUBSCRIPTION ASUB " +
+            " WHERE" +
+            "   ASUB.API_PRODUCT_ID=? " +
+            "   AND ASUB.APPLICATION_ID=? " +
+            "   AND AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID " +
+            "   AND AW.WF_TYPE=?";
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_SQL =
             "SELECT" +
@@ -2144,6 +2162,17 @@ public class SQLConstants {
             "   AND AW.WF_REFERENCE::integer=ASUB.SUBSCRIPTION_ID " +
             "   AND AW.WF_TYPE=?";
 
+    public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_PRODUCT_SQL =
+            "SELECT" +
+            "   AW.WF_EXTERNAL_REFERENCE" +
+            " FROM" +
+            "   AM_WORKFLOWS AW, " +
+            "   AM_SUBSCRIPTION ASUB  " +
+            " WHERE" +
+            "   ASUB.API_PRODUCT_ID=? " +
+            "   AND ASUB.APPLICATION_ID=?" +
+            "   AND AW.WF_REFERENCE::integer=ASUB.SUBSCRIPTION_ID " +
+            "   AND AW.WF_TYPE=?";
     public static final String GET_EXTERNAL_WORKFLOW_FOR_SUBSCRIPTION_SQL =
             " SELECT " +
             "   WF_EXTERNAL_REFERENCE" +
@@ -2176,6 +2205,9 @@ public class SQLConstants {
     public static final String GET_SUBSCRIPTION_STATUS_SQL =
             "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
 
+    public static final String GET_SUBSCRIPTION_STATUS_PRODUCT_SQL =
+            "SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE API_PRODUCT_ID = ? AND APPLICATION_ID = ?";
+    
     public static final String GET_SUBSCRIPTION_CREATION_STATUS_SQL =
             "SELECT SUBS_CREATE_STATE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
 

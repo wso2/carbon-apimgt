@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -151,6 +152,7 @@ public class RestAPIStoreUtils {
         String username = RestApiUtil.getLoggedInUsername();
         Application application = subscribedAPI.getApplication();
         APIIdentifier apiIdentifier = subscribedAPI.getApiId();
+        APIProductIdentifier productIdentifier = subscribedAPI.getProductId();
         if (apiIdentifier != null && application != null) {
             try {
                 if (!isUserAccessAllowedForAPI(apiIdentifier)) {
@@ -162,6 +164,14 @@ public class RestAPIStoreUtils {
                                 + " has access to the subscription " + subscribedAPI.getUUID();
                 throw new APIManagementException(message, e);
             }
+            if (isUserAccessAllowedForApplication(application)) {
+                return true;
+            }
+        }
+        
+        if (productIdentifier != null && application != null) {
+            
+            //TODO add api product related validation
             if (isUserAccessAllowedForApplication(application)) {
                 return true;
             }

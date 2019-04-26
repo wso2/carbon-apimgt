@@ -271,6 +271,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 APIProductIdentifier identifier = new  APIProductIdentifier(product.getProvider(), product.getName());
                 identifier.setUuid(uuid);
                 identifier.setTier(body.getTier());
+                identifier.setProductId(product.getProductId());
                 //product related subscription
 
                 subscriptionResponse = apiConsumer.addSubscription(identifier, username, application.getId());
