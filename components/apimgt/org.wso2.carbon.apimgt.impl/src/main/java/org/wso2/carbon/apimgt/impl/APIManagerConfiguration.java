@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
+import org.wso2.securevault.commons.MiscellaneousUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -234,10 +235,7 @@ public class APIManagerConfiguration {
                 persistentNotifierProperties = properties;
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
-                String value = element.getText();
-                if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
-                    value = secretResolver.resolve(key);
-                }
+                String value = MiscellaneousUtil.resolve(element, secretResolver);
                 addToConfiguration(key, APIUtil.replaceSystemProperty(value));
             } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
@@ -268,15 +266,9 @@ public class APIManagerConfiguration {
 
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_USERNAME)).getText()));
-
-                    String key = APIConstants.API_GATEWAY + APIConstants.API_GATEWAY_PASSWORD;
-                    String value;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
-                        value = secretResolver.resolve(key);
-                    } else {
-                        value = environmentElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_PASSWORD)).getText();
-                    }
+                    OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(
+                            APIConstants.API_GATEWAY_PASSWORD));
+                    String value = MiscellaneousUtil.resolve(passwordElement, secretResolver);
                     environment.setPassword(APIUtil.replaceSystemProperty(value));
                     environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
@@ -351,14 +343,7 @@ public class APIManagerConfiguration {
                         OMElement password = storeElem.getFirstChildWithName(new QName(
                                 APIConstants.EXTERNAL_API_STORE_PASSWORD));
                         if (password != null) {
-                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "." + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name;//Set store login password [optional]
-                            String value;
-                            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
-                                value = secretResolver.resolve(key);
-                            } else {
-
-                                value = password.getText();
-                            }
+                            String value = MiscellaneousUtil.resolve(password, secretResolver);
                             store.setPassword(APIUtil.replaceSystemProperty(value));
                             store.setUsername(APIUtil.replaceSystemProperty(
                                     storeElem.getFirstChildWithName(new QName(
@@ -561,37 +546,22 @@ public class APIManagerConfiguration {
             if (workflowDCREPElement != null) {
                 workflowProperties.setdCREndPoint(APIUtil.replaceSystemProperty(workflowDCREPElement.getText()));
             }
-            
+
             OMElement workflowTokenEpElement = workflowConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_TOKEN_EP));
             if (workflowTokenEpElement != null) {
                 workflowProperties.setTokenEndPoint(APIUtil.replaceSystemProperty(workflowTokenEpElement.getText()));
-            }            
-            
-            String workflowServerPassword;
-            String workflowServerPasswordKey = APIConstants.WorkflowConfigConstants.WORKFLOW + "."
-                    + APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_PASSWORD;
-            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(workflowServerPasswordKey)) {
-                workflowServerPassword = secretResolver.resolve(workflowServerPasswordKey);
-            } else {
-                workflowServerPassword = workflowConfigurationElement
-                        .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_PASSWORD))
-                        .getText();
-                workflowServerPassword = APIUtil.replaceSystemProperty(workflowServerPassword);
             }
+            OMElement workflowServerPasswordOmElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_PASSWORD));
+            String workflowServerPassword = MiscellaneousUtil.resolve(workflowServerPasswordOmElement, secretResolver);
+            workflowServerPassword = APIUtil.replaceSystemProperty(workflowServerPassword);
             workflowProperties.setServerPassword(workflowServerPassword);
-            
-            String dcrEPPassword;
-            String dcrEPPasswordKey = APIConstants.WorkflowConfigConstants.WORKFLOW + "."
-                    + APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD;
-            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(dcrEPPasswordKey)) {
-                dcrEPPassword = secretResolver.resolve(dcrEPPasswordKey);
-            } else {
-                dcrEPPassword = workflowConfigurationElement
-                        .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD))
-                        .getText();
-                dcrEPPassword = APIUtil.replaceSystemProperty(dcrEPPassword);
-            }
+
+            OMElement dcrEPPasswordOmElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD));
+            String dcrEPPassword = MiscellaneousUtil.resolve(dcrEPPasswordOmElement, secretResolver);
+            dcrEPPassword = APIUtil.replaceSystemProperty(dcrEPPassword);
             workflowProperties.setdCREndpointPassword(dcrEPPassword);
 
         }
@@ -686,17 +656,10 @@ public class APIManagerConfiguration {
                         trafficManager.setType(dataPublisherTypeElement.getText());
                     }
                     String dataPublisherConfigurationPassword;
-                    String dataPublisherConfigurationPasswordKey = APIConstants.AdvancedThrottleConstants
-                            .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                            .TRAFFIC_MANAGER + "." + APIConstants.AdvancedThrottleConstants.PASSWORD;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected
-                            (dataPublisherConfigurationPasswordKey)) {
-                        dataPublisherConfigurationPassword = secretResolver.resolve
-                                (dataPublisherConfigurationPasswordKey);
-                    } else {
-                        dataPublisherConfigurationPassword = trafficManagerConfigurationElement.getFirstChildWithName
-                                (new QName(APIConstants.AdvancedThrottleConstants.PASSWORD)).getText();
-                    }
+                    OMElement dataPublisherConfigurationPasswordOmElement = trafficManagerConfigurationElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                    dataPublisherConfigurationPassword = MiscellaneousUtil.
+                            resolve(dataPublisherConfigurationPasswordOmElement, secretResolver);
                     trafficManager.setPassword(APIUtil.replaceSystemProperty(dataPublisherConfigurationPassword));
                     throttleProperties.setTrafficManager(trafficManager);
                 }
@@ -819,19 +782,10 @@ public class APIManagerConfiguration {
                     OMElement jmsConnectionPasswordElement = jmsConnectionDetailElement.getFirstChildWithName(new
                             QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
                     if (jmsConnectionPasswordElement != null) {
-                        String jmsConnectionPassword;
-                        String jmsConnectionPasswordKey = APIConstants.AdvancedThrottleConstants
-                                .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                                .JMS_CONNECTION_DETAILS + "." + APIConstants.AdvancedThrottleConstants
-                                .PASSWORD;
-                        if (secretResolver.isInitialized() && secretResolver.isTokenProtected
-                                (jmsConnectionPasswordKey)) {
-                            jmsConnectionPassword = secretResolver.resolve(jmsConnectionPasswordKey);
-                        } else {
-                            jmsConnectionPassword = jmsConnectionDetailElement.getFirstChildWithName(new QName
-                                    (APIConstants
-                                            .AdvancedThrottleConstants.PASSWORD)).getText();
-                        }
+                        OMElement jmsConnectionPasswordOmElement = jmsConnectionDetailElement
+                                .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                        String jmsConnectionPassword = MiscellaneousUtil.
+                                resolve(jmsConnectionPasswordOmElement, secretResolver);
                         jmsConnectionProperties.setPassword(APIUtil.replaceSystemProperty(jmsConnectionPassword));
                         System.setProperty("jms.password", jmsConnectionProperties.getPassword());
                     }
@@ -843,7 +797,8 @@ public class APIManagerConfiguration {
                         Properties properties = new Properties();
                         while (jmsProperties.hasNext()) {
                             OMElement property = (OMElement) jmsProperties.next();
-                            properties.put(property.getLocalName(), APIUtil.replaceSystemProperty(property.getText()));
+                            String value = MiscellaneousUtil.resolve(property, secretResolver);
+                            properties.put(property.getLocalName(), APIUtil.replaceSystemProperty(value));
                         }
                         jmsConnectionProperties.setJmsConnectionProperties(properties);
                     }
@@ -1016,20 +971,10 @@ public class APIManagerConfiguration {
                         policyDeployerConfiguration.setUsername(APIUtil.replaceSystemProperty
                                 (policyDeployerServiceServiceUsernameElement.getText()));
                     }
-                    String policyDeployerServicePassword;
-                    String policyDeployerServicePasswordKey = APIConstants.AdvancedThrottleConstants
-                            .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                            .POLICY_DEPLOYER_CONFIGURATION + "." + APIConstants.AdvancedThrottleConstants
-                            .PASSWORD;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected
-                            (policyDeployerServicePasswordKey)) {
-                        policyDeployerServicePassword = secretResolver.resolve
-                                (policyDeployerServicePasswordKey);
-                    } else {
-                        policyDeployerServicePassword = policyDeployerConnectionElement
-                                .getFirstChildWithName(new QName(APIConstants
-                                        .AdvancedThrottleConstants.PASSWORD)).getText();
-                    }
+                    OMElement policyDeployerServicePasswordElement = policyDeployerConnectionElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                    String policyDeployerServicePassword = MiscellaneousUtil.
+                            resolve(policyDeployerServicePasswordElement, secretResolver);
                     policyDeployerConfiguration.setPassword(APIUtil.replaceSystemProperty
                             (policyDeployerServicePassword));
                 }
