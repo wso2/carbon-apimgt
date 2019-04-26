@@ -52,7 +52,7 @@ include("/jagg/jagg.jag");
             callbackUrlNew = request.getParameter("callbackUrlNew");
         }        
         descriptionNew = request.getParameter("descriptionNew");
-        if (request.getParameter("applicationAttributeNew")) {
+        if (request.getParameter("applicationAttributeNew") == null) {
             applicationAttributeNew = "";
         } else {
             applicationAttributeNew = request.getParameter("applicationAttributeNew");
