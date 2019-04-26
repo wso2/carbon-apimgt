@@ -768,25 +768,33 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public int addSubscription(APIIdentifier identifier, String context, int applicationId, String status,
+    public int addSubscription(Identifier identifier, String context, int applicationId, String status,
                                String subscriber) throws APIManagementException {
         Connection conn = null;
+        boolean isProduct = false;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         PreparedStatement preparedStForInsert = null;
         ResultSet rs = null;
         int subscriptionId = -1;
-        int apiId;
+        int id = -1;
 
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            apiId = getAPIID(identifier, conn);
+            
 
             //Query to check if this subscription already exists
             String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
+            if(identifier instanceof APIIdentifier) {
+                id = getAPIID((APIIdentifier) identifier, conn);
+            } else if (identifier instanceof APIProductIdentifier) {
+                checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_PRODUCT_SQL;
+                id = ((APIProductIdentifier) identifier).getProductId();
+                isProduct = true;
+            }
             ps = conn.prepareStatement(checkDuplicateQuery);
-            ps.setInt(1, apiId);
+            ps.setInt(1, id);
             ps.setInt(2, applicationId);
 
             resultSet = ps.executeQuery();
@@ -804,25 +812,33 @@ public class ApiMgtDAO {
                         APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
 
                     //Throw error saying subscription already exists.
-                    log.error("Subscription already exists for API " + identifier.getApiName() + " in Application " +
+                    log.error("Subscription already exists for API/API Prouct " + identifier.getApiName() + " in Application " +
                             applicationName);
-                    throw new SubscriptionAlreadyExistingException("Subscription already exists for API " +
+                    throw new SubscriptionAlreadyExistingException("Subscription already exists for API/API Prouct " +
                             identifier.getApiName() + " in Application " +
                             applicationName);
+
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
                         .SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus)) {
-                    deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
+                    if(isProduct) {
+                        deleteSubscriptionByApiProductIDAndAppID(id, applicationId, conn);
+                    } else {
+                        deleteSubscriptionByApiIDAndAppID(id, applicationId, conn);
+                    }
                 } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants
                         .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
-                    log.error("Subscription to API " + identifier.getApiName() + " through application " +
+                    log.error("Subscription to API/API Prouct " + identifier.getApiName() + " through application " +
                             applicationName + " was blocked");
-                    throw new APIManagementException("Subscription to API " + identifier.getApiName() + " through " +
+                    throw new APIManagementException("Subscription to API/API Prouct " + identifier.getApiName() + " through " +
                             "application " + applicationName + " was blocked");
                 }
             }
 
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery = SQLConstants.ADD_SUBSCRIPTION_SQL;
+            if(isProduct) {
+                sqlQuery = SQLConstants.ADD_PRODUCT_SUBSCRIPTION_SQL;
+            }
 
             //Adding data to the AM_SUBSCRIPTION table
             //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
@@ -832,7 +848,7 @@ public class ApiMgtDAO {
             }
 
             preparedStForInsert.setString(1, identifier.getTier());
-            preparedStForInsert.setInt(2, apiId);
+            preparedStForInsert.setInt(2, id);
             preparedStForInsert.setInt(3, applicationId);
             preparedStForInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
             preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
@@ -867,108 +883,6 @@ public class ApiMgtDAO {
         }
         return subscriptionId;
     }
-
-    public int addSubscription(APIProductIdentifier identifier, int applicationId, String status, String subscriber)
-            throws APIManagementException {
-        Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-        PreparedStatement preparedStForInsert = null;
-        ResultSet rs = null;
-        int subscriptionId = -1;
-        int apiProductId;
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            String productName = identifier.getApiProductName();
-            String provider = identifier.getProviderName();
-            apiProductId = getAPIProductID(productName, provider, conn);
-
-            // Query to check if this subscription already exists
-            String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_PRODUCT_SQL;
-            ps = conn.prepareStatement(checkDuplicateQuery);
-            ps.setInt(1, apiProductId);
-            ps.setInt(2, applicationId);
-
-            resultSet = ps.executeQuery();
-
-            // If the subscription already exists
-            if (resultSet.next()) {
-                String subStatus = resultSet.getString("SUB_STATUS");
-                String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
-
-                String applicationName = getApplicationNameFromId(applicationId);
-
-                if ((APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
-                        || APIConstants.SubscriptionStatus.ON_HOLD.equals(subStatus)
-                        || APIConstants.SubscriptionStatus.REJECTED.equals(subStatus))
-                        && APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
-
-                    // Throw error saying subscription already exists.
-                    log.error("Subscription already exists for API Product " + productName + " in Application "
-                            + applicationName);
-                    throw new SubscriptionAlreadyExistingException("Subscription already exists for API Product "
-                            + productName + " in Application " + applicationName);
-                } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
-                        && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus)) {
-                    deleteSubscriptionByApiProductIDAndAppID(apiProductId, applicationId, conn);
-                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
-                        || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
-                    log.error("Subscription to API Product " + productName + " through application "
-                            + applicationName + " was blocked");
-                    throw new APIManagementException("Subscription to API Product " + productName + " through "
-                            + "application " + applicationName + " was blocked");
-                }
-            }
-
-            // This query to update the AM_SUBSCRIPTION table
-            String sqlQuery = SQLConstants.ADD_PRODUCT_SUBSCRIPTION_SQL;
-
-            // Adding data to the AM_SUBSCRIPTION table
-            // ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
-            preparedStForInsert = conn.prepareStatement(sqlQuery, new String[] { "SUBSCRIPTION_ID" });
-            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
-                preparedStForInsert = conn.prepareStatement(sqlQuery, new String[] { "subscription_id" });
-            }
-
-            preparedStForInsert.setString(1, identifier.getTier());
-            preparedStForInsert.setInt(2, apiProductId);
-            preparedStForInsert.setInt(3, applicationId);
-            preparedStForInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
-            preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-            preparedStForInsert.setString(6, subscriber);
-
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            preparedStForInsert.setTimestamp(7, timestamp);
-            preparedStForInsert.setTimestamp(8, timestamp);
-            preparedStForInsert.setString(9, UUID.randomUUID().toString());
-
-            preparedStForInsert.executeUpdate();
-            rs = preparedStForInsert.getGeneratedKeys();
-            while (rs.next()) {
-                // subscriptionId = rs.getInt(1);
-                subscriptionId = Integer.parseInt(rs.getString(1));
-            }
-
-            // finally commit transaction
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add subscription ", e1);
-                }
-            }
-            handleException("Failed to add subscriber data ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-            APIMgtDBUtil.closeAllConnections(preparedStForInsert, null, rs);
-        }
-        return subscriptionId;
-    }
-
     
     /**
      * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier.
@@ -13236,6 +13150,7 @@ public class ApiMgtDAO {
                 product.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
                 product.setState(rs.getString("STATE"));
                 productId = rs.getInt("API_PRODUCT_ID");
+                product.setProductId(productId);
             }
             //get api resources related to api product
             //TODO move to constant
@@ -13313,6 +13228,7 @@ public class ApiMgtDAO {
                 product.setUuid(rs.getString("UUID"));
                 product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
                 product.setState(rs.getString("STATE"));
+                product.setProductId(rs.getInt("API_PRODUCT_ID"));
                 productList.add(product);
                
             }

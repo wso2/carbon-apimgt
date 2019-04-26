@@ -24,6 +24,7 @@ public class APIProduct {
     // TODO add rest of the properties
     private String name;
     private String uuid;
+    private int productId;
     private String provider;
     private String description;
     private String productTier;
@@ -99,6 +100,12 @@ public class APIProduct {
     }
     public void setBusinessOwnerEmail(String businessOwnerEmail) {
         this.businessOwnerEmail = businessOwnerEmail;
+    }
+    public int getProductId() {
+        return productId;
+    }
+    public void setProductId(int productId) {
+        this.productId = productId;
     }
 
 }

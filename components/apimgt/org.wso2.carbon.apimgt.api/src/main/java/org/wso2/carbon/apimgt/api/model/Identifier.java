@@ -19,5 +19,8 @@ package org.wso2.carbon.apimgt.api.model;
 
 public interface Identifier {
     String getProviderName();
+    String getTier();
+    String getApiName();
+    String getVersion();
 
 }

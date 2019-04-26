@@ -298,26 +298,14 @@ public interface APIConsumer extends APIManager {
     /**
      * Add new Subscriber
      *
-     * @param identifier    APIIdentifier
+     * @param identifier    Identifier
      * @param userId        id of the user
      * @param applicationId Application Id
      * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    SubscriptionResponse addSubscription(Identifier identifier, String userId, int applicationId)
             throws APIManagementException;
-    /**
-     * Add new Subscriber for API Product
-     *
-     * @param identifier    APIProductIdentifier
-     * @param userId        id of the user
-     * @param applicationId Application Id
-     * @return SubscriptionResponse subscription response object
-     * @throws APIManagementException if failed to add subscription details to database
-     */
-    SubscriptionResponse addSubscription(APIProductIdentifier identifier, String userId, int applicationId)
-            throws APIManagementException;
-
 
     /**
      * Add new Subscriber with GroupId

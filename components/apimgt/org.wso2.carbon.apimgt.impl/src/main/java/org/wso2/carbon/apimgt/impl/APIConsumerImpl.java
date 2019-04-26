@@ -2686,15 +2686,29 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public SubscriptionResponse addSubscription(Identifier identifier, String userId, int applicationId)
             throws APIManagementException {
 
-        API api = getAPI(identifier);
+        API api = null;
+        APIProduct product = null;
+        APIIdentifier apiIdentifier = null;
+        APIProductIdentifier apiProdIdentifier = null;
+        String state = "";
+        if (identifier instanceof APIIdentifier) {
+            apiIdentifier = (APIIdentifier) identifier;
+            api = getAPI(apiIdentifier);
+            state = api.getStatus();
+        } 
+        if (identifier instanceof APIProductIdentifier) {
+            apiProdIdentifier = (APIProductIdentifier) identifier;
+            product = apiMgtDAO.getAPIProduct(apiProdIdentifier.getUuid());
+            state = product.getState();
+        }
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        if (APIConstants.PUBLISHED.equals(api.getStatus())) {
-            subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
+        if (APIConstants.PUBLISHED.equals(state)) {
+            subscriptionId = apiMgtDAO.addSubscription(identifier, "", applicationId,
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
             boolean isTenantFlowStarted = false;
@@ -2716,9 +2730,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
                 workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
                 workflowDTO.setCallbackUrl(addSubscriptionWFExecutor.getCallbackURL());
-                workflowDTO.setApiName(identifier.getApiName());
-                workflowDTO.setApiContext(api.getContext());
-                workflowDTO.setApiVersion(identifier.getVersion());
+                if (apiIdentifier != null) {
+                    workflowDTO.setApiName(apiIdentifier.getApiName());
+                    workflowDTO.setApiContext(api.getContext());
+                    workflowDTO.setApiVersion(apiIdentifier.getVersion());
+                } else if (apiProdIdentifier != null) {
+                    workflowDTO.setProductIdentifier(apiProdIdentifier);
+                }
                 workflowDTO.setApiProvider(identifier.getProviderName());
                 workflowDTO.setTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
@@ -2765,7 +2783,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subscriptionUUID = addedSubscription.getUUID();
 
                 JSONObject subsLogObject = new JSONObject();
-                subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getApiName());
+                if (apiIdentifier != null) {
+                    subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, apiIdentifier.getApiName());
+                } else if (apiProdIdentifier != null) {
+                    subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getApiProductName());
+                }
                 subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
@@ -2778,7 +2800,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             if (log.isDebugEnabled()) {
-                String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
+                String logMessage = "API/Product Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
                         + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId
                         + " for app " + applicationName;
                 log.debug(logMessage);
@@ -2786,115 +2808,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
         } else {
-            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs in the state: " +
-                    api.getStatus());
-        }
-    }
-    
-    @Override //TODO refactor this with addSubscription(APIIdentifier identifier, String userId, int applicationId)
-    public SubscriptionResponse addSubscription(APIProductIdentifier identifier, String userId, int applicationId)
-            throws APIManagementException {
-
-        APIProduct product = apiMgtDAO.getAPIProduct(identifier.getUuid());
-        if(product == null) {
-            throw new APIMgtResourceNotFoundException("API Product for " + identifier.getUuid() + " not found.");
-        }
-        WorkflowResponse workflowResponse = null;
-        int subscriptionId;
-        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        if (APIConstants.PUBLISHED.equalsIgnoreCase(product.getState())) {
-            subscriptionId = apiMgtDAO.addSubscription(identifier, applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
-
-            boolean isTenantFlowStarted = false;
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
-            }
-
-            String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
-
-            try {
-                WorkflowExecutor addSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-
-                SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
-                workflowDTO.setStatus(WorkflowStatus.CREATED);
-                workflowDTO.setCreatedTime(System.currentTimeMillis());
-                workflowDTO.setTenantDomain(tenantDomain);
-                workflowDTO.setTenantId(tenantId);
-                workflowDTO.setExternalWorkflowReference(addSubscriptionWFExecutor.generateUUID());
-                workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
-                workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-                workflowDTO.setCallbackUrl(addSubscriptionWFExecutor.getCallbackURL());
-                workflowDTO.setProductIdentifier(identifier);
-                workflowDTO.setApiProvider(identifier.getProviderName());
-                workflowDTO.setTierName(identifier.getTier());
-                workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
-                workflowDTO.setApplicationId(applicationId);
-                workflowDTO.setSubscriber(userId);
-                workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
-            } catch (WorkflowException e) {
-                //If the workflow execution fails, roll back transaction by removing the subscription entry.
-                apiMgtDAO.removeSubscriptionById(subscriptionId);
-                log.error("Could not execute Workflow", e);
-                throw new APIManagementException("Could not execute Workflow", e);
-            } finally {
-                if (isTenantFlowStarted) {
-                    endTenantFlow();
-                }
-            }
-
-            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-                invalidateCachedKeys(applicationId);
-            }
-
-            //to handle on-the-fly subscription rejection (and removal of subscription entry from the database)
-            //the response should have {"Status":"REJECTED"} in the json payload for this to work.
-            boolean subscriptionRejected = false;
-            String subscriptionStatus = null;
-            String subscriptionUUID = "";
-
-            if (workflowResponse != null && workflowResponse.getJSONPayload() != null
-                    && !workflowResponse.getJSONPayload().isEmpty()) {
-                try {
-                    JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
-                    if (APIConstants.SubscriptionStatus.REJECTED.equals(wfResponseJson.get("Status"))) {
-                        subscriptionRejected = true;
-                        subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
-                    }
-                } catch (ParseException e) {
-                    log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
-                }
-            }
-
-            if (!subscriptionRejected) {
-                SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
-                subscriptionStatus = addedSubscription.getSubStatus();
-                subscriptionUUID = addedSubscription.getUUID();
-
-                JSONObject subsLogObject = new JSONObject();
-                subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, identifier.getApiProductName());
-                subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
-                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
-                subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
-                subsLogObject.put(APIConstants.AuditLogConstants.TIER, identifier.getTier());
-
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
-                        APIConstants.AuditLogConstants.CREATED, this.username);
-
-                workflowResponse = new GeneralWorkflowResponse();
-            }
-
-            if (log.isDebugEnabled()) {
-                String logMessage = "API Product Name: " + identifier.getApiProductName() + ", API provider "
-                        + identifier.getProviderName() + ", Subscription Status: " + subscriptionStatus
-                        + " subscribe by " + userId + " for app " + applicationName;
-                log.debug(logMessage);
-            }
-
-            return new SubscriptionResponse(subscriptionStatus, subscriptionUUID, workflowResponse);
-        } else {
-            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on API product in the state: " +
-                    product.getState());
+            throw new APIMgtResourceNotFoundException("Subscriptions not allowed on APIs/API Products in the state: " +
+                    state);
         }
     }
 
@@ -3025,14 +2940,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
         } catch (WorkflowException e) {
-            String errorMsg = null;
-            if (apiIdentifier != null) {
-                errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION
-                        + " for apiID " + apiIdentifier.getApiName();
-            } else if (apiProdIdentifier != null) {
-                errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION
-                        + " for api product Id " + apiProdIdentifier.getUuid();
-            }
+            String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION
+                    + " for resource " + identifier.toString();
             handleException(errorMsg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -3044,15 +2953,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             invalidateCachedKeys(applicationId);
         }
         if (log.isDebugEnabled()) {
-            String logMessage = null;
-            if (apiIdentifier != null) {
-                logMessage = "API Name: " + apiIdentifier.getApiName() + ", API Version " +
-                        apiIdentifier.getVersion() + " subscription removed from app " + applicationName + " by " + userId;
-            } else if (apiProdIdentifier != null) {
-                logMessage = "Product Name: " + apiProdIdentifier.getApiProductName() + " with UUID "
-                        + apiProdIdentifier.getUuid() + " subscription removed from app " + applicationName + " by "
-                        + userId;
-            }
+            String logMessage = "Subscription removed from app " + applicationName + " by " + userId + " For Id: "
+                    + identifier.toString();
             log.debug(logMessage);
         }
     }
@@ -3081,27 +2983,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionByUUID(uuid);
         if (subscribedAPI != null) {
             Application application = subscribedAPI.getApplication();
-            APIIdentifier apiIdentifier = subscribedAPI.getApiId();
-            APIProductIdentifier prodIdentifier = subscribedAPI.getProductId();
+            Identifier identifier = subscribedAPI.getApiId() != null ? subscribedAPI.getApiId()
+                    : subscribedAPI.getProductId();
             String userId = application.getSubscriber().getName();
-
-            if (prodIdentifier != null) {
-                removeSubscription(prodIdentifier, userId, application.getId());
-            } else if (apiIdentifier != null) {
-                removeSubscription(apiIdentifier, userId, application.getId());
-            }
-
+            removeSubscription(identifier, userId, application.getId());
             if (log.isDebugEnabled()) {
                 String appName = application.getName();
-                String logMessage = "";
-                if (prodIdentifier != null) {
-                    logMessage = "API Product Id : " + prodIdentifier.getUuid() + " subscription (uuid : " + uuid
-                            + ") removed from app " + appName;
-                } else if (apiIdentifier != null) {
-                    logMessage = "API Name: " + apiIdentifier.getApiName() + ", API Version "
-                            + apiIdentifier.getVersion() + " subscription (uuid : " + uuid + ") removed from app "
-                            + appName;
-                }                      
+                String logMessage = "Identifier:  " + identifier.toString() + " subscription (uuid : " + uuid
+                        + ") removed from app " + appName;
                 log.debug(logMessage);
             }
         } else {
