@@ -53,7 +53,7 @@ include("/jagg/jagg.jag");
             callbackUrl = request.getParameter("callbackUrl");
         }        
         description = request.getParameter("description");
-        if (request.getParameter("applicationAttributes")) {
+        if (request.getParameter("applicationAttributes") == null) {
             applicationAttributes = "";
         } else {
             applicationAttributes = request.getParameter("applicationAttributes");
