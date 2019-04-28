@@ -270,6 +270,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 
                 APIProductIdentifier identifier = new  APIProductIdentifier(product.getProvider(), product.getName());
                 identifier.setUuid(uuid);
+                
+                //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
+                //  throw an APIMgtAuthorizationFailedException with the reason as the message
+                RestAPIStoreUtils.checkSubscriptionAllowed(identifier, body.getTier());
                 identifier.setTier(body.getTier());
                 identifier.setProductId(product.getProductId());
                 //product related subscription

@@ -13002,20 +13002,32 @@ public class ApiMgtDAO {
             String queryAddAPIProduct = "INSERT INTO "
                     + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
                     + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
-                    + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION) " 
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION,"
+                    + "SUBSCRIPTION_AVAILABILE_TENANTS) " 
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_product_id"});
             prepStmtAddAPIProduct.setString(1, apiproduct.getProvider());
             prepStmtAddAPIProduct.setString(2, apiproduct.getName());
             prepStmtAddAPIProduct.setString(3, apiproduct.getDescription());
-            prepStmtAddAPIProduct.setString(4, apiproduct.getProductTier());
+            List<String> tierList = new ArrayList<String>();
+            Set<Tier> tiers = apiproduct.getAvailableTiers();
+            for (Tier tier : tiers) {
+                tierList.add(tier.getName());
+            }
+            prepStmtAddAPIProduct.setString(4, StringUtils.join(tierList,","));
             prepStmtAddAPIProduct.setString(5, apiproduct.getProvider()); //TODO get the created user
             prepStmtAddAPIProduct.setString(6, apiproduct.getVisibility());
             prepStmtAddAPIProduct.setString(7, apiproduct.getSubscriptionAvailability());
             prepStmtAddAPIProduct.setString(8, apiproduct.getUuid());
             prepStmtAddAPIProduct.setString(9, tenantDomain);
-            prepStmtAddAPIProduct.setString(10, apiproduct.getState() == null? "CREATED" : apiproduct.getState()); //TODO move to constant
-            prepStmtAddAPIProduct.setString(11, "0"); //TODO move to constant
+            prepStmtAddAPIProduct.setString(10,
+                    apiproduct.getState() == null ? APIConstants.CREATED : apiproduct.getState());
+            prepStmtAddAPIProduct.setString(11, ""); //version is not supported atm
+            String subscriptionAvailableTenants = "";
+            if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(apiproduct.getSubscriptionAvailability())) {
+                subscriptionAvailableTenants = apiproduct.getSubscriptionAvailableTenants();
+            }
+            prepStmtAddAPIProduct.setString(12, subscriptionAvailableTenants);
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -13132,7 +13144,7 @@ public class ApiMgtDAO {
             
             //TODO check this
             //TODO move to constant
-            String queryGetAPIProduct = "SELECT API_PRODUCT_ID,UUID,DESCRIPTION,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_TIER,VISIBILITY,BUSINESS_OWNER,BUSINESS_OWNER_EMAIL,SUBSCRIPTION_AVAILABILITY,STATE FROM AM_API_PRODUCT WHERE UUID = ?";
+            String queryGetAPIProduct = "SELECT API_PRODUCT_ID,UUID,DESCRIPTION,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_TIER,VISIBILITY,BUSINESS_OWNER,BUSINESS_OWNER_EMAIL,SUBSCRIPTION_AVAILABILITY,STATE, SUBSCRIPTION_AVAILABILE_TENANTS FROM AM_API_PRODUCT WHERE UUID = ?";
             int productId = 0;
             
             prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
@@ -13143,11 +13155,21 @@ public class ApiMgtDAO {
                 product.setDescription(rs.getString("DESCRIPTION"));
                 product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
                 product.setName(rs.getString("API_PRODUCT_NAME"));
-                product.setProductTier(rs.getString("API_PRODUCT_TIER"));
+                String productTiers = rs.getString("API_PRODUCT_TIER");
+                if (!StringUtils.isEmpty(productTiers)) {
+                    String[] tierArray = productTiers.split(",");
+                    Set<Tier> availableTiers = new HashSet<Tier>();
+                    for (String tier : tierArray) {
+                        availableTiers.add(new Tier(tier));
+                    }           
+                    product.setAvailableTiers(availableTiers );
+                }
+
                 product.setVisibility(rs.getString("VISIBILITY"));
                 product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
                 product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
                 product.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
+                product.setSubscriptionAvailableTenants(rs.getString("SUBSCRIPTION_AVAILABILE_TENANTS"));
                 product.setState(rs.getString("STATE"));
                 productId = rs.getInt("API_PRODUCT_ID");
                 product.setProductId(productId);

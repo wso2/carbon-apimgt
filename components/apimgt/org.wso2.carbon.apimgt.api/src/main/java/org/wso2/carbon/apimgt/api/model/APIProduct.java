@@ -18,7 +18,9 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class APIProduct {
     // TODO add rest of the properties
@@ -27,9 +29,10 @@ public class APIProduct {
     private int productId;
     private String provider;
     private String description;
-    private String productTier;
+    private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
     private String visibility;
     private String subscriptionAvailability;
+    private String subscriptionAvailableTenants;
     private String state;
     private String businessOwner;
     private String businessOwnerEmail;
@@ -64,12 +67,6 @@ public class APIProduct {
     }
     public void setDescription(String description) {
         this.description = description;
-    }
-    public String getProductTier() {
-        return productTier;
-    }
-    public void setProductTier(String productTier) {
-        this.productTier = productTier;
     }
     public String getVisibility() {
         return visibility;
@@ -106,6 +103,18 @@ public class APIProduct {
     }
     public void setProductId(int productId) {
         this.productId = productId;
+    }
+    public Set<Tier> getAvailableTiers() {
+        return availableTiers;
+    }
+    public void setAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers = availableTiers;
+    }
+    public String getSubscriptionAvailableTenants() {
+        return subscriptionAvailableTenants;
+    }
+    public void setSubscriptionAvailableTenants(String subscriptionAvailableTenants) {
+        this.subscriptionAvailableTenants = subscriptionAvailableTenants;
     }
 
 }
