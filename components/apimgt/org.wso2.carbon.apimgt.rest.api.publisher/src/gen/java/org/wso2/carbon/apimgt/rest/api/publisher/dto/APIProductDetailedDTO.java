@@ -36,6 +36,9 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
   
   private List<String> visibleTenants = new ArrayList<String>();
   
+  
+  private List<String> tiers = new ArrayList<String>();
+  
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
   };
@@ -103,6 +106,19 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
   }
   public void setVisibleTenants(List<String> visibleTenants) {
     this.visibleTenants = visibleTenants;
+  }
+
+  
+  /**
+   * The subscription tiers selected for the particular API Product
+   **/
+  @ApiModelProperty(value = "The subscription tiers selected for the particular API Product")
+  @JsonProperty("tiers")
+  public List<String> getTiers() {
+    return tiers;
+  }
+  public void setTiers(List<String> tiers) {
+    this.tiers = tiers;
   }
 
   
@@ -179,6 +195,7 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
+    sb.append("  tiers: ").append(tiers).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
     sb.append("  additionalProperties: ").append(additionalProperties).append("\n");

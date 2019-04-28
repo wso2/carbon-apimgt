@@ -882,6 +882,22 @@ public class APIMappingUtil {
         }
 
     }
+    
+    private static APIProductDetailedDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPIProducttoDTO(
+            String subscriptionAvailability) {
+
+        switch (subscriptionAvailability) {
+            case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT :
+                return APIProductDetailedDTO.SubscriptionAvailabilityEnum.current_tenant;
+            case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS :
+                return APIProductDetailedDTO.SubscriptionAvailabilityEnum.all_tenants;
+            case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS :
+                return APIProductDetailedDTO.SubscriptionAvailabilityEnum.specific_tenants;
+            default:
+                return null; // how to handle this?
+        }
+
+    }
 
     private static String mapSubscriptionAvailabilityFromDTOtoAPI(
             APIDetailedDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
@@ -894,6 +910,20 @@ public class APIMappingUtil {
                 return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
             default:
                 return null; // how to handle this? 500 or 400
+        }
+
+    }
+    private static String mapSubscriptionAvailabilityFromDTOtoAPIProduct(
+            APIProductDetailedDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
+        switch (subscriptionAvailability) {
+            case current_tenant:
+                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
+            case all_tenants:
+                return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
+            case specific_tenants:
+                return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
+            default:
+                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT; // default to current tenant
         }
 
     }
@@ -934,6 +964,19 @@ public class APIMappingUtil {
         product.setProvider(provider);
         product.setUuid(dto.getId());
         product.setState(dto.getState().toString());
+        Set<Tier> apiTiers = new HashSet<>();
+        List<String> tiersFromDTO = dto.getTiers();
+        for (String tier : tiersFromDTO) {
+            apiTiers.add(new Tier(tier));
+        }
+        product.setAvailableTiers(apiTiers);
+        if (dto.getSubscriptionAvailability() != null) {
+            product.setSubscriptionAvailability(
+                    mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
+        }
+        if (dto.getSubscriptionAvailableTenants() != null) {
+            product.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
+        }
         List<APIProductResource> productResources = new ArrayList<APIProductResource>();
 
         for (int i = 0; i < dto.getApis().size(); i++) {
@@ -981,6 +1024,23 @@ public class APIMappingUtil {
             
         }
         productDto.setApis(apis);
+        
+        String subscriptionAvailability = product.getSubscriptionAvailability();
+        if (subscriptionAvailability != null) {
+            productDto.setSubscriptionAvailability(
+                    mapSubscriptionAvailabilityFromAPIProducttoDTO(subscriptionAvailability));
+        }
+
+        if (product.getSubscriptionAvailableTenants() != null) {
+            productDto.setSubscriptionAvailableTenants(Arrays.asList(product.getSubscriptionAvailableTenants().split(",")));
+        }
+
+        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = product.getAvailableTiers();
+        List<String> tiersToReturn = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
+            tiersToReturn.add(tier.getName());
+        }
+        productDto.setTiers(tiersToReturn);
         return productDto;
     }
 
