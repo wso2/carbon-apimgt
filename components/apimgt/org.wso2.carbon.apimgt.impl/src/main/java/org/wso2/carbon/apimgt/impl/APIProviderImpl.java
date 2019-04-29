@@ -146,6 +146,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -206,6 +207,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     protected String getUserNameWithoutChange() {
         return userNameWithoutChange;
+    }
+
+    @Override
+    public void addSwaggerToLocalEntry(API api, String jsonText) {
+        if (log.isDebugEnabled()) {
+            log.debug("Adding a new Local Entry for the API: " + api.getId().toString());
+        }
+        Map<String, Environment> environments;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        environments = config.getApiGatewayEnvironments();
+        LocalEntryAdminClient localEntryAdminClient;
+        for (String environmentName : api.getEnvironments()) {
+            Environment environment = environments.get(environmentName);
+            api.getEnvironments();
+            try {
+                localEntryAdminClient = new LocalEntryAdminClient(api.getId(), environment);
+                localEntryAdminClient.deleteEntry(api.getId().toString());
+                localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getId() + "\">" +
+                        jsonText.replaceAll("&(?!amp;)", "&amp;").
+                                replaceAll("<","&lt;").replaceAll(">","&gt;") + "</localEntry>");
+            } catch (AxisFault e) {
+                log.error("Error occurred while Deleting the local entry for the API: " + api.getId().toString(), e);
+            }
+        }
+    }
+
+    @Override
+    public void deleteSwaggerLocalEntry(API api) {
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting the local entry for API: " + api.getId().toString());
+        }
+        Map<String, Environment> environments;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        environments = config.getApiGatewayEnvironments();
+        LocalEntryAdminClient localEntryAdminClient;
+        for (String environmentName : api.getEnvironments()) {
+            Environment environment = environments.get(environmentName);
+            try {
+                localEntryAdminClient = new LocalEntryAdminClient(api.getId(), environment);
+                localEntryAdminClient.deleteEntry(api.getId().toString());
+            } catch (AxisFault e) {
+                log.error("Error occurred while Deleting the local entry ", e);
+            }
+        }
     }
 
     /**
@@ -2018,7 +2066,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
                         APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
             }
-
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
             Map<String, String> properties = new HashMap<String, String>();
