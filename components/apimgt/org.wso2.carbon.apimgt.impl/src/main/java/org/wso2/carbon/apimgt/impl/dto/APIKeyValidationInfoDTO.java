@@ -60,6 +60,8 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
+    private String apiProductName;
+    private String apiProductProvider;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -260,6 +262,10 @@ public class APIKeyValidationInfoDTO implements Serializable {
                 append(" , subscriberTenantDomain:").append(subscriberTenantDomain).
                 append(" , stopOnQuotaReach:").append(stopOnQuotaReach).
                 append(" , apiPublisher:").append(apiPublisher);
+        if (apiProductName != null && apiProductProvider != null) {
+            builder.append(" , apiProductName:").append(apiProductName).
+                    append(" , apiProductProvider:").append(apiProductProvider);
+        }
 
         if (authorizedDomains != null && !authorizedDomains.isEmpty()) {
             builder.append(" , authorizedDomains:[");
@@ -316,5 +322,20 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.subscriberTenantDomain = subscriberTenantDomain;
     }
 
+    public void setApiProductName(String apiProductName) {
+        this.apiProductName = apiProductName;
+    }
+
+    public String getApiProductName() {
+        return apiProductName;
+    }
+
+    public void setApiProductProvider(String apiProductProvider) {
+        this.apiProductProvider = apiProductProvider;
+    }
+
+    public String getApiProductProvider() {
+        return apiProductProvider;
+    }
 }
 

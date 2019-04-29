@@ -157,6 +157,12 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
 
+        if (validationContext.getSubscriptionType().equals("API")) {
+            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":" + "API");
+        } else {
+            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":" + "APIProduct");
+        }
+
         accessTokenDO.setAccessToken(validationContext.getAccessToken());
 
         String actualVersion = validationContext.getVersion();
