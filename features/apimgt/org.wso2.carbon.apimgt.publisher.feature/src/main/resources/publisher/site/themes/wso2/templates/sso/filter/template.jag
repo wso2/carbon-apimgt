@@ -3,7 +3,7 @@
     var site = require("/site/conf/site.json");
     var security =require("sso");
 
-	var ssoRelyingParty = new security. (site.ssoConfiguration.issuer);
+	var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
 	var sessionId = session.getId();
 	var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
 
