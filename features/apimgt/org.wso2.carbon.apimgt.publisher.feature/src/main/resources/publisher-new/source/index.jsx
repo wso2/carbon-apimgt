@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,6 +16,14 @@
  * under the License.
  */
 
-import React from "react";
-import ReactDOM from "react-dom";
+import 'typeface-roboto';
 
+import ReactDOM from 'react-dom';
+import React from 'react';
+import Publisher from './src/App.jsx';
+import './index.css';
+
+ReactDOM.render(
+    <Publisher />,
+    document.getElementById('react-root'),
+);
