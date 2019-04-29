@@ -28,7 +28,7 @@ const config = {
         path: path.resolve(__dirname, 'public/dist'),
         filename: '[name].bundle.js',
         chunkFilename: '[name].bundle.js',
-        publicPath: 'public/app/dist/',
+        publicPath: 'static/public/dist/',
     },
     watch: false,
     devtool: 'source-map',
