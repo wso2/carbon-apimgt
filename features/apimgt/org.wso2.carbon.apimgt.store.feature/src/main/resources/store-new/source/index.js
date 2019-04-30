@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,5 +16,16 @@
  * under the License.
  */
 
-import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from 'react-dom'
+import React from 'react'
+import Store from "./src/App.js"
+// import 'typeface-roboto'
+import 'material-design-icons'
+import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
+import Config from 'Config';
+
+const theme = createMuiTheme(Config);
+
+ReactDOM.render(<MuiThemeProvider theme={theme}>
+        <Store/>
+    </MuiThemeProvider>, document.getElementById("react-root"));
