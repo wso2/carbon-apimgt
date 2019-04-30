@@ -1574,7 +1574,7 @@
         <owasp.encoder.version>1.2.2</owasp.encoder.version>
 
         <httpclient.version>4.3.6.wso2v2</httpclient.version>
-        <wss4j.version>1.5.11.wso2v17</wss4j.version>
+        <wss4j.version>1.5.11-wso2v18</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <commons-httpclient.version>3.1</commons-httpclient.version>
