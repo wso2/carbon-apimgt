@@ -109,9 +109,7 @@ class SampleAPI extends Component {
             name: 'Swagger Petstore',
             context: '/v2',
             version: '1.0.0',
-            description: 'This is a sample server Petstore server.  You can find out more about Swagger at' +
-            '[http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).' +
-            '  For this sample, you can use the api key `special-key` to test the authorization filters.',
+            description: 'This is a sample server Petstore server.  You can find out more about Swagger at' + '[http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).' + '  For this sample, you can use the api key `special-key` to test the authorization filters.',
             isDefaultVersion: true,
             responseCaching: 'Disabled',
             cacheTimeout: 300,
@@ -129,7 +127,7 @@ class SampleAPI extends Component {
             scopes: ['read:pets', 'write:pets'],
             policies: ['Bronze', 'Unlimited', 'Gold'],
         };
-        const serviceUrl = 'https://localhost:9443/publisher/public/app/petstore/pet/1.json';
+        const serviceUrl = 'https://localhost:9443/publisher/static/public/petstore/pet/1.json';
         const production = {
             type: 'Production',
             inline: {
@@ -181,15 +179,16 @@ class SampleAPI extends Component {
                         <FormattedMessage id='welcome.to.wso2.api.manager' defaultMessage='Welcome to WSO2 API Manager' />
                     </Typography>
                     <Typography component='p' className={classes.content}>
-                        <FormattedMessage id={'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' +
-                        'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' +
-                        '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'}
-                        />
+                        <FormattedMessage id={'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' + 'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' + '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'} />
                     </Typography>
                     <div className={classes.actions}>
-                        <APICreateMenu buttonProps={{
-                            size: 'small', color: 'primary', variant: 'outlined', className: classes.buttonLeft,
-                        }}
+                        <APICreateMenu
+                            buttonProps={{
+                                size: 'small',
+                                color: 'primary',
+                                variant: 'outlined',
+                                className: classes.buttonLeft,
+                            }}
                         >
                             <Create />
                             <FormattedMessage id='create.new.api' defaultMessage='Create New API' />

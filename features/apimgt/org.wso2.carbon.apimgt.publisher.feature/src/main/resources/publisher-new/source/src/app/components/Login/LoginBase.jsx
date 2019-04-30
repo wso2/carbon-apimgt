@@ -26,7 +26,7 @@ const LoginBase = (props) => {
                 <div className='container-fluid'>
                     <div className='pull-left brand float-remove-xs text-center-xs'>
                         <a href='/publisher/'>
-                            <img alt='logo' src='/publisher/public/app/images/logo.svg' className='logo' />
+                            <img alt='logo' src='/publisher/static/public/images/logo.svg' className='logo' />
                             <h1>API Publisher</h1>
                         </a>
                     </div>
@@ -39,7 +39,8 @@ const LoginBase = (props) => {
                         WSO2 | © 2018
                         <a href='http://wso2.com/' rel='noopener noreferrer' target='_blank'>
                             <i className='icon fw fw-wso2' /> Inc
-                        </a>.
+                        </a>
+                        .
                     </p>
                 </div>
             </footer>

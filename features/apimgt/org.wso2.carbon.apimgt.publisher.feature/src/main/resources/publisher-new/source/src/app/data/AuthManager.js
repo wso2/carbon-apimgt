@@ -169,11 +169,10 @@ class AuthManager {
      */
     static loginUserMapper(response, environmentName) {
         const { data } = response;
-        const { validityPeriod } = data; // In seconds
-        const WSO2_AM_TOKEN_1 = data.partialToken;
+        const { AM_ACC_TOKEN_DEFAULT_P1, expires_in: expiresIn } = data;
         const user = new User(environmentName, data.authUser);
-        user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
-        user.setExpiryTime(validityPeriod);
+        user.setPartialToken(AM_ACC_TOKEN_DEFAULT_P1, expiresIn, Utils.CONST.CONTEXT_PATH);
+        user.setExpiryTime(expiresIn);
         user.scopes = data.scopes.split(' ');
         return user;
     }
