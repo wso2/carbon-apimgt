@@ -161,7 +161,8 @@ class Utils {
     }
 
     static getDCRAppInfoRequestURL(environment = Utils.getCurrentEnvironment()) {
-        // TODO: tmkasun need to implement proper API return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
+        // TODO: tmkasun need to implement proper API return
+        // `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}`;
     }
 

@@ -82,8 +82,10 @@ function LeftMenuItem(props) {
             onKeyDown={() => props.handleMenuSelect(props.text)}
             style={{ backgroundColor: props.active === props.text ? theme.palette.background.appBar : '' }}
         >
-            {// If the icon pro ( which is comming from the React Material library ) is coming we add css class and render.
-            // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to allow customers theme
+            {// If the icon pro ( which is comming from the React Material library )
+            // is coming we add css class and render.
+            // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
+            // allow customers theme
             // the product without compiling.
                 Icon ? (
                     React.cloneElement(Icon, {

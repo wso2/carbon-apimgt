@@ -167,7 +167,13 @@ class Listing extends React.Component {
         return (
             <main className={classes.content}>
                 <TopMenu setListType={this.setListType} apis={apis} />
-                <div className={classes.contentInside}>{listType === 'grid' ? <CardView updateAPIsList={this.updateAPIsList} apis={apis} /> : <TableView updateAPIsList={this.updateAPIsList} apis={apis} />}</div>
+                <div className={classes.contentInside}>
+                    {listType === 'grid' ? (
+                        <CardView updateAPIsList={this.updateAPIsList} apis={apis} />
+                    ) : (
+                        <TableView updateAPIsList={this.updateAPIsList} apis={apis} />
+                    )}
+                </div>
             </main>
         );
     }

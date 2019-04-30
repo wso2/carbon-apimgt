@@ -44,14 +44,28 @@ const GlobalNavBar = (props) => {
     const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     return (
         <div>
-            <Drawer className={classes.drawerStyles} PaperProps={paperStyles} SlideProps={commonStyle} ModalProps={commonStyle} BackdropProps={commonStyle} open={open} onClose={toggleGlobalNavBar}>
+            <Drawer
+                className={classes.drawerStyles}
+                PaperProps={paperStyles}
+                SlideProps={commonStyle}
+                ModalProps={commonStyle}
+                BackdropProps={commonStyle}
+                open={open}
+                onClose={toggleGlobalNavBar}
+            >
                 <div tabIndex={0} role='button' onClick={toggleGlobalNavBar} onKeyDown={toggleGlobalNavBar}>
                     <div className={classes.list}>
                         <List>
                             <Link to='/apis'>
                                 <ListItem button>
                                     <ListItemIcon>
-                                        <CustomIcon width={32} height={32} icon='api' className={classes.listText} strokeColor={strokeColor} />
+                                        <CustomIcon
+                                            width={32}
+                                            height={32}
+                                            icon='api'
+                                            className={classes.listText}
+                                            strokeColor={strokeColor}
+                                        />
                                     </ListItemIcon>
                                     <ListItemText classes={{ primary: classes.listText }} primary='APIs' />
                                 </ListItem>

@@ -213,14 +213,54 @@ class Details extends Component {
                         </div>
                     </Link>
                     <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='lifecycle' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<LifeCycleIcon />} />
-                    <LeftMenuItem text='endpoints' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<EndpointIcon />} />
-                    <LeftMenuItem text='resources' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<ResourcesIcon />} />
-                    <LeftMenuItem text='scopes' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<ScopesIcon />} />
-                    <LeftMenuItem text='documents' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<DocumentsIcon />} />
-                    <LeftMenuItem text='subscriptions' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<SubscriptionsIcon />} />
-                    <LeftMenuItem text='security' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<SecurityIcon />} />
-                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} Icon={<CommentsIcon />} />
+                    <LeftMenuItem
+                        text='lifecycle'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<LifeCycleIcon />}
+                    />
+                    <LeftMenuItem
+                        text='endpoints'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<EndpointIcon />}
+                    />
+                    <LeftMenuItem
+                        text='resources'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<ResourcesIcon />}
+                    />
+                    <LeftMenuItem
+                        text='scopes'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<ScopesIcon />}
+                    />
+                    <LeftMenuItem
+                        text='documents'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<DocumentsIcon />}
+                    />
+                    <LeftMenuItem
+                        text='subscriptions'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<SubscriptionsIcon />}
+                    />
+                    <LeftMenuItem
+                        text='security'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<SecurityIcon />}
+                    />
+                    <LeftMenuItem
+                        text='comments'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<CommentsIcon />}
+                    />
                 </div>
                 <div className={classes.content}>
                     <APIDetailsTopMenu api={api} />

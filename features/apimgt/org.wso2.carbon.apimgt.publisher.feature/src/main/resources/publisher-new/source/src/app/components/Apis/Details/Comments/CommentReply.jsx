@@ -208,38 +208,49 @@ class CommentReply extends React.Component {
         } = this.props;
         const { editIndex, openDialog } = this.state;
         const props = { api, allComments, commentsUpdate };
-        return (
-            [comments
-            && comments.map((comment, index) => (
-                <div key={this.getKey()} className={classes.contentWrapper}>
-                    <Grid container spacing={8} className={classes.root}>
-                        <Grid item>
-                            <AccountBox className={classes.commentIcon} />
-                        </Grid>
-                        <Grid item xs zeroMinWidth>
-                            <Typography noWrap className={classes.commentText} variant='body2'>
-                                {comment.createdBy}
-                            </Typography>
-
-                            {(index !== editIndex)
-                            && (
-                                <Typography className={classes.commentText}>
-                                    {comment.commentText}
+        return [
+            comments &&
+                comments.map((comment, index) => (
+                    <div key={this.getKey()} className={classes.contentWrapper}>
+                        <Grid container spacing={8} className={classes.root}>
+                            <Grid item>
+                                <AccountBox className={classes.commentIcon} />
+                            </Grid>
+                            <Grid item xs zeroMinWidth>
+                                <Typography noWrap className={classes.commentText} variant='body2'>
+                                    {comment.createdBy}
                                 </Typography>
-                            )
-                            }
 
-                            {(index === editIndex)
-                            && <CommentEdit {...props} comment={comment} toggleShowEdit={this.handleShowEdit} />
-                            }
-                            <CommentOptions classes={classes} comment={comment} editIndex={editIndex} index={index} showAddComment={this.showAddComment} handleClickOpen={this.handleClickOpen} showEditComment={this.showEditComment} />
+                                {index !== editIndex && (
+                                    <Typography className={classes.commentText}>{comment.commentText}</Typography>
+                                )}
+
+                                {index === editIndex && (
+                                    <CommentEdit {...props} comment={comment} toggleShowEdit={this.handleShowEdit} />
+                                )}
+                                <CommentOptions
+                                    classes={classes}
+                                    comment={comment}
+                                    editIndex={editIndex}
+                                    index={index}
+                                    showAddComment={this.showAddComment}
+                                    handleClickOpen={this.handleClickOpen}
+                                    showEditComment={this.showEditComment}
+                                />
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </div>
-
-            )), <ConfirmDialog key='key-dialog' labelCancel='Cancel' title='Confirm Delete' message='Are you sure you want to delete this comment?' labelOk='Yes' callback={this.handleConfirmDialog} open={openDialog} />,
-            ]
-        );
+                    </div>
+                )),
+            <ConfirmDialog
+                key='key-dialog'
+                labelCancel='Cancel'
+                title='Confirm Delete'
+                message='Are you sure you want to delete this comment?'
+                labelOk='Yes'
+                callback={this.handleConfirmDialog}
+                open={openDialog}
+            />,
+        ];
     }
 }
 

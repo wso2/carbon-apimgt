@@ -39,7 +39,10 @@ const styles = theme => ({
         color: green[500],
         position: 'relative',
     },
-    headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+    headline: {
+        paddingTop: theme.spacing.unit * 1.25,
+        paddingLeft: theme.spacing.unit * 2.5,
+    },
     head: {
         paddingBottom: theme.spacing.unit,
     },
@@ -109,7 +112,10 @@ class SampleAPI extends Component {
             name: 'Swagger Petstore',
             context: '/v2',
             version: '1.0.0',
-            description: 'This is a sample server Petstore server.  You can find out more about Swagger at' + '[http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).' + '  For this sample, you can use the api key `special-key` to test the authorization filters.',
+            description:
+                'This is a sample server Petstore server.  You can find out more about Swagger at' +
+                '[http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).' +
+                '  For this sample, you can use the api key `special-key` to test the authorization filters.',
             isDefaultVersion: true,
             responseCaching: 'Disabled',
             cacheTimeout: 300,
@@ -134,7 +140,10 @@ class SampleAPI extends Component {
                 name: data.name.replace(/ /g, '_') + data.version.replace(/\./g, '_'),
                 // TODO: It's better to add this name property from the REST api itself,
                 // making sure no name conflicts with other inline endpoint definitions ~tmkb
-                endpointConfig: { list: [{ url: serviceUrl, timeout: '1000' }], endpointType: 'SINGLE' },
+                endpointConfig: {
+                    list: [{ url: serviceUrl, timeout: '1000' }],
+                    endpointType: 'SINGLE',
+                },
                 endpointSecurity: { enabled: false },
                 type: 'http',
             },
@@ -176,10 +185,19 @@ class SampleAPI extends Component {
             <InlineMessage type='info' height={140}>
                 <div className={classes.contentWrapper}>
                     <Typography variant='headline' component='h3' className={classes.head}>
-                        <FormattedMessage id='welcome.to.wso2.api.manager' defaultMessage='Welcome to WSO2 API Manager' />
+                        <FormattedMessage
+                            id='welcome.to.wso2.api.manager'
+                            defaultMessage='Welcome to WSO2 API Manager'
+                        />
                     </Typography>
                     <Typography component='p' className={classes.content}>
-                        <FormattedMessage id={'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' + 'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' + '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'} />
+                        <FormattedMessage
+                            id={
+                                'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' +
+                                'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' +
+                                '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'
+                            }
+                        />
                     </Typography>
                     <div className={classes.actions}>
                         <APICreateMenu
@@ -193,7 +211,13 @@ class SampleAPI extends Component {
                             <Create />
                             <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
                         </APICreateMenu>
-                        <Button size='small' color='primary' disabled={deploying} variant='outlined' onClick={this.handleDeploySample}>
+                        <Button
+                            size='small'
+                            color='primary'
+                            disabled={deploying}
+                            variant='outlined'
+                            onClick={this.handleDeploySample}
+                        >
                             <GetApp />
                             <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
                         </Button>
