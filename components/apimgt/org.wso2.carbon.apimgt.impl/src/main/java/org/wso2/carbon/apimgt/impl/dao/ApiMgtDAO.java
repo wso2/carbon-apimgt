@@ -13586,7 +13586,14 @@ public class ApiMgtDAO {
 
             rs = prepStmt.executeQuery();
 
-            if (rs.next()) {
+            int recordCount = 0;
+
+            while (rs.next()) {
+                if (recordCount >= 1) {
+                    throw new APIManagementException("Application " + infoDTO.getApplicationName() + " has subscriptions"
+                            + " to more than one api product containing the requested context");
+                }
+
                 String subscriptionStatus = rs.getString("SUB_STATUS");
                 String type = rs.getString("KEY_TYPE");
                 //todo: revisit sibscription status checks and modify to suit product implementation
@@ -13619,12 +13626,15 @@ public class ApiMgtDAO {
                 infoDTO.setTier(subTier);
                 infoDTO.setSubscriber(rs.getString("USER_ID"));
                 infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
-                infoDTO.setApiProductName(rs.getString("API_PRODUCT_NAME"));
+                String productName = rs.getString("API_PRODUCT_NAME");
+                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                infoDTO.setProductIdentifier(new APIProductIdentifier(productProvider, productName));
                 infoDTO.setApiPublisher(apiProductProvider);
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(appTier);
                 infoDTO.setType(type);
 
+                recordCount++;
                 //ToDO : handle throttling realted properties
                 return true;
             }

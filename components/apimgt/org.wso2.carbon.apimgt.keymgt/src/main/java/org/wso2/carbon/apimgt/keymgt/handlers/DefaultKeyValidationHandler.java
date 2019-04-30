@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -160,7 +161,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         if (validationContext.getSubscriptionType().equals("API")) {
             accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":" + "API");
         } else {
-            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":" + "APIProduct");
+            APIProductIdentifier productId = apiKeyValidationInfoDTO.getProductIdentifier();
+            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":APIProduct:" + productId);
         }
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());

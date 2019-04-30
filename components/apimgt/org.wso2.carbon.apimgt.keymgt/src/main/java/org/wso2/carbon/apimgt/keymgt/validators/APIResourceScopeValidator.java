@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.identity.application.common.model.User;
@@ -84,7 +85,15 @@ public class APIResourceScopeValidator extends OAuth2ScopeValidator{
 
         }
 
-        String subscriptionType = accessTokenDO.getTokenType().split(":")[1];
+        String[] subscriptionDetails =  accessTokenDO.getTokenType().split(":");
+        String subscriptionType = "API";
+        if (subscriptionDetails.length > 1) {
+            subscriptionType = subscriptionDetails[1];
+        } else {
+            log.info("Subscription Type was not set properly in accesstoken data object. So type is considered as "
+                    + "default  'API'.");
+        }
+
         List<String> tokenScopeList = new ArrayList<>(Arrays.asList(scopes));
         List<String> resourceScopeList = Arrays.asList(resourceScopes.split(", "));
         String apiResourceScope = null;
@@ -101,7 +110,39 @@ public class APIResourceScopeValidator extends OAuth2ScopeValidator{
 
         //if requset type is APIProduct add an additional scope validation step
         if (subscriptionType.equals("APIProduct")) {
-            //ToDo: implement poduct scope validation
+            //extract the api product identified in subscription validation phase and carry out scope validation for the
+            //scope relevant to that product
+            String apiProductName = "";
+            String apiProductProvider = "";
+            String productScope = "";
+            if (subscriptionDetails.length == 3) {
+                String apiProductID = subscriptionDetails[2];
+
+                String[] productNameProviderPair = apiProductID.split("-");
+                if (productNameProviderPair.length == 2) {
+                    apiProductProvider = productNameProviderPair[0];
+                    apiProductName = productNameProviderPair[1];
+                }
+
+                productScope = APIUtil.getProductScope(new APIProductIdentifier(apiProductProvider, apiProductName));
+            }
+
+            if (StringUtils.isNotEmpty(productScope)) {
+                if (resourceScopeList.contains(productScope) ) {
+                    if (!tokenScopeList.contains(productScope)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Access token does not bear the required product scope");
+                        }
+                        return false;
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Requested resource is not allowed in api product " + apiProductName + " by " +
+                        apiProductProvider);
+                    }
+                    return false;
+                }
+            }
         }
 
         //Return TRUE if - There does not exist a scope definition for the resource
