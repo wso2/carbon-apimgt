@@ -1,0 +1,10 @@
+{
+  "created.by": "Created by",
+  "last.update": "Last update",
+  "throttling.policies": "Throttling Policies",
+  "tags": "Tags",
+  "transport": "Transport",
+  "not.set.for.this.api": "NOT SET FOR THIS API",
+  "grant.types": "Grant Types",
+  "token.type":"Token Type"
+}

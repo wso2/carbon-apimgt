@@ -4979,6 +4979,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return filterMultipleVersionedAPIs(searchResults);
     }
 
+
+    @Override
+    public String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId);
+        return APIUtil.removeXMediationScriptsFromSwagger(definition);
+    }
+
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
         ArrayList<Object> apiSet = (ArrayList<Object>) searchResults.get("apis");
 

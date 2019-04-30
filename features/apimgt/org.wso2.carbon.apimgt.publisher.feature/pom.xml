@@ -173,7 +173,70 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>npm install (initialize)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>install</argument>
+                                <argument>--silent</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm run build (compile)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>${npm.build.command}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <workingDirectory>${npm.working.dir}</workingDirectory>
+                </configuration>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>publisher-new/public/**</include>
+                    <include>publisher-new/pages/**</include>
+                    <include>publisher-new/source/**</include>
+                    <include>publisher-new/.babelrc</include>
+                    <include>publisher-new/jaggery.conf</include>
+                    <include>publisher-new/package.json</include>
+                    <include>publisher-new/package-lock.json</include>
+                    <include>publisher-new/webpack.config.js</include>
+                    <include>lifecycles/APILifeCycle.xml</include>
+                    <include>p2.inf</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
+    <properties>
+        <maven.test.skip>false</maven.test.skip>
+        <npm.executable>npm</npm.executable>
+        <npm.build.command>build:prod</npm.build.command>
+        <npm.working.dir>./src/main/</npm.working.dir>
+    </properties>
 
 </project>

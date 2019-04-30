@@ -381,9 +381,9 @@
                 <configuration>
                     <!--Uncomment the following in order to debug the aspectJ weaving-->
                     <!--<showWeaveInfo>true</showWeaveInfo>-->
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <complianceLevel>1.7</complianceLevel>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <complianceLevel>1.8</complianceLevel>
                     <excludes>
                         <!--The following class have been excluded from aspectj weaving, to avoid build failures-->
                         <exclude>**/thrift/*Service.java</exclude>

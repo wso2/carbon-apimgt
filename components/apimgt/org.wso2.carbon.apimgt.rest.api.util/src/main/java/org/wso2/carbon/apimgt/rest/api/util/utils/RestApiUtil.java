@@ -34,8 +34,6 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
-import org.wso2.carbon.apimgt.api.LoginPostExecutor;
-import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
@@ -49,11 +47,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
@@ -67,10 +64,6 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
@@ -1077,8 +1070,8 @@ public class RestApiUtil {
     public static Set<URITemplate> getStoreAppResourceMapping() {
 
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
-                RestApiConstants.REST_API_PUBLISHER_CONTEXT,
-                RestApiConstants.REST_API_PUBLISHER_VERSION));
+                RestApiConstants.REST_API_STORE_CONTEXT,
+                RestApiConstants.REST_API_STORE_VERSION_0));
 
         if (storeResourceMappings != null) {
             return storeResourceMappings;
@@ -1106,20 +1099,25 @@ public class RestApiUtil {
      *
      * @return URITemplate set associated with API Manager publisher REST API
      */
-    public static Set<URITemplate> getPublisherAppResourceMapping() {
-
+    public static Set<URITemplate> getPublisherAppResourceMapping(String version) {
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_STORE_CONTEXT,
-                RestApiConstants.REST_API_STORE_VERSION));
-
+                RestApiConstants.REST_API_STORE_VERSION_0));
+        
         if (publisherResourceMappings != null) {
             return publisherResourceMappings;
         } else {
-            //if(basePath.contains("/api/am/store/")){
-            //this is store API and pick resources accordingly
             try {
-                String definition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                String definition;
+                APIDefinition apiDefinitionFromOpenAPISpec;
+                if (RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version)) {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
+                    apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                } else {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
+                    apiDefinitionFromOpenAPISpec = new APIDefinitionUsingOASParser();
+                }
                 //Get URL templates from swagger content we created
                 publisherResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
             } catch (APIManagementException e) {
@@ -1349,7 +1347,7 @@ public class RestApiUtil {
         //check whether the user has super tenant admin role
         boolean isSuperAdminRoleNameExist = false;
         try {
-            isSuperAdminRoleNameExist = isUserInRole(username, superAdminRole);
+            isSuperAdminRoleNameExist = APIUtil.isUserInRole(username, superAdminRole);
         } catch (UserStoreException | APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error in checking whether the user has admin role", e, log);
         }
@@ -1362,25 +1360,5 @@ public class RestApiUtil {
             ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
             throw new ForbiddenException(errorDTO);
         }
-    }
-
-    /**
-     * Check whether the user has the given role
-     *
-     * @throws UserStoreException
-     * @throws APIManagementException
-     */
-    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
-        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
-        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-        UserStoreManager manager = realm.getUserStoreManager();
-        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
-        return abstractManager.isUserInRole(tenantAwareUserName, role);
     }
 }

@@ -99,29 +99,28 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 log.error("You cannot access API as scope validation failed");
             }
         } else {
-            log.error(String.format("Authentication failed. Please check your username/password"));
+            log.error("Authentication failed. Please check your username/password");
         }
         return false;
     }
-
 
     /**
      * @param message   CXF message to be validate
      * @param tokenInfo Token information associated with incoming request
      * @return return true if we found matching scope in resource and token information
-     *         else false(means scope validation failed).
+     * else false(means scope validation failed).
      */
     private boolean validateScopes(Message message, AccessTokenInfo tokenInfo) {
-        boolean authorized = false;
         String basePath = (String) message.get(Message.BASE_PATH);
         String path = (String) message.get(Message.PATH_INFO);
         String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
-        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT)) {
-            //this is publisher API so pick that API
-            uriTemplates = RestApiUtil.getPublisherAppResourceMapping();
+        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
         } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
             uriTemplates = RestApiUtil.getStoreAppResourceMapping();
         } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
@@ -133,7 +132,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             org.wso2.uri.template.URITemplate templateToValidate = null;
             Map<String, String> var = new HashMap<String, String>();
             //check scopes with what we have
-            String templateString = ((URITemplate) template).getUriTemplate().toString();
+            String templateString = ((URITemplate) template).getUriTemplate();
             try {
                 templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
             } catch (URITemplateException e) {
@@ -141,11 +140,11 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                         templateString, e);
             }
             if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
-                    && verb != null && verb.equalsIgnoreCase(((URITemplate)template).getHTTPVerb())) {
-                for (int i = 0; i < scopes.length; i++) {
+                    && verb != null && verb.equalsIgnoreCase(((URITemplate) template).getHTTPVerb())) {
+                for (String scope : scopes) {
                     Scope scp = ((URITemplate) template).getScope();
                     if (scp != null) {
-                        if (scopes[i].equalsIgnoreCase(scp.getKey())) {
+                        if (scope.equalsIgnoreCase(scp.getKey())) {
                             //we found scopes matches
                             if (log.isDebugEnabled()) {
                                 log.debug("Scope validation successful for access token: " +
@@ -153,6 +152,20 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                                         " for resource path: " + path + " and verb " + verb);
                             }
                             return true;
+                        }
+                    } else if (((URITemplate) template).getScopes() != null && !((URITemplate) template).getScopes()
+                            .isEmpty()) {
+                        List<Scope> scopesList = ((URITemplate) template).getScopes();
+                        for (Scope scpObj : scopesList) {
+                            if (scope.equalsIgnoreCase(scpObj.getKey())) {
+                                //we found scopes matches
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Scope validation successful for access token: " +
+                                            tokenInfo.getAccessToken() + " with scope: " + scpObj.getKey() +
+                                            " for resource path: " + path + " and verb " + verb);
+                                }
+                                return true;
+                            }
                         }
                     } else {
                         if (log.isDebugEnabled()) {
@@ -164,7 +177,6 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 }
             }
         }
-        return authorized;
+        return false;
     }
 }
-
