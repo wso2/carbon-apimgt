@@ -112,6 +112,8 @@ public final class RestApiConstants {
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
+    public static final String COOKIE_NAME = "cookie";
+    public static final String AUTH_COOKIE_NAME = "WSO2_AM_TOKEN_DEFAULT";
 
     public static final int PAGINATION_LIMIT_DEFAULT = 25;
     public static final int PAGINATION_OFFSET_DEFAULT = 0;
