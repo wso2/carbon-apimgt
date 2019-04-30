@@ -296,8 +296,10 @@ GrantTypes.prototype.getMap = function(selected){
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
 	        selectedGrants = selected;
-            var scopes = $('#scopes option:selected')
-                            .map(function(){ return $( this ).val();}).get().join(" ");
+            var scopes = "";
+            if(this.element.find("select.scope_select").val() != null) {
+                scopes = this.element.find("select.scope_select").val().join(" ");
+            }
 
             this.element.find('.generatekeys').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
