@@ -121,8 +121,10 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
         } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
             uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
-        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
-            uriTemplates = RestApiUtil.getStoreAppResourceMapping();
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
         } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
         } else {
