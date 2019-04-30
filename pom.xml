@@ -1474,7 +1474,7 @@
         <carbon.kernel.version>4.4.40</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.6.64</carbon.commons.version>
+        <carbon.commons.version>4.6.65</carbon.commons.version>
         <carbon.registry.version>4.6.43</carbon.registry.version>
         <carbon.mediation.version>4.6.130</carbon.mediation.version>
 
