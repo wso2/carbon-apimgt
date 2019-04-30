@@ -134,7 +134,6 @@ class APIClient {
             return data;
         }
     }
-
 }
 
 APIClient.spec = null;
