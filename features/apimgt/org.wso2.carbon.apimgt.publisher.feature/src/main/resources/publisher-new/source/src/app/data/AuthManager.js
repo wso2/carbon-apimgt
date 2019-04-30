@@ -146,9 +146,7 @@ class AuthManager {
         const data = {
             username,
             password,
-            grant_type: 'password',
-            validity_period: -1,
-            scopes: AuthManager.CONST.USER_SCOPES,
+            application: 'publisher',
             remember_me: true, // By default always remember user session
         };
         // Set the environment that user tried to authenticate
@@ -170,12 +168,8 @@ class AuthManager {
      * @returns {User} Instance of an user who is currently logged in (for the selected environment)
      */
     static loginUserMapper(response, environmentName) {
-        const {
-            data,
-        } = response;
-        const {
-            validityPeriod,
-        } = data; // In seconds
+        const { data } = response;
+        const { validityPeriod } = data; // In seconds
         const WSO2_AM_TOKEN_1 = data.partialToken;
         const user = new User(environmentName, data.authUser);
         user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
@@ -314,7 +308,7 @@ class AuthManager {
      * @returns {Promise} Axios Promise object with the login request made
      */
     postAuthenticationRequest(headers, data, environment) {
-        const promisedResponse = axios(Utils.getLoginTokenPath(environment), {
+        const promisedResponse = axios('/publisher/services/login', {
             method: 'POST',
             data: qs.stringify(data),
             headers,
@@ -341,7 +335,6 @@ class AuthManager {
 
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
-    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
-        'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
+    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
 export default AuthManager;

@@ -80,15 +80,12 @@ function getExtToContentType(extension){
 var log = new Log("Static Router");
 
 var uri = request.getRequestURI();
-log.info(uri.split(request.getContextPath()));
 
 var paths = uri.split(request.getContextPath() + '/static/');
-log.info(paths);
 
 var filePath = paths[paths.length-1];
 
 var path = "../../" + filePath;
-log.info(path);
 
 var file = new File(path);
 if (!file.isExists()) {
@@ -96,9 +93,7 @@ if (!file.isExists()) {
 } else {
     file.open("r");
     var pathSegments = path.split('.');
-    log.info(pathSegments);
     var ext = "." + pathSegments[pathSegments.length - 1]; // TODO: Query param with dot will screw up this logic ~tmkasun
-    log.info(ext);
     response.contentType = getExtToContentType(ext);
     print(file.getStream());
 }

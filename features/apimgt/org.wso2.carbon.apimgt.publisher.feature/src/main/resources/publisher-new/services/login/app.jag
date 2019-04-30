@@ -14,7 +14,6 @@
     var Base64 = org.apache.axiom.om.util.Base64;
     var String = Packages.java.lang.String;
     var base64encoded = Base64.encode(new String(clientId+":"+clientSecret).getBytes());
-
     var tokenRequestData = {
         "grant_type": "password",
         "username": request.getParameter("username", "UTF-8"),
@@ -29,6 +28,31 @@
 
 
     response.contentType = "application/json";
-    print(result.data);
+    var token_response = JSON.parse(result.data);
+
+    var token_length = token_response.access_token.length;
+    var access_token = String(token_response.access_token);
+
+
+    var access_token_token_part_1 = access_token.substring(0, token_length/2);
+    var access_token_token_part_2 = access_token.substring(token_length/2, token_length);
+
+    var refresh_token = String(token_response.refresh_token);
+    token_length = token_response.refresh_token.length;
+    var refresh_token_token_part_1 = refresh_token.substring(0, token_length/2)
+    var refresh_token_token_part_2 = refresh_token.substring(token_length/2, token_length)
+
+
+    var response_data = {
+        AM_ACC_TOKEN_DEFAULT_P1: String(access_token_token_part_1),
+        AM_REF_TOKEN_DEFAULT_P1: String(refresh_token_token_part_1),
+        scope: String(token_response.scope),
+        expires_in: String(token_response.expires_in)
+    }
+    var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': access_token_token_part_2, 'path': "/api/am/publisher", "secure": true, "maxAge": -1};
+    response.addCookie(cookie);
+    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refresh_token_token_part_2, 'path': "/api/am/publisher", "secure": true, "maxAge": -1};
+    response.addCookie(cookie);
+    print(response_data);
 
 %>
