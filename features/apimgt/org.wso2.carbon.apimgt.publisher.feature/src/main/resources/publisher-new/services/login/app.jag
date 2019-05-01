@@ -13,7 +13,7 @@
     var clientSecret = result.data.clientSecret;
     var Base64 = org.apache.axiom.om.util.Base64;
     var String = Packages.java.lang.String;
-    var base64encoded = Base64.encode(new String(clientId+":"+clientSecret).getBytes());
+    var base64encoded = Base64.encode ( new String (clientId+":"+clientSecret).getBytes());
     var tokenRequestData = {
         "grant_type": "password",
         "username": request.getParameter("username", "UTF-8"),
