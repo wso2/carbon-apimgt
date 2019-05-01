@@ -277,6 +277,9 @@
                     <include>store-new/jaggery.conf</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>
+                    <include>apistore/**</include>
+                    <include>customTheme/**</include>
+                    <include>store/**</include>
                 </includes>
             </resource>
         </resources>
