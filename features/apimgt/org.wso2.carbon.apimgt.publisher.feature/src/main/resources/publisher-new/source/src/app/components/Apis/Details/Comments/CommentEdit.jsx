@@ -44,10 +44,10 @@ const styles = theme => ({
 });
 
 /**
-   * Display a component to edit a comment
-   * @class CommmentEdit
-   * @extends {React.Component}
-   */
+ * Display a component to edit a comment
+ * @class CommmentEdit
+ * @extends {React.Component}
+ */
 class CommentEdit extends React.Component {
     /**
      * Creates an instance of CommentEdit
@@ -74,7 +74,11 @@ class CommentEdit extends React.Component {
      */
     componentDidMount() {
         const { comment } = this.props;
-        this.setState({ commentText: comment.commentText, category: comment.category, currentLength: comment.commentText.length });
+        this.setState({
+            commentText: comment.commentText,
+            category: comment.category,
+            currentLength: comment.commentText.length,
+        });
     }
 
     /**
@@ -179,10 +183,7 @@ class CommentEdit extends React.Component {
         return (
             <div>
                 <FormControl className={classes.category}>
-                    <Select
-                        value={category}
-                        onChange={this.handleCategoryChange}
-                    >
+                    <Select value={category} onChange={this.handleCategoryChange}>
                         <MenuItem value='General'>General</MenuItem>
                         <MenuItem value='Feature Request'>Feature Request</MenuItem>
                         <MenuItem value='Bug Report'>Bug Report</MenuItem>
@@ -200,16 +201,18 @@ class CommentEdit extends React.Component {
                     onChange={this.inputChange}
                 />
                 <Typography className={classes.commentText} align='right'>
-                    {currentLength + '/' + theme.custom.maxCommentLength }
+                    {currentLength + '/' + theme.custom.maxCommentLength}
                 </Typography>
                 <Grid container spacing={8}>
                     <Grid item>
                         <Button variant='contained' color='primary' onClick={() => this.handleClickUpdateComment()}>
-              Save
+                            Save
                         </Button>
                     </Grid>
                     <Grid item>
-                        <Button onClick={() => this.handleClickCancel()} className={classes.button}>Cancel</Button>
+                        <Button onClick={() => this.handleClickCancel()} className={classes.button}>
+                            Cancel
+                        </Button>
                     </Grid>
                 </Grid>
             </div>

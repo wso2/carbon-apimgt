@@ -73,10 +73,7 @@ class SubscriptionsTable extends Component {
                         className={classes.button}
                         disabled='true'
                     >
-                        <FormattedMessage
-                            id='block.production.only'
-                            defaultMessage='Block Production Only'
-                        />
+                        <FormattedMessage id='block.production.only' defaultMessage='Block Production Only' />
                     </Button>
                     <Button
                         size='small'
@@ -85,10 +82,7 @@ class SubscriptionsTable extends Component {
                         onClick={() => this.blockSubscription(subscriptionId)}
                         className={classes.button}
                     >
-                        <FormattedMessage
-                            id='block.all'
-                            defaultMessage='Block All'
-                        />
+                        <FormattedMessage id='block.all' defaultMessage='Block All' />
                     </Button>
                     <Button
                         size='small'
@@ -97,12 +91,10 @@ class SubscriptionsTable extends Component {
                         onClick={() => this.unblockSubscription(subscriptionId)}
                         className={classes.button}
                     >
-                        <FormattedMessage
-                            id='unblock'
-                            defaultMessage='Unblock'
-                        />
+                        <FormattedMessage id='unblock' defaultMessage='Unblock' />
                     </Button>
-                </dev>);
+                </dev>
+            );
         } else if (state === 'BLOCKED') {
             return (
                 <dev>
@@ -113,10 +105,7 @@ class SubscriptionsTable extends Component {
                         onClick={() => this.blockProductionOnly(subscriptionId)}
                         className={classes.button}
                     >
-                        <FormattedMessage
-                            id='block.production.only'
-                            defaultMessage='Block Production Only'
-                        />
+                        <FormattedMessage id='block.production.only' defaultMessage='Block Production Only' />
                     </Button>
                     <Button
                         size='small'
@@ -126,10 +115,7 @@ class SubscriptionsTable extends Component {
                         className={classes.button}
                         disabled='true'
                     >
-                        <FormattedMessage
-                            id='block.all'
-                            defaultMessage='Block All'
-                        />
+                        <FormattedMessage id='block.all' defaultMessage='Block All' />
                     </Button>
                     <Button
                         size='small'
@@ -138,12 +124,10 @@ class SubscriptionsTable extends Component {
                         onClick={() => this.unblockSubscription(subscriptionId)}
                         className={classes.button}
                     >
-                        <FormattedMessage
-                            id='unblock'
-                            defaultMessage='Unblock'
-                        />
+                        <FormattedMessage id='unblock' defaultMessage='Unblock' />
                     </Button>
-                </dev>);
+                </dev>
+            );
         } else {
             return (
                 <dev>
@@ -154,10 +138,7 @@ class SubscriptionsTable extends Component {
                         onClick={() => this.blockProductionOnly(subscriptionId)}
                         className={classes.button}
                     >
-                        <FormattedMessage
-                            id='block.production.only'
-                            defaultMessage='Block Production Only'
-                        />
+                        <FormattedMessage id='block.production.only' defaultMessage='Block Production Only' />
                     </Button>
                     <Button
                         size='small'
@@ -166,10 +147,7 @@ class SubscriptionsTable extends Component {
                         onClick={() => this.blockSubscription(subscriptionId)}
                         className={classes.button}
                     >
-                        <FormattedMessage
-                            id='block.all'
-                            defaultMessage='Block All'
-                        />
+                        <FormattedMessage id='block.all' defaultMessage='Block All' />
                     </Button>
                     <Button
                         size='small'
@@ -179,12 +157,10 @@ class SubscriptionsTable extends Component {
                         className={classes.button}
                         disabled='true'
                     >
-                        <FormattedMessage
-                            id='unblock'
-                            defaultMessage='Unblock'
-                        />
+                        <FormattedMessage id='unblock' defaultMessage='Unblock' />
                     </Button>
-                </dev>);
+                </dev>
+            );
         }
     }
 
@@ -197,20 +173,11 @@ class SubscriptionsTable extends Component {
      */
     formatSubscriptionStateString(state) {
         if (state === 'PROD_ONLY_BLOCKED') {
-            return (<FormattedMessage
-                id='blocked.production.only'
-                defaultMessage='Blocked Production Only'
-            />);
+            return <FormattedMessage id='blocked.production.only' defaultMessage='Blocked Production Only' />;
         } else if (state === 'BLOCKED') {
-            return (<FormattedMessage
-                id='blocked'
-                defaultMessage='Blocked'
-            />);
+            return <FormattedMessage id='blocked' defaultMessage='Blocked' />;
         } else {
-            return (<FormattedMessage
-                id='active'
-                defaultMessage='Active'
-            />);
+            return <FormattedMessage id='active' defaultMessage='Active' />;
         }
     }
 
@@ -223,13 +190,16 @@ class SubscriptionsTable extends Component {
     blockSubscription(subscriptionId) {
         const api = new API();
         const promisedSubscriptionUpdate = api.blockSubscriptions(subscriptionId, 'BLOCKED');
-        promisedSubscriptionUpdate.then(() => {
-            Alert.success('Subscription was blocked.');
-            this.fetchSubscriptionData();
-        }).catch((errorResponse) => {
-            console.log(errorResponse);
-            Alert.error('Error: Unable to block subscription. (Reason: ' + errorResponse.response.body.message + ')');
-        });
+        promisedSubscriptionUpdate
+            .then(() => {
+                Alert.success('Subscription was blocked.');
+                this.fetchSubscriptionData();
+            })
+            .catch((errorResponse) => {
+                console.log(errorResponse);
+                const { message } = errorResponse.response.body;
+                Alert.error('Error: Unable to block subscription. (Reason: ' + message + ')');
+            });
     }
 
     /**
@@ -241,13 +211,16 @@ class SubscriptionsTable extends Component {
     blockProductionOnly(subscriptionId) {
         const api = new API();
         const promisedSubscriptionUpdate = api.blockSubscriptions(subscriptionId, 'PROD_ONLY_BLOCKED');
-        promisedSubscriptionUpdate.then(() => {
-            Alert.success('Subscription was blocked for production only.');
-            this.fetchSubscriptionData();
-        }).catch((errorResponse) => {
-            console.log(errorResponse);
-            Alert.error('Error: Unable to block subscription. (Reason: ' + errorResponse.response.body.message + ')');
-        });
+        promisedSubscriptionUpdate
+            .then(() => {
+                Alert.success('Subscription was blocked for production only.');
+                this.fetchSubscriptionData();
+            })
+            .catch((errorResponse) => {
+                console.log(errorResponse);
+                const { message } = errorResponse.response.body;
+                Alert.error('Error: Unable to block subscription. (Reason: ' + message + ')');
+            });
     }
 
     /**
@@ -259,13 +232,16 @@ class SubscriptionsTable extends Component {
     unblockSubscription(subscriptionId) {
         const api = new API();
         const promisedSubscriptionUpdate = api.unblockSubscriptions(subscriptionId);
-        promisedSubscriptionUpdate.then(() => {
-            Alert.success('Subscription was unblocked.');
-            this.fetchSubscriptionData();
-        }).catch((errorResponse) => {
-            console.log(errorResponse);
-            Alert.error('Error: Unable to unblock subscription. (Reason: ' + errorResponse.response.body.message + ')');
-        });
+        promisedSubscriptionUpdate
+            .then(() => {
+                Alert.success('Subscription was unblocked.');
+                this.fetchSubscriptionData();
+            })
+            .catch((errorResponse) => {
+                console.log(errorResponse);
+                const { message } = errorResponse.response.body;
+                Alert.error('Error: Unable to unblock subscription. (Reason: ' + message + ')');
+            });
     }
 
     /**
@@ -279,7 +255,8 @@ class SubscriptionsTable extends Component {
         promisedSubscriptions
             .then((response) => {
                 this.setState({ subscriptions: response.obj.list });
-            }).catch((errorMessage) => {
+            })
+            .catch((errorMessage) => {
                 console.log(errorMessage);
                 Alert.error(JSON.stringify(errorMessage));
             });
@@ -295,10 +272,7 @@ class SubscriptionsTable extends Component {
             return (
                 <dev>
                     <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
-                        <FormattedMessage
-                            id='manage.subscriptions'
-                            defaultMessage='Manage Subscriptions'
-                        />
+                        <FormattedMessage id='manage.subscriptions' defaultMessage='Manage Subscriptions' />
                     </Typography>
                     <Table className={classes.table}>
                         <colgroup>
@@ -311,34 +285,19 @@ class SubscriptionsTable extends Component {
                         <TableHead>
                             <TableRow>
                                 <TableCell>
-                                    <FormattedMessage
-                                        id='subscriber'
-                                        defaultMessage='Subscriber'
-                                    />
+                                    <FormattedMessage id='subscriber' defaultMessage='Subscriber' />
                                 </TableCell>
                                 <TableCell>
-                                    <FormattedMessage
-                                        id='application'
-                                        defaultMessage='Application'
-                                    />
+                                    <FormattedMessage id='application' defaultMessage='Application' />
                                 </TableCell>
                                 <TableCell>
-                                    <FormattedMessage
-                                        id='tier'
-                                        defaultMessage='Tier'
-                                    />
+                                    <FormattedMessage id='tier' defaultMessage='Tier' />
                                 </TableCell>
                                 <TableCell>
-                                    <FormattedMessage
-                                        id='status'
-                                        defaultMessage='Status'
-                                    />
+                                    <FormattedMessage id='status' defaultMessage='Status' />
                                 </TableCell>
                                 <TableCell>
-                                    <FormattedMessage
-                                        id='actions'
-                                        defaultMessage='Actions'
-                                    />
+                                    <FormattedMessage id='actions' defaultMessage='Actions' />
                                 </TableCell>
                             </TableRow>
                         </TableHead>
@@ -347,8 +306,12 @@ class SubscriptionsTable extends Component {
                                 .sort((a, b) => {
                                     const x = a.subscriptionId;
                                     const y = b.subscriptionId;
-                                    if (x < y) { return -1; }
-                                    if (x > y) { return 1; }
+                                    if (x < y) {
+                                        return -1;
+                                    }
+                                    if (x > y) {
+                                        return 1;
+                                    }
                                     return 0;
                                 })
                                 .map((row) => {
@@ -357,24 +320,36 @@ class SubscriptionsTable extends Component {
                                             <TableCell>{row.applicationInfo.subscriber}</TableCell>
                                             <TableCell>{row.applicationInfo.name}</TableCell>
                                             <TableCell>{row.policy}</TableCell>
-                                            <TableCell>{this.formatSubscriptionStateString(row.subscriptionStatus)}</TableCell>
+                                            <TableCell>
+                                                {this.formatSubscriptionStateString(row.subscriptionStatus)}
+                                            </TableCell>
                                             <TableCell>
                                                 <div>
-                                                    <ApiPermissionValidation userPermissions={api.userPermissionsForApi}>
+                                                    <ApiPermissionValidation
+                                                        userPermissions={api.userPermissionsForApi}
+                                                    >
                                                         <ApiPermissionValidation
-                                                            checkingPermissionType={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
+                                                            checkingPermissionType={
+                                                                ApiPermissionValidation.permissionType
+                                                                    .MANAGE_SUBSCRIPTION
+                                                            }
                                                             userPermissions={api.userPermissionsForApi}
                                                         >
-                                                            {this.getSubscriptionBlockingButtons(row.subscriptionStatus, row.subscriptionId)}
+                                                            {this.getSubscriptionBlockingButtons(
+                                                                row.subscriptionStatus,
+                                                                row.subscriptionId,
+                                                            )}
                                                         </ApiPermissionValidation>
                                                     </ApiPermissionValidation>
                                                 </div>
                                             </TableCell>
-                                        </TableRow>);
+                                        </TableRow>
+                                    );
                                 })}
                         </TableBody>
                     </Table>
-                </dev>);
+                </dev>
+            );
         } else {
             return null;
         }

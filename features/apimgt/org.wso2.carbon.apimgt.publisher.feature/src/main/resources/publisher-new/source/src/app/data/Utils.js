@@ -161,7 +161,8 @@ class Utils {
     }
 
     static getDCRAppInfoRequestURL(environment = Utils.getCurrentEnvironment()) {
-        // TODO: tmkasun need to implement proper API return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
+        // TODO: tmkasun need to implement proper API return
+        // `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}`;
     }
 
@@ -238,7 +239,7 @@ Utils.CONST = {
     MULTI_ENVIRONMENT_OVERVIEW_ENABLED: 'multi_env_overview',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
-    SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',
+    SWAGGER_YAML: '/api/am/publisher/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
     CONTEXT_PATH: '/publisher',
 };

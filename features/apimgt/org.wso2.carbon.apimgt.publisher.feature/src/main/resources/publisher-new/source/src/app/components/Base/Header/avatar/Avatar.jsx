@@ -16,6 +16,7 @@ import NightMode from '@material-ui/icons/Brightness2';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import qs from 'qs';
+import PropTypes from 'prop-types';
 
 const styles = theme => ({
     profileMenu: {
@@ -119,5 +120,10 @@ class Avatar extends Component {
         );
     }
 }
+Avatar.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    user: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
+    toggleTheme: PropTypes.func.isRequired,
+};
 
 export default withStyles(styles)(Avatar);

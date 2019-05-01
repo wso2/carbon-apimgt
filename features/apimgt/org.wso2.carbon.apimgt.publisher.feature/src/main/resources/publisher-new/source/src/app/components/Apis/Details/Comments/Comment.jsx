@@ -29,7 +29,6 @@ import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
 import CommentReply from './CommentReply';
 
-
 const styles = theme => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -56,10 +55,10 @@ const styles = theme => ({
 });
 
 /**
-   * Display a particular comment and details
-   * @class Comment
-   * @extends {React.Component}
-   */
+ * Display a particular comment and details
+ * @class Comment
+ * @extends {React.Component}
+ */
 class Comment extends React.Component {
     /**
      * Creates an instance of Comment
@@ -235,44 +234,69 @@ class Comment extends React.Component {
         } = this.props;
         const { editIndex, replyIndex, openDialog } = this.state;
         const props = { api, allComments, commentsUpdate };
-        return (
-            [comments
-      && comments.slice(0).reverse().map((comment, index) => (
-          <div key={this.getKey()} className={classes.contentWrapper}>
-              <Grid container spacing={8} className={classes.root}>
-                  <Grid item>
-                      <AccountBox className={classes.commentIcon} />
-                  </Grid>
-                  <Grid item xs zeroMinWidth>
-                      <Typography noWrap className={classes.commentText} variant='body2'>
-                          {comment.createdBy}
-                      </Typography>
+        return [
+            comments &&
+                comments
+                    .slice(0)
+                    .reverse()
+                    .map((comment, index) => (
+                        <div key={this.getKey()} className={classes.contentWrapper}>
+                            <Grid container spacing={8} className={classes.root}>
+                                <Grid item>
+                                    <AccountBox className={classes.commentIcon} />
+                                </Grid>
+                                <Grid item xs zeroMinWidth>
+                                    <Typography noWrap className={classes.commentText} variant='body2'>
+                                        {comment.createdBy}
+                                    </Typography>
 
-                      {(index !== editIndex)
-              &&
-              <Typography className={classes.commentText}>
-                  {comment.commentText}
-              </Typography>
-                      }
+                                    {index !== editIndex && (
+                                        <Typography className={classes.commentText}>{comment.commentText}</Typography>
+                                    )}
 
-                      {(index === editIndex)
-              && <CommentEdit {...props} comment={comment} toggleShowEdit={this.handleShowEdit} />
-                      }
+                                    {index === editIndex && (
+                                        <CommentEdit
+                                            {...props}
+                                            comment={comment}
+                                            toggleShowEdit={this.handleShowEdit}
+                                        />
+                                    )}
 
-                      <CommentOptions classes={classes} comment={comment} editIndex={editIndex} index={index} showAddComment={this.showAddComment} handleClickOpen={this.handleClickOpen} showEditComment={this.showEditComment} />
+                                    <CommentOptions
+                                        classes={classes}
+                                        comment={comment}
+                                        editIndex={editIndex}
+                                        index={index}
+                                        showAddComment={this.showAddComment}
+                                        handleClickOpen={this.handleClickOpen}
+                                        showEditComment={this.showEditComment}
+                                    />
 
-                      {(index === replyIndex)
-              && <CommentAdd {...props} parentCommentId={comment.commentId} toggleShowReply={this.handleShowReply} cancelButton />
-                      }
-                      {(comment.replies.length !== 0)
-              && <CommentReply {...props} classes={classes} comments={comment.replies} /> }
-                  </Grid>
-              </Grid>
-          </div>
-
-      )), <ConfirmDialog key='key-dialog' labelCancel='Cancel' title='Confirm Delete' message='Are you sure you want to delete this comment?' labelOk='Yes' callback={this.handleConfirmDialog} open={openDialog} />,
-            ]
-        );
+                                    {index === replyIndex && (
+                                        <CommentAdd
+                                            {...props}
+                                            parentCommentId={comment.commentId}
+                                            toggleShowReply={this.handleShowReply}
+                                            cancelButton
+                                        />
+                                    )}
+                                    {comment.replies.length !== 0 && (
+                                        <CommentReply {...props} classes={classes} comments={comment.replies} />
+                                    )}
+                                </Grid>
+                            </Grid>
+                        </div>
+                    )),
+            <ConfirmDialog
+                key='key-dialog'
+                labelCancel='Cancel'
+                title='Confirm Delete'
+                message='Are you sure you want to delete this comment?'
+                labelOk='Yes'
+                callback={this.handleConfirmDialog}
+                open={openDialog}
+            />,
+        ];
     }
 }
 

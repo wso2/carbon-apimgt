@@ -1067,7 +1067,7 @@ public class RestApiUtil {
      *
      * @return URITemplate set associated with API Manager Store REST API
      */
-    public static Set<URITemplate> getStoreAppResourceMapping() {
+    public static Set<URITemplate> getStoreAppResourceMapping(String version) {
 
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
                 RestApiConstants.REST_API_STORE_CONTEXT,
@@ -1076,11 +1076,19 @@ public class RestApiUtil {
         if (storeResourceMappings != null) {
             return storeResourceMappings;
         } else {
-
             try {
-                String definition = IOUtils.toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                //Get URL templates from swagger content we created
+                String definition;
+                APIDefinition apiDefinitionFromOpenAPISpec;
+                if (RestApiConstants.REST_API_STORE_VERSION_0.equals(version)) {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
+                    apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                } else {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+                    apiDefinitionFromOpenAPISpec = new APIDefinitionUsingOASParser();
+                }
+                //Get URL templates from swagger content w created
                 storeResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);

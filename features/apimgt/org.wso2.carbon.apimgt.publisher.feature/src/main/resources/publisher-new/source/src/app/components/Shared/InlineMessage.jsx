@@ -50,6 +50,7 @@ InlineMessage.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     height: PropTypes.number,
     type: PropTypes.string,
+    children: PropTypes.shape({}).isRequired,
 };
 InlineMessage.defaultProps = {
     height: 100,

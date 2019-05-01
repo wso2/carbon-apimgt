@@ -94,7 +94,13 @@ class Comments extends Component {
                 if (commentList.length < theme.custom.commentsLimit) {
                     this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
                 } else {
-                    this.setState({ startCommentsToDisplay: commentList.length - theme.custom.commentsLimit, comments: commentList.slice(commentList.length - theme.custom.commentsLimit, commentList.length) });
+                    this.setState({
+                        startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
+                        comments: commentList.slice(
+                            commentList.length - theme.custom.commentsLimit,
+                            commentList.length,
+                        ),
+                    });
                 }
             })
             .catch((error) => {
@@ -117,7 +123,10 @@ class Comments extends Component {
         if (startCommentsToDisplay - theme.custom.commentsLimit <= 0) {
             this.setState({ startCommentsToDisplay: 0, comments: allComments.slice(0, totalComments) });
         } else {
-            this.setState({ startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit, comments: allComments.slice(startCommentsToDisplay - theme.custom.commentsLimit, totalComments) });
+            this.setState({
+                startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit,
+                comments: allComments.slice(startCommentsToDisplay - theme.custom.commentsLimit, totalComments),
+            });
         }
     }
 
@@ -149,7 +158,11 @@ class Comments extends Component {
             difference = comments.length - totalComments;
             newStart = startCommentsToDisplay + difference;
             newTotal = comments.length;
-            this.setState({ startCommentsToDisplay: newStart, totalComments: newTotal, comments: comments.slice(newStart, newTotal) });
+            this.setState({
+                startCommentsToDisplay: newStart,
+                totalComments: newTotal,
+                comments: comments.slice(newStart, newTotal),
+            });
         } else {
             difference = totalComments - comments.length;
             if (startCommentsToDisplay === 0) {
@@ -158,7 +171,11 @@ class Comments extends Component {
                 newStart = startCommentsToDisplay - difference;
             }
             newTotal = comments.length;
-            this.setState({ startCommentsToDisplay: newStart, totalComments: newTotal, comments: comments.slice(newStart, newTotal) });
+            this.setState({
+                startCommentsToDisplay: newStart,
+                totalComments: newTotal,
+                comments: comments.slice(newStart, newTotal),
+            });
         }
     }
 
@@ -175,27 +192,34 @@ class Comments extends Component {
         return (
             <div className={classes.contentWrapper}>
                 <div className={classes.root}>
-                    <ArrowDropDownCircleOutlined
-                        onClick={this.handleExpandClick}
-                        aria-expanded={expanded}
-                    />
-                    <Typography
-                        onClick={this.handleExpandClick}
-                        variant='display1'
-                        className={classes.titleSub}
-                    >
+                    <ArrowDropDownCircleOutlined onClick={this.handleExpandClick} aria-expanded={expanded} />
+                    <Typography onClick={this.handleExpandClick} variant='display1' className={classes.titleSub}>
                         Comments
                     </Typography>
                 </div>
                 <Collapse in={expanded} timeout='auto' unmountOnExit>
-                    <CommentAdd api={api} commentsUpdate={this.updateCommentList} allComments={allComments} parentCommentId={null} cancelButton={false} />
-                    <Comment comments={comments} api={api} commentsUpdate={this.updateCommentList} allComments={allComments} />
-                    { startCommentsToDisplay !== 0
-                    && (
+                    <CommentAdd
+                        api={api}
+                        commentsUpdate={this.updateCommentList}
+                        allComments={allComments}
+                        parentCommentId={null}
+                        cancelButton={false}
+                    />
+                    <Comment
+                        comments={comments}
+                        api={api}
+                        commentsUpdate={this.updateCommentList}
+                        allComments={allComments}
+                    />
+                    {startCommentsToDisplay !== 0 && (
                         <div className={classes.contentWrapper}>
                             <Grid container spacing={32} className={classes.root}>
                                 <Grid item>
-                                    <Typography className={classes.verticalSpace} variant='body2' onClick={this.handleLoadMoreComments}>
+                                    <Typography
+                                        className={classes.verticalSpace}
+                                        variant='body2'
+                                        onClick={this.handleLoadMoreComments}
+                                    >
                                         <a className={classes.link + ' ' + classes.loadMoreLink}>
                                             Load Previous Comments
                                         </a>
@@ -209,13 +233,13 @@ class Comments extends Component {
                                 </Grid>
                                 <Grid item>
                                     <Typography className={classes.verticalSpace} variant='body2'>
-                                        Showing comments { (totalComments - startCommentsToDisplay) + ' of ' + totalComments }
+                                        Showing comments
+                                        {totalComments + -startCommentsToDisplay + ' of ' + totalComments}
                                     </Typography>
                                 </Grid>
                             </Grid>
                         </div>
-                    )
-                    }
+                    )}
                 </Collapse>
             </div>
         );

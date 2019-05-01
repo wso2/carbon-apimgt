@@ -23,7 +23,6 @@ import { withStyles } from '@material-ui/core/styles';
 import AuthManager from 'AppData/AuthManager';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
-
 const styles = theme => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -59,7 +58,6 @@ const styles = theme => ({
     },
 });
 
-
 /**
  * Component to display options of the comment
  * @class CommentOptions
@@ -73,9 +71,7 @@ class CommentOptions extends React.Component {
      */
     constructor(props) {
         super(props);
-        this.state = {
-
-        };
+        this.state = {};
         this.showAddComment = this.showAddComment.bind(this);
         this.showEditComment = this.showEditComment.bind(this);
         this.handleClickOpen = this.handleClickOpen.bind(this);
@@ -146,55 +142,65 @@ class CommentOptions extends React.Component {
         const {
             classes, comment, editIndex, index, theme,
         } = this.props;
+        const canDelete =
+            comment.createdBy === AuthManager.getUser().name || AuthManager.getUser().name === theme.custom.adminRole;
+        const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
         return (
             <Grid container spacing={8} className={classes.verticalSpace} key={comment.commentId}>
-                { comment.parentCommentId == null
-                && [
+                {comment.parentCommentId == null && [
                     <Grid item key='key-reply'>
-                        <Typography component='a' className={(editIndex === -1 ? classes.link : classes.disable)} onClick={() => this.showAddComment(index)}>
+                        <Typography
+                            component='a'
+                            className={editIndex === -1 ? classes.link : classes.disable}
+                            onClick={() => this.showAddComment(index)}
+                        >
                             Reply
                         </Typography>
                     </Grid>,
                     <Grid item key='key-reply-vertical-divider'>
                         <VerticalDivider height={15} />
                     </Grid>,
-                ]
-                }
+                ]}
 
                 {/* only the comment owner or admin can delete a comment */}
-                {(comment.createdBy === AuthManager.getUser().name || AuthManager.getUser().name === theme.custom.adminRole)
-                && [
+                {canDelete && [
                     <Grid item key='key-delete'>
-                        <Typography component='a' className={(editIndex === -1 ? classes.link : classes.disable)} onClick={() => this.handleClickOpen(comment)}>
+                        <Typography
+                            component='a'
+                            className={editIndex === -1 ? classes.link : classes.disable}
+                            onClick={() => this.handleClickOpen(comment)}
+                        >
                             Delete
                         </Typography>
                     </Grid>,
                     <Grid item key='key-delete-vertical-divider'>
                         <VerticalDivider height={15} />
                     </Grid>,
-                ]
-                }
+                ]}
 
                 {/* only the comment owner can modify the comment from the exact entry point */}
-                {(comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher')
-                && [
+                {canModify && [
                     <Grid item key='key-edit'>
-                        <Typography component='a' className={(editIndex === -1 ? classes.link : classes.disable)} onClick={() => this.showEditComment(index)}>
+                        <Typography
+                            component='a'
+                            className={editIndex === -1 ? classes.link : classes.disable}
+                            onClick={() => this.showEditComment(index)}
+                        >
                             Edit
                         </Typography>
                     </Grid>,
                     <Grid item key='key-edit-verical-divider'>
                         <VerticalDivider height={15} />
                     </Grid>,
-                ]
-                }
+                ]}
                 <Grid item className={classes.time}>
                     <Typography component='a' variant='caption'>
                         {this.displayDate(comment.createdTime)}
                     </Typography>
                 </Grid>
 
-                {editIndex === index ? null
+                {editIndex === index
+                    ? null
                     : [
                         <Grid item key='key-category-vertical-divider'>
                             <VerticalDivider height={15} />
@@ -204,8 +210,7 @@ class CommentOptions extends React.Component {
                                 {comment.category}
                             </Typography>
                         </Grid>,
-                    ]
-                }
+                    ]}
             </Grid>
         );
     }
