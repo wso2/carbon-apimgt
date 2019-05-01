@@ -14,7 +14,7 @@ const styles = theme => ({
     paper: {
         marginRight: theme.spacing.unit * 2,
     },
-    possition: {
+    position: {
         zIndex: 1,
     },
 });
@@ -82,7 +82,7 @@ class MenuButton extends React.Component {
                     onClick={this.handleToggle}
                     {...buttonProps}
                 >
-                    {children}  ▼
+                    {children} ▼
                 </Button>
                 <Popper
                     open={open}
@@ -90,7 +90,7 @@ class MenuButton extends React.Component {
                     anchorEl={this.anchorEl}
                     transition
                     disablePortal
-                    className={this.props.classes.possition}
+                    className={this.props.classes.position}
                 >
                     {({ TransitionProps, placement }) => (
                         <Grow
@@ -110,8 +110,10 @@ class MenuButton extends React.Component {
 }
 
 MenuButton.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({ position: PropTypes.shape({}) }).isRequired,
     menuList: PropTypes.element.isRequired,
+    children: PropTypes.shape({}).isRequired,
+    buttonProps: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(MenuButton);

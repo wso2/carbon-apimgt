@@ -7,7 +7,6 @@ target
 .idea
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repository/database/WSO2AM_DB.h2.db
 *.DS_Store
-package-lock.json
 WSO2AM_DB.trace.db
 node_modules
 features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#calculator#*.war
