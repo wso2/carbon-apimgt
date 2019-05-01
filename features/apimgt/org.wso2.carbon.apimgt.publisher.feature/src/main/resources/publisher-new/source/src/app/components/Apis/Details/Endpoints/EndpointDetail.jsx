@@ -458,7 +458,7 @@ class EndpointDetail extends Component {
                                                 <Button
                                                     component='a'
                                                     target='_blank'
-                                                    href='/publisher/endpoints'
+                                                    href='/publisher-new/endpoints'
                                                     size='small'
                                                     className={classes.viewInStoreLauncher}>
                                                     <LaunchIcon />

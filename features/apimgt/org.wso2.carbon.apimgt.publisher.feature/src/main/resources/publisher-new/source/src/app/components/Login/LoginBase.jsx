@@ -25,8 +25,8 @@ const LoginBase = (props) => {
             <header className='header header-default'>
                 <div className='container-fluid'>
                     <div className='pull-left brand float-remove-xs text-center-xs'>
-                        <a href='/publisher/'>
-                            <img alt='logo' src='/publisher/static/public/images/logo.svg' className='logo' />
+                        <a href='/publisher-new/'>
+                            <img alt='logo' src='/publisher-new/static/public/images/logo.svg' className='logo' />
                             <h1>API Publisher</h1>
                         </a>
                     </div>
