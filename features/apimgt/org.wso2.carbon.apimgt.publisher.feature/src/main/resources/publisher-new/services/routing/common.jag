@@ -1,0 +1,15 @@
+<%
+var log = new Log("Common Router");
+
+var uri = request.getRequestURI();
+var filePath = uri.split(request.getContextPath());
+
+var path = "../../public/pages/index.html";
+var file = new File(path);
+file.open("r");
+response.contentType = 'text/html';
+response.characterEncoding = 'UTF-8';
+print(file.getStream());
+file.close();
+
+%>

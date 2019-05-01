@@ -47,8 +47,6 @@ import java.util.regex.Pattern;
 public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
 
     private static final Log log = LogFactory.getLog(WebAppAuthenticatorImpl.class);
-    private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
-    private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -58,8 +56,8 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
      * @throws APIManagementException when error in authentication process
      */
     public boolean authenticate(Message message) throws APIManagementException {
-        String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message, PATTERN,
-                RestApiConstants.AUTH_HEADER_NAME);
+        String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message,
+                RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
         AccessTokenInfo tokenInfo = null;
         try {
             tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(accessToken);

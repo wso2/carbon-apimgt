@@ -7,17 +7,20 @@ import PlaceIcon from '@material-ui/icons/Place';
 import MailIcon from '@material-ui/icons/Mail';
 
 const icons = {
-    InboxIcon, FaceIcon, PlaceIcon, MailIcon,
+    InboxIcon,
+    FaceIcon,
+    PlaceIcon,
+    MailIcon,
 };
 
 const iconNames = Object.keys(icons);
-const styles = ({
+const styles = {
     svgImage: {
         cursor: 'pointer',
         // ⚠️ object-fit is not supported by IE11.
         objectFit: 'cover',
     },
-});
+};
 
 /**
  * Generate dynamic API thumbnail image (SVG), Use PureComponent to avoid unnessasary re-rendering when hover ect
@@ -90,6 +93,7 @@ ImageGenerator.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     height: PropTypes.number,
     width: PropTypes.number,
+    api: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(ImageGenerator);

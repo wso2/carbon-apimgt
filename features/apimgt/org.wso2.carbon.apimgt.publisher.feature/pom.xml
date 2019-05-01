@@ -213,13 +213,8 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>publisher-new/public/**</include>
-                    <include>publisher-new/pages/**</include>
-                    <include>publisher-new/source/**</include>
-                    <include>publisher-new/.babelrc</include>
+                    <include>publisher-new/services/**</include>
                     <include>publisher-new/jaggery.conf</include>
-                    <include>publisher-new/package.json</include>
-                    <include>publisher-new/package-lock.json</include>
-                    <include>publisher-new/webpack.config.js</include>
                     <include>lifecycles/APILifeCycle.xml</include>
                     <include>p2.inf</include>
                 </includes>

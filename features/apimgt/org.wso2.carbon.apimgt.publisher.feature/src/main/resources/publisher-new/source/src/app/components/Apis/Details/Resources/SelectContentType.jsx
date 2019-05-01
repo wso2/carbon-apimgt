@@ -18,7 +18,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import deburr from 'lodash/deburr';
-import keycode from 'keycode';
 import Downshift from 'downshift';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -29,11 +28,8 @@ import Chip from '@material-ui/core/Chip';
 import mimeTypes from './MimeTypes';
 const suggestions = mimeTypes;
 
-
 function renderInput(inputProps) {
-    const {
-        InputProps, classes, ref, ...other
-    } = inputProps;
+    const { InputProps, classes, ref, ...other } = inputProps;
 
     return (
         <TextField
@@ -50,9 +46,7 @@ function renderInput(inputProps) {
     );
 }
 
-function renderSuggestion({
-    suggestion, index, itemProps, highlightedIndex, selectedItem,
-}) {
+function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, selectedItem }) {
     const isHighlighted = highlightedIndex === index;
     const isSelected = (selectedItem || '').indexOf(suggestion.label) > -1;
 
@@ -61,7 +55,7 @@ function renderSuggestion({
             {...itemProps}
             key={suggestion.label}
             selected={isHighlighted}
-            component='div'
+            component="div"
             style={{
                 fontWeight: isSelected ? 500 : 400,
             }}
@@ -85,15 +79,15 @@ function getSuggestions(value) {
 
     return inputLength === 0
         ? []
-        : suggestions.filter((suggestion) => {
-            const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
+        : suggestions.filter(suggestion => {
+              const keep = count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
 
-            if (keep) {
-                count += 1;
-            }
+              if (keep) {
+                  count += 1;
+              }
 
-            return keep;
-        });
+              return keep;
+          });
 }
 
 class SelectContentType extends React.Component {
@@ -102,20 +96,20 @@ class SelectContentType extends React.Component {
         selectedItem: [],
     };
 
-    handleKeyDown = (event) => {
+    handleKeyDown = event => {
         const { inputValue, selectedItem } = this.state;
-        if (selectedItem.length && !inputValue.length && keycode(event) === 'backspace') {
+        if (selectedItem.length && !inputValue.length && event.keyCode === 8) {
             this.setState({
                 selectedItem: selectedItem.slice(0, selectedItem.length - 1),
             });
         }
     };
 
-    handleInputChange = (event) => {
+    handleInputChange = event => {
         this.setState({ inputValue: event.target.value });
     };
 
-    handleChange = (item) => {
+    handleChange = item => {
         let { selectedItem } = this.state;
 
         if (selectedItem.indexOf(item) === -1) {
@@ -129,7 +123,7 @@ class SelectContentType extends React.Component {
     };
 
     handleDelete = item => () => {
-        this.setState((state) => {
+        this.setState(state => {
             const selectedItem = [...state.selectedItem];
             selectedItem.splice(selectedItem.indexOf(item), 1);
             return { selectedItem };
@@ -137,24 +131,42 @@ class SelectContentType extends React.Component {
     };
 
     componentDidMount() {
-      if(this.props.value){
-        this.setState({selectedItem: this.props.value});   
-      }
+        if (this.props.value) {
+            this.setState({ selectedItem: this.props.value });
+        }
     }
     render() {
         const { classes, value } = this.props;
         const { inputValue, selectedItem } = this.state;
         return (
-            <Downshift id='downshift-multiple' inputValue={inputValue} onChange={this.handleChange} selectedItem={value}>
+            <Downshift
+                id="downshift-multiple"
+                inputValue={inputValue}
+                onChange={this.handleChange}
+                selectedItem={value}
+            >
                 {({
-                    getInputProps, getItemProps, isOpen, inputValue: inputValue2, selectedItem: selectedItem2, highlightedIndex,
+                    getInputProps,
+                    getItemProps,
+                    isOpen,
+                    inputValue: inputValue2,
+                    selectedItem: selectedItem2,
+                    highlightedIndex,
                 }) => (
                     <div className={classes.container}>
                         {renderInput({
                             fullWidth: true,
                             classes,
                             InputProps: getInputProps({
-                                startAdornment: selectedItem.map(item => <Chip key={item} tabIndex={-1} label={item} className={classes.chip} onDelete={this.handleDelete(item)} />),
+                                startAdornment: selectedItem.map(item => (
+                                    <Chip
+                                        key={item}
+                                        tabIndex={-1}
+                                        label={item}
+                                        className={classes.chip}
+                                        onDelete={this.handleDelete(item)}
+                                    />
+                                )),
                                 onChange: this.handleInputChange,
                                 onKeyDown: this.handleKeyDown,
                             }),
@@ -168,7 +180,8 @@ class SelectContentType extends React.Component {
                                         itemProps: getItemProps({ item: suggestion.label }),
                                         highlightedIndex,
                                         selectedItem: selectedItem2,
-                                    }))}
+                                    }),
+                                )}
                             </Paper>
                         ) : null}
                     </div>
@@ -208,7 +221,6 @@ const styles = theme => ({
         height: theme.spacing.unit * 2,
     },
 });
-
 
 SelectContentType.propTypes = {
     classes: PropTypes.object.isRequired,

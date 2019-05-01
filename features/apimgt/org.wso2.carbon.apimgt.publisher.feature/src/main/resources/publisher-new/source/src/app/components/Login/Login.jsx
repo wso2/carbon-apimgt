@@ -346,7 +346,12 @@ class Login extends Component {
                                                                 <TextField
                                                                     error={!this.state.username && this.state.validate}
                                                                     id='username'
-                                                                    label={<FormattedMessage id='username' defaultMessage='Username' />}
+                                                                    label={
+                                                                        <FormattedMessage
+                                                                            id='username'
+                                                                            defaultMessage='Username'
+                                                                        />
+                                                                    }
                                                                     type='text'
                                                                     autoComplete='username'
                                                                     margin='normal'
@@ -356,7 +361,12 @@ class Login extends Component {
                                                                 <TextField
                                                                     error={!this.state.password && this.state.validate}
                                                                     id='password'
-                                                                    label={<FormattedMessage id='password' defaultMessage='Password' />}
+                                                                    label={
+                                                                        <FormattedMessage
+                                                                            id='password'
+                                                                            defaultMessage='Password'
+                                                                        />
+                                                                    }
                                                                     type='password'
                                                                     autoComplete='current-password'
                                                                     margin='normal'
@@ -380,9 +390,14 @@ class Login extends Component {
                                                     className='login-form-submit'
                                                     disabled={!isSsoUpdated}
                                                 >
-                                                    {isSsoEnabled
-                                                        ? <FormattedMessage id='visit.login.page' defaultMessage='Visit Login Page' />
-                                                        : <FormattedMessage id='login' defaultMessage='Login' />}
+                                                    {isSsoEnabled ? (
+                                                        <FormattedMessage
+                                                            id='visit.login.page'
+                                                            defaultMessage='Visit Login Page'
+                                                        />
+                                                    ) : (
+                                                        <FormattedMessage id='login' defaultMessage='Login' />
+                                                    )}
                                                 </Button>
                                             </form>
                                         </Paper>

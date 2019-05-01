@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.rest.api.util;
 
 import java.io.File;
+import java.util.regex.Pattern;
 
 public final class RestApiConstants {
 
@@ -112,8 +113,9 @@ public final class RestApiConstants {
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
-    public static final String COOKIE_NAME = "cookie";
-    public static final String AUTH_COOKIE_NAME = "WSO2_AM_TOKEN_DEFAULT";
+    public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
+    public static final String COOKIE_HEADER_NAME = "cookie";
+    public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive
 
     public static final int PAGINATION_LIMIT_DEFAULT = 25;
     public static final int PAGINATION_OFFSET_DEFAULT = 0;

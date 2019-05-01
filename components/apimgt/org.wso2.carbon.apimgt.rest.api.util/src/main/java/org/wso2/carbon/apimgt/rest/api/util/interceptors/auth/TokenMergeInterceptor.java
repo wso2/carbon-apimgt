@@ -23,7 +23,9 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -39,27 +41,33 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
     public void handleMessage(Message message) throws Fault {
         //If Authorization headers are present anonymous URI check will be skipped
 
-        ArrayList authHeaders = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
-                .get(RestApiConstants.AUTH_HEADER_NAME);
+        String accessToken = RestApiUtil
+                .extractOAuthAccessTokenFromMessage(message, RestApiConstants.REGEX_BEARER_PATTERN,
+                        RestApiConstants.AUTH_HEADER_NAME);
+        if (accessToken == null) {
+            return;
+        }
 
         ArrayList tokenCookie = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
-                .get(RestApiConstants.COOKIE_NAME);
+                .get(RestApiConstants.COOKIE_HEADER_NAME);
+        String cookie = tokenCookie.get(0).toString();
+        if (cookie != null) {
+            cookie = cookie.trim();
+            String[] cookies = cookie.split(";");
+            String tokenFromCookie = Arrays.stream(cookies)
+                    .filter(name -> name.contains(RestApiConstants.AUTH_COOKIE_NAME)).findFirst().orElse("");
+            String[] tokenParts = tokenFromCookie.split("=");
+            if (tokenParts.length == 2) {
+                accessToken += tokenParts[1]; // Append the token section from cookie to token part from Auth header
+            }
 
-        TreeMap headers = (TreeMap) message.get(Message.PROTOCOL_HEADERS);
-        if (authHeaders != null && tokenCookie != null) {
-            String headerTokenString = authHeaders.get(0).toString();
-            String cookieTokenString = tokenCookie.get(0).toString();
-            int startingIndexOfToken =
-                    cookieTokenString.lastIndexOf(RestApiConstants.AUTH_COOKIE_NAME) + RestApiConstants.AUTH_COOKIE_NAME
-                            .length() + 1;
-            String tokenStringPartTwo = cookieTokenString.substring(startingIndexOfToken);
-            String accessToken = headerTokenString + tokenStringPartTwo;
-            ArrayList AuthorizationHeader = new ArrayList<>();
-            AuthorizationHeader.add(0, accessToken);
-            headers.put(RestApiConstants.AUTH_HEADER_NAME, AuthorizationHeader);
+            TreeMap headers = (TreeMap) message.get(Message.PROTOCOL_HEADERS);
+
+            ArrayList authorizationHeader = new ArrayList<>();
+            authorizationHeader.add(0, String.format("Bearer %s", accessToken));
+            headers.put(RestApiConstants.AUTH_HEADER_NAME, authorizationHeader);
             message.put(Message.PROTOCOL_HEADERS, headers);
-        } else {
-            return;
+
         }
     }
 }
