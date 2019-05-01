@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -163,6 +164,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_NAME = "apiName";
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
+    private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
     /* Map to Store APIs against Tag */
     private ConcurrentMap<String, Set<API>> taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
@@ -3644,6 +3646,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                   Set<Scope> reqScopeSet) {
         String[] userRoles = null;
         org.wso2.carbon.user.api.UserStoreManager userStoreManager = null;
+        String preservedCaseSensitiveValue = System.getProperty(PRESERVED_CASE_SENSITIVE_VARIABLE);
+        boolean preservedCaseSensitive = JavaUtils.isTrueExplicitly(preservedCaseSensitiveValue);
 
         List<Scope> authorizedScopes = new ArrayList<Scope>();
         try {
@@ -3660,7 +3664,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         List<String> userRoleList;
         if (userRoles != null) {
-            userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
+            if (preservedCaseSensitive) {
+                userRoleList = Arrays.asList(userRoles);
+            } else {
+                userRoleList = new ArrayList<String>();
+                for (String userRole : userRoles) {
+                    userRoleList.add(userRole.toLowerCase());
+                }
+            }
         } else {
             userRoleList = Collections.emptyList();
         }
@@ -3672,8 +3683,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             //If the scope has been defined in the context of the App and if roles have been defined for the scope
             if (roles != null && roles.length() != 0) {
-                List<String> roleList =
-                        new ArrayList<String>(Arrays.asList(roles.replaceAll(" ", EMPTY_STRING).split(",")));
+                List<String> roleList = new ArrayList<String>();
+                for (String aRole : roles.split(",")) {
+                    if (preservedCaseSensitive) {
+                        roleList.add(aRole.trim());
+                    } else {
+                        roleList.add(aRole.trim().toLowerCase());
+                    }
+                }
                 //Check if user has at least one of the roles associated with the scope
                 roleList.retainAll(userRoleList);
                 if (!roleList.isEmpty()) {
