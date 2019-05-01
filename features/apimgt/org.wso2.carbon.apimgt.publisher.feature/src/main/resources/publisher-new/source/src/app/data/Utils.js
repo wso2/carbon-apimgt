@@ -239,7 +239,7 @@ Utils.CONST = {
     MULTI_ENVIRONMENT_OVERVIEW_ENABLED: 'multi_env_overview',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
-    SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',
+    SWAGGER_YAML: '/api/am/publisher/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
     CONTEXT_PATH: '/publisher',
 };
