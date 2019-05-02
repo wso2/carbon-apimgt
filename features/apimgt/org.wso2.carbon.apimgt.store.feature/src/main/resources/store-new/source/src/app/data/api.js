@@ -42,7 +42,7 @@ export default class API extends Resource {
     getAllAPIs(callback = null) {
         let promise_get_all = this.client.then(
             (client) => {
-                return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
+                return client.apis["APIs"].get_apis({}, this._requestMetaData());
             }
         );
         if (callback) {
