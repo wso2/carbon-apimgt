@@ -17,19 +17,19 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
-        import org.json.JSONException;
-        import org.json.JSONObject;
-        import org.json.JSONTokener;
-        import org.wso2.carbon.apimgt.api.APIManagementException;
-        import org.wso2.carbon.apimgt.impl.APIConstants;
-        import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-        import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-        import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-        import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-        import java.util.Arrays;
-        import java.util.List;
-        import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class RestApiPublisherUtils {
 
@@ -84,7 +84,6 @@ public class RestApiPublisherUtils {
             isMatched = true;
         } else {
             userRoleList = APIUtil.getListOfRoles(userName);
-
         }
         if (inputRoles != null && !inputRoles.isEmpty()) {
             if (tenantRoleList != null || userRoleList != null) {
@@ -109,6 +108,7 @@ public class RestApiPublisherUtils {
      * Validation will be done for the keys of additional properties. Property keys should not contain spaces in it
      * and property keys should not conflict with reserved key words.
      *
+     * @param additionalProperties Map<String, String>  properties to validate
      * @return error message if there is an validation error with additional properties.
      */
     public static String validateAdditionalProperties(Map<String, String> additionalProperties) {
