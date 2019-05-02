@@ -21,8 +21,8 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -285,6 +285,20 @@ public class ApisApiServiceImpl extends ApisApiService {
                                 provider + ") overridden with current user (" + username + ")");
                     }
                     provider = username;
+                } else {
+                    if (!MultitenantUtils.getTenantDomain(username).equals(MultitenantUtils
+                            .getTenantDomain(provider))) {
+                        String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
+                                body.getName() + "-" + body.getVersion() + ". The tenant " +
+                                "domain '" + MultitenantUtils.getTenantDomain(provider) + "' of provider '" + provider
+                                + "' is not compatible with admin's('" + username + "') tenant domain '" +
+                                MultitenantUtils.getTenantDomain(username) + "'";
+                        RestApiUtil.handleBadRequest(errorMessage, log);
+                    } else {
+                        //When tenant domain contains upper case characters, this will convert those to lowercase
+                        provider = MultitenantUtils.getTenantAwareUsername(provider) + "@" +
+                                MultitenantUtils.getTenantDomain(provider);
+                    }
                 }
             } else {
                 //Set username in case provider is null or empty

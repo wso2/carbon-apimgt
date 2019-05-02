@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -3663,7 +3663,7 @@ public class ApiMgtDAO {
             }
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
-            if( application.getApplicationAttributes() != null) {
+            if (application.getApplicationAttributes() != null) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
             }
         } catch (SQLException e) {
@@ -3734,7 +3734,7 @@ public class ApiMgtDAO {
             handleException("Failed to update OAuth Consumer Application", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
-            APIMgtDBUtil.closeAllConnections(preparedStatement,conn,null);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, conn, null);
         }
     }
 
@@ -5948,7 +5948,7 @@ public class ApiMgtDAO {
             String whereClauseWithGroupIdCaseInSensitive =
                     "  WHERE  (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
                             + " AND LOWER(SUB.USER_ID) = LOWER(?))) AND "
-                            + "APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+                            + "APP.NAME = ? AND LOWER(SUB.SUBSCRIBER_ID) = LOWER(APP.SUBSCRIBER_ID)";
 
             String whereClauseWithMultiGroupId = "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
                     "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR   SUB.USER_ID = ? " +
@@ -5959,7 +5959,7 @@ public class ApiMgtDAO {
                     + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  "
                     + "OR   LOWER(SUB.USER_ID) = LOWER(?)  "
                     + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) "
-                    + "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+                    + "AND APP.NAME = ? AND LOWER(SUB.SUBSCRIBER_ID) = LOWER(APP.SUBSCRIBER_ID)";
 
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
@@ -12583,7 +12583,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            if(attributes != null) {
+            if (attributes != null) {
                 ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
                 for (String key : attributes.keySet()) {
                     ps.setInt(1, applicationId);

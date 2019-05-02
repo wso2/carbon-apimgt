@@ -6,7 +6,7 @@ import PageNav from '../Base/container/navigation/PageNav';
 import NavItem from '../Base/container/navigation/NavItem';
 
 /**
- * Compose the Left side fixed navigation bar for APIs page (/publisher/apis)
+ * Compose the Left side fixed navigation bar for APIs page (/publisher-new/apis)
  * @returns {React.Component} @inheritdoc
  */
 const NavBar = () => {

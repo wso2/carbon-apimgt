@@ -34,9 +34,9 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -1748,6 +1748,17 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * Method used to create the file name of the wsdl to be stored in the registry
+     *
+     * @param provider   Name of the provider of the API
+     * @param apiName    Name of the API
+     * @param apiVersion API Version
+     * @return WSDL file name
+     */
+    public static String createWsdlFileName(String provider, String apiName, String apiVersion) {
+        return provider + "--" + apiName + apiVersion + ".wsdl";
+    }
 
     /**
      * Crate an WSDL from given wsdl url. Reset the endpoint details to gateway node
@@ -1762,34 +1773,34 @@ public final class APIUtil {
     public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {
 
         try {
-            String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
-                    "--" + api.getId().getApiName() + api.getId().getVersion() + ".wsdl";
+            String wsdlResourcePath =
+                    APIConstants.API_WSDL_RESOURCE_LOCATION + createWsdlFileName(api.getId().getProviderName(),
+                            api.getId().getApiName(), api.getId().getVersion());
 
-            String absoluteWSDLResourcePath =
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlResourcePath;
+            String absoluteWSDLResourcePath = RegistryUtils
+                    .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                    + wsdlResourcePath;
 
             APIMWSDLReader wsdlReader = new APIMWSDLReader(api.getWsdlUrl());
             OMElement wsdlContentEle;
             String wsdRegistryPath;
 
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase
-                    (tenantDomain)) {
-                wsdRegistryPath = RegistryConstants.PATH_SEPARATOR + "registry"
-                        + RegistryConstants.PATH_SEPARATOR + "resource"
-                        + absoluteWSDLResourcePath;
+            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equalsIgnoreCase(tenantDomain)) {
+                wsdRegistryPath =
+                        RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR + "resource"
+                                + absoluteWSDLResourcePath;
             } else {
                 wsdRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
-                        + RegistryConstants.PATH_SEPARATOR + "resource"
-                        + absoluteWSDLResourcePath;
+                        + RegistryConstants.PATH_SEPARATOR + "resource" + absoluteWSDLResourcePath;
             }
 
             Resource wsdlResource = registry.newResource();
             // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
             // Hence if this is a registry url, should not go in to the following if block
-            if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl
-                    ().startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
+            if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
+                    .startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
                 if (isWSDL2Document(api.getWsdlUrl())) {
                     wsdlContentEle = wsdlReader.readAndCleanWsdl2(api);
                     wsdlResource.setContent(wsdlContentEle.toString());
@@ -1804,7 +1815,8 @@ public final class APIUtil {
                 if (api.getVisibleRoles() != null) {
                     visibleRoles = api.getVisibleRoles().split(",");
                 }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        wsdlResourcePath);
             } else {
                 byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
                 if (isWSDL2Resource(wsdl)) {
@@ -1821,7 +1833,8 @@ public final class APIUtil {
                 if (api.getVisibleRoles() != null) {
                     visibleRoles = api.getVisibleRoles().split(",");
                 }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        wsdlResourcePath);
             }
 
             //set the wsdl resource permlink as the wsdlURL.

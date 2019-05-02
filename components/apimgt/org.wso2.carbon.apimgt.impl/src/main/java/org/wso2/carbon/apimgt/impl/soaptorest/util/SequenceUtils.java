@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.soaptorest.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

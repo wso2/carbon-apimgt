@@ -144,7 +144,7 @@ class Login extends Component {
 
             if (WSO2_AM_TOKEN_1) {
                 const user = new User(environmentName, params.user_name);
-                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, '/publisher');
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, '/publisher-new');
                 user.scopes = params.scopes.split(' ');
                 AuthManager.setUser(user);
                 this.setState({ isLogin: true });
@@ -279,7 +279,7 @@ class Login extends Component {
                                         <Grid item>
                                             <img
                                                 className='brand'
-                                                src='/publisher/static/public/images/logo.svg'
+                                                src='/publisher-new/static/public/images/logo.svg'
                                                 alt='wso2-logo'
                                             />
                                         </Grid>

@@ -184,7 +184,7 @@ Utils.CONST = {
     LOGIN_SIGN_UP_PATH: '/login/signup',
     SWAGGER_YAML: '/api/am/store/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
-    CONTEXT_PATH: '/store'
+    CONTEXT_PATH: '/store-new'
 };
 
 /**

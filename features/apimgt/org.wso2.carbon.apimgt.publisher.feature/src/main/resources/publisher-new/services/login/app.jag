@@ -46,8 +46,9 @@
     var response_data = {
         AM_ACC_TOKEN_DEFAULT_P1: String(access_token_token_part_1),
         AM_REF_TOKEN_DEFAULT_P1: String(refresh_token_token_part_1),
-        scope: String(token_response.scope),
-        expires_in: String(token_response.expires_in)
+        scopes: String(token_response.scope),
+        expires_in: String(token_response.expires_in),
+        authUser : request.getParameter("username", "UTF-8")
     }
     var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': access_token_token_part_2, 'path': "/api/am/publisher", "secure": true, "maxAge": -1};
     response.addCookie(cookie);

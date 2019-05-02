@@ -57,7 +57,7 @@ class Store extends React.Component {
     }
     render() {
         return (
-            <Router basename="/store">
+            <Router basename="/store-new">
                 <Switch>
                     <Route path={"/login"} render={() => <Login appName={"store"} appLabel={"STORE"}/>}/>
                     <Route path={"/logout"} component={Logout}/>

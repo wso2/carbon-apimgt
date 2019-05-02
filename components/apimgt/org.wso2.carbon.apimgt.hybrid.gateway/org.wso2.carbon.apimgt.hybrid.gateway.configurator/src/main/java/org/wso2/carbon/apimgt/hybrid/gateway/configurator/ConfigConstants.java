@@ -28,6 +28,8 @@ public class ConfigConstants {
     public static final String CONF_DIR = "conf";
     public static final String CLOUD_CONFIG_DIR = "wso2-cloud";
     public static final String RESOURCES_DIR = "resources";
+    public static final String UPDATES_DIR = "updates";
+    public static final String WUM_DIR = "wum";
 
     public static final String EMAIL = "email";
     public static final String TENANT_DOMAIN = "tenant.domain";
@@ -36,6 +38,7 @@ public class ConfigConstants {
     public static final String HOST_NAME = "hostname";
     public static final String MAC_ADDRESS = "macAddress";
     public static final String PORT = "port";
+    public static final String LAST_WUM_UPDATE = "lastWumUpdate";
 
     public static final String CONFIGURE_LOCK_FILE_NAME = "configure.lck";
     public static final String CONFIG_TOOL_CONFIG_FILE_NAME = "gateway-config-tool.properties";
@@ -43,6 +46,9 @@ public class ConfigConstants {
     public static final String GATEWAY_CARBON_FILE_NAME = "carbon.xml";
 
     public static final String API_KEY_VALIDATION_CLIENT_TYPE = "api.key.validator.client.type";
+    public static final String HYBRID_GATEWAY_LABEL_PROPERTY = "api.hybrid.gateway.label";
+    public static final String HYBRID_GATEWAY_ENV_METADATA = "api.hybrid.meta.env.";
+    public static final String HYBRID_GATEWAY_CUSTOM_METADATA = "api.hybrid.meta.custom.";
 
     public static final String PUBLIC_CLOUD_SETUP = "public.cloud.setup";
     public static final String STRATOS_PUBLIC_CLOUD_SETUP = "stratos.public.cloud.setup";

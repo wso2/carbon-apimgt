@@ -128,7 +128,7 @@ class Publisher extends React.Component {
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
                 <AppErrorBoundary appName='Publisher Application'>
-                    <Router basename='/publisher'>
+                    <Router basename='/publisher-new'>
                         <Switch>
                             <Route path='/login' render={props => <Login {...props} updateUser={this.updateUser} />} />
                             <Route path='/logout' component={Logout} />

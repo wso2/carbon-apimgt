@@ -307,7 +307,7 @@ class AuthManager {
      * @returns {Promise} Axios Promise object with the login request made
      */
     postAuthenticationRequest(headers, data, environment) {
-        const promisedResponse = axios('/publisher/services/login', {
+        const promisedResponse = axios('/publisher-new/services/login', {
             method: 'POST',
             data: qs.stringify(data),
             headers,
