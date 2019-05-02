@@ -138,14 +138,25 @@ export default class ProtectedApp extends Component {
         const environmentName = this.handleEnvironmentQueryParam();
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
+        return(
+            <IntlProvider locale={language} messages={this.state.messages}>
+                    <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
+                        <Base setTheme={() => this.setTheme()}>
+                            <Switch>
+                                <Redirect exact from="/" to="/apis"/>
+                                <Route path={"/apis"} component={Apis}/>
+                                <Route component={PageNotFound}/>
+                            </Switch>
+                        </Base>
+                    </MuiThemeProvider>
+                </IntlProvider>
+        );
         if (AuthManager.getUser(environmentName)) {
             return (
                 <IntlProvider locale={language} messages={this.state.messages}>
                     <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
                         <Base setTheme={() => this.setTheme()}>
                             <Switch>
-                                <Redirect exact from="/" to="/apis"/>
-                                <Route path={"/apis"} component={Apis}/>
                                 <Route path={"/applications"} component={Applications}/>
                                 <Route path={"/application/create"} component={ApplicationCreate}/>
                                 <Route path={"/application/edit/:application_id"} component={ApplicationEdit}/>
@@ -166,10 +177,10 @@ export default class ProtectedApp extends Component {
                 </IntlProvider>
             );
         }
-
+    
         let params = qs.stringify({referrer: this.props.location.pathname});
         return (
             <Redirect to={{pathname: '/login', search: params}}/>
-        );
+        );    
     }
 }
