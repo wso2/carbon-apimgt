@@ -177,10 +177,10 @@ export default class ProtectedApp extends Component {
                 </IntlProvider>
             );
         }
-    
+
         let params = qs.stringify({referrer: this.props.location.pathname});
         return (
             <Redirect to={{pathname: '/login', search: params}}/>
-        );    
+        );
     }
 }
