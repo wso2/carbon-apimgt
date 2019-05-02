@@ -239,6 +239,30 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
+        APIDTO apiToReturn;
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
+            return Response.ok().entity(apiToReturn).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Response apisApiIdDelete(String apiId, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -297,12 +321,6 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
-    @Override
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
@@ -525,5 +543,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             api.setGatewayLabels(labelList);
         }
         return api;
+    }
+
+    /**
+     * To check whether a particular exception is due to access control restriction.
+     *
+     * @param e Exception object.
+     * @return true if the the exception is caused due to authorization failure.
+     */
+    private boolean isAuthorizationFailure(Exception e) {
+        String errorMessage = e.getMessage();
+        return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }
