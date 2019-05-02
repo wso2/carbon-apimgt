@@ -56,7 +56,7 @@ class ConfigManager {
  * @type {Object}
  */
 ConfigManager.ConfigRequestPaths = {
-    ENVIRONMENT_CONFIG_PATH: '/store/static/public/theme/temporary_environments_config.json',
+    ENVIRONMENT_CONFIG_PATH: '/store-new/static/public/theme/temporary_environments_config.json',
     FEATURE_LIST_PATH: '/publisher/static/public/theme/temporary_features_config.json',
 };
 

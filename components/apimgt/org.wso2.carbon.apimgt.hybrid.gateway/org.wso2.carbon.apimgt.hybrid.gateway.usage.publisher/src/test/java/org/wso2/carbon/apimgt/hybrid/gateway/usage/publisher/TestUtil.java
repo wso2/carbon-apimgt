@@ -17,7 +17,7 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.constants.Constants;
 
 import java.io.File;

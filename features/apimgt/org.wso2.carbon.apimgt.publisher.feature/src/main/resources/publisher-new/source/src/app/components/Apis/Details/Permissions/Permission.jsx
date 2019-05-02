@@ -410,7 +410,7 @@ class Permission extends Component {
                     <Col span={4}>
                         <Card bodyStyle={{ padding: 5 }}>
                             <div className='custom-image'>
-                                <img alt='API thumb' width='100%' src='/publisher/static/public/images/api/api-default.png' />
+                                <img alt='API thumb' width='100%' src='/publisher-new/static/public/images/api/api-default.png' />
                             </div>
                             <div className='custom-card'>
                                 <Badge status='processing' text={api.lifeCycleStatus} />

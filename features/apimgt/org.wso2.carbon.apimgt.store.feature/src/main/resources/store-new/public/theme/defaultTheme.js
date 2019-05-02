@@ -33,8 +33,8 @@ const Configurations = {
                 leftMenuWidth: 220,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
-                logo: '/store/static/public/images/logo.png',
-                backgroundImage: '/store/static/public/images/back-light.png',
+                logo: '/store-new/public/images/logo.png',
+                backgroundImage: '/store-new/public/images/back-light.png',
                 title: 'WSO2 Developer Portal',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
@@ -81,8 +81,8 @@ const Configurations = {
                 leftMenuWidth: 120,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
-                logo: '/store/static/public/images/logo.png',
-                backgroundImage: '/store/static/public/images/back-light.png',
+                logo: '/store-new/public/images/logo.png',
+                backgroundImage: '/store-new/public/images/back-light.png',
                 title: 'WSO2 Developer Portal',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.

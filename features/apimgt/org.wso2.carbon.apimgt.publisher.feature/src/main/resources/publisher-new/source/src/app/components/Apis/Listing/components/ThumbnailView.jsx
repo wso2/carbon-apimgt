@@ -276,7 +276,7 @@ class ThumbnailView extends Component {
                                             className={classes.preview}
                                             src={file && file.length > 0 ?
                                                 file[0].preview :
-                                                '/publisher/static/public/images/api/api-default.png'
+                                                '/publisher-new/static/public/images/api/api-default.png'
                                             }
                                             alt='Thumbnail Preview'
                                         />

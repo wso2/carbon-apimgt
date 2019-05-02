@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.keymgt.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;

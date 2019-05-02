@@ -5,7 +5,7 @@ import NavItem from 'AppComponents/Base/container/navigation/NavItem';
 import EndpointsIcon from '@material-ui/icons/ZoomOutMapOutlined';
 
 /**
- * Compose the Left side fixed navigation bar for APIs page (/publisher/apis)
+ * Compose the Left side fixed navigation bar for APIs page (/publisher-new/apis)
  * @returns {React.Component} @inheritdoc
  */
 const EndpointsNavigation = () => {

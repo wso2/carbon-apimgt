@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -148,9 +148,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
             Object applicationAttributesFromUser = body.getAttributes();
             Map<String, String> applicationAttributes =
-                    new ObjectMapper().convertValue(applicationAttributesFromUser,Map.class);
+                    new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
 
-            if (applicationAttributes!=null) {
+            if (applicationAttributes != null) {
                 JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
                 Set<String> keySet = new HashSet<>();
                 Set attributeKeysFromUSer = applicationAttributes.keySet();

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.0-SNAPSHOT</version>
+        <version>6.4.175-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -98,7 +98,7 @@
             <artifactId>org.wso2.carbon.event.template.manager.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.apache.commons</groupId>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
@@ -214,12 +214,12 @@
                             <importBundles>
                                 <importBundleDef>commons-io.wso2:commons-io:${commons-io.version}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
-                                <importBundleDef>org.wso2.orbit.org.apache.commons:commons-lang3:${commons-lang3.version}</importBundleDef>
+                                <importBundleDef>org.apache.commons:commons-lang3:${apache.commons.lang3.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:jempbox:${pdfbox.version}</importBundleDef>
-                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:${waffle-jna.version}</importBundleDef>
+                                <importBundleDef>org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
                             </importBundles>
                         </configuration>
@@ -277,6 +277,9 @@
                     <include>store-new/jaggery.conf</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>
+                    <include>apistore/**</include>
+                    <include>customTheme/**</include>
+                    <include>store/**</include>
                 </includes>
             </resource>
         </resources>
