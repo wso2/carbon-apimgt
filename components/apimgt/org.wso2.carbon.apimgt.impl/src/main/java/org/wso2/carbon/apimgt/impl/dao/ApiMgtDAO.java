@@ -13561,6 +13561,7 @@ public class ApiMgtDAO {
 
         Connection connection = null;
         ResultSet rs = null;
+        PreparedStatement prepStmt = null;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -13580,7 +13581,7 @@ public class ApiMgtDAO {
                     + " AND AKM.APPLICATION_ID=APP.APPLICATION_ID AND API.CONTEXT=?"
                     + " AND AKM.CONSUMER_KEY=?";
 
-            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, context);
             prepStmt.setString(2, consumerKey);
 
@@ -13641,8 +13642,48 @@ public class ApiMgtDAO {
             return false;
         } catch (SQLException e) {
             handleException("Error while adding product resource and scope mappings for api product ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return true;
 
+    }
+
+    public Map<String, String> getProductScopeRolesOfApplication(String consumerKey) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        Map<String, String> scopes = new HashMap<String, String>();
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String sql = "SELECT "
+                    + "PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER  "
+                    + "FROM "
+                    + "AM_SUBSCRIPTION AS SUB, AM_APPLICATION_KEY_MAPPING AS AKM, AM_API_PRODUCT AS PRODUCT "
+                    + "WHERE "
+                    + "AKM.APPLICATION_ID = SUB.APPLICATION_ID AND "
+                    + "PRODUCT.API_PRODUCT_ID = SUB.API_PRODUCT_ID AND "
+                    + "SUB.API_PRODUCT_ID IS NOT NULL "
+                    + "AND AKM.CONSUMER_KEY=?";
+
+            prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, consumerKey);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                String productName = rs.getString("API_PRODUCT_NAME");
+                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+
+                APIProductIdentifier productId = new APIProductIdentifier(productProvider, productName);
+                String scope = APIUtil.getProductScope(productId);
+                scopes.put(scope, ""); //product scopes are not meant to be bound to any role, so the role list will be empty
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving product scope and role mappings for consumer key " + consumerKey, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return scopes;
     }
 }
