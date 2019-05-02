@@ -8126,4 +8126,37 @@ public final class APIUtil {
         }
         return null;
     }
+
+    /**
+     * This method is used to set environments values to api object.
+     *
+     * @param environments environments values in json format
+     * @return set of environments that need to Publish
+     */
+    public static Set<String> extractEnvironmentsForAPI(List<String> environments) {
+
+        Set<String> environmentStringSet = null;
+        if (environments == null) {
+            environmentStringSet = new HashSet<String>(
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+        } else {
+            //handle not to publish to any of the gateways
+            if (environments.size() == 1 && APIConstants.API_GATEWAY_NONE.equals(environments.get(0))) {
+                environmentStringSet = new HashSet<String>();
+            }
+            //handle to set published gateways into api object
+            else if (environments.size() > 0) {
+                environmentStringSet = new HashSet<String>(environments);
+                environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
+            }
+            //handle to publish to any of the gateways when api creating stage
+            else if (environments.size() == 0) {
+                environmentStringSet = new HashSet<String>(
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+            }
+        }
+        return environmentStringSet;
+    }
 }
