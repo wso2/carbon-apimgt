@@ -3684,11 +3684,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             //If the scope has been defined in the context of the App and if roles have been defined for the scope
             if (roles != null && roles.length() != 0) {
                 List<String> roleList = new ArrayList<String>();
-                for (String aRole : roles.split(",")) {
+                for (String scopeRole : roles.split(",")) {
                     if (preservedCaseSensitive) {
-                        roleList.add(aRole.trim());
+                        roleList.add(scopeRole.trim());
                     } else {
-                        roleList.add(aRole.trim().toLowerCase());
+                        roleList.add(scopeRole.trim().toLowerCase());
                     }
                 }
                 //Check if user has at least one of the roles associated with the scope
