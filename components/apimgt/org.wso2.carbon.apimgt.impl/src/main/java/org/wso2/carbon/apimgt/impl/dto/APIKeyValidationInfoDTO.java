@@ -18,10 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 
 /**
  * This class represent the API key validation Info DTO.
