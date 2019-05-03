@@ -313,248 +313,266 @@ public class ApisApiServiceImpl extends ApisApiService {
 //        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
+        APIDTO apiToReturn;
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
+            return Response.ok().entity(apiToReturn).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Response apisApiIdDelete(String apiId, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
             String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
             InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
             String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdGatewayConfigGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
-    @Override 
+    @Override
     public Response apisApiIdLifecycleGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdLifecycleLifecyclePendingTaskDelete(String apiId) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdPoliciesMediationGet(String apiId, Integer limit, Integer offset, String query,
             String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdPoliciesMediationMediationPolicyIdDelete(String apiId, String mediationPolicyId,
             String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdPoliciesMediationMediationPolicyIdGet(String apiId, String mediationPolicyId,
             String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdPoliciesMediationMediationPolicyIdPut(String apiId, String mediationPolicyId,
             MediationDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdPoliciesMediationPost(MediationDTO body, String apiId, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath,
             String verb, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId,
             String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId,
             ResourcePolicyInfoDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdScopesGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdScopesNameDelete(String apiId, String name, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdScopesNameGet(String apiId, String name, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdScopesNamePut(String apiId, String name, ScopeDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdScopesPost(String apiId, ScopeDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdThreatProtectionPoliciesGet(String apiId) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
             String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisCopyApiPost(String newVersion, String apiId) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -566,14 +584,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail,
             String url, String additionalProperties, String implementationType, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override 
+    @Override
     public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream,
             Attachment fileDetail) {
         // do some magic!
@@ -600,5 +618,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             api.setGatewayLabels(labelList);
         }
         return api;
+    }
+
+    /**
+     * To check whether a particular exception is due to access control restriction.
+     *
+     * @param e Exception object.
+     * @return true if the the exception is caused due to authorization failure.
+     */
+    private boolean isAuthorizationFailure(Exception e) {
+        String errorMessage = e.getMessage();
+        return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }

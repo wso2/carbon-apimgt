@@ -25,10 +25,10 @@ const config = {
         index: './source/index.js',
     },
     output: {
-        path: path.resolve(__dirname, 'public/dist'),
+        path: path.resolve(__dirname, 'site/public/dist'),
         filename: '[name].bundle.js',
         chunkFilename: '[name].bundle.js',
-        publicPath: 'static/public/dist/',
+        publicPath: 'site/public/dist/',
     },
     watch: false,
     devtool: 'source-map',

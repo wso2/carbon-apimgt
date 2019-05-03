@@ -74,7 +74,7 @@ export default class ProtectedApp extends Component {
      * @returns {Promise} Promise
      */
     loadLocale(locale = 'en') {
-        fetch(`${Utils.CONST.CONTEXT_PATH}/public/app/locales/${locale}.json`)
+        fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
             .then((resp) => resp.json())
             .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require

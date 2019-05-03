@@ -271,9 +271,7 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>store-new/public/**</include>
-                    <include>store-new/pages/**</include>
-                    <include>store-new/routing/**</include>
+                    <include>store-new/site/**</include>
                     <include>store-new/jaggery.conf</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>

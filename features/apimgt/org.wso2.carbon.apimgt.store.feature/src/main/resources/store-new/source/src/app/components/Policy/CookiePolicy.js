@@ -56,7 +56,7 @@ class CookiePolicy extends React.Component {
                     <AppBar position="absolute">
                         <ToolBar>
                             <Typography variant="title"  noWrap>
-                                <img src="/store-new/public/app/images/logo.png"
+                                <img src="/store-new/site/public/images/logo.png"
                                      alt="wso2-logo"/> <span style={{color: 'white'}}>API STORE</span>
                             </Typography>
                         </ToolBar>

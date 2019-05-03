@@ -238,7 +238,7 @@ class Login extends Component {
                                     <Grid container direction={"column"}>
                                         <Grid item>
                                             <img className="brand"
-                                                 src={`/${appName}/public/app/images/logo.svg`}
+                                                 src={`/${appName}/site/public/images/logo.svg`}
                                                  alt="wso2-logo"/>
                                         </Grid>
                                         <Grid item>
