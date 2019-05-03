@@ -32,8 +32,8 @@ import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
 const LoadableProtectedApp = Loadable({
     loader: () =>
         import(// eslint-disable-line function-paren-newline
-        /* webpackChunkName: "ProtectedApp" */
-        /* webpackPrefetch: true */
+            /* webpackChunkName: "ProtectedApp" */
+            /* webpackPrefetch: true */
             './app/ProtectedApp'),
     loading: Progress,
 });
@@ -42,9 +42,7 @@ const LoadableProtectedApp = Loadable({
  * Language.
  * @type {string}
  */
-const language = (navigator.languages && navigator.languages[0])
-    || navigator.language
-    || navigator.userLanguage;
+const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
 
 /**
  * Language without region code.
@@ -104,7 +102,7 @@ class Publisher extends React.Component {
      * @param {string} locale Locale name
      */
     loadLocale(locale = 'en') {
-        fetch(`${Utils.CONST.CONTEXT_PATH}/static/public/locales/${locale}.json`)
+        fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
             .then(resp => resp.json())
             .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require

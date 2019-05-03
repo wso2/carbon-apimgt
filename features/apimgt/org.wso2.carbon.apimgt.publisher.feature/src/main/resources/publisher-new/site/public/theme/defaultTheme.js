@@ -1,4 +1,4 @@
-var Configurations = {
+const Configurations = {
     themes: {
         light: {
             palette: {
@@ -39,8 +39,8 @@ var Configurations = {
                 leftMenuWidth: 120,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
-                logo: '/publisher-new/static/public/images/logo.png',
-                backgroundImage: '/publisher-new/static/public/images/back-light.png',
+                logo: '/publisher-new/site/public/images/logo.png',
+                backgroundImage: '/publisher-new/site/public/images/back-light.png',
                 title: 'WSO2 APIM Publisher',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
@@ -48,7 +48,15 @@ var Configurations = {
                 leftMenuIconSize: 20,
                 leftMenuIconMainSize: 52,
                 leftMenuTextStyle: 'uppercase',
-                resourceChipColors: { get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446' },
+                resourceChipColors: {
+                    get: '#02a8f4',
+                    post: '#8ac149',
+                    put: '#ff9700',
+                    delete: '#fd5621',
+                    option: '#5f7c8a',
+                    patch: '#785446',
+                    head: '#785446',
+                },
                 // lifeCycleImage: '/publisher-new/public/app/images/logo.png',
                 // Uncomment above if you want to add a custom image to the lifecycle diagram.
                 adminRole: 'admin',
@@ -92,8 +100,8 @@ var Configurations = {
                 leftMenuWidth: 120,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
-                logo: '/publisher-new/static/public/images/logo.png',
-                backgroundImage: '/publisher-new/static/public/images/back-light.png',
+                logo: '/publisher-new/site/public/images/logo.png',
+                backgroundImage: '/publisher-new/site/public/images/back-light.png',
                 title: 'WSO2 APIM Publisher',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
@@ -101,7 +109,15 @@ var Configurations = {
                 leftMenuIconSize: 32,
                 leftMenuIconMainSize: 52,
                 leftMenuTextStyle: 'uppercase',
-                resourceChipColors: { get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446' },
+                resourceChipColors: {
+                    get: '#02a8f4',
+                    post: '#8ac149',
+                    put: '#ff9700',
+                    delete: '#fd5621',
+                    option: '#5f7c8a',
+                    patch: '#785446',
+                    head: '#785446',
+                },
                 adminRole: 'admin',
                 commentsLimit: 5,
                 maxCommentLength: 1300,

@@ -67,7 +67,7 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdWsdlPut(String apiId,InputStream fileInputStream,Attachment fileDetail,String ifMatch);
     public abstract Response apisChangeLifecyclePost(String action,String apiId,String lifecycleChecklist,String ifMatch);
     public abstract Response apisCopyApiPost(String newVersion,String apiId);
-    public abstract Response apisGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String ifNoneMatch,Boolean expand,String tenantDomain);
+    public abstract Response apisGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String ifNoneMatch,Boolean expand,String accept,String tenantDomain);
     public abstract Response apisHead(String query,String ifNoneMatch);
     public abstract Response apisImportDefinitionPost(String type,InputStream fileInputStream,Attachment fileDetail,String url,String additionalProperties,String implementationType,String ifMatch);
     public abstract Response apisPost(APIDTO body);

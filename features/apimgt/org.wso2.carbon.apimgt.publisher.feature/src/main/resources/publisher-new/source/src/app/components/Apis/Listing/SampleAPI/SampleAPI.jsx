@@ -133,7 +133,7 @@ class SampleAPI extends Component {
             scopes: ['read:pets', 'write:pets'],
             policies: ['Bronze', 'Unlimited', 'Gold'],
         };
-        const serviceUrl = 'https://localhost:9443/publisher-new/static/public/petstore/pet/1.json';
+        const serviceUrl = 'https://localhost:9443/publisher-new/site/public/petstore/pet/1.json';
         const production = {
             type: 'Production',
             inline: {

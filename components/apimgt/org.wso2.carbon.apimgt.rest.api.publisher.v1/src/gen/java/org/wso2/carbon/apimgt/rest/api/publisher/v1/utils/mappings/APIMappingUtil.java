@@ -210,6 +210,91 @@ public class APIMappingUtil {
         return model;
     }
 
+    /**
+     * Converts a List object of APIs into a DTO
+     *
+     * @param apiList List of APIs
+     * @param expand defines whether APIListDTO should contain APIINFODTOs or APIDTOs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
+        APIListDTO apiListDTO = new APIListDTO();
+        List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
+        if (apiList != null && !expand) {
+            for (API api : apiList) {
+                apiInfoDTOs.add(fromAPIToInfoDTO(api));
+            }
+        }
+        //todo: support expand
+//        else if (apiList != null && expand) {
+//            for (API api : apiList) {
+//                apiInfoDTOs.add(fromAPItoDTO(api));
+//            }
+//        }
+        apiListDTO.setCount(apiInfoDTOs.size());
+        return apiListDTO;
+    }
+
+    /**
+     * Creates a minimal DTO representation of an API object
+     *
+     * @param api API object
+     * @return a minimal representation DTO
+     */
+    public static APIInfoDTO fromAPIToInfoDTO(API api) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setDescription(api.getDescription());
+        String context = api.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        apiInfoDTO.setContext(context);
+        apiInfoDTO.setId(api.getUUID());
+        APIIdentifier apiId = api.getId();
+        apiInfoDTO.setName(apiId.getApiName());
+        apiInfoDTO.setVersion(apiId.getVersion());
+        String providerName = api.getId().getProviderName();
+        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        apiInfoDTO.setLifeCycleStatus(api.getStatus().toString());
+        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
+            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
+        }
+        return apiInfoDTO;
+    }
+
+
+    /**
+     * Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
+     *
+     * @param apiListDTO a APIListDTO object
+     * @param query      search condition
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
+     */
+    public static void setPaginationParams(APIListDTO apiListDTO, String query, int offset, int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+        }
+
+        apiListDTO.setNext(paginatedNext);
+        apiListDTO.setPrevious(paginatedPrevious);
+    }
+
     private static String checkAndSetVersionParam(String context) {
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.

@@ -218,8 +218,7 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>publisher-new/public/**</include>
-                    <include>publisher-new/services/**</include>
+		    <include>publisher-new/site/**</include>
                     <include>publisher-new/jaggery.conf</include>
                     <include>lifecycles/APILifeCycle.xml</include>
                     <include>p2.inf</include>

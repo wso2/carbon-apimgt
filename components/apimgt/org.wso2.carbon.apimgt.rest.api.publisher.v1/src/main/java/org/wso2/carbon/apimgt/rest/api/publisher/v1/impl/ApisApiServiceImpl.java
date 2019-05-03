@@ -32,18 +32,22 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -51,12 +55,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
 
@@ -66,9 +72,78 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
-            String ifNoneMatch, Boolean expand, String tenantDomain) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+            String ifNoneMatch, Boolean expand, String accept ,String tenantDomain) {
+
+        List<API> allMatchedApis = new ArrayList<>();
+        APIListDTO apiListDTO;
+
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        query = query == null ? "" : query;
+        expand = (expand != null && expand) ? true : false;
+        try {
+            String newSearchQuery = APIUtil.constructNewSearchQuery(query);
+
+            //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
+            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+                newSearchQuery = newSearchQuery
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
+            }
+
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+
+            //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
+            // instead of looking at type and query
+            String username = RestApiUtil.getLoggedInUsername();
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            boolean migrationMode = Boolean.getBoolean(RestApiConstants.MIGRATION_MODE);
+
+            /*if (migrationMode) { // migration flow
+                if (!StringUtils.isEmpty(targetTenantDomain)) {
+                    tenantDomain = targetTenantDomain;
+                }
+                RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
+            }*/
+
+            Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
+                    offset, limit, false);
+            Set<API> apis = (Set<API>) result.get("apis");
+            allMatchedApis.addAll(apis);
+
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
+            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
+
+            //Add pagination section in the response
+            Object totalLength = result.get("length");
+            Integer length = 0;
+            if(totalLength != null) {
+                length = (Integer) totalLength;
+            }
+            APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
+            paginationDTO.setOffset(offset);
+            paginationDTO.setLimit(limit);
+            paginationDTO.setTotal(length);
+            apiListDTO.setPagination(paginationDTO);
+
+            if (APIConstants.APPLICATION_GZIP.equals(accept)) {
+                try {
+                    File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
+                    return Response.ok().entity(zippedResponse)
+                            .header("Content-Disposition", "attachment").
+                                    header("Content-Encoding", "gzip").build();
+                } catch (APIManagementException e) {
+                    RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
+                }
+            } else {
+                return Response.ok().entity(apiListDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving APIs";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override
