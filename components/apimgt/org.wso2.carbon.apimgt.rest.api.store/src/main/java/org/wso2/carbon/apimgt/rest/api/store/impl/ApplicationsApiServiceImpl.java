@@ -34,9 +34,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
@@ -45,22 +43,19 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDT
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyReGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.Set;
 import javax.ws.rs.core.Response;
 
@@ -478,7 +473,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdScopesGet(String applicationId, Boolean filterByUserRoles, String ifNoneMatch, String ifModifiedSince) {
+    public Response applicationsApplicationIdScopesGet(String applicationId, Boolean filterByUserRoles,
+            String ifNoneMatch, String ifModifiedSince) {
         String userName = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
@@ -489,8 +485,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    ScopeListDTO filteredScopes = RestAPIStoreUtils.getScopesForApplication(userName, application,
-                            ((filterByUserRoles != null) ? filterByUserRoles : false));
+                    ScopeListDTO filteredScopes = org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                            .getScopesForApplication(userName, application,
+                                    ((filterByUserRoles != null) ? filterByUserRoles : false));
 
                     return Response.ok().entity(filteredScopes).build();
                 } else {
@@ -547,8 +544,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return
      */
     @Override
-    public String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId, String ifMatch, String ifUnmodifiedSince) {
-        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    public String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId, String ifMatch,
+            String ifUnmodifiedSince) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .getLastUpdatedTimeByApplicationId(applicationId);
     }
 
     /**
@@ -575,8 +574,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    ScopeListDTO filteredScopes = RestAPIStoreUtils.getScopesForApplication(userName, application,
-                            ((filterByUserRoles != null) ? filterByUserRoles : false));
+                    ScopeListDTO filteredScopes = org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                            .getScopesForApplication(userName, application,
+                                    ((filterByUserRoles != null) ? filterByUserRoles : false));
 
                     return Response.ok().entity(filteredScopes).build();
                 } else {
@@ -603,8 +603,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return
      */
     @Override
-    public String applicationsApplicationIdGetGetLastUpdatedTime(String applicationId, String accept, String ifNoneMatch, String ifModifiedSince) {
-        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    public String applicationsApplicationIdGetGetLastUpdatedTime(String applicationId, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .getLastUpdatedTimeByApplicationId(applicationId);
     }
 
     @Override
@@ -630,8 +632,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return
      */
     @Override
-    public String applicationsApplicationIdPutGetLastUpdatedTime(String applicationId, ApplicationDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
-        return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    public String applicationsApplicationIdPutGetLastUpdatedTime(String applicationId, ApplicationDTO body,
+            String contentType, String ifMatch, String ifUnmodifiedSince) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .getLastUpdatedTimeByApplicationId(applicationId);
     }
 
     @Override
