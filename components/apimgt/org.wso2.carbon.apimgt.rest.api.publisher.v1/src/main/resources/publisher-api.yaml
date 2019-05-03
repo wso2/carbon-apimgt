@@ -136,6 +136,7 @@ paths:
           type: string
         - $ref : "#/parameters/If-None-Match"
         - $ref : "#/parameters/expand"
+        - $ref : "#/parameters/Accept"
         - name: tenantDomain
           in: query
           description: |
@@ -4917,6 +4918,15 @@ parameters:
       Maximum size of resource array to return.
     default: 25
     type: integer
+
+# The HTTP Accept header
+  Accept:
+    name: Accept
+    in: header
+    description: |
+      Media types acceptable for the response. Default is application/json.
+    default: application/json
+    type: string
 
 # Used for pagination:
 # The order number of an instance in a qualified set of resoures
