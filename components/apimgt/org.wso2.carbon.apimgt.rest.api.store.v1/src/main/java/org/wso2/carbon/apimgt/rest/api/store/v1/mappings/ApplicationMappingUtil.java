@@ -49,6 +49,8 @@ public class ApplicationMappingUtil {
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getSubscriber().getName());
         applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.OAUTH);
+        applicationDTO.setOwner(application.getOwner());
+        applicationDTO.setSubscriptionCount(application.getSubscriptionCount());
         if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
                 .equals(application.getTokenType())) {
             applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.valueOf(application.getTokenType()));
@@ -119,18 +121,13 @@ public class ApplicationMappingUtil {
             throws APIManagementException {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
         List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
-        String username = RestApiUtil.getLoggedInUsername();
-        String groupId = RestApiUtil.getLoggedInUserGroupId();
         if (applicationInfoDTOs == null) {
             applicationInfoDTOs = new ArrayList<>();
             applicationListDTO.setList(applicationInfoDTOs);
         }
 
         for (Application application : applications) {
-            int subscriptionCount = apiConsumer
-                    .getSubscriptionCountByApplicationId(new Subscriber(username), application.getId(), groupId);
             ApplicationInfoDTO applicationInfoDTO = fromApplicationToInfoDTO(application);
-            applicationInfoDTO.setSubscriptionCount(subscriptionCount);
             applicationInfoDTOs.add(applicationInfoDTO);
         }
 
@@ -179,6 +176,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         applicationInfoDTO.setOwner(application.getOwner());
+        applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
         return applicationInfoDTO;
     }
 

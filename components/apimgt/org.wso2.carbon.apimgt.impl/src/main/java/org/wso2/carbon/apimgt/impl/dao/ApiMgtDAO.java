@@ -4285,7 +4285,8 @@ public class ApiMgtDAO {
             Application application;
             while (rs.next()) {
                 application = new Application(rs.getString("NAME"), subscriber);
-                application.setId(rs.getInt("APPLICATION_ID"));
+                int applicationId = rs.getInt("APPLICATION_ID");
+                application.setId(applicationId);
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
@@ -4297,6 +4298,10 @@ public class ApiMgtDAO {
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
+
+                //setting subscription count
+                int subscriptionCount = getSubscriptionCountByApplicationId(subscriber, applicationId, groupingId);
+                application.setSubscriptionCount(subscriptionCount);
 
                 applicationsList.add(application);
             }
@@ -6262,6 +6267,10 @@ public class ApiMgtDAO {
                         application.setGroupId(getGroupId(application.getId()));
                     }
                 }
+
+                int subscriptionCount = getSubscriptionCountByApplicationId(subscriber, applicationId,
+                        application.getGroupId());
+                application.setSubscriptionCount(subscriptionCount);
 
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
                 application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
