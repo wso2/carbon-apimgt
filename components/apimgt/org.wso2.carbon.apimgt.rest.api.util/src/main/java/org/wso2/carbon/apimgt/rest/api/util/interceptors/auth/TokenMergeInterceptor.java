@@ -50,24 +50,29 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
 
         ArrayList tokenCookie = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
                 .get(RestApiConstants.COOKIE_HEADER_NAME);
-        String cookie = tokenCookie.get(0).toString();
-        if (cookie != null) {
-            cookie = cookie.trim();
-            String[] cookies = cookie.split(";");
-            String tokenFromCookie = Arrays.stream(cookies)
-                    .filter(name -> name.contains(RestApiConstants.AUTH_COOKIE_NAME)).findFirst().orElse("");
-            String[] tokenParts = tokenFromCookie.split("=");
-            if (tokenParts.length == 2) {
-                accessToken += tokenParts[1]; // Append the token section from cookie to token part from Auth header
-            }
-
-            TreeMap headers = (TreeMap) message.get(Message.PROTOCOL_HEADERS);
-
-            ArrayList authorizationHeader = new ArrayList<>();
-            authorizationHeader.add(0, String.format("Bearer %s", accessToken));
-            headers.put(RestApiConstants.AUTH_HEADER_NAME, authorizationHeader);
-            message.put(Message.PROTOCOL_HEADERS, headers);
-
+        if (tokenCookie == null) {
+            return;
         }
+        
+        String cookie = tokenCookie.get(0).toString();
+        if (cookie == null) {
+            return;
+        }
+
+        cookie = cookie.trim();
+        String[] cookies = cookie.split(";");
+        String tokenFromCookie = Arrays.stream(cookies)
+                .filter(name -> name.contains(RestApiConstants.AUTH_COOKIE_NAME)).findFirst().orElse("");
+        String[] tokenParts = tokenFromCookie.split("=");
+        if (tokenParts.length == 2) {
+            accessToken += tokenParts[1]; // Append the token section from cookie to token part from Auth header
+        }
+
+        TreeMap headers = (TreeMap) message.get(Message.PROTOCOL_HEADERS);
+
+        ArrayList authorizationHeader = new ArrayList<>();
+        authorizationHeader.add(0, String.format("Bearer %s", accessToken));
+        headers.put(RestApiConstants.AUTH_HEADER_NAME, authorizationHeader);
+        message.put(Message.PROTOCOL_HEADERS, headers);
     }
 }
