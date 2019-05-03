@@ -32,9 +32,9 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -115,7 +115,9 @@ public class APIMappingUtil {
 
         if (!APIConstants.APIType.WS.toString().equals(model.getType())) {
             apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
-            apiSwaggerDefinition = RestAPIStoreUtils.removeXMediationScriptsFromSwagger(apiSwaggerDefinition);
+            if (apiSwaggerDefinition != null) {
+                apiSwaggerDefinition = APIUtil.removeXMediationScriptsFromSwagger(apiSwaggerDefinition);
+            }
         }
         dto.setApiDefinition(apiSwaggerDefinition);
 
