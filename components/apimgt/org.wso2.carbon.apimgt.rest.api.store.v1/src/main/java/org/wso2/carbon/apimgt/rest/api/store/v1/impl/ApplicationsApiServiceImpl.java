@@ -203,11 +203,27 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         }
         return null;
     }
-    
+
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                    apiConsumer.removeApplication(application, username);
+                    return Response.ok().build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while deleting application " + applicationId, e, log);
+        }
+        return null;
     }
 
     @Override

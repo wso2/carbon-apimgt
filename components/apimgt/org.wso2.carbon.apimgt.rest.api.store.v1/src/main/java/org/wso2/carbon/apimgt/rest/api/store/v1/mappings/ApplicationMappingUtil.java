@@ -48,8 +48,8 @@ public class ApplicationMappingUtil {
         applicationDTO.setAttributes(applicationAttributes);
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
-        if (applicationDTO.getGroups() != null && applicationDTO.getGroups().size() > 0) {
-            application.setGroupId(String.join(",", applicationDTO.getGroups()));
+        if (application.getGroupId() != null) {
+            applicationDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
         }
         applicationDTO.setSubscriber(application.getSubscriber().getName());
         applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.OAUTH);
