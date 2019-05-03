@@ -19,16 +19,17 @@
 
 /* eslint-disable */
 var path = require('path');
+var child_process = require('child_process');
 
 const config = {
     entry: {
         index: './source/index.jsx',
     },
     output: {
-        path: path.resolve(__dirname, 'public/dist'),
+        path: path.resolve(__dirname, 'site/public/dist'),
         filename: '[name].bundle.js',
         chunkFilename: '[name].bundle.js',
-        publicPath: 'static/public/dist/',
+        publicPath: 'site/public/dist/',
     },
     watch: false,
     devtool: 'source-map',
@@ -40,12 +41,15 @@ const config = {
         extensions: ['.js', '.jsx'],
     },
     module: {
-        rules: [{
+        rules: [
+            {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
-                use: [{
-                    loader: 'babel-loader',
-                }, ],
+                use: [
+                    {
+                        loader: 'babel-loader',
+                    },
+                ],
             },
             {
                 test: /\.css$/,
@@ -53,7 +57,8 @@ const config = {
             },
             {
                 test: /\.less$/,
-                use: [{
+                use: [
+                    {
                         loader: 'style-loader', // creates style nodes from JS strings
                     },
                     {
@@ -92,7 +97,7 @@ if (process.env.NODE_ENV === 'development') {
     config.module.rules.push(esLintLoader);
 }
 
-module.exports = function (env) {
+module.exports = function(env) {
     if (env && env.analysis) {
         var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
         config.plugins.push(new BundleAnalyzerPlugin());

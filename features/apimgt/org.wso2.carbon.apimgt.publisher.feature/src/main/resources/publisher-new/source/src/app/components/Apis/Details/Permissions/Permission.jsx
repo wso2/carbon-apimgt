@@ -340,25 +340,37 @@ class Permission extends Component {
                 title: 'Read',
                 dataIndex: 'isRead',
                 key: 'isRead',
-                render: isChecked => <Checkbox checked={isChecked} name='read' value={ApiPermissionValidation.permissionType.READ} />,
+                render: isChecked => (
+                    <Checkbox checked={isChecked} name='read' value={ApiPermissionValidation.permissionType.READ} />
+                ),
             },
             {
                 title: 'Update',
                 dataIndex: 'isUpdate',
                 key: 'isUpdate',
-                render: isChecked => <Checkbox checked={isChecked} name='update' value={ApiPermissionValidation.permissionType.UPDATE} />,
+                render: isChecked => (
+                    <Checkbox checked={isChecked} name='update' value={ApiPermissionValidation.permissionType.UPDATE} />
+                ),
             },
             {
                 title: 'Delete',
                 dataIndex: 'isDelete',
                 key: 'isDelete',
-                render: isChecked => <Checkbox checked={isChecked} name='delete' value={ApiPermissionValidation.permissionType.DELETE} />,
+                render: isChecked => (
+                    <Checkbox checked={isChecked} name='delete' value={ApiPermissionValidation.permissionType.DELETE} />
+                ),
             },
             {
                 title: 'Manage Subscriptions',
                 dataIndex: 'isManageSubscription',
                 key: 'isManageSubscription',
-                render: isChecked => <Checkbox checked={isChecked} name='manage_subscription' value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION} />,
+                render: isChecked => (
+                    <Checkbox
+                        checked={isChecked}
+                        name='manage_subscription'
+                        value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
+                    />
+                ),
             },
             {
                 title: 'Action',
@@ -410,7 +422,11 @@ class Permission extends Component {
                     <Col span={4}>
                         <Card bodyStyle={{ padding: 5 }}>
                             <div className='custom-image'>
-                                <img alt='API thumb' width='100%' src='/publisher-new/static/public/images/api/api-default.png' />
+                                <img
+                                    alt='API thumb'
+                                    width='100%'
+                                    src='/publisher-new/site/public/images/api/api-default.png'
+                                />
                             </div>
                             <div className='custom-card'>
                                 <Badge status='processing' text={api.lifeCycleStatus} />
@@ -433,10 +449,19 @@ class Permission extends Component {
                                     </Select>
                                 </Row>
 
-                                <Row style={{ marginBottom: '10px', display: `${this.state.visibleRolesDisplay}` }} type='flex' justify='left'>
+                                <Row
+                                    style={{ marginBottom: '10px', display: `${this.state.visibleRolesDisplay}` }}
+                                    type='flex'
+                                    justify='left'
+                                >
                                     <Col span={8}>Visible to Roles</Col>
                                     <Col span={16}>
-                                        <Input name='roles' placeholder='Sales-group,Engineering' value={this.state.visibleRoles} onChange={this.handleChangeVisibilityRolesField} />
+                                        <Input
+                                            name='roles'
+                                            placeholder='Sales-group,Engineering'
+                                            value={this.state.visibleRoles}
+                                            onChange={this.handleChangeVisibilityRolesField}
+                                        />
                                     </Col>
                                 </Row>
                             </Card>
@@ -447,30 +472,58 @@ class Permission extends Component {
                                     <Col span={16}>
                                         <Row>
                                             <Col span={4} style={{ margin: '10px' }}>
-                                                <Input name='roleField' placeholder='role' value={this.state.roleField} onChange={this.handleChangeRoleField} />
+                                                <Input
+                                                    name='roleField'
+                                                    placeholder='role'
+                                                    value={this.state.roleField}
+                                                    onChange={this.handleChangeRoleField}
+                                                />
                                             </Col>
                                             <Col span={2} style={{ margin: '10px' }}>
-                                                <Checkbox name='readField' value={ApiPermissionValidation.permissionType.READ} checked={this.state.readField} onChange={this.handleChangeReadField}>
+                                                <Checkbox
+                                                    name='readField'
+                                                    value={ApiPermissionValidation.permissionType.READ}
+                                                    checked={this.state.readField}
+                                                    onChange={this.handleChangeReadField}
+                                                >
                                                     Read
                                                 </Checkbox>
                                             </Col>
                                             <Col span={2} style={{ margin: '10px' }}>
-                                                <Checkbox name='updateField' value={ApiPermissionValidation.permissionType.UPDATE} checked={this.state.updateField} onChange={this.handleChangeUpdateField}>
+                                                <Checkbox
+                                                    name='updateField'
+                                                    value={ApiPermissionValidation.permissionType.UPDATE}
+                                                    checked={this.state.updateField}
+                                                    onChange={this.handleChangeUpdateField}
+                                                >
                                                     Update
                                                 </Checkbox>
                                             </Col>
                                             <Col span={2} style={{ margin: '10px' }}>
-                                                <Checkbox name='deleteField' value={ApiPermissionValidation.permissionType.DELETE} checked={this.state.deleteField} onChange={this.handleChangeDeleteField}>
+                                                <Checkbox
+                                                    name='deleteField'
+                                                    value={ApiPermissionValidation.permissionType.DELETE}
+                                                    checked={this.state.deleteField}
+                                                    onChange={this.handleChangeDeleteField}
+                                                >
                                                     Delete
                                                 </Checkbox>
                                             </Col>
                                             <Col span={5} style={{ margin: '10px' }}>
-                                                <Checkbox name='manageSubField' value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION} checked={this.state.manageSubField} onChange={this.handleChangeManageSubField}>
+                                                <Checkbox
+                                                    name='manageSubField'
+                                                    value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
+                                                    checked={this.state.manageSubField}
+                                                    onChange={this.handleChangeManageSubField}
+                                                >
                                                     Manage Subscriptions
                                                 </Checkbox>
                                             </Col>
                                             <Col span={1} style={{ margin: '10px' }}>
-                                                <Button name='add' onClick={this.handleAddRole.bind(this, permissionData)}>
+                                                <Button
+                                                    name='add'
+                                                    onClick={this.handleAddRole.bind(this, permissionData)}
+                                                >
                                                     Add
                                                 </Button>
                                             </Col>
@@ -490,12 +543,20 @@ class Permission extends Component {
                                     <Col span={16}>
                                         <Row>
                                             <Col span={8} style={{ margin: '10px' }}>
-                                                <Checkbox name='oauthField' checked={this.state.oauthField} onChange={this.toggleOauthSelect}>
+                                                <Checkbox
+                                                    name='oauthField'
+                                                    checked={this.state.oauthField}
+                                                    onChange={this.toggleOauthSelect}
+                                                >
                                                     Oauth
                                                 </Checkbox>
                                             </Col>
                                             <Col span={8} style={{ margin: '10px' }}>
-                                                <Checkbox name='apikeyField' checked={this.state.apikeyField} onChange={this.toggleApiKeySelect}>
+                                                <Checkbox
+                                                    name='apikeyField'
+                                                    checked={this.state.apikeyField}
+                                                    onChange={this.toggleApiKeySelect}
+                                                >
                                                     API Key
                                                 </Checkbox>
                                             </Col>
@@ -534,7 +595,13 @@ class PermissionFormWrapper extends React.Component {
 
     render = () => {
         const { match } = this.props;
-        return <PermissionFormGenerated match={match} history={this.props.history} resourceNotFountMessage={this.props.resourceNotFountMessage} />;
+        return (
+            <PermissionFormGenerated
+                match={match}
+                history={this.props.history}
+                resourceNotFountMessage={this.props.resourceNotFountMessage}
+            />
+        );
     };
 }
 

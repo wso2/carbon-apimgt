@@ -118,13 +118,12 @@ class ThumbnailView extends Component {
     componentDidMount() {
         const thumbApi = new Api();
         const { api } = this.props;
-        thumbApi.getAPIThumbnail(api.id)
-            .then((response) => {
-                if (response && response.data && response.data.size > 0) {
-                    const url = windowURL.createObjectURL(response.data);
-                    this.setState({ thumbnail: url });
-                }
-            });
+        thumbApi.getAPIThumbnail(api.id).then((response) => {
+            if (response && response.data && response.data.size > 0) {
+                const url = windowURL.createObjectURL(response.data);
+                this.setState({ thumbnail: url });
+            }
+        });
     }
 
     /**
@@ -171,15 +170,17 @@ class ThumbnailView extends Component {
         }
         const api = new Api();
         const thumbnailPromise = api.addAPIThumbnail(apiId, file);
-        thumbnailPromise.then(() => {
-            Alert.info(intl.formatMessage({ id: 'thumbnail.upload.success' }));
-            this.setState({ open: false, thumbnail: file.preview });
-        }).catch((error) => {
-            if (process.env.NODE_ENV !== 'production') {
-                console.log(error);
-            }
-            Alert.error(intl.formatMessage({ id: 'thumbnail.upload.error' }));
-        });
+        thumbnailPromise
+            .then(() => {
+                Alert.info(intl.formatMessage({ id: 'thumbnail.upload.success' }));
+                this.setState({ open: false, thumbnail: file.preview });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                Alert.error(intl.formatMessage({ id: 'thumbnail.upload.error' }));
+            });
     }
 
     /**
@@ -211,30 +212,21 @@ class ThumbnailView extends Component {
 
         return (
             <React.Fragment>
-                {isEditable ?
-                    <ButtonBase
-                        focusRipple
-                        className={classes.thumb}
-                        onClick={this.handleClick}
-                        id='btnEditAPIThumb'
-                    >
-                        { view }
+                {isEditable ? (
+                    <ButtonBase focusRipple className={classes.thumb} onClick={this.handleClick} id='btnEditAPIThumb'>
+                        {view}
                         <span className={classes.thumbBackdrop} />
                         <span className={classes.thumbButton}>
-                            <Typography
-                                component='span'
-                                variant='subheading'
-                                color='inherit'
-                            >
+                            <Typography component='span' variant='subheading' color='inherit'>
                                 <EditIcon />
                             </Typography>
                         </span>
                     </ButtonBase>
-                    :
+                ) : (
                     <Link className={classes.suppressLinkStyles} to={overviewPath}>
-                        { view }
+                        {view}
                     </Link>
-                }
+                )}
 
                 <Dialog
                     TransitionComponent={Transition}
@@ -255,13 +247,11 @@ class ThumbnailView extends Component {
                                     className={classes.dropzone}
                                     activeClassName={classes.acceptDrop}
                                     rejectClassName={classes.rejectDrop}
-                                    onDrop={(dropFile) => { this.onDrop(dropFile); }}
+                                    onDrop={(dropFile) => {
+                                        this.onDrop(dropFile);
+                                    }}
                                 >
-                                    <Typography
-                                        component='span'
-                                        variant='title'
-                                        color='inherit'
-                                    >
+                                    <Typography component='span' variant='title' color='inherit'>
                                         <FormattedMessage
                                             id='drop.image.message'
                                             defaultMessage='Drop your image or click the box to '
@@ -274,34 +264,27 @@ class ThumbnailView extends Component {
                                     <GridListTile key='tileImage' cols='1'>
                                         <img
                                             className={classes.preview}
-                                            src={file && file.length > 0 ?
-                                                file[0].preview :
-                                                '/publisher-new/static/public/images/api/api-default.png'
+                                            src={
+                                                file && file.length > 0
+                                                    ? file[0].preview
+                                                    : '/publisher-new/site/public/images/api/api-default.png'
                                             }
                                             alt='Thumbnail Preview'
                                         />
-                                        <GridListTileBar
-                                            title='Preview'
-                                        />
+                                        <GridListTileBar title='Preview' />
                                     </GridListTile>
                                 </GridList>
                             </Grid>
                         </Grid>
                     </DialogContent>
                     <DialogActions>
-                        <Button color='primary' onClick={this.handleClick} id='btnUploadAPIThumb' >
+                        <Button color='primary' onClick={this.handleClick} id='btnUploadAPIThumb'>
                             <UploadIcon />
-                            <FormattedMessage
-                                id='upload.btn'
-                                defaultMessage='UPLOAD'
-                            />
+                            <FormattedMessage id='upload.btn' defaultMessage='UPLOAD' />
                         </Button>
                         <Button onClick={this.handleClose} color='secondary'>
                             <CancelIcon />
-                            <FormattedMessage
-                                id='cancel.btn'
-                                defaultMessage='CANCEL'
-                            />
+                            <FormattedMessage id='cancel.btn' defaultMessage='CANCEL' />
                         </Button>
                     </DialogActions>
                 </Dialog>

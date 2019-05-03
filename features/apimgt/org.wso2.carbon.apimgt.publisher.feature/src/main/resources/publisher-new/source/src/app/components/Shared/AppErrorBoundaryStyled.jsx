@@ -134,7 +134,7 @@ class AppErrorBoundaryStyled extends React.Component {
                     <div className={classes.errorDisplay}>
                         <div className={classes.errorDisplayContent}>
                             <div className={classes.errorTitle}>
-                                <img src='/publisher-new/static/public/images/robo.png' alt='OOPS' />
+                                <img src='/publisher-new/site/public/images/robo.png' alt='OOPS' />
                                 <Typography variant='h2' gutterBottom>
                                     Something went wrong
                                 </Typography>
