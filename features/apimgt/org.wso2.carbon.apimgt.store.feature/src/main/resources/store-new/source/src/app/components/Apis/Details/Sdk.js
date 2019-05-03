@@ -131,7 +131,7 @@ class Sdk extends React.Component {
                     (index < 3) && <Grid item xs={4}>
                         <a onClick={event => this.handleClick(event,language)} style={{cursor: 'pointer'}}>
                             <img alt={language} 
-                            src={"/store-new/public/app/images/sdks/" + new String(language) + ".svg"} 
+                            src={"/store-new/site/public/images/sdks/" + new String(language) + ".svg"}
                             style={{width:80, height:80, margin:15 }}/>
                         </a>
                     </Grid>
@@ -162,9 +162,9 @@ class Sdk extends React.Component {
                                                 <Divider/>
                                                 <CardMedia
                                                     title={language.toString().toUpperCase()}
-                                                    src={"/store-new/public/app/images/sdks/"+new String(language)+".svg"}
+                                                    src={"/store-new/site/public/images/sdks/"+new String(language)+".svg"}
                                                 >
-                                                    <img alt={language} src={"/store-new/public/app/images/sdks/"+new String(language)+".svg"} style={{width:"100px",height:"100px",margin:"15px"}}/>
+                                                    <img alt={language} src={"/store-new/site/public/images/sdks/"+new String(language)+".svg"} style={{width:"100px",height:"100px",margin:"15px"}}/>
                                                 </CardMedia>
                                                 <CardActions>
                                                     <Grid container justify="center">
