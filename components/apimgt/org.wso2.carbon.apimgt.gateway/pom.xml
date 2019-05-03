@@ -346,7 +346,6 @@
                             org.apache.commons.*,
                             org.apache.commons.lang3.*,
                             org.apache.synapse.*,
-                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*; version="2.0.4.wso2v4",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",

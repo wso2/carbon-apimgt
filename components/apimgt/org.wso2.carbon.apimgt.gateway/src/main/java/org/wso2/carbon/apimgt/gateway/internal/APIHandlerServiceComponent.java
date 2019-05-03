@@ -27,7 +27,6 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
-import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
@@ -65,7 +64,6 @@ public class APIHandlerServiceComponent {
     private static final Log log = LogFactory.getLog(APIHandlerServiceComponent.class);
 
     private APIKeyValidatorClientPool clientPool;
-    private ThriftKeyValidatorClientPool thriftClientPool;
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
     private ServiceRegistration registration;
 
@@ -81,8 +79,6 @@ public class APIHandlerServiceComponent {
 
             if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
                 clientPool = APIKeyValidatorClientPool.getInstance();
-            } else {
-                thriftClientPool = ThriftKeyValidatorClientPool.getInstance();
             }
 
             String filePath = getFilePath();
@@ -138,8 +134,6 @@ public class APIHandlerServiceComponent {
         }
         if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
             clientPool.cleanup();
-        } else {
-            thriftClientPool.cleanup();
         }
         if (registration != null) {
             log.debug("Unregistering ThrottleDataService...");
