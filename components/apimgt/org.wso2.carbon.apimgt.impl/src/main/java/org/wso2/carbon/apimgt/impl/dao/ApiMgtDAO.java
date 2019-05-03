@@ -6672,7 +6672,7 @@ public class ApiMgtDAO {
             //check whether there are any associated api products before updating url temaplates and scopes
             //TODO move to constants
             String queryGetAssociatedAPIProducts =
-                    "SELECT AM_API_PRODUCT.UUID " + "FROM AM_API_PRODUCT_MAPPING, AM_API_URL_MAPPING, AM_API_PRODUCT "
+                    "SELECT AM_API_PRODUCT.UUID, AM_API_PRODUCT.TENANT_DOMAIN " + "FROM AM_API_PRODUCT_MAPPING, AM_API_URL_MAPPING, AM_API_PRODUCT "
                             + "WHERE " + "AM_API_PRODUCT_MAPPING.URL_MAPPING_ID = AM_API_URL_MAPPING.URL_MAPPING_ID "
                             + "AND AM_API_PRODUCT.API_PRODUCT_ID  = AM_API_PRODUCT_MAPPING.API_PRODUCT_ID "
                             + "AND API_ID = ?";
@@ -6687,7 +6687,8 @@ public class ApiMgtDAO {
 
             while (rs.next()) {
                 String productUUID = rs.getString("UUID");
-                apiProducts.add(getAPIProduct(productUUID));
+                String tenantDomain = rs.getString("TENANT_DOMAIN");
+                apiProducts.add(getAPIProduct(productUUID, tenantDomain));
             }
 
             synchronized (scopeMutex) {
@@ -12992,6 +12993,9 @@ public class ApiMgtDAO {
         PreparedStatement prepStmtAddScopeLink = null;
         PreparedStatement prepStmtAddScopeResourceMapping = null;
 
+        if(log.isDebugEnabled()) {
+            log.debug("addAPIProduct() : " + apiproduct.toString() + " for tenant " + tenantDomain);
+        }
         ResultSet rs = null;
         int productId = 0;
         int scopeId = 0;
@@ -13003,8 +13007,8 @@ public class ApiMgtDAO {
                     + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
                     + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
                     + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION,"
-                    + "SUBSCRIPTION_AVAILABILE_TENANTS) " 
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES) " 
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_product_id"});
             prepStmtAddAPIProduct.setString(1, apiproduct.getProvider());
             prepStmtAddAPIProduct.setString(2, apiproduct.getName());
@@ -13019,7 +13023,8 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(6, apiproduct.getVisibility());
             prepStmtAddAPIProduct.setString(7, apiproduct.getSubscriptionAvailability());
             prepStmtAddAPIProduct.setString(8, apiproduct.getUuid());
-            prepStmtAddAPIProduct.setString(9, tenantDomain);
+            prepStmtAddAPIProduct.setString(9,
+                    StringUtils.isEmpty(tenantDomain) ? MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
             prepStmtAddAPIProduct.setString(10,
                     apiproduct.getState() == null ? APIConstants.CREATED : apiproduct.getState());
             prepStmtAddAPIProduct.setString(11, ""); //version is not supported atm
@@ -13028,6 +13033,7 @@ public class ApiMgtDAO {
                 subscriptionAvailableTenants = apiproduct.getSubscriptionAvailableTenants();
             }
             prepStmtAddAPIProduct.setString(12, subscriptionAvailableTenants);
+            prepStmtAddAPIProduct.setString(13, apiproduct.getVisibleRoles());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -13131,7 +13137,14 @@ public class ApiMgtDAO {
         
     }
     
-    public APIProduct getAPIProduct(String uuid) throws APIManagementException {
+    /**
+     * Get API Product.
+     * @param uuid uuid of the product
+     * @param tenantDomain tenant domain 
+     * @return product
+     * @throws APIManagementException exception
+     */
+    public APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
         APIProduct product = new APIProduct();
         Connection connection = null;
         PreparedStatement prepStmtGetAPIProduct = null;
@@ -13141,14 +13154,12 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();   
-            
-            //TODO check this
-            //TODO move to constant
-            String queryGetAPIProduct = "SELECT API_PRODUCT_ID,UUID,DESCRIPTION,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_TIER,VISIBILITY,BUSINESS_OWNER,BUSINESS_OWNER_EMAIL,SUBSCRIPTION_AVAILABILITY,STATE, SUBSCRIPTION_AVAILABILE_TENANTS FROM AM_API_PRODUCT WHERE UUID = ?";
+            String queryGetAPIProduct = SQLConstants.GET_API_PRODUCT_SQL;
             int productId = 0;
             
             prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
             prepStmtGetAPIProduct.setString(1, uuid);
+            prepStmtGetAPIProduct.setString(2, tenantDomain);
             rs = prepStmtGetAPIProduct.executeQuery();
             if (rs.next()) {
                 product.setUuid(rs.getString("UUID"));
@@ -13171,25 +13182,13 @@ public class ApiMgtDAO {
                 product.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
                 product.setSubscriptionAvailableTenants(rs.getString("SUBSCRIPTION_AVAILABILE_TENANTS"));
                 product.setState(rs.getString("STATE"));
+                product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));
+                product.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                 productId = rs.getInt("API_PRODUCT_ID");
                 product.setProductId(productId);
             }
             //get api resources related to api product
-            //TODO move to constant
-            String queryListProductResourceMapping =
-                    "SELECT API_NAME, API_PROVIDER , API_VERSION ,T1.API_ID ,API_PRODUCT_ID, HTTP_METHOD, URL_PATTERN, "
-                            + "T1.URL_MAPPING_ID " +
-                    "FROM " + 
-                    "(SELECT API_NAME ,API_PROVIDER, API_VERSION, API.API_ID,URL.URL_MAPPING_ID "
-                    + "FROM AM_API_URL_MAPPING URL, AM_API API "
-                    + "WHERE API.API_ID = URL.API_ID) T1 " + 
-                    "INNER JOIN " + 
-                    "(SELECT API_PRODUCT_ID, HTTP_METHOD, URL_PATTERN, URL.URL_MAPPING_ID "
-                    + "FROM AM_API_PRODUCT_MAPPING PRODUCT, AM_API_URL_MAPPING URL "
-                    + "WHERE URL.URL_MAPPING_ID  = PRODUCT.URL_MAPPING_ID  AND API_PRODUCT_ID =? ) T2 " + 
-                    "ON " + 
-                    "(T1.URL_MAPPING_ID =T2.URL_MAPPING_ID )";
-                    
+            String queryListProductResourceMapping = SQLConstants.LIST_PRODUCT_RESOURCE_MAPPING;      
             prepStmtGetAPIProductResource = connection.prepareStatement(queryListProductResourceMapping);
             prepStmtGetAPIProductResource.setInt(1, productId);
 
@@ -13223,6 +13222,9 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, null, rs);
             APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProductResource, connection, rs2);
+        }
+        if(log.isDebugEnabled()) {
+            log.debug("getAPIProduct() for uuid " + uuid + " : " + product.toString());
         }
         return product;
     }
@@ -13506,5 +13508,57 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmtAddcopeLink, connection, null);
             APIMgtDBUtil.closeAllConnections(prepStmtAddScopeResourceMapping, connection, null);
         }
+    }
+    
+    /**
+     * Get api products that can be access by specific set of roles and tenant domain
+     * 
+     * @param roles set of roles that 
+     * @param tenantDomain Tenant domain
+     * @return list of products
+     * @throws APIManagementException 
+     */
+    public List<APIProduct> getStoreVisibleAPIProducts(String user, String tenantDomain) throws APIManagementException {
+        List<APIProduct> productList = new ArrayList<APIProduct>();
+        Connection connection = null;
+        PreparedStatement prepStmtGetAPIProduct = null;
+        ResultSet rs = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String queryGetAPIProduct = SQLConstants.GET_PUBLISHED_PRODUCT_SQL;
+            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
+            prepStmtGetAPIProduct.setString(1, APIStatus.PUBLISHED.toString());
+            prepStmtGetAPIProduct.setString(2, tenantDomain);
+
+            rs = prepStmtGetAPIProduct.executeQuery();
+
+            while (rs.next()) {
+                String visibleRoles = rs.getString("VISIBILE_ROLES");
+                String visibility = rs.getString("VISIBILITY");
+                String productTenant = rs.getString("TENANT_DOMAIN");
+                // add if the product is 1)public 2) restrict to current domain 3)restrict to a role within tenant
+                if (APIConstants.API_GLOBAL_VISIBILITY.equals(visibility)
+                        || (APIConstants.API_PRIVATE_VISIBILITY.equals(visibility)
+                                && tenantDomain.equals(productTenant))
+                        || (APIConstants.API_RESTRICTED_VISIBILITY.equals(visibility)
+                                && APIUtil.isRoleExistForUser(user, visibleRoles)
+                                && tenantDomain.equals(productTenant))) {
+
+                    APIProduct product = new APIProduct();
+                    product.setName(rs.getString("API_PRODUCT_NAME"));
+                    product.setUuid(rs.getString("UUID"));
+                    product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
+                    product.setProductId(rs.getInt("API_PRODUCT_ID"));
+                    productList.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving api product for tenant " + tenantDomain, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
+        }
+        return productList;
     }
 }

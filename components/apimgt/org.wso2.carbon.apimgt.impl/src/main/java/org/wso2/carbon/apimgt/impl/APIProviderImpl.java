@@ -6085,7 +6085,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public APIProduct getAPIProduct(String uuid, String apiProvider) throws APIManagementException {
         //TODO add validation for tenant and publisher visibility. currently no domain or user check is set
-        APIProduct product = apiMgtDAO.getAPIProduct(uuid);
+        APIProduct product = apiMgtDAO.getAPIProduct(uuid, MultitenantUtils.getTenantDomain(apiProvider));
         return product;
     }
 
