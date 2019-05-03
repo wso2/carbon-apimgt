@@ -3137,11 +3137,10 @@ definitions:
         type: string
         example: APPROVED
         default: ""
-      groupId:
-        type: string
-        example: ""
-      owner:
-        type: string
+      groups:
+        type: array
+        items:
+          type: string
         example: ""
       subscriptionCount:
         type: integer
@@ -3152,6 +3151,8 @@ definitions:
         example: []
       attributes:
         type: object
+        additionalProperties:
+          type: string
         example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
@@ -3179,11 +3180,10 @@ definitions:
         type: string
         example: APPROVED
         default: ""
-      groupId:
-        type: string
-        example: ""
-      owner:
-        type: string
+      groups:
+        type: array
+        items:
+          type: string
         example: ""
       subscriptionCount:
         type: integer

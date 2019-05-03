@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -46,10 +48,11 @@ public class ApplicationMappingUtil {
         applicationDTO.setAttributes(applicationAttributes);
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
-        applicationDTO.setGroupId(application.getGroupId());
+        if (applicationDTO.getGroups() != null && applicationDTO.getGroups().size() > 0) {
+            application.setGroupId(String.join(",", applicationDTO.getGroups()));
+        }
         applicationDTO.setSubscriber(application.getSubscriber().getName());
         applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.OAUTH);
-        applicationDTO.setOwner(application.getOwner());
         applicationDTO.setSubscriptionCount(application.getSubscriptionCount());
         if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
                 .equals(application.getTokenType())) {
@@ -78,10 +81,11 @@ public class ApplicationMappingUtil {
                 .equals(applicationDTO.getTokenType())) {
             application.setTokenType(applicationDTO.getTokenType().toString());
         }
-        Object applicationAttributes = applicationDTO.getAttributes();
-        Map appAttributes = new ObjectMapper().convertValue(applicationAttributes,Map.class);
+        Map <String, String> appAttributes = applicationDTO.getAttributes();
         application.setApplicationAttributes(appAttributes);
-        application.setGroupId(applicationDTO.getGroupId());
+        if (applicationDTO.getGroups() != null && applicationDTO.getGroups().size() > 0) {
+            application.setGroupId(String.join(",", applicationDTO.getGroups()));
+        }
         return application;
     }
 
@@ -173,9 +177,10 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
-        applicationInfoDTO.setGroupId(application.getGroupId());
+        if (application.getGroupId() != null) {
+            applicationInfoDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
+        }
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
-        applicationInfoDTO.setOwner(application.getOwner());
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
         return applicationInfoDTO;
     }

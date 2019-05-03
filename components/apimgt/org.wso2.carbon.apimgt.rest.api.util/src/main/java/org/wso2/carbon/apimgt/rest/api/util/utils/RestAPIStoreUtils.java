@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.rest.api.util.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -38,8 +40,10 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -281,5 +285,56 @@ public class RestAPIStoreUtils {
         if (apiConsumer.isTierDeneid(tier)) {
             throw new APIMgtAuthorizationFailedException("Tier " + tier + " is not allowed for user " + username);
         }
+    }
+
+    /**
+     * Validate application attributes with the provided keys. Removes any attribute from the map if it is not contained
+     * in the provided set of keys
+     *
+     * @param applicationAttributes Application attributes
+     * @param keys provided keys
+     * @return attributes after removing invalid items
+     */
+    public static Map<String, String> validateApplicationAttributes(Map<String, String> applicationAttributes, Set keys) {
+        Iterator iterator = applicationAttributes.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = (String) iterator.next();
+            if (!keys.contains(key)) {
+                iterator.remove();
+                applicationAttributes.remove(key);
+            }
+        }
+        return applicationAttributes;
+    }
+
+    /**
+     * Retrieves valid application attribute keys in the provided application attributes
+     *
+     * @param applicationAttributes application attributes
+     * @return valid application attribute keys
+     * @throws APIManagementException when error occurs
+     */
+    public static Set<String> getValidApplicationAttributeKeys(Map<String, String> applicationAttributes)
+            throws APIManagementException {
+        String username = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+        Set<String> keySet = new HashSet<>();
+        Set attributeKeysFromUSer = applicationAttributes.keySet();
+
+        for (Object object : attributeKeysFromConfig) {
+            JSONObject jsonObject = (JSONObject) object;
+            Boolean isRequired = false;
+            if (jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED) != null) {
+                isRequired = (Boolean) jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED);
+            }
+            String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+
+            if (isRequired && !attributeKeysFromUSer.contains(key)) {
+                RestApiUtil.handleBadRequest(key + " should be specified", log);
+            }
+            keySet.add(key);
+        }
+        return keySet;
     }
 }
