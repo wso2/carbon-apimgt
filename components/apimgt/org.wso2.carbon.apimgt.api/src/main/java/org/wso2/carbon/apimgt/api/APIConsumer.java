@@ -853,5 +853,22 @@ public interface APIConsumer extends APIManager {
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
     
-    APIProduct getAPIProduct(String uuid, String user) throws APIManagementException;
+    /**
+     * Get API product based on the UUID
+     * @param uuid uuid of the product
+     * @param tenantDomain tenant domain
+     * @return product product
+     * @throws APIManagementException
+     */
+    APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException;
+    
+    /**
+     * Retrieve list of API products
+     * 
+     * @param user tenant aware username. this would be null for anonymous users. 
+     * @param tenantDomain Requesting tenant domain. if null, super tenant will be used
+     * @return list of proudcts List of product visible for the user
+     * @throws APIManagementException Exception
+     */
+    List<APIProduct> getStoreVisibleAPIProductsForUser(String user, String tenantDomain) throws APIManagementException;
 }

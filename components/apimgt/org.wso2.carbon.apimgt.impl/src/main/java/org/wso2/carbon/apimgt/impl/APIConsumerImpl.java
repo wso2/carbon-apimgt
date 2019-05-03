@@ -2693,6 +2693,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIProduct product = null;
         APIIdentifier apiIdentifier = null;
         APIProductIdentifier apiProdIdentifier = null;
+        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
+        String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUsername);
         String state = "";
         if (identifier instanceof APIIdentifier) {
             apiIdentifier = (APIIdentifier) identifier;
@@ -2701,12 +2703,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } 
         if (identifier instanceof APIProductIdentifier) {
             apiProdIdentifier = (APIProductIdentifier) identifier;
-            product = apiMgtDAO.getAPIProduct(apiProdIdentifier.getUuid());
+            product = apiMgtDAO.getAPIProduct(apiProdIdentifier.getUuid(), tenantDomain);
             state = product.getState();
         }
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
-        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         if (APIConstants.PUBLISHED.equals(state)) {
             subscriptionId = apiMgtDAO.addSubscription(identifier, "", applicationId,
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
@@ -5147,9 +5148,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     
     @Override
-    public APIProduct getAPIProduct(String uuid, String user) throws APIManagementException {
-        //TODO add validation for tenant and  visibility. currently no domain or user check is set
-        APIProduct product = apiMgtDAO.getAPIProduct(uuid);
-        return product;
+    public APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
+        return apiMgtDAO.getAPIProduct(uuid, tenantDomain);
     }
+    
+    @Override
+    public List<APIProduct> getStoreVisibleAPIProductsForUser(String user, String tenantDomain)
+            throws APIManagementException {
+        if(StringUtils.isEmpty(tenantDomain)) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        return apiMgtDAO.getStoreVisibleAPIProducts(user, tenantDomain);
+
+    }
+        
 }

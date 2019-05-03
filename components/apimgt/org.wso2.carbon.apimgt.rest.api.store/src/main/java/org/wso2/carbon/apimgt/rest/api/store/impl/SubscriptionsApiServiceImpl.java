@@ -261,13 +261,19 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             SubscriptionResponse subscriptionResponse = null;
             if(!StringUtils.isEmpty(body.getApiProductIdentifier())) {
                 String uuid = body.getApiProductIdentifier();
-                APIProduct product = apiConsumer.getAPIProduct(uuid, username); //TODO pass additional param (tenant etc.)
+                APIProduct product = apiConsumer.getAPIProduct(uuid, tenantDomain); 
                 if(product == null) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
                     return null;
                 }
-                //TODO add api Product related subscription allowed validation
-                
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
+                }
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    //application access failure occurred
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+      
                 APIProductIdentifier identifier = new  APIProductIdentifier(product.getProvider(), product.getName());
                 identifier.setUuid(uuid);
                 

@@ -243,6 +243,34 @@ public class RestAPIStoreUtils {
         }
         return true;
     }
+    
+    /**
+     * 
+     * @param product
+     * @return
+     * @throws APIManagementException
+     */
+    public static boolean isUserAccessAllowedForAPIProduct(APIProduct product) throws APIManagementException {
+        //TODO check whether the username has external domain info as well
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (log.isDebugEnabled()) {
+            log.debug("isUserAccessAllowedForAPIProduct():- productId: " + product.getUuid() + ", visibility: "
+                    + product.getVisibility() + " username:" + username + " tenantDomain:" + tenantDomain);
+        }
+        if (APIConstants.API_GLOBAL_VISIBILITY.equals(product.getVisibility())) {
+            return true;
+        } else if (APIConstants.API_RESTRICTED_VISIBILITY.equals(product.getVisibility())) {
+            if (APIUtil.isRoleExistForUser(username, product.getVisibleRoles())
+                    && tenantDomain.equals(product.getTenantDomain())) {
+                return true;
+            }
+        } else if (APIConstants.API_PRIVATE_VISIBILITY.equals(product.getVisibility())
+                && tenantDomain.equals(product.getTenantDomain())) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Check if the specified subscription is allowed for the logged in user
@@ -277,7 +305,8 @@ public class RestAPIStoreUtils {
             subscriptionAvailability = api.getSubscriptionAvailability();
         } 
         if (identifier instanceof APIProductIdentifier) {
-            APIProduct product = apiConsumer.getAPIProduct(((APIProductIdentifier) identifier).getUuid(), username);
+            APIProduct product = apiConsumer.getAPIProduct(((APIProductIdentifier) identifier).getUuid(),
+                    userTenantDomain);
             tiers = product.getAvailableTiers();
             subscriptionAvailability = product.getSubscriptionAvailability();
             subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();

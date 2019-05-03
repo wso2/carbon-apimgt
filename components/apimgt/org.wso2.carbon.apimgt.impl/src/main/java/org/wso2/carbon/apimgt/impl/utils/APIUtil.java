@@ -4457,6 +4457,33 @@ public final class APIUtil {
         }
         return true;
     }
+    
+    /**
+     * Check whether roles exist for the user.
+     * @param userName
+     * @param roleName
+     * @return
+     * @throws APIManagementException
+     */
+    public static boolean isRoleExistForUser(String userName, String roleName) throws APIManagementException {
+        boolean foundUserRole = false;
+        String[] userRoleList = APIUtil.getListOfRoles(userName);
+        String[] inputRoles = roleName.split(",");
+        if(log.isDebugEnabled()) {
+            log.debug("isRoleExistForUser(): User Roles " + Arrays.toString(userRoleList));
+            log.debug("isRoleExistForUser(): InputRoles Roles " + Arrays.toString(inputRoles));
+        }
+        if (inputRoles != null) {
+            for (String inputRole : inputRoles) {
+                if (APIUtil.compareRoleList(userRoleList, inputRole)) {
+                    foundUserRole = true;
+                    break;
+                }
+            }
+        }
+        return foundUserRole;
+    }
+ 
 
     /**
      * Create API Definition in JSON
