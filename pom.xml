@@ -664,6 +664,20 @@
                 <groupId>org.apache.synapse</groupId>
                 <artifactId>synapse-extensions</artifactId>
                 <version>${synapse.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-context</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-beans</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -1108,6 +1122,11 @@
                 <artifactId>spring-web</artifactId>
                 <version>${spring-web.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring-web.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>
@@ -1234,6 +1253,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
+                <version>${fasterxml.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
                 <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
@@ -1588,7 +1612,7 @@
         <slf4j.api.version>1.7.26</slf4j.api.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <jackson.version>1.9.12</jackson.version>
-        <spring-web.version>4.3.23.RELEASE</spring-web.version>
+        <spring-web.version>5.1.1.RELEASE</spring-web.version>
         <hibernate-validator.version>5.2.0.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.5.22</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
