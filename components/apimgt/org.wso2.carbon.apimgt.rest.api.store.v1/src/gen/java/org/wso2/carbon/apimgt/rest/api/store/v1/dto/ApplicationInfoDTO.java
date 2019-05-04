@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -33,10 +35,7 @@ public class ApplicationInfoDTO  {
   private String status = "";
   
   
-  private String groupId = null;
-  
-  
-  private String owner = null;
+  private List<String> groups = new ArrayList<String>();
   
   
   private Integer subscriptionCount = null;
@@ -117,24 +116,12 @@ public class ApplicationInfoDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("groupId")
-  public String getGroupId() {
-    return groupId;
+  @JsonProperty("groups")
+  public List<String> getGroups() {
+    return groups;
   }
-  public void setGroupId(String groupId) {
-    this.groupId = groupId;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("owner")
-  public String getOwner() {
-    return owner;
-  }
-  public void setOwner(String owner) {
-    this.owner = owner;
+  public void setGroups(List<String> groups) {
+    this.groups = groups;
   }
 
   
@@ -162,8 +149,7 @@ public class ApplicationInfoDTO  {
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  status: ").append(status).append("\n");
-    sb.append("  groupId: ").append(groupId).append("\n");
-    sb.append("  owner: ").append(owner).append("\n");
+    sb.append("  groups: ").append(groups).append("\n");
     sb.append("  subscriptionCount: ").append(subscriptionCount).append("\n");
     sb.append("}\n");
     return sb.toString();

@@ -146,24 +146,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
 
             if (applicationAttributes != null) {
-                JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
-                Set<String> keySet = new HashSet<>();
-                Set attributeKeysFromUSer = applicationAttributes.keySet();
-
-                for (Object object : attributeKeysFromConfig) {
-                    JSONObject jsonObject = (JSONObject) object;
-                    Boolean isRequired = false;
-                    if (jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED) != null) {
-                        isRequired = (Boolean) jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED);
-                    }
-                    String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
-
-                    if (isRequired && !attributeKeysFromUSer.contains(key)) {
-                        RestApiUtil.handleBadRequest(key + " should be specified", log);
-                    }
-                    keySet.add(key);
-                }
-                body.setAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+                Set<String> keySet = RestAPIStoreUtils.getValidApplicationAttributeKeys(applicationAttributes);
+                body.setAttributes(RestAPIStoreUtils.validateApplicationAttributes(applicationAttributes, keySet));
             }
 
             //subscriber field of the body is not honored. It is taken from the context
@@ -437,7 +421,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                         keySet.add(key);
                     }
                     if (applicationAttributes != null) {
-                        body.setAttributes(validateApplicationAttributes(applicationAttributes, keySet));
+                        body.setAttributes(RestAPIStoreUtils.validateApplicationAttributes(applicationAttributes, keySet));
                     }
                     //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
@@ -670,18 +654,5 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public String applicationsScopesApplicationIdGetGetLastUpdatedTime(String applicationId,
             Boolean filterByUserRoles, String ifNoneMatch, String ifModifiedSince) {
         return null;
-    }
-
-    private Map<String, String> validateApplicationAttributes(Map<String, String> applicationAttributes, Set keys) {
-
-        Iterator iterator = applicationAttributes.keySet().iterator();
-        while (iterator.hasNext()) {
-            String key = (String) iterator.next();
-            if (!keys.contains(key)) {
-                iterator.remove();
-                applicationAttributes.remove(key);
-            }
-        }
-        return applicationAttributes;
     }
 }
