@@ -308,6 +308,26 @@ public class RestAPIStoreUtils {
     }
 
     /**
+     * Retrieves application attribute keys defined in APIM configuration
+     * 
+     * @return application attribute keys defined in APIM configuration
+     * @throws APIManagementException when error occurs
+     */
+    public static Set<String> getApplicationAttributeKeys() throws APIManagementException {
+        
+        Set<String> keySet = new HashSet<>();
+        String username = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+        for (Object object : attributeKeysFromConfig) {
+            JSONObject jsonObject = (JSONObject) object;
+            String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+            keySet.add(key);
+        }
+        return keySet;
+    }
+
+    /**
      * Retrieves valid application attribute keys in the provided application attributes
      *
      * @param applicationAttributes application attributes

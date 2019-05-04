@@ -48,7 +48,7 @@ public class ApplicationMappingUtil {
         applicationDTO.setAttributes(applicationAttributes);
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
-        if (application.getGroupId() != null) {
+        if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
         }
         applicationDTO.setSubscriber(application.getSubscriber().getName());
@@ -90,38 +90,11 @@ public class ApplicationMappingUtil {
     }
 
     /** Converts an Application[] array into a corresponding ApplicationListDTO
-     * 
-     * @param applications array of Application objects
-     * @param limit limit parameter
-     * @param offset starting index
-     * @return ApplicationListDTO object corresponding to Application[] array
-     */
-    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, int limit, int offset) {
-        ApplicationListDTO applicationListDTO = new ApplicationListDTO();
-        List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
-        if (applicationInfoDTOs == null) {
-            applicationInfoDTOs = new ArrayList<>();
-            applicationListDTO.setList(applicationInfoDTOs);
-        }
-
-        //identifying the proper start and end indexes
-        int start = offset < applications.length && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= applications.length - 1 ? offset + limit - 1 : applications.length - 1;
-
-        for (int i = start; i <= end; i++) {
-            applicationInfoDTOs.add(fromApplicationToInfoDTO(applications[i]));
-        }
-        applicationListDTO.setCount(applicationInfoDTOs.size());
-        return applicationListDTO;
-    }
-
-    /** Converts an Application[] array into a corresponding ApplicationListDTO
      *
      * @param applications array of Application objects
-     * @param apiConsumer consumer object to get the subscription count
      * @return ApplicationListDTO object corresponding to Application[] array
      */
-    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications, APIConsumer apiConsumer)
+    public static ApplicationListDTO fromApplicationsToDTO(Application[] applications)
             throws APIManagementException {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
         List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
@@ -177,7 +150,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
-        if (application.getGroupId() != null) {
+        if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationInfoDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
         }
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());

@@ -95,7 +95,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 
-            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications, apiConsumer);
+            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications);
             ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
                     applications.length);
 
@@ -182,6 +182,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
+    /**
+     * Get an application by Id
+     *
+     * @param applicationId   application identifier
+     * @param ifNoneMatch     If-None-Match header value
+     * @return response containing the required application object
+     */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -200,6 +207,62 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Update an application by Id
+     *
+     * @param applicationId     application identifier
+     * @param body              request body containing application details
+     * @param ifMatch           If-Match header value
+     * @return response containing the updated application object
+     */
+    @Override
+    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
+            
+            if (oldApplication == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            
+            if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            
+            Map<String, String> applicationAttributes = body.getAttributes();
+            if (applicationAttributes != null) {
+                Set<String> keySet = RestAPIStoreUtils.getApplicationAttributeKeys();
+                body.setAttributes(
+                        RestAPIStoreUtils.validateApplicationAttributes(applicationAttributes, keySet));
+            }
+            
+            //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
+            Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
+
+            //we do not honor the application id which is sent via the request body
+            application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
+
+            apiConsumer.updateApplication(application);
+
+            //retrieves the updated application and send as the response
+            Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);
+            ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil
+                    .fromApplicationtoDTO(updatedApplication);
+            return Response.ok().entity(updatedApplicationDTO).build();
+                
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
+                RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
+            } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
+                RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
+            }
         }
         return null;
     }
@@ -270,12 +333,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdMapKeysPost(String applicationId,
             ApplicationKeyMappingRequestDTO body) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
-    @Override
-    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
