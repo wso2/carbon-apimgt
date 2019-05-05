@@ -16,7 +16,6 @@
  * under the License.
  */
 
-
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect, Route, Switch } from 'react-router-dom';
@@ -76,6 +75,16 @@ export default class Protected extends Component {
             .catch((error) => {
                 Log.error('Error while receiving environment configurations : ', error);
             });
+        const user = AuthManager.getUser();
+        if (user) {
+            this.setState({ user });
+        } else {
+            // If no user data available , Get the user info from existing token information
+            // This could happen when OAuth code authentication took place and could send
+            // user information via redirection
+            const userPromise = AuthManager.getUserFromToken();
+            userPromise.then(loggedUser => this.setState({ user: loggedUser }));
+        }
     }
 
     /**
@@ -91,7 +100,7 @@ export default class Protected extends Component {
      * @memberof Protected
      */
     render() {
-        const user = AuthManager.getUser();
+        const user = this.state.user || AuthManager.getUser();
         const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} user={user} />} user={user} />;
 
         if (!user) {

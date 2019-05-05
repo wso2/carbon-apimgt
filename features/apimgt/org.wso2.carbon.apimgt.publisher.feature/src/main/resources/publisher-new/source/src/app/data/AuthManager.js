@@ -79,7 +79,7 @@ class AuthManager {
     }
 
     /**
-     * An user object is return in present of user logged in user info in browser local storage, at the same
+     * An user object is return in present of logged in user info in browser local storage, at the same
      *  time checks for partialToken in the cookie as well.
      * This may give a partial indication(passive check not actually check the token validity via an API) of
      *  whether the user has logged in or not, The actual API call may get denied
@@ -93,10 +93,41 @@ class AuthManager {
         if (!(userData && partialToken)) {
             return null;
         }
-
         return User.fromJson(JSON.parse(userData), environmentName);
     }
 
+    /**
+     * Do token introspection and Get the currently logged in user's details
+     * When user authentication happens via redirection flow, This method might get used to
+     * retrieve the user information
+     * after setting the access token parts in cookies, Because access token parts are stored in /publisher-new path ,
+     * just making an external request in same path will submit both cookies, allowing the service to build the
+     * complete access token and do the introspection.
+     * Return a promise resolving to user object iff introspect calls return active user else null
+     * @static
+     * @returns {Promise} fetch response promise resolving to introspect response JSON or null otherwise
+     * @memberof AuthManager
+     */
+    static getUserFromToken() {
+        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
+        if (!partialToken) {
+            return new Promise(resolve => resolve(null));
+        }
+        const promisedResponse = fetch('/publisher-new/services/auth/introspect');
+        return promisedResponse
+            .then(response => response.json())
+            .then((data) => {
+                let user = null;
+                if (data.active) {
+                    const currentEnv = Utils.getCurrentEnvironment();
+                    user = new User(currentEnv.label, data.username);
+                    AuthManager.setUser(user, currentEnv.label);
+                } else {
+                    console.warn('User with ' + partialToken + ' is not active!');
+                }
+                return user;
+            });
+    }
     /**
      * Persist an user in browser local storage and in-memory, Since only one use can be
      * logged into the application at a time,
@@ -307,7 +338,7 @@ class AuthManager {
      * @returns {Promise} Axios Promise object with the login request made
      */
     postAuthenticationRequest(headers, data, environment) {
-        const promisedResponse = axios('/publisher-new/services/login/basic', {
+        const promisedResponse = axios('/publisher-new/services/auth/basic', {
             method: 'POST',
             data: qs.stringify(data),
             headers,
