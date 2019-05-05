@@ -26,12 +26,14 @@ import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import Progress from 'AppComponents/Shared/Progress';
+import SelectLogin from 'AppComponents/Login/SelectLogin';
 // Localization
 import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
 
 const LoadableProtectedApp = Loadable({
     loader: () =>
-        import(// eslint-disable-line function-paren-newline
+        // eslint-disable-next-line function-paren-newline
+        import(
             /* webpackChunkName: "ProtectedApp" */
             /* webpackPrefetch: true */
             './app/ProtectedApp'),
@@ -68,6 +70,7 @@ class Publisher extends React.Component {
         const { environment = Utils.getCurrentEnvironment().label } = queryParams;
 
         this.state = {
+            userResolved: false,
             user: AuthManager.getUser(environment),
             messages: {},
         };
@@ -81,9 +84,19 @@ class Publisher extends React.Component {
     /**
      * Initialize i18n.
      */
-    componentWillMount() {
+    componentDidMount() {
         const locale = languageWithoutRegionCode || language;
         this.loadLocale(locale);
+        const user = AuthManager.getUser();
+        if (user) {
+            this.setState({ user, userResolved: true });
+        } else {
+            // If no user data available , Get the user info from existing token information
+            // This could happen when OAuth code authentication took place and could send
+            // user information via redirection
+            const userPromise = AuthManager.getUserFromToken();
+            if (userPromise) userPromise.then(loggedUser => this.setState({ user: loggedUser, userResolved: true }));
+        }
     }
 
     /**
@@ -118,20 +131,31 @@ class Publisher extends React.Component {
      * @memberof Publisher
      */
     render() {
-        const { user } = this.state;
+        const { user, userResolved } = this.state;
         const { pathname } = window.location;
         const params = qs.stringify({
             referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
         });
+        if (!userResolved) {
+            return <Progress />;
+        }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
                 <AppErrorBoundary appName='Publisher Application'>
                     <Router basename='/publisher-new'>
                         <Switch>
-                            <Route path='/login' render={props => <Login {...props} updateUser={this.updateUser} />} />
+                            <Route path='/login' exact component={SelectLogin} />
+                            <Route
+                                path='/login/basic'
+                                render={props => <Login {...props} updateUser={this.updateUser} />}
+                            />
                             <Route path='/logout' component={Logout} />
                             {!user && <Redirect to={{ pathname: '/login', search: params }} />}
-                            <Route render={() => <LoadableProtectedApp user={user} />} />
+                            <Route
+                                render={() => {
+                                    return <LoadableProtectedApp user={user} />;
+                                }}
+                            />
                         </Switch>
                     </Router>
                 </AppErrorBoundary>

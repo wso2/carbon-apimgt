@@ -73,6 +73,7 @@ class ConfigManager {
 ConfigManager.ConfigRequestPaths = {
     ENVIRONMENT_CONFIG_PATH: '/publisher-new/site/public/theme/temporary_environments_config.json',
     FEATURE_LIST_PATH: '/publisher-new/site/public/theme/temporary_features_config.json',
+    IDP_CONFIGS: '/publisher-new/site/public/theme/temporary_features_config.json',
 };
 
 /**
