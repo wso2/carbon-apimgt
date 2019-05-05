@@ -31,14 +31,14 @@
     var access_token_token_part_1 = access_token.substring(0, token_length/2);
     var access_token_token_part_2 = access_token.substring(token_length/2, token_length);
 
-    var refresh_token = String(token_response.refresh_token);
-    token_length = token_response.refresh_token.length;
-    var refresh_token_token_part_1 = refresh_token.substring(0, token_length/2);
-    var refresh_token_token_part_2 = refresh_token.substring(token_length/2, token_length);
+    // var refresh_token = String(token_response.refresh_token);
+    // token_length = token_response.refresh_token.length;
+    // var refresh_token_token_part_1 = refresh_token.substring(0, token_length/2);
+    // var refresh_token_token_part_2 = refresh_token.substring(token_length/2, token_length);
 
     var response_data = {
         AM_ACC_TOKEN_DEFAULT_P1: String(access_token_token_part_1),
-        AM_REF_TOKEN_DEFAULT_P1: String(refresh_token_token_part_1),
+        // AM_REF_TOKEN_DEFAULT_P1: String(refresh_token_token_part_1),
         id_token: String(token_response.id_token),
         scope: String(token_response.scope),
         expires_in: String(token_response.expires_in)
@@ -53,8 +53,8 @@
     cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': access_token_token_part_2, 'path': "/api/am/publisher/", "HttpOnly": true, "secure": true, "maxAge": -1};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refresh_token_token_part_2, 'path': "/publisher-new/", "HttpOnly": true, "secure": true, "maxAge": -1};
-    response.addCookie(cookie);
+    // cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refresh_token_token_part_2, 'path': "/publisher-new/", "HttpOnly": true, "secure": true, "maxAge": -1};
+    // response.addCookie(cookie);
 
     cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': access_token_token_part_1, 'path': "/publisher-new/", "secure": true, "maxAge": -1}; // TODO: set maxage accordingly to toke expire time ~tmkb
     response.addCookie(cookie);
