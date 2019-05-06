@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;

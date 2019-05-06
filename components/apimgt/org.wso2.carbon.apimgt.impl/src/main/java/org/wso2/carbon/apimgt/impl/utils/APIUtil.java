@@ -34,9 +34,9 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -69,6 +69,7 @@ import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
@@ -114,6 +115,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -171,6 +173,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
@@ -223,6 +226,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
@@ -1681,6 +1686,16 @@ public final class APIUtil {
         throw new APIManagementException(msg, t);
     }
 
+    public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {
+        log.error(msg, t);
+        throw new APIMgtInternalException(msg, t);
+    }
+
+    public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
+        log.error(msg);
+        throw new APIMgtAuthorizationFailedException(msg);
+    }
+    
     public static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
 
         KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
@@ -1734,6 +1749,17 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * Method used to create the file name of the wsdl to be stored in the registry
+     *
+     * @param provider   Name of the provider of the API
+     * @param apiName    Name of the API
+     * @param apiVersion API Version
+     * @return WSDL file name
+     */
+    public static String createWsdlFileName(String provider, String apiName, String apiVersion) {
+        return provider + "--" + apiName + apiVersion + ".wsdl";
+    }
 
     /**
      * Crate an WSDL from given wsdl url. Reset the endpoint details to gateway node
@@ -1748,34 +1774,34 @@ public final class APIUtil {
     public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {
 
         try {
-            String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
-                    "--" + api.getId().getApiName() + api.getId().getVersion() + ".wsdl";
+            String wsdlResourcePath =
+                    APIConstants.API_WSDL_RESOURCE_LOCATION + createWsdlFileName(api.getId().getProviderName(),
+                            api.getId().getApiName(), api.getId().getVersion());
 
-            String absoluteWSDLResourcePath =
-                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlResourcePath;
+            String absoluteWSDLResourcePath = RegistryUtils
+                    .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                    + wsdlResourcePath;
 
             APIMWSDLReader wsdlReader = new APIMWSDLReader(api.getWsdlUrl());
             OMElement wsdlContentEle;
             String wsdRegistryPath;
 
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase
-                    (tenantDomain)) {
-                wsdRegistryPath = RegistryConstants.PATH_SEPARATOR + "registry"
-                        + RegistryConstants.PATH_SEPARATOR + "resource"
-                        + absoluteWSDLResourcePath;
+            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equalsIgnoreCase(tenantDomain)) {
+                wsdRegistryPath =
+                        RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR + "resource"
+                                + absoluteWSDLResourcePath;
             } else {
                 wsdRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
-                        + RegistryConstants.PATH_SEPARATOR + "resource"
-                        + absoluteWSDLResourcePath;
+                        + RegistryConstants.PATH_SEPARATOR + "resource" + absoluteWSDLResourcePath;
             }
 
             Resource wsdlResource = registry.newResource();
             // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
             // Hence if this is a registry url, should not go in to the following if block
-            if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl
-                    ().startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
+            if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
+                    .startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
                 if (isWSDL2Document(api.getWsdlUrl())) {
                     wsdlContentEle = wsdlReader.readAndCleanWsdl2(api);
                     wsdlResource.setContent(wsdlContentEle.toString());
@@ -1790,7 +1816,8 @@ public final class APIUtil {
                 if (api.getVisibleRoles() != null) {
                     visibleRoles = api.getVisibleRoles().split(",");
                 }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        wsdlResourcePath);
             } else {
                 byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
                 if (isWSDL2Resource(wsdl)) {
@@ -1807,7 +1834,8 @@ public final class APIUtil {
                 if (api.getVisibleRoles() != null) {
                     visibleRoles = api.getVisibleRoles().split(",");
                 }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, wsdlResourcePath);
+                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        wsdlResourcePath);
             }
 
             //set the wsdl resource permlink as the wsdlURL.
@@ -4418,6 +4446,26 @@ public final class APIUtil {
             return new String[0];
 
         }
+    }
+
+    /**
+     * Check whether the user has the given role
+     *
+     * @throws UserStoreException
+     * @throws APIManagementException
+     */
+    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
+        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
+        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+        return abstractManager.isUserInRole(tenantAwareUserName, role);
     }
 
     /**
@@ -7563,6 +7611,77 @@ public final class APIUtil {
     }
 
     /**
+     * Removes x-mediation-scripts from swagger as they should not be provided to store consumers
+     *
+     * @param apiSwagger swagger definition of API
+     * @return swagger which exclude x-mediation-script elements
+     */
+    public static String removeXMediationScriptsFromSwagger(String apiSwagger) {
+        //removes x-mediation-script key:values
+        String mediationScriptRegex = "\"x-mediation-script\":\".*?(?<!\\\\)\"";
+        Pattern pattern = Pattern.compile("," + mediationScriptRegex);
+        Matcher matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(mediationScriptRegex + ",");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        return apiSwagger;
+    }
+
+    /**
+     * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
+     * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
+     * started with the system property 'migrationMode=true' if a migration related exports are to be done.
+     *
+     * @param targetTenantDomain Tenant domain of which resources are requested
+     * @param username           Logged in user name
+     * @throws APIMgtInternalException  When internal error occurred
+     */
+    public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
+            throws APIMgtInternalException {
+        String superAdminRole = null;
+        
+        //Accessing the same tenant as the user's tenant
+        if (targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username))) {
+            return true;
+        }
+
+        try {
+            superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting super admin role name", e);
+        }
+
+        //check whether logged in user is a super tenant user
+        String superTenantDomain = null;
+        try {
+            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getSuperTenantDomain();
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting the super tenant domain", e);
+        }
+        boolean isSuperTenantUser = MultitenantUtils.getTenantDomain(username).equals(superTenantDomain);
+        if (!isSuperTenantUser) {
+            return false;
+        }
+
+        //check whether the user has super tenant admin role
+        boolean isSuperAdminRoleNameExistInUser = false;
+        try {
+            isSuperAdminRoleNameExistInUser = isUserInRole(username, superAdminRole);
+        } catch (UserStoreException | APIManagementException e) {
+            handleInternalException("Error in checking whether the user has admin role", e);
+        }
+
+        return isSuperAdminRoleNameExistInUser;
+    }
+
+    /**
      * To set the resource properties to the API.
      *
      * @param api          API that need to set the resource properties.
@@ -8049,6 +8168,39 @@ public final class APIUtil {
         return null;
     }
 
+    /**
+     * This method is used to set environments values to api object.
+     *
+     * @param environments environments values in json format
+     * @return set of environments that need to Publish
+     */
+    public static Set<String> extractEnvironmentsForAPI(List<String> environments) {
+
+        Set<String> environmentStringSet = null;
+        if (environments == null) {
+            environmentStringSet = new HashSet<String>(
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+        } else {
+            //handle not to publish to any of the gateways
+            if (environments.size() == 1 && APIConstants.API_GATEWAY_NONE.equals(environments.get(0))) {
+                environmentStringSet = new HashSet<String>();
+            }
+            //handle to set published gateways into api object
+            else if (environments.size() > 0) {
+                environmentStringSet = new HashSet<String>(environments);
+                environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
+            }
+            //handle to publish to any of the gateways when api creating stage
+            else if (environments.size() == 0) {
+                environmentStringSet = new HashSet<String>(
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+            }
+        }
+        return environmentStringSet;
+    }
+    
     /**
      * Return autogenerated product scope when product ID is given
      *

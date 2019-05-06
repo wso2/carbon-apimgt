@@ -17,25 +17,10 @@ public class LabelDTO  {
   
   
   @NotNull
-  private String labelId = null;
-  
-  @NotNull
   private String name = null;
   
-  @NotNull
-  private List<String> accessUrls = new ArrayList<String>();
-
   
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("labelId")
-  public String getLabelId() {
-    return labelId;
-  }
-  public void setLabelId(String labelId) {
-    this.labelId = labelId;
-  }
+  private List<String> accessUrls = new ArrayList<String>();
 
   
   /**
@@ -52,7 +37,7 @@ public class LabelDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("accessUrls")
   public List<String> getAccessUrls() {
     return accessUrls;
@@ -68,7 +53,6 @@ public class LabelDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class LabelDTO {\n");
     
-    sb.append("  labelId: ").append(labelId).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  accessUrls: ").append(accessUrls).append("\n");
     sb.append("}\n");

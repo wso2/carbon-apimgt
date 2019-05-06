@@ -28,6 +28,9 @@ public class ApplicationDTO  {
   
   
   private String description = null;
+  
+  
+  private String groupId = null;
 
   
   /**
@@ -90,6 +93,18 @@ public class ApplicationDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("groupId")
+  public String getGroupId() {
+    return groupId;
+  }
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -101,6 +116,7 @@ public class ApplicationDTO  {
     sb.append("  subscriber: ").append(subscriber).append("\n");
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
     sb.append("  description: ").append(description).append("\n");
+    sb.append("  groupId: ").append(groupId).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

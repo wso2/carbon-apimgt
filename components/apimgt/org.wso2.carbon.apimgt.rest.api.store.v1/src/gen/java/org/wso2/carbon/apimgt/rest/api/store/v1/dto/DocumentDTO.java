@@ -30,16 +30,13 @@ public class DocumentDTO  {
   private String summary = null;
   
   public enum SourceTypeEnum {
-     INLINE,  URL,  FILE, 
+     INLINE,  MARKDOWN,  URL,  FILE, 
   };
   @NotNull
   private SourceTypeEnum sourceType = null;
   
   
   private String sourceUrl = null;
-  
-  
-  private String inlineContent = null;
   
   
   private String otherTypeName = null;
@@ -120,18 +117,6 @@ public class DocumentDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("inlineContent")
-  public String getInlineContent() {
-    return inlineContent;
-  }
-  public void setInlineContent(String inlineContent) {
-    this.inlineContent = inlineContent;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("otherTypeName")
   public String getOtherTypeName() {
     return otherTypeName;
@@ -153,7 +138,6 @@ public class DocumentDTO  {
     sb.append("  summary: ").append(summary).append("\n");
     sb.append("  sourceType: ").append(sourceType).append("\n");
     sb.append("  sourceUrl: ").append(sourceUrl).append("\n");
-    sb.append("  inlineContent: ").append(inlineContent).append("\n");
     sb.append("  otherTypeName: ").append(otherTypeName).append("\n");
     sb.append("}\n");
     return sb.toString();

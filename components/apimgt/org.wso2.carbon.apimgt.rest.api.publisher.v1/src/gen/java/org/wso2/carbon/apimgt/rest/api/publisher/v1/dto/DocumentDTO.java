@@ -30,7 +30,7 @@ public class DocumentDTO  {
   private String summary = null;
   
   public enum SourceTypeEnum {
-     INLINE,  URL,  FILE, 
+     INLINE,  MARKDOWN,  URL,  FILE, 
   };
   @NotNull
   private SourceTypeEnum sourceType = null;
@@ -46,9 +46,6 @@ public class DocumentDTO  {
   
   
   private String otherTypeName = null;
-  
-  
-  private String permission = null;
   
   public enum VisibilityEnum {
      OWNER_ONLY,  PRIVATE,  API_LEVEL, 
@@ -179,18 +176,6 @@ public class DocumentDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("permission")
-  public String getPermission() {
-    return permission;
-  }
-  public void setPermission(String permission) {
-    this.permission = permission;
-  }
-
-  
-  /**
-   **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
@@ -264,7 +249,6 @@ public class DocumentDTO  {
     sb.append("  fileName: ").append(fileName).append("\n");
     sb.append("  inlineContent: ").append(inlineContent).append("\n");
     sb.append("  otherTypeName: ").append(otherTypeName).append("\n");
-    sb.append("  permission: ").append(permission).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  createdTime: ").append(createdTime).append("\n");
     sb.append("  createdBy: ").append(createdBy).append("\n");

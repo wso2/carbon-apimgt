@@ -17,22 +17,22 @@ import javax.ws.rs.core.Response;
 
 public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
-    public Response endpointsEndpointIdDelete(String endpointId,String ifMatch,String ifUnmodifiedSince){
+    public Response endpointsEndpointIdDelete(String endpointId,String ifMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response endpointsEndpointIdGet(String endpointId,String ifMatch,String ifUnmodifiedSince){
+    public Response endpointsEndpointIdGet(String endpointId,String ifMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response endpointsEndpointIdPut(String endpointId,EndPointDTO body,String ifMatch,String ifUnmodifiedSince){
+    public Response endpointsEndpointIdPut(String endpointId,EndPointDTO body,String ifMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response endpointsGet(String ifNoneMatch,String ifModifiedSince){
+    public Response endpointsGet(String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
@@ -42,7 +42,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response endpointsPost(EndPointDTO body,String ifNoneMatch,String ifModifiedSince){
+    public Response endpointsPost(EndPointDTO body,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

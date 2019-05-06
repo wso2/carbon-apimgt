@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExtendedSubscriptionDTO;
 
 import java.util.List;
 
@@ -43,10 +43,9 @@ public class SubscriptionsApi  {
 
     public Response subscriptionsBlockSubscriptionPost(@ApiParam(value = "Subscription Id\n",required=true) @QueryParam("subscriptionId")  String subscriptionId,
     @ApiParam(value = "Subscription block state.\n",required=true, allowableValues="{values=[BLOCKED, PROD_ONLY_BLOCKED]}") @QueryParam("blockState")  String blockState,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.subscriptionsBlockSubscriptionPost(subscriptionId,blockState,ifMatch,ifUnmodifiedSince);
+    return delegate.subscriptionsBlockSubscriptionPost(subscriptionId,blockState,ifMatch);
     }
     @GET
     
@@ -63,7 +62,7 @@ public class SubscriptionsApi  {
     public Response subscriptionsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",required=true) @QueryParam("apiId")  String apiId,
     @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
     return delegate.subscriptionsGet(apiId,limit,offset,ifNoneMatch);
     }
@@ -71,7 +70,7 @@ public class SubscriptionsApi  {
     @Path("/{subscriptionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get details of a subscription", notes = "This operation can be used to get details of a single subscription.\n", response = SubscriptionDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Get details of a subscription", notes = "This operation can be used to get details of a single subscription.\n", response = ExtendedSubscriptionDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSubscription returned\n"),
         
@@ -80,10 +79,9 @@ public class SubscriptionsApi  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Subscription does not exist.\n") })
 
     public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id\n",required=true ) @PathParam("subscriptionId")  String subscriptionId,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.subscriptionsSubscriptionIdGet(subscriptionId,ifNoneMatch,ifModifiedSince);
+    return delegate.subscriptionsSubscriptionIdGet(subscriptionId,ifNoneMatch);
     }
     @POST
     @Path("/unblock-subscription")
@@ -100,10 +98,9 @@ public class SubscriptionsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response subscriptionsUnblockSubscriptionPost(@ApiParam(value = "Subscription Id\n",required=true) @QueryParam("subscriptionId")  String subscriptionId,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.subscriptionsUnblockSubscriptionPost(subscriptionId,ifMatch,ifUnmodifiedSince);
+    return delegate.subscriptionsUnblockSubscriptionPost(subscriptionId,ifMatch);
     }
 }
 

@@ -158,6 +158,31 @@ public class WSDLSOAPOperationExtractorImplTestCase {
                 parameterModelMap.get("ItemSearchRequest").getProperties().get("Availability").getType());
     }
 
+    @Test
+    public void testGetSwaggerModelForWSDLsWithCompositeBindings() throws Exception {
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(Thread.currentThread().getContextClassLoader()
+                .getResource("wsdls/wsdl-with-composite-bindings/sampleservice.wsdl").toExternalForm());
+        byte[] wsdlContent = wsdlReader.getWSDL();
+        WSDLSOAPOperationExtractor processor = getWSDLProcessor(wsdlContent, wsdlReader);
+        Set<WSDLSOAPOperation> operations = processor.getWsdlInfo().getSoapBindingOperations();
+        Assert.assertNotNull(operations);
+        Map<String, ModelImpl> parameterModelMap = processor.getWsdlInfo().getParameterModelMap();
+        Assert.assertNotNull(parameterModelMap);
+    }
+
+    @Test
+    public void testGetSwaggerModelForImportedSchemas() throws Exception {
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(
+                Thread.currentThread().getContextClassLoader().getResource("wsdls/import-schemas/sampleservice.wsdl")
+                        .toExternalForm());
+        byte[] wsdlContent = wsdlReader.getWSDL();
+        WSDLSOAPOperationExtractor processor = getWSDLProcessor(wsdlContent, wsdlReader);
+        Set<WSDLSOAPOperation> operations = processor.getWsdlInfo().getSoapBindingOperations();
+        Assert.assertNotNull(operations);
+        Map<String, ModelImpl> parameterModelMap = processor.getWsdlInfo().getParameterModelMap();
+        Assert.assertNotNull(parameterModelMap);
+    }
+
     public static API getAPIForTesting() {
         API api = new API(new APIIdentifier("admin", "api1", "1.0.0"));
         api.setTransports("https");

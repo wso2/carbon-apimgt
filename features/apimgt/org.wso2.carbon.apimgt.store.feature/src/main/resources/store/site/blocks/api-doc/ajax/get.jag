@@ -150,7 +150,7 @@ var log = new Log();
                     var accessURLs = labels[i].accessURLs.split(",");
                     var accessURL = "";
                     for(var j = 0 ; j < accessURLs.length ; j++){
-                        if(accessURLs[j].indexOf("https://") == 0){
+                        if (accessURLs[j].trim().indexOf("https://") == 0) {
                             urlArr[count] = accessURLs[j];
                             break;
                         }
@@ -195,10 +195,15 @@ var log = new Log();
 
         //handle schems IMPORTANT: order of https and http is important to make sure https is targeted first.
         var schemes = []
-        if(api.transports.search("https") != -1){
+        if (api.transports === "https") {
             schemes.push("https");
         }
-        if(api.transports.search("http") != -1){
+        if (api.transports === "http") {
+            schemes.push("http");
+        }
+
+        if (api.transports === "http,https") {
+            schemes.push("https");
             schemes.push("http");
         }
 

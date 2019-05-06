@@ -19,8 +19,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -43,9 +43,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -55,6 +52,9 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  *  This class contains REST API Publisher related utility operations

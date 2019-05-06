@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;

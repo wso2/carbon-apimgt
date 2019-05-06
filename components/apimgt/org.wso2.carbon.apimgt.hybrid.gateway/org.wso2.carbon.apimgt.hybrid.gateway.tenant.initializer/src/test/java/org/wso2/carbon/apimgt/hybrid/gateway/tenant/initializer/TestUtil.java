@@ -17,7 +17,7 @@
 
 package org.wso2.carbon.apimgt.hybrid.gateway.tenant.initializer;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.hybrid.gateway.tenant.initializer.constants.Constants;
 
 import java.io.File;

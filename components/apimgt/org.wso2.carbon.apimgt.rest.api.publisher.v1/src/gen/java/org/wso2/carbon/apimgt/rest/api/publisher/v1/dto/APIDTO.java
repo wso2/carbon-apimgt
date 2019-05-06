@@ -1,13 +1,18 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -41,22 +46,10 @@ public class APIDTO  {
   private String provider = null;
   
   
-  private String wsdlUri = null;
-  
-  
   private String lifeCycleStatus = null;
   
   
-  private String workflowStatus = null;
-  
-  
-  private String createdTime = null;
-  
-  
-  private String apiPolicy = null;
-  
-  
-  private String lastUpdatedTime = null;
+  private String wsdlUri = null;
   
   
   private String responseCaching = null;
@@ -70,20 +63,32 @@ public class APIDTO  {
   @NotNull
   private Boolean isDefaultVersion = null;
   
+  public enum TypeEnum {
+     HTTP,  WS,  SOAPTOREST, 
+  };
+  
+  private TypeEnum type = TypeEnum.HTTP;
+  
   @NotNull
   private List<String> transport = new ArrayList<String>();
   
   
   private List<String> tags = new ArrayList<String>();
   
-  
-  private Boolean hasOwnGateway = null;
-  
-  
-  private List<String> labels = new ArrayList<String>();
-  
   @NotNull
   private List<String> policies = new ArrayList<String>();
+  
+  
+  private String apiPolicy = null;
+  
+  
+  private String authorizationHeader = null;
+  
+  
+  private List<String> securityScheme = new ArrayList<String>();
+  
+  
+  private APIMaxTpsDTO maxTps = null;
   
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED, 
@@ -95,19 +100,40 @@ public class APIDTO  {
   private List<String> visibleRoles = new ArrayList<String>();
   
   
-  private String permission = null;
-  
-  
-  private List<String> userPermissionsForApi = new ArrayList<String>();
-  
-  
   private List<String> visibleTenants = new ArrayList<String>();
   
   
-  private String gatewayEnvironments = null;
+  private APIEndpointSecurityDTO endpointSecurity = null;
   
   
-  private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
+  private List<String> gatewayEnvironments = new ArrayList<String>();
+  
+  
+  private List<LabelDTO> labels = new ArrayList<LabelDTO>();
+  
+  
+  private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
+  
+  public enum SubscriptionAvailabilityEnum {
+     current_tenant,  all_tenants,  specific_tenants, 
+  };
+  
+  private SubscriptionAvailabilityEnum subscriptionAvailability = null;
+  
+  
+  private List<String> subscriptionAvailableTenants = new ArrayList<String>();
+  
+  
+  private Map<String, String> additionalProperties = new HashMap<String, String>();
+  
+  public enum AccessControlEnum {
+     NONE,  RESTRICTED, 
+  };
+  
+  private AccessControlEnum accessControl = null;
+  
+  
+  private List<String> accessControlRoles = new ArrayList<String>();
   
   
   private APIBusinessInformationDTO businessInformation = null;
@@ -116,10 +142,16 @@ public class APIDTO  {
   private APICorsConfigurationDTO corsConfiguration = null;
   
   
+  private String workflowStatus = null;
+  
+  
+  private String createdTime = null;
+  
+  
+  private String lastUpdatedTime = null;
+  
+  
   private List<APIEndpointDTO> endpoint = new ArrayList<APIEndpointDTO>();
-  
-  
-  private List<String> securityScheme = new ArrayList<String>();
   
   
   private List<String> scopes = new ArrayList<String>();
@@ -206,19 +238,6 @@ public class APIDTO  {
 
   
   /**
-   * WSDL URL if the API is based on a WSDL endpoint\n
-   **/
-  @ApiModelProperty(value = "WSDL URL if the API is based on a WSDL endpoint\n")
-  @JsonProperty("wsdlUri")
-  public String getWsdlUri() {
-    return wsdlUri;
-  }
-  public void setWsdlUri(String wsdlUri) {
-    this.wsdlUri = wsdlUri;
-  }
-
-  
-  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("lifeCycleStatus")
@@ -231,50 +250,15 @@ public class APIDTO  {
 
   
   /**
+   * WSDL URL if the API is based on a WSDL endpoint\n
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("workflowStatus")
-  public String getWorkflowStatus() {
-    return workflowStatus;
+  @ApiModelProperty(value = "WSDL URL if the API is based on a WSDL endpoint\n")
+  @JsonProperty("wsdlUri")
+  public String getWsdlUri() {
+    return wsdlUri;
   }
-  public void setWorkflowStatus(String workflowStatus) {
-    this.workflowStatus = workflowStatus;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("createdTime")
-  public String getCreatedTime() {
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime) {
-    this.createdTime = createdTime;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("apiPolicy")
-  public String getApiPolicy() {
-    return apiPolicy;
-  }
-  public void setApiPolicy(String apiPolicy) {
-    this.apiPolicy = apiPolicy;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
+  public void setWsdlUri(String wsdlUri) {
+    this.wsdlUri = wsdlUri;
   }
 
   
@@ -327,6 +311,19 @@ public class APIDTO  {
 
   
   /**
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
+   **/
+  @ApiModelProperty(value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST")
+  @JsonProperty("type")
+  public TypeEnum getType() {
+    return type;
+  }
+  public void setType(TypeEnum type) {
+    this.type = type;
+  }
+
+  
+  /**
    * Supported transports for the API (http and/or https).\n
    **/
   @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https).\n")
@@ -353,30 +350,6 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("hasOwnGateway")
-  public Boolean getHasOwnGateway() {
-    return hasOwnGateway;
-  }
-  public void setHasOwnGateway(Boolean hasOwnGateway) {
-    this.hasOwnGateway = hasOwnGateway;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("labels")
-  public List<String> getLabels() {
-    return labels;
-  }
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
-  }
-
-  
-  /**
-   **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("policies")
   public List<String> getPolicies() {
@@ -388,8 +361,60 @@ public class APIDTO  {
 
   
   /**
+   * The policy selected for the particular API
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "The policy selected for the particular API")
+  @JsonProperty("apiPolicy")
+  public String getApiPolicy() {
+    return apiPolicy;
+  }
+  public void setApiPolicy(String apiPolicy) {
+    this.apiPolicy = apiPolicy;
+  }
+
+  
+  /**
+   * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used.\n
+   **/
+  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified\nin tenant or system level will be used.\n")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() {
+    return authorizationHeader;
+  }
+  public void setAuthorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+  }
+
+  
+  /**
+   * Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If\nit is not set OAuth2 will be set as the security for the current API.\n
+   **/
+  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If\nit is not set OAuth2 will be set as the security for the current API.\n")
+  @JsonProperty("securityScheme")
+  public List<String> getSecurityScheme() {
+    return securityScheme;
+  }
+  public void setSecurityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("maxTps")
+  public APIMaxTpsDTO getMaxTps() {
+    return maxTps;
+  }
+  public void setMaxTps(APIMaxTpsDTO maxTps) {
+    this.maxTps = maxTps;
+  }
+
+  
+  /**
+   * The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.
+   **/
+  @ApiModelProperty(required = true, value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
@@ -400,39 +425,15 @@ public class APIDTO  {
 
   
   /**
+   * The user roles that are able to access the API in Store
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The user roles that are able to access the API in Store")
   @JsonProperty("visibleRoles")
   public List<String> getVisibleRoles() {
     return visibleRoles;
   }
   public void setVisibleRoles(List<String> visibleRoles) {
     this.visibleRoles = visibleRoles;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("permission")
-  public String getPermission() {
-    return permission;
-  }
-  public void setPermission(String permission) {
-    this.permission = permission;
-  }
-
-  
-  /**
-   * LoggedIn user permissions for the API\n
-   **/
-  @ApiModelProperty(value = "LoggedIn user permissions for the API\n")
-  @JsonProperty("userPermissionsForApi")
-  public List<String> getUserPermissionsForApi() {
-    return userPermissionsForApi;
-  }
-  public void setUserPermissionsForApi(List<String> userPermissionsForApi) {
-    this.userPermissionsForApi = userPermissionsForApi;
   }
 
   
@@ -449,27 +450,116 @@ public class APIDTO  {
 
   
   /**
-   * Comma separated list of gateway environments.\n
    **/
-  @ApiModelProperty(value = "Comma separated list of gateway environments.\n")
+  @ApiModelProperty(value = "")
+  @JsonProperty("endpointSecurity")
+  public APIEndpointSecurityDTO getEndpointSecurity() {
+    return endpointSecurity;
+  }
+  public void setEndpointSecurity(APIEndpointSecurityDTO endpointSecurity) {
+    this.endpointSecurity = endpointSecurity;
+  }
+
+  
+  /**
+   * List of gateway environments the API is available\n
+   **/
+  @ApiModelProperty(value = "List of gateway environments the API is available\n")
   @JsonProperty("gatewayEnvironments")
-  public String getGatewayEnvironments() {
+  public List<String> getGatewayEnvironments() {
     return gatewayEnvironments;
   }
-  public void setGatewayEnvironments(String gatewayEnvironments) {
+  public void setGatewayEnvironments(List<String> gatewayEnvironments) {
     this.gatewayEnvironments = gatewayEnvironments;
+  }
+
+  
+  /**
+   * Labels of micro-gateway environments attached to the API.\n
+   **/
+  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API.\n")
+  @JsonProperty("labels")
+  public List<LabelDTO> getLabels() {
+    return labels;
+  }
+  public void setLabels(List<LabelDTO> labels) {
+    this.labels = labels;
   }
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("sequences")
-  public List<SequenceDTO> getSequences() {
-    return sequences;
+  @JsonProperty("mediationPolicies")
+  public List<MediationPolicyDTO> getMediationPolicies() {
+    return mediationPolicies;
   }
-  public void setSequences(List<SequenceDTO> sequences) {
-    this.sequences = sequences;
+  public void setMediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
+    this.mediationPolicies = mediationPolicies;
+  }
+
+  
+  /**
+   * The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
+   **/
+  @ApiModelProperty(value = "The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.")
+  @JsonProperty("subscriptionAvailability")
+  public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
+    return subscriptionAvailability;
+  }
+  public void setSubscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
+    this.subscriptionAvailability = subscriptionAvailability;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscriptionAvailableTenants")
+  public List<String> getSubscriptionAvailableTenants() {
+    return subscriptionAvailableTenants;
+  }
+  public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
+    this.subscriptionAvailableTenants = subscriptionAvailableTenants;
+  }
+
+  
+  /**
+   * Map of custom properties of API
+   **/
+  @ApiModelProperty(value = "Map of custom properties of API")
+  @JsonProperty("additionalProperties")
+  public Map<String, String> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
+  
+  /**
+   * Is the API is restricted to certain set of publishers or creators or is it visible to all the\npublishers and creators. If the accessControl restriction is none, this API can be modified by all the\npublishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,\n based on the restriction.\n
+   **/
+  @ApiModelProperty(value = "Is the API is restricted to certain set of publishers or creators or is it visible to all the\npublishers and creators. If the accessControl restriction is none, this API can be modified by all the\npublishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,\n based on the restriction.\n")
+  @JsonProperty("accessControl")
+  public AccessControlEnum getAccessControl() {
+    return accessControl;
+  }
+  public void setAccessControl(AccessControlEnum accessControl) {
+    this.accessControl = accessControl;
+  }
+
+  
+  /**
+   * The user roles that are able to view/modify as API publisher or creator.
+   **/
+  @ApiModelProperty(value = "The user roles that are able to view/modify as API publisher or creator.")
+  @JsonProperty("accessControlRoles")
+  public List<String> getAccessControlRoles() {
+    return accessControlRoles;
+  }
+  public void setAccessControlRoles(List<String> accessControlRoles) {
+    this.accessControlRoles = accessControlRoles;
   }
 
   
@@ -500,24 +590,48 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("endpoint")
-  public List<APIEndpointDTO> getEndpoint() {
-    return endpoint;
+  @JsonProperty("workflowStatus")
+  public String getWorkflowStatus() {
+    return workflowStatus;
   }
-  public void setEndpoint(List<APIEndpointDTO> endpoint) {
-    this.endpoint = endpoint;
+  public void setWorkflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
   }
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("securityScheme")
-  public List<String> getSecurityScheme() {
-    return securityScheme;
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
   }
-  public void setSecurityScheme(List<String> securityScheme) {
-    this.securityScheme = securityScheme;
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("lastUpdatedTime")
+  public String getLastUpdatedTime() {
+    return lastUpdatedTime;
+  }
+  public void setLastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("endpoint")
+  public List<APIEndpointDTO> getEndpoint() {
+    return endpoint;
+  }
+  public void setEndpoint(List<APIEndpointDTO> endpoint) {
+    this.endpoint = endpoint;
   }
 
   
@@ -569,32 +683,38 @@ public class APIDTO  {
     sb.append("  context: ").append(context).append("\n");
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
-    sb.append("  wsdlUri: ").append(wsdlUri).append("\n");
     sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
-    sb.append("  workflowStatus: ").append(workflowStatus).append("\n");
-    sb.append("  createdTime: ").append(createdTime).append("\n");
-    sb.append("  apiPolicy: ").append(apiPolicy).append("\n");
-    sb.append("  lastUpdatedTime: ").append(lastUpdatedTime).append("\n");
+    sb.append("  wsdlUri: ").append(wsdlUri).append("\n");
     sb.append("  responseCaching: ").append(responseCaching).append("\n");
     sb.append("  cacheTimeout: ").append(cacheTimeout).append("\n");
     sb.append("  destinationStatsEnabled: ").append(destinationStatsEnabled).append("\n");
     sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
+    sb.append("  type: ").append(type).append("\n");
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
-    sb.append("  hasOwnGateway: ").append(hasOwnGateway).append("\n");
-    sb.append("  labels: ").append(labels).append("\n");
     sb.append("  policies: ").append(policies).append("\n");
+    sb.append("  apiPolicy: ").append(apiPolicy).append("\n");
+    sb.append("  authorizationHeader: ").append(authorizationHeader).append("\n");
+    sb.append("  securityScheme: ").append(securityScheme).append("\n");
+    sb.append("  maxTps: ").append(maxTps).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
-    sb.append("  permission: ").append(permission).append("\n");
-    sb.append("  userPermissionsForApi: ").append(userPermissionsForApi).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
+    sb.append("  endpointSecurity: ").append(endpointSecurity).append("\n");
     sb.append("  gatewayEnvironments: ").append(gatewayEnvironments).append("\n");
-    sb.append("  sequences: ").append(sequences).append("\n");
+    sb.append("  labels: ").append(labels).append("\n");
+    sb.append("  mediationPolicies: ").append(mediationPolicies).append("\n");
+    sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
+    sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
+    sb.append("  additionalProperties: ").append(additionalProperties).append("\n");
+    sb.append("  accessControl: ").append(accessControl).append("\n");
+    sb.append("  accessControlRoles: ").append(accessControlRoles).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("  corsConfiguration: ").append(corsConfiguration).append("\n");
+    sb.append("  workflowStatus: ").append(workflowStatus).append("\n");
+    sb.append("  createdTime: ").append(createdTime).append("\n");
+    sb.append("  lastUpdatedTime: ").append(lastUpdatedTime).append("\n");
     sb.append("  endpoint: ").append(endpoint).append("\n");
-    sb.append("  securityScheme: ").append(securityScheme).append("\n");
     sb.append("  scopes: ").append(scopes).append("\n");
     sb.append("  operations: ").append(operations).append("\n");
     sb.append("  threatProtectionPolicies: ").append(threatProtectionPolicies).append("\n");

@@ -77,7 +77,7 @@ else{
 		                             </select>
 	                         	</div>
 	                         	<div class="col-sm-4">
-                             		<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
+                             		<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" data-perPage="<%=itemsPerPage%>" data-page="<%=currentPage%>" data-length="<%=length%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
                              	</div>
                               <%}else if (tasks[i].status=='COMPLETED'){%>
                               	<label>Completed</label>
@@ -89,7 +89,7 @@ else{
 	                              </select>
 	                          </div>
 	                          <div class="col-sm-4">
-                              	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
+                              	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" data="<%=tasks[i].id%>" data-perPage="<%=itemsPerPage%>" data-page="<%=currentPage%>" data-length="<%=length%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
                               </div>
                               <div class="col-sm-2"></div>
                               <%}else if (tasks[i].status=='READY'){%>
@@ -104,7 +104,7 @@ else{
 	                              </select>
 	                          </div>
 	                          <div class="col-sm-4">
-                              	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
+                              	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" data-perPage="<%=itemsPerPage%>" data-page="<%=currentPage%>" data-length="<%=length%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
                               </div>
                                <%}%>
                                </div>

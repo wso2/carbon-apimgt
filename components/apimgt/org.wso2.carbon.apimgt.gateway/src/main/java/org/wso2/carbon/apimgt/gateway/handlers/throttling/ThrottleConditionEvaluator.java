@@ -21,7 +21,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
 import org.apache.axis2.context.MessageContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;

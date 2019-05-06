@@ -292,6 +292,18 @@
         <EnableTokenHashMode>false</EnableTokenHashMode>
     </OAuthConfigurations>
 
+    <TokenRevocationNotifiers class="org.wso2.carbon.apimgt.keymgt.events.TokenRevocationNotifierImpl">
+        <RealtimeNotifier>
+            <Property name="ttl">5000</Property>
+        </RealtimeNotifier>
+        <PersistentNotifier>
+            <Property name="hostname">https://localhost:2379/v2/keys/jti/</Property>
+            <Property name="ttl">5000</Property>
+            <Property name="username">root</Property>
+            <Property name="password">root</Property>
+        </PersistentNotifier>
+    </TokenRevocationNotifiers>
+
     <!-- Settings related to managing API access tiers. -->
     <TierManagement>
         <!-- Enable the providers to expose their APIs over the special 'Unlimited' tier which
@@ -406,6 +418,18 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/admin/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
@@ -592,6 +616,7 @@
             <Password>${admin.password}</Password>
         </PolicyDeployer>
         <BlockCondition>
+            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1</ServiceURL>
             <Enabled>true</Enabled>
             <!--InitDelay>300000</InitDelay>
             <Period>3600000</Period-->
