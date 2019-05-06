@@ -549,7 +549,7 @@ public class ApiMgtDAO {
                 // infoDTO properties
                 String productName = rs.getString("API_PRODUCT_NAME");
 
-                if (productName == null || StringUtils.isEmpty(productName)) {
+                if (StringUtils.isEmpty(productName)) {
                     if (log.isDebugEnabled()) {
                         log.debug("A valid API subscription was found for request to " + context + " through consumer"
                                 + " key " + consumerKey);
@@ -12200,7 +12200,7 @@ public class ApiMgtDAO {
                 // infoDTO properties
                 String productName = rs.getString("API_PRODUCT_NAME");
 
-                if (productName == null || StringUtils.isEmpty(productName)) {
+                if (StringUtils.isEmpty(productName)) {
                     if (log.isDebugEnabled()) {
                         log.debug("A valid API subscription was found for request to " + context + " through consumer"
                                 + " key " + consumerKey);
