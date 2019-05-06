@@ -32,9 +32,9 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
@@ -578,7 +578,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
 
             //Save swagger in the registry
-            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get(APIConstants.SWAGGER, apiData));
+            apiProvider.addSwaggerToLocalEntry(api, (String) apiData.get(APIConstants.SWAGGER, apiData));
         }
 
         //get new key manager instance for  resource registration.
@@ -4227,6 +4228,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
+            // delete the local Entry for given API ID
+            API api = apiProvider.getAPI(apiId);
+            apiProvider.deleteSwaggerLocalEntry(api);
             apiProvider.deleteAPI(apiId);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 

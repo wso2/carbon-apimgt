@@ -33,6 +33,8 @@ public class LabelDTO  {
     @NotNull
     private String name = null;
 
+    private String description = null;
+
     private List<String> accessUrls = new ArrayList<String>();
 
     private String lastUpdatedTime = null;
@@ -75,6 +77,17 @@ public class LabelDTO  {
     /**
      **/
     @ApiModelProperty(value = "")
+    @JsonProperty("description")
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     **/
+    @ApiModelProperty(value = "")
     @JsonProperty("accessUrls")
     public List<String> getAccessUrls() {
         return accessUrls;
@@ -88,6 +101,7 @@ public class LabelDTO  {
         StringBuilder sb = new StringBuilder();
         sb.append("class LabelDTO {\n");
         sb.append("  name: ").append(name).append("\n");
+        sb.append("  description:  ").append(description).append("\n");
         sb.append("  accessUrls: ").append(accessUrls).append("\n");
         sb.append("}\n");
         return sb.toString();

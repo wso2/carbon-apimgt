@@ -41,6 +41,9 @@ public class APIInfoDTO  {
   private String workflowStatus = null;
   
   
+  private String thumbnailUri = null;
+  
+  
   private List<String> securityScheme = new ArrayList<String>();
 
   
@@ -144,6 +147,18 @@ public class APIInfoDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("thumbnailUri")
+  public String getThumbnailUri() {
+    return thumbnailUri;
+  }
+  public void setThumbnailUri(String thumbnailUri) {
+    this.thumbnailUri = thumbnailUri;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;
@@ -167,6 +182,7 @@ public class APIInfoDTO  {
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
     sb.append("  workflowStatus: ").append(workflowStatus).append("\n");
+    sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("  securityScheme: ").append(securityScheme).append("\n");
     sb.append("}\n");
     return sb.toString();

@@ -14,10 +14,7 @@ import javax.validation.constraints.NotNull;
 public class ApplicationTokenGenerateRequestDTO  {
   
   
-  @NotNull
-  private String consumerKey = null;
   
-  @NotNull
   private String consumerSecret = null;
   
   
@@ -31,22 +28,9 @@ public class ApplicationTokenGenerateRequestDTO  {
 
   
   /**
-   * Consumer key of the application
-   **/
-  @ApiModelProperty(required = true, value = "Consumer key of the application")
-  @JsonProperty("consumerKey")
-  public String getConsumerKey() {
-    return consumerKey;
-  }
-  public void setConsumerKey(String consumerKey) {
-    this.consumerKey = consumerKey;
-  }
-
-  
-  /**
    * Consumer secret of the application
    **/
-  @ApiModelProperty(required = true, value = "Consumer secret of the application")
+  @ApiModelProperty(value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
   public String getConsumerSecret() {
     return consumerSecret;
@@ -101,7 +85,6 @@ public class ApplicationTokenGenerateRequestDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationTokenGenerateRequestDTO {\n");
     
-    sb.append("  consumerKey: ").append(consumerKey).append("\n");
     sb.append("  consumerSecret: ").append(consumerSecret).append("\n");
     sb.append("  validityPeriod: ").append(validityPeriod).append("\n");
     sb.append("  scopes: ").append(scopes).append("\n");

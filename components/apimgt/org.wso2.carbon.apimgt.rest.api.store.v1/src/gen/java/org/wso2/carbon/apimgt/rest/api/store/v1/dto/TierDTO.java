@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TierPermissionInfoDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -24,7 +25,7 @@ public class TierDTO  {
   private String description = null;
   
   public enum TierLevelEnum {
-     api,  application,  subscription, 
+     application,  subscription, 
   };
   
   private TierLevelEnum tierLevel = null;
@@ -46,6 +47,9 @@ public class TierDTO  {
   
   @NotNull
   private Boolean stopOnQuotaReach = null;
+  
+  
+  private TierPermissionInfoDTO tierPermissions = null;
 
   
   /**
@@ -85,9 +89,9 @@ public class TierDTO  {
 
   
   /**
-   * Custom attributes added to the policy policy\n
+   * Custom attributes added to the tier\n
    **/
-  @ApiModelProperty(value = "Custom attributes added to the policy policy\n")
+  @ApiModelProperty(value = "Custom attributes added to the tier\n")
   @JsonProperty("attributes")
   public Map<String, String> getAttributes() {
     return attributes;
@@ -123,9 +127,9 @@ public class TierDTO  {
 
   
   /**
-   * This attribute declares whether this policy is available under commercial or free\n
+   * This attribute declares whether this tier is available under commercial or free\n
    **/
-  @ApiModelProperty(required = true, value = "This attribute declares whether this policy is available under commercial or free\n")
+  @ApiModelProperty(required = true, value = "This attribute declares whether this tier is available under commercial or free\n")
   @JsonProperty("tierPlan")
   public TierPlanEnum getTierPlan() {
     return tierPlan;
@@ -148,6 +152,18 @@ public class TierDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("tierPermissions")
+  public TierPermissionInfoDTO getTierPermissions() {
+    return tierPermissions;
+  }
+  public void setTierPermissions(TierPermissionInfoDTO tierPermissions) {
+    this.tierPermissions = tierPermissions;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -162,6 +178,7 @@ public class TierDTO  {
     sb.append("  unitTime: ").append(unitTime).append("\n");
     sb.append("  tierPlan: ").append(tierPlan).append("\n");
     sb.append("  stopOnQuotaReach: ").append(stopOnQuotaReach).append("\n");
+    sb.append("  tierPermissions: ").append(tierPermissions).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

@@ -31,9 +31,9 @@ public class TierListDTO  {
 
   
   /**
-   * Number of Tiers returned.\n
+   * Number of Throttling Tiers returned.\n
    **/
-  @ApiModelProperty(value = "Number of Tiers returned.\n")
+  @ApiModelProperty(value = "Number of Throttling Tiers returned.\n")
   @JsonProperty("count")
   public Integer getCount() {
     return count;

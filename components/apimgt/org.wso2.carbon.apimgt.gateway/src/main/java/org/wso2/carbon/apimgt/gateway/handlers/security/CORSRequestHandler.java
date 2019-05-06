@@ -179,6 +179,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                             break;
                         }
                     }
+                    if (selectedResource == null) {
+                        handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
+                        return false;
+                    }
                 }
                 //If no acceptable resources are found
                 else {

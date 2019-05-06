@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -30,7 +32,13 @@ public class ApplicationInfoDTO  {
   private String description = null;
   
   
-  private String lifeCycleStatus = null;
+  private String status = "";
+  
+  
+  private List<String> groups = new ArrayList<String>();
+  
+  
+  private Integer subscriptionCount = null;
 
   
   /**
@@ -96,12 +104,36 @@ public class ApplicationInfoDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("lifeCycleStatus")
-  public String getLifeCycleStatus() {
-    return lifeCycleStatus;
+  @JsonProperty("status")
+  public String getStatus() {
+    return status;
   }
-  public void setLifeCycleStatus(String lifeCycleStatus) {
-    this.lifeCycleStatus = lifeCycleStatus;
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("groups")
+  public List<String> getGroups() {
+    return groups;
+  }
+  public void setGroups(List<String> groups) {
+    this.groups = groups;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscriptionCount")
+  public Integer getSubscriptionCount() {
+    return subscriptionCount;
+  }
+  public void setSubscriptionCount(Integer subscriptionCount) {
+    this.subscriptionCount = subscriptionCount;
   }
 
   
@@ -116,7 +148,9 @@ public class ApplicationInfoDTO  {
     sb.append("  subscriber: ").append(subscriber).append("\n");
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
+    sb.append("  status: ").append(status).append("\n");
+    sb.append("  groups: ").append(groups).append("\n");
+    sb.append("  subscriptionCount: ").append(subscriptionCount).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

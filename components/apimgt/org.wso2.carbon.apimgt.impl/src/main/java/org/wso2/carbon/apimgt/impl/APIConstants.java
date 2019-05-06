@@ -172,7 +172,6 @@ public final class APIConstants {
     public static final String WSDL_FILE = "wsdlFile";
     public static final String UPDATED_WSDL_ZIP = "updated.zip";
     public static final String FILE_URI_PREFIX = "file://";
-    
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
@@ -332,6 +331,7 @@ public final class APIConstants {
     public static final String APPLICATION_NAME = "NAME";
     public static final String APPLICATION_SUBSCRIBER_ID = "SUBSCRIBER_ID";
     public static final String APPLICATION_TIER = "APPLICATION_TIER";
+    public static final String APPLICATION_STATUS = "APPLICATION_STATUS";
 
     //IDENTITY OAUTH2 table
     public static final String IDENTITY_OAUTH2_FIELD_TOKEN_STATE = "TOKEN_STATE";
@@ -340,7 +340,6 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_TIME_CREATED = "TIME_CREATED";
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
-    
     public static final String DOT = ".";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
@@ -352,7 +351,6 @@ public final class APIConstants {
     public static final String CLAIMS_RETRIEVER_CLASS = JWT_CONFIGS + "ClaimsRetrieverImplClass";
     public static final String CONSUMER_DIALECT_URI = JWT_CONFIGS + "ConsumerDialectURI";
     public static final String JWT_SIGNATURE_ALGORITHM = JWT_CONFIGS + "SignatureAlgorithm";
-
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
     public static final String API_SECURITY = "APISecurity";
@@ -432,6 +430,7 @@ public final class APIConstants {
     public static final String PUBLISHING_TIME_OUT = "publishTimeout";
     public static final String NON_BLOCKING = "non-blocking";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
+    public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
 
     //Property for enabling scope sharing between APIs
@@ -768,6 +767,7 @@ public final class APIConstants {
 
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
+    public static final String TOKEN_REVOCATION_EVENT_PUBLISHER = "tokenRevocationPublisher";
 
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
     public static final int AM_CREATOR_GOVERNANCE_EXECUTION_ID = 201;
@@ -1170,6 +1170,8 @@ public final class APIConstants {
     public static final long MAX_FILE_SIZE = 1024L;
 
     public static final String REGISTRY_RESOURCE_PREFIX = "/registry/resource";
+    public static final String REGISTRY_RESOURCE_URL_PREFIX =
+            "/registry/resource/_system/governance/apimgt/applicationdata/provider/";
 
     public enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
@@ -1351,7 +1353,7 @@ public final class APIConstants {
     /**
      * Parameter for adding custom attributes against application in API Store
      */
-    public static class ApplicationAttributes{
+    public static class ApplicationAttributes {
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigs";
         public static final String APPLICATION_ATTRIBUTES = "ApplicationAttributes";
         public static final String ATTRIBUTES = "Attributes";

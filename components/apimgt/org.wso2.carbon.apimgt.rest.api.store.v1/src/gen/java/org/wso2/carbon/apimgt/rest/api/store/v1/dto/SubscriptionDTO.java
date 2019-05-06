@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -23,25 +25,26 @@ public class SubscriptionDTO  {
   @NotNull
   private String apiIdentifier = null;
   
-  @NotNull
-  private String apiName = null;
+  
+  private APIInfoDTO apiInfo = null;
+  
+  
+  private ApplicationInfoDTO applicationInfo = null;
   
   @NotNull
-  private String apiVersion = null;
+  private String tier = null;
   
-  @NotNull
-  private String policy = null;
-  
-  public enum LifeCycleStatusEnum {
-     BLOCKED,  PROD_ONLY_BLOCKED,  ACTIVE,  ON_HOLD,  REJECTED, 
+  public enum StatusEnum {
+     BLOCKED,  PROD_ONLY_BLOCKED,  UNBLOCKED,  ON_HOLD,  REJECTED, 
   };
   
-  private LifeCycleStatusEnum lifeCycleStatus = null;
+  private StatusEnum status = null;
 
   
   /**
+   * The UUID of the subscription
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The UUID of the subscription")
   @JsonProperty("subscriptionId")
   public String getSubscriptionId() {
     return subscriptionId;
@@ -52,8 +55,9 @@ public class SubscriptionDTO  {
 
   
   /**
+   * The UUID of the application
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "The UUID of the application")
   @JsonProperty("applicationId")
   public String getApplicationId() {
     return applicationId;
@@ -64,8 +68,9 @@ public class SubscriptionDTO  {
 
   
   /**
+   * The unique identifier of the API.
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "The unique identifier of the API.")
   @JsonProperty("apiIdentifier")
   public String getApiIdentifier() {
     return apiIdentifier;
@@ -77,49 +82,49 @@ public class SubscriptionDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("apiName")
-  public String getApiName() {
-    return apiName;
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiInfo")
+  public APIInfoDTO getApiInfo() {
+    return apiInfo;
   }
-  public void setApiName(String apiName) {
-    this.apiName = apiName;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("apiVersion")
-  public String getApiVersion() {
-    return apiVersion;
-  }
-  public void setApiVersion(String apiVersion) {
-    this.apiVersion = apiVersion;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("policy")
-  public String getPolicy() {
-    return policy;
-  }
-  public void setPolicy(String policy) {
-    this.policy = policy;
+  public void setApiInfo(APIInfoDTO apiInfo) {
+    this.apiInfo = apiInfo;
   }
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("lifeCycleStatus")
-  public LifeCycleStatusEnum getLifeCycleStatus() {
-    return lifeCycleStatus;
+  @JsonProperty("applicationInfo")
+  public ApplicationInfoDTO getApplicationInfo() {
+    return applicationInfo;
   }
-  public void setLifeCycleStatus(LifeCycleStatusEnum lifeCycleStatus) {
-    this.lifeCycleStatus = lifeCycleStatus;
+  public void setApplicationInfo(ApplicationInfoDTO applicationInfo) {
+    this.applicationInfo = applicationInfo;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("tier")
+  public String getTier() {
+    return tier;
+  }
+  public void setTier(String tier) {
+    this.tier = tier;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("status")
+  public StatusEnum getStatus() {
+    return status;
+  }
+  public void setStatus(StatusEnum status) {
+    this.status = status;
   }
 
   
@@ -132,10 +137,10 @@ public class SubscriptionDTO  {
     sb.append("  subscriptionId: ").append(subscriptionId).append("\n");
     sb.append("  applicationId: ").append(applicationId).append("\n");
     sb.append("  apiIdentifier: ").append(apiIdentifier).append("\n");
-    sb.append("  apiName: ").append(apiName).append("\n");
-    sb.append("  apiVersion: ").append(apiVersion).append("\n");
-    sb.append("  policy: ").append(policy).append("\n");
-    sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
+    sb.append("  apiInfo: ").append(apiInfo).append("\n");
+    sb.append("  applicationInfo: ").append(applicationInfo).append("\n");
+    sb.append("  tier: ").append(tier).append("\n");
+    sb.append("  status: ").append(status).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
