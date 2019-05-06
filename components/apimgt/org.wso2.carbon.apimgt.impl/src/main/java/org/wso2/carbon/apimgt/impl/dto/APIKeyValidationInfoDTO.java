@@ -19,10 +19,9 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 
 /**
  * This class represent the API key validation Info DTO.
@@ -60,6 +59,8 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
+
+    private APIProductIdentifier productIdentifier;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -316,5 +317,12 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.subscriberTenantDomain = subscriberTenantDomain;
     }
 
+    public void setProductIdentifier(APIProductIdentifier productIdentifier) {
+        this.productIdentifier = productIdentifier;
+    }
+
+    public APIProductIdentifier getProductIdentifier() {
+        return productIdentifier;
+    }
 }
 
