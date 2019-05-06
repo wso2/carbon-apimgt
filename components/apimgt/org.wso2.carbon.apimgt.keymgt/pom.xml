@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.wso2.carbon.apimgt</groupId>
 		<artifactId>apimgt</artifactId>
-		<version>6.4.176-SNAPSHOT</version>
+		<version>6.4.180-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -217,7 +217,6 @@
 							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
 							org.wso2.carbon.identity.base.*; version="${carbon.identity.imp.pkg.version}",
 							org.wso2.carbon.identity.core.*; version="${carbon.identity.imp.pkg.version}",
-							org.apache.thrift.*; version="${libthrift.import.version.range}",
 							*;resolution:=optional
 						</Import-Package>
 						<Export-Package>

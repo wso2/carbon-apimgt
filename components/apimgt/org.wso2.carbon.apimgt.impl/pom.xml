@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.4.176-SNAPSHOT</version>
+        <version>6.4.180-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -384,10 +384,6 @@
                     <source>1.7</source>
                     <target>1.7</target>
                     <complianceLevel>1.7</complianceLevel>
-                    <excludes>
-                        <!--The following class have been excluded from aspectj weaving, to avoid build failures-->
-                        <exclude>**/thrift/*Service.java</exclude>
-                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -466,7 +462,6 @@
                             version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${pdfbox.version}",
                             org.apache.poi.*,
-                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*,
                             org.apache.velocity.*,
                             org.apache.solr.common,

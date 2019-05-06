@@ -42,7 +42,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
-import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -404,7 +403,7 @@ public class APIKeyValidatorTestCase {
         return new APIKeyValidator(axisConfig) {
             @Override
             protected String getKeyValidatorClientType() {
-                return "thriftClient";
+                return "WSClient";
             }
 
             @Override
@@ -494,7 +493,7 @@ public class APIKeyValidatorTestCase {
 
             @Override
             protected String getKeyValidatorClientType() {
-                return "thriftClient";
+                return "WSClient";
             }
 
             @Override
@@ -574,9 +573,7 @@ public class APIKeyValidatorTestCase {
 
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
         WSAPIKeyDataStore wsDataStore = Mockito.mock(WSAPIKeyDataStore.class);
-        ThriftAPIDataStore thriftDataStore = Mockito.mock(ThriftAPIDataStore.class);
         PowerMockito.whenNew(WSAPIKeyDataStore.class).withNoArguments().thenReturn(wsDataStore);
-        PowerMockito.whenNew(ThriftAPIDataStore.class).withNoArguments().thenReturn(thriftDataStore);
 
 
         APIKeyValidator wsKeyValidator = new APIKeyValidator(axisConfig) {
@@ -586,21 +583,10 @@ public class APIKeyValidatorTestCase {
             }
         };
 
-        APIKeyValidator thriftKeyValidator = new APIKeyValidator(axisConfig) {
-            @Override
-            protected String getKeyValidatorClientType() {
-                return "ThriftClient";
-            }
-        };
 
         // test cleanup for WSClient
         wsKeyValidator.cleanup();
         Mockito.verify(wsDataStore, Mockito.times(1)).cleanup();
-        Mockito.verify(thriftDataStore, Mockito.times(0)).cleanup();
-
-        //test cleanup for ThriftClient
-        thriftKeyValidator.cleanup();
-        Mockito.verify(thriftDataStore, Mockito.times(1)).cleanup();
     }
 
     private ArrayList<URITemplate> getDefaultURITemplates(String uriTemplate, String verb) {

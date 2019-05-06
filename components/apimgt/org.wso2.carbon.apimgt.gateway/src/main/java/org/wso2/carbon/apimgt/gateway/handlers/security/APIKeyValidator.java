@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
-import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -87,8 +86,6 @@ public class APIKeyValidator {
         String keyValidatorClientType = getKeyValidatorClientType();
         if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
             this.dataStore = new WSAPIKeyDataStore();
-        } else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT.equals(keyValidatorClientType)) {
-            this.dataStore = new ThriftAPIDataStore();
         }
 
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
