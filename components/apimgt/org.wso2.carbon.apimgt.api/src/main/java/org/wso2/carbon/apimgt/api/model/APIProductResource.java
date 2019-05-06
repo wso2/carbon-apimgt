@@ -63,4 +63,15 @@ public class APIProductResource {
     public APIIdentifier getApiIdentifier() {
         return apiIdentifier;
     }
+
+    @Override
+    public String toString() {
+        String resources = "";
+        for (URITemplate uriTemplate : this.resources) {
+            resources += uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI() + " " ;   
+        }
+        return "APIProductResource [apiName=" + apiName + ", apiId=" + apiId + ", apiIdentifier=" + apiIdentifier
+                + ", resources=" + resources + "]";
+    }
+    
 }

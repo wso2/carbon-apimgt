@@ -141,6 +141,11 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                 provider = username;
             }
 
+            List<String> tiersFromDTO = body.getTiers();
+            //If tiers are not defined, 
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
+            }
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
             String uuid = apiProvider.createAPIProduct(product, tenantDomain);
             APIProduct createdProduct = apiProvider.getAPIProduct(uuid, provider);

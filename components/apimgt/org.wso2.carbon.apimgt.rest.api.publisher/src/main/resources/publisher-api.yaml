@@ -5254,6 +5254,12 @@ definitions:
             type: array
             items:
               type: string
+          tiers:
+            type: array
+            description: The subscription tiers selected for the particular API Product
+            items:
+              type: string
+            example: ["Unlimited"]
           subscriptionAvailability:
             type: string
             description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.

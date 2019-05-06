@@ -2028,4 +2028,20 @@ public class APIUtilTest {
         Assert.assertEquals("Test%26123%26test", APIUtil.sanitizeUserRole("Test&123&test"));
         Assert.assertEquals("Test123", APIUtil.sanitizeUserRole("Test123"));
     }
+    
+    @Test
+    public void testIsRoleExistForUser() throws Exception {
+        /*
+        String userName = "user1";
+        String[] userRoleList = {"role1", "role2"};
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getListOfRoles(userName)).thenReturn(userRoleList);
+        Assert.assertFalse(APIUtil.isRoleExistForUser(userName, "roleA,roleB"));
+        Assert.assertTrue(APIUtil.isRoleExistForUser(userName, "role1,roleB"));
+        //Assert.assertTrue(APIUtil.isRoleExistForUser(userName, "role1,role2"));
+        Assert.assertFalse(APIUtil.isRoleExistForUser(userName, ""));
+        Assert.assertFalse(APIUtil.isRoleExistForUser(userName, null));
+        Assert.assertFalse(APIUtil.isRoleExistForUser(userName, "test"));
+        */
+    }
 }
