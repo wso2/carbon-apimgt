@@ -3382,7 +3382,7 @@ definitions:
     title: Subscription
     required:
       - applicationId
-      - apiIdentifier
+      - apiId
       - tier
       - apiName
       - apiVersion
@@ -3395,7 +3395,7 @@ definitions:
         type: string
         description: The UUID of the application
         example: b3ade481-30b0-4b38-9a67-498a40873a6d
-      apiIdentifier:
+      apiId:
         type: string
         description: The unique identifier of the API.
       apiInfo:
@@ -3405,6 +3405,11 @@ definitions:
       tier:
         type: string
         example: Unlimited
+      type:
+        type: string
+        enum:
+          - api
+          - apiProduct
       status:
         type: string
         enum:

@@ -23,7 +23,7 @@ public class SubscriptionDTO  {
   private String applicationId = null;
   
   @NotNull
-  private String apiIdentifier = null;
+  private String apiId = null;
   
   
   private APIInfoDTO apiInfo = null;
@@ -33,6 +33,12 @@ public class SubscriptionDTO  {
   
   @NotNull
   private String tier = null;
+  
+  public enum TypeEnum {
+     api,  apiProduct, 
+  };
+  
+  private TypeEnum type = null;
   
   public enum StatusEnum {
      BLOCKED,  PROD_ONLY_BLOCKED,  UNBLOCKED,  ON_HOLD,  REJECTED, 
@@ -71,12 +77,12 @@ public class SubscriptionDTO  {
    * The unique identifier of the API.
    **/
   @ApiModelProperty(required = true, value = "The unique identifier of the API.")
-  @JsonProperty("apiIdentifier")
-  public String getApiIdentifier() {
-    return apiIdentifier;
+  @JsonProperty("apiId")
+  public String getApiId() {
+    return apiId;
   }
-  public void setApiIdentifier(String apiIdentifier) {
-    this.apiIdentifier = apiIdentifier;
+  public void setApiId(String apiId) {
+    this.apiId = apiId;
   }
 
   
@@ -119,6 +125,18 @@ public class SubscriptionDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("type")
+  public TypeEnum getType() {
+    return type;
+  }
+  public void setType(TypeEnum type) {
+    this.type = type;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;
@@ -136,10 +154,11 @@ public class SubscriptionDTO  {
     
     sb.append("  subscriptionId: ").append(subscriptionId).append("\n");
     sb.append("  applicationId: ").append(applicationId).append("\n");
-    sb.append("  apiIdentifier: ").append(apiIdentifier).append("\n");
+    sb.append("  apiId: ").append(apiId).append("\n");
     sb.append("  apiInfo: ").append(apiInfo).append("\n");
     sb.append("  applicationInfo: ").append(applicationInfo).append("\n");
     sb.append("  tier: ").append(tier).append("\n");
+    sb.append("  type: ").append(type).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("}\n");
     return sb.toString();

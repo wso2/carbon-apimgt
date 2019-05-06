@@ -39,7 +39,7 @@ import java.util.Set;
 
 public class APIMappingUtil {
 
-    public static APIDTO fromAPItoDTO(API model, String tenantDomain) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
         APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
         APIDTO dto = new APIDTO();
