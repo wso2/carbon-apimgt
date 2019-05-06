@@ -3042,7 +3042,6 @@ public class SQLConstants {
             + "WHERE URL.URL_MAPPING_ID  = PRODUCT.URL_MAPPING_ID  AND API_PRODUCT_ID =? ) T2 " + 
             "ON " + 
             "(T1.URL_MAPPING_ID =T2.URL_MAPPING_ID )";
-
     public static final String UPDATE_PRODUCT_SQL =
             " UPDATE AM_API_PRODUCT " +
             " SET" +
@@ -3059,7 +3058,16 @@ public class SQLConstants {
             "   SUBSCRIPTION_AVAILABILE_TENANTS=? " +
             " WHERE" +
             "   UUID=?";
-            
+
+    public static final String GET_PRODUCT_SCOPES_ROLES_OF_APPLICATION = "SELECT "
+            + "PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER  "
+            + "FROM "
+            + "AM_SUBSCRIPTION AS SUB, AM_APPLICATION_KEY_MAPPING AS AKM, AM_API_PRODUCT AS PRODUCT "
+            + "WHERE "
+            + "AKM.APPLICATION_ID = SUB.APPLICATION_ID AND "
+            + "PRODUCT.API_PRODUCT_ID = SUB.API_PRODUCT_ID AND "
+            + "SUB.API_PRODUCT_ID IS NOT NULL "
+            + "AND AKM.CONSUMER_KEY=?";
 
     /** Throttle related constants**/
 
