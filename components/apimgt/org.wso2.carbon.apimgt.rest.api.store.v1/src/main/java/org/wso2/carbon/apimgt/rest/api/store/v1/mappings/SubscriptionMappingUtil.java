@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,19 +24,14 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /** This class is responsible for mapping APIM core subscription related objects into REST API subscription related DTOs 
  *
