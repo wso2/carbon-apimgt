@@ -25,7 +25,6 @@
             "Authorization": "Basic YWRtaW46YWRtaW4=",
             "Content-Type": "application/json"
         }, "json");
-
         var clientId = result.data.clientId;
         var clientSecret = result.data.clientSecret;
 
