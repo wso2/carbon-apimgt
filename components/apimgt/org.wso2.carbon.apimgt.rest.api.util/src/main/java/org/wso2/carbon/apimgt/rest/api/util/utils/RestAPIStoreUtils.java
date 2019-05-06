@@ -288,6 +288,21 @@ public class RestAPIStoreUtils {
     }
 
     /**
+     * Retrieves the API Identifier object from given API UUID and tenant domain
+     *
+     * @param apiId API Identifier UUID
+     * @param requestedTenantDomain tenant which API resides
+     * @return API Identifier object 
+     * @throws APIManagementException if the retrieval fails
+     */
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+        return  api.getId();
+    }
+
+    /**
      * Validate application attributes with the provided keys. Removes any attribute from the map if it is not contained
      * in the provided set of keys
      *
