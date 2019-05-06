@@ -1108,6 +1108,11 @@
                 <artifactId>spring-web</artifactId>
                 <version>${spring-web.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring-web.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>junit</groupId>
@@ -1234,6 +1239,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
+                <version>${fasterxml.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
                 <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
@@ -1584,7 +1594,7 @@
         <slf4j.api.version>1.7.26</slf4j.api.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <jackson.version>1.9.12</jackson.version>
-        <spring-web.version>4.3.23.RELEASE</spring-web.version>
+        <spring-web.version>5.1.1.RELEASE</spring-web.version>
         <hibernate-validator.version>5.2.0.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.5.22</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
@@ -1619,7 +1629,7 @@
         <xercesImpl.version>2.8.1.wso2v2</xercesImpl.version>
         <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
         <velocity.version>1.7</velocity.version>
-        <fasterxml.jackson.version>2.9.5</fasterxml.jackson.version>
+        <fasterxml.jackson.version>2.9.8</fasterxml.jackson.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.2.73</carbon.broker.version>
         <waffle-jna.version>1.6.wso2v6</waffle-jna.version>
