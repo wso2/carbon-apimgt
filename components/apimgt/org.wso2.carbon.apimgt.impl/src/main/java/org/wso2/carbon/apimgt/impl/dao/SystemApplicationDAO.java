@@ -99,8 +99,8 @@ public class SystemApplicationDAO {
             preparedStatement = connection.prepareStatement(addCertQuery);
             preparedStatement.setString(1, appName);
             preparedStatement.setString(2, consumerKey);
-            preparedStatement.setString(2, consumerSecret);
-            preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()),
+            preparedStatement.setString(3, consumerSecret);
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()),
                     Calendar.getInstance(TimeZone.getTimeZone("UTC")));
             result = preparedStatement.executeUpdate() >= 1;
             connection.commit();

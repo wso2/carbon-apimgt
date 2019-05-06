@@ -212,7 +212,7 @@ class Login extends Component {
                     this.state.environments,
                     this.state.authConfigs,
                 );
-                this.props.history.push(params.referrer);
+                this.props.history.push(params.referrer || '/');
             })
             .catch((error) => {
                 const { response } = error;

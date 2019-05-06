@@ -1,37 +1,44 @@
 <%
     var log = new Log("Services login DCR request");
+    log.info("Hit the service");
+    var dcrUrl = 'https://localhost:9443/client-registration/v0.14/register'; // TODO: fetch from config
+    var authorizeEndpoint = "https://localhost:8243/authorize"; // TODO: fetch from config
+    var callbackUrl = "https://localhost:9443/publisher-new/services/auth/callback"; // TODO: fetch from config
+    var scopes = "apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:mediation_policy_view apim:api_workflow openid"; // TODO: fetch from config
 
-    var dcr_url = 'https://localhost:9443/client-registration/v0.14/register';
-    var dcr_request_data = { "callbackUrl": "https://localhost:9443/publisher-new/services/token", "clientName": "publisher" , "owner": "admin", "grantType": "authorization_code", "saasApp": true };
-
-    var result = post(dcr_url, JSON.stringify(dcr_request_data) , {
-        "Authorization": "Basic YWRtaW46YWRtaW4=",
-        "Content-Type": "application/json"
-    }, "json");
-
-    var clientId = result.data.clientId;
-    var clientSecret = result.data.clientSecret;
-    var scopes = "apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:mediation_policy_view apim:api_workflow openid";
-    var IDPHost = "localhost:9443";
-
-    var systemApplicationDAO = org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+    var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDAO();
-    var addApplicationKey = systemApplicationDAO.addApplicationKey("admin_publisher", clientId, clientSecret);
-    
 
-    var authorize_endpoint = "https://localhost:8243/authorize";
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
+    if(systemApplicationDTO  !== null) {
+        var clientId = systemApplicationDTO.getConsumerKey();
+    } else {
+        var dcrRequestData = {
+            "callbackUrl": callbackUrl,
+            "clientName": "publisher",
+            "owner": "admin",
+            "grantType": "authorization_code",
+            "saasApp": true
+        };
 
-    var authorize_request_data = {
-        client_id: clientId,
-        redirect_uri: result.data.callBackURL,
-        grant-type: "authorization_code",
-        scope: scopes,
-        response_type: "code",
-        idp_host_port: IDPHost,
+        var result = post(dcrUrl, JSON.stringify(dcrRequestData) , {
+            "Authorization": "Basic YWRtaW46YWRtaW4=",
+            "Content-Type": "application/json"
+        }, "json");
+
+        var clientId = result.data.clientId;
+        var clientSecret = result.data.clientSecret;
+
+        log.info("Client ID = " + clientId);
+
+        var addApplicationKey = systemApplicationDAO.addApplicationKey("admin_publisher", clientId, clientSecret);
+        if (!addApplicationKey) {
+            log.error("Error while persisting application information in system application DB table!!");
+            log.error("Client ID = " + clientId);
+        }
     }
-
-    response.content = authorize_request_data;
-    response.sendRedirect(authorize_endpoint);
-    print(authorize_request_data);
+    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&redirect_uri=" + callbackUrl;
+    log.info("Redirecting to = " + authorizeEndpoint + authRequestParams);
+    response.sendRedirect(authorizeEndpoint + authRequestParams);
 
 %>
