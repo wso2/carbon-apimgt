@@ -3042,6 +3042,22 @@ public class SQLConstants {
             + "WHERE URL.URL_MAPPING_ID  = PRODUCT.URL_MAPPING_ID  AND API_PRODUCT_ID =? ) T2 " + 
             "ON " + 
             "(T1.URL_MAPPING_ID =T2.URL_MAPPING_ID )";
+    public static final String UPDATE_PRODUCT_SQL =
+            " UPDATE AM_API_PRODUCT " +
+            " SET" +
+            "   STATE=?," +
+            "   DESCRIPTION=?," +
+            "   API_PRODUCT_TIER=?," +
+            "   UPDATED_BY=?," +
+            "   UPDATED_TIME=?," +
+            "   VISIBILITY=?," +
+            "   VISIBILE_ROLES=?, " +
+            "   BUSINESS_OWNER=?, " +
+            "   BUSINESS_OWNER_EMAIL=?, " +
+            "   SUBSCRIPTION_AVAILABILITY=?, " +
+            "   SUBSCRIPTION_AVAILABILE_TENANTS=? " +
+            " WHERE" +
+            "   UUID=?";
 
     public static final String GET_PRODUCT_SCOPES_ROLES_OF_APPLICATION = "SELECT "
             + "PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER  "

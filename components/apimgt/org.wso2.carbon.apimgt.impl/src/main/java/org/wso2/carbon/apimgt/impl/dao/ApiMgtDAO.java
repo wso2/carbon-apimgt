@@ -13626,6 +13626,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return scopes;
+    }
     
     /**
      * Get api products that can be access by specific set of roles and tenant domain
@@ -13677,5 +13678,52 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
         }
         return productList;
+    }
+    
+    public void updateAPIProduct(APIProduct product, String username) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        if(log.isDebugEnabled()) {
+            log.debug("updateAPIProduct() : product- " + product.toString());
+        }
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String query = SQLConstants.UPDATE_PRODUCT_SQL;
+
+            ps = conn.prepareStatement(query);
+            ps.setString(1, product.getState());
+            ps.setString(2, product.getDescription());
+            Set<Tier> tiers = product.getAvailableTiers();
+            List<String> tierList = new ArrayList<String>();
+            for (Tier tier : tiers) {
+                tierList.add(tier.getName());
+            }
+            ps.setString(3, StringUtils.join(tierList,","));
+            ps.setString(4, username);
+            ps.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+            ps.setString(6, product.getVisibility());
+            ps.setString(7, product.getVisibleRoles());
+            ps.setString(8, product.getBusinessOwner());
+            ps.setString(9, product.getBusinessOwnerEmail());
+            ps.setString(10, product.getSubscriptionAvailability());
+            ps.setString(11, product.getSubscriptionAvailableTenants());
+            ps.setString(12, product.getUuid());
+            ps.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error while rolling back the failed operation", e1);
+                }
+            }
+            handleException("Error in updating API Product: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
     }
 }

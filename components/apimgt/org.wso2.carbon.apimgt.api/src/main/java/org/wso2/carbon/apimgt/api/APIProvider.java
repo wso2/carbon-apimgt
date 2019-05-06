@@ -1099,13 +1099,13 @@ public interface APIProvider extends APIManager {
     String createAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException;
     
     /**
-     * Return the API product based on the UUID and the provider's accessibility restrictions
-     * @param uuid uuid of the api p
-     * @param apiProvider
+     * Return the API product based on the UUID and tenant domain
+     * @param uuid uuid of the api product
+     * @param tenantDomain
      * @return APIproduct object
      * @throws APIManagementException
      */
-    APIProduct getAPIProduct(String uuid, String apiProvider) throws APIManagementException;
+    APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException;
     
     /**
      * Return the API product list based on the tenant domain and the requesting user's accessibility restrictions
@@ -1123,4 +1123,12 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Update API Product
+     * @param product
+     * @param user updating user
+     * @throws APIManagementException
+     */
+    void updateAPIProduct(APIProduct product, String user) throws APIManagementException;
 }
