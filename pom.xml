@@ -1516,10 +1516,6 @@
         <!-- Wsdl4j version comes here-->
         <wsdl4j.version.range>[1.6.3.wso2v3, 1.7.0)</wsdl4j.version.range>
 
-        <!--lib thrift version range-->
-        <libthrift.version>0.12.0.wso2v1</libthrift.version>
-        <libthrift.import.version.range>[0.12.0.wso2v1,0.15.0)</libthrift.import.version.range>
-
         <!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
 

@@ -203,7 +203,6 @@
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}</importBundleDef>
-                                <importBundleDef>libthrift.wso2:libthrift:${libthrift.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.event-processing:org.wso2.carbon.event.processor.stub:${event.processor.stub.version}</importBundleDef>
                             </importBundles>
                             <importFeatures>

@@ -74,7 +74,6 @@ import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
 
 /**
@@ -385,11 +384,6 @@ public class WebsocketInboundHandlerTestCase {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
 
             @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForThriftClient(String apiKey) throws APISecurityException {
-                return info;
-            }
-
-            @Override
             protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
                 return info;
             }
@@ -408,13 +402,6 @@ public class WebsocketInboundHandlerTestCase {
 
         WebsocketInboundHandler websocketInboundHandler3 = new WebsocketInboundHandler() {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
-
-            @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForThriftClient(String apiKey) throws APISecurityException {
-                info.setAuthorized(true);
-                info.setType(APIConstants.API_KEY_TYPE_SANDBOX);
-                return info;
-            }
 
             @Override
             protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
@@ -448,11 +435,7 @@ public class WebsocketInboundHandlerTestCase {
         PowerMockito.whenNew(APIMgtGoogleAnalyticsUtils.class).withAnyArguments().thenReturn(apiMgtGoogleAnalyticsUtils);
 
         websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
-
-        // keyValidatorClientType = thrift client
-        PowerMockito.when(APISecurityUtils.getKeyValidatorClientType()).thenReturn(API_KEY_VALIDATOR_THRIFT_CLIENT);
         PowerMockito.when(WebsocketUtil.isGatewayTokenCacheEnabled()).thenReturn(false);
-
         websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
 
         //When gateway token cache is enabled
