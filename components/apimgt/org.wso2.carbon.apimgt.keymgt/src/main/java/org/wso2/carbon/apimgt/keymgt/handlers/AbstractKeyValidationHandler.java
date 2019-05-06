@@ -76,24 +76,15 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                         + validationContext.getVersion() + " , consumerKey : " + dto.getConsumerKey() + " }");
             }
 
-            //keep auth status and validation status bedore passing validationInfoDto through api subscription validation
-            boolean authStatus = dto.isAuthorized();
-            int validationStatus = dto.getValidationStatus();
-
             state = dao.validateSubscriptionDetails(validationContext.getContext(), validationContext.getVersion(),
                     dto.getConsumerKey(), dto);
 
             //check whether an API subscription existed for the given consumer key, if yes handle the request as an api request
-            // if no check for a product subscription and handle as a product request
-            if (state) {
+            // if no handle as a product request
+            if (dto.getProductIdentifier() == null) {
                 validationContext.setSubscriptionType("API");
             } else {
-                //set authStatus and validationStatus back to previous values
-                dto.setAuthorized(authStatus);
-                dto.setValidationStatus(validationStatus);
                 validationContext.setSubscriptionType("APIProduct");
-                state = dao.validateProductSubscriptionDetails(validationContext.getContext(), validationContext.getVersion(),
-                        dto.getConsumerKey(), dto);
             }
 
 
