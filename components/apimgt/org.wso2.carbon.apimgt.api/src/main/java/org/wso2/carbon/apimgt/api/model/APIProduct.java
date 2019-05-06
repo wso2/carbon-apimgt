@@ -18,20 +18,27 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class APIProduct {
     // TODO add rest of the properties
     private String name;
     private String uuid;
+    private int productId;
     private String provider;
     private String description;
-    private String productTier;
+    private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
     private String visibility;
+    private String visibleRoles;
+    private String visibleTenants;
     private String subscriptionAvailability;
+    private String subscriptionAvailableTenants;
     private String state;
     private String businessOwner;
     private String businessOwnerEmail;
+    private String tenantDomain;
     private List<APIProductResource> productResources = new ArrayList<>();
     
     public String getName() {
@@ -64,12 +71,6 @@ public class APIProduct {
     public void setDescription(String description) {
         this.description = description;
     }
-    public String getProductTier() {
-        return productTier;
-    }
-    public void setProductTier(String productTier) {
-        this.productTier = productTier;
-    }
     public String getVisibility() {
         return visibility;
     }
@@ -99,6 +100,56 @@ public class APIProduct {
     }
     public void setBusinessOwnerEmail(String businessOwnerEmail) {
         this.businessOwnerEmail = businessOwnerEmail;
+    }
+    public int getProductId() {
+        return productId;
+    }
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+    public Set<Tier> getAvailableTiers() {
+        return availableTiers;
+    }
+    public void setAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers = availableTiers;
+    }
+    public String getSubscriptionAvailableTenants() {
+        return subscriptionAvailableTenants;
+    }
+    public void setSubscriptionAvailableTenants(String subscriptionAvailableTenants) {
+        this.subscriptionAvailableTenants = subscriptionAvailableTenants;
+    }
+    public String getVisibleRoles() {
+        return visibleRoles;
+    }
+    public void setVisibleRoles(String visibleRoles) {
+        this.visibleRoles = visibleRoles;
+    }
+    public String getVisibleTenants() {
+        return visibleTenants;
+    }
+    public void setVisibleTenants(String visibleTenants) {
+        this.visibleTenants = visibleTenants;
+    }
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
+    }
+    @Override
+    public String toString() {
+        String tiers = "";
+        for (Tier tier : availableTiers) {
+            tiers += tier.getName() + " ";
+        }
+        return "APIProduct [name=" + name + ", uuid=" + uuid + ", productId=" + productId + ", provider=" + provider
+                + ", description=" + description + ", availableTiers=" + tiers + ", visibility=" + visibility
+                + ", visibleRoles=" + visibleRoles + ", visibleTenants=" + visibleTenants
+                + ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableTenants="
+                + subscriptionAvailableTenants + ", state=" + state + ", businessOwner=" + businessOwner
+                + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain=" + tenantDomain
+                + ", productResources=" + productResources + "]";
     }
 
 }

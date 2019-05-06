@@ -261,16 +261,27 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             SubscriptionResponse subscriptionResponse = null;
             if(!StringUtils.isEmpty(body.getApiProductIdentifier())) {
                 String uuid = body.getApiProductIdentifier();
-                APIProduct product = apiConsumer.getAPIProduct(uuid, username); //TODO pass additional param (tenant etc.)
+                APIProduct product = apiConsumer.getAPIProduct(uuid, tenantDomain); 
                 if(product == null) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
                     return null;
                 }
-                //TODO add api Product related subscription allowed validation
-                
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
+                }
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    //application access failure occurred
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+      
                 APIProductIdentifier identifier = new  APIProductIdentifier(product.getProvider(), product.getName());
                 identifier.setUuid(uuid);
+                
+                //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
+                //  throw an APIMgtAuthorizationFailedException with the reason as the message
+                RestAPIStoreUtils.checkSubscriptionAllowed(identifier, body.getTier());
                 identifier.setTier(body.getTier());
+                identifier.setProductId(product.getProductId());
                 //product related subscription
 
                 subscriptionResponse = apiConsumer.addSubscription(identifier, username, application.getId());
