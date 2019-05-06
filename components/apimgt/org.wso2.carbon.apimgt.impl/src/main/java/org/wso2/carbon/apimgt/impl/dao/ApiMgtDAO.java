@@ -13626,6 +13626,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return scopes;
+    }
     
     /**
      * Get api products that can be access by specific set of roles and tenant domain
