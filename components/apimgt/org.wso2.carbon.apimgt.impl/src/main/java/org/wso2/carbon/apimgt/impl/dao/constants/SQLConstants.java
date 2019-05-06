@@ -2960,6 +2960,24 @@ public class SQLConstants {
             "ON " + 
             "(T1.URL_MAPPING_ID =T2.URL_MAPPING_ID )";
 
+    public static final String UPDATE_PRODUCT_SQL =
+            " UPDATE AM_API_PRODUCT " +
+            " SET" +
+            "   STATE=?," +
+            "   DESCRIPTION=?," +
+            "   API_PRODUCT_TIER=?," +
+            "   UPDATED_BY=?," +
+            "   UPDATED_TIME=?," +
+            "   VISIBILITY=?," +
+            "   VISIBILE_ROLES=?, " +
+            "   BUSINESS_OWNER=?, " +
+            "   BUSINESS_OWNER_EMAIL=?, " +
+            "   SUBSCRIPTION_AVAILABILITY=?, " +
+            "   SUBSCRIPTION_AVAILABILE_TENANTS=? " +
+            " WHERE" +
+            "   UUID=?";
+            
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

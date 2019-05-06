@@ -6083,9 +6083,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIProduct getAPIProduct(String uuid, String apiProvider) throws APIManagementException {
+    public APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
         //TODO add validation for tenant and publisher visibility. currently no domain or user check is set
-        APIProduct product = apiMgtDAO.getAPIProduct(uuid, MultitenantUtils.getTenantDomain(apiProvider));
+        APIProduct product = apiMgtDAO.getAPIProduct(uuid, tenantDomain);
         return product;
     }
 
@@ -6100,6 +6100,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
       //TODO add validation for tenant and publisher visibility. currently no domain or user check is set
         apiMgtDAO.deleteAPIProduct(uuid, tenantDomain);
+    }
+
+    @Override
+    public void updateAPIProduct(APIProduct product, String user) throws APIManagementException {
+        apiMgtDAO.updateAPIProduct(product, user);
     }
 
 }

@@ -20,18 +20,23 @@ package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
@@ -69,10 +74,11 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (log.isDebugEnabled()) {
                 log.debug("API Product request: Id " +apiProductId + " by " + username);
             }
-            APIProduct apiProduct = apiProvider.getAPIProduct(apiProductId, username);
+            APIProduct apiProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
             if (apiProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
@@ -145,10 +151,24 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             //If tiers are not defined, 
             if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
                 RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
+            } 
+            Set<Tier> definedTiers = apiProvider.getTiers();
+            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (!invalidTiers.isEmpty()) {
+                RestApiUtil.handleBadRequest(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
             }
+            if (body.getAdditionalProperties() != null) {
+                String errorMessage = RestApiPublisherUtils
+                        .validateAdditionalProperties(body.getAdditionalProperties());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
+            
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
             String uuid = apiProvider.createAPIProduct(product, tenantDomain);
-            APIProduct createdProduct = apiProvider.getAPIProduct(uuid, provider);
+            APIProduct createdProduct = apiProvider.getAPIProduct(uuid, tenantDomain);
 
             APIProductDetailedDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(
@@ -211,7 +231,44 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
     @Override
     public Response apiProductsApiProductIdPut(String apiProductId, APIProductDetailedDTO body, String contentType,
             String ifMatch, String ifUnmodifiedSince) {
-        // TODO Auto-generated method stub
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIProduct retrievedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            if (retrievedProduct == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            }
+            //validation for tiers
+            List<String> tiersFromDTO = body.getTiers();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
+            }
+            //check whether the added API Products's tiers are all valid
+            Set<Tier> definedTiers = apiProvider.getTiers();
+            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (!invalidTiers.isEmpty()) {
+                RestApiUtil.handleBadRequest(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+            }
+            if (body.getAdditionalProperties() != null) {
+                String errorMessage = RestApiPublisherUtils
+                        .validateAdditionalProperties(body.getAdditionalProperties());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
+            
+            APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
+            product.setUuid(apiProductId);
+            apiProvider.updateAPIProduct(product, username);
+            APIProduct updatedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            APIProductDetailedDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
+            return Response.ok().entity(updatedProductDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating API Product : " + apiProductId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
     @Override
