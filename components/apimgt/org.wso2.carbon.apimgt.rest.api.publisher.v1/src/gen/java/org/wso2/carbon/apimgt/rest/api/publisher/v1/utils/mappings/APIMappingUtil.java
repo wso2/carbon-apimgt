@@ -41,6 +41,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.*;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+
 public class APIMappingUtil {
 
     private static final Log log = LogFactory.getLog(APIMappingUtil.class);
@@ -672,5 +674,104 @@ public class APIMappingUtil {
             //logs the error and continues as this is not a blocker
             log.error("Cannot convert to Long format when setting maxTps for API", e);
         }
+    }
+
+
+    /**
+     * This method returns URI templates according to the given list of operations
+     *
+     * @param operations List operations
+     * @return URI Templates
+     * @throws APIManagementException
+     */
+    public Set<URITemplate> getURITemplates(List<APIOperationsDTO> operations) throws APIManagementException {
+        JSONParser parser = new JSONParser();
+        JSONObject swagger;
+        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+//        Set<Scope> scopes = getScopes(resourceConfigsJSON);
+        try {
+//            swagger = (JSONObject) parser.parse(resourceConfigsJSON);
+            if (operations != null) {
+//                JSONObject paths = (JSONObject) swagger.get("paths");
+                for (APIOperationsDTO operation : operations) {
+                    String uriTempVal = operation.getUritemplate();
+                    //if url template is a custom attribute "^x-" ignore.
+                    if (uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")) {
+                        continue;
+                    }
+//                    JSONObject path = (JSONObject) paths.get(uriTempVal);todo
+                    // Following code check is done to handle $ref objects supported by swagger spec
+                    // See field types supported by "Path Item Object" in swagger spec.
+                   /* if (path.containsKey("$ref")) {
+                        log.info("Reference " + uriTempVal + " path object was ignored when generating URL template " +
+                                "for api \"" + api.getId().getApiName() + '\"');
+                        continue;
+                    }*/
+
+                    boolean isHttpVerbDefined = false;
+
+                    for (Object o1 : path.keySet()) {
+                        String httpVerb = (String) o1;
+
+                        if (APIConstants.SWAGGER_SUMMARY.equals(httpVerb.toLowerCase())
+                                || APIConstants.SWAGGER_DESCRIPTION.equals(httpVerb.toLowerCase())
+                                || APIConstants.SWAGGER_SERVERS.equals(httpVerb.toLowerCase())
+                                || APIConstants.PARAMETERS.equals(httpVerb.toLowerCase())
+                                || httpVerb.startsWith("x-")
+                                || httpVerb.startsWith("X-")) {
+                            // openapi 3.x allow 'summary', 'description' and extensions in PathItem Object.
+                            // which we are not interested at this point
+                            continue;
+                        }
+                        //Only continue for supported operations
+                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                            isHttpVerbDefined = true;
+                            JSONObject operation = (JSONObject) path.get(httpVerb);
+                            URITemplate template = new URITemplate();
+                            Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants
+                                    .SWAGGER_X_SCOPE));
+                            String authType = (String) operation.get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                            if ("Application & Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                            } else if ("Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
+                            } else if ("None".equals(authType)) {
+                                authType = APIConstants.AUTH_NO_AUTHENTICATION;
+                            } else if ("Application".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                            } else {
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                            }
+                            template.setThrottlingTier((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
+                            template.setThrottlingTiers((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
+                            template.setMediationScript((String) operation.get(APIConstants
+                                    .SWAGGER_X_MEDIATION_SCRIPT));
+                            template.setMediationScripts(httpVerb.toUpperCase(), (String) operation.get(
+                                    APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+                            template.setUriTemplate(uriTempVal);
+                            template.setHTTPVerb(httpVerb.toUpperCase());
+                            template.setHttpVerbs(httpVerb.toUpperCase());
+                            template.setAuthType(authType);
+                            template.setAuthTypes(authType);
+                            template.setScope(scope);
+                            template.setScopes(scope);
+
+                            uriTemplates.add(template);
+                        } else {
+                            handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
+                                    + "' is invalid");
+                        }
+                    }
+
+                    if (!isHttpVerbDefined) {
+                        handleException("Resource '" + uriTempVal + "' has global parameters without " +
+                                "HTTP methods");
+                    }
+                }
+            }
+        } catch (ParseException e) {
+            handleException("Invalid resource configuration ", e);
+        }
+        return uriTemplates;
     }
 }
