@@ -1651,7 +1651,7 @@
         <io.swagger.codegen.version>2.3.1</io.swagger.codegen.version>
         <commons.collections4.version>4.1</commons.collections4.version>
 
-        <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
+        <maven.checkstyleplugin.version>3.0.0</maven.checkstyleplugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
         <httpcore.version>4.3.3.wso2v1</httpcore.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
