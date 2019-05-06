@@ -521,15 +521,56 @@ public class ApiMgtDAO {
             if (!isAdvancedThrottleEnabled) {
                 if (!defaultVersionInvoked) {
                     ps.setString(3, version);
+                    ps.setString(4, context);
+                    ps.setString(5, consumerKey);
+                    ps.setString(6, version);
                 }
             } else {
                 ps.setInt(3, apiOwnerTenantId);
                 if (!defaultVersionInvoked) {
                     ps.setString(4, version);
+                    ps.setString(5, context);
+                    ps.setString(6, consumerKey);
+                    ps.setInt(7, apiOwnerTenantId);
+                    ps.setString(8, version);
+
                 }
             }
             rs = ps.executeQuery();
-            if (rs.next()) {
+            boolean isAPISubscriptionExist = false;
+            boolean subscriptionsExist = false;
+            int productSubscriptionCount = 0;
+            while (rs.next()) {
+                subscriptionsExist = true;
+                if (isAPISubscriptionExist) {
+                    break;
+                }
+
+                // check whether the current subscription is an api subscription and if yes allow to override previous
+                // infoDTO properties
+                String productName = rs.getString("API_PRODUCT_NAME");
+
+                if (StringUtils.isEmpty(productName)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("A valid API subscription was found for request to " + context + " through consumer"
+                                + " key " + consumerKey);
+                    }
+                    infoDTO.setProductIdentifier(null);
+                    isAPISubscriptionExist = true;
+                } else {
+                    // Allow to override previous infoDTO properties only if no API subscription was found and no previous
+                    // product subscription was found
+                    // Order by API_NAME DESC in sql query assures the api subscriptions (where api_name is not null)
+                    // appear first in the result set
+                    infoDTO.setApiName(null);
+                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                    infoDTO.setProductIdentifier(new APIProductIdentifier(productProvider, productName));
+                    if (productSubscriptionCount > 0) {
+                        throw new APIManagementException("Requested context " + context + " has more than one product "
+                                + "subscription from consumer key " + consumerKey );
+                    }
+                    productSubscriptionCount++;
+                }
                 String subscriptionStatus = rs.getString("SUB_STATUS");
                 String type = rs.getString("KEY_TYPE");
                 if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
@@ -604,10 +645,14 @@ public class ApiMgtDAO {
                     // condition id list for all throttling tiers associated with this API.
                     infoDTO.setThrottlingDataList(list);
                 }
-                return true;
             }
-            infoDTO.setAuthorized(false);
-            infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
+
+            if (subscriptionsExist) {
+                return true;
+            } else {
+                infoDTO.setAuthorized(false);
+                infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
+            }
         } catch (SQLException e) {
             handleException("Exception occurred while validating Subscription.", e);
         } finally {
@@ -12061,16 +12106,57 @@ public class ApiMgtDAO {
             if (!isAdvancedThrottleEnabled) {
                 if (!defaultVersionInvoked) {
                     ps.setString(3, version);
+                    ps.setString(4, context);
+                    ps.setString(5, consumerKey);
+                    ps.setString(6, version);
                 }
             } else {
                 ps.setInt(3, apiOwnerTenantId);
                 if (!defaultVersionInvoked) {
                     ps.setString(4, version);
+                    ps.setString(5, context);
+                    ps.setString(6, consumerKey);
+                    ps.setInt(7, apiOwnerTenantId);
+                    ps.setString(8, version);
+
                 }
             }
 
             rs = ps.executeQuery();
-            if (rs.next()) {
+            boolean isAPISubscriptionExist = false;
+            boolean subscriptionsExist = false;
+            int productSubscriptionCount = 0;
+            while (rs.next()) {
+                subscriptionsExist = true;
+                if (isAPISubscriptionExist) {
+                    break;
+                }
+
+                // check whether the current subscription is an api subscription and if yes allow to override previous
+                // infoDTO properties
+                String productName = rs.getString("API_PRODUCT_NAME");
+
+                if (StringUtils.isEmpty(productName)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("A valid API subscription was found for request to " + context + " through consumer"
+                                + " key " + consumerKey);
+                    }
+                    infoDTO.setProductIdentifier(null);
+                    isAPISubscriptionExist = true;
+                } else {
+                    // Allow to override previous infoDTO properties only if no API subscription was found and no previous
+                    // product subscription was found
+                    // Order by API_NAME DESC in sql query assures the api subscriptions (where api_name is not null)
+                    // appear first in the result set
+                    infoDTO.setApiName(null);
+                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                    infoDTO.setProductIdentifier(new APIProductIdentifier(productProvider, productName));
+                    if (productSubscriptionCount > 0) {
+                        throw new APIManagementException("Requested context " + context + " has more than one product "
+                                + "subscription from consumer key " + consumerKey );
+                    }
+                    productSubscriptionCount++;
+                }
                 String subscriptionStatus = rs.getString("SUB_STATUS");
                 String type = rs.getString("KEY_TYPE");
                 if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
@@ -12149,12 +12235,14 @@ public class ApiMgtDAO {
                     // condition id list for all throttling tiers associated with this API.
                     infoDTO.setThrottlingDataList(list);
                 }
+            }
+            if (subscriptionsExist) {
                 infoDTO.setAuthorized(true);
                 return infoDTO;
+            } else {
+                infoDTO.setAuthorized(false);
+                infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
             }
-            infoDTO.setAuthorized(false);
-            infoDTO.setValidationStatus(
-                    APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         } catch (SQLException e) {
             handleException("Exception occurred while validating Subscription.", e);
         } finally {
@@ -13509,6 +13597,43 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmtAddScopeResourceMapping, connection, null);
         }
     }
+
+    public Map<String, String> getProductScopeRolesOfApplication(String consumerKey) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        Map<String, String> scopes = new HashMap<String, String>();
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String sql = "SELECT "
+                    + "PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER  "
+                    + "FROM "
+                    + "AM_SUBSCRIPTION AS SUB, AM_APPLICATION_KEY_MAPPING AS AKM, AM_API_PRODUCT AS PRODUCT "
+                    + "WHERE "
+                    + "AKM.APPLICATION_ID = SUB.APPLICATION_ID AND "
+                    + "PRODUCT.API_PRODUCT_ID = SUB.API_PRODUCT_ID AND "
+                    + "SUB.API_PRODUCT_ID IS NOT NULL "
+                    + "AND AKM.CONSUMER_KEY=?";
+
+            prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, consumerKey);
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                String productName = rs.getString("API_PRODUCT_NAME");
+                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+
+                APIProductIdentifier productId = new APIProductIdentifier(productProvider, productName);
+                String scope = APIUtil.getProductScope(productId);
+                scopes.put(scope, ""); //product scopes are not meant to be bound to any role, so the role list will be empty
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving product scope and role mappings for consumer key " + consumerKey, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return scopes;
     
     /**
      * Get api products that can be access by specific set of roles and tenant domain

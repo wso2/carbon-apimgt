@@ -265,6 +265,7 @@ public class SQLConstants {
             "   AND API.API_ID = SUB.API_ID" +
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
+    //we are not expecting api product calls through default version todo:reviw
     public static final String VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
             "   SUB.TIER_ID," +
@@ -302,7 +303,9 @@ public class SQLConstants {
             "   APP.TOKEN_TYPE," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER" +
+            "   API.API_PROVIDER," +
+            "   NULL AS API_PRODUCT_NAME," +
+            "   NULL AS API_PRODUCT_PROVIDER " +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -316,7 +319,42 @@ public class SQLConstants {
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
             "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
             "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+            " UNION " +
+            " SELECT DISTINCT " +
+            "   SUB.TIER_ID," +
+            "   SUBR.USER_ID," +
+            "   SUB.SUB_STATUS," +
+            "   APP.APPLICATION_ID," +
+            "   APP.NAME," +
+            "   APP.APPLICATION_TIER," +
+            "   APP.TOKEN_TYPE," +
+            "   AKM.KEY_TYPE," +
+            "   API.API_NAME," +
+            "   API.API_PROVIDER," +
+            "   APIPRO.API_PRODUCT_NAME," +
+            "   APIPRO.API_PRODUCT_PROVIDER" +
+            " FROM " +
+            "   AM_API AS API," +
+            "   AM_API_URL_MAPPING AS AUM," +
+            "   AM_API_PRODUCT_MAPPING AS APM," +
+            "   AM_SUBSCRIPTION AS SUB," +
+            "   AM_APPLICATION AS APP," +
+            "   AM_SUBSCRIBER AS SUBR," +
+            "   AM_APPLICATION_KEY_MAPPING AS AKM," +
+            "   AM_API_PRODUCT AS APIPRO " +
+            " WHERE " +
+            "   API.API_ID=AUM.API_ID" +
+            "   AND AUM.URL_MAPPING_ID=APM.URL_MAPPING_ID" +
+            "   AND SUB.API_PRODUCT_ID=APM.API_PRODUCT_ID" +
+            "   AND APM.API_PRODUCT_ID=APIPRO.API_PRODUCT_ID" +
+            "   AND APP.APPLICATION_ID=SUB.APPLICATION_ID" +
+            "   AND SUBR.SUBSCRIBER_ID=APP.SUBSCRIBER_ID" +
+            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+            "   AND API.CONTEXT = ? " +
+            "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND API.API_VERSION = ? " +
+            " ORDER BY API_NAME DESC";
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
@@ -354,38 +392,83 @@ public class SQLConstants {
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
             " SELECT " +
-                    "   SUB.TIER_ID," +
-                    "   SUBS.USER_ID," +
-                    "   SUB.SUB_STATUS," +
-                    "   APP.APPLICATION_ID," +
-                    "   APP.NAME," +
-                    "   APP.APPLICATION_TIER," +
-                    "   APP.TOKEN_TYPE," +
-                    "   AKM.KEY_TYPE," +
-                    "   API.API_NAME," +
-                    "   API.API_TIER," +
-                    "   API.API_PROVIDER," +
-                    "   APS.RATE_LIMIT_COUNT," +
-                    "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID" +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION SUB," +
-                    "   AM_SUBSCRIBER SUBS," +
-                    "   AM_APPLICATION APP," +
-                    "   AM_APPLICATION_KEY_MAPPING AKM," +
-                    "   AM_API API," +
-                    "   AM_POLICY_SUBSCRIPTION APS" +
-                    " WHERE " +
-                    "   API.CONTEXT = ? " +
-                    "   AND AKM.CONSUMER_KEY = ? " +
-                    "   AND APS.TENANT_ID = ? " +
-                    "   AND API.API_VERSION = ? " +
-                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-                    "   AND API.API_ID = SUB.API_ID" +
-                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-                    "   AND APS.NAME = SUB.TIER_ID" ;
+            "   SUB.TIER_ID," +
+            "   SUBS.USER_ID," +
+            "   SUB.SUB_STATUS," +
+            "   APP.APPLICATION_ID," +
+            "   APP.NAME," +
+            "   APP.APPLICATION_TIER," +
+            "   APP.TOKEN_TYPE," +
+            "   AKM.KEY_TYPE," +
+            "   API.API_NAME," +
+            "   API.API_TIER," +
+            "   API.API_PROVIDER," +
+            "   NULL AS API_PRODUCT_NAME," +
+            "   NULL AS API_PRODUCT_PROVIDER," +
+            "   APS.RATE_LIMIT_COUNT," +
+            "   APS.RATE_LIMIT_TIME_UNIT," +
+            "   APS.STOP_ON_QUOTA_REACH," +
+            "   API.API_ID" +
+            " FROM " +
+            "   AM_SUBSCRIPTION SUB," +
+            "   AM_SUBSCRIBER SUBS," +
+            "   AM_APPLICATION APP," +
+            "   AM_APPLICATION_KEY_MAPPING AKM," +
+            "   AM_API API," +
+            "   AM_POLICY_SUBSCRIPTION APS" +
+            " WHERE " +
+            "   API.CONTEXT = ? " +
+            "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND APS.TENANT_ID = ? " +
+            "   AND API.API_VERSION = ? " +
+            "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+            "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+            "   AND API.API_ID = SUB.API_ID" +
+            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+            "   AND APS.NAME = SUB.TIER_ID" +
+            " UNION " +
+            " SELECT DISTINCT " +
+            "   SUB.TIER_ID," +
+            "   SUBR.USER_ID," +
+            "   SUB.SUB_STATUS," +
+            "   APP.APPLICATION_ID," +
+            "   APP.NAME," +
+            "   APP.APPLICATION_TIER," +
+            "   APP.TOKEN_TYPE," +
+            "   AKM.KEY_TYPE," +
+            "   API.API_NAME," +
+            "   API.API_TIER," + //need to know backend api limit
+            "   API.API_PROVIDER," +
+            "   APIPRO.API_PRODUCT_NAME," +
+            "   APIPRO.API_PRODUCT_PROVIDER," +
+            "   APS.RATE_LIMIT_COUNT," +
+            "   APS.RATE_LIMIT_TIME_UNIT," +
+            "   APS.STOP_ON_QUOTA_REACH," +
+            "   API.API_ID" +
+            " FROM " +
+            "   AM_API AS API," +
+            "   AM_API_URL_MAPPING AS AUM," +
+            "   AM_API_PRODUCT_MAPPING AS APM," +
+            "   AM_SUBSCRIPTION AS SUB," +
+            "   AM_APPLICATION AS APP," +
+            "   AM_SUBSCRIBER AS SUBR," +
+            "   AM_APPLICATION_KEY_MAPPING AS AKM," +
+            "   AM_API_PRODUCT AS APIPRO, " +
+            "   AM_POLICY_SUBSCRIPTION APS" +
+            " WHERE " +
+            "   API.API_ID=AUM.API_ID" +
+            "   AND AUM.URL_MAPPING_ID=APM.URL_MAPPING_ID" +
+            "   AND SUB.API_PRODUCT_ID=APM.API_PRODUCT_ID" +
+            "   AND APM.API_PRODUCT_ID=APIPRO.API_PRODUCT_ID" +
+            "   AND APP.APPLICATION_ID=SUB.APPLICATION_ID" +
+            "   AND SUBR.SUBSCRIBER_ID=APP.SUBSCRIBER_ID" +
+            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
+            "   AND APS.NAME = SUB.TIER_ID" +
+            "   AND API.CONTEXT = ? " +
+            "   AND AKM.CONSUMER_KEY = ? " +
+            "   AND APS.TENANT_ID = ? " +
+            "   AND API.API_VERSION = ? " +
+            " ORDER BY API_NAME DESC";
 
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
