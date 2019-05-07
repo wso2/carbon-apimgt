@@ -17,7 +17,7 @@
             "callbackUrl": callbackUrl,
             "clientName": "publisher",
             "owner": "admin",
-            "grantType": "authorization_code",
+            "grantType": "authorization_code refresh_token",
             "saasApp": true
         };
 

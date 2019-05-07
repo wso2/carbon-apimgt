@@ -8208,6 +8208,6 @@ public final class APIUtil {
      * @return product scope
      */
     public static String getProductScope(APIProductIdentifier productIdentifier) {
-        return "productscope-" + productIdentifier.getApiProductName() + ":" + productIdentifier.getProviderName();
+        return "productscope-" + productIdentifier.getName() + ":" + productIdentifier.getProviderName();
     }
 }

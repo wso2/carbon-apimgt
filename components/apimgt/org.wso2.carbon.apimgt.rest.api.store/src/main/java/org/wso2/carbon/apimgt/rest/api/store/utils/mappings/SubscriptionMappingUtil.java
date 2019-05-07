@@ -61,7 +61,7 @@ public class SubscriptionMappingUtil {
         }
         APIProductIdentifier productId = subscription.getProductId();
         if (productId != null) {
-            subscriptionDTO.setApiProductIdentifier(subscription.getProductId().getUuid());
+            subscriptionDTO.setApiProductIdentifier(subscription.getProductId().getUUID());
         }
 
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());

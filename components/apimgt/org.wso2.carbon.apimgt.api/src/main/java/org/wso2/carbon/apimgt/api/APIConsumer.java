@@ -871,4 +871,12 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException Exception
      */
     List<APIProduct> getStoreVisibleAPIProductsForUser(String user, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Return api product by uuid
+     * @param uuid uuid of the product 
+     * @return product
+     * @throws APIManagementException Exception
+     */
+    APIProduct getAPIProductByUUID(String uuid) throws APIManagementException;
 }

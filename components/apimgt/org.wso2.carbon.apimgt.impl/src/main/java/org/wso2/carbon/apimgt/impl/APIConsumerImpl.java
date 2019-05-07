@@ -2703,7 +2703,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } 
         if (identifier instanceof APIProductIdentifier) {
             apiProdIdentifier = (APIProductIdentifier) identifier;
-            product = apiMgtDAO.getAPIProduct(apiProdIdentifier.getUuid(), tenantDomain);
+            product = apiMgtDAO.getAPIProduct(apiProdIdentifier.getUUID(), tenantDomain);
             state = product.getState();
         }
         WorkflowResponse workflowResponse = null;
@@ -2787,7 +2787,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (apiIdentifier != null) {
                     subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, apiIdentifier.getApiName());
                 } else if (apiProdIdentifier != null) {
-                    subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getApiProductName());
+                    subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getName());
                 }
                 subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
@@ -2801,7 +2801,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             if (log.isDebugEnabled()) {
-                String logMessage = "API/Product Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
+                String logMessage = "API/Product Name: " + identifier.getName() + ", API Version " + identifier.getVersion()
                         + ", Subscription Status: " + subscriptionStatus + " subscribe by " + userId
                         + " for app " + applicationName;
                 log.debug(logMessage);
@@ -2930,7 +2930,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (apiIdentifier != null) {
                 subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, apiIdentifier.getApiName());
             } else if (apiProdIdentifier != null) {
-                subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getApiProductName());
+                subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getName());
             }
             
             subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
@@ -5163,6 +5163,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return apiMgtDAO.getStoreVisibleAPIProducts(user, tenantDomain);
 
+    }
+
+    @Override
+    public APIProduct getAPIProductByUUID(String uuid) throws APIManagementException {   
+        return apiMgtDAO.getAPIProductByUUID(uuid);
     }
         
 }

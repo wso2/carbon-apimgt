@@ -17,10 +17,37 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+/**
+ * Interface for All Identifiers
+ */
 public interface Identifier {
+    /**
+     * Name of provider 
+     * @return name
+     */
     String getProviderName();
+    
+    /**
+     * Tier related to the identifier
+     * @return Tier
+     */
     String getTier();
-    String getApiName();
+    
+    /**
+     * Name of the identifier
+     * @return name
+     */
+    String getName();
+    
+    /**
+     * Version of the identifier
+     * @return version
+     */
     String getVersion();
-
+    
+    /**
+     * UUID of the identifier
+     * @return uuid
+     */
+    String getUUID();
 }

@@ -134,6 +134,7 @@ public class RestAPIStoreUtils {
         String username = RestApiUtil.getLoggedInUsername();
         Application application = subscribedAPI.getApplication();
         APIIdentifier apiIdentifier = subscribedAPI.getApiId();
+        APIProductIdentifier productIdentifier = subscribedAPI.getProductId();
         if (apiIdentifier != null && application != null) {
             try {
                 if (!isUserAccessAllowedForAPI(apiIdentifier)) {
@@ -149,11 +150,23 @@ public class RestAPIStoreUtils {
                 return true;
             }
         }
+        
+        if (productIdentifier != null && application != null) {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIProduct product = apiConsumer.getAPIProductByUUID(productIdentifier.getUUID());
+            if(!isUserAllowedForSubscription(product, username) || !isUserAccessAllowedForAPIProduct(product)) {
+                return false;
+            }
+
+            if (isUserAccessAllowedForApplication(application)) {
+                return true;
+            }
+        }
 
         //user don't have access
         return false;
     }
-
+    
     /**
      * Check whether the specified API exists and the current logged in user has access to it.
      * <p>
@@ -247,14 +260,13 @@ public class RestAPIStoreUtils {
             }
             tiers = api.getAvailableTiers();
             subscriptionAvailability = api.getSubscriptionAvailability();
+            subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         } 
         if (identifier instanceof APIProductIdentifier) {
-            APIProduct product = apiConsumer.getAPIProduct(((APIProductIdentifier) identifier).getUuid(),
-                    userTenantDomain);
+            APIProduct product = apiConsumer.getAPIProductByUUID(((APIProductIdentifier) identifier).getUUID());
             tiers = product.getAvailableTiers();
             subscriptionAvailability = product.getSubscriptionAvailability();
-            subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
-            
+            subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();    
         }
 
         //Tenant based validation for subscription
@@ -300,6 +312,21 @@ public class RestAPIStoreUtils {
             throw new APIMgtAuthorizationFailedException("Tier " + tier + " is not allowed for user " + username);
         }
 
+    }
+
+    /**
+     * Retrieves the API Identifier object from given API UUID and tenant domain
+     *
+     * @param apiId API Identifier UUID
+     * @param requestedTenantDomain tenant which API resides
+     * @return API Identifier object 
+     * @throws APIManagementException if the retrieval fails
+     */
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+        return  api.getId();
     }
 
     /**
@@ -399,5 +426,36 @@ public class RestAPIStoreUtils {
             return true;
         }
         return false;
+    }
+    
+    public static boolean isUserAllowedForSubscription(APIProduct product, String user) {
+        String subscriptionAvailability = product.getSubscriptionAvailability();
+        String subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (log.isDebugEnabled()) {
+            log.debug("isUserAllowedForSubscription():- productId: " + product.getUuid()
+                    + ", subscriptionAvailability: " + subscriptionAvailability + " subscriptionAllowedTenants: "
+                    + subscriptionAllowedTenants + " username:" + user + " tenantDomain:" + tenantDomain);
+        }
+        boolean subscriptionAllowed = false;
+        if (!tenantDomain.equals(product.getTenantDomain())) {
+            if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
+                subscriptionAllowed = true;
+            } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
+                if (subscriptionAllowedTenants != null) {
+                    String[] allowedTenants = subscriptionAllowedTenants.split(",");
+                    for (String tenant : allowedTenants) {
+                        if (tenant != null && tenantDomain.equals(tenant.trim())) {
+                            subscriptionAllowed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            subscriptionAllowed = true;
+        }
+        
+        return subscriptionAllowed;
     }
 }

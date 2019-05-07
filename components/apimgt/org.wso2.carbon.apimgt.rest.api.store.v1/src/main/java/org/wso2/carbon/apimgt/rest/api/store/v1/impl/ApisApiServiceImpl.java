@@ -140,7 +140,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
-            apiToReturn = APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
             return Response.ok().entity(apiToReturn).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
