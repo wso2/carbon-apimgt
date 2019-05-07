@@ -2328,6 +2328,12 @@ public class SQLConstants {
     public static final String ADD_SCOPE_LINK_SQL =
             " INSERT INTO AM_API_SCOPES (API_ID, SCOPE_ID) VALUES (?,?)";
 
+    public static final String ADD_PRODUCT_RESOURCE_MAPPING_SQL = "INSERT INTO AM_API_PRODUCT_MAPPING "
+            + "(API_PRODUCT_ID,URL_MAPPING_ID) " + "VALUES (?, ?)";
+
+    public static final String DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL = "DELETE FROM AM_API_PRODUCT_MAPPING WHERE "
+            + "API_PRODUCT_ID = ? ";
+
     public static final String GET_API_SCOPES_SQL =
             " SELECT A.SCOPE_ID, A.NAME, A.DISPLAY_NAME, A.DESCRIPTION, C.SCOPE_BINDING " +
             " FROM  " +
@@ -2503,6 +2509,9 @@ public class SQLConstants {
 
     public static final String REMOVE_FROM_API_SCOPES_SQL =
             "DELETE FROM AM_API_SCOPES WHERE API_ID = ?";
+
+    public static final String REMOVE_FROM_API_SCOPES_BY_SCOPE_ID_SQL =
+            "DELETE FROM AM_API_SCOPES WHERE SCOPE_ID = ?";
 
     public static final String REMOVE_FROM_OAUTH_SCOPE_SQL =
             "DELETE FROM IDN_OAUTH2_SCOPE  WHERE SCOPE_ID = ?";
