@@ -460,10 +460,7 @@ Overview.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
-        additionalProperties: PropTypes.shape({
-            key: PropTypes.string,
-            value: PropTypes.string,
-        }).isRequired,
+        additionalProperties: PropTypes.shape({}).isRequired,
     }).isRequired,
     isEditable: PropTypes.bool,
 };

@@ -39,8 +39,9 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -207,6 +208,35 @@ public class APIMappingUtil {
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
 //        model.setApiSecurity(dto.getApiSecurity());todo
         return model;
+    }
+
+    /**
+     * Returns the APIIdentifier given the uuid
+     *
+     * @param apiId                 API uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return APIIdentifier which represents the given id
+     * @throws APIManagementException
+     */
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        return getAPIInfoFromUUID(apiId, requestedTenantDomain).getId();
+    }
+
+    /**
+     * Returns an API with minimal info given the uuid.
+     *
+     * @param apiUUID                 API uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
+            throws APIManagementException {
+        API api;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        return api;
     }
 
     /**
