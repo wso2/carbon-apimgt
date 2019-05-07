@@ -566,8 +566,11 @@ public class ApiMgtDAO {
                     String productProvider = rs.getString("API_PRODUCT_PROVIDER");
                     infoDTO.setProductIdentifier(new APIProductIdentifier(productProvider, productName));
                     if (productSubscriptionCount > 0) {
-                        throw new APIManagementException("Requested context " + context + " has more than one product "
+                        //if the provided consumer key has more than one product subscriptions to the requested context
+                        //log a warning and return subscription details for the first subscription
+                        log.warn("Requested context " + context + " has more than one product "
                                 + "subscription from consumer key " + consumerKey );
+                        return true;
                     }
                     productSubscriptionCount++;
                 }
@@ -12163,8 +12166,12 @@ public class ApiMgtDAO {
                     String productProvider = rs.getString("API_PRODUCT_PROVIDER");
                     infoDTO.setProductIdentifier(new APIProductIdentifier(productProvider, productName));
                     if (productSubscriptionCount > 0) {
-                        throw new APIManagementException("Requested context " + context + " has more than one product "
+                        //if the provided consumer key has more than one product subscriptions to the requested context
+                        //log a warning and return subscription details for the first subscription
+                        log.warn("Requested context " + context + " has more than one product "
                                 + "subscription from consumer key " + consumerKey );
+                        infoDTO.setAuthorized(true);
+                        return infoDTO;
                     }
                     productSubscriptionCount++;
                 }
@@ -13087,10 +13094,7 @@ public class ApiMgtDAO {
     public void addAPIProduct(APIProduct apiproduct, String tenantDomain) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmtAddAPIProduct = null;
-        PreparedStatement prepStmtAddResourceMapping = null;
         PreparedStatement prepStmtAddScopeEntry = null;
-        PreparedStatement prepStmtAddScopeLink = null;
-        PreparedStatement prepStmtAddScopeResourceMapping = null;
 
         if(log.isDebugEnabled()) {
             log.debug("addAPIProduct() : " + apiproduct.toString() + " for tenant " + tenantDomain);
@@ -13174,21 +13178,47 @@ public class ApiMgtDAO {
             }
 
             productScope.setId(scopeId);
+            addAPIProductResourceMappings(apiproduct, productId, scopeId, tenantDomain, connection);
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding API product " + apiproduct.getName() + " of provider "
+                    + apiproduct.getProvider(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtAddAPIProduct, null, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeEntry, connection, null);
+        }
+    }
 
-            //add scope - api mapping
-            String scopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
-            prepStmtAddScopeLink = connection.prepareStatement(scopeLink);
+    /**
+     * Add api product url mappings to DB
+     *    - product scope to api mapping AM_API_SCOPES
+     *    - url templeates to product mappings (resource bundling) - AM_API_PRODUCT_MAPPING
+     *    - product scope to url template mappings - IDN_OAUTH2_RESOURCE_SCOPES
+     * @param apiProduct
+     * @param productId
+     * @param scopeId
+     * @param tenantDomain
+     * @throws APIManagementException
+     */
+    public void addAPIProductResourceMappings(APIProduct apiProduct, int productId, int scopeId, String tenantDomain,
+            Connection connection)
+            throws APIManagementException {
+        //add api-productscope mappings
+        PreparedStatement prepStmtAddScopeLink = null;
+        PreparedStatement prepStmtAddScopeResourceMapping = null;
+        PreparedStatement prepStmtAddResourceMapping = null;
 
-            //TODO move to constant
-            String queryAddResourceMapping = "INSERT INTO AM_API_PRODUCT_MAPPING (API_PRODUCT_ID,URL_MAPPING_ID) "
-                                                + "VALUES (?, ?)";
-            prepStmtAddResourceMapping = connection.prepareStatement(queryAddResourceMapping);
+        String addScopeLinkSql = SQLConstants.ADD_SCOPE_LINK_SQL;
+        String addProductResourceMappingSql = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
+        String addOauth2ResourceScopeSql = SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL;
 
-            String queryAddScopeResourceMapping = SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL;
-            prepStmtAddScopeResourceMapping = connection.prepareStatement(queryAddScopeResourceMapping);
+        try {
+            prepStmtAddScopeLink = connection.prepareStatement(addScopeLinkSql);
+            prepStmtAddResourceMapping = connection.prepareStatement(addProductResourceMappingSql);
+            prepStmtAddScopeResourceMapping = connection.prepareStatement(addOauth2ResourceScopeSql);
 
-            //add the resources in each API in the API product. Add the resource_ma
-            List<APIProductResource> productApis = apiproduct.getProductResources();
+            //add the resources in each API in the API product.
+            List<APIProductResource> productApis = apiProduct.getProductResources();
             for (APIProductResource apiProductResource : productApis) {
                 APIIdentifier apiIdentifier = apiProductResource.getApiIdentifier();
                 int apiID = getAPIID(apiIdentifier, connection);
@@ -13220,20 +13250,56 @@ public class ApiMgtDAO {
             prepStmtAddResourceMapping.clearBatch();
             prepStmtAddScopeResourceMapping.executeBatch();
             prepStmtAddScopeResourceMapping.clearBatch();
-
-            connection.commit();
-            
         } catch (SQLException e) {
-            handleException("Error while adding API product " + apiproduct.getName() + " of provider "
-                    + apiproduct.getProvider(), e);
+            handleException("Error while adding API product " + apiProduct.getName() + " of provider " + apiProduct
+                    .getProvider(), e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtAddAPIProduct, null, null);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, connection, null);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeEntry, connection, null);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeLink, connection, null);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeResourceMapping, connection, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, null, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeLink, null, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeResourceMapping, null, null);
         }
-        
+    }
+
+    /**
+     *
+     * @param apiProduct
+     * @param productId
+     * @param scopeId
+     * @param tenantDomain
+     * @throws APIManagementException
+     */
+    public void updateAPIProductResourceMappings(APIProduct apiProduct, int productId, int scopeId, String tenantDomain,
+            Connection connection) throws APIManagementException {
+
+        PreparedStatement prepStmtRemoveApiToProductScopeMappings = null;
+        PreparedStatement prepStmtRemoveResourceToProductMappings = null;
+        PreparedStatement prepStmtRemoveResourceToProductScopeMappings = null;
+
+        String removeApiToProductScopeMappingsSql = SQLConstants.REMOVE_FROM_API_SCOPES_BY_SCOPE_ID_SQL;
+        String removeResourceToProductMappingsSql = SQLConstants.DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL;
+        String removeResourceToProductScopeMappingsSql = SQLConstants.REMOVE_FROM_OAUTH_RESOURCE_SQL;
+
+        try {
+            prepStmtRemoveApiToProductScopeMappings = connection.prepareStatement(removeApiToProductScopeMappingsSql);
+            prepStmtRemoveApiToProductScopeMappings.setInt(1, scopeId);
+            prepStmtRemoveApiToProductScopeMappings.execute();
+
+            prepStmtRemoveResourceToProductMappings = connection.prepareStatement(removeResourceToProductMappingsSql);
+            prepStmtRemoveResourceToProductMappings.setInt(1, productId);
+            prepStmtRemoveResourceToProductMappings.execute();
+
+            prepStmtRemoveResourceToProductScopeMappings = connection.prepareStatement(removeResourceToProductScopeMappingsSql);
+            prepStmtRemoveResourceToProductScopeMappings.setInt(1, scopeId);
+            prepStmtRemoveResourceToProductScopeMappings.execute();
+
+            addAPIProductResourceMappings(apiProduct, productId, scopeId, tenantDomain, connection);
+        } catch (SQLException e) {
+            handleException("Error while updating API-Product Resources.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtRemoveApiToProductScopeMappings, null, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtRemoveResourceToProductMappings, null, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtRemoveResourceToProductScopeMappings, null, null);
+        }
     }
     
     /**
@@ -13368,7 +13434,9 @@ public class ApiMgtDAO {
 
     public void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
         String deleteQuery = "DELETE FROM AM_API_PRODUCT WHERE UUID = ? AND TENANT_DOMAIN = ?";
+        String deleteProductScopeQuery = "DELETE FROM IDN_OAUTH2_SCOPE WHERE SCOPE_ID = ? ";
         PreparedStatement ps = null;
+        PreparedStatement psDeleteScope = null;
         Connection connection = null;
         try {
             connection = APIMgtDBUtil.getConnection();  
@@ -13377,6 +13445,15 @@ public class ApiMgtDAO {
             ps.setString(1, uuid);
             ps.setString(2, tenantDomain);
             ps.executeUpdate();
+
+            //remove productScope and its mappings
+            psDeleteScope = connection.prepareStatement(deleteProductScopeQuery);
+            APIProduct product = getAPIProduct(uuid, tenantDomain);
+            String productScope = APIUtil.getProductScope(new APIProductIdentifier(product.getProvider(), product.getName()));
+            int scopeId = getScopeIdByScopeName(productScope, connection);
+            psDeleteScope.setInt(1, scopeId);
+            psDeleteScope.executeUpdate();
+
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting api product " + uuid + " tenant " + tenantDomain , e);
@@ -13641,8 +13718,7 @@ public class ApiMgtDAO {
     
     /**
      * Get api products that can be access by specific set of roles and tenant domain
-     * 
-     * @param roles set of roles that 
+     *
      * @param tenantDomain Tenant domain
      * @return list of products
      * @throws APIManagementException 
@@ -13723,6 +13799,11 @@ public class ApiMgtDAO {
             ps.setString(12, product.getUuid());
             ps.executeUpdate();
 
+            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+            String productScopeName = "productscope-" + product.getName() + ":" + product.getProvider();
+            int scopeId = getScopeIdByScopeName(productScopeName, conn);
+            int productId = getAPIProductID(product.getName(), product.getProvider(), conn);
+            updateAPIProductResourceMappings(product, productId, scopeId, tenantDomain, conn);
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -13736,6 +13817,28 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
+    }
+
+    public int getScopeIdByScopeName(String scopeName, Connection connection) throws  APIManagementException{
+
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        String sql = "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? ";
+        int scopeId = -1;
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, scopeName);
+            rs = preparedStatement.executeQuery();
+
+            if (rs.next()) {
+                scopeId = rs.getInt("SCOPE_ID");
+            }
+        } catch (SQLException e) {
+            handleException("Error while getting scope id by scope name : " + scopeName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(preparedStatement, null, rs);
+        }
+        return scopeId;
     }
 
     /**
