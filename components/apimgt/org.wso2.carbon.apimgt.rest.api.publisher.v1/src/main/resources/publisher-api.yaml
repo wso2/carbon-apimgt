@@ -1277,6 +1277,8 @@ paths:
           description: |
             OK.
             Lifecycle state change history returned successfully.
+          schema:
+            $ref: '#/definitions/LifecycleHistory'
           headers:
             ETag:
               description: |
@@ -6106,7 +6108,7 @@ definitions:
           $ref: '#/definitions/Label'
 
 #-----------------------------------------------------
-# The Lifecycle resource
+# The Lifecycle state resource
 #-----------------------------------------------------
   LifecycleState:
     title:  Lifecycle State
@@ -6138,6 +6140,43 @@ definitions:
             targetState:
               type: string
               example: "Created"
+
+#-----------------------------------------------------
+# The Lifecycle history resource
+#-----------------------------------------------------
+
+  LifecycleHistory:
+    title: Lifecycle history item list
+    properties:
+      count:
+        type: integer
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/LifecycleHistoryItem'
+
+#-----------------------------------------------------
+# The Lifecycle history item resource
+#-----------------------------------------------------
+
+  LifecycleHistoryItem:
+    title: Lifecycle history item
+    properties:
+      previousState:
+        type: string
+        example: "Created"
+      postState:
+        type: string
+        example: "Published"
+      user:
+        type: string
+        example: "admin"
+      updatedTime:
+        type: string
+        format: dateTime
+        example: "2019-02-31T23:59:60Z"
+        
 
 #-----------------------------------------------------
 # The workflow executor's response resource

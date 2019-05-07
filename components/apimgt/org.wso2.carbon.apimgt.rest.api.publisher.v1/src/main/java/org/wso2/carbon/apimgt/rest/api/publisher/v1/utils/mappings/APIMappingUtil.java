@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -747,6 +750,29 @@ public class APIMappingUtil {
         return lifecycleStateDTO;
     }
 
+
+    /**
+     * Return the REST API DTO representation of API Lifecycle history information
+     *
+     * @param lifeCycleEvents API lifecycle history information
+     * @return REST API DTO representation of API Lifecycle history information
+     */
+    public static LifecycleHistoryDTO fromLifecycleHistoryModelToDTO (List<LifeCycleEvent> lifeCycleEvents) {
+        LifecycleHistoryDTO historyDTO = new LifecycleHistoryDTO();
+        historyDTO.setCount(lifeCycleEvents.size());
+        for (LifeCycleEvent event: lifeCycleEvents) {
+            LifecycleHistoryItemDTO historyItemDTO = new LifecycleHistoryItemDTO();
+            historyItemDTO.setPostState(event.getNewStatus());
+            historyItemDTO.setPreviousState(event.getOldStatus());
+            historyItemDTO.setUser(event.getUserId());
+            
+            String updatedTime = RestApiUtil.getRFC3339Date(event.getDate());
+            historyItemDTO.setUpdatedTime(updatedTime);
+            historyDTO.getList().add(historyItemDTO);
+        }
+        return historyDTO;
+    }
+    
     /**
      * This method returns URI templates according to the given list of operations
      *
