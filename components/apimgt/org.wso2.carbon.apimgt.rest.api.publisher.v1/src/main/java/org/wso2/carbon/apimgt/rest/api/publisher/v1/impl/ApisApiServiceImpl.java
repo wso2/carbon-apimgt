@@ -20,12 +20,14 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.json.JSONException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -568,8 +570,47 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
             String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        //pre-processing
+        String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
+
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
+            String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
+            if (!ArrayUtils.contains(nextAllowedStates, action)) {
+                RestApiUtil.handleBadRequest(
+                        "Action '" + action + "' is not allowed. Allowed actions are " + Arrays
+                                .toString(nextAllowedStates), log);
+            }
+
+            //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
+            for (String checkListItem : checkListItems) {
+                String[] attributeValPair = checkListItem.split(":");
+                if (attributeValPair.length == 2) {
+                    String checkListItemName = attributeValPair[0].trim();
+                    boolean checkListItemValue = Boolean.valueOf(attributeValPair[1].trim());
+                    apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
+                }
+            }
+            apiProvider.changeLifeCycleStatus(apiIdentifier, action);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating the lifecycle of API " + apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
+            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating the API in Gateway " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override
