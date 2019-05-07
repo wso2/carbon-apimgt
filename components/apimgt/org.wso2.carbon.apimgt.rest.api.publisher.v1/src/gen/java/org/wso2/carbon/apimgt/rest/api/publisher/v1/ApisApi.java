@@ -203,47 +203,6 @@ public class ApisApi  {
     return delegate.apisApiIdDocumentsPost(apiId,body,ifMatch);
     }
     @GET
-    @Path("/{apiId}/gateway-config")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get gateway definition", notes = "This operation can be used to retrieve the gateway configuration of an API.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nRequested gateway configuration of the API is returned\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
-
-    public Response apisApiIdGatewayConfigGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    {
-    return delegate.apisApiIdGatewayConfigGet(apiId,ifNoneMatch);
-    }
-    @PUT
-    @Path("/{apiId}/gateway-config")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update gateway configuration", notes = "This operation can be used to update the gateway configuration of an existing API. gateway configuration to be updated is passed as a form data parameter `gatewayConfig`.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with updated gateway configuration\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 403, message = "Forbidden.\nThe request must be conditional but no condition has been specified.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
-
-    public Response apisApiIdGatewayConfigPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
-    @ApiParam(value = "gateway configuration of the API", required=true )@Multipart(value = "gatewayConfig")  String gatewayConfig,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
-    {
-    return delegate.apisApiIdGatewayConfigPut(apiId,gatewayConfig,ifMatch);
-    }
-    @GET
     @Path("/{apiId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })

@@ -36,8 +36,6 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String ifMatch);
     public abstract Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String ifNoneMatch);
     public abstract Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String ifMatch);
-    public abstract Response apisApiIdGatewayConfigGet(String apiId,String ifNoneMatch);
-    public abstract Response apisApiIdGatewayConfigPut(String apiId,String gatewayConfig,String ifMatch);
     public abstract Response apisApiIdGet(String apiId,String xWSO2Tenant,String ifNoneMatch);
     public abstract Response apisApiIdLifecycleHistoryGet(String apiId,String ifNoneMatch);
     public abstract Response apisApiIdLifecycleStateGet(String apiId,String ifNoneMatch);

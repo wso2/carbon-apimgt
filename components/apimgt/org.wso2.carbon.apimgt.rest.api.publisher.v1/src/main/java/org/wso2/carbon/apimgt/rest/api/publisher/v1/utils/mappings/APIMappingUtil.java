@@ -705,68 +705,6 @@ public class APIMappingUtil {
     }
 
     /**
-     * Returns the APIIdentifier given the uuid or the id in {provider}-{api}-{version} format
-     *
-     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
-     * @param requestedTenantDomain tenant domain of the API
-     * @return APIIdentifier which represents the given id
-     * @throws APIManagementException
-     */
-    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
-            throws APIManagementException {
-
-        return getAPIInfoFromApiIdOrUUID(apiId, requestedTenantDomain).getId();
-    }
-
-    /**
-     * Returns an API with minimal info given the uuid or the id in {provider}-{api}-{version} format
-     *
-     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
-     * @param requestedTenantDomain tenant domain of the API
-     * @return API which represents the given id
-     * @throws APIManagementException
-     */
-    public static API getAPIInfoFromApiIdOrUUID(String apiId, String requestedTenantDomain)
-            throws APIManagementException {
-
-        API api;
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        if (RestApiUtil.isUUID(apiId)) {
-            api = apiProvider.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-        } else {
-            APIIdentifier apiIdentifier;
-            try {
-                apiIdentifier = getAPIIdentifierFromApiId(apiId);
-            } catch (UnsupportedEncodingException e) {
-                throw new APIManagementException("Couldn't decode value", e);
-            }
-
-            //Checks whether the logged in user's tenant and the API's tenant is equal
-            RestApiUtil.validateUserTenantWithAPIIdentifier(apiIdentifier);
-
-            api = apiProvider.getLightweightAPI(apiIdentifier);
-        }
-        return api;
-    }
-
-    public static APIIdentifier getAPIIdentifierFromApiId(String apiId) throws UnsupportedEncodingException {
-        //if apiId contains -AT-, that need to be replaced before splitting
-        apiId = APIUtil.replaceEmailDomainBack(apiId);
-        String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
-
-        if (apiIdDetails.length < 3) {
-            RestApiUtil.handleBadRequest("Provided API identifier '" + apiId + "' is invalid", log);
-        }
-
-        // apiId format: provider-apiName-version
-        String providerName = URLDecoder.decode(apiIdDetails[0], "UTF-8");
-        String apiName = URLDecoder.decode(apiIdDetails[1], "UTF-8");
-        String version = URLDecoder.decode(apiIdDetails[2], "UTF-8");
-        String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
-        return new APIIdentifier(providerNameEmailReplaced, apiName, version);
-    }
-
-    /**
      * Return the REST API DTO representation of API Lifecycle state information
      * 
      * @param apiLCData API lifecycle state information
