@@ -30,11 +30,14 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -339,10 +342,45 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Delete API
+     *
+     * @param apiId   API Id
+     * @param ifMatch If-Match header value
+     * @return Status of API Deletion
+     */
     @Override
     public Response apisApiIdDelete(String apiId, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
+            //check if the API has subscriptions
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+            if (apiUsages != null && apiUsages.size() > 0) {
+                RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+            }
+
+            //deletes the API
+            apiProvider.deleteAPI(apiIdentifier);
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            keyManager.deleteRegisteredResourceByAPIId(apiId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
