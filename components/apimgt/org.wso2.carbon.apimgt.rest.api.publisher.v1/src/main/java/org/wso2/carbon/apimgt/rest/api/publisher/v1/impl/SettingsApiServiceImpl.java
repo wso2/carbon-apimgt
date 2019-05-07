@@ -20,19 +20,12 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.PublisherSettings;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -43,13 +36,18 @@ public class SettingsApiServiceImpl extends SettingsApiService {
 
     @Override
     public Response settingsGet(){
+
         try {
             String username = RestApiUtil.getLoggedInUsername();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            PublisherSettings publisherSettings = apiProvider.getPublisherSettings(username);
-            return Response.ok().entity(publisherSettings).build();
+            Boolean isUserAvailable = false;
+            if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
+                isUserAvailable = true;
+            }
+            SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable);
+            return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Settings";
+            String errorMessage = "Error while retrieving Publisher Settings";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

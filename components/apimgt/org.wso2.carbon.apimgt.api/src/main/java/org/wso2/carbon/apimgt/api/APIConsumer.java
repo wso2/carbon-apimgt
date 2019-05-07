@@ -853,12 +853,4 @@ public interface APIConsumer extends APIManager {
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 
-    /**
-     * Returns a set of settings associated with a API Store.
-     *
-     * @return set of settings.
-     * @throws APIManagementException
-     */
-    StoreSettings getStoreSettings(String username) throws APIManagementException;
-
 }

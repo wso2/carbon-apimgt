@@ -60,7 +60,6 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.PublisherSettings;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -92,14 +91,11 @@ import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
-import org.wso2.carbon.apimgt.impl.soaptorest.WSDLSOAPOperationExtractor;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -5894,23 +5890,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(e);
         }
         return sequenceText;
-    }
-
-    @Override
-    public PublisherSettings getPublisherSettings(String username) throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String apiStoreUrl = config.getFirstProperty(APIConstants.API_STORE_URL);
-
-        PublisherSettings publisherSettings = new PublisherSettings();
-        // Retrieve publisher settings from anonymous user.
-        if ((APIConstants.WSO2_ANONYMOUS_USER).equalsIgnoreCase(username)) {
-            publisherSettings.setApiPublisherUrl(apiStoreUrl);
-        } else {
-            // Retrieve publisher settings from logged in user.
-            publisherSettings.setApiPublisherUrl(apiStoreUrl);
-        }
-        return publisherSettings;
     }
 
     /**

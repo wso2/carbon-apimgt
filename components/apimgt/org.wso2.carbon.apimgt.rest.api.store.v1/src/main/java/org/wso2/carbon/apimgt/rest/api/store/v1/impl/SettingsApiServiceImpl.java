@@ -18,14 +18,15 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.StoreSettings;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -35,14 +36,18 @@ public class SettingsApiServiceImpl extends SettingsApiService {
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
     @Override
-    public Response settingsGet(){
+    public Response settingsGet() {
         try {
             String username = RestApiUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            StoreSettings storeSettings = apiConsumer.getStoreSettings(username);
-            return Response.ok().entity(storeSettings).build();
+            Boolean isUserAvailable = false;
+            if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
+                isUserAvailable = true;
+            }
+            SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
+            SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable);
+            return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Settings";
+            String errorMessage = "Error while retrieving Store Settings";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

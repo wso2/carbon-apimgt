@@ -37,12 +37,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.registry.api.Registry;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Models API definition using OAS (swagger 2.0) parser
@@ -89,8 +84,18 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     @Override
-    public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        return new TreeSet<>();
+    public Set<Scope> getScopes(String apiDefinition) throws APIManagementException {
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swagger = parser.parse(apiDefinition);
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        Set<Scope> scopeSet = new HashSet<>();
+        for (Map.Entry<String, String> entry : ((OAuth2Definition) (securityDefinitions.get("OAuth2Security"))).
+                getScopes().entrySet()) {
+            Scope scope = new Scope();
+            scope.setKey(entry.getKey());
+            scopeSet.add(scope);
+        }
+        return scopeSet;
     }
 
     @Override

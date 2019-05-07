@@ -33,8 +33,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.LoginPostExecutor;
-import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -50,7 +48,6 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.StoreSettings;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
@@ -100,11 +97,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.mgt.stub.UserAdminStub;
-import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -117,7 +110,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -4700,27 +4692,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException {
         Set<APIKey> apikeys = getApplicationKeys(applicationId);
         return apikeys;
-    }
-
-    @Override
-    public StoreSettings getStoreSettings(String username) throws APIManagementException {
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String serverUrl = config.getFirstProperty(APIConstants.API_STORE_SERVER_URL);
-        String apiStoreUrl = config.getFirstProperty(APIConstants.API_STORE_URL);
-
-        StoreSettings storeSettings = new StoreSettings();
-        // Retrieve store settings from anonymous user.
-        if ((APIConstants.WSO2_ANONYMOUS_USER).equalsIgnoreCase(username)) {
-            storeSettings.setServerUrl(serverUrl);
-            storeSettings.setApiStoreUrl(apiStoreUrl);
-        } else {
-            // Retrieve store settings from logged in user.
-            storeSettings.setServerUrl(serverUrl);
-            storeSettings.setApiStoreUrl(apiStoreUrl);
-        }
-        return storeSettings;
     }
 
     private void getZipFileFromFileList(String zipFile, Collection<File> fileList) throws APIManagementException {
