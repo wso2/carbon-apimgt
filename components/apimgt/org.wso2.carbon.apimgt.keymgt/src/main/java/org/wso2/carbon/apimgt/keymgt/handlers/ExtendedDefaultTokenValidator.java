@@ -3,9 +3,8 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.validators.DefaultOAuth2TokenValidator;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidationMessageContext;
-import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidator;
 
-public class ExtendedDefaultTokenValidator extends DefaultOAuth2TokenValidator implements OAuth2TokenValidator {
+public class ExtendedDefaultTokenValidator extends DefaultOAuth2TokenValidator {
 
     public static final String TOKEN_TYPE = "bearer";
     private static final String ACCESS_TOKEN_DO = "AccessTokenDO";
