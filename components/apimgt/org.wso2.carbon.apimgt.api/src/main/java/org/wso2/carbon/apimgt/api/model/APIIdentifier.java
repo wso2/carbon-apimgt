@@ -76,7 +76,6 @@ public class APIIdentifier implements Serializable, Identifier {
         return providerName;
     }
 
-    @Deprecated
     public String getApiName() {
         return apiName;
     }
