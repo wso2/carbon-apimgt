@@ -765,7 +765,7 @@ public class APIMappingUtil {
     }
 
     /**
-     * This method returns the oauth scopes according to the given swagger
+     * This method returns the oauth scopes according to the given list of scopes
      *
      * @param scopesList list of scopes
      * @return scope set
