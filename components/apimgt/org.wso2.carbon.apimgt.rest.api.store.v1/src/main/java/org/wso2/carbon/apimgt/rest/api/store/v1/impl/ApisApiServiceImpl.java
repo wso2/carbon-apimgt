@@ -248,7 +248,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             //this will fail if user does not have access to the API or the API does not exist
-
             APIIdentifier apiIdentifier = RestAPIStoreUtils.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);;
             String apiSwagger = apiConsumer.getOpenAPIDefinition(apiIdentifier);
             apiSwagger = APIUtil.removeXMediationScriptsFromSwagger(apiSwagger);
