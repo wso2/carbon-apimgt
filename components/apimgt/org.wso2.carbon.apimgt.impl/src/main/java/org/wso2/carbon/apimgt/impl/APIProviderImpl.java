@@ -4592,8 +4592,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //Put next states into map
             lcData.put(APIConstants.LC_NEXT_STATES, actions);
             String lifeCycleState = artifact.getLifecycleState();
-            LifecycleBean bean;
+            lcData.put(APIConstants.LC_STATUS, lifeCycleState);
 
+            LifecycleBean bean;
             bean = LifecycleBeanPopulator.getLifecycleBean(path, (UserRegistry) registry, configRegistry);
             if (bean != null) {
                 ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();

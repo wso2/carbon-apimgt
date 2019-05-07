@@ -264,25 +264,6 @@ public class ApisApi  {
     return delegate.apisApiIdGet(apiId,xWSO2Tenant,ifNoneMatch);
     }
     @GET
-    @Path("/{apiId}/lifecycle")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get Lifecycle state data of the API.", notes = "This operation can be used to retrieve Lifecycle state data of the API.\n", response = LifecycleStateDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nLifecycle state data returned successfully.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
-
-    public Response apisApiIdLifecycleGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    {
-    return delegate.apisApiIdLifecycleGet(apiId,ifNoneMatch);
-    }
-    @GET
     @Path("/{apiId}/lifecycle-history")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -299,8 +280,27 @@ public class ApisApi  {
     {
     return delegate.apisApiIdLifecycleHistoryGet(apiId,ifNoneMatch);
     }
+    @GET
+    @Path("/{apiId}/lifecycle-state")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get Lifecycle state data of the API.", notes = "This operation can be used to retrieve Lifecycle state data of the API.\n", response = LifecycleStateDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nLifecycle state data returned successfully.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
+
+    public Response apisApiIdLifecycleStateGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    {
+    return delegate.apisApiIdLifecycleStateGet(apiId,ifNoneMatch);
+    }
     @DELETE
-    @Path("/{apiId}/lifecycle/lifecycle-pending-task")
+    @Path("/{apiId}/lifecycle-state/pending-tasks")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete pending lifecycle state change tasks.", notes = "This operation can be used to remove pending lifecycle state change requests that are in pending state\n", response = void.class)
@@ -311,9 +311,9 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response apisApiIdLifecycleLifecyclePendingTaskDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId)
+    public Response apisApiIdLifecycleStatePendingTasksDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId)
     {
-    return delegate.apisApiIdLifecycleLifecyclePendingTaskDelete(apiId);
+    return delegate.apisApiIdLifecycleStatePendingTasksDelete(apiId);
     }
     @GET
     @Path("/{apiId}/policies/mediation")

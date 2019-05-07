@@ -1442,7 +1442,7 @@ paths:
 ######################################################
 #  The "API Lifecycle State Data"  resource API
 ######################################################
-  /apis/{apiId}/lifecycle:
+  /apis/{apiId}/lifecycle-state:
 
 #--------------------------------------------
 # Retrieve API LIfecycle state data
@@ -1463,6 +1463,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
+        
       tags:
         - API (Individual)
       responses:
@@ -1506,7 +1507,7 @@ paths:
 ######################################################
 #  The "API Lifecycle State Data"  resource API
 ######################################################
-  /apis/{apiId}/lifecycle/lifecycle-pending-task:
+  /apis/{apiId}/lifecycle-state/pending-tasks:
 
 #--------------------------------------------
 # Delete API LIfecycle state change pending task
@@ -6252,87 +6253,24 @@ definitions:
   LifecycleState:
     title:  Lifecycle State
     properties:
-      lcName:
-        type: string
-        example: "API Lifecycle"
       state:
         type: string
         example: "Created"
-      lifecyelId:
-        type: string
-        example: "01234567-0123-0123-0123-012345678901"
-      checkItemBeanList:
+      checkItems:
         type: array
         items:
           properties:
-            permissionBeans:
-              type: array
-              items:
-                properties:
-                  roles:
-                    type: array
-                    items:
-                      type: string
-                  forTarget:
-                    type: string
             name:
               type: string
               example: "Deprecate old versions after publish the API"
-            validationBeans:
-              type: array
-              items:
-                properties:
-                  classObject:
-                    type: object
-                  targetName:
-                    type: string
-                    example: "Published"
-                  customMessage:
-                    type: string
-                    example: "Validation successful"
-            targets:
-              type: array
-              items:
-                  type: string
             value:
               type: boolean
               example: false
-      inputBeanList:
-        type: array
-        items:
-          properties:
-            name:
-              type: string
-              example: "Gateways to be published"
-            isRequired:
-              type: boolean
-              example:  true
-            label:
-              type: string
-            placeHolder:
-              type: string
-            tooltip:
-              type: string
-            regex:
-              type: string
-            values:
-              type: string
-            forTarget:
-              type: string
-              example: "Created"
-      customCodeBeanList:
-        type: array
-        items:
-          properties:
-            classObject:
-              type: object
-            targetName:
-              type: string
-              example: "Published"
-            customMessage:
-              type: string
-              example: "Validation successful"
-      availableTransitionBeanList:
+            requiredStates:
+              type: array
+              items:
+                  type: string
+      availableTransitions:
         type: array
         items:
           properties:
@@ -6342,16 +6280,6 @@ definitions:
             targetState:
               type: string
               example: "Created"
-      permissionBeanList:
-        type: array
-        items:
-          properties:
-            roles:
-              type: array
-              items:
-                type: string
-            forTarget:
-              type: string
 
 #-----------------------------------------------------
 # The workflow executor's response resource
