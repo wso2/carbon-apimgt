@@ -272,6 +272,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>store-new/site/**</include>
+                    <include>store-new/services/**</include>
                     <include>store-new/jaggery.conf</include>
                     <include>p2.inf</include>
                     <include>admin/**</include>
