@@ -8,32 +8,30 @@
     var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value;
     var token = tokenP1 + tokenP2;
     var userData = {};
-    var user_result = get(userInfoEndpoint, userData , {
-        "Authorization": "Bearer "+token
+    var userResult = get(userInfoEndpoint, userData , {
+        "Authorization": "Bearer " + token
     });
-    log.info(user_result);
 
     var data = {token: token }
-    log.info(data);
-    var introspect_result = post(introspectEndpoint, data , {
+    var introspectResult = post(introspectEndpoint, data , {
         "Authorization": "Basic YWRtaW46YWRtaW4=", // TODO: get super admin username password from configs and do encoding ~tmkb
         "Content-Type": "application/x-www-form-urlencoded"
     });
 
-    log.info(introspect_result);
+    log.debug("Intropspection result json: " + introspectResult);
     response.contentType = "application/json";
 
     var scopes = "apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:mediation_policy_view apim:api_workflow openid"; // TODO: fetch from introspect request
 
-    if (introspect_result.data.active) {
-        print(introspect_result.data);
+    if (introspectResult.data.active) {
+        print(introspectResult.data);
     } else {
         log.warn("Something went wrong while introspecting the token " + tokenP1 + tokenP2 );
 
         // TODO: remove mock once the introspect API issue get resolved ~tmkb
         var mock = {
             "exp": 1464161608,
-            "username": JSON.parse(user_result.data).sub,
+            "username": JSON.parse(userResult.data).sub,
             "active": true,
             "token_type": "Bearer",
             "client_id": "rgfKVdnMQnJSSr_pKFTxj3apiwYa",
