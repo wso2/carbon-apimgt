@@ -217,15 +217,15 @@
 							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
 							org.wso2.carbon.identity.base.*; version="${carbon.identity.imp.pkg.version}",
 							org.wso2.carbon.identity.core.*; version="${carbon.identity.imp.pkg.version}",
-							*;resolution:=optional
 						</Import-Package>
+						<DynamicImport-Package>*</DynamicImport-Package>
 						<Export-Package>
 							!org.wso2.carbon.apimgt.keymgt.stub.validator,
 							!org.wso2.carbon.apimgt.keymgt.stub.provider,
 							!org.wso2.carbon.apimgt.keymgt.stub.subscriber,
 							!org.wso2.carbon.apimgt.keymgt.stub.types.axis2,
 							!org.wso2.carbon.apimgt.keymgt.stub.types.carbon,
-							!org.wso2.carbon.apimgt.keymgt.stub.useradmin
+							!org.wso2.carbon.apimgt.keymgt.stub.useradmin,
 							!org.wso2.carbon.apimgt.keymgt.client,
 							org.wso2.carbon.apimgt.keymgt.*
 						</Export-Package>
