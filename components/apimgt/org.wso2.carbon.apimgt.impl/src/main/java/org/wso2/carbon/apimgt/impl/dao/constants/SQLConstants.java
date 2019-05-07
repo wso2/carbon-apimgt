@@ -754,12 +754,14 @@ public class SQLConstants {
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
+            "   SUBS.UUID AS SUB_UUID, " +
             "   SUBS.SUBSCRIPTION_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
+            "   APP.UUID AS APP_UUID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   APP.NAME AS APP_NAME, " +

@@ -1760,11 +1760,13 @@ public class ApiMgtDAO {
                             ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
 
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                    subscribedAPI.setUUID(result.getString("SUB_UUID"));
                     subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                     subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                     subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
 
                     Application application = new Application(result.getString("APP_NAME"), subscriber);
+                    application.setUUID(result.getString("APP_UUID"));
                     subscribedAPI.setApplication(application);
                     subscribedAPIs.add(subscribedAPI);
                     if (index == endSubIndex - 1) {
