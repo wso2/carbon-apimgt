@@ -6151,6 +6151,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void updateAPIProduct(APIProduct product, String user) throws APIManagementException {
+        //validate resources and set api identifiers and resource ids to product
+        List<APIProductResource> resources = product.getProductResources();
+        for (APIProductResource apiProductResource : resources) {
+            API api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
+            // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
+            apiProductResource.setApiIdentifier(api.getId());
+            List<URITemplate> apiResources = apiProductResource.getResources();
+
+            Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
+            if (apiResources == null) {
+                // TODO handle if no resource is defined. either throw an error or add all the resources of that API
+                // to the product
+            } else {
+                for (URITemplate resourceTemplate : apiResources) {
+                    String key = resourceTemplate.getHTTPVerb() + ":" + resourceTemplate.getResourceURI();
+                    if (templateMap.containsKey(key)) {
+
+                        //Since the template ID is not set from the request, we manually set it.
+                        resourceTemplate.setId(templateMap.get(key).getId());
+
+                    } else {
+                        throw new APIManagementException("API with id " + apiProductResource.getApiId()
+                                + " does not have a resource " + resourceTemplate.getResourceURI()
+                                + " with http method " + resourceTemplate.getHTTPVerb());
+                    }
+                }
+            }
+        }
+
         apiMgtDAO.updateAPIProduct(product, user);
     }
 
