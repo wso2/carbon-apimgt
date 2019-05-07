@@ -56,20 +56,8 @@ public class APIProductIdentifier implements Serializable, Identifier {
         this.applicationId = applicationId;
     }
 
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
+    public void setUUID(String uuid) {
         this.uuid = uuid;
-    }
-
-    public String getProviderName() {
-        return providerName;
-    }
-
-    public String getApiProductName() {
-        return apiProductName;
     }
     
     public int getProductId() {
@@ -99,18 +87,28 @@ public class APIProductIdentifier implements Serializable, Identifier {
     
     @Override
     public String toString() {
-        return this.getProviderName() + '-' + this.getApiProductName() + " : " + this.uuid;
+        return this.getProviderName() + '-' + this.getName() + " : " + this.uuid;
     }
 
     @Override
-    public String getApiName() {
+    public String getName() {
         // API name of the product is the product name
-        return getApiProductName();
+        return apiProductName;
     }
 
     @Override
     public String getVersion() {
         // Version is not implemented yet
         return "";
+    }
+
+    @Override
+    public String getUUID() {
+        return uuid;
+    }
+
+    @Override
+    public String getProviderName() {
+        return providerName;
     }
 }

@@ -857,10 +857,10 @@ public class ApiMgtDAO {
                         APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus)) {
 
                     //Throw error saying subscription already exists.
-                    log.error("Subscription already exists for API/API Prouct " + identifier.getApiName() + " in Application " +
+                    log.error("Subscription already exists for API/API Prouct " + identifier.getName() + " in Application " +
                             applicationName);
                     throw new SubscriptionAlreadyExistingException("Subscription already exists for API/API Prouct " +
-                            identifier.getApiName() + " in Application " +
+                            identifier.getName() + " in Application " +
                             applicationName);
 
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus) && APIConstants
@@ -872,9 +872,9 @@ public class ApiMgtDAO {
                     }
                 } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus) || APIConstants
                         .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
-                    log.error("Subscription to API/API Prouct " + identifier.getApiName() + " through application " +
+                    log.error("Subscription to API/API Prouct " + identifier.getName() + " through application " +
                             applicationName + " was blocked");
-                    throw new APIManagementException("Subscription to API/API Prouct " + identifier.getApiName() + " through " +
+                    throw new APIManagementException("Subscription to API/API Prouct " + identifier.getName() + " through " +
                             "application " + applicationName + " was blocked");
                 }
             }
@@ -1152,7 +1152,7 @@ public class ApiMgtDAO {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PRODUCT_PROVIDER")),
                             resultSet.getString("API_PRODUCT_NAME"));
-                    apiProductIdentifier.setUuid(resultSet.getString("PRODUCT_UUID"));
+                    apiProductIdentifier.setUUID(resultSet.getString("PRODUCT_UUID"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_PRODUCT_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 }
@@ -1205,7 +1205,7 @@ public class ApiMgtDAO {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PRODUCT_PROVIDER")),
                             resultSet.getString("API_PRODUCT_NAME"));
-                    apiProductIdentifier.setUuid(resultSet.getString("PRODUCT_UUID"));
+                    apiProductIdentifier.setUUID(resultSet.getString("PRODUCT_UUID"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_PRODUCT_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 }
@@ -13736,5 +13736,95 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
+    }
+
+    /**
+     * Get the product using uuid. This could be used for cross tenant scenarios.
+     * @param uuid uuid of the product
+     * @return product
+     * @throws APIManagementException
+     */
+    public APIProduct getAPIProductByUUID(String uuid) throws APIManagementException {
+        APIProduct product = new APIProduct();
+        Connection connection = null;
+        PreparedStatement prepStmtGetAPIProduct = null;
+        PreparedStatement prepStmtGetAPIProductResource = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();   
+            String queryGetAPIProduct = SQLConstants.GET_API_PRODUCT_UUID_SQL;
+            int productId = 0;
+            
+            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
+            prepStmtGetAPIProduct.setString(1, uuid);
+            rs = prepStmtGetAPIProduct.executeQuery();
+            if (rs.next()) {
+                product.setUuid(rs.getString("UUID"));
+                product.setDescription(rs.getString("DESCRIPTION"));
+                product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
+                product.setName(rs.getString("API_PRODUCT_NAME"));
+                String productTiers = rs.getString("API_PRODUCT_TIER");
+                if (!StringUtils.isEmpty(productTiers)) {
+                    String[] tierArray = productTiers.split(",");
+                    Set<Tier> availableTiers = new HashSet<Tier>();
+                    for (String tier : tierArray) {
+                        availableTiers.add(new Tier(tier));
+                    }           
+                    product.setAvailableTiers(availableTiers );
+                }
+
+                product.setVisibility(rs.getString("VISIBILITY"));
+                product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
+                product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
+                product.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
+                product.setSubscriptionAvailableTenants(rs.getString("SUBSCRIPTION_AVAILABILE_TENANTS"));
+                product.setState(rs.getString("STATE"));
+                product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));
+                product.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                productId = rs.getInt("API_PRODUCT_ID");
+                product.setProductId(productId);
+            }
+            //get api resources related to api product
+            String queryListProductResourceMapping = SQLConstants.LIST_PRODUCT_RESOURCE_MAPPING;      
+            prepStmtGetAPIProductResource = connection.prepareStatement(queryListProductResourceMapping);
+            prepStmtGetAPIProductResource.setInt(1, productId);
+
+            //keep a temporary map for each resources for each api in the product
+            Map<String, APIProductResource> resourceMap = new HashMap<String, APIProductResource>();
+            String apiId = "";
+            rs2 = prepStmtGetAPIProductResource.executeQuery();
+            while (rs2.next()) {
+                apiId = rs2.getString("API_ID");
+                APIProductResource resource;
+                if (resourceMap.containsKey(apiId)) {
+                    resource = resourceMap.get(apiId);
+                } else {
+                    resource = new APIProductResource();
+                    resource.setApiName(rs2.getString("API_NAME"));
+                    APIIdentifier identifier = new APIIdentifier(rs2.getString("API_PROVIDER"),
+                            rs2.getString("API_NAME"), rs2.getString("API_VERSION"));
+                    resource.setApiId(identifier.toString()); // TODO set API UUID
+                    resource.setApiIdentifier(identifier);
+                }
+                URITemplate template = new URITemplate();
+                template.setHTTPVerb(rs2.getString("HTTP_METHOD"));
+                template.setResourceURI(rs2.getString("URL_PATTERN"));
+                template.setId(rs2.getInt("URL_MAPPING_ID"));
+                resource.setResource(template);
+                resourceMap.put(apiId, resource);
+            }
+            product.setProductResources(new ArrayList<APIProductResource>(resourceMap.values()));
+        } catch (SQLException e) {
+            handleException("Error while retrieving api product for UUID " + uuid , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, null, rs);
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProductResource, connection, rs2);
+        }
+        if(log.isDebugEnabled()) {
+            log.debug("getAPIProductByUUID() for uuid " + uuid + " : " + product.toString());
+        }
+        return product;
     }
 }
