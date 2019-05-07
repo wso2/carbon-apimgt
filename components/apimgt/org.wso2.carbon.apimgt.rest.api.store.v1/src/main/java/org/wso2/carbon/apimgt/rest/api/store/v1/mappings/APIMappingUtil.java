@@ -31,6 +31,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -357,4 +359,33 @@ public class APIMappingUtil {
     //        }
     //        return scopeDto;
     //    }
+
+    public static APIIdentifier getAPIIdentifierFromApiId(String apiId) throws UnsupportedEncodingException {
+        //if apiId contains -AT-, that need to be replaced before splitting
+        apiId = APIUtil.replaceEmailDomainBack(apiId);
+        String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
+
+        if (apiIdDetails.length < 3) {
+            throw RestApiUtil.buildBadRequestException("Provided API identifier '" + apiId + "' is invalid");
+        }
+
+        // apiId format: provider-apiName-version
+        String providerName = URLDecoder.decode(apiIdDetails[0], "UTF-8");
+        String apiName = URLDecoder.decode(apiIdDetails[1], "UTF-8");
+        String version = URLDecoder.decode(apiIdDetails[2], "UTF-8");
+        String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
+        return new APIIdentifier(providerNameEmailReplaced, apiName, version);
+    }
+
+    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException, UnsupportedEncodingException {
+        APIIdentifier apiIdentifier;
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        if (RestApiUtil.isUUID(apiId)) {
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
+        } else {
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
+        }
+        return apiIdentifier;
+    }
 }
