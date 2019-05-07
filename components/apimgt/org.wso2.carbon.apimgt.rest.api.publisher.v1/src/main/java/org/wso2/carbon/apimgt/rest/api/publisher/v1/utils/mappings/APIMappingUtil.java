@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -763,6 +764,49 @@ public class APIMappingUtil {
         String version = URLDecoder.decode(apiIdDetails[2], "UTF-8");
         String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
         return new APIIdentifier(providerNameEmailReplaced, apiName, version);
+    }
+
+    /**
+     * Return the REST API DTO representation of API Lifecycle state information
+     * 
+     * @param apiLCData API lifecycle state information
+     * @return REST API DTO representation of API Lifecycle state information
+     */
+    public static LifecycleStateDTO fromLifecycleModelToDTO (Map<String, Object> apiLCData) {
+        LifecycleStateDTO lifecycleStateDTO = new LifecycleStateDTO();
+        
+        String currentState = (String) apiLCData.get(APIConstants.LC_STATUS);
+        lifecycleStateDTO.setState(currentState);
+        
+        String[] nextStates = (String[])apiLCData.get(APIConstants.LC_NEXT_STATES);
+        if (nextStates != null) {
+            List<LifecycleStateAvailableTransitionsDTO> transitionDTOList = new ArrayList<>();
+            for (String state: nextStates) {
+                LifecycleStateAvailableTransitionsDTO transitionDTO = new LifecycleStateAvailableTransitionsDTO();
+                transitionDTO.setEvent(state);
+                //todo: Set target state properly
+                transitionDTO.setTargetState("");
+                transitionDTOList.add(transitionDTO);
+            }
+            lifecycleStateDTO.setAvailableTransitions(transitionDTOList);
+        }
+        
+        List checkListItems = (List)apiLCData.get(APIConstants.LC_CHECK_ITEMS);
+        if (checkListItems != null) {
+            List<LifecycleStateCheckItemsDTO> checkItemsDTOList = new ArrayList<>();
+            for (Object checkListItemObj: checkListItems) {
+                CheckListItem checkListItem = (CheckListItem)checkListItemObj;
+                LifecycleStateCheckItemsDTO checkItemsDTO = new LifecycleStateCheckItemsDTO();
+                checkItemsDTO.setName(checkListItem.getName());
+                checkItemsDTO.setValue(Boolean.getBoolean(checkListItem.getValue()));
+                //todo: Set targets properly
+                checkItemsDTO.setRequiredStates(new ArrayList<>());
+
+                checkItemsDTOList.add(checkItemsDTO);
+            }
+            lifecycleStateDTO.setCheckItems(checkItemsDTOList);
+        }
+        return lifecycleStateDTO;
     }
 
     /**

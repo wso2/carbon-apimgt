@@ -39,9 +39,9 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdGatewayConfigGet(String apiId,String ifNoneMatch);
     public abstract Response apisApiIdGatewayConfigPut(String apiId,String gatewayConfig,String ifMatch);
     public abstract Response apisApiIdGet(String apiId,String xWSO2Tenant,String ifNoneMatch);
-    public abstract Response apisApiIdLifecycleGet(String apiId,String ifNoneMatch);
     public abstract Response apisApiIdLifecycleHistoryGet(String apiId,String ifNoneMatch);
-    public abstract Response apisApiIdLifecycleLifecyclePendingTaskDelete(String apiId);
+    public abstract Response apisApiIdLifecycleStateGet(String apiId,String ifNoneMatch);
+    public abstract Response apisApiIdLifecycleStatePendingTasksDelete(String apiId);
     public abstract Response apisApiIdPoliciesMediationGet(String apiId,Integer limit,Integer offset,String query,String ifNoneMatch);
     public abstract Response apisApiIdPoliciesMediationMediationPolicyIdDelete(String apiId,String mediationPolicyId,String ifMatch);
     public abstract Response apisApiIdPoliciesMediationMediationPolicyIdGet(String apiId,String mediationPolicyId,String ifNoneMatch);

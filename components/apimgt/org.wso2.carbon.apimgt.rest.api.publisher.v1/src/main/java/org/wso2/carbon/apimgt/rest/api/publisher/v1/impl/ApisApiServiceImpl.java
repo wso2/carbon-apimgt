@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
@@ -315,7 +317,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-//        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
@@ -356,9 +357,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
 
             //check if the API has subscriptions
+            //Todo : need to optimize this check. This method seems too costly to check if subscription exists
             List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
             if (apiUsages != null && apiUsages.size() > 0) {
                 RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
@@ -441,19 +443,47 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdLifecycleGet(String apiId, String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
-    @Override
     public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
+    /**
+     * Retrieves API Lifecycle state information
+     * 
+     * @param apiId API Id
+     * @param ifNoneMatch If-None-Match header value
+     * @return API Lifecycle state information
+     */
     @Override
-    public Response apisApiIdLifecycleLifecyclePendingTaskDelete(String apiId) {
+    public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
+            if (apiLCData == null) {
+                String errorMessage = "Error while getting lifecycle state for API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
+            LifecycleStateDTO stateDTO = APIMappingUtil.fromLifecycleModelToDTO(apiLCData);
+            return Response.ok().entity(stateDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

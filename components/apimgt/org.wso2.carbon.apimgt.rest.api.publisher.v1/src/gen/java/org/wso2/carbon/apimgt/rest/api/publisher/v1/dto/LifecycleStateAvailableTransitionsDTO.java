@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class LifecycleStateAvailableTransitionBeanListDTO  {
+public class LifecycleStateAvailableTransitionsDTO  {
   
   
   
@@ -49,7 +49,7 @@ public class LifecycleStateAvailableTransitionBeanListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LifecycleStateAvailableTransitionBeanListDTO {\n");
+    sb.append("class LifecycleStateAvailableTransitionsDTO {\n");
     
     sb.append("  targetState: ").append(targetState).append("\n");
     sb.append("  event: ").append(event).append("\n");
