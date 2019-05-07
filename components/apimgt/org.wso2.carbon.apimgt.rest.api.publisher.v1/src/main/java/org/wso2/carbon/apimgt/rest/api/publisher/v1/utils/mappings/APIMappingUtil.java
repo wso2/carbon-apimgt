@@ -42,7 +42,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -212,63 +211,32 @@ public class APIMappingUtil {
     }
 
     /**
-     * Returns the APIIdentifier given the uuid or the id in {provider}-{api}-{version} format
+     * Returns the APIIdentifier given the uuid
      *
-     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
+     * @param apiId                 API uuid
      * @param requestedTenantDomain tenant domain of the API
      * @return APIIdentifier which represents the given id
      * @throws APIManagementException
      */
-    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
-        return getAPIInfoFromApiIdOrUUID(apiId, requestedTenantDomain).getId();
+        return getAPIInfoFromUUID(apiId, requestedTenantDomain).getId();
     }
 
     /**
-     * Returns an API with minimal info given the uuid or the id in {provider}-{api}-{version} format
+     * Returns an API with minimal info given the uuid.
      *
-     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
+     * @param apiUUID                 API uuid
      * @param requestedTenantDomain tenant domain of the API
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIInfoFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
             throws APIManagementException {
         API api;
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        if (RestApiUtil.isUUID(apiId)) {
-            api = apiProvider.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-        } else {
-            APIIdentifier apiIdentifier;
-            try {
-                apiIdentifier = getAPIIdentifierFromApiId(apiId);
-            } catch (UnsupportedEncodingException e) {
-                throw new APIManagementException("Couldn't decode value",e);
-            }
-
-            //Checks whether the logged in user's tenant and the API's tenant is equal
-            RestApiUtil.validateUserTenantWithAPIIdentifier(apiIdentifier);
-
-            api = apiProvider.getLightweightAPI(apiIdentifier);
-        }
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
         return api;
-    }
-
-    public static APIIdentifier getAPIIdentifierFromApiId(String apiId) throws UnsupportedEncodingException {
-        //if apiId contains -AT-, that need to be replaced before splitting
-        apiId = APIUtil.replaceEmailDomainBack(apiId);
-        String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
-
-        if (apiIdDetails.length < 3) {
-            RestApiUtil.handleBadRequest("Provided API identifier '" + apiId + "' is invalid", log);
-        }
-
-        // apiId format: provider-apiName-version
-        String providerName = URLDecoder.decode(apiIdDetails[0], "UTF-8");
-        String apiName = URLDecoder.decode(apiIdDetails[1], "UTF-8");
-        String version = URLDecoder.decode(apiIdDetails[2], "UTF-8");
-        String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
-        return new APIIdentifier(providerNameEmailReplaced, apiName, version);
     }
 
     /**
