@@ -241,8 +241,8 @@ class StarRatingBar extends React.Component {
     let promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
     promised_rating.then(response => {
       this.setState({
-        rating: response.obj,
-        dummyRateValue: response.obj.userRating
+        //rating: response.obj,
+        //dummyRateValue: response.obj.userRating
       });
     });
   }
