@@ -13263,7 +13263,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     *
+     * Update Product scope and resource mappings
      * @param apiProduct
      * @param productId
      * @param scopeId
