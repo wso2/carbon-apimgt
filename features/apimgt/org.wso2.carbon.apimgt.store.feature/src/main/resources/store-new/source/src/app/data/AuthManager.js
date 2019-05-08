@@ -107,15 +107,47 @@ class AuthManager {
      * @param {string} environmentName: label of the environment, the user to be retrieved from
      * @returns {User | null} Is any user has logged in or not
      */
-    static getUser(environmentName) {
-        environmentName = environmentName || Utils.getEnvironment().label;
+    static getUser(environmentName = Utils.getCurrentEnvironment().label) {
         const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
         if (!(userData && partialToken)) {
             return null;
         }
 
-        return User.fromJson(JSON.parse(userData));
+        return User.fromJson(JSON.parse(userData),environmentName);
+    }
+
+    /**
+     * Do token introspection and Get the currently logged in user's details
+     * When user authentication happens via redirection flow, This method might get used to
+     * retrieve the user information
+     * after setting the access token parts in cookies, Because access token parts are stored in /publisher-new path ,
+     * just making an external request in same path will submit both cookies, allowing the service to build the
+     * complete access token and do the introspection.
+     * Return a promise resolving to user object iff introspect calls return active user else null
+     * @static
+     * @returns {Promise} fetch response promise resolving to introspect response JSON or null otherwise
+     * @memberof AuthManager
+     */
+    static getUserFromToken() {
+        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
+        if (!partialToken) {
+            return new Promise(resolve => resolve(null));
+        }
+        const promisedResponse = fetch('/store-new/services/auth/introspect');
+        return promisedResponse
+            .then(response => response.json())
+            .then((data) => {
+                let user = null;
+                if (data.active) {
+                    const currentEnv = Utils.getCurrentEnvironment();
+                    user = new User(currentEnv.label, data.username);
+                    AuthManager.setUser(user, currentEnv.label);
+                } else {
+                    console.warn('User with ' + partialToken + ' is not active!');
+                }
+                return user;
+            });
     }
 
     /**
