@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -154,7 +155,7 @@ public class APIDTO  {
   private List<APIEndpointDTO> endpoint = new ArrayList<APIEndpointDTO>();
   
   
-  private List<String> scopes = new ArrayList<String>();
+  private List<ScopeDTO> scopes = new ArrayList<ScopeDTO>();
   
   
   private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
@@ -639,10 +640,10 @@ public class APIDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("scopes")
-  public List<String> getScopes() {
+  public List<ScopeDTO> getScopes() {
     return scopes;
   }
-  public void setScopes(List<String> scopes) {
+  public void setScopes(List<ScopeDTO> scopes) {
     this.scopes = scopes;
   }
 
