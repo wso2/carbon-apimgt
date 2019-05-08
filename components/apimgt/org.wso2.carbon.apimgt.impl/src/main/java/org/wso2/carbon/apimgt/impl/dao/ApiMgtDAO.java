@@ -13436,33 +13436,40 @@ public class ApiMgtDAO {
         
     }
 
-    public void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
-        String deleteQuery = "DELETE FROM AM_API_PRODUCT WHERE UUID = ? AND TENANT_DOMAIN = ?";
-        String deleteProductScopeQuery = "DELETE FROM IDN_OAUTH2_SCOPE WHERE SCOPE_ID = ? ";
+    /**
+     * Delete API product and its related scopes
+     * @param product
+     * @param tenantDomain
+     * @throws APIManagementException
+     */
+    public void deleteAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException {
+        String deleteQuery = SQLConstants.DELETE_API_PRODUCT_SQL;
+        String deleteProductScopeQuery = SQLConstants.DELETE_API_PRODUCT_SCOPE_SQL;
         PreparedStatement ps = null;
         PreparedStatement psDeleteScope = null;
         Connection connection = null;
         try {
-            connection = APIMgtDBUtil.getConnection();  
+            connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             ps = connection.prepareStatement(deleteQuery);
-            ps.setString(1, uuid);
+            ps.setString(1, product.getUuid());
             ps.setString(2, tenantDomain);
             ps.executeUpdate();
 
-            //remove productScope and its mappings
+            // remove productScope and its mappings
             psDeleteScope = connection.prepareStatement(deleteProductScopeQuery);
-            APIProduct product = getAPIProduct(uuid, tenantDomain);
-            String productScope = APIUtil.getProductScope(new APIProductIdentifier(product.getProvider(), product.getName()));
+            String productScope = APIUtil
+                    .getProductScope(new APIProductIdentifier(product.getProvider(), product.getName()));
             int scopeId = getScopeIdByScopeName(productScope, connection);
             psDeleteScope.setInt(1, scopeId);
             psDeleteScope.executeUpdate();
 
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while deleting api product " + uuid + " tenant " + tenantDomain , e);
+            handleException("Error while deleting api product " + product + " tenant " + tenantDomain, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
+            APIMgtDBUtil.closeAllConnections(psDeleteScope, connection, null);
         }
     }
 
@@ -13823,11 +13830,11 @@ public class ApiMgtDAO {
         }
     }
 
-    public int getScopeIdByScopeName(String scopeName, Connection connection) throws  APIManagementException{
+    public int getScopeIdByScopeName(String scopeName, Connection connection) throws APIManagementException {
 
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
-        String sql = "SELECT SCOPE_ID FROM IDN_OAUTH2_SCOPE WHERE NAME = ? ";
+        String sql = SQLConstants.GET_SCOPE_ID_BY_NAME;
         int scopeId = -1;
         try {
             preparedStatement = connection.prepareStatement(sql);

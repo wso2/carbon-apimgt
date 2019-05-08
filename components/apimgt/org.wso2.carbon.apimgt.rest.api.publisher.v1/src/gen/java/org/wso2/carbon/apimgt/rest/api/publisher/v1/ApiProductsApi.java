@@ -10,7 +10,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDetailedDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 
@@ -199,7 +199,7 @@ public class ApiProductsApi  {
     @Path("/{apiProductId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get details of an API Product", notes = "Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API to retrive it.\n", response = APIProductDetailedDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Get details of an API Product", notes = "Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API to retrive it.\n", response = APIProductDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nRequested API Product is returned\n"),
         
@@ -219,7 +219,7 @@ public class ApiProductsApi  {
     @Path("/{apiProductId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update an API product", notes = "This operation can be used to update an existing API product.\nBut the properties `name`, `provider`\n", response = APIProductDetailedDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Update an API product", notes = "This operation can be used to update an existing API product.\nBut the properties `name`, `provider`\n", response = APIProductDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with updated API product object\n"),
         
@@ -232,7 +232,7 @@ public class ApiProductsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response apiProductsApiProductIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
-    @ApiParam(value = "API object that needs to be added\n" ,required=true ) APIProductDetailedDTO body,
+    @ApiParam(value = "API object that needs to be added\n" ,required=true ) APIProductDTO body,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
     return delegate.apiProductsApiProductIdPut(apiProductId,body,ifMatch);
@@ -323,7 +323,7 @@ public class ApiProductsApi  {
     @GET
     
     @Consumes({ "application/json" })
-    @Produces({ "application/json", "application/gzip" })
+    @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve/Search API Products\n", notes = "This operation provides you a list of available API Products qualifying under a given search condition.\n\nEach retrieved API Product is represented with a minimal amount of attributes. If you want to get complete details of an API Product, you need to use **Get details of an API Product** operation.\n", response = APIProductListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nList of qualifying API Products is returned.\n"),
@@ -337,16 +337,15 @@ public class ApiProductsApi  {
     @ApiParam(value = "") @QueryParam("query")  String query,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Defines whether the returned response should contain full details of API\n") @QueryParam("expand")  Boolean expand,
-    @ApiParam(value = "Tenant domain, whose API Products should be retrieved. If not specified, the logged in user's tenant domain will\nbe considered for this.\n") @QueryParam("tenantDomain")  String tenantDomain)
+    @ApiParam(value = "Defines whether the returned response should contain full details of API\n") @QueryParam("expand")  Boolean expand)
     {
-    return delegate.apiProductsGet(limit,offset,query,accept,ifNoneMatch,expand,tenantDomain);
+    return delegate.apiProductsGet(limit,offset,query,accept,ifNoneMatch,expand);
     }
     @POST
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Create a new API Product", notes = "This operation can be used to create a new API Product specifying the details of the API Product in the payload. \n", response = APIProductDetailedDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Create a new API Product", notes = "This operation can be used to create a new API Product specifying the details of the API Product in the payload. \n", response = APIProductDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n"),
         
@@ -354,7 +353,7 @@ public class ApiProductsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response apiProductsPost(@ApiParam(value = "API object that needs to be added\n" ,required=true ) APIProductDetailedDTO body)
+    public Response apiProductsPost(@ApiParam(value = "API object that needs to be added\n" ,required=true ) APIProductDTO body)
     {
     return delegate.apiProductsPost(body);
     }

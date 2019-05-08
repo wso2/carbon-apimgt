@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -20,10 +21,7 @@ public class ProductAPIDTO  {
   private String apiId = null;
   
   
-  private String name = null;
-  
-  
-  private List<String> resources = new ArrayList<String>();
+  private List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
 
   
   /**
@@ -41,24 +39,12 @@ public class ProductAPIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
+  @JsonProperty("operations")
+  public List<ProductAPIOperationsDTO> getOperations() {
+    return operations;
   }
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("resources")
-  public List<String> getResources() {
-    return resources;
-  }
-  public void setResources(List<String> resources) {
-    this.resources = resources;
+  public void setOperations(List<ProductAPIOperationsDTO> operations) {
+    this.operations = operations;
   }
 
   
@@ -69,8 +55,7 @@ public class ProductAPIDTO  {
     sb.append("class ProductAPIDTO {\n");
     
     sb.append("  apiId: ").append(apiId).append("\n");
-    sb.append("  name: ").append(name).append("\n");
-    sb.append("  resources: ").append(resources).append("\n");
+    sb.append("  operations: ").append(operations).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

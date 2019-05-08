@@ -37,9 +37,9 @@ public class APIProductInfoDTO  {
 
   
   /**
-   * UUID of the api registry artifact\n
+   * UUID of the api product\n
    **/
-  @ApiModelProperty(value = "UUID of the api registry artifact\n")
+  @ApiModelProperty(value = "UUID of the api product\n")
   @JsonProperty("id")
   public String getId() {
     return id;

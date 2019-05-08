@@ -6144,9 +6144,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
     
-    public void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
-      //TODO add validation for tenant and publisher visibility. currently no domain or user check is set
-        apiMgtDAO.deleteAPIProduct(uuid, tenantDomain);
+    public void deleteAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException {
+        apiMgtDAO.deleteAPIProduct(product, tenantDomain);
     }
 
     @Override

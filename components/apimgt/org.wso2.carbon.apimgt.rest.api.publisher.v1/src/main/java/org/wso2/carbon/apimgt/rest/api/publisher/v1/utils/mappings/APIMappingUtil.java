@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -784,8 +784,8 @@ public class APIMappingUtil {
         return scopeSet;
     }
     
-    public static APIProductDetailedDTO fromAPIProducttoDTO(APIProduct product) {
-        APIProductDetailedDTO productDto = new APIProductDetailedDTO();
+    public static APIProductDTO fromAPIProducttoDTO(APIProduct product) {
+        APIProductDTO productDto = new APIProductDTO();
         productDto.setName(product.getName());
         productDto.setProvider(product.getProvider());
         productDto.setId(product.getUuid());
@@ -803,17 +803,18 @@ public class APIMappingUtil {
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
             ProductAPIDTO productAPI = new ProductAPIDTO();
-            productAPI.setName(apiProductResource.getApiName());
             productAPI.setApiId(apiProductResource.getApiId());
-            List<String> resourcesOfAPI = new ArrayList<String>();
-            
+            List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
             List<URITemplate> templates = apiProductResource.getResources();
+
             for (URITemplate template : templates) {
-                resourcesOfAPI.add(template.getHTTPVerb() + ":" + template.getResourceURI());
+                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
+                operation.setHttpVerb(template.getHTTPVerb());
+                operation.setUritemplate(template.getResourceURI());
+                operations.add(operation);
             }
-            productAPI.setResources(resourcesOfAPI);
-            apis.add(productAPI);
-            
+            productAPI.setOperations(operations);
+            apis.add(productAPI);  
         }
         productDto.setApis(apis);
         
@@ -832,7 +833,7 @@ public class APIMappingUtil {
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
             tiersToReturn.add(tier.getName());
         }
-        productDto.setTiers(tiersToReturn);
+        productDto.setPolicies(tiersToReturn);
         productDto.setVisibility(mapVisibilityFromAPIProducttoDTO(product.getVisibility()));
 
         if (product.getVisibleRoles() != null) {
@@ -845,38 +846,36 @@ public class APIMappingUtil {
         return productDto;
     }
     
-    private static APIProductDetailedDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPIProducttoDTO(
+    private static APIProductDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPIProducttoDTO(
             String subscriptionAvailability) {
 
         switch (subscriptionAvailability) {
             case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT :
-                return APIProductDetailedDTO.SubscriptionAvailabilityEnum.current_tenant;
+                return APIProductDTO.SubscriptionAvailabilityEnum.current_tenant;
             case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS :
-                return APIProductDetailedDTO.SubscriptionAvailabilityEnum.all_tenants;
+                return APIProductDTO.SubscriptionAvailabilityEnum.all_tenants;
             case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS :
-                return APIProductDetailedDTO.SubscriptionAvailabilityEnum.specific_tenants;
+                return APIProductDTO.SubscriptionAvailabilityEnum.specific_tenants;
             default:
                 return null; // how to handle this?
         }
 
     }
     
-    private static APIProductDetailedDTO.VisibilityEnum mapVisibilityFromAPIProducttoDTO(String visibility) {
+    private static APIProductDTO.VisibilityEnum mapVisibilityFromAPIProducttoDTO(String visibility) {
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY :
-                return APIProductDetailedDTO.VisibilityEnum.PUBLIC;
+                return APIProductDTO.VisibilityEnum.PUBLIC;
             case APIConstants.API_PRIVATE_VISIBILITY :
-                return APIProductDetailedDTO.VisibilityEnum.PRIVATE;
+                return APIProductDTO.VisibilityEnum.PRIVATE;
             case APIConstants.API_RESTRICTED_VISIBILITY :
-                return APIProductDetailedDTO.VisibilityEnum.RESTRICTED;
-            case APIConstants.API_CONTROLLED_VISIBILITY :
-                return APIProductDetailedDTO.VisibilityEnum.CONTROLLED;
+                return APIProductDTO.VisibilityEnum.RESTRICTED;
             default:
                 return null; // how to handle this?
         }
     }
     
-    public static APIProduct fromDTOtoAPIProduct(APIProductDetailedDTO dto, String provider)
+    public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider)
             throws APIManagementException {
         APIProduct product = new APIProduct();
         product.setName(dto.getName());
@@ -891,7 +890,7 @@ public class APIMappingUtil {
         String state = dto.getState() == null ? APIStatus.CREATED.toString() :dto.getState().toString() ;
         product.setState(state);
         Set<Tier> apiTiers = new HashSet<>();
-        List<String> tiersFromDTO = dto.getTiers();
+        List<String> tiersFromDTO = dto.getPolicies();
         
         if (dto.getVisibility() != null) {
             product.setVisibility(mapVisibilityFromDTOtoAPIProduct(dto.getVisibility()));
@@ -921,13 +920,11 @@ public class APIMappingUtil {
             ProductAPIDTO res = dto.getApis().get(i);
             APIProductResource resource = new APIProductResource();
             resource.setApiId(res.getApiId());
-            resource.setApiName(res.getName());
-            List<String> productResourcesDto = res.getResources();
-            for (String resourceItem : productResourcesDto) {
-                String[] resourceItemSplit = resourceItem.split(":");
+            List<ProductAPIOperationsDTO> productAPIOperationsDTO = res.getOperations();
+            for (ProductAPIOperationsDTO resourceItem : productAPIOperationsDTO) {
                 URITemplate template = new URITemplate();
-                template.setHTTPVerb(resourceItemSplit[0]);
-                template.setResourceURI(resourceItemSplit[1]);
+                template.setHTTPVerb(resourceItem.getHttpVerb());
+                template.setResourceURI(resourceItem.getUritemplate());
                 resource.setResource(template);
             }
             productResources.add(resource);
@@ -936,7 +933,7 @@ public class APIMappingUtil {
         return product;
     }
     
-    private static String mapVisibilityFromDTOtoAPIProduct(APIProductDetailedDTO.VisibilityEnum visibility) {
+    private static String mapVisibilityFromDTOtoAPIProduct(APIProductDTO.VisibilityEnum visibility) {
         switch (visibility) {
             case PUBLIC:
                 return APIConstants.API_GLOBAL_VISIBILITY;
@@ -944,15 +941,13 @@ public class APIMappingUtil {
                 return APIConstants.API_PRIVATE_VISIBILITY;
             case RESTRICTED:
                 return APIConstants.API_RESTRICTED_VISIBILITY;
-            case CONTROLLED:
-                return APIConstants.API_CONTROLLED_VISIBILITY;
             default:
                 return null; // how to handle this?
         }
     }
     
     private static String mapSubscriptionAvailabilityFromDTOtoAPIProduct(
-            APIProductDetailedDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
+            APIProductDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
         switch (subscriptionAvailability) {
             case current_tenant:
                 return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;

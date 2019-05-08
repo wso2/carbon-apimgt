@@ -1133,11 +1133,11 @@ public interface APIProvider extends APIManager {
 
     /**
      * Delete API product
-     * @param uuid uuid of the api product
+     * @param apiProduct product api product
      * @param tenantDomain tenant domain.
      * @throws APIManagementException
      */
-    void deleteAPIProduct(String uuid, String tenantDomain) throws APIManagementException;
+    void deleteAPIProduct(APIProduct apiProduct, String tenantDomain) throws APIManagementException;
 
     /**
      * Update API Product

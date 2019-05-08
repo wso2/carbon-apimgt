@@ -4763,9 +4763,6 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_publish
-      produces:
-        - application/json
-        - application/gzip
       summary: |
         Retrieve/Search API Products
       description: |
@@ -4782,13 +4779,6 @@ paths:
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
         - $ref : "#/parameters/expand"
-        - name: tenantDomain
-          in: query
-          description: |
-            Tenant domain, whose API Products should be retrieved. If not specified, the logged in user's tenant domain will
-            be considered for this.
-          required: false
-          type: string
       tags:
         - API Product (Collection)
       responses:
@@ -4834,7 +4824,7 @@ paths:
             API object that needs to be added
           required: true
           schema:
-            $ref: '#/definitions/APIProductDetailed'
+            $ref: '#/definitions/APIProduct'
       tags:
         - API Product (Individual)
       responses:
@@ -4844,7 +4834,7 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
-            $ref: '#/definitions/APIProductDetailed'
+            $ref: '#/definitions/APIProduct'
           headers:
             Location:
               description: |
@@ -4944,7 +4934,7 @@ paths:
                 Used by caches, or in conditional requests (Will be supported in future).
               type: string
           schema:
-            $ref: '#/definitions/APIProductDetailed'
+            $ref: '#/definitions/APIProduct'
         304:
           description: |
             Not Modified.
@@ -4981,7 +4971,7 @@ paths:
             API object that needs to be added
           required: true
           schema:
-            $ref: '#/definitions/APIProductDetailed'
+            $ref: '#/definitions/APIProduct'
         - $ref: '#/parameters/If-Match'
       tags:
         - API Product (Individual)
@@ -4991,7 +4981,7 @@ paths:
             OK.
             Successful response with updated API product object
           schema:
-            $ref: '#/definitions/APIProductDetailed'
+            $ref: '#/definitions/APIProduct'
           headers:
             Location:
               description: |
@@ -6420,7 +6410,7 @@ definitions:
       id:
         type: string
         description: |
-          UUID of the api registry artifact
+          UUID of the api product
         example: 01234567-0123-0123-0123-012345678901
       name:
         type: string
@@ -6449,80 +6439,92 @@ definitions:
   #-----------------------------------------------------
   # The Detailed API Product resource
   #-----------------------------------------------------
-  APIProductDetailed:
+  APIProduct:
     title: API Product object
     required:
       - name
-    allOf:
-      - $ref: '#/definitions/APIProductInfo'
-      - properties:
-          apiProductDefinition:
-            description: |
-              Swagger definition of the API Product which contains details about URI templates and scopes
-            type: string
-            example: ""
-          visibility:
-            type: string
-            description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
-            enum:
-              - PUBLIC
-              - PRIVATE
-              - RESTRICTED
-              - CONTROLLED
-            example: PUBLIC
-          state:
-            type: string
-            description: |
-              State of the API product. Only published api products are visible on the store
-            enum:
-              - CREATED
-              - PUBLISHED
-          visibleRoles:
-            type: array
-            description: The user roles that are able to access the API
-            items:
-              type: string
-            example: []
-          visibleTenants:
-            type: array
-            items:
-              type: string
-          tiers:
-            type: array
-            description: The subscription tiers selected for the particular API Product
-            items:
-              type: string
-            example: ["Unlimited"]
-          subscriptionAvailability:
-            type: string
-            description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
-            enum:
-              - current_tenant
-              - all_tenants
-              - specific_tenants
-            example: current_tenant
-          subscriptionAvailableTenants:
-            type: array
-            items:
-              type: string
-            example: ["tenant1", "tenant2"]
-          additionalProperties:
-            type: object
-            additionalProperties:
-              type: string
-            description : Map of custom properties of API
-          businessInformation:
-            $ref: '#/definitions/APIProductBusinessInformation'
-          apis:
-            description: |
-              APIs and resources in the API Product.
-            type: array
-            items:
-              $ref: '#/definitions/productAPI'
+    properties:
+      id:
+        type: string
+        description: |
+          UUID of the api product
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        description: Name of the API Product
+        example: CalculatorAPIProduct
+      description:
+        type: string
+        description: A brief description about the API
+        example: A calculator API Product that supports basic operations
+      provider:
+        description: |
+          If the provider value is not given, the user invoking the API will be used as the provider.
+        type: string
+        example: admin
+      thumbnailUri:
+        type: string
+        example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
+      state:
+        type: string
+        description: |
+          State of the API product. Only published api products are visible on the store
+        enum:
+          - CREATED
+          - PUBLISHED
+      visibility:
+        type: string
+        description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.
+        enum:
+          - PUBLIC
+          - PRIVATE
+          - RESTRICTED
+        example: PUBLIC
+      visibleRoles:
+        type: array
+        description: The user roles that are able to access the API
+        items:
+          type: string
+        example: []
+      visibleTenants:
+        type: array
+        items:
+          type: string
+      policies:
+        type: array
+        items:
+          type: string
+        example: ["Unlimited"]
+      subscriptionAvailability:
+        type: string
+        description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
+        enum:
+          - current_tenant
+          - all_tenants
+          - specific_tenants
+        example: current_tenant
+      subscriptionAvailableTenants:
+        type: array
+        items:
+          type: string
+        example: ["tenant1", "tenant2"]
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: string
+        description : Map of custom properties of API
+      businessInformation:
+        $ref: '#/definitions/APIProductBusinessInformation'
+      apis:
+        description: |
+          APIs and resources in the API Product.
+        type: array
+        items:
+          $ref: '#/definitions/ProductAPI'
   #-----------------------------------------------------
   # The API and its resources in a API Product resource
   #-----------------------------------------------------              
-  productAPI:
+  ProductAPI:
     title: ProductAPI
     required:
       - apiId
@@ -6530,14 +6532,14 @@ definitions:
       apiId:
         type: string
         example: 01234567-0123-0123-0123-012345678901
-      name:
-        type: string
-        example: CalculatorAPI
-      resources:
-        type: array
-        items:
-          type: string
-        example: ["GET:/add", "GET:/divide"]
+      operations:
+       type: array
+       items:
+        properties:
+          uritemplate:
+            type: string
+          httpVerb:
+            type: string
 
   #-----------------------------------------------------
   # API Business Information resource

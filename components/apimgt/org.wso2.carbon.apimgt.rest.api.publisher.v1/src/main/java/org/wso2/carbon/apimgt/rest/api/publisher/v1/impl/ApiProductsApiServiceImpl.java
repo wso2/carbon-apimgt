@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUti
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDetailedDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -62,7 +62,11 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             if (log.isDebugEnabled()) {
                 log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
             }
-            apiProvider.deleteAPIProduct(apiProductId, tenantDomain);
+            APIProduct apiProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            if (apiProduct == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            }
+            apiProvider.deleteAPIProduct(apiProduct, tenantDomain);
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting API Product : " + apiProductId;
@@ -120,7 +124,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
 
-            APIProductDetailedDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
+            APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
             return Response.ok().entity(createdApiProductDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId ;
@@ -129,7 +133,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         return null;
     }
     @Override
-    public Response apiProductsApiProductIdPut(String apiProductId,APIProductDetailedDTO body,String ifMatch){
+    public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch){
 
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -140,7 +144,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
             //validation for tiers
-            List<String> tiersFromDTO = body.getTiers();
+            List<String> tiersFromDTO = body.getPolicies();
             if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
                 RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
             }
@@ -166,7 +170,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             product.setUuid(apiProductId);
             apiProvider.updateAPIProduct(product, username);
             APIProduct updatedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
-            APIProductDetailedDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
+            APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
             return Response.ok().entity(updatedProductDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating API Product : " + apiProductId;
@@ -194,8 +198,10 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
     @Override
-    public Response apiProductsGet(Integer limit,Integer offset,String query,String accept,String ifNoneMatch,Boolean expand,String tenant){
+    public Response apiProductsGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
+            Boolean expand) {
 
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -228,7 +234,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
 
     }
     @Override
-    public Response apiProductsPost(APIProductDetailedDTO body){
+    public Response apiProductsPost(APIProductDTO body) {
 
         // Check if product exists
         try {
@@ -251,7 +257,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                 provider = username;
             }
 
-            List<String> tiersFromDTO = body.getTiers();
+            List<String> tiersFromDTO = body.getPolicies();
             //If tiers are not defined, 
             if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
                 RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
@@ -274,7 +280,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             String uuid = apiProvider.createAPIProduct(product, tenantDomain);
             APIProduct createdProduct = apiProvider.getAPIProduct(uuid, tenantDomain);
 
-            APIProductDetailedDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
+            APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(
                     RestApiConstants.RESOURCE_PATH_API_PRODUCTS + "/" + createdApiProductDTO.getId());
             return Response.created(createdApiProductUri).entity(createdApiProductDTO).build();
