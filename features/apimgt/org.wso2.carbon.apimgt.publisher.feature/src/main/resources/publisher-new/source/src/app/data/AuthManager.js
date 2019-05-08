@@ -113,7 +113,7 @@ class AuthManager {
         if (!partialToken) {
             return new Promise(resolve => resolve(null));
         }
-        const promisedResponse = fetch('/publisher-new/services/auth/introspect');
+        const promisedResponse = fetch('/publisher-new/services/auth/introspect', { credentials: 'same-origin' });
         return promisedResponse
             .then(response => response.json())
             .then((data) => {
