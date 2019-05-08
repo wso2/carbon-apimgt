@@ -5198,7 +5198,7 @@ definitions:
       scopes:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/Scope'
       operations:
        type: array
        items:
