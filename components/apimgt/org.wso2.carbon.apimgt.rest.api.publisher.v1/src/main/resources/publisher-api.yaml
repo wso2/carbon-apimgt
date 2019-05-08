@@ -5112,10 +5112,6 @@ definitions:
       - name
       - context
       - version
-      - policies
-      - isDefaultVersion
-      - transport
-      - visibility
     properties:
       id:
         type: string

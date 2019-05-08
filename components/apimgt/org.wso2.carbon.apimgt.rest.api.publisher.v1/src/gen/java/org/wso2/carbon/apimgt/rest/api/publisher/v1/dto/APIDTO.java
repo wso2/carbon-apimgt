@@ -61,7 +61,7 @@ public class APIDTO  {
   
   private String destinationStatsEnabled = null;
   
-  @NotNull
+  
   private Boolean isDefaultVersion = null;
   
   public enum TypeEnum {
@@ -70,13 +70,13 @@ public class APIDTO  {
   
   private TypeEnum type = TypeEnum.HTTP;
   
-  @NotNull
+  
   private List<String> transport = new ArrayList<String>();
   
   
   private List<String> tags = new ArrayList<String>();
   
-  @NotNull
+  
   private List<String> policies = new ArrayList<String>();
   
   
@@ -94,7 +94,7 @@ public class APIDTO  {
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED, 
   };
-  @NotNull
+  
   private VisibilityEnum visibility = null;
   
   
@@ -301,7 +301,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("isDefaultVersion")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
@@ -327,7 +327,7 @@ public class APIDTO  {
   /**
    * Supported transports for the API (http and/or https).\n
    **/
-  @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https).\n")
+  @ApiModelProperty(value = "Supported transports for the API (http and/or https).\n")
   @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
@@ -351,7 +351,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("policies")
   public List<String> getPolicies() {
     return policies;
@@ -415,7 +415,7 @@ public class APIDTO  {
   /**
    * The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.
    **/
-  @ApiModelProperty(required = true, value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.")
+  @ApiModelProperty(value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
