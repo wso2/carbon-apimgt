@@ -121,6 +121,7 @@ class AuthManager {
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
                     user = new User(currentEnv.label, data.username);
+                    user.scopes = data.scope.split(' ');
                     AuthManager.setUser(user, currentEnv.label);
                 } else {
                     console.warn('User with ' + partialToken + ' is not active!');
@@ -153,6 +154,16 @@ class AuthManager {
         User.destroyInMemoryUser(environmentName);
     }
 
+
+    /**
+     *
+     * Get scope for resources
+     * @static
+     * @param {String} resourcePath
+     * @param {String} resourceMethod
+     * @returns Boolean
+     * @memberof AuthManager
+     */
     static hasScopes(resourcePath, resourceMethod) {
         const userscopes = AuthManager.getUser().scopes;
         const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
