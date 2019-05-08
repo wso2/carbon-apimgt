@@ -97,7 +97,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
-            //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
+            // We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
             String username = RestApiUtil.getLoggedInUsername();
             tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
@@ -170,11 +170,14 @@ public class ApisApiServiceImpl extends ApisApiService {
 //                }
             }
 
-//            String apiSecurity = body.getApiSecurity();todo
-           /* if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
-                    .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                RestApiUtil.handleBadRequest("Mutual SSL Based authentication is not supported in this server", log);
-            }*/
+            List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
+            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
+                for (String apiSecurityScheme : apiSecuritySchemes) {
+                    if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                        RestApiUtil.handleBadRequest("Mutual SSL Based authentication is not supported in this server", log);
+                    }
+                }
+            }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
 
@@ -259,7 +262,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified policy " + body.getApiPolicy() + " is invalid", log);
             }
-//            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {
+//            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {todo check
 //                String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
 //                body.setApiDefinition(swaggerStr);
 //            }
