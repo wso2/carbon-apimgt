@@ -1,0 +1,44 @@
+<%
+    var log = new Log("Services login DCR request");
+
+    var dcrUrl = 'https://localhost:9443/client-registration/v0.14/register'; // TODO: fetch from config
+    var authorizeEndpoint = "https://localhost:8243/authorize"; // TODO: fetch from config
+    var callbackUrl = "https://localhost:9443/store-new/services/auth/callback"; // TODO: fetch from config
+    var scopes = "apim:subscribe apim:self-signup apim:dedicated_gateway openid"; // TODO: fetch from config
+
+    var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+    var systemApplicationDAO = new SystemApplicationDAO();
+
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_store");
+    if (systemApplicationDTO  !== null) {
+        var clientId = systemApplicationDTO.getConsumerKey();
+    } else {
+        var dcrRequestData = {
+            "callbackUrl": callbackUrl,
+            "clientName": "store",
+            "owner": "admin",
+            "grantType": "authorization_code refresh_token",
+            "saasApp": true
+        };
+
+        var result = post(dcrUrl, JSON.stringify(dcrRequestData) , {
+            "Authorization": "Basic YWRtaW46YWRtaW4=",
+            "Content-Type": "application/json"
+        }, "json");
+
+        var clientId = result.data.clientId;
+        var clientSecret = result.data.clientSecret;
+
+        log.debug("Client ID = " + clientId);
+
+        var addApplicationKey = systemApplicationDAO.addApplicationKey("admin_store", clientId, clientSecret);
+        if (!addApplicationKey) {
+            log.error("Error while persisting application information in system application DB table!!");
+            log.error("Client ID = " + clientId);
+        }
+    }
+    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&redirect_uri=" + callbackUrl;
+    log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
+    response.sendRedirect(authorizeEndpoint + authRequestParams);
+
+%>

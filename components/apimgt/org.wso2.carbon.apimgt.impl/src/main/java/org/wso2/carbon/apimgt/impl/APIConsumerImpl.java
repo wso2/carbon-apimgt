@@ -33,8 +33,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.LoginPostExecutor;
-import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -99,11 +97,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.mgt.stub.UserAdminStub;
-import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -116,7 +110,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -4977,6 +4970,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Object> searchResults = super
                 .searchPaginatedAPIsByContent(registry, tenantId, searchQuery, start, end, limitAttributes);
         return filterMultipleVersionedAPIs(searchResults);
+    }
+
+
+    @Override
+    public String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId);
+        return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {

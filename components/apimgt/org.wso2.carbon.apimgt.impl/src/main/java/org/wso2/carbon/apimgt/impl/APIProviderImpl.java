@@ -91,15 +91,11 @@ import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
-import org.wso2.carbon.apimgt.impl.soaptorest.WSDLSOAPOperationExtractor;
-import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -4592,8 +4588,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //Put next states into map
             lcData.put(APIConstants.LC_NEXT_STATES, actions);
             String lifeCycleState = artifact.getLifecycleState();
-            LifecycleBean bean;
+            lcData.put(APIConstants.LC_STATUS, lifeCycleState);
 
+            LifecycleBean bean;
             bean = LifecycleBeanPopulator.getLifecycleBean(path, (UserRegistry) registry, configRegistry);
             if (bean != null) {
                 ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();

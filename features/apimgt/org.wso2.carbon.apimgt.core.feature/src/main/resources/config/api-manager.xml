@@ -407,6 +407,18 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
                 <URI>/api/am/store/{version}/apis</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
@@ -448,6 +460,14 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/store/{version}/search</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
         </WhiteListedURIs>

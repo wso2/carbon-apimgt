@@ -15,7 +15,8 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -173,7 +174,68 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>npm install (initialize)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>install</argument>
+                                <argument>--silent</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm run build (compile)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>${npm.build.command}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <workingDirectory>${npm.working.dir}</workingDirectory>
+                </configuration>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>publisher-new/site/**</include>
+                    <include>publisher-new/services/**</include>
+                    <include>publisher-new/jaggery.conf</include>
+                    <include>lifecycles/APILifeCycle.xml</include>
+                    <include>p2.inf</include>
+                    <include>apipublisher/**</include>
+                    <include>customTheme/**</include>
+                    <include>publisher/**</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
+    <properties>
+        <maven.test.skip>false</maven.test.skip>
+        <npm.executable>npm</npm.executable>
+        <npm.build.command>build:prod</npm.build.command>
+        <npm.working.dir>./src/main/</npm.working.dir>
+    </properties>
 
 </project>

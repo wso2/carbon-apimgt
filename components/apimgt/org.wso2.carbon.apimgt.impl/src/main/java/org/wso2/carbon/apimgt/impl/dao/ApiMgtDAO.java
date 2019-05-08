@@ -1670,11 +1670,13 @@ public class ApiMgtDAO {
                             ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
 
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                    subscribedAPI.setUUID(result.getString("SUB_UUID"));
                     subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                     subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                     subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
 
                     Application application = new Application(result.getString("APP_NAME"), subscriber);
+                    application.setUUID(result.getString("APP_UUID"));
                     subscribedAPI.setApplication(application);
                     subscribedAPIs.add(subscribedAPI);
                     if (index == endSubIndex - 1) {
@@ -4285,7 +4287,8 @@ public class ApiMgtDAO {
             Application application;
             while (rs.next()) {
                 application = new Application(rs.getString("NAME"), subscriber);
-                application.setId(rs.getInt("APPLICATION_ID"));
+                int applicationId = rs.getInt("APPLICATION_ID");
+                application.setId(applicationId);
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
@@ -4297,6 +4300,10 @@ public class ApiMgtDAO {
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
+
+                //setting subscription count
+                int subscriptionCount = getSubscriptionCountByApplicationId(subscriber, applicationId, groupingId);
+                application.setSubscriptionCount(subscriptionCount);
 
                 applicationsList.add(application);
             }
@@ -5795,7 +5802,7 @@ public class ApiMgtDAO {
                         Scope scopeByKey = APIUtil.findScopeByKey(api.getScopes(), scopeKey);
                         if (scopeByKey != null) {
                             if (scopeByKey.getId() > 0) {
-                                uriTemplate.getScopes().setId(scopeByKey.getId());
+                                uriTemplate.getScope().setId(scopeByKey.getId());
                             }
                         }
                     }
@@ -6262,6 +6269,10 @@ public class ApiMgtDAO {
                         application.setGroupId(getGroupId(application.getId()));
                     }
                 }
+
+                int subscriptionCount = getSubscriptionCountByApplicationId(subscriber, applicationId,
+                        application.getGroupId());
+                application.setSubscriptionCount(subscriptionCount);
 
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
                 application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));

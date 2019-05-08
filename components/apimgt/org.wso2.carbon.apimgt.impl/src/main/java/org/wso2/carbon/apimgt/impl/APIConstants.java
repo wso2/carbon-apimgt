@@ -331,6 +331,7 @@ public final class APIConstants {
     public static final String APPLICATION_NAME = "NAME";
     public static final String APPLICATION_SUBSCRIBER_ID = "SUBSCRIBER_ID";
     public static final String APPLICATION_TIER = "APPLICATION_TIER";
+    public static final String APPLICATION_STATUS = "APPLICATION_STATUS";
 
     //IDENTITY OAUTH2 table
     public static final String IDENTITY_OAUTH2_FIELD_TOKEN_STATE = "TOKEN_STATE";
@@ -594,6 +595,7 @@ public final class APIConstants {
     public static final String API_STORE_FORUM_ENABLED = API_STORE + "isStoreForumEnabled";
     public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
+    public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";

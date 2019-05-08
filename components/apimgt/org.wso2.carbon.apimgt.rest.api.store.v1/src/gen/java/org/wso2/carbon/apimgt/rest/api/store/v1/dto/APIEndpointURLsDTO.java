@@ -1,0 +1,76 @@
+package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
+
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEnvironmentURLsDTO;
+
+import io.swagger.annotations.*;
+import com.fasterxml.jackson.annotation.*;
+
+import javax.validation.constraints.NotNull;
+
+
+
+
+
+@ApiModel(description = "")
+public class APIEndpointURLsDTO  {
+  
+  
+  
+  private String environmentName = null;
+  
+  
+  private String environmentType = null;
+  
+  
+  private APIEnvironmentURLsDTO environmentURLs = null;
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("environmentName")
+  public String getEnvironmentName() {
+    return environmentName;
+  }
+  public void setEnvironmentName(String environmentName) {
+    this.environmentName = environmentName;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("environmentType")
+  public String getEnvironmentType() {
+    return environmentType;
+  }
+  public void setEnvironmentType(String environmentType) {
+    this.environmentType = environmentType;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("environmentURLs")
+  public APIEnvironmentURLsDTO getEnvironmentURLs() {
+    return environmentURLs;
+  }
+  public void setEnvironmentURLs(APIEnvironmentURLsDTO environmentURLs) {
+    this.environmentURLs = environmentURLs;
+  }
+
+  
+
+  @Override
+  public String toString()  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("class APIEndpointURLsDTO {\n");
+    
+    sb.append("  environmentName: ").append(environmentName).append("\n");
+    sb.append("  environmentType: ").append(environmentType).append("\n");
+    sb.append("  environmentURLs: ").append(environmentURLs).append("\n");
+    sb.append("}\n");
+    return sb.toString();
+  }
+}
