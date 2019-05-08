@@ -21,9 +21,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 
 
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;

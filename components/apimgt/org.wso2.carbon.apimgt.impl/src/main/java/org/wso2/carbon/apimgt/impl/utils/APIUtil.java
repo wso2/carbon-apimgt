@@ -8185,10 +8185,10 @@ public final class APIUtil {
         List<String> grantTypes = new ArrayList<>();
         configParser = IdentityConfigParser.getInstance();
         OMElement oauthElem = configParser.getConfigElement(CONFIG_ELEM_OAUTH);
-        Iterator i = oauthElem.getFirstChildWithName(getQNameWithIdentityNS(
+        Iterator supportedGrantTypes = oauthElem.getFirstChildWithName(getQNameWithIdentityNS(
                 "SupportedGrantTypes")).getChildElements();
-        while (i.hasNext()) {
-            grantTypes.add(StringUtils.substringBetween(i.next().toString(),
+        while (supportedGrantTypes.hasNext()) {
+            grantTypes.add(StringUtils.substringBetween(supportedGrantTypes.next().toString(),
                     GRANT_TYPE_NAME, GRANT_TYPE_NAME));
         }
         return grantTypes;
