@@ -143,6 +143,8 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
+import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
@@ -270,6 +272,11 @@ public final class APIUtil {
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
     public static String multiGrpAppSharing = null;
+
+    private static final String CONFIG_ELEM_OAUTH = "OAuth";
+    private static final String REVOKE = "revoke";
+    private static final String TOKEN = "token";
+    private static final String GRANT_TYPE_NAME = "<GrantTypeName>";
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -8171,5 +8178,29 @@ public final class APIUtil {
             }
         }
         return environmentStringSet;
+    }
+
+    public static List<String> getGrantTypes() throws APIManagementException {
+        IdentityConfigParser configParser;
+        List<String> grantTypes = new ArrayList<>();
+        configParser = IdentityConfigParser.getInstance();
+        OMElement oauthElem = configParser.getConfigElement(CONFIG_ELEM_OAUTH);
+        Iterator supportedGrantTypes = oauthElem.getFirstChildWithName(getQNameWithIdentityNS(
+                "SupportedGrantTypes")).getChildElements();
+        while (supportedGrantTypes.hasNext()) {
+            grantTypes.add(StringUtils.substringBetween(supportedGrantTypes.next().toString(),
+                    GRANT_TYPE_NAME, GRANT_TYPE_NAME));
+        }
+        return grantTypes;
+    }
+
+    public static String getTokenUrl() throws APIManagementException {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.REVOKE_API_URL).
+                replace(REVOKE, TOKEN);
+    }
+
+    private static QName getQNameWithIdentityNS(String localPart) {
+        return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
 }
