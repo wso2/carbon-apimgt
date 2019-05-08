@@ -107,6 +107,36 @@ class Utils {
     }
 
     /**
+     * Get the current environment from local-storage
+     * @returns {Object} environment: {label, host, loginTokenPath}
+     */
+    static getCurrentEnvironment() {
+        if (Utils.environment) {
+            return Utils.environment;
+        }
+
+        const environmentData = localStorage.getItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT);
+        if (!environmentData) {
+            return Utils.getDefaultEnvironment();
+        }
+
+        return JSON.parse(environmentData);
+    }
+
+    /**
+     * Get an environment object with default values.
+     * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
+     * @private
+     */
+    static getDefaultEnvironment() {
+        return {
+            label: 'Default',
+            host: window.location.host,
+            loginTokenPath: '/login/token',
+        };
+    }
+    
+    /**
      * Get current environment's index from the given environment array
      * @param {Array} environments
      * @param {string} name: name of the environment [default]: current environment name
