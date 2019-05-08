@@ -13310,7 +13310,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException exception
      */
     public APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
-        APIProduct product = new APIProduct();
+        APIProduct product = null;
         Connection connection = null;
         PreparedStatement prepStmtGetAPIProduct = null;
         PreparedStatement prepStmtGetAPIProductResource = null;
@@ -13327,6 +13327,7 @@ public class ApiMgtDAO {
             prepStmtGetAPIProduct.setString(2, tenantDomain);
             rs = prepStmtGetAPIProduct.executeQuery();
             if (rs.next()) {
+                product = new APIProduct();
                 product.setUuid(rs.getString("UUID"));
                 product.setDescription(rs.getString("DESCRIPTION"));
                 product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
@@ -13351,7 +13352,10 @@ public class ApiMgtDAO {
                 product.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                 productId = rs.getInt("API_PRODUCT_ID");
                 product.setProductId(productId);
+            } else {
+                return null;
             }
+            
             //get api resources related to api product
             String queryListProductResourceMapping = SQLConstants.LIST_PRODUCT_RESOURCE_MAPPING;      
             prepStmtGetAPIProductResource = connection.prepareStatement(queryListProductResourceMapping);
