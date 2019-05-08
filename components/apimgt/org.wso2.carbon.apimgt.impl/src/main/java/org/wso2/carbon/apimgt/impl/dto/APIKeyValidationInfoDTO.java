@@ -59,7 +59,7 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
-
+    //keeps productId of product for which the key was validated, if key was validated for an api this will be null
     private APIProductIdentifier productIdentifier;
 
     public List<String> getThrottlingDataList() {

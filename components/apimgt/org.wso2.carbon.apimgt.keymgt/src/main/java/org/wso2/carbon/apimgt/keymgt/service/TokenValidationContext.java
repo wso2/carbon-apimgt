@@ -43,7 +43,6 @@ public class TokenValidationContext {
     private APIKeyValidationInfoDTO validationInfoDTO;
     private boolean isCacheHit;
     private AccessTokenInfo tokenInfo;
-    private String subscriptionType;
 
     public AccessTokenInfo getTokenInfo() {
         return tokenInfo;
@@ -141,11 +140,4 @@ public class TokenValidationContext {
         return this.attributeMap.get(key);
     }
 
-    public void setSubscriptionType(String subscriptionType) {
-        this.subscriptionType = subscriptionType;
-    }
-
-    public String getSubscriptionType() {
-        return subscriptionType;
-    }
 }
