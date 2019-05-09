@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.keymgt.client;
 
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +30,7 @@ import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceA
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceIdentityException;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceStub;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
@@ -39,11 +42,13 @@ public class SubscriberKeyMgtClient {
     private APIKeyMgtSubscriberServiceStub subscriberServiceStub;
     private volatile String cookie;
 
-    public SubscriberKeyMgtClient(String backendServerURL, String username, String password)
+    public      SubscriberKeyMgtClient(String backendServerURL, String username, String password)
             throws Exception {
         try {
+            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
+                    (getClientRepoLocation(), getAxis2ClientXmlLocation());
             subscriberServiceStub = new APIKeyMgtSubscriberServiceStub(
-                    null, backendServerURL + "APIKeyMgtSubscriberService");
+                    ctx, backendServerURL + "APIKeyMgtSubscriberService");
             ServiceClient client = subscriberServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
@@ -54,6 +59,17 @@ public class SubscriberKeyMgtClient {
             log.error(errorMsg, e);
             throw e;
         }
+    }
+
+    protected String getAxis2ClientXmlLocation() {
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
+                ".clientAxis2XmlLocation");
+        return axis2ClientXml;
+    }
+    protected String getClientRepoLocation() {
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
+                ".ClientRepositoryLocation");
+        return axis2ClientXml;
     }
 
     public OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(OAuthApplicationInfo oauthAppInfo) throws Exception {

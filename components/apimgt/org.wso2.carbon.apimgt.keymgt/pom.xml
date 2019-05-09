@@ -225,7 +225,7 @@
 							!org.wso2.carbon.apimgt.keymgt.stub.subscriber,
 							!org.wso2.carbon.apimgt.keymgt.stub.types.axis2,
 							!org.wso2.carbon.apimgt.keymgt.stub.types.carbon,
-							!org.wso2.carbon.apimgt.keymgt.stub.useradmin
+							!org.wso2.carbon.apimgt.keymgt.stub.useradmin,
 							!org.wso2.carbon.apimgt.keymgt.client,
 							org.wso2.carbon.apimgt.keymgt.*
 						</Export-Package>
