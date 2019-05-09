@@ -240,10 +240,10 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             List<String> tiersFromDTO = body.getPolicies();
             //If tiers are not defined, the api should be a PROTOTYPED one,
-            if (!APIConstants.PROTOTYPED.equals(body.getLifeCycleStatus()) &&
+/*            if (!APIConstants.PROTOTYPED.equals(body.getLifeCycleStatus()) &&
                     (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
                 RestApiUtil.handleBadRequest("No tier defined for the API", log);
-            }
+            }*/
             //check whether the added API's tiers are all valid
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
