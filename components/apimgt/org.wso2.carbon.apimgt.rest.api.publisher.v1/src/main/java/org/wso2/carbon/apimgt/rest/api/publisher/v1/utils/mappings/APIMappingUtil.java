@@ -834,7 +834,9 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         productDto.setPolicies(tiersToReturn);
-        productDto.setVisibility(mapVisibilityFromAPIProducttoDTO(product.getVisibility()));
+        if (product.getVisibility() != null) {
+            productDto.setVisibility(mapVisibilityFromAPIProducttoDTO(product.getVisibility()));
+        }
 
         if (product.getVisibleRoles() != null) {
             productDto.setVisibleRoles(Arrays.asList(product.getVisibleRoles().split(",")));
@@ -968,6 +970,9 @@ public class APIMappingUtil {
             APIProductInfoDTO productDto = new APIProductInfoDTO();
             productDto.setName(apiProduct.getName());
             productDto.setProvider(apiProduct.getProvider());
+            productDto.setDescription(apiProduct.getDescription());
+            productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
+                    .valueOf(apiProduct.getState()));
             productDto.setId(apiProduct.getUuid());
             productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                     .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));

@@ -3096,6 +3096,13 @@ public class SQLConstants {
             + "SUB.API_PRODUCT_ID IS NOT NULL "
             + "AND AKM.CONSUMER_KEY=?";
 
+    public static final String IS_API_PRODUCT_EXIST = 
+            "SELECT UUID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER=? AND API_PRODUCT_NAME=? AND TENANT_DOMAIN = ?";
+
+    public static final String GET_ALL_API_PRODUCTS = 
+            "SELECT API_PRODUCT_ID, UUID, DESCRIPTION, API_PRODUCT_PROVIDER, API_PRODUCT_NAME, STATE "
+            + "FROM AM_API_PRODUCT WHERE TENANT_DOMAIN = ?";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

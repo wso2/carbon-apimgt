@@ -13398,6 +13398,12 @@ public class ApiMgtDAO {
         return product;
     }
     
+    /**
+     * Retrieve all the api products in the given tenant
+     * @param tenantDomain tenant domain
+     * @return list of products
+     * @throws APIManagementException
+     */
     public List<APIProduct> getAPIProductsForTenantDomain(String tenantDomain) throws APIManagementException {
         List<APIProduct> productList = new ArrayList<APIProduct>();
         Connection connection = null;
@@ -13407,23 +13413,20 @@ public class ApiMgtDAO {
 
         try {
             connection = APIMgtDBUtil.getConnection();   
-
-            //TODO move to constant
-            String queryGetAPIProduct = "SELECT API_PRODUCT_ID,UUID,DESCRIPTION,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,API_PRODUCT_TIER,VISIBILITY,BUSINESS_OWNER,BUSINESS_OWNER_EMAIL,SUBSCRIPTION_AVAILABILITY,TENANT_DOMAIN,STATE FROM AM_API_PRODUCT WHERE TENANT_DOMAIN = ?";
+            String queryGetAPIProduct = SQLConstants.GET_ALL_API_PRODUCTS;
             prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
             prepStmtGetAPIProduct.setString(1, tenantDomain);
             rs = prepStmtGetAPIProduct.executeQuery();
 
             while (rs.next()) {
                 APIProduct product = new APIProduct();
-                //only send a 
                 product.setName(rs.getString("API_PRODUCT_NAME"));
                 product.setUuid(rs.getString("UUID"));
                 product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
                 product.setState(rs.getString("STATE"));
                 product.setProductId(rs.getInt("API_PRODUCT_ID"));
-                productList.add(product);
-               
+                product.setDescription(rs.getString("DESCRIPTION"));
+                productList.add(product);  
             }
 
         } catch (SQLException e) {
@@ -13940,5 +13943,42 @@ public class ApiMgtDAO {
             log.debug("getAPIProductByUUID() for uuid " + uuid + " : " + product.toString());
         }
         return product;
+    }
+
+    /**
+     * Check whether a product with the given name and provider exists in the tenant domain
+     * @param productName
+     * @param provider
+     * @param tenantDomain
+     * @return boolean
+     * @throws APIManagementException
+     */
+    public boolean isProductExist(String productName, String provider, String tenantDomain)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmtGetAPIProduct = null;
+        boolean isExist = false;
+        
+        ResultSet rs = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();   
+            String queryGetAPIProduct = SQLConstants.IS_API_PRODUCT_EXIST;
+            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
+            prepStmtGetAPIProduct.setString(1, provider);
+            prepStmtGetAPIProduct.setString(2, productName);
+            prepStmtGetAPIProduct.setString(3, tenantDomain);
+            rs = prepStmtGetAPIProduct.executeQuery();
+
+            if (rs.next()) {
+                isExist = true;
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while retrieving api product for tenant " + tenantDomain , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
+        }
+        return isExist;
     }
 }

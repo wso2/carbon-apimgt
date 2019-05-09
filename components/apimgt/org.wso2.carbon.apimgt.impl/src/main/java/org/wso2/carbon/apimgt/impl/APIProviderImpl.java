@@ -6182,4 +6182,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateAPIProduct(product, user);
     }
 
+    @Override
+    public boolean isProductExist(String productName, String provider, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.isProductExist(productName, provider, tenantDomain);
+    }
+
 }

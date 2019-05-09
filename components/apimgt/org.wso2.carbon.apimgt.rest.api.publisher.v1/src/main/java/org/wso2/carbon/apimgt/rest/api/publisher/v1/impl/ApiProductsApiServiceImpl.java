@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -163,6 +164,16 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                 }
             }
             
+            //only publish api product if tiers are defined 
+            if(StateEnum.PUBLISHED.equals(body.getState())) {
+                //if the already created API product does not have tiers defined and the update request also doesn't
+                //have tiers defined, then the product should not moved to PUBLISHED state.
+                if (retrievedProduct.getAvailableTiers() == null && body.getPolicies() == null) {
+                    RestApiUtil.handleBadRequest("Policy needs to be defined before publishing the API Product", log);
+                }
+            }
+            
+            
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
             //We do not allow to modify provider and product name and uuid. Set the origial value
             product.setName(retrievedProduct.getName());
@@ -215,17 +226,8 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             APIProductListDTO apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(productList);
 
             //TODO implement pagination
-            if (APIConstants.APPLICATION_GZIP.equals(accept)) {
-                try {
-                    File zippedResponse = GZIPUtils.constructZippedResponse(apiProductListDTO);
-                    return Response.ok().entity(zippedResponse).header("Content-Disposition", "attachment")
-                            .header("Content-Encoding", "gzip").build();
-                } catch (APIManagementException e) {
-                    RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
-                }
-            } else {
-                return Response.ok().entity(apiProductListDTO).build();
-            }
+            
+            return Response.ok().entity(apiProductListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API Products ";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -236,13 +238,13 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
     @Override
     public Response apiProductsPost(APIProductDTO body) {
 
-        // Check if product exists
+        String provider = null;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             String username = RestApiUtil.getLoggedInUsername();
             // if not add product
-            String provider = body.getProvider();
+            provider = body.getProvider();
             if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
                 if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
                     if (log.isDebugEnabled()) {
@@ -257,11 +259,11 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                 provider = username;
             }
 
+            if (apiProvider.isProductExist(body.getName(), provider, tenantDomain)) {
+                RestApiUtil.handleBadRequest(
+                        "Product with name " + body.getName() + " for provider " + provider + " already exists", log);
+            }
             List<String> tiersFromDTO = body.getPolicies();
-            //If tiers are not defined, 
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
-            } 
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
             if (!invalidTiers.isEmpty()) {
@@ -286,11 +288,11 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             return Response.created(createdApiProductUri).entity(createdApiProductDTO).build();
 
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API Product : " + body.getProvider() + "-" + body.getName()
+            String errorMessage = "Error while adding new API Product : " + provider + "-" + body.getName()
                     + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API Product location : " + body.getProvider() + "-"
+            String errorMessage = "Error while retrieving API Product location : " + provider + "-"
                     + body.getName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
