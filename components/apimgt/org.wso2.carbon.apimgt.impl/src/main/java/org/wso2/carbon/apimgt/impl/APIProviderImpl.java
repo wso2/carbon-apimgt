@@ -1766,7 +1766,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<API> sortedAPIs = new ArrayList<API>();
         for (String version : versions) {
             API otherApi = getAPI(new APIIdentifier(provider, apiName, version));
-            if (comparator.compare(otherApi, api) < 0 && !otherApi.getStatus().equals(APIStatus.RETIRED)) {
+            if (comparator.compare(otherApi, api) < 0 && !APIConstants.RETIRED.equals(otherApi.getStatus())) {
                 sortedAPIs.add(otherApi);
             }
         }
