@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -60,7 +61,7 @@ public class APIDTO  {
   
   private String destinationStatsEnabled = null;
   
-  @NotNull
+  
   private Boolean isDefaultVersion = null;
   
   public enum TypeEnum {
@@ -69,13 +70,13 @@ public class APIDTO  {
   
   private TypeEnum type = TypeEnum.HTTP;
   
-  @NotNull
+  
   private List<String> transport = new ArrayList<String>();
   
   
   private List<String> tags = new ArrayList<String>();
   
-  @NotNull
+  
   private List<String> policies = new ArrayList<String>();
   
   
@@ -93,7 +94,7 @@ public class APIDTO  {
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED, 
   };
-  @NotNull
+  
   private VisibilityEnum visibility = null;
   
   
@@ -154,7 +155,7 @@ public class APIDTO  {
   private List<APIEndpointDTO> endpoint = new ArrayList<APIEndpointDTO>();
   
   
-  private List<String> scopes = new ArrayList<String>();
+  private List<ScopeDTO> scopes = new ArrayList<ScopeDTO>();
   
   
   private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
@@ -300,7 +301,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("isDefaultVersion")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
@@ -326,7 +327,7 @@ public class APIDTO  {
   /**
    * Supported transports for the API (http and/or https).\n
    **/
-  @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https).\n")
+  @ApiModelProperty(value = "Supported transports for the API (http and/or https).\n")
   @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
@@ -350,7 +351,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("policies")
   public List<String> getPolicies() {
     return policies;
@@ -414,7 +415,7 @@ public class APIDTO  {
   /**
    * The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.
    **/
-  @ApiModelProperty(required = true, value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.")
+  @ApiModelProperty(value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
@@ -639,10 +640,10 @@ public class APIDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("scopes")
-  public List<String> getScopes() {
+  public List<ScopeDTO> getScopes() {
     return scopes;
   }
-  public void setScopes(List<String> scopes) {
+  public void setScopes(List<ScopeDTO> scopes) {
     this.scopes = scopes;
   }
 

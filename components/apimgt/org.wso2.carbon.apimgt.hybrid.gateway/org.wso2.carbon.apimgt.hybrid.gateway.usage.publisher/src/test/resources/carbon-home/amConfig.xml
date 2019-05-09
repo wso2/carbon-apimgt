@@ -27,12 +27,7 @@
         <Password>admin</Password>
         <EnableJWTCache>false</EnableJWTCache>
         <EnableKeyMgtValidationInfoCache>false</EnableKeyMgtValidationInfoCache>
-        <KeyValidatorClientType>ThriftClient</KeyValidatorClientType>
-        <ThriftClientPort>10397</ThriftClientPort>
-        <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
-        <ThriftServerPort>10397</ThriftServerPort>
-        <!--ThriftServerHost>localhost</ThriftServerHost-->
-        <EnableThriftServer>true</EnableThriftServer>
+        <KeyValidatorClientType>WSClient</KeyValidatorClientType>
         <ApplicationTokenScope>am_application_scope</ApplicationTokenScope>
         <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler</KeyValidationHandlerClassName>
         <TokenEndPointName>/oauth2/token</TokenEndPointName>

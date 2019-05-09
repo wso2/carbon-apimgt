@@ -254,7 +254,7 @@ public class APISynchronizer implements OnPremiseGatewayInitListener {
         while (pagination != null && pagination.getOffset() + pagination.getLimit() < pagination.getTotal()) {
             int newOffset = pagination.getOffset() + pagination.getLimit();
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving paginated APIs from offset value:" + newOffset + " to: " +
+                log.debug("Retrieving paginated APIs from offset value: " + newOffset + " to: " +
                           (newOffset + pagination.getLimit()));
             }
             summarizedApiDTOList = getAPIList(accessTokenDTO, newOffset);

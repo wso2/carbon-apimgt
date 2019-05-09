@@ -27,7 +27,7 @@ import ChipInput from 'material-ui-chip-input';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import moment from 'moment';
-import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 
 import { Progress } from 'AppComponents/Shared';
@@ -64,6 +64,10 @@ const styles = () => ({
     endpointsWrapper: {
         display: 'flex',
         justifyContent: 'flex-start',
+    },
+    button: {
+        width: 50,
+        marginTop: 20,
     },
 });
 /**
@@ -204,10 +208,13 @@ class Overview extends Component {
      */
     handleAddAdditionalProperties() {
         this.setState({
-            additionalProperties: [...this.state.additionalProperties, {
-                key: '',
-                value: '',
-            }],
+            additionalProperties: [
+                ...this.state.additionalProperties,
+                {
+                    key: '',
+                    value: '',
+                },
+            ],
         });
     }
 
@@ -262,11 +269,24 @@ class Overview extends Component {
         this.setState({ [sEvent.target.id]: sEvent.target.value });
     }
 
+    renderAdditionalProperties(additionalProperties) {
+        const { isEditable } = this.props;
+        const items = [];
+        for (const key in additionalProperties) {
+            if (Object.prototype.hasOwnProperty.call(additionalProperties, key)) {
+                items.push(<AdditionalProperty
+                    property={{ key, value: additionalProperties[key] }}
+                    isEditable={isEditable}
+                    onDelete={this.handleDeleteAdditionalProperties}
+                />);
+            }
+        }
+        return items;
+    }
     /** @inheritDoc */
     render() {
-        const { api, isEditable } = this.props;
+        const { api, isEditable, classes } = this.props;
         const { additionalProperties } = this.state;
-
         if (!api) {
             return <Progress />;
         }
@@ -411,31 +431,26 @@ class Overview extends Component {
                 </APIPropertyField>
                 {additionalProperties && (
                     <React.Fragment>
-                        <Grid item >
+                        <Grid item>
                             <Typography variant='headline'> Additional Properties</Typography>
                             <Divider />
                         </Grid>
-                        { additionalProperties
-                            .map(property => (<AdditionalProperty
-                                property={property}
-                                isEditable={isEditable}
-                                onDelete={this.handleDeleteAdditionalProperties}
-                            />))
-                        }
-                        <IconButton
+                        <Button
+                            variant='outlined'
                             id='add'
                             aria-label='Add'
                             onClick={this.handleAddAdditionalProperties}
+                            className={classes.button}
                         >
                             <AddIcon id='1' />
-                        </IconButton>
+                        </Button>
+                        {this.renderAdditionalProperties(additionalProperties)}
                     </React.Fragment>
                 )}
             </Grid>
         );
     }
 }
-
 
 Overview.defaultProps = {
     isEditable: false,
@@ -445,10 +460,7 @@ Overview.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
-        additionalProperties: PropTypes.shape({
-            key: PropTypes.string,
-            value: PropTypes.string,
-        }).isRequired,
+        additionalProperties: PropTypes.shape({}).isRequired,
     }).isRequired,
     isEditable: PropTypes.bool,
 };

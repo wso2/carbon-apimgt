@@ -21,7 +21,7 @@
             
         </jaxrs:serviceBeans>
         <jaxrs:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:server>
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.throttle.service.interceptors.auth.BasicAuthenticationInterceptor" />

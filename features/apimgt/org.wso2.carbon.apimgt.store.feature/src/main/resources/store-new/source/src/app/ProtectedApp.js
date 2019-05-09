@@ -86,10 +86,20 @@ export default class ProtectedApp extends Component {
     componentDidMount() {
         ConfigManager.getConfigs().environments.then(response => {
             this.environments = response.data.environments;
-            this.handleEnvironmentQueryParam();
+            //this.handleEnvironmentQueryParam(); todo: do we really need to handle environment query params here ?
         }).catch(error => {
             console.error('Error while receiving environment configurations : ', error);
         });
+        const user = AuthManager.getUser();
+        if (user) {
+            this.setState({ user });
+        } else {
+            // If no user data available , Get the user info from existing token information
+            // This could happen when OAuth code authentication took place and could send
+            // user information via redirection
+            const userPromise = AuthManager.getUserFromToken();
+            userPromise.then(loggedUser => this.setState({ user: loggedUser }));
+        }
     }
 
     /**
@@ -151,7 +161,7 @@ export default class ProtectedApp extends Component {
                     </MuiThemeProvider>
                 </IntlProvider>
         );
-        if (AuthManager.getUser(environmentName)) {
+        if (AuthManager.getUser()) {
             return (
                 <IntlProvider locale={language} messages={this.state.messages}>
                     <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>

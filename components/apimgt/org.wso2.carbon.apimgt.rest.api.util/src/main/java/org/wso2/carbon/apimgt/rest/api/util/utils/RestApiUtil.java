@@ -24,6 +24,9 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -75,6 +78,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -310,6 +314,19 @@ public class RestApiUtil {
         }
     }
 
+    /**
+     * Returns date in RFC3339 format.
+     * Example: 2008-11-13T12:23:30-08:00
+     * 
+     * @param date Date object
+     * @return date string in RFC3339 format.
+     */
+    public static String getRFC3339Date(Date date) {
+        DateTimeFormatter jodaDateTimeFormatter = ISODateTimeFormat.dateTime();
+        DateTime dateTime = new DateTime(date);
+        return jodaDateTimeFormatter.print(dateTime);
+    }
+            
     /**
      * Returns a new InternalServerErrorException
      *
