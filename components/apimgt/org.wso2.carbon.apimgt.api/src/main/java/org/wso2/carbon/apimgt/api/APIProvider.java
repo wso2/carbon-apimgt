@@ -1146,4 +1146,14 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void updateAPIProduct(APIProduct product, String user) throws APIManagementException;
+    
+    /**
+     * Check whether api product exists for the given name and the provider
+     * @param productName product name 
+     * @param provider provider name
+     * @param tenantDomain tenant
+     * @return boolean
+     * @throws APIManagementException
+     */
+    boolean isProductExist(String productName, String provider, String tenantDomain) throws APIManagementException;
 }
