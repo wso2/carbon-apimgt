@@ -1,12 +1,11 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -18,14 +17,32 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class APIProductDetailedDTO extends APIProductInfoDTO {
+public class APIProductDTO  {
   
   
   
-  private String apiProductDefinition = null;
+  private String id = null;
+  
+  @NotNull
+  private String name = null;
+  
+  
+  private String description = null;
+  
+  
+  private String provider = null;
+  
+  
+  private String thumbnailUri = null;
+  
+  public enum StateEnum {
+     CREATED,  PUBLISHED, 
+  };
+  
+  private StateEnum state = null;
   
   public enum VisibilityEnum {
-     PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
+     PUBLIC,  PRIVATE,  RESTRICTED, 
   };
   
   private VisibilityEnum visibility = null;
@@ -37,7 +54,7 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
   private List<String> visibleTenants = new ArrayList<String>();
   
   
-  private List<String> tiers = new ArrayList<String>();
+  private List<String> policies = new ArrayList<String>();
   
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
@@ -59,22 +76,86 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
 
   
   /**
-   * Swagger definition of the API Product which contains details about URI templates and scopes\n
+   * UUID of the api product\n
    **/
-  @ApiModelProperty(value = "Swagger definition of the API Product which contains details about URI templates and scopes\n")
-  @JsonProperty("apiProductDefinition")
-  public String getApiProductDefinition() {
-    return apiProductDefinition;
+  @ApiModelProperty(value = "UUID of the api product\n")
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
-  public void setApiProductDefinition(String apiProductDefinition) {
-    this.apiProductDefinition = apiProductDefinition;
+  public void setId(String id) {
+    this.id = id;
   }
 
   
   /**
-   * The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
+   * Name of the API Product
    **/
-  @ApiModelProperty(value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.")
+  @ApiModelProperty(required = true, value = "Name of the API Product")
+  @JsonProperty("name")
+  public String getName() {
+    return name;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  
+  /**
+   * A brief description about the API
+   **/
+  @ApiModelProperty(value = "A brief description about the API")
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
+  }
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  
+  /**
+   * If the provider value is not given, the user invoking the API will be used as the provider.\n
+   **/
+  @ApiModelProperty(value = "If the provider value is not given, the user invoking the API will be used as the provider.\n")
+  @JsonProperty("provider")
+  public String getProvider() {
+    return provider;
+  }
+  public void setProvider(String provider) {
+    this.provider = provider;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("thumbnailUri")
+  public String getThumbnailUri() {
+    return thumbnailUri;
+  }
+  public void setThumbnailUri(String thumbnailUri) {
+    this.thumbnailUri = thumbnailUri;
+  }
+
+  
+  /**
+   * State of the API product. Only published api products are visible on the store\n
+   **/
+  @ApiModelProperty(value = "State of the API product. Only published api products are visible on the store\n")
+  @JsonProperty("state")
+  public StateEnum getState() {
+    return state;
+  }
+  public void setState(StateEnum state) {
+    this.state = state;
+  }
+
+  
+  /**
+   * The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.
+   **/
+  @ApiModelProperty(value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
@@ -110,15 +191,14 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
 
   
   /**
-   * The subscription tiers selected for the particular API Product
    **/
-  @ApiModelProperty(value = "The subscription tiers selected for the particular API Product")
-  @JsonProperty("tiers")
-  public List<String> getTiers() {
-    return tiers;
+  @ApiModelProperty(value = "")
+  @JsonProperty("policies")
+  public List<String> getPolicies() {
+    return policies;
   }
-  public void setTiers(List<String> tiers) {
-    this.tiers = tiers;
+  public void setPolicies(List<String> policies) {
+    this.policies = policies;
   }
 
   
@@ -189,13 +269,18 @@ public class APIProductDetailedDTO extends APIProductInfoDTO {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIProductDetailedDTO {\n");
-    sb.append("  " + super.toString()).append("\n");
-    sb.append("  apiProductDefinition: ").append(apiProductDefinition).append("\n");
+    sb.append("class APIProductDTO {\n");
+    
+    sb.append("  id: ").append(id).append("\n");
+    sb.append("  name: ").append(name).append("\n");
+    sb.append("  description: ").append(description).append("\n");
+    sb.append("  provider: ").append(provider).append("\n");
+    sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
+    sb.append("  state: ").append(state).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
-    sb.append("  tiers: ").append(tiers).append("\n");
+    sb.append("  policies: ").append(policies).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
     sb.append("  additionalProperties: ").append(additionalProperties).append("\n");

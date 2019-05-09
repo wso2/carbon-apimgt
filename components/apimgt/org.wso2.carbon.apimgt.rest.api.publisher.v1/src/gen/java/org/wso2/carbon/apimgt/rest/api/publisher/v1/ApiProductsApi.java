@@ -1,18 +1,18 @@
-package org.wso2.carbon.apimgt.rest.api.publisher;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.ApiProductsApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApiProductsApiServiceFactory;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.factories.ApiProductsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import java.io.File;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductDetailedDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 
 import java.util.List;
 
@@ -46,10 +46,9 @@ public class ApiProductsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response apiProductsApiProductIdDelete(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
-    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apiProductsApiProductIdDelete(apiProductId,ifMatch,ifUnmodifiedSince);
+    return delegate.apiProductsApiProductIdDelete(apiProductId,ifMatch);
     }
     @GET
     @Path("/{apiProductId}/documents/{documentId}/content")
@@ -70,10 +69,9 @@ public class ApiProductsApi  {
     public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Document Identifier\n",required=true ) @PathParam("documentId")  String documentId,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdDocumentsDocumentIdContentGet(apiProductId,documentId,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apiProductsApiProductIdDocumentsDocumentIdContentGet(apiProductId,documentId,accept,ifNoneMatch);
     }
     @POST
     @Path("/{apiProductId}/documents/{documentId}/content")
@@ -91,14 +89,12 @@ public class ApiProductsApi  {
 
     public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Document Identifier\n",required=true ) @PathParam("documentId")  String documentId,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Document to upload") @Multipart(value = "file", required = false) InputStream fileInputStream,
     @ApiParam(value = "Document to upload : details") @Multipart(value = "file" , required = false) Attachment fileDetail,
     @ApiParam(value = "Inline content of the document" )@Multipart(value = "inlineContent", required = false)  String inlineContent,
-    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apiProductsApiProductIdDocumentsDocumentIdContentPost(apiProductId,documentId,contentType,fileInputStream,fileDetail,inlineContent,ifMatch,ifUnmodifiedSince);
+    return delegate.apiProductsApiProductIdDocumentsDocumentIdContentPost(apiProductId,documentId,fileInputStream,fileDetail,inlineContent,ifMatch);
     }
     @DELETE
     @Path("/{apiProductId}/documents/{documentId}")
@@ -114,10 +110,9 @@ public class ApiProductsApi  {
 
     public Response apiProductsApiProductIdDocumentsDocumentIdDelete(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Document Identifier\n",required=true ) @PathParam("documentId")  String documentId,
-    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apiProductsApiProductIdDocumentsDocumentIdDelete(apiProductId,documentId,ifMatch,ifUnmodifiedSince);
+    return delegate.apiProductsApiProductIdDocumentsDocumentIdDelete(apiProductId,documentId,ifMatch);
     }
     @GET
     @Path("/{apiProductId}/documents/{documentId}")
@@ -136,10 +131,9 @@ public class ApiProductsApi  {
     public Response apiProductsApiProductIdDocumentsDocumentIdGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Document Identifier\n",required=true ) @PathParam("documentId")  String documentId,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdDocumentsDocumentIdGet(apiProductId,documentId,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apiProductsApiProductIdDocumentsDocumentIdGet(apiProductId,documentId,accept,ifNoneMatch);
     }
     @PUT
     @Path("/{apiProductId}/documents/{documentId}")
@@ -158,11 +152,9 @@ public class ApiProductsApi  {
     public Response apiProductsApiProductIdDocumentsDocumentIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Document Identifier\n",required=true ) @PathParam("documentId")  String documentId,
     @ApiParam(value = "Document object that needs to be added\n" ,required=true ) DocumentDTO body,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apiProductsApiProductIdDocumentsDocumentIdPut(apiProductId,documentId,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.apiProductsApiProductIdDocumentsDocumentIdPut(apiProductId,documentId,body,ifMatch);
     }
     @GET
     @Path("/{apiProductId}/documents")
@@ -182,7 +174,7 @@ public class ApiProductsApi  {
     @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
     return delegate.apiProductsApiProductIdDocumentsGet(apiProductId,limit,offset,accept,ifNoneMatch);
     }
@@ -196,19 +188,18 @@ public class ApiProductsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
+        @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n\n######################################################\n") })
 
     public Response apiProductsApiProductIdDocumentsPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
-    @ApiParam(value = "Document object that needs to be added\n" ,required=true ) DocumentDTO body,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
+    @ApiParam(value = "Document object that needs to be added\n" ,required=true ) DocumentDTO body)
     {
-    return delegate.apiProductsApiProductIdDocumentsPost(apiProductId,body,contentType);
+    return delegate.apiProductsApiProductIdDocumentsPost(apiProductId,body);
     }
     @GET
     @Path("/{apiProductId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get details of an API Product", notes = "Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API to retrive it.\n", response = APIProductDetailedDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Get details of an API Product", notes = "Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API to retrive it.\n", response = APIProductDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nRequested API Product is returned\n"),
         
@@ -220,16 +211,15 @@ public class ApiProductsApi  {
 
     public Response apiProductsApiProductIdGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdGet(apiProductId,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apiProductsApiProductIdGet(apiProductId,accept,ifNoneMatch);
     }
     @PUT
     @Path("/{apiProductId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update an API product", notes = "This operation can be used to update an existing API product.\nBut the properties `name`, `provider`\n", response = APIProductDetailedDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Update an API product", notes = "This operation can be used to update an existing API product.\nBut the properties `name`, `provider`\n", response = APIProductDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with updated API product object\n"),
         
@@ -242,12 +232,10 @@ public class ApiProductsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response apiProductsApiProductIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
-    @ApiParam(value = "API object that needs to be added\n" ,required=true ) APIProductDetailedDTO body,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "API object that needs to be added\n" ,required=true ) APIProductDTO body,
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apiProductsApiProductIdPut(apiProductId,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.apiProductsApiProductIdPut(apiProductId,body,ifMatch);
     }
     @GET
     @Path("/{apiProductId}/swagger")
@@ -265,10 +253,9 @@ public class ApiProductsApi  {
 
     public Response apiProductsApiProductIdSwaggerGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdSwaggerGet(apiProductId,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apiProductsApiProductIdSwaggerGet(apiProductId,accept,ifNoneMatch);
     }
     @PUT
     @Path("/{apiProductId}/swagger")
@@ -288,11 +275,9 @@ public class ApiProductsApi  {
 
     public Response apiProductsApiProductIdSwaggerPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Swagger definition of the API product", required=true )@Multipart(value = "apiDefinition")  String apiDefinition,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apiProductsApiProductIdSwaggerPut(apiProductId,apiDefinition,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.apiProductsApiProductIdSwaggerPut(apiProductId,apiDefinition,ifMatch);
     }
     @GET
     @Path("/{apiProductId}/thumbnail")
@@ -310,10 +295,9 @@ public class ApiProductsApi  {
 
     public Response apiProductsApiProductIdThumbnailGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdThumbnailGet(apiProductId,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apiProductsApiProductIdThumbnailGet(apiProductId,accept,ifNoneMatch);
     }
     @POST
     @Path("/{apiProductId}/thumbnail")
@@ -332,16 +316,14 @@ public class ApiProductsApi  {
     public Response apiProductsApiProductIdThumbnailPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Image to upload") @Multipart(value = "file") InputStream fileInputStream,
     @ApiParam(value = "Image to upload : details") @Multipart(value = "file" ) Attachment fileDetail,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apiProductsApiProductIdThumbnailPost(apiProductId,fileInputStream,fileDetail,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.apiProductsApiProductIdThumbnailPost(apiProductId,fileInputStream,fileDetail,ifMatch);
     }
     @GET
     
     @Consumes({ "application/json" })
-    @Produces({ "application/json", "application/gzip" })
+    @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve/Search API Products\n", notes = "This operation provides you a list of available API Products qualifying under a given search condition.\n\nEach retrieved API Product is represented with a minimal amount of attributes. If you want to get complete details of an API Product, you need to use **Get details of an API Product** operation.\n", response = APIProductListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nList of qualifying API Products is returned.\n"),
@@ -354,17 +336,16 @@ public class ApiProductsApi  {
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
     @ApiParam(value = "") @QueryParam("query")  String query,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Defines whether the returned response should contain full details of API\n") @QueryParam("expand")  Boolean expand,
-    @ApiParam(value = "Tenant domain, whose API Products should be retrieved. If not specified, the logged in user's tenant domain will\nbe considered for this.\n") @QueryParam("tenantDomain")  String tenantDomain)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Defines whether the returned response should contain full details of API\n") @QueryParam("expand")  Boolean expand)
     {
-    return delegate.apiProductsGet(limit,offset,query,accept,ifNoneMatch,expand,tenantDomain);
+    return delegate.apiProductsGet(limit,offset,query,accept,ifNoneMatch,expand);
     }
     @POST
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Create a new API Product", notes = "This operation can be used to create a new API Product specifying the details of the API Product in the payload. \n", response = APIProductDetailedDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Create a new API Product", notes = "This operation can be used to create a new API Product specifying the details of the API Product in the payload. \n", response = APIProductDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n"),
         
@@ -372,10 +353,9 @@ public class ApiProductsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response apiProductsPost(@ApiParam(value = "API object that needs to be added\n" ,required=true ) APIProductDetailedDTO body,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
+    public Response apiProductsPost(@ApiParam(value = "API object that needs to be added\n" ,required=true ) APIProductDTO body)
     {
-    return delegate.apiProductsPost(body,contentType);
+    return delegate.apiProductsPost(body);
     }
 }
 

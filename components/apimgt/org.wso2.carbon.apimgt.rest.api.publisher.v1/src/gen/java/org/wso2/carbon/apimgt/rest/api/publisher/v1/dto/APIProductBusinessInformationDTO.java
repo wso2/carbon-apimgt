@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 
 import io.swagger.annotations.*;

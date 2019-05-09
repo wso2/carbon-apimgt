@@ -1,9 +1,9 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListPaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
