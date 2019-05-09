@@ -240,8 +240,8 @@ public class URITemplate implements Serializable{
     public Scope getScope() {
         return scope;
     }
-    public List<Scope> getScopes() {
-        return scopes;
+    public Scope getScopes() {
+        return scope;
     }
 
     public void setScope(Scope scope) {
