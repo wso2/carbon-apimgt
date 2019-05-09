@@ -520,7 +520,16 @@ public class APIMappingUtil {
         }
 
         if (!APIConstants.APIType.WS.equals(model.getType())) {
+            if (StringUtils.isEmpty(model.getTransports())) {
+                List<String> transports = new ArrayList<>();
+                transports.add(APIConstants.HTTPS_PROTOCOL);
+
+                dto.setTransport(transports);
+            }
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        }
+        if (StringUtils.isEmpty(model.getTransports())) {
+            dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
 
