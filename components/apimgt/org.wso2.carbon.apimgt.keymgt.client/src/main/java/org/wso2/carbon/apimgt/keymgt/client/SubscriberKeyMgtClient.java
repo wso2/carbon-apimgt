@@ -42,13 +42,12 @@ public class SubscriberKeyMgtClient {
     private APIKeyMgtSubscriberServiceStub subscriberServiceStub;
     private volatile String cookie;
 
-    public      SubscriberKeyMgtClient(String backendServerURL, String username, String password)
-            throws Exception {
+    public SubscriberKeyMgtClient(String backendServerURL, String username, String password) throws Exception {
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
-                    (getClientRepoLocation(), getAxis2ClientXmlLocation());
-            subscriberServiceStub = new APIKeyMgtSubscriberServiceStub(
-                    ctx, backendServerURL + "APIKeyMgtSubscriberService");
+            ConfigurationContext ctx = ConfigurationContextFactory
+                    .createConfigurationContextFromFileSystem(getClientRepoLocation(), getAxis2ClientXmlLocation());
+            subscriberServiceStub = new APIKeyMgtSubscriberServiceStub(ctx,
+                    backendServerURL + "APIKeyMgtSubscriberService");
             ServiceClient client = subscriberServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
