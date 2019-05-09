@@ -216,7 +216,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                 </div>
                <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
                <div class="btn-group" role="group">
-                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next, next)%>"/>
+                    <input type="button" id="actionButton<%=String(i)%>" <%if((api.availableTiers == null || api.availableTiers == "") && api.apisecurity_oauth2 == "checked" ){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next, next)%>"/>
                 </div>
                <%} else {%>
                <div class="btn-group" role="group">

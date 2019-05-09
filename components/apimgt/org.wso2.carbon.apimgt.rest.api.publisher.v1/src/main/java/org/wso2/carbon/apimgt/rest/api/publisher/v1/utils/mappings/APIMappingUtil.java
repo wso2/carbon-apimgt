@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -35,13 +38,15 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -49,9 +54,9 @@ public class APIMappingUtil {
 
     private static final Log log = LogFactory.getLog(APIMappingUtil.class);
 
-    public static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException{
+    public static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException {
 
-        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+//        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
 
         String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
 
@@ -82,7 +87,7 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
-//        model.setEndpointConfig(dto.getEndpointConfig());todo
+        model.setEndpointConfig(getEndpointConfig(dto.getEndpoint()));
         model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
 //        model.setThumbnailUrl(dto.getThumbnailUri());todo
@@ -123,14 +128,13 @@ public class APIMappingUtil {
         if (dto.getSubscriptionAvailableTenants() != null) {
             model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
+        // scopes
+        Set<Scope> scopes = getScopes(dto);
+        model.setScopes(scopes);
 
-            //URI Templates
-            Set<URITemplate> uriTemplates = getURITemplates(dto.getOperations());
-            model.setUriTemplates(uriTemplates);
-
-            // scopes
-            Set<Scope> scopes = getScopes(dto.getScopes());
-            model.setScopes(scopes);
+        //URI Templates
+        Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
+        model.setUriTemplates(uriTemplates);
 
         if (dto.getTags() != null) {
             Set<String> apiTags = new HashSet<>(dto.getTags());
@@ -206,18 +210,48 @@ public class APIMappingUtil {
         setEndpointSecurityFromApiDTOToModel(dto, model);
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
-//        model.setApiSecurity(dto.getApiSecurity());todo
+        model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         return model;
+    }
+
+    /**
+     * Returns the APIIdentifier given the uuid
+     *
+     * @param apiId                 API uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return APIIdentifier which represents the given id
+     * @throws APIManagementException
+     */
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        return getAPIInfoFromUUID(apiId, requestedTenantDomain).getId();
+    }
+
+    /**
+     * Returns an API with minimal info given the uuid.
+     *
+     * @param apiUUID                 API uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
+            throws APIManagementException {
+        API api;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        return api;
     }
 
     /**
      * Converts a List object of APIs into a DTO
      *
      * @param apiList List of APIs
-     * @param expand defines whether APIListDTO should contain APIINFODTOs or APIDTOs
+     * @param expand  defines whether APIListDTO should contain APIINFODTOs or APIDTOs
      * @return APIListDTO object containing APIDTOs
      */
     public static APIListDTO fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
+
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiList != null && !expand) {
@@ -242,6 +276,7 @@ public class APIMappingUtil {
      * @return a minimal representation DTO
      */
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
+
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
         String context = api.getContextTemplate();
@@ -261,7 +296,6 @@ public class APIMappingUtil {
         }
         return apiInfoDTO;
     }
-
 
     /**
      * Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
@@ -403,7 +437,7 @@ public class APIMappingUtil {
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
-//        dto.setEndpointConfig(model.getEndpointConfig());todo
+        dto.setEndpoint(getAPIEndpointDTO(model.getEndpoint()));
       /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
             dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
         }*/
@@ -462,11 +496,9 @@ public class APIMappingUtil {
         }
 
         //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition;
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
 
-        apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
-
-//        dto.setApiDefinition(apiSwaggerDefinition); todo
+        dto.setOperations(getOperationsFromSwaggerDef(apiSwaggerDefinition));
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -489,7 +521,16 @@ public class APIMappingUtil {
         }
 
         if (!APIConstants.APIType.WS.equals(model.getType())) {
+            if (StringUtils.isEmpty(model.getTransports())) {
+                List<String> transports = new ArrayList<>();
+                transports.add(APIConstants.HTTPS_PROTOCOL);
+
+                dto.setTransport(transports);
+            }
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        }
+        if (StringUtils.isEmpty(model.getTransports())) {
+            dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
 
@@ -674,7 +715,72 @@ public class APIMappingUtil {
         }
     }
 
+    /**
+     * Return the REST API DTO representation of API Lifecycle state information
+     * 
+     * @param apiLCData API lifecycle state information
+     * @return REST API DTO representation of API Lifecycle state information
+     */
+    public static LifecycleStateDTO fromLifecycleModelToDTO (Map<String, Object> apiLCData) {
+        LifecycleStateDTO lifecycleStateDTO = new LifecycleStateDTO();
+        
+        String currentState = (String) apiLCData.get(APIConstants.LC_STATUS);
+        lifecycleStateDTO.setState(currentState);
+        
+        String[] nextStates = (String[])apiLCData.get(APIConstants.LC_NEXT_STATES);
+        if (nextStates != null) {
+            List<LifecycleStateAvailableTransitionsDTO> transitionDTOList = new ArrayList<>();
+            for (String state: nextStates) {
+                LifecycleStateAvailableTransitionsDTO transitionDTO = new LifecycleStateAvailableTransitionsDTO();
+                transitionDTO.setEvent(state);
+                //todo: Set target state properly
+                transitionDTO.setTargetState("");
+                transitionDTOList.add(transitionDTO);
+            }
+            lifecycleStateDTO.setAvailableTransitions(transitionDTOList);
+        }
+        
+        List checkListItems = (List)apiLCData.get(APIConstants.LC_CHECK_ITEMS);
+        if (checkListItems != null) {
+            List<LifecycleStateCheckItemsDTO> checkItemsDTOList = new ArrayList<>();
+            for (Object checkListItemObj: checkListItems) {
+                CheckListItem checkListItem = (CheckListItem)checkListItemObj;
+                LifecycleStateCheckItemsDTO checkItemsDTO = new LifecycleStateCheckItemsDTO();
+                checkItemsDTO.setName(checkListItem.getName());
+                checkItemsDTO.setValue(Boolean.getBoolean(checkListItem.getValue()));
+                //todo: Set targets properly
+                checkItemsDTO.setRequiredStates(new ArrayList<>());
 
+                checkItemsDTOList.add(checkItemsDTO);
+            }
+            lifecycleStateDTO.setCheckItems(checkItemsDTOList);
+        }
+        return lifecycleStateDTO;
+    }
+
+
+    /**
+     * Return the REST API DTO representation of API Lifecycle history information
+     *
+     * @param lifeCycleEvents API lifecycle history information
+     * @return REST API DTO representation of API Lifecycle history information
+     */
+    public static LifecycleHistoryDTO fromLifecycleHistoryModelToDTO (List<LifeCycleEvent> lifeCycleEvents) {
+        LifecycleHistoryDTO historyDTO = new LifecycleHistoryDTO();
+        historyDTO.setCount(lifeCycleEvents.size());
+        for (LifeCycleEvent event: lifeCycleEvents) {
+            LifecycleHistoryItemDTO historyItemDTO = new LifecycleHistoryItemDTO();
+            historyItemDTO.setPostState(event.getNewStatus());
+            historyItemDTO.setPreviousState(event.getOldStatus());
+            historyItemDTO.setUser(event.getUserId());
+            
+            String updatedTime = RestApiUtil.getRFC3339Date(event.getDate());
+            historyItemDTO.setUpdatedTime(updatedTime);
+            historyDTO.getList().add(historyItemDTO);
+        }
+        return historyDTO;
+    }
+    
     /**
      * This method returns URI templates according to the given list of operations
      *
@@ -682,85 +788,99 @@ public class APIMappingUtil {
      * @return URI Templates
      * @throws APIManagementException
      */
-    public static Set<URITemplate> getURITemplates(List<APIOperationsDTO> operations) throws APIManagementException {
+    public static Set<URITemplate> getURITemplates(API model, List<APIOperationsDTO> operations) throws APIManagementException {
+
         boolean isHttpVerbDefined = false;
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
-            if (operations != null) {
-                for (APIOperationsDTO operation : operations) {
-                    String uriTempVal = operation.getUritemplate();
-                    //if url template is a custom attribute "^x-" ignore.
-                    if (uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")) {
-                        continue;
-                    }
-                    String httpVerb = operation.getHttpVerb();
-                    List<String> scopeList = operation.getScopes();
-                    Scope scope = new Scope();
-                    if (scopeList != null && scopeList.size() > 0) {
-                        // There is only one scope is supported at the moment.
-                        // Hence, taking only the first scope.
-                        scope.setName(scopeList.get(0));
-                    }
+        Set<Scope> scopesToAdd = new HashSet<>();
 
-                    if (APIConstants.SWAGGER_SUMMARY.equals(httpVerb.toLowerCase())
-                            || APIConstants.SWAGGER_DESCRIPTION.equals(httpVerb.toLowerCase())
-                            || APIConstants.SWAGGER_SERVERS.equals(httpVerb.toLowerCase())
-                            || APIConstants.PARAMETERS.equals(httpVerb.toLowerCase())
-                            || httpVerb.startsWith("x-")
-                            || httpVerb.startsWith("X-")) {
-                        // openapi 3.x allow 'summary', 'description' and extensions in PathItem Object.
-                        // which we are not interested at this point
-                        continue;
-                    }
-                    //Only continue for supported operations
-                    else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
-                        isHttpVerbDefined = true;
-                        URITemplate template = new URITemplate();
-                        String authType =  operation.getAuthType();
-                        if ("Application & Application User".equals(authType)) {
-                            authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                        } else if ("Application User".equals(authType)) {
-                            authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
-                        } else if ("None".equals(authType)) {
-                            authType = APIConstants.AUTH_NO_AUTHENTICATION;
-                        } else if ("Application".equals(authType)) {
-                            authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
-                        } else {
-                            authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+        if (operations != null) {
+            for (APIOperationsDTO operation : operations) {
+                URITemplate template = new URITemplate();
+
+                String uriTempVal = operation.getUritemplate();
+                //if url template is a custom attribute "^x-" ignore.
+                if (uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")) {
+                    continue;
+                }
+                String httpVerb = operation.getHttpVerb();
+                List<String> scopeList = operation.getScopes();
+                if (scopeList != null) {
+                    for (String scopeKey : scopeList) {
+                        for (Scope definedScope : model.getScopes()) {
+                            if (definedScope.getKey().equalsIgnoreCase(scopeKey)) {
+                                Scope scope = new Scope();
+                                scope.setKey(scopeKey);
+                                scope.setName(definedScope.getName());
+                                scope.setDescription(definedScope.getDescription());
+                                scope.setRoles(definedScope.getRoles());
+                                template.setScopes(scope);
+                                template.setScope(scope);
+
+                            }
                         }
-                        template.setThrottlingTier(operation.getPolicy());
-                        template.setThrottlingTiers((String) operation.getPolicy());
-//                        template.setMediationScript((String) operation.get(APIConstants
-//                                .SWAGGER_X_MEDIATION_SCRIPT));
-//                        template.setMediationScripts(httpVerb.toUpperCase(), (String) operation.get(
-//                                APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
-                        template.setUriTemplate(uriTempVal);
-                        template.setHTTPVerb(httpVerb.toUpperCase());
-                        template.setHttpVerbs(httpVerb.toUpperCase());
-                        template.setAuthType(authType);
-                        template.setAuthTypes(authType);
-                        template.setScope(scope);
-                        template.setScopes(scope);
-
-                        uriTemplates.add(template);
-                    } else {
-                        handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                                + "' is invalid");
                     }
+                }
+
+                if (APIConstants.SWAGGER_SUMMARY.equals(httpVerb.toLowerCase())
+                        || APIConstants.SWAGGER_DESCRIPTION.equals(httpVerb.toLowerCase())
+                        || APIConstants.SWAGGER_SERVERS.equals(httpVerb.toLowerCase())
+                        || APIConstants.PARAMETERS.equals(httpVerb.toLowerCase())
+                        || httpVerb.startsWith("x-")
+                        || httpVerb.startsWith("X-")) {
+                    // openapi 3.x allow 'summary', 'description' and extensions in PathItem Object.
+                    // which we are not interested at this point
+                    continue;
+                }
+                //Only continue for supported operations
+                else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                    isHttpVerbDefined = true;
+                    String authType = operation.getAuthType();
+                    if ("Application & Application User".equals(authType)) {
+                        authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                    } else if ("Application User".equals(authType)) {
+                        authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
+                    } else if ("None".equals(authType)) {
+                        authType = APIConstants.AUTH_NO_AUTHENTICATION;
+                    } else if ("Application".equals(authType)) {
+                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                    } else {
+                        authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                    }
+                    template.setThrottlingTier(operation.getPolicy());
+                    template.setThrottlingTiers(operation.getPolicy());
+//                        template.setMediationScript((String) operation.get(APIConstants todo
+//                                .SWAGGER_X_MEDIATION_SCRIPT));
+//                        template.setMediationScripts(httpVerb.toUpperCase(), (String) operation.get( todo
+//                                APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+                    template.setUriTemplate(uriTempVal);
+                    template.setHTTPVerb(httpVerb.toUpperCase());
+                    template.setHttpVerbs(httpVerb.toUpperCase());
+                    template.setAuthType(authType);
+                    template.setAuthTypes(authType);
+//                    template.setScope(scope);moved to above
+//                    template.setScopes(scope);
+
+                    uriTemplates.add(template);
+                } else {
+                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
+                            + "' is invalid");
+                }
 //                    JSONObject path = (JSONObject) paths.get(uriTempVal);todo
-                    // Following code check is done to handle $ref objects supported by swagger spec
-                    // See field types supported by "Path Item Object" in swagger spec.
-              /*      if (operation.("$ref")) {
+                // Following code check is done to handle $ref objects supported by swagger spec
+                // See field types supported by "Path Item Object" in swagger spec.
+                   /* if (operation.("$ref")) {
                         log.info("Reference " + uriTempVal + " path object was ignored when generating URL template " +
                                 "for api \"" + api.getId().getApiName() + '\"');
                         continue;
                     }*/
 
-                    if (!isHttpVerbDefined) {
-                        handleException("Resource '" + uriTempVal + "' has global parameters without " +
-                                "HTTP methods");
-                    }
+                if (!isHttpVerbDefined) {
+                    handleException("Resource '" + uriTempVal + "' has global parameters without " +
+                            "HTTP methods");
                 }
             }
+        }
 
         return uriTemplates;
     }
@@ -768,22 +888,131 @@ public class APIMappingUtil {
     /**
      * This method returns the oauth scopes according to the given list of scopes
      *
-     * @param scopesList list of scopes
+     * @param apiDTO list of scopes
      * @return scope set
-     * @throws APIManagementException
      */
-    public static Set<Scope> getScopes(List<String> scopesList) throws APIManagementException {
-        Set<Scope> scopeSet = new LinkedHashSet<Scope>();
-        JSONObject swaggerObject;
-        JSONParser parser = new JSONParser();
-        for(String scp : scopesList){
+    public static Set<Scope> getScopes(APIDTO apiDTO) {
+
+        Set<Scope> scopeSet = new LinkedHashSet<>();
+        for (ScopeDTO scopeDTO : apiDTO.getScopes()) {
             Scope scope = new Scope();
-            scope.setName(scp);
+            scope.setKey(scopeDTO.getName());
+            scope.setName(scopeDTO.getName());
+            scope.setDescription(scopeDTO.getDescription());
+            scope.setRoles(String.join(",", scopeDTO.getBindings().getValues()));
             scopeSet.add(scope);
         }
         return scopeSet;
     }
-    
+
+    /**
+     * This method returns endpoints according to the given endpoint config
+     *
+     * @param endpoints list of endpoints given
+     * @return String endpoint config
+     */
+    public static String getEndpointConfig(List<APIEndpointDTO> endpoints) {
+
+        List<APIEndpoint> APIendpoints = new ArrayList<>(endpoints.size());
+        for (APIEndpointDTO apiEndpointDTO : endpoints) {
+            APIEndpoint apiEndpoint = new APIEndpoint();
+            apiEndpoint.setKey(apiEndpointDTO.getKey());
+            apiEndpoint.setType(apiEndpointDTO.getType());
+
+            EndpointSecurity endpointSecurity = new EndpointSecurity();
+            EndPointEndpointSecurityDTO endPointEndpointSecurityDTO = apiEndpointDTO.getInline().getEndpointSecurity();
+            endpointSecurity.setEnabled(endPointEndpointSecurityDTO.getEnabled());
+            endpointSecurity.setPassword(endPointEndpointSecurityDTO.getPassword());
+            endpointSecurity.setUsername(endPointEndpointSecurityDTO.getUsername());
+            endpointSecurity.setType(endPointEndpointSecurityDTO.getType());
+
+            EndPointDTO endPointDTO = apiEndpointDTO.getInline();
+            Endpoint endpoint = new Endpoint();
+            endpoint.setEndpointConfig(endPointDTO.getEndpointConfig());
+            endpoint.setName(endPointDTO.getName());
+            endpoint.setId(endPointDTO.getId());
+            endpoint.setType(endPointDTO.getType());
+            endpoint.setMaxTps(endPointDTO.getMaxTps());
+            endpoint.setEndpointSecurity(endpointSecurity);
+            apiEndpoint.setInline(endpoint);
+            APIendpoints.add(apiEndpoint);
+
+        }
+        return API.getEndpointConfigString(APIendpoints);
+    }
+
+    /**
+     * This method returns api security scheme as a comma seperated string
+     *
+     * @param securitySchemes api security scheme
+     * @return comma seperated string of api security schemes
+     */
+    public static String getSecurityScheme(List<String> securitySchemes) {
+
+        if (securitySchemes == null || securitySchemes.size() <= 0) {
+            return "";
+        }
+        StringBuilder apiSecurityScheme = new StringBuilder();
+        if (securitySchemes != null) {
+            for (String scheme : securitySchemes) {
+                apiSecurityScheme.append(scheme).append(",");
+            }
+            apiSecurityScheme.deleteCharAt(apiSecurityScheme.length() - 1);
+        }
+        return apiSecurityScheme.toString();
+    }
+
+    /**
+     * This method converts APIEndpoint model to corresponding APIEndpointDTO object
+     *
+     * @param apiEndpointsList list of api endpoints
+     * @return APIEndpointDTO List of apiEndpointDTO
+     */
+    public static List<APIEndpointDTO> getAPIEndpointDTO(List<APIEndpoint> apiEndpointsList) {
+
+        List<APIEndpointDTO> apiEndpointDTOList = new ArrayList<>(apiEndpointsList.size());
+
+        for (APIEndpoint apiEndpoint : apiEndpointsList) {
+            APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
+            Endpoint endpoint = apiEndpoint.getInline();
+            EndpointSecurity endpointSecurity = endpoint.getEndpointSecurity();
+            EndPointDTO endPointDTO = new EndPointDTO();
+
+            EndPointEndpointSecurityDTO endPointEndpointSecurityDTO = new EndPointEndpointSecurityDTO();
+
+            endPointEndpointSecurityDTO.setEnabled(endpointSecurity.getEnabled());
+            endPointEndpointSecurityDTO.setPassword(endpointSecurity.getPassword());
+            endPointEndpointSecurityDTO.setUsername(endpointSecurity.getUsername());
+            endPointEndpointSecurityDTO.setType(endpointSecurity.getType());
+
+            endPointDTO.setEndpointSecurity(endPointEndpointSecurityDTO);
+            endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
+            endPointDTO.setId(endpoint.getId());
+            endPointDTO.setMaxTps(endpoint.getMaxTps());
+            endPointDTO.setName(endpoint.getName());
+            endPointDTO.setType(endpoint.getType());
+
+            apiEndpointDTO.setInline(endPointDTO);
+            apiEndpointDTO.setKey(apiEndpoint.getKey());
+            apiEndpointDTO.setType(apiEndpoint.getType());
+
+            apiEndpointDTOList.add(apiEndpointDTO);
+        }
+
+        return apiEndpointDTOList;
+    }
+
+    private static List<APIOperationsDTO> getOperationsFromSwaggerDef(String swaggerDefinition) {
+//todo
+        List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
+        if (!StringUtils.isEmpty(swaggerDefinition)) {
+
+        }
+
+        return operationsDTOList;
+    }
+
+
     public static APIProductDTO fromAPIProducttoDTO(APIProduct product) {
         APIProductDTO productDto = new APIProductDTO();
         productDto.setName(product.getName());

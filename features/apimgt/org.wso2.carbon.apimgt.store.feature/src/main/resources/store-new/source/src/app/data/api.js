@@ -122,7 +122,7 @@ export default class API extends Resource {
 
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["API (Individual)"].get_apis__apiId__swagger(
+                return client.apis["APIs"].get_apis__apiId__swagger(
                     {apiId: id}, this._requestMetaData());
             }
         );
@@ -142,7 +142,7 @@ export default class API extends Resource {
     getApplication(id, callback = null) {
         let promise_get = this.client.then(
             (client) => {
-                return client.apis["Application (Individual)"].get_applications__applicationId_(
+                return client.apis["Applications"].get_applications__applicationId_(
                     {applicationId: id}, this._requestMetaData());
             }
         );

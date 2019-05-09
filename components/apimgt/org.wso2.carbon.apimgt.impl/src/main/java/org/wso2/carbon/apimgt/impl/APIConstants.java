@@ -531,12 +531,6 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
     public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
             + "ApplicationTokenDefaultValidityPeriod";
-    public static final int DEFAULT_THRIFT_PORT = 10397;
-    public static final int DEFAULT_THRIFT_CLIENT_CONNECTION_TIMEOUT = 10000;
-    public static final String API_KEY_VALIDATOR_THRIFT_CLIENT_PORT = API_KEY_VALIDATOR + "ThriftClientPort";
-    public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
-    public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
-    public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
 
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
@@ -572,11 +566,8 @@ public final class APIConstants {
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
     public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
 
-    public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
-    public static final String API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER = API_KEY_VALIDATOR + "EnableThriftServer";
-    public static final String API_KEY_VALIDATOR_THRIFT_CLIENT = "ThriftClient";
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
@@ -604,6 +595,7 @@ public final class APIConstants {
     public static final String API_STORE_FORUM_ENABLED = API_STORE + "isStoreForumEnabled";
     public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
+    public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";

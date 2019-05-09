@@ -76,6 +76,7 @@ securityDefinitions:
       apim:subscribe: Subscribe API
       apim:self-signup: Self Sign-up
       apim:dedicated_gateway: Updating dedicated Gateway
+      apim:store_setting: Retrieve store settings
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2637,6 +2638,35 @@ paths:
             Error while retrieving the list.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The Store settings List
+######################################################
+  /settings:
+#-----------------------------------------------------
+# Retrieve store settings
+#-----------------------------------------------------
+    get:
+      summary: Retreive store settings
+      security:
+        - OAuth2Security:
+          - apim:store_setting
+      description: |
+        Retreive store settings
+      responses:
+        200:
+          description: |
+            OK.
+            Settings returned
+          schema:
+            $ref: '#/definitions/Settings'
+        404:
+          description: |
+            Not Found.
+            Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -4009,7 +4039,7 @@ definitions:
           apiProvider:
             type: string
             example: admin
-       #-----------------------------------------------------
+#-----------------------------------------------------
 # The pagination resource
 #-----------------------------------------------------
   Pagination:
@@ -4024,6 +4054,23 @@ definitions:
       total:
         type: integer
         example: 1290
+
+#-----------------------------------------------------
+# The settings resource
+#-----------------------------------------------------
+  Settings:
+    title: Settings
+    properties:
+      tokenUrl:
+        type: string
+      grantTypes:
+        type: array
+        items:
+          type: string
+      scopes:
+        type: array
+        items:
+          type: string
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

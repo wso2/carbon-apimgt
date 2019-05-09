@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
@@ -40,6 +41,7 @@ import java.util.Set;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -228,10 +230,43 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
+    /**
+     * Retrieves the swagger document of an API
+     *
+     * @param apiId           API identifier
+     * @param ifNoneMatch     If-None-Match header value
+     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
+     * @return Swagger document of the API
+     */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String ifModifiedSince) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String xWSO2Tenant) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            }
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = RestAPIStoreUtils.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);;
+            String apiSwagger = apiConsumer.getOpenAPIDefinition(apiIdentifier);
+            apiSwagger = APIUtil.removeXMediationScriptsFromSwagger(apiSwagger);
+
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {

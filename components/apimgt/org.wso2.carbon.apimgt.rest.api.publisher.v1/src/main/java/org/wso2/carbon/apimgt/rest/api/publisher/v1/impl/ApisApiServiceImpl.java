@@ -19,33 +19,29 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.google.gson.Gson;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.json.JSONException;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListPaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -60,6 +56,7 @@ import java.util.Map;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -94,7 +91,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
-            //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
+            // We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
             String username = RestApiUtil.getLoggedInUsername();
             tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
@@ -167,11 +164,14 @@ public class ApisApiServiceImpl extends ApisApiService {
 //                }
             }
 
-//            String apiSecurity = body.getApiSecurity();todo
-           /* if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
-                    .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                RestApiUtil.handleBadRequest("Mutual SSL Based authentication is not supported in this server", log);
-            }*/
+            List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
+            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
+                for (String apiSecurityScheme : apiSecuritySchemes) {
+                    if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                        RestApiUtil.handleBadRequest("Mutual SSL Based authentication is not supported in this server", log);
+                    }
+                }
+            }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
 
@@ -240,10 +240,10 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             List<String> tiersFromDTO = body.getPolicies();
             //If tiers are not defined, the api should be a PROTOTYPED one,
-            if (!APIConstants.PROTOTYPED.equals(body.getLifeCycleStatus()) &&
+/*            if (!APIConstants.PROTOTYPED.equals(body.getLifeCycleStatus()) &&
                     (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
                 RestApiUtil.handleBadRequest("No tier defined for the API", log);
-            }
+            }*/
             //check whether the added API's tiers are all valid
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
@@ -256,7 +256,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified policy " + body.getApiPolicy() + " is invalid", log);
             }
-//            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {
+//            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {todo check
 //                String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
 //                body.setApiDefinition(swaggerStr);
 //            }
@@ -310,7 +310,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-//        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
@@ -337,83 +336,484 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Delete API
+     *
+     * @param apiId   API Id
+     * @param ifMatch If-Match header value
+     * @return Status of API Deletion
+     */
     @Override
     public Response apisApiIdDelete(String apiId, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+
+            //check if the API has subscriptions
+            //Todo : need to optimize this check. This method seems too costly to check if subscription exists
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+            if (apiUsages != null && apiUsages.size() > 0) {
+                RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+            }
+
+            //deletes the API
+            apiProvider.deleteAPI(apiIdentifier);
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            keyManager.deleteRegisteredResourceByAPIId(apiId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
+    /**
+     * Retrieves the content of a document
+     *
+     * @param apiId           API identifier
+     * @param documentId      document identifier
+     * @param ifNoneMatch     If-None-Match header value
+     * @return Content of the document/ either inline/file or source url as a redirection
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
             String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        Documentation documentation;
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                return null;
+            }
+
+            //gets the content depending on the type of the document
+            if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+                String resource = documentation.getFilePath();
+                Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+                Object fileDataStream = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA);
+                Object contentType = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
+                contentType = contentType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : contentType;
+                String name = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME).toString();
+                return Response.ok(fileDataStream)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
+                        .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
+                        .build();
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+                String content = apiProvider.getDocumentationContent(apiIdentifier, documentation.getName());
+                return Response.ok(content)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
+                        .build();
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.URL)) {
+                String sourceUrl = documentation.getSourceUrl();
+                return Response.seeOther(new URI(sourceUrl)).build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving source URI location of " + documentId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
+    /**
+     * Add content to a document. Content can be inline or File
+     *
+     * @param apiId             API identifier
+     * @param documentId        document identifier
+     * @param inputStream       file input stream
+     * @param fileDetail        file details as Attachment
+     * @param inlineContent     inline content for the document
+     * @param ifMatch           If-match header value
+     * @return updated document as DTO
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-            InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+            InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
+            if (inputStream != null && inlineContent != null) {
+                RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
+            }
+
+            //retrieves the document and send 404 if not found
+            Documentation documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                return null;
+            }
+
+            //add content depending on the availability of either input stream or inline content
+            if (inputStream != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
+                }
+                RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE", log);
+                }
+                apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not MARKDOWN", log);
+                }
+                apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
+            } else {
+                RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
+            }
+
+            //retrieving the updated doc and the URI
+            Documentation updatedDoc = apiProvider.getDocumentation(documentId, tenantDomain);
+            DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc);
+            String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENT_CONTENT
+                    .replace(RestApiConstants.APIID_PARAM, apiId)
+                    .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(documentDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while adding content to the document: " + documentId + " of API "
+                                + apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving document content location : " + documentId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        return null;
     }
 
+    /**
+     * Deletes an existing document of an API
+     *
+     * @param apiId             API identifier
+     * @param documentId        document identifier
+     * @param ifMatch           If-match header value
+     * @return 200 response if deleted successfully
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        Documentation documentation;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+            }
+            apiProvider.removeDocumentation(apiIdentifier, documentId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while deleting : " + documentId + " of API " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        Documentation documentation;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            if (documentation == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+            }
+
+            DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+            return Response.ok().entity(documentDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving document : " + documentId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
+    /**
+     * Updates an existing document of an API
+     *
+     * @param apiId             API identifier
+     * @param documentId        document identifier
+     * @param body              updated document DTO
+     * @param ifMatch           If-match header value
+     * @return updated document DTO as response
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
             String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String sourceUrl = body.getSourceUrl();
+            Documentation oldDocument = apiProvider.getDocumentation(documentId, tenantDomain);
 
+            //validation checks for existence of the document
+            if (oldDocument == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                return null;
+            }
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER && org.apache.commons.lang3.StringUtils.isBlank(body.getOtherTypeName())) {
+                //check otherTypeName for not null if doc type is OTHER
+                RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
+                return null;
+            }
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
+                    (org.apache.commons.lang3.StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
+                RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
+                return null;
+            }
+
+            //overriding some properties
+            body.setName(oldDocument.getName());
+
+            Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            newDocumentation.setFilePath(oldDocument.getFilePath());
+            apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
+
+            //retrieve the updated documentation
+            newDocumentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating document : " + documentId + " of API " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+    /**
+     * Returns all the documents of the given API identifier that matches to the search condition
+     *
+     * @param apiId       API identifier
+     * @param limit       max number of records returned
+     * @param offset      starting index
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched documents as a list if DocumentDTOs
+     */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiIdentifier);
+            DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
+                    offset, limit);
+            DocumentationMappingUtil
+                    .setPaginationParams(documentListDTO, apiId, offset, limit, allDocumentation.size());
+            return Response.ok().entity(documentListDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving documents of API : " + apiId, e, log);
+            } else {
+                String msg = "Error while retrieving documents of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
+        }
+        return null;
     }
 
+    /**
+     * Add a documentation to an API
+     *
+     * @param apiId       api identifier
+     * @param body        Documentation DTO as request body
+     * @return created document DTO as response
+     */
     @Override
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
+            String documentName = body.getName();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER && org.apache.commons.lang3.StringUtils.isBlank(body.getOtherTypeName())) {
+                //check otherTypeName for not null if doc type is OTHER
+                RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
+            }
+            String sourceUrl = body.getSourceUrl();
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
+                    (org.apache.commons.lang3.StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
+                RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
+            }
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            if (apiProvider.isDocumentationExist(apiIdentifier, documentName)) {
+                String errorMessage = "Requested document '" + documentName + "' already exists";
+                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
+            }
+            apiProvider.addDocumentation(apiIdentifier, documentation);
+
+            //retrieve the newly added document
+            String newDocumentId = documentation.getId();
+            documentation = apiProvider.getDocumentation(newDocumentId, tenantDomain);
+            DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+            String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
+                    .replace(RestApiConstants.APIID_PARAM, apiId)
+                    .replace(RestApiConstants.DOCUMENTID_PARAM, newDocumentId);
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(newDocumentDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while adding documents of API : " + apiId, e,
+                                log);
+            } else {
+                String errorMessage = "Error while adding the document for API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving location for document " + body.getName() + " of API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
-    @Override
-    public Response apisApiIdGatewayConfigGet(String apiId, String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
-    @Override
-    public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
-    @Override
-    public Response apisApiIdLifecycleGet(String apiId, String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
+    /**
+     * Retrieves API Lifecycle history information
+     *
+     * @param apiId API Id
+     * @param ifNoneMatch If-None-Match header value
+     * @return API Lifecycle history information
+     */
     @Override
     public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(apiIdentifier);
+            LifecycleHistoryDTO historyDTO = APIMappingUtil.fromLifecycleHistoryModelToDTO(lifeCycleEvents);
+            return Response.ok().entity(historyDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves API Lifecycle state information
+     * 
+     * @param apiId API Id
+     * @param ifNoneMatch If-None-Match header value
+     * @return API Lifecycle state information
+     */
+    @Override
+    public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
+            if (apiLCData == null) {
+                String errorMessage = "Error while getting lifecycle state for API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
+            LifecycleStateDTO stateDTO = APIMappingUtil.fromLifecycleModelToDTO(apiLCData);
+            return Response.ok().entity(stateDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
-    public Response apisApiIdLifecycleLifecyclePendingTaskDelete(String apiId) {
+    public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
@@ -508,17 +908,81 @@ public class ApisApiServiceImpl extends ApisApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
-
+    /**
+     * Retrieves the swagger document of an API
+     *
+     * @param apiId           API identifier
+     * @param ifNoneMatch     If-None-Match header value
+     * @return Swagger document of the API
+     */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving swagger of API : " + apiId,
+                                e, log);
+            } else {
+                String errorMessage = "Error while retrieving swagger of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
-
+    /**
+     * Updates the swagger definition of an existing API
+     *
+     * @param apiId             API identifier
+     * @param apiDefinition     Swagger definition
+     * @param ifMatch           If-match header value
+     * @return updated swagger document of the API
+     */
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            API existingAPI = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, apiDefinition);
+            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
+            existingAPI.setUriTemplates(uriTemplates);
+            existingAPI.setScopes(scopes);
+
+            //Update API is called to update URITemplates and scopes of the API
+            apiProvider.updateAPI(existingAPI);
+            apiProvider.saveSwagger20Definition(existingAPI.getId(), apiDefinition);
+            //retrieves the updated swagger definition
+            String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating swagger definition of API: " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override
@@ -568,8 +1032,47 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
             String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        //pre-processing
+        String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
+
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
+            String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
+            if (!ArrayUtils.contains(nextAllowedStates, action)) {
+                RestApiUtil.handleBadRequest(
+                        "Action '" + action + "' is not allowed. Allowed actions are " + Arrays
+                                .toString(nextAllowedStates), log);
+            }
+
+            //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
+            for (String checkListItem : checkListItems) {
+                String[] attributeValPair = checkListItem.split(":");
+                if (attributeValPair.length == 2) {
+                    String checkListItemName = attributeValPair[0].trim();
+                    boolean checkListItemValue = Boolean.valueOf(attributeValPair[1].trim());
+                    apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
+                }
+            }
+            apiProvider.changeLifeCycleStatus(apiIdentifier, action);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating the lifecycle of API " + apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
+            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating the API in Gateway " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override

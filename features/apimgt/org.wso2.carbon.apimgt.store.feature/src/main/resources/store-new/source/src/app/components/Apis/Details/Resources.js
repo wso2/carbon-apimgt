@@ -31,7 +31,7 @@ function RenderMethodBase(props) {
   let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
-        console.log('Check the theme settings. The resourceChipColors is not populated properlly');
+        console.log('Check the theme settings. The resourceChipColors is not populated properly');
         chipColor = '#cccccc';
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
@@ -73,7 +73,6 @@ class Resources extends React.Component {
     componentDidMount() {
         const api = new Api();
         this.api_uuid = this.props.api.id;
-
         const promised_api = this.api.getSwaggerByAPIId(this.api_uuid);
         promised_api
             .then((response) => {

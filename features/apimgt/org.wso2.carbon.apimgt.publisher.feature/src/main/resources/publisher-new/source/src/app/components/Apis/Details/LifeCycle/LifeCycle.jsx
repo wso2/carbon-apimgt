@@ -82,18 +82,18 @@ class LifeCycle extends Component {
     updateData() {
         const { id } = this.props.api;
         const promised_api = Api.get(id);
-        const promised_tiers = Api.policies('api');
+        // const promised_tiers = Api.policies('api');
         const promised_lcState = this.api.getLcState(id);
         let privateJetModeEnabled = false;
 
-        ConfigManager.getConfigs().features.then((response) => {
+        ConfigManager.getConfigs().features.then(response => {
             privateJetModeEnabled = response.data.privateJetMode.isEnabled;
         });
 
-        const promised_lcHistory = this.api.getLcHistory(id);
-        const promised_labels = this.api.labels();
+        // const promised_lcHistory = this.api.getLcHistory(id);
+        // const promised_labels = this.api.labels();
         Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels])
-            .then((response) => {
+            .then(response => {
                 const [api, tiers, lcState, lcHistory, labels] = response.map(data => data.obj);
 
                 if (privateJetModeEnabled) {
@@ -117,7 +117,10 @@ class LifeCycle extends Component {
                 let index = 0;
                 for (const item of lcState.checkItemBeanList) {
                     checkList.push({
-                        index, label: item.name, value: item.name, checked: false,
+                        index,
+                        label: item.name,
+                        value: item.name,
+                        checked: false,
                     });
                     index++;
                 }
@@ -131,7 +134,7 @@ class LifeCycle extends Component {
                     checkList,
                 });
             })
-            .catch((error) => {
+            .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
@@ -148,7 +151,7 @@ class LifeCycle extends Component {
      * @memberof LifeCycle
      */
     render() {
-        const { classes, api } = this.props;
+        const { classes, api, lcState, checkList, privateJetModeEnabled } = this.props;
         const { lcHistory } = this.state;
 
         if (!lcHistory) {
@@ -157,19 +160,26 @@ class LifeCycle extends Component {
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <Typography variant="h4" align="left" className={classes.mainTitle}>
                         Lifecycle
                     </Typography>
                 </div>
                 <div className={classes.contentWrapper}>
                     <Grid container>
                         <Grid item xs={12}>
-                            <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState} checkList={this.state.checkList} handleChangeCheckList={this.handleChangeCheckList} api={api} privateJetModeEnabled={this.state.privateJetModeEnabled} />
+                            <LifeCycleUpdate
+                                handleUpdate={this.updateData}
+                                lcState={lcState}
+                                checkList={checkList}
+                                handleChangeCheckList={this.handleChangeCheckList}
+                                api={api}
+                                privateJetModeEnabled={privateJetModeEnabled}
+                            />
                         </Grid>
                         <Grid item xs={12}>
                             {lcHistory.length > 1 && (
                                 <div>
-                                    <Typography variant='h6' gutterBottom className={classes.historyHead}>
+                                    <Typography variant="h6" gutterBottom className={classes.historyHead}>
                                         History
                                     </Typography>
                                     <LifeCycleHistory lcHistory={lcHistory} />
