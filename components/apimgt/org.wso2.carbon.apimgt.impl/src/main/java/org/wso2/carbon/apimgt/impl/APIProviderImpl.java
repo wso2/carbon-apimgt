@@ -1071,7 +1071,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
             }
             validateResourceThrottlingTiers(api, tenantDomain);
-            apiMgtDAO.updateAPI(api, tenantId);
+            apiMgtDAO.updateAPI(api, tenantId, userNameWithoutChange);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated the API: " + api.getId() + " in the database");
             }
