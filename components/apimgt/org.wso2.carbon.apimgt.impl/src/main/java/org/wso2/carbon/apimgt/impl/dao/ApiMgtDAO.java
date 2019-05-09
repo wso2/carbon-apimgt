@@ -5325,6 +5325,7 @@ public class ApiMgtDAO {
                 info.applicationId = rs.getInt("APPLICATION_ID");
                 info.accessToken = rs.getString("ACCESS_TOKEN");  // no decryption needed.
                 info.tokenType = rs.getString("KEY_TYPE");
+                info.subscriptionStatus = rs.getString("SUB_STATUS");
                 subscriptionData.add(info);
             }
 
@@ -5335,8 +5336,11 @@ public class ApiMgtDAO {
                 try {
                     if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
                         apiId.setTier(info.tierId);
-                        int subscriptionId = addSubscription(apiId, context, info.applicationId, APIConstants
-                                .SubscriptionStatus.UNBLOCKED, provider);
+                        String subscriptionStatus = (APIConstants.SubscriptionStatus.BLOCKED
+                                .equalsIgnoreCase(info.subscriptionStatus)) ?
+                                APIConstants.SubscriptionStatus.BLOCKED : APIConstants.SubscriptionStatus.UNBLOCKED;
+                        int subscriptionId = addSubscription(apiId, context, info.applicationId, subscriptionStatus,
+                                provider);
                         if (subscriptionId == -1) {
                             String msg = "Unable to add a new subscription for the API: " + apiName +
                                     ":v" + newVersion;
@@ -7633,6 +7637,7 @@ public class ApiMgtDAO {
         private int applicationId;
         private String accessToken;
         private String tokenType;
+        private String subscriptionStatus;
     }
 
     /**
