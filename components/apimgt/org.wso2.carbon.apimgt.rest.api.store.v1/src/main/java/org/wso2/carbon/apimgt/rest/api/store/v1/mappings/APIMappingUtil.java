@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -145,6 +146,35 @@ public class APIMappingUtil {
         dto.setApiSecurity(model.getApiSecurity());
         */
         return dto;
+    }
+
+    /**
+     * Returns an API with minimal info given the uuid.
+     *
+     * @param apiUUID                 API uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
+            throws APIManagementException {
+        API api;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        return api;
+    }
+
+    /**
+     * Returns the APIIdentifier given the uuid
+     *
+     * @param apiId                 API uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return APIIdentifier which represents the given id
+     * @throws APIManagementException
+     */
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        return getAPIInfoFromUUID(apiId, requestedTenantDomain).getId();
     }
 
     /**
