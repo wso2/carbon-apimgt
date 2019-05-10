@@ -98,19 +98,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
-            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
-
             //Add pagination section in the response
             Object totalLength = allMatchedApisMap.get("length");
-            Integer length = 0;
+            Integer totalAvailableAPis = 0;
             if (totalLength != null) {
-                length = (Integer) totalLength;
+                totalAvailableAPis = (Integer) totalLength;
             }
-            PaginationDTO paginationDTO = new PaginationDTO();
-            paginationDTO.setOffset(offset);
-            paginationDTO.setLimit(limit);
-            paginationDTO.setTotal(length);
-            apiListDTO.setPagination(paginationDTO);
+
+            APIMappingUtil
+                    .setPaginationParams(apiListDTO, query, offset, limit, totalAvailableAPis);
 
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
@@ -118,8 +114,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 //this is not an error of the user as he does not know the total number of apis available. Thus sends 
                 //  an empty response
                 apiListDTO.setCount(0);
-                apiListDTO.setNext("");
-                apiListDTO.setPrevious("");
+                apiListDTO.setPagination(new PaginationDTO());
                 return Response.ok().entity(apiListDTO).build();
             } else {
                 String errorMessage = "Error while retrieving APIs";
@@ -281,6 +276,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
+
+            //todo : set total count properly
             DocumentationMappingUtil
                     .setPaginationParams(documentListDTO, apiId, offset, limit, documentationList.size());
             return Response.ok().entity(documentListDTO).build();

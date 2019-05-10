@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -204,8 +205,9 @@ public class APIMappingUtil {
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
-        apiListDTO.setNext(paginatedNext);
-        apiListDTO.setPrevious(paginatedPrevious);
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        apiListDTO.setPagination(paginationDTO);
     }
 
     /**
