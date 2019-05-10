@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class TierListDTO  {
+public class ThrottlingPolicyListDTO  {
   
   
   
@@ -27,7 +27,7 @@ public class TierListDTO  {
   private String previous = null;
   
   
-  private List<TierDTO> list = new ArrayList<TierDTO>();
+  private List<ThrottlingPolicyDTO> list = new ArrayList<ThrottlingPolicyDTO>();
 
   
   /**
@@ -73,10 +73,10 @@ public class TierListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<TierDTO> getList() {
+  public List<ThrottlingPolicyDTO> getList() {
     return list;
   }
-  public void setList(List<TierDTO> list) {
+  public void setList(List<ThrottlingPolicyDTO> list) {
     this.list = list;
   }
 
@@ -85,7 +85,7 @@ public class TierListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TierListDTO {\n");
+    sb.append("class ThrottlingPolicyListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");

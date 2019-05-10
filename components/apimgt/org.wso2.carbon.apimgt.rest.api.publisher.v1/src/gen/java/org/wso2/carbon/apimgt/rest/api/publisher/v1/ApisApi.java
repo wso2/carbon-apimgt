@@ -276,7 +276,7 @@ public class ApisApi  {
     return delegate.apisApiIdLifecycleStatePendingTasksDelete(apiId);
     }
     @GET
-    @Path("/{apiId}/policies/mediation")
+    @Path("/{apiId}/mediation-policies")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get all mediation policies of an API\n", notes = "This operation provides you a list of available mediation policies of an API.\n", response = MediationListDTO.class)
@@ -287,16 +287,16 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
-    public Response apisApiIdPoliciesMediationGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
+    public Response apisApiIdMediationPoliciesGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
     @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
     @ApiParam(value = "-Not supported yet-") @QueryParam("query")  String query,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apisApiIdPoliciesMediationGet(apiId,limit,offset,query,ifNoneMatch);
+    return delegate.apisApiIdMediationPoliciesGet(apiId,limit,offset,query,ifNoneMatch);
     }
     @DELETE
-    @Path("/{apiId}/policies/mediation/{mediationPolicyId}")
+    @Path("/{apiId}/mediation-policies/{mediationPolicyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete an API specific mediation policy", notes = "This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy.\n", response = void.class)
@@ -309,14 +309,14 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response apisApiIdPoliciesMediationMediationPolicyIdDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
+    public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
     @ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId")  String mediationPolicyId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apisApiIdPoliciesMediationMediationPolicyIdDelete(apiId,mediationPolicyId,ifMatch);
+    return delegate.apisApiIdMediationPoliciesMediationPolicyIdDelete(apiId,mediationPolicyId,ifMatch);
     }
     @GET
-    @Path("/{apiId}/policies/mediation/{mediationPolicyId}")
+    @Path("/{apiId}/mediation-policies/{mediationPolicyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get an API specific mediation policy", notes = "This operation can be used to retrieve a particular API specific mediation policy.\n", response = MediationDTO.class)
@@ -329,14 +329,14 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
-    public Response apisApiIdPoliciesMediationMediationPolicyIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
+    public Response apisApiIdMediationPoliciesMediationPolicyIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
     @ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId")  String mediationPolicyId,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apisApiIdPoliciesMediationMediationPolicyIdGet(apiId,mediationPolicyId,ifNoneMatch);
+    return delegate.apisApiIdMediationPoliciesMediationPolicyIdGet(apiId,mediationPolicyId,ifNoneMatch);
     }
     @PUT
-    @Path("/{apiId}/policies/mediation/{mediationPolicyId}")
+    @Path("/{apiId}/mediation-policies/{mediationPolicyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update an API specific mediation policy", notes = "This operation can be used to update an existing mediation policy of an API.\n", response = MediationDTO.class)
@@ -351,15 +351,15 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response apisApiIdPoliciesMediationMediationPolicyIdPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
+    public Response apisApiIdMediationPoliciesMediationPolicyIdPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
     @ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId")  String mediationPolicyId,
     @ApiParam(value = "Mediation policy object that needs to be updated\n" ,required=true ) MediationDTO body,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apisApiIdPoliciesMediationMediationPolicyIdPut(apiId,mediationPolicyId,body,ifMatch);
+    return delegate.apisApiIdMediationPoliciesMediationPolicyIdPut(apiId,mediationPolicyId,body,ifMatch);
     }
     @POST
-    @Path("/{apiId}/policies/mediation")
+    @Path("/{apiId}/mediation-policies")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Add an API specific mediation policy", notes = "This operation can be used to add an API specifc mediation policy.\n", response = MediationDTO.class)
@@ -372,11 +372,11 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response apisApiIdPoliciesMediationPost(@ApiParam(value = "mediation policy to upload" ,required=true ) MediationDTO body,
+    public Response apisApiIdMediationPoliciesPost(@ApiParam(value = "mediation policy to upload" ,required=true ) MediationDTO body,
     @ApiParam(value = "**API ID** consisting of the **UUID** of the API.\n",required=true ) @PathParam("apiId")  String apiId,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch)
     {
-    return delegate.apisApiIdPoliciesMediationPost(body,apiId,ifMatch);
+    return delegate.apisApiIdMediationPoliciesPost(body,apiId,ifMatch);
     }
     @PUT
     @Path("/{apiId}")
