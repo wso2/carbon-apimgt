@@ -21,11 +21,15 @@ package org.wso2.carbon.apimgt.keymgt.client;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
+<<<<<<< HEAD
 import org.apache.axis2.context.ConfigurationContextFactory;
+=======
+>>>>>>> f1360a9... Adding activate method to keymgt client component
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.keymgt.client.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceAPIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceIdentityException;
@@ -44,8 +48,7 @@ public class SubscriberKeyMgtClient {
 
     public SubscriberKeyMgtClient(String backendServerURL, String username, String password) throws Exception {
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory
-                    .createConfigurationContextFromFileSystem(getClientRepoLocation(), getAxis2ClientXmlLocation());
+            ConfigurationContext ctx = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
             subscriberServiceStub = new APIKeyMgtSubscriberServiceStub(ctx,
                     backendServerURL + "APIKeyMgtSubscriberService");
             ServiceClient client = subscriberServiceStub._getServiceClient();
