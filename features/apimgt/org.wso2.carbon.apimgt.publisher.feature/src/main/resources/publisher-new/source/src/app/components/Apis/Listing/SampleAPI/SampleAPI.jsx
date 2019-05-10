@@ -109,50 +109,88 @@ class SampleAPI extends Component {
      */
     createSampleAPI() {
         const data = {
-            name: 'Swagger Petstore',
-            context: '/v2',
+            name: 'CalculatorAPI',
+            description: 'A calculator API that supports basic operations',
+            context: 'CalculatorAPI',
             version: '1.0.0',
-            description:
-                'This is a sample server Petstore server.  You can find out more about Swagger at' +
-                '[http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).' +
-                '  For this sample, you can use the api key `special-key` to test the authorization filters.',
-            isDefaultVersion: true,
+            provider: 'admin',
+            lifeCycleStatus: 'CREATED',
             responseCaching: 'Disabled',
             cacheTimeout: 300,
             destinationStatsEnabled: 'Disabled',
-            businessInformation: {
-                businessOwner: 'APIM Team',
-                businessOwnerEmail: 'hello@wso2.com',
-                technicalOwner: 'WSO2 APIM Team',
-                technicalOwnerEmail: 'dev@wso2.org',
-            },
-            tags: ['Pet', 'Store', 'Cat', 'Hippopotamus'],
+            isDefaultVersion: false,
+            type: 'HTTP',
             transport: ['http', 'https'],
-            visibility: 'PUBLIC',
-            securityScheme: ['OAuth'],
-            scopes: ['read:pets', 'write:pets'],
-            policies: ['Bronze', 'Unlimited', 'Gold'],
-        };
-        const serviceUrl = 'https://localhost:9443/publisher-new/site/public/petstore/pet/1.json';
-        const production = {
-            type: 'Production',
-            inline: {
-                name: data.name.replace(/ /g, '_') + data.version.replace(/\./g, '_'),
-                // TODO: It's better to add this name property from the REST api itself,
-                // making sure no name conflicts with other inline endpoint definitions ~tmkb
-                endpointConfig: {
-                    list: [{ url: serviceUrl, timeout: '1000' }],
-                    endpointType: 'SINGLE',
-                },
-                endpointSecurity: { enabled: false },
-                type: 'http',
+            tags: ['substract', 'add'],
+            policies: ['Unlimited'],
+            apiPolicy: 'Unlimited',
+            authorizationHeader: 'string',
+            securityScheme: ['string'],
+            maxTps: {
+                production: 1000,
+                sandbox: 1000,
             },
+            visibility: 'PUBLIC',
+            visibleRoles: [],
+            visibleTenants: ['string'],
+            workflowStatus: 'APPROVED',
+            endpoint: [
+                {
+                    inline: {
+                        id: 'id',
+                        name: 'name',
+                        endpointConfig: '{https://localhost:9443/am/sample/pizzashack/v1/api/, timeout: 1000}',
+                        endpointSecurity: {
+                            enabled: false,
+                            type: 'basic',
+                            username: 'basic',
+                            password: 'basic',
+                        },
+                        maxTps: 1000,
+                        type: 'http',
+                    },
+                    type: 'production_endpoints',
+                    key: '01234567-0123-0123-0123-012345678903',
+                },
+                {
+                    inline: {
+                        id: 'id',
+                        name: 'name',
+                        endpointConfig: '{https://localhost:9443/am/sample/pizzashack/v1/api/, timeout: 1000}',
+                        endpointSecurity: {
+                            enabled: false,
+                            type: 'basic',
+                            username: 'basic',
+                            password: 'basic',
+                        },
+                        maxTps: 1000,
+                        type: 'http',
+                    },
+                    type: 'sandbox_endpoints',
+                    key: '01234567-0123-0123-0123-012345678904',
+                },
+            ],
+            scopes: [
+                {
+                    name: 'newScopeForGET5',
+                    description: 'This Scope can be used to create Apis',
+                    bindings: {
+                        type: 'newRole',
+                        values: ['newRoleVal'],
+                    },
+                },
+            ],
+            operations: [
+                {
+                    id: 'postapiresource1',
+                    uritemplate: '/*',
+                    httpVerb: 'GET',
+                    authType: 'Any',
+                    scopes: ['newScopeForGET'],
+                },
+            ],
         };
-        const sandbox = JSON.parse(JSON.stringify(production)); // deep coping the object
-        sandbox.type = 'Sandbox';
-        sandbox.inline.name += '_sandbox';
-        data.endpoint = [production, sandbox];
-        Alert.info('Creating sample Pet-Store API . . .');
+
         const sampleAPI = new API(data);
         return sampleAPI.save().catch((error) => {
             console.error(error);
