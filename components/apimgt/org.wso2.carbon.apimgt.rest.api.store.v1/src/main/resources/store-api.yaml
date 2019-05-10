@@ -356,6 +356,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
+        - $ref : '#/parameters/requestedTenant'
       tags:
         - APIs
       responses:
