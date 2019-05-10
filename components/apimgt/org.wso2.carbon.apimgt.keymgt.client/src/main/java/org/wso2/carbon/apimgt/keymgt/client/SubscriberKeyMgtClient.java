@@ -59,17 +59,6 @@ public class SubscriberKeyMgtClient {
         }
     }
 
-    protected String getAxis2ClientXmlLocation() {
-        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
-                ".clientAxis2XmlLocation");
-        return axis2ClientXml;
-    }
-    protected String getClientRepoLocation() {
-        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
-                ".ClientRepositoryLocation");
-        return axis2ClientXml;
-    }
-
     public OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(OAuthApplicationInfo oauthAppInfo) throws Exception {
         //setCookie(subscriberServiceStub);
         OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.createOAuthApplicationByApplicationInfo(oauthAppInfo);
