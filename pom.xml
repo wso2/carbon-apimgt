@@ -1509,7 +1509,7 @@
         <analytics.shared.version>1.0.4</analytics.shared.version>
         <carbon.analytics.common.version>5.1.57</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.40</carbon.kernel.version>
+        <carbon.kernel.version>4.4.41-SNAPSHOT</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.4.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.6.66</carbon.commons.version>
