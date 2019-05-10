@@ -22,8 +22,13 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
@@ -358,4 +363,68 @@ public class APIMappingUtil {
     //        return scopeDto;
     //    }
 
+    /**
+     * Converts a List object of API Products into a DTO
+     *
+     * @param apiProdList List of APIs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIProductListDTO fromAPIProductListToDTO(List<APIProduct> apiProdList) {
+        APIProductListDTO apiProdListDTO = new APIProductListDTO();
+        List<APIProductInfoDTO> apiProdInfoDTOs = apiProdListDTO.getList();
+        if (apiProdList != null) {
+            for (APIProduct api : apiProdList) {
+                apiProdInfoDTOs.add(fromAPIProductToInfoDTO(api));
+            }
+        }
+        apiProdListDTO.setCount(apiProdInfoDTOs.size());
+        return apiProdListDTO;
+    }
+    
+    public static APIProductDTO fromAPIProductToDTO(APIProduct product) throws APIManagementException{
+        APIProductDTO dto = new APIProductDTO();
+        dto.setId(product.getUuid());
+        dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setProvider(product.getProvider());
+        dto.setApiDefinition(""); //TODO set def
+        dto.setThumbnailUrl(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
+        APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
+        businessInformation.setBusinessOwner(product.getBusinessOwner());
+        businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
+        dto.setBusinessInformation(businessInformation );
+        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = product.getAvailableTiers();
+        List<String> tiersToReturn = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
+            tiersToReturn.add(tier.getName());
+        }
+        dto.setTiers(tiersToReturn);
+
+        return dto;
+    }
+    
+    /**
+     * Creates a minimal DTO representation of an API Product object
+     *
+     * @param apiProduct API product object
+     * @return a minimal representation DTO
+     */
+    public static APIProductInfoDTO fromAPIProductToInfoDTO(APIProduct apiProduct) {
+        APIProductInfoDTO apiProductInfoDTO = new APIProductInfoDTO();
+        apiProductInfoDTO.setDescription(apiProduct.getDescription());
+        apiProductInfoDTO.setId(apiProduct.getUuid());
+        apiProductInfoDTO.setName(apiProduct.getName());
+        String providerName = apiProduct.getProvider();
+        apiProductInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        //TODO check this how to implement with product
+//        if (apiProduct.getScopes() != null) {
+//            apiProductInfoDTO.setScopes(getScopeInfoDTO(apiProduct.getScopes()));
+//        }
+
+        apiProductInfoDTO.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+
+        return apiProductInfoDTO;
+    }
 }
