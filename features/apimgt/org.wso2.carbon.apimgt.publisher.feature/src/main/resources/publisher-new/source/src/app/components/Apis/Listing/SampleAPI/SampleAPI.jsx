@@ -108,97 +108,87 @@ class SampleAPI extends Component {
      * @memberof SampleAPI
      */
     createSampleAPI() {
-      const data = {
-          "name": "CalculatorAPI",
-          "description": "A calculator API that supports basic operations",
-          "context": "CalculatorAPI",
-          "version": "1.0.0",
-          "provider": "admin",
-          "lifeCycleStatus": "CREATED",
-          "responseCaching": "Disabled",
-          "cacheTimeout": 300,
-          "destinationStatsEnabled": "Disabled",
-          "isDefaultVersion": false,
-          "type": "HTTP",
-          "transport": [
-            "http",
-            "https"
-          ],
-          "tags": [
-            "substract",
-            "add"
-          ],
-          "policies": [
-            "Unlimited"
-          ],
-          "apiPolicy": "Unlimited",
-          "authorizationHeader": "string",
-          "securityScheme": [
-            "string"
-          ],
-          "maxTps": {
-            "production": 1000,
-            "sandbox": 1000
-          },
-          "visibility": "PUBLIC",
-          "visibleRoles": [],
-          "visibleTenants": [
-            "string"
-          ],
-          "workflowStatus": "APPROVED",
-          "endpoint":[
-            {
-               "inline":{
-                     "id":"id",
-                     "name":"name",
-                     "endpointConfig":"{https://localhost:9443/am/sample/pizzashack/v1/api/, timeout: 1000}",
-                     "endpointSecurity":{
-                        "enabled":false,
-                        "type":"basic",
-                        "username":"basic",
-                        "password":"basic"
-                     },
-                     "maxTps":1000,
-                     "type":"http"
-               },
-               "type":"production_endpoints",
-               "key":"01234567-0123-0123-0123-012345678903"
+        const data = {
+            name: 'CalculatorAPI',
+            description: 'A calculator API that supports basic operations',
+            context: 'CalculatorAPI',
+            version: '1.0.0',
+            provider: 'admin',
+            lifeCycleStatus: 'CREATED',
+            responseCaching: 'Disabled',
+            cacheTimeout: 300,
+            destinationStatsEnabled: 'Disabled',
+            isDefaultVersion: false,
+            type: 'HTTP',
+            transport: ['http', 'https'],
+            tags: ['substract', 'add'],
+            policies: ['Unlimited'],
+            apiPolicy: 'Unlimited',
+            authorizationHeader: 'string',
+            securityScheme: ['string'],
+            maxTps: {
+                production: 1000,
+                sandbox: 1000,
             },
-            {
-               "inline":{
-                     "id":"id",
-                     "name":"name",
-                     "endpointConfig":"{https://localhost:9443/am/sample/pizzashack/v1/api/, timeout: 1000}",
-                     "endpointSecurity":{
-                        "enabled":false,
-                        "type":"basic",
-                        "username":"basic",
-                        "password":"basic"
+            visibility: 'PUBLIC',
+            visibleRoles: [],
+            visibleTenants: ['string'],
+            workflowStatus: 'APPROVED',
+            endpoint: [
+                {
+                    inline: {
+                        id: 'id',
+                        name: 'name',
+                        endpointConfig: '{https://localhost:9443/am/sample/pizzashack/v1/api/, timeout: 1000}',
+                        endpointSecurity: {
+                            enabled: false,
+                            type: 'basic',
+                            username: 'basic',
+                            password: 'basic',
+                        },
+                        maxTps: 1000,
+                        type: 'http',
                     },
-                    "maxTps":1000,
-                    "type":"http"
-               },
-               "type":"sandbox_endpoints",
-               "key":"01234567-0123-0123-0123-012345678904"
-            }
-         ],
-          "scopes":[{
-              "name": "newScopeForGET5",
-              "description" : "This Scope can be used to create Apis",
-              "bindings" : {
-                  "type":"newRole",
-                  "values":["newRoleVal"]
-            }
-          }],
-          "operations":[
-              {
-                "id":"postapiresource1",
-                "uritemplate":"/*",
-                "httpVerb":"GET",
-                "authType":"Any",
-                "scopes":["newScopeForGET"]
-              }
-          ]
+                    type: 'production_endpoints',
+                    key: '01234567-0123-0123-0123-012345678903',
+                },
+                {
+                    inline: {
+                        id: 'id',
+                        name: 'name',
+                        endpointConfig: '{https://localhost:9443/am/sample/pizzashack/v1/api/, timeout: 1000}',
+                        endpointSecurity: {
+                            enabled: false,
+                            type: 'basic',
+                            username: 'basic',
+                            password: 'basic',
+                        },
+                        maxTps: 1000,
+                        type: 'http',
+                    },
+                    type: 'sandbox_endpoints',
+                    key: '01234567-0123-0123-0123-012345678904',
+                },
+            ],
+            scopes: [
+                {
+                    name: 'newScopeForGET5',
+                    description: 'This Scope can be used to create Apis',
+                    bindings: {
+                        type: 'newRole',
+                        values: ['newRoleVal'],
+                    },
+                },
+            ],
+            operations: [
+                {
+                    id: 'postapiresource1',
+                    uritemplate: '/*',
+                    httpVerb: 'GET',
+                    authType: 'Any',
+                    scopes: ['newScopeForGET'],
+                },
+            ],
         };
 
         const sampleAPI = new API(data);
