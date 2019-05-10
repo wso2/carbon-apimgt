@@ -658,6 +658,10 @@ public final class APIConstants {
             + "Access-Control-Allow-Headers";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS = CORS_CONFIGURATION
             + "Access-Control-Allow-Methods";
+
+    public static final String CORS_CONFIGURATION_ACCESS_CTL_EXPOSE_HEADERS = CORS_CONFIGURATION
+            + "Access-Control-Expose-Headers";
+
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
             + "Access-Control-Allow-Credentials";
 
@@ -903,6 +907,7 @@ public final class APIConstants {
     public static class CORSHeaders {
         public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
         public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+        public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
         public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
         public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
