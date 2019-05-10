@@ -372,7 +372,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch) {
+    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,26 +27,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/** This class is responsible for mapping APIM core documentation related objects into REST API documentation
- *  related DTOs 
- *
+/**
+ * This class is responsible for mapping APIM core documentation related objects into REST API documentation
+ * related DTOs
  */
 public class DocumentationMappingUtil {
 
-    /** Converts a APIM core Document object into corresponding REST API Document DTO object
-     * 
+    /**
+     * Converts a APIM core Document object into corresponding REST API Document DTO object
+     *
      * @param documentation Documentation object
      * @return a new DocumentDTO object corresponding to given Documentation object
      */
     public static DocumentDTO fromDocumentationToDTO(Documentation documentation) {
+
         DocumentDTO documentDTO = new DocumentDTO();
         documentDTO.setDocumentId(documentation.getId());
         documentDTO.setName(documentation.getName());
         documentDTO.setSummary(documentation.getSummary());
         documentDTO.setType(DocumentDTO.TypeEnum.valueOf(documentation.getType().toString()));
         documentDTO.setOtherTypeName(documentation.getOtherTypeName());
-        if (documentation.getSourceType() != null)
+        if (documentation.getSourceType() != null) {
             documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(documentation.getSourceType().toString()));
+        }
         documentDTO.setSourceUrl(documentation.getSourceUrl());
         return documentDTO;
     }
@@ -60,7 +63,8 @@ public class DocumentationMappingUtil {
      * @return DocumentListDTO object containing Document DTOs
      */
     public static DocumentListDTO fromDocumentationListToDTO(List<Documentation> documentations, int offset,
-            int limit) {
+                                                             int limit) {
+
         DocumentListDTO documentListDTO = new DocumentListDTO();
         List<DocumentDTO> documentDTOs = documentListDTO.getList();
         if (documentDTOs == null) {
@@ -78,16 +82,16 @@ public class DocumentationMappingUtil {
         return documentListDTO;
     }
 
-    /** Sets pagination urls for a DocumentListDTO object given pagination parameters and url parameters
+    /**
+     * Sets pagination urls for a DocumentListDTO object given pagination parameters and url parameters
      *
      * @param documentListDTO a DocumentListDTO object
-     * @param limit max number of objects returned
-     * @param offset starting index
-     * @param size max offset
-     *
+     * @param limit           max number of objects returned
+     * @param offset          starting index
+     * @param size            max offset
      */
     public static void setPaginationParams(DocumentListDTO documentListDTO, String apiId, int offset,
-            int limit, int size) {
+                                           int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
