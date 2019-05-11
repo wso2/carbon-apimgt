@@ -90,6 +90,8 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
             }
             ThrottlingPolicyListDTO policyListDTO = ThrottlingPolicyMappingUtil
                     .fromTierListToDTO(tierList, policyLevel, limit, offset);
+            
+            //todo: set total counts properly
             ThrottlingPolicyMappingUtil.setPaginationParams(policyListDTO, policyLevel, limit, offset, tierList.size());
             return Response.ok().entity(policyListDTO).build();
         } catch (APIManagementException e) {

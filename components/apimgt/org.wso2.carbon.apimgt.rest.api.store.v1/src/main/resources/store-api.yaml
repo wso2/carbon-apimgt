@@ -2889,7 +2889,7 @@ definitions:
         items:
           $ref: '#/definitions/APIInfo'
       pagination:
-         $ref: '#/definitions/Pagination'
+        $ref: '#/definitions/Pagination'
     example:
       count: 2
       list:
@@ -3125,10 +3125,10 @@ definitions:
         items:
           $ref: '#/definitions/ApplicationInfo'
       pagination:
-          $ref: '#/definitions/Pagination'
-          # example:
-          #   next: "/applications?limit=1&offset=2&groupId="
-          #   previous: "/applications?limit=1&offset=0&groupId="
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/applications?limit=1&offset=2&groupId="
+        #   previous: "/applications?limit=1&offset=0&groupId="
 
 #-----------------------------------------------------
 # The Application resource
@@ -3239,10 +3239,10 @@ definitions:
         items:
           $ref: '#/definitions/Document'
       pagination:
-          $ref: '#/definitions/Pagination'
-          # example:
-          #   next: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=2"
-          #   previous: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=0"
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=2"
+        #   previous: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Document resource
@@ -3305,10 +3305,10 @@ definitions:
         items:
           $ref: '#/definitions/Tier'
       pagination:
-          $ref: '#/definitions/Pagination'
-          # example:
-          #   next: "/tiers/subscription?limit=1&offset=2"
-          #   previous: "/tiers/subscription?limit=1&offset=0"
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/tiers/subscription?limit=1&offset=2"
+        #   previous: "/tiers/subscription?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Throttling Tier resource
@@ -3384,10 +3384,10 @@ definitions:
         items:
           $ref: '#/definitions/Subscription'
       pagination:
-          $ref: '#/definitions/Pagination'
-          # example:
-          #   next: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
-          #   previous: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
+        #   previous: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
 
 #-----------------------------------------------------
 # The Subscription resource
@@ -3467,10 +3467,10 @@ definitions:
         items:
           $ref: '#/definitions/Tag'
       pagination:
-          $ref: '#/definitions/Pagination'
-          # example:
-          #   next: "/tags?limit=1&offset=2"
-          #   previous: "/tags?limit=1&offset=0"
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/tags?limit=1&offset=2"
+        #   previous: "/tags?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Rating resource
@@ -3518,10 +3518,10 @@ definitions:
         items:
           $ref: '#/definitions/Rating'
       pagination:
-          $ref: '#/definitions/Pagination'
-          # example:
-          #   next: "/ratings?limit=1&offset=2"
-          #   previous: "/ratings?limit=1&offset=0"
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/ratings?limit=1&offset=2"
+        #   previous: "/ratings?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Comment resource
@@ -3571,10 +3571,10 @@ definitions:
         items:
           $ref: '#/definitions/Comment'
       pagination:
-          $ref: '#/definitions/Pagination'
-          # example:
-          #   next: "/comments?limit=1&offset=2"
-          #   previous: "/comments?limit=1&offset=0"
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/comments?limit=1&offset=2"
+        #   previous: "/comments?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Error resource
@@ -3816,7 +3816,7 @@ definitions:
         items:
           $ref: '#/definitions/ScopeInfo'
       pagination:
-          $ref: '#/definitions/Pagination'
+        $ref: '#/definitions/Pagination'
 
 #-----------------------------------------------------
 # Tier Permission Info resource
@@ -3898,7 +3898,7 @@ definitions:
         items:
           $ref: '#/definitions/SearchResult'
       pagination:
-          $ref: '#/definitions/Pagination'
+        $ref: '#/definitions/Pagination'
 
   SearchResult:
     title: Search Result

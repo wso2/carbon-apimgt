@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -66,13 +67,13 @@ public class ThrottlingPolicyMappingUtil {
     /**
      * Sets pagination urls for a ThrottlingPolicyListDTO object given pagination parameters and url parameters
      *
-     * @param ThrottlingPolicyListDTO a ThrottlingPolicyListDTO object
+     * @param throttlingPolicyListDTO a ThrottlingPolicyListDTO object
      * @param tierLevel   tier level (api/application or resource)
      * @param limit       max number of objects returned
      * @param offset      starting index
      * @param size        max offset
      */
-    public static void setPaginationParams(ThrottlingPolicyListDTO ThrottlingPolicyListDTO, String tierLevel, int limit, int offset, int size) {
+    public static void setPaginationParams(ThrottlingPolicyListDTO throttlingPolicyListDTO, String tierLevel, int limit, int offset, int size) {
 
         String paginatedPrevious = "";
         String paginatedNext = "";
@@ -93,8 +94,10 @@ public class ThrottlingPolicyMappingUtil {
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }
 
-        ThrottlingPolicyListDTO.setNext(paginatedNext);
-        ThrottlingPolicyListDTO.setPrevious(paginatedPrevious);
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        throttlingPolicyListDTO.setPagination(paginationDTO);
     }
 
     /**

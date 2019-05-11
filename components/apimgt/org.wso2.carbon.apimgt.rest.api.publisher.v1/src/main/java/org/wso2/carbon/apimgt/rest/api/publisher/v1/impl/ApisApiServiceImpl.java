@@ -110,19 +110,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             allMatchedApis.addAll(apis);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
-            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
 
             //Add pagination section in the response
             Object totalLength = result.get("length");
             Integer length = 0;
-            if(totalLength != null) {
+            if (totalLength != null) {
                 length = (Integer) totalLength;
             }
-            APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
-            paginationDTO.setOffset(offset);
-            paginationDTO.setLimit(limit);
-            paginationDTO.setTotal(length);
-            apiListDTO.setPagination(paginationDTO);
+
+            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
 
             if (APIConstants.APPLICATION_GZIP.equals(accept)) {
                 try {

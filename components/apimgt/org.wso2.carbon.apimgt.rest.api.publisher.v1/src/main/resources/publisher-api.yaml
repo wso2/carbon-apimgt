@@ -4927,33 +4927,15 @@ definitions:
         description: |
           Number of APIs returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/apis?limit=1&offset=2&query="
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/apis?limit=1&offset=0&query="
       list:
         type: array
         items:
           $ref: '#/definitions/APIInfo'
       pagination:
-        properties:
-          offset:
-            type: integer
-            example: 12
-          limit:
-            type: integer
-            example: 25
-          total:
-            type: integer
-            example: 1290
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/apis?limit=1&offset=2&query="
+        #   previous: "/apis?limit=1&offset=0&query="
 
 #-----------------------------------------------------
 # The API Info resource
@@ -5282,22 +5264,15 @@ definitions:
         description: |
           Number of Documents returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=2"
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=0"
       list:
         type: array
         items:
           $ref: '#/definitions/Document'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=2"
+        #   previous: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Document resource
@@ -5381,22 +5356,12 @@ definitions:
         description: |
           Number of mediation sequences returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of sequences qualified.
-          Empty if no more sequences are to be returned.
-        example: ""
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of sequences qualified.
-          Empty if current subset is the first subset returned.
-        example: ""
       list:
         type: array
         items:
           $ref: '#/definitions/MediationInfo'
+      pagination:
+        $ref: '#/definitions/Pagination'
 
   #-----------------------------------------------------
   # The MediationInfo resource
@@ -5464,22 +5429,15 @@ definitions:
         description: |
           Number of Tiers returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/throttling-policies/subscription?limit=1&offset=2"
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/throttling-policies/subscription?limit=1&offset=0"
       list:
         type: array
         items:
           $ref: '#/definitions/ThrottlingPolicy'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/throttling-policies/subscription?limit=1&offset=2"
+        #   previous: "/throttling-policies/subscription?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Tier resource
@@ -5552,22 +5510,15 @@ definitions:
         description: |
           Number of Subscriptions returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901"
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901"
       list:
         type: array
         items:
           $ref: '#/definitions/Subscription'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901"
+        #   previous: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901"
 
 #-----------------------------------------------------
 # The Subscription resource
@@ -5637,21 +5588,6 @@ definitions:
       shared:
         type: boolean
         example: true
-
-#  #-----------------------------------------------------
-#  # The Label resource
-#  #-----------------------------------------------------
-#  Label:
-#    title: Label
-#    required:
-#      - name
-#    properties:
-#      name:
-#        type: string
-#        example: Development
-#      description:
-#        type: string
-#        example: Explanation about the micro gateway.
 
 #-----------------------------------------------------
 # The Error resource
@@ -5970,27 +5906,15 @@ definitions:
       count:
         type: integer
         example: 1
-      next:
-        type: string
-        example: '/certificates?limit=1&offset=2'
-      previous:
-        type: string
-        example: '/certificates?limit=1&offset=0'
       certificates:
         type: array
         items:
           $ref: '#/definitions/CertMetadata'
       pagination:
-        properties:
-          offset:
-            type: integer
-            example: 12
-          limit:
-            type: integer
-            example: 25
-          total:
-            type: integer
-            example: 1290
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/endpoint-certificates?limit=1&offset=2"
+        #   previous: "/endpoint-certificates?limit=1&offset=0"
 
   #-----------------------------------------------------
   # Certificate metadata resource
@@ -6047,27 +5971,15 @@ definitions:
       count:
         type: integer
         example: 1
-      next:
-        type: string
-        example: '/certificates?limit=1&offset=2'
-      previous:
-        type: string
-        example: '/certificates?limit=1&offset=0'
       certificates:
         type: array
         items:
           $ref: '#/definitions/ClientCertMetadata'
       pagination:
-        properties:
-          offset:
-            type: integer
-            example: 12
-          limit:
-            type: integer
-            example: 25
-          total:
-            type: integer
-            example: 1290
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/client-certificates?limit=1&offset=2"
+        #   previous: "/client-certificates?limit=1&offset=0"
 
   #-----------------------------------------------------
   # Certificate metadata resource
@@ -6118,20 +6030,12 @@ definitions:
         type: integer
         description: |
           Number of Labels returned.
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
       list:
         type: array
         items:
           $ref: '#/definitions/Label'
+      pagination:
+        $ref: '#/definitions/Pagination'
 
 #-----------------------------------------------------
 # The Lifecycle state resource
@@ -6327,33 +6231,15 @@ definitions:
         description: |
           Number of results returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/apis?limit=1&offset=2&query="
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/apis?limit=1&offset=0&query="
       list:
         type: array
         items:
           $ref: '#/definitions/SearchResult'
       pagination:
-        properties:
-          offset:
-            type: integer
-            example: 12
-          limit:
-            type: integer
-            example: 25
-          total:
-            type: integer
-            example: 1290
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/client-certificates?limit=1&offset=2"
+        #   previous: "/client-certificates?limit=1&offset=0"
 
   SearchResult:
     title: Search Result
@@ -6507,6 +6393,32 @@ definitions:
         type: array
         items:
           type: string
+
+#-----------------------------------------------------
+# The pagination resource
+#-----------------------------------------------------
+  Pagination:
+    title: Pagination
+    properties:
+      offset:
+        type: integer
+        example: 0
+      limit:
+        type: integer
+        example: 1
+      total:
+        type: integer
+        example: 10
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
 
 #-----------------------------------------------------
 # END-OF-FILE
