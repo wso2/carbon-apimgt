@@ -6584,9 +6584,9 @@ public final class APIUtil {
     }
 
     /**
-     * Used to get access control allowed methods define in api-manager.xml
+     * Used to get access control expose headers define in api-manager.xml
      *
-     * @return access control allowed methods string
+     * @return access control expose headers string
      */
     public static String getExposedHeaders() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
