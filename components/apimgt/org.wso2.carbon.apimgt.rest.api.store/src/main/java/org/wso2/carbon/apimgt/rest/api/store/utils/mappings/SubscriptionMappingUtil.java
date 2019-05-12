@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -51,19 +50,12 @@ public class SubscriptionMappingUtil {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
-        if (apiId != null) {
-            APIIdentifier apiIdEmailReplacedBack = new APIIdentifier(APIUtil.replaceEmailDomainBack(apiId.getProviderName
-                    ()).replace(RestApiConstants.API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER),
-                    URLEncoder.encode(apiId.getApiName(), RestApiConstants.CHARSET).replace(RestApiConstants
-                            .API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER),apiId.getVersion().
-                    replace(RestApiConstants.API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER));
-            subscriptionDTO.setApiIdentifier(apiIdEmailReplacedBack.toString());
-        }
-        APIProductIdentifier productId = subscription.getProductId();
-        if (productId != null) {
-            subscriptionDTO.setApiProductIdentifier(subscription.getProductId().getUUID());
-        }
-
+        APIIdentifier apiIdEmailReplacedBack = new APIIdentifier(APIUtil.replaceEmailDomainBack(apiId.getProviderName
+                ()).replace(RestApiConstants.API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER),
+                URLEncoder.encode(apiId.getApiName(), RestApiConstants.CHARSET).replace(RestApiConstants
+                        .API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER),apiId.getVersion().
+                replace(RestApiConstants.API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER));
+        subscriptionDTO.setApiIdentifier(apiIdEmailReplacedBack.toString());
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setTier(subscription.getTier().getName());
