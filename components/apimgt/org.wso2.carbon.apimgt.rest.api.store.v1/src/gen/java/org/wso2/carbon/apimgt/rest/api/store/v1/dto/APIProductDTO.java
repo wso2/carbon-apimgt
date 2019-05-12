@@ -1,10 +1,10 @@
-package org.wso2.carbon.apimgt.rest.api.store.dto;
+package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;

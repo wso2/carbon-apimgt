@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -15,25 +15,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.carbon.apimgt.rest.api.store.impl;
+package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.rest.api.store.*;
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApiProductsApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.*;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
+
+
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 
 import java.util.List;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,22 +49,22 @@ import javax.ws.rs.core.Response;
 public class ApiProductsApiServiceImpl extends ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,String documentId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,String documentId,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId,String documentId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId,String documentId,String xWSO2Tenant,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apiProductsApiProductIdDocumentsGet(String apiProductId,Integer limit,Integer offset,String xWSO2Tenant,String accept,String ifNoneMatch){
+    public Response apiProductsApiProductIdDocumentsGet(String apiProductId,Integer limit,Integer offset,String xWSO2Tenant,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apiProductsApiProductIdGet(String apiProductId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant){
+    public Response apiProductsApiProductIdGet(String apiProductId,String ifNoneMatch,String xWSO2Tenant){
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
@@ -69,6 +74,12 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             }
 
             APIProduct product = apiConsumer.getAPIProduct(apiProductId, requestedTenantDomain);
+            if (product == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            }
+            if(!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            }
             APIProductDTO productToReturn = APIMappingUtil.fromAPIProductToDTO(product);
             return Response.ok().entity(productToReturn).build();
         } catch (APIManagementException e) {
@@ -87,19 +98,18 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         return null;
     }
     @Override
-    public Response apiProductsApiProductIdSwaggerGet(String apiProductId,String accept,String ifNoneMatch,String ifModifiedSince,String xWSO2Tenant){
+    public Response apiProductsApiProductIdSwaggerGet(String apiProductId,String ifNoneMatch,String xWSO2Tenant){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apiProductsApiProductIdThumbnailGet(String apiProductId,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apiProductsApiProductIdThumbnailGet(String apiProductId,String xWSO2Tenant,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+    @Override
+    public Response apiProductsGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String ifNoneMatch){
 
-    @Override
-    public Response apiProductsGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String accept,
-            String ifNoneMatch) {
         //TODO implement pagination
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIProductListDTO apiProductListDTO = new APIProductListDTO();

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.store.dto;
+package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 
 import io.swagger.annotations.*;

@@ -1,16 +1,16 @@
-package org.wso2.carbon.apimgt.rest.api.store;
+package org.wso2.carbon.apimgt.rest.api.store.v1;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.ApiProductsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.factories.ApiProductsApiServiceFactory;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ApiProductsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.factories.ApiProductsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 
 import java.util.List;
 
@@ -47,12 +47,9 @@ public class ApiProductsApi  {
 
     public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Document Identifier\n",required=true ) @PathParam("documentId")  String documentId,
-    @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,
-    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdDocumentsDocumentIdContentGet(apiProductId,documentId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apiProductsApiProductIdDocumentsDocumentIdContentGet(apiProductId,documentId,ifNoneMatch);
     }
     @GET
     @Path("/{apiProductId}/documents/{documentId}")
@@ -71,11 +68,9 @@ public class ApiProductsApi  {
     public Response apiProductsApiProductIdDocumentsDocumentIdGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "Document Identifier\n",required=true ) @PathParam("documentId")  String documentId,
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,
-    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdDocumentsDocumentIdGet(apiProductId,documentId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apiProductsApiProductIdDocumentsDocumentIdGet(apiProductId,documentId,xWSO2Tenant,ifNoneMatch);
     }
     @GET
     @Path("/{apiProductId}/documents")
@@ -95,10 +90,9 @@ public class ApiProductsApi  {
     @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,
-    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdDocumentsGet(apiProductId,limit,offset,xWSO2Tenant,accept,ifNoneMatch);
+    return delegate.apiProductsApiProductIdDocumentsGet(apiProductId,limit,offset,xWSO2Tenant,ifNoneMatch);
     }
     @GET
     @Path("/{apiProductId}/")
@@ -115,12 +109,10 @@ public class ApiProductsApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
     public Response apiProductsApiProductIdGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
-    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince,
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant)
     {
-    return delegate.apiProductsApiProductIdGet(apiProductId,accept,ifNoneMatch,ifModifiedSince,xWSO2Tenant);
+    return delegate.apiProductsApiProductIdGet(apiProductId,ifNoneMatch,xWSO2Tenant);
     }
     @GET
     @Path("/{apiProductId}/swagger")
@@ -137,12 +129,10 @@ public class ApiProductsApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
     public Response apiProductsApiProductIdSwaggerGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
-    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince,
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant)
     {
-    return delegate.apiProductsApiProductIdSwaggerGet(apiProductId,accept,ifNoneMatch,ifModifiedSince,xWSO2Tenant);
+    return delegate.apiProductsApiProductIdSwaggerGet(apiProductId,ifNoneMatch,xWSO2Tenant);
     }
     @GET
     @Path("/{apiProductId}/thumbnail")
@@ -160,11 +150,9 @@ public class ApiProductsApi  {
 
     public Response apiProductsApiProductIdThumbnailGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product.\n",required=true ) @PathParam("apiProductId") @Encoded String apiProductId,
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,
-    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsApiProductIdThumbnailGet(apiProductId,xWSO2Tenant,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apiProductsApiProductIdThumbnailGet(apiProductId,xWSO2Tenant,ifNoneMatch);
     }
     @GET
     
@@ -182,10 +170,9 @@ public class ApiProductsApi  {
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,
     @ApiParam(value = "**Search condition**.\n\nYou can search in attributes by using an **\"<attribute>:\"** modifier.\n\nEg.\n\"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".\n\nAdditionally you can use wildcards.\n\nEg.\n\"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider, tag**]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.\n") @QueryParam("query")  String query,
-    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apiProductsGet(limit,offset,xWSO2Tenant,query,accept,ifNoneMatch);
+    return delegate.apiProductsGet(limit,offset,xWSO2Tenant,query,ifNoneMatch);
     }
 }
 

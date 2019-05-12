@@ -20,11 +20,8 @@ public class SubscriptionDTO  {
   @NotNull
   private String applicationId = null;
   
-  
+  @NotNull
   private String apiIdentifier = null;
-  
-  
-  private String apiProductIdentifier = null;
   
   @NotNull
   private String tier = null;
@@ -61,6 +58,7 @@ public class SubscriptionDTO  {
   public void setCreatedTime(String createdTime){
     this.createdTime=createdTime;
   }
+
   
   /**
    * The UUID of the subscription
@@ -91,26 +89,13 @@ public class SubscriptionDTO  {
   /**
    * The unique identifier of the API.
    **/
-  @ApiModelProperty(value = "The unique identifier of the API.")
+  @ApiModelProperty(required = true, value = "The unique identifier of the API.")
   @JsonProperty("apiIdentifier")
   public String getApiIdentifier() {
     return apiIdentifier;
   }
   public void setApiIdentifier(String apiIdentifier) {
     this.apiIdentifier = apiIdentifier;
-  }
-
-  
-  /**
-   * The unique identifier of the API prodduct.
-   **/
-  @ApiModelProperty(value = "The unique identifier of the API prodduct.")
-  @JsonProperty("apiProductIdentifier")
-  public String getApiProductIdentifier() {
-    return apiProductIdentifier;
-  }
-  public void setApiProductIdentifier(String apiProductIdentifier) {
-    this.apiProductIdentifier = apiProductIdentifier;
   }
 
   
@@ -147,7 +132,6 @@ public class SubscriptionDTO  {
     sb.append("  subscriptionId: ").append(subscriptionId).append("\n");
     sb.append("  applicationId: ").append(applicationId).append("\n");
     sb.append("  apiIdentifier: ").append(apiIdentifier).append("\n");
-    sb.append("  apiProductIdentifier: ").append(apiProductIdentifier).append("\n");
     sb.append("  tier: ").append(tier).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("}\n");

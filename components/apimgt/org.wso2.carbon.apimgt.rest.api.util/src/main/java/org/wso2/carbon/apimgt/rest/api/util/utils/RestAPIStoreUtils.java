@@ -422,7 +422,8 @@ public class RestAPIStoreUtils {
                 return true;
             }
         } else if (APIConstants.API_PRIVATE_VISIBILITY.equals(product.getVisibility())
-                && tenantDomain.equals(product.getTenantDomain())) {
+                && tenantDomain.equals(product.getTenantDomain())
+                && !APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
             return true;
         }
         return false;

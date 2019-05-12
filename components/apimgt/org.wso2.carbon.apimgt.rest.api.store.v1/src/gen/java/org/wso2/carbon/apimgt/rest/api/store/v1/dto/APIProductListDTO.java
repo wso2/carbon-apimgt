@@ -1,9 +1,9 @@
-package org.wso2.carbon.apimgt.rest.api.store.dto;
+package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIListPaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -31,7 +31,7 @@ public class APIProductListDTO  {
   private List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
   
   
-  private APIListPaginationDTO pagination = null;
+  private PaginationDTO pagination = null;
 
   
   /**
@@ -89,10 +89,10 @@ public class APIProductListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("pagination")
-  public APIListPaginationDTO getPagination() {
+  public PaginationDTO getPagination() {
     return pagination;
   }
-  public void setPagination(APIListPaginationDTO pagination) {
+  public void setPagination(PaginationDTO pagination) {
     this.pagination = pagination;
   }
 

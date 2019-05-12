@@ -1,7 +1,7 @@
-package org.wso2.carbon.apimgt.rest.api.store.factories;
+package org.wso2.carbon.apimgt.rest.api.store.v1.factories;
 
-import org.wso2.carbon.apimgt.rest.api.store.ApiProductsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.impl.ApiProductsApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ApiProductsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApiProductsApiServiceImpl;
 
 public class ApiProductsApiServiceFactory {
 

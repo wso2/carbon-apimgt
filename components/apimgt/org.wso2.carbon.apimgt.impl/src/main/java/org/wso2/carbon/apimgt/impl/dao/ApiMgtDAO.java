@@ -13110,8 +13110,8 @@ public class ApiMgtDAO {
                     + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
                     + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
                     + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION,"
-                    + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES) " 
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES, BUSINESS_OWNER, BUSINESS_OWNER_EMAIL) " 
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_product_id"});
             prepStmtAddAPIProduct.setString(1, apiproduct.getProvider());
             prepStmtAddAPIProduct.setString(2, apiproduct.getName());
@@ -13137,6 +13137,8 @@ public class ApiMgtDAO {
             }
             prepStmtAddAPIProduct.setString(12, subscriptionAvailableTenants);
             prepStmtAddAPIProduct.setString(13, apiproduct.getVisibleRoles());
+            prepStmtAddAPIProduct.setString(14, apiproduct.getBusinessOwner());
+            prepStmtAddAPIProduct.setString(15, apiproduct.getBusinessOwnerEmail());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -13757,10 +13759,11 @@ public class ApiMgtDAO {
                 String visibleRoles = rs.getString("VISIBILE_ROLES");
                 String visibility = rs.getString("VISIBILITY");
                 String productTenant = rs.getString("TENANT_DOMAIN");
-                // add if the product is 1)public 2) restrict to current domain 3)restrict to a role within tenant
+                // add if the product is 1)public 2) restrict to current domain for non-anonymous users
+                //    3)restrict to a role within tenant
                 if (APIConstants.API_GLOBAL_VISIBILITY.equals(visibility)
                         || (APIConstants.API_PRIVATE_VISIBILITY.equals(visibility)
-                                && tenantDomain.equals(productTenant))
+                                && tenantDomain.equals(productTenant) && !APIConstants.WSO2_ANONYMOUS_USER.equals(user))
                         || (APIConstants.API_RESTRICTED_VISIBILITY.equals(visibility)
                                 && APIUtil.isRoleExistForUser(user, visibleRoles)
                                 && tenantDomain.equals(productTenant))) {

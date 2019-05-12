@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 
 import io.swagger.annotations.*;
@@ -22,11 +23,17 @@ public class SubscriptionDTO  {
   @NotNull
   private String applicationId = null;
   
-  @NotNull
+  
   private String apiId = null;
   
   
   private APIInfoDTO apiInfo = null;
+  
+  
+  private String apiProductId = null;
+  
+  
+  private APIProductInfoDTO apiProductInfo = null;
   
   
   private ApplicationInfoDTO applicationInfo = null;
@@ -76,7 +83,7 @@ public class SubscriptionDTO  {
   /**
    * The unique identifier of the API.
    **/
-  @ApiModelProperty(required = true, value = "The unique identifier of the API.")
+  @ApiModelProperty(value = "The unique identifier of the API.")
   @JsonProperty("apiId")
   public String getApiId() {
     return apiId;
@@ -95,6 +102,31 @@ public class SubscriptionDTO  {
   }
   public void setApiInfo(APIInfoDTO apiInfo) {
     this.apiInfo = apiInfo;
+  }
+
+  
+  /**
+   * The unique identifier of the API Product.
+   **/
+  @ApiModelProperty(value = "The unique identifier of the API Product.")
+  @JsonProperty("apiProductId")
+  public String getApiProductId() {
+    return apiProductId;
+  }
+  public void setApiProductId(String apiProductId) {
+    this.apiProductId = apiProductId;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiProductInfo")
+  public APIProductInfoDTO getApiProductInfo() {
+    return apiProductInfo;
+  }
+  public void setApiProductInfo(APIProductInfoDTO apiProductInfo) {
+    this.apiProductInfo = apiProductInfo;
   }
 
   
@@ -156,6 +188,8 @@ public class SubscriptionDTO  {
     sb.append("  applicationId: ").append(applicationId).append("\n");
     sb.append("  apiId: ").append(apiId).append("\n");
     sb.append("  apiInfo: ").append(apiInfo).append("\n");
+    sb.append("  apiProductId: ").append(apiProductId).append("\n");
+    sb.append("  apiProductInfo: ").append(apiProductInfo).append("\n");
     sb.append("  applicationInfo: ").append(applicationInfo).append("\n");
     sb.append("  tier: ").append(tier).append("\n");
     sb.append("  type: ").append(type).append("\n");
