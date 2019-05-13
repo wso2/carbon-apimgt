@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
@@ -150,14 +151,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST == body.getType();
 
             // validate web socket api endpoint configurations
-            if (isWSAPI) {
-                if (!RestApiPublisherUtils.isValidWSAPI(body)) {
-                    RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
-                }
-            } else {
-//                if (body.getApiDefinition() == null) {todo
-//                    RestApiUtil.handleBadRequest("Parameter: \"apiDefinition\" cannot be null", log);
-//                }
+            if (isWSAPI && !RestApiPublisherUtils.isValidWSAPI(body)) {
+                RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
             }
 
             List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
@@ -282,9 +277,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                                     + "-" + body.getName() + "-" + body.getVersion();
                     RestApiUtil.handleInternalServerError(errorMessage, log);
                 }
-            } /*else if (!isWSAPI) {todo
-                apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
-            }*/
+            } else if (!isWSAPI) {
+                APIDefinitionUsingOASParser apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
+                String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
+                apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
+            }
+
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);

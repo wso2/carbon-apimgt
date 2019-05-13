@@ -5195,21 +5195,9 @@ definitions:
           authType:
             type: string
             default: "Any"
-          policy:
+          throttlingPolicy:
             type: string
             example: "Unlimited"
-          endpoint:
-            type: array
-            items:
-             properties:
-              key:
-               type: string
-               example: "01234567-0123-0123-0123-012345678901"
-              inline:
-               $ref: '#/definitions/EndPoint'
-              type:
-                type: string
-                example: "Production"
           scopes:
             type: array
             items:

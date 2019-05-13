@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -21,22 +20,19 @@ public class APIOperationsDTO  {
   private String uritemplate = "/*";
   
   
-  private List<APIEndpointDTO> endpoint = new ArrayList<APIEndpointDTO>();
-  
-  
   private String httpVerb = "GET";
   
   
   private String id = null;
   
   
+  private String throttlingPolicy = null;
+  
+  
   private List<String> scopes = new ArrayList<String>();
   
   
   private String authType = "Any";
-  
-  
-  private String policy = null;
 
   
   /**
@@ -48,18 +44,6 @@ public class APIOperationsDTO  {
   }
   public void setUritemplate(String uritemplate) {
     this.uritemplate = uritemplate;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("endpoint")
-  public List<APIEndpointDTO> getEndpoint() {
-    return endpoint;
-  }
-  public void setEndpoint(List<APIEndpointDTO> endpoint) {
-    this.endpoint = endpoint;
   }
 
   
@@ -90,6 +74,18 @@ public class APIOperationsDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("throttlingPolicy")
+  public String getThrottlingPolicy() {
+    return throttlingPolicy;
+  }
+  public void setThrottlingPolicy(String throttlingPolicy) {
+    this.throttlingPolicy = throttlingPolicy;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
@@ -111,18 +107,6 @@ public class APIOperationsDTO  {
   }
 
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("policy")
-  public String getPolicy() {
-    return policy;
-  }
-  public void setPolicy(String policy) {
-    this.policy = policy;
-  }
-
-  
 
   @Override
   public String toString()  {
@@ -130,12 +114,11 @@ public class APIOperationsDTO  {
     sb.append("class APIOperationsDTO {\n");
     
     sb.append("  uritemplate: ").append(uritemplate).append("\n");
-    sb.append("  endpoint: ").append(endpoint).append("\n");
     sb.append("  httpVerb: ").append(httpVerb).append("\n");
     sb.append("  id: ").append(id).append("\n");
+    sb.append("  throttlingPolicy: ").append(throttlingPolicy).append("\n");
     sb.append("  scopes: ").append(scopes).append("\n");
     sb.append("  authType: ").append(authType).append("\n");
-    sb.append("  policy: ").append(policy).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

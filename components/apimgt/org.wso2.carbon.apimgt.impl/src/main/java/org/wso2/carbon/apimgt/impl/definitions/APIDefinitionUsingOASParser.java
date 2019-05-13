@@ -19,30 +19,41 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import io.swagger.models.Contact;
 import io.swagger.models.HttpMethod;
+import io.swagger.models.Info;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
+import io.swagger.models.Response;
 import io.swagger.models.SecurityRequirement;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.PathParameter;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.util.Json;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.registry.api.Registry;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Models API definition using OAS (swagger 2.0) parser
@@ -50,6 +61,7 @@ import java.util.HashSet;
 public class APIDefinitionUsingOASParser extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(APIDefinitionUsingOASParser.class);
+    private final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
 
     @Override
     public Set<URITemplate> getURITemplates(API api, String apiDefinition)
@@ -117,7 +129,108 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     @Override
     public String generateAPIDefinition(API api) throws APIManagementException {
-        return null;
+        Swagger swagger = new Swagger();
+
+        //Create info object
+        Info info = new Info();
+        info.setTitle(api.getId().getApiName());
+        if (api.getDescription() != null) {
+            info.setDescription(api.getDescription());
+        }
+
+        Contact contact = new Contact();
+        //Create contact object and map business owner info
+        if (api.getBusinessOwner() != null) {
+            contact.setName(api.getBusinessOwner());
+        }
+        if (api.getBusinessOwnerEmail() != null) {
+            contact.setEmail(api.getBusinessOwnerEmail());
+        }
+        if (api.getBusinessOwner() != null || api.getBusinessOwnerEmail() != null) {
+            //put contact object to info object
+            info.setContact(contact);
+        }
+
+        info.setVersion(api.getId().getVersion());
+        OAuth2Definition oAuth2Definition = new OAuth2Definition().password("https://test.com");
+
+        Set<Scope> scopes = api.getScopes();
+        
+        if (scopes != null && !scopes.isEmpty()) {
+            List<Map<String,String>> xSecurityScopesArray = new ArrayList<>();
+            for (Scope scope : scopes) {
+                oAuth2Definition.addScope(scope.getName(), scope.getDescription());
+
+                Map<String, String> xWso2ScopesObject = new LinkedHashMap<>();
+                xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
+                xSecurityScopesArray.add(xWso2ScopesObject);
+            }
+            Map<String, Object> xWSO2Scopes = new LinkedHashMap<>();
+            xWSO2Scopes.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xSecurityScopesArray);
+            Map<String, Object> xWSO2SecurityDefinitionObject = new LinkedHashMap<>();
+            xWSO2SecurityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, xWSO2Scopes);
+
+            swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_SECURITY, xWSO2SecurityDefinitionObject);
+        }
+
+        swagger.addSecurityDefinition("OAuth2Security", oAuth2Definition);
+        swagger.setInfo(info);
+
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            Path path;
+            if (swagger.getPath(uriTemplate.getUriTemplate()) != null) {
+                path = swagger.getPath(uriTemplate.getUriTemplate());
+            } else {
+                path = new Path();
+            }
+
+            Operation operation = new Operation();
+            List<String> pathParams = getPathParamNames(uriTemplate.getUriTemplate());
+            for (String pathParam : pathParams) {
+                PathParameter pathParameter = new PathParameter();
+                pathParameter.setName(pathParam);
+                pathParameter.setType("string");
+                operation.addParameter(pathParameter);
+            }
+
+            String authType = uriTemplate.getAuthType();
+            if (!APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)
+                    && !APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)
+                    && !APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authType)
+                    && !APIConstants.AUTH_NO_AUTHENTICATION.equals(authType)) {
+                throw new APIManagementException("Invalid auth type provided.");
+            }
+            operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
+            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
+            
+            Response response = new Response();
+            response.setDescription("OK");
+            operation.addResponse(APIConstants.SWAGGER_RESPONSE_200, response);
+            path.set(uriTemplate.getHTTPVerb().toLowerCase(), operation);
+
+            swagger.path(uriTemplate.getUriTemplate(), path);
+        }
+
+        return Json.pretty(swagger);
+    }
+
+    /**
+     * Extract and return path parameters in the given URI template
+     * 
+     * @param uriTemplate URI Template value
+     * @return path parameters in the given URI template
+     */
+    private List<String> getPathParamNames(String uriTemplate) {
+        List<String> params = new ArrayList<>();
+
+        Matcher bracesMatcher = CURLY_BRACES_PATTERN.matcher(uriTemplate);
+        while (bracesMatcher.find()) {
+            params.add(bracesMatcher.group());
+        }
+        return params;
     }
 
     @Override
