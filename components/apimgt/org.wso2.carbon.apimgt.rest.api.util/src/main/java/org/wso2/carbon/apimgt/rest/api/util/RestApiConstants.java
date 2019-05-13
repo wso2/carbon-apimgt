@@ -47,6 +47,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_CUSTOM_RULE = "custom rule";
     public static final String RESOURCE_BLOCK_CONDITION = "block condition";
     public static final String RESOURCE_TIER = "tier";
+    public static final String RESOURCE_THROTTLING_POLICY = "throttling policy";
     public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";
     public static final String RESOURCE_WORKFLOW = "workflow";

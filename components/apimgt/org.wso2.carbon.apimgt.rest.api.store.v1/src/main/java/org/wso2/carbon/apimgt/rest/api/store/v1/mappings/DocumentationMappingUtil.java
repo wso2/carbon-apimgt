@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -110,8 +111,9 @@ public class DocumentationMappingUtil {
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId);
         }
 
-        documentListDTO.setNext(paginatedNext);
-        documentListDTO.setPrevious(paginatedPrevious);
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        documentListDTO.setPagination(paginationDTO);
     }
 
 }

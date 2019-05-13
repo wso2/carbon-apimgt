@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class TierDTO  {
+public class ThrottlingPolicyDTO  {
   
   
   @NotNull
@@ -24,7 +24,7 @@ public class TierDTO  {
   private String description = null;
   
   public enum PolicyLevelEnum {
-     api,  application,  resource, 
+     subscription,  api, 
   };
   
   private PolicyLevelEnum policyLevel = null;
@@ -167,7 +167,7 @@ public class TierDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TierDTO {\n");
+    sb.append("class ThrottlingPolicyDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");

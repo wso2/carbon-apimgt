@@ -62,10 +62,10 @@ class APIInputForm extends Component {
      * @memberof InputForm
      */
     componentDidMount() {
-        const promisedTier = API.policies('api');
+        const promisedTier = API.policies('subscription');
         promisedTier.then((response) => {
-            const tiers = response.obj;
-            this.setState({ policies: tiers });
+            const policies = response.obj;
+            this.setState({ policies: policies.list });
         });
     }
 

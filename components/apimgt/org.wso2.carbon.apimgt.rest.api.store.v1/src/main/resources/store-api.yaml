@@ -2884,24 +2884,37 @@ definitions:
         description: |
           Number of APIs returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/apis?limit=1&offset=2&query="
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/apis?limit=1&offset=0&query="
       list:
         type: array
         items:
           $ref: '#/definitions/APIInfo'
       pagination:
         $ref: '#/definitions/Pagination'
+    example:
+      count: 2
+      list:
+        - id: 01234567-0123-0123-0123-012345678901
+          name: CalculatorAPI
+          description: A calculator API that supports basic operations
+          context: /CalculatorAPI
+          version: 1.0.0
+          provider: admin
+          lifeCycleStatus: PUBLISHED
+          thumbnailUri: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+        - id: 01123567-1233-5453-0212-12353678901
+          name: PizzaShackAPI
+          description: A Pizza ordering API
+          context: /PizzaShackAPI
+          version: 1.0.0
+          provider: admin
+          lifeCycleStatus: PUBLISHED
+          thumbnailUri: /apis/01123567-1233-5453-0212-12353678901/thumbnail
+      pagination:
+        offset: 2
+        limit: 2
+        total: 10
+        next: "/apis?limit=2&offset=4"
+        previous: "/apis?limit=2&offset=0"
 
 #-----------------------------------------------------
 # The Standard API Info resource
@@ -3107,24 +3120,15 @@ definitions:
         description: |
           Number of applications returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/applications?limit=1&offset=2&groupId="
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/applications?limit=1&offset=0&groupId="
       list:
         type: array
         items:
           $ref: '#/definitions/ApplicationInfo'
       pagination:
-          $ref: '#/definitions/Pagination'
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/applications?limit=1&offset=2&groupId="
+        #   previous: "/applications?limit=1&offset=0&groupId="
 
 #-----------------------------------------------------
 # The Application resource
@@ -3230,22 +3234,15 @@ definitions:
         description: |
           Number of Documents returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=2"
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=0"
       list:
         type: array
         items:
           $ref: '#/definitions/Document'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=2"
+        #   previous: "/apis/01234567-0123-0123-0123-012345678901/documents?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Document resource
@@ -3303,22 +3300,15 @@ definitions:
         description: |
           Number of Throttling Tiers returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/tiers/subscription?limit=1&offset=2"
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/tiers/subscription?limit=1&offset=0"
       list:
         type: array
         items:
           $ref: '#/definitions/Tier'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/tiers/subscription?limit=1&offset=2"
+        #   previous: "/tiers/subscription?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Throttling Tier resource
@@ -3389,22 +3379,15 @@ definitions:
         description: |
           Number of Subscriptions returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
       list:
         type: array
         items:
           $ref: '#/definitions/Subscription'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
+        #   previous: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
 
 #-----------------------------------------------------
 # The Subscription resource
@@ -3479,22 +3462,15 @@ definitions:
         description: |
           Number of Tags returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/tags?limit=1&offset=2"
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/tags?limit=1&offset=0"
       list:
         type: array
         items:
           $ref: '#/definitions/Tag'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/tags?limit=1&offset=2"
+        #   previous: "/tags?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Rating resource
@@ -3536,20 +3512,16 @@ definitions:
         type: integer
         description: |
            Number of Subscriber Ratings returned.
-      next:
-        type: string
-        description: |
-           Link to the next subset of resources qualified.
-           Empty if no more resources are to be returned.
-      previous:
-        type: string
-        description: |
-           Link to the previous subset of resources qualified.
-           Empty if current subset is the first subset returned.
+        example: 1
       list:
         type: array
         items:
           $ref: '#/definitions/Rating'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/ratings?limit=1&offset=2"
+        #   previous: "/ratings?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Comment resource
@@ -3593,20 +3565,16 @@ definitions:
         type: integer
         description: |
            Number of Comments returned.
-      next:
-        type: string
-        description: |
-           Link to the next subset of resources qualified.
-           Empty if no more resources are to be returned.
-      previous:
-        type: string
-        description: |
-           Link to the previous subset of resources qualified.
-           Empty if current subset is the first subset returned.
+        example: 1
       list:
         type: array
         items:
           $ref: '#/definitions/Comment'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/comments?limit=1&offset=2"
+        #   previous: "/comments?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Error resource
@@ -3742,6 +3710,7 @@ definitions:
         type: integer
         description: |
           Number of applications keys returned.
+        example: 1
       list:
         type: array
         items:
@@ -3837,10 +3806,17 @@ definitions:
   ScopeList :
     title : Scope list
     properties:
+      count:
+        type: integer
+        description: |
+          Number of results returned.
+        example: 1
       list :
         type : array
         items:
           $ref: '#/definitions/ScopeInfo'
+      pagination:
+        $ref: '#/definitions/Pagination'
 
 #-----------------------------------------------------
 # Tier Permission Info resource
@@ -3917,33 +3893,12 @@ definitions:
         description: |
           Number of results returned.
         example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/apis?limit=1&offset=2&search="
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/apis?limit=1&offset=0&search="
       list:
         type: array
         items:
           $ref: '#/definitions/SearchResult'
       pagination:
-        properties:
-          offset:
-            type: integer
-            example: 12
-          limit:
-            type: integer
-            example: 25
-          total:
-            type: integer
-            example: 1290
+        $ref: '#/definitions/Pagination'
 
   SearchResult:
     title: Search Result
@@ -4048,13 +4003,23 @@ definitions:
     properties:
       offset:
         type: integer
-        example: 12
+        example: 0
       limit:
         type: integer
-        example: 25
+        example: 1
       total:
         type: integer
-        example: 1290
+        example: 10
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
 
 #-----------------------------------------------------
 # The settings resource

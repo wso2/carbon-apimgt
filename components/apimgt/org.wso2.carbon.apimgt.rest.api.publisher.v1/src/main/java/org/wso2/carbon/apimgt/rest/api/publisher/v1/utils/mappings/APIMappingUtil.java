@@ -324,8 +324,9 @@ public class APIMappingUtil {
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
-        apiListDTO.setNext(paginatedNext);
-        apiListDTO.setPrevious(paginatedPrevious);
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        apiListDTO.setPagination(paginationDTO);
     }
 
     private static String checkAndSetVersionParam(String context) {
