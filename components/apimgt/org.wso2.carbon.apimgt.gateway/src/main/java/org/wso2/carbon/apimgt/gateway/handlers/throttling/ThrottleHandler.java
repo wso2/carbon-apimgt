@@ -154,7 +154,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         //Throttle Keys
         //applicationLevelThrottleKey key is combination of {applicationId}:{authorizedUser}
         String applicationLevelThrottleKey;
-        //subscriptionLevelThrottleKey key is combination of {applicationId}:{apiContext}:{apiVersion}
+        //subscriptionLevelThrottleKey key for an api subscription is combination of {applicationId}:{apiContext}:{apiVersion}
+        //subscriptionLevelThrottleKey key for an api subscription is combination of {applicationId}:{productName}:{productProvider}
+        //Todo: add product version to key when versioning is supported
         String subscriptionLevelThrottleKey;
         // The key is combination of {apiContext}/ {apiVersion}{resourceUri}:{httpMethod} if policy is user level then authorized user will append at end
         String resourceLevelThrottleKey;
@@ -357,8 +359,13 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     //if resource level not throttled then move to subscription level
                     if (!isResourceLevelThrottled) {
                         //Subscription Level Throttling
-                        subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":"
-                                                       + apiVersion;
+                        if (authContext.getProductName() != null && authContext.getProductProvider() != null) {
+                            subscriptionLevelThrottleKey =
+                                    authContext.getApplicationId() + ":" + authContext.getProductName() + ":"
+                                            + authContext.getProductProvider();
+                        } else {
+                            subscriptionLevelThrottleKey = authContext.getApplicationId() + ":" + apiContext + ":" + apiVersion;
+                        }
                         isSubscriptionLevelThrottled = getThrottleDataHolder().
                                 isThrottled(subscriptionLevelThrottleKey);
                         if (!isSubscriptionLevelThrottled && authContext.getSpikeArrestLimit() > 0) {
