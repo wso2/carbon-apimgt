@@ -13,6 +13,7 @@
                <xs:element maxOccurs="unbounded" minOccurs="0" name="authTypes" nillable="true" type="xs:string"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="conditionGroups" nillable="true" type="ax2133:ConditionGroupDTO"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="httpVerbs" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="id" type="xs:int"/>
                <xs:element minOccurs="0" name="mediationScript" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="methodsAsString" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="resourceMap" nillable="true" type="xs:string"/>
@@ -148,6 +149,8 @@
                <xs:element minOccurs="0" name="endUserName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="endUserToken" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="issuedTime" type="xs:long"/>
+               <xs:element minOccurs="0" name="productName" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="productProvider" nillable="true" type="xs:string"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="scopes" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="spikeArrestLimit" type="xs:int"/>
                <xs:element minOccurs="0" name="spikeArrestUnit" nillable="true" type="xs:string"/>
