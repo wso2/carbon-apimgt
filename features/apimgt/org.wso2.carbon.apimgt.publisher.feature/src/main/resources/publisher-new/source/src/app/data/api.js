@@ -129,9 +129,9 @@ class API extends Resource {
     getPolicies() {
         const promisedPolicies = this.policies.map(policy => {
             return this.client.then(
-                client => client.apis["Throttling Tier (Individual)"].get_policies__policyLevel___policyName_({
-                        tierLevel: 'subscription',
-                        tierName: policy
+                client => client.apis["Throttling Policies"].getThrottlingPolicyByName({
+                        policyLevel: 'subscription',
+                        policyName: policy
                     },
                     this._requestMetaData(),
                 )
@@ -1168,16 +1168,16 @@ class API extends Resource {
 
     /**
      * Get the available policies information by tier level.
-     * @param {String} tierLevel List API or Application or Resource type policies.parameter should be one
+     * @param {String} policyLevel List API or Application or Resource type policies.parameter should be one
      * of api, application, subscription and resource
      * @returns {Promise}
      *
      */
-    static policies(tierLevel) {
+    static policies(policyLevel) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
-            return client.apis['Throttling Tier (Collection)'].get_policies__policyLevel_({
-                    tierLevel: 'subscription'
+            return client.apis["Throttling Policies"].getAllThrottlingPolicies({
+                    policyLevel: 'subscription'
                 },
                 this._requestMetaData(),
             );

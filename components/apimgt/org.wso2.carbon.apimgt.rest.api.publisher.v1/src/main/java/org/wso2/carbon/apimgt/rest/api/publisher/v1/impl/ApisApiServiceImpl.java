@@ -110,19 +110,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             allMatchedApis.addAll(apis);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
-            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
 
             //Add pagination section in the response
             Object totalLength = result.get("length");
             Integer length = 0;
-            if(totalLength != null) {
+            if (totalLength != null) {
                 length = (Integer) totalLength;
             }
-            APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
-            paginationDTO.setOffset(offset);
-            paginationDTO.setLimit(limit);
-            paginationDTO.setTotal(length);
-            apiListDTO.setPagination(paginationDTO);
+
+            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
 
             if (APIConstants.APPLICATION_GZIP.equals(accept)) {
                 try {
@@ -818,36 +814,31 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationGet(String apiId, Integer limit, Integer offset, String query,
+    @Override public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query,
             String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationMediationPolicyIdDelete(String apiId, String mediationPolicyId,
+    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId,
             String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationMediationPolicyIdGet(String apiId, String mediationPolicyId,
+    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId,
             String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationMediationPolicyIdPut(String apiId, String mediationPolicyId,
+    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId,
             MediationDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationPost(MediationDTO body, String apiId, String ifMatch) {
+    @Override public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

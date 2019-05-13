@@ -58,7 +58,7 @@ export default class Application extends Resource {
      */
     getKeys(key_type) {
         let promise_keys = this.client.then((client) => {
-            return client.apis["Application (Individual)"].get_applications__applicationId__keys({ applicationId: this.id });
+            return client.apis["Applications"].get_applications__applicationId__keys({ applicationId: this.id });
         });
         return promise_keys.then(keys_response => {
             this._setKeys(keys_response.obj);
@@ -80,7 +80,7 @@ export default class Application extends Resource {
                 scopes: ""
             };
             let payload = { applicationId: this.id, body: request_content };
-            return client.apis["Application (Individual)"].post_applications__applicationId__generate_token(payload);
+            return client.apis["Applications"].post_applications__applicationId__generate_token(payload);
         });
         return promise_token.then(token_response => {
             let token = token_response.obj;
@@ -107,7 +107,7 @@ export default class Application extends Resource {
                     tokenType: tokenType
                 };
             let payload = { applicationId: this.id, body: request_content };
-            return client.apis["Application (Individual)"].post_applications__applicationId__generate_keys(payload);
+            return client.apis["Applications"].post_applications__applicationId__generate_keys(payload);
         });
         return promised_keys.then(keys_response => {
             this.keys.set(key_type, keys_response.obj);
@@ -137,7 +137,7 @@ export default class Application extends Resource {
                 tokenType: tokenType
               }
             let payload = { applicationId: this.id, keyType: key_type, body: request_content };
-            return client.apis["Application (Individual)"].put_applications__applicationId__keys__keyType_(payload);
+            return client.apis["Applications"].put_applications__applicationId__keys__keyType_(payload);
         });
         return promised_put.then(keys_response => {
             this.keys.set(key_type, keys_response.obj);
@@ -149,7 +149,7 @@ export default class Application extends Resource {
         let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_get = apiClient.client.then(
             (client) => {
-                return client.apis["Application (Individual)"].get_applications__applicationId_({ applicationId: id },
+                return client.apis["Applications"].get_applications__applicationId_({ applicationId: id },
                     this._requestMetaData());
             });
         return promised_get.then(response => {
@@ -162,7 +162,7 @@ export default class Application extends Resource {
         let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_all = apiClient.client.then(
             (client) => {
-                return client.apis["Application (Collection)"].get_applications({}, this._requestMetaData());
+                return client.apis["Applications"].get_applications({}, this._requestMetaData());
             });
         return promised_all.then(response => response.obj);
     }
@@ -171,7 +171,7 @@ export default class Application extends Resource {
         let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_delete = apiClient.client.then(
             (client) => {
-                return client.apis["Application (Individual)"].delete_applications__applicationId_({ applicationId: id },
+                return client.apis["Applications"].delete_applications__applicationId_({ applicationId: id },
                     this._requestMetaData());
             });
         return promised_delete.then(response => response.ok);

@@ -1,8 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TierDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,32 +11,58 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class TierListDTO  {
+public class PaginationDTO  {
   
   
   
-  private Integer count = null;
+  private Integer offset = null;
+  
+  
+  private Integer limit = null;
+  
+  
+  private Integer total = null;
   
   
   private String next = null;
   
   
   private String previous = null;
-  
-  
-  private List<TierDTO> list = new ArrayList<TierDTO>();
 
   
   /**
-   * Number of Tiers returned.\n
    **/
-  @ApiModelProperty(value = "Number of Tiers returned.\n")
-  @JsonProperty("count")
-  public Integer getCount() {
-    return count;
+  @ApiModelProperty(value = "")
+  @JsonProperty("offset")
+  public Integer getOffset() {
+    return offset;
   }
-  public void setCount(Integer count) {
-    this.count = count;
+  public void setOffset(Integer offset) {
+    this.offset = offset;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("limit")
+  public Integer getLimit() {
+    return limit;
+  }
+  public void setLimit(Integer limit) {
+    this.limit = limit;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("total")
+  public Integer getTotal() {
+    return total;
+  }
+  public void setTotal(Integer total) {
+    this.total = total;
   }
 
   
@@ -69,28 +92,17 @@ public class TierListDTO  {
   }
 
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("list")
-  public List<TierDTO> getList() {
-    return list;
-  }
-  public void setList(List<TierDTO> list) {
-    this.list = list;
-  }
-
-  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TierListDTO {\n");
+    sb.append("class PaginationDTO {\n");
     
-    sb.append("  count: ").append(count).append("\n");
+    sb.append("  offset: ").append(offset).append("\n");
+    sb.append("  limit: ").append(limit).append("\n");
+    sb.append("  total: ").append(total).append("\n");
     sb.append("  next: ").append(next).append("\n");
     sb.append("  previous: ").append(previous).append("\n");
-    sb.append("  list: ").append(list).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

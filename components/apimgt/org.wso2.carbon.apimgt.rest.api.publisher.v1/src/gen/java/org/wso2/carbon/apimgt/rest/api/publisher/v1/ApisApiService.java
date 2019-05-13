@@ -41,11 +41,11 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdLifecycleHistoryGet(String apiId,String ifNoneMatch);
     public abstract Response apisApiIdLifecycleStateGet(String apiId,String ifNoneMatch);
     public abstract Response apisApiIdLifecycleStatePendingTasksDelete(String apiId);
-    public abstract Response apisApiIdPoliciesMediationGet(String apiId,Integer limit,Integer offset,String query,String ifNoneMatch);
-    public abstract Response apisApiIdPoliciesMediationMediationPolicyIdDelete(String apiId,String mediationPolicyId,String ifMatch);
-    public abstract Response apisApiIdPoliciesMediationMediationPolicyIdGet(String apiId,String mediationPolicyId,String ifNoneMatch);
-    public abstract Response apisApiIdPoliciesMediationMediationPolicyIdPut(String apiId,String mediationPolicyId,MediationDTO body,String ifMatch);
-    public abstract Response apisApiIdPoliciesMediationPost(MediationDTO body,String apiId,String ifMatch);
+    public abstract Response apisApiIdMediationPoliciesGet(String apiId,Integer limit,Integer offset,String query,String ifNoneMatch);
+    public abstract Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId,String mediationPolicyId,String ifMatch);
+    public abstract Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId,String mediationPolicyId,String ifNoneMatch);
+    public abstract Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId,String mediationPolicyId,MediationDTO body,String ifMatch);
+    public abstract Response apisApiIdMediationPoliciesPost(MediationDTO body,String apiId,String ifMatch);
     public abstract Response apisApiIdPut(String apiId,APIDTO body,String ifMatch);
     public abstract Response apisApiIdResourcePoliciesGet(String apiId,String sequenceType,String resourcePath,String verb,String ifNoneMatch);
     public abstract Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId,String resourcePolicyId,String ifNoneMatch);

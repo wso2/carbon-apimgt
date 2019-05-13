@@ -95,14 +95,12 @@ class Details extends React.Component {
         let existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
         let promised_applications = api.getAllApplications();
 
-        //Promise.all([ promised_api, existing_subscriptions, promised_applications] ).then(
-        Promise.all([ promised_api] ).then(
+        Promise.all([ promised_api, existing_subscriptions, promised_applications] ).then(
             response => {
-                //let [api, subscriptions, applications] = response.map(data => data.obj);
-                let [api] = response.map(data => data.obj);
+                let [api, subscriptions, applications] = response.map(data => data.obj);
                 //Getting the policies from api details
                 this.setState({api: api});
-                /*if(api && api.policies){
+                if(api && api.policies){
                     let apiTiers = api.policies;
                     let tiers = [];
                     for (let i = 0; i < apiTiers.length; i++) {
@@ -142,7 +140,7 @@ class Details extends React.Component {
                 this.setState({applicationsAvailable});
                 if (applicationsAvailable && applicationsAvailable.length > 0) {
                     this.setState({applicationId: applicationsAvailable[0].value});
-                }*/
+                }
 
             }
         ).catch(
