@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.EndpointAdminException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
+import org.wso2.carbon.apimgt.keymgt.client.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
@@ -50,7 +52,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         //String qualifiedDefaultApiName = apiId.getProviderName() + "--" + apiId.getApiName();
         //String providerDomain = apiId.getProviderName();
         //providerDomain = APIUtil.replaceEmailDomainBack(providerDomain);
-        apiGatewayAdminStub = new APIGatewayAdminStub(null, environment.getServerURL() + "APIGatewayAdmin");
+        ConfigurationContext ctx = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
+        apiGatewayAdminStub = new APIGatewayAdminStub(ctx, environment.getServerURL() + "APIGatewayAdmin");
         setup(apiGatewayAdminStub, environment);
         this.environment = environment;
 
