@@ -197,4 +197,13 @@ public final class RestApiConstants {
     public static final String SEQUENCE_CONTENT = "content";
     public static final String SEQUENCE_ARTIFACT_ID = "id";
     public static final String HTTP_METHOD = "method";
+    
+    public static final String[] SUPPORTED_METHODS = {"get", "put", "post", "delete", "patch"};
+
+    public static class ResourceAuthTypes {
+        public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
+        public static final String APPLICATION_USER = "Application User";
+        public static final String APPLICATION = "Application";
+        public static final String NONE = "None";
+    }
 }

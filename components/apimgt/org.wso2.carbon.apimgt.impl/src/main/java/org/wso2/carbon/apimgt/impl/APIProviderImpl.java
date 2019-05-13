@@ -1067,7 +1067,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
             }
             validateResourceThrottlingTiers(api, tenantDomain);
-            apiMgtDAO.updateAPI(api, tenantId);
+            apiMgtDAO.updateAPI(api, tenantId, userNameWithoutChange);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated the API: " + api.getId() + " in the database");
             }
@@ -1759,12 +1759,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String apiName = api.getId().getApiName();
         Set<String> versions = getAPIVersions(provider, apiName);
         APIVersionComparator comparator = new APIVersionComparator();
+        List<API> sortedAPIs = new ArrayList<API>();
         for (String version : versions) {
             API otherApi = getAPI(new APIIdentifier(provider, apiName, version));
-            if (comparator.compare(otherApi, api) < 0 && !(APIConstants.RETIRED.equals(otherApi.getStatus()))) {
-                apiMgtDAO.makeKeysForwardCompatible(provider, apiName, version,
-                        api.getId().getVersion(), api.getContext());
+            if (comparator.compare(otherApi, api) < 0 && !APIConstants.RETIRED.equals(otherApi.getStatus())) {
+                sortedAPIs.add(otherApi);
             }
+        }
+
+        // Get the subscriptions from the latest api version first
+        Collections.sort(sortedAPIs, comparator);
+        for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
+            String oldVersion = sortedAPIs.get(i).getId().getVersion();
+            apiMgtDAO.makeKeysForwardCompatible(provider, apiName, oldVersion, api.getId().getVersion(),
+                    api.getContext());
         }
     }
 
