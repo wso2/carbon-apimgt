@@ -3037,7 +3037,7 @@ public class SQLConstants {
     public static final String GET_API_PRODUCT_SQL = 
             "SELECT API_PRODUCT_ID, UUID, DESCRIPTION, API_PRODUCT_PROVIDER, API_PRODUCT_NAME, API_PRODUCT_TIER, "
             + "BUSINESS_OWNER_EMAIL, VISIBILITY, VISIBILE_ROLES, BUSINESS_OWNER,SUBSCRIPTION_AVAILABILITY, STATE, "
-            + "SUBSCRIPTION_AVAILABILE_TENANTS, TENANT_DOMAIN "
+            + "SUBSCRIPTION_AVAILABILE_TENANTS, TENANT_DOMAIN, DEFINITION "
             + "FROM AM_API_PRODUCT WHERE UUID = ? AND TENANT_DOMAIN = ?";
     
     public static final String GET_SCOPE_ID_BY_NAME = 
@@ -3046,7 +3046,7 @@ public class SQLConstants {
     public static final String GET_API_PRODUCT_UUID_SQL = 
             "SELECT API_PRODUCT_ID, UUID, DESCRIPTION, API_PRODUCT_PROVIDER, API_PRODUCT_NAME, API_PRODUCT_TIER, "
             + "BUSINESS_OWNER_EMAIL, VISIBILITY, VISIBILE_ROLES, BUSINESS_OWNER,SUBSCRIPTION_AVAILABILITY, STATE, "
-            + "SUBSCRIPTION_AVAILABILE_TENANTS, TENANT_DOMAIN "
+            + "SUBSCRIPTION_AVAILABILE_TENANTS, TENANT_DOMAIN, DEFINITION "
             + "FROM AM_API_PRODUCT WHERE UUID = ?";
     
     public static final String DELETE_API_PRODUCT_SQL = 
@@ -3102,7 +3102,15 @@ public class SQLConstants {
     public static final String GET_ALL_API_PRODUCTS = 
             "SELECT API_PRODUCT_ID, UUID, DESCRIPTION, API_PRODUCT_PROVIDER, API_PRODUCT_NAME, STATE "
             + "FROM AM_API_PRODUCT WHERE TENANT_DOMAIN = ?";
-
+    
+    public static final String GET_PRODUCT_RESOURCE_BY_COLUMN = 
+            "SELECT VISIBILITY, VISIBILE_ROLES, {column} FROM AM_API_PRODUCT WHERE UUID = ?";
+    
+    public static final String ADD_BLOB_API_PRODUCT_BY_COLUMN = 
+            "INSERT INTO AM_API_PRODUCT ({column}) VALUES (?) WHERE UUID = ?";
+    
+    public static final String UPDATE_BLOB_API_PRODUCT_BY_COLUMN = 
+            "UPDATE AM_API_PRODUCT SET {column} = ? WHERE UUID = ?";
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

@@ -1156,4 +1156,27 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     boolean isProductExist(String productName, String provider, String tenantDomain) throws APIManagementException;
+    
+    /**
+     * Update openapi definition to the product
+     * @param apiDefinition definition to add to the product
+     * @param uuid uuid of the product
+     * @throws APIManagementException
+     */
+    void updateAPIDefinitionToAPIProduct(String apiDefinition, String uuid) throws APIManagementException;
+    
+    /**
+     * Remove openapi definition to the product
+     * @param uuid uuid of the product
+     * @throws APIManagementException
+     */
+    void removeAPIDefinitionToAPIProduct(String uuid) throws APIManagementException;
+
+    /**
+     * Get open api definition for the product
+     * @param uuid uuid
+     * @return APIProduct 
+     * @throws APIManagementException
+     */
+    APIProduct getAPIDefinitionOfAPIProduct(String uuid) throws APIManagementException;
 }
