@@ -555,7 +555,8 @@ public class ApiMgtDAO {
                         log.debug("A valid API subscription was found for request to " + context + " through consumer"
                                 + " key " + consumerKey);
                     }
-                    infoDTO.setProductIdentifier(null);
+                    infoDTO.setProductName(null);
+                    infoDTO.setProductProvider(null);
                     isAPISubscriptionExist = true;
                 } else {
                     // Allow to override previous infoDTO properties only if no API subscription was found and no previous
@@ -564,7 +565,8 @@ public class ApiMgtDAO {
                     // appear first in the result set
                     infoDTO.setApiName(null);
                     String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                    infoDTO.setProductIdentifier(new APIProductIdentifier(productProvider, productName));
+                    infoDTO.setProductName(productName);
+                    infoDTO.setProductProvider(productProvider);
                     if (productSubscriptionCount > 0) {
                         //if the provided consumer key has more than one product subscriptions to the requested context
                         //log a warning and return subscription details for the first subscription
@@ -12155,7 +12157,8 @@ public class ApiMgtDAO {
                         log.debug("A valid API subscription was found for request to " + context + " through consumer"
                                 + " key " + consumerKey);
                     }
-                    infoDTO.setProductIdentifier(null);
+                    infoDTO.setProductName(null);
+                    infoDTO.setProductProvider(null);
                     isAPISubscriptionExist = true;
                 } else {
                     // Allow to override previous infoDTO properties only if no API subscription was found and no previous
@@ -12164,7 +12167,8 @@ public class ApiMgtDAO {
                     // appear first in the result set
                     infoDTO.setApiName(null);
                     String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                    infoDTO.setProductIdentifier(new APIProductIdentifier(productProvider, productName));
+                    infoDTO.setProductName(productName);
+                    infoDTO.setProductProvider(productProvider);
                     if (productSubscriptionCount > 0) {
                         //if the provided consumer key has more than one product subscriptions to the requested context
                         //log a warning and return subscription details for the first subscription
