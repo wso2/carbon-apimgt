@@ -191,19 +191,61 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
     }
     @Override
     public Response apiProductsApiProductIdSwaggerGet(String apiProductId,String accept,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIProduct retrievedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            if (retrievedProduct == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            }
+            APIProduct productWithSwagger = apiProvider.getAPIDefinitionOfAPIProduct(apiProductId);
+            //Implement visibility related tasks using the retrieved product if needed
+            
+            String apiSwagger = "";
+            if (!StringUtils.isEmpty(productWithSwagger.getDefinition())) {
+                apiSwagger = productWithSwagger.getDefinition();
+            } 
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
+    
     @Override
     public Response apiProductsApiProductIdSwaggerPut(String apiProductId,String apiDefinition,String ifMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIProduct retrievedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            if (retrievedProduct == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            }
+            //Implement visibility related tasks using the retrieved product if needed
+            apiProvider.updateAPIDefinitionToAPIProduct(apiDefinition, apiProductId);
+            APIProduct productWithSwagger = apiProvider.getAPIDefinitionOfAPIProduct(apiProductId);
+
+            String apiSwagger = "";
+            if (!StringUtils.isEmpty(productWithSwagger.getDefinition())) {
+                apiSwagger = productWithSwagger.getDefinition();
+            } 
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
+    
     @Override
     public Response apiProductsApiProductIdThumbnailGet(String apiProductId,String accept,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+    
     @Override
     public Response apiProductsApiProductIdThumbnailPost(String apiProductId,InputStream fileInputStream,Attachment fileDetail,String ifMatch){
         // do some magic!

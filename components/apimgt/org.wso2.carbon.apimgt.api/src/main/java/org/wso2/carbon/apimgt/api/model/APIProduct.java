@@ -40,6 +40,7 @@ public class APIProduct {
     private String businessOwnerEmail;
     private String tenantDomain;
     private List<APIProductResource> productResources = new ArrayList<>();
+    private String definition;
     
     public String getName() {
         return name;
@@ -136,6 +137,12 @@ public class APIProduct {
     }
     public void setTenantDomain(String tenantDomain) {
         this.tenantDomain = tenantDomain;
+    }
+    public String getDefinition() {
+        return definition;
+    }
+    public void setDefinition(String definition) {
+        this.definition = definition;
     }
     @Override
     public String toString() {

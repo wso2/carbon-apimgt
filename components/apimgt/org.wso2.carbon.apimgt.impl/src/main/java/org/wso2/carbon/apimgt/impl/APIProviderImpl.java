@@ -6185,4 +6185,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.isProductExist(productName, provider, tenantDomain);
     }
 
+    @Override
+    public void updateAPIDefinitionToAPIProduct(String apiDefinition, String uuid) throws APIManagementException {
+        apiMgtDAO.updateStringDataToProductTable(uuid, APIConstants.COLUMN_PRODUCT_DEFINITION, apiDefinition);
+        
+    }
+
+    @Override
+    public void removeAPIDefinitionToAPIProduct(String uuid) throws APIManagementException {
+        apiMgtDAO.removeStringDataFromProductTable(uuid, APIConstants.COLUMN_PRODUCT_DEFINITION);   
+    }
+ 
+    @Override
+    public APIProduct getAPIDefinitionOfAPIProduct(String uuid) throws APIManagementException {
+        return apiMgtDAO.getProductDefinition(uuid);
+        
+    }
+
 }

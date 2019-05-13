@@ -13344,6 +13344,11 @@ public class ApiMgtDAO {
                     product.setAvailableTiers(availableTiers );
                 }
 
+                InputStream inputStream = rs.getBinaryStream("DEFINITION");
+                if (inputStream != null) {
+                    String content = APIMgtDBUtil.getStringFromInputStream(inputStream);
+                    product.setDefinition(content);                
+                }
                 product.setVisibility(rs.getString("VISIBILITY"));
                 product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
                 product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
@@ -13894,7 +13899,11 @@ public class ApiMgtDAO {
                     }           
                     product.setAvailableTiers(availableTiers );
                 }
-
+                InputStream inputStream = rs.getBinaryStream("DEFINITION");
+                if (inputStream != null) {
+                    String content = APIMgtDBUtil.getStringFromInputStream(inputStream);
+                    product.setDefinition(content);                
+                }
                 product.setVisibility(rs.getString("VISIBILITY"));
                 product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
                 product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
@@ -13983,5 +13992,88 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
         }
         return isExist;
+    }
+    
+    /**
+     * Get product definition for uuid. 
+     * @param uuid
+     * @return APIProduct product object with visibility information
+     * @throws APIManagementException
+     */
+    public APIProduct getProductDefinition(String uuid) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmtGetAPIProduct = null;
+        String content = "";
+        APIProduct product = null;
+        ResultSet rs = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            String queryGetAPIProduct = SQLConstants.GET_PRODUCT_RESOURCE_BY_COLUMN.replace("{column}", "DEFINITION");
+            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
+            prepStmtGetAPIProduct.setString(1, uuid);
+            rs = prepStmtGetAPIProduct.executeQuery();
+
+            if (rs.next()) {
+                InputStream inputStream = rs.getBinaryStream("DEFINITION");
+                if (inputStream != null) {
+                    content = APIMgtDBUtil.getStringFromInputStream(inputStream);
+                    product = new APIProduct();
+                    product.setUuid(uuid);
+                    product.setDefinition(content);
+                    //setting visibility 
+                    product.setVisibility(rs.getString("VISIBILITY"));
+                    product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));                  
+                }
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while retrieving definition for product id " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("getResourceAsStringFromProductTable() : content for uuid " + uuid
+                    + " : " + content);
+        }
+        return product;
+    }
+    
+    /**
+     * Remove data to the given column as a blob in the api product table
+     * @param uuid
+     * @param columnName
+     * @throws APIManagementException
+     */
+    public void removeStringDataFromProductTable(String uuid, String columnName) throws APIManagementException {
+        updateStringDataToProductTable(uuid, columnName, "");
+    }
+    
+    /**
+     * Update string data in the given column as a blob in the api product table
+     * @param uuid uuid
+     * @param columnName column name
+     * @param data string data
+     * @throws APIManagementException
+     */
+    public void updateStringDataToProductTable(String uuid, String columnName, String data) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement addStatement = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String addQuery = SQLConstants.UPDATE_BLOB_API_PRODUCT_BY_COLUMN.replace("{column}", columnName);
+            addStatement = conn.prepareStatement(addQuery);
+            addStatement.setBlob(1, new ByteArrayInputStream(data.getBytes()));
+            addStatement.setString(2, uuid);
+            addStatement.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Failed to update data in column : " + columnName + " for product " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(addStatement, conn, null);
+        }
+
     }
 }

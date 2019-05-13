@@ -23,12 +23,14 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
@@ -381,19 +383,19 @@ public class APIMappingUtil {
         return apiProdListDTO;
     }
     
-    public static APIProductDTO fromAPIProductToDTO(APIProduct product) throws APIManagementException{
+    public static APIProductDTO fromAPIProductToDTO(APIProduct product) throws APIManagementException {
         APIProductDTO dto = new APIProductDTO();
         dto.setId(product.getUuid());
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
         dto.setProvider(product.getProvider());
-        dto.setApiDefinition(""); //TODO set def
+        dto.setApiDefinition(product.getDefinition());
         dto.setThumbnailUrl(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
-        dto.setBusinessInformation(businessInformation );
+        dto.setBusinessInformation(businessInformation);
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = product.getAvailableTiers();
         List<String> tiersToReturn = new ArrayList<>();
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
@@ -417,10 +419,17 @@ public class APIMappingUtil {
         apiProductInfoDTO.setName(apiProduct.getName());
         String providerName = apiProduct.getProvider();
         apiProductInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        //TODO check this how to implement with product
-//        if (apiProduct.getScopes() != null) {
-//            apiProductInfoDTO.setScopes(getScopeInfoDTO(apiProduct.getScopes()));
-//        }
+        List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
+        //API product has only one scope.
+        ScopeInfoDTO productScope = new ScopeInfoDTO();
+        productScope.setKey(
+                APIUtil.getProductScope(new APIProductIdentifier(apiProduct.getName(), apiProduct.getProvider())));
+        productScope.setName("API Product Scope");
+        productScope.setRoles(new ArrayList<String>());
+        productScope
+                .setDescription("Scope of the token which is needed to access the API Product " + apiProduct.getName());
+        scopes.add(productScope);
+        apiProductInfoDTO.setScopes(scopes);
 
         apiProductInfoDTO.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));

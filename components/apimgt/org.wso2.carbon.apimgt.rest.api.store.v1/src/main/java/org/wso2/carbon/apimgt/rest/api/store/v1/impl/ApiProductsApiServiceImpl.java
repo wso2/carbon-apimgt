@@ -40,6 +40,7 @@ import java.util.List;
 
 import java.io.InputStream;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -83,14 +84,8 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             APIProductDTO productToReturn = APIMappingUtil.fromAPIProductToDTO(product);
             return Response.ok().entity(productToReturn).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving API Product : " + apiProductId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while retrieving API Product : " + apiProductId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -99,8 +94,35 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
     }
     @Override
     public Response apiProductsApiProductIdSwaggerGet(String apiProductId,String ifNoneMatch,String xWSO2Tenant){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            }
+
+            APIProduct product = apiConsumer.getAPIProduct(apiProductId, requestedTenantDomain);
+            if (product == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            }
+            if(!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
+            }
+            String apiSwagger = "";
+            if (!StringUtils.isEmpty(product.getDefinition())) {
+                apiSwagger = product.getDefinition();
+            } 
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API Product : " + apiProductId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } 
+        return null;
     }
     @Override
     public Response apiProductsApiProductIdThumbnailGet(String apiProductId,String xWSO2Tenant,String ifNoneMatch){
