@@ -162,7 +162,7 @@ export default class API extends Resource {
     getAllApplications(callback = null) {
         let promise_get = this.client.then(
             (client) => {
-                return client.apis["Application (Collection)"].get_applications(
+                return client.apis["Applications"].get_applications(
                     {}, this._requestMetaData());
             }
         );
@@ -203,7 +203,7 @@ export default class API extends Resource {
         var promise_create = this.client.then(
             (client) => {
                 let payload = {body: application};
-                return client.apis["Application (Individual)"].post_applications(
+                return client.apis["Applications"].post_applications(
                     payload, {'Content-Type': 'application/json'});
             }
         );
@@ -224,7 +224,7 @@ export default class API extends Resource {
         var promise_get = this.client.then(
             (client) => {
                 let payload = {applicationId: application.id, body: application};
-                return client.apis["Application (Individual)"].put_applications__applicationId_(
+                return client.apis["Applications"].put_applications__applicationId_(
                     payload, this._requestMetaData());
             }
         );
@@ -377,7 +377,7 @@ export default class API extends Resource {
         var promise_get = this.client.then(
             (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
-                return client.apis["Application (Individual)"].post_applications__applicationId__generate_keys(
+                return client.apis["Applications"].post_applications__applicationId__generate_keys(
                     payload, this._requestMetaData());
             }
         );
@@ -400,7 +400,7 @@ export default class API extends Resource {
         var promise_get = this.client.then(
             (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
-                return client.apis["Application (Individual)"].post_applications__applicationId__generate_token(
+                return client.apis["Applications"].post_applications__applicationId__generate_token(
                     payload, this._requestMetaData());
             }
         );
@@ -421,7 +421,7 @@ export default class API extends Resource {
     getKeys(applicationId, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["Application (Individual)"].get_applications__applicationId__keys(
+                return client.apis["Applications"].get_applications__applicationId__keys(
                     {applicationId: applicationId}, this._requestMetaData());
             }
         );
@@ -441,7 +441,7 @@ export default class API extends Resource {
     getSubscriptions(apiId, applicationId, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["Subscription (Collection)"].get_subscriptions(
+                return client.apis["Subscriptions"].get_subscriptions(
                     {apiId: apiId, applicationId: applicationId}, this._requestMetaData());
             }
         );
@@ -464,7 +464,7 @@ export default class API extends Resource {
             (client) => {
                 let subscriptionData = {apiIdentifier: apiId, applicationId: applicationId, policy: policy};
                 let payload = {body: subscriptionData};
-                return client.apis["Subscription (Individual)"].post_subscriptions(
+                return client.apis["Subscriptions"].post_subscriptions(
                     payload, {'Content-Type': 'application/json'}
                 );
             }
