@@ -158,11 +158,12 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
 
-        if (validationContext.getSubscriptionType().equals("API")) {
+        if (apiKeyValidationInfoDTO.getProductName() == null && apiKeyValidationInfoDTO.getProductProvider() == null) {
             accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":" + "API");
         } else {
-            APIProductIdentifier productId = apiKeyValidationInfoDTO.getProductIdentifier();
-            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":APIProduct:" + productId);
+            String productName = apiKeyValidationInfoDTO.getProductName();
+            String productProvider = apiKeyValidationInfoDTO.getProductProvider();
+            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":APIProduct:" + productName + ":" + productProvider);
         }
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());

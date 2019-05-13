@@ -94,6 +94,11 @@ public class APIResourceScopeValidator extends OAuth2ScopeValidator {
                 resourceTenantId = scopeMap.getRight();
             }
 
+            //if resourceScopes is null, then this resource is not protected by any oauth scope
+            if (resourceScopes == null) {
+                return true;
+            }
+
             cacheKey = new OAuthCacheKey(resource);
             ResourceScopeCacheEntry cacheEntry = new ResourceScopeCacheEntry(resourceScopes);
             cacheEntry.setTenantId(resourceTenantId);

@@ -59,8 +59,9 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
-
-    private APIProductIdentifier productIdentifier;
+    //keeps productId of product for which the key was validated, if key was validated for an api this will be null
+    private String productName;
+    private String productProvider;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -317,12 +318,20 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.subscriberTenantDomain = subscriberTenantDomain;
     }
 
-    public void setProductIdentifier(APIProductIdentifier productIdentifier) {
-        this.productIdentifier = productIdentifier;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
-    public APIProductIdentifier getProductIdentifier() {
-        return productIdentifier;
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductProvider(String productProvider) {
+        this.productProvider = productProvider;
+    }
+
+    public String getProductProvider() {
+        return productProvider;
     }
 }
 
