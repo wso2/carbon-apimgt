@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndPointEndPointConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndPointEndpointSecurityDTO;
 
 import io.swagger.annotations.*;
@@ -22,7 +23,7 @@ public class EndPointDTO  {
   private String name = null;
   
   
-  private String endpointConfig = null;
+  private EndPointEndPointConfigDTO endPointConfig = null;
   
   
   private EndPointEndpointSecurityDTO endpointSecurity = null;
@@ -61,15 +62,14 @@ public class EndPointDTO  {
 
   
   /**
-   * Endpoint Configuration
    **/
-  @ApiModelProperty(value = "Endpoint Configuration")
-  @JsonProperty("endpointConfig")
-  public String getEndpointConfig() {
-    return endpointConfig;
+  @ApiModelProperty(value = "")
+  @JsonProperty("endPointConfig")
+  public EndPointEndPointConfigDTO getEndPointConfig() {
+    return endPointConfig;
   }
-  public void setEndpointConfig(String endpointConfig) {
-    this.endpointConfig = endpointConfig;
+  public void setEndPointConfig(EndPointEndPointConfigDTO endPointConfig) {
+    this.endPointConfig = endPointConfig;
   }
 
   
@@ -118,7 +118,7 @@ public class EndPointDTO  {
     
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
+    sb.append("  endPointConfig: ").append(endPointConfig).append("\n");
     sb.append("  endpointSecurity: ").append(endpointSecurity).append("\n");
     sb.append("  maxTps: ").append(maxTps).append("\n");
     sb.append("  type: ").append(type).append("\n");

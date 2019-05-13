@@ -38,7 +38,7 @@ export default class Subscription extends Resource {
      */
     getSubscriptions(apiId, applicationId) {
         var promise_get = this.client.then((client) => {
-            return client.apis["Subscription (Collection)"].get_subscriptions(
+            return client.apis["Subscriptions"].get_subscriptions(
                 { apiId: apiId, applicationId: applicationId });
         }
         );
@@ -52,7 +52,7 @@ export default class Subscription extends Resource {
     */
     deleteSubscription(subscriptionId) {
         const promised_delete_subscription = this.client.then((client) => {
-            return client.apis["Subscription (Individual)"].delete_subscriptions__subscriptionId_(
+            return client.apis["Subscriptions"].delete_subscriptions__subscriptionId_(
                 {
                     subscriptionId: subscriptionId,
                 }

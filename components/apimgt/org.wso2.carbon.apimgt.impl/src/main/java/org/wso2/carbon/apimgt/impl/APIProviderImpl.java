@@ -1871,7 +1871,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void validateAndSetTransports(API api) throws APIManagementException {
         String transports = api.getTransports();
-        if (transports != null && !("null".equalsIgnoreCase(transports))) {
+        if (!StringUtils.isEmpty(transports) && !("null".equalsIgnoreCase(transports))) {
             if (transports.contains(",")) {
                 StringTokenizer st = new StringTokenizer(transports, ",");
                 while (st.hasMoreTokens()) {

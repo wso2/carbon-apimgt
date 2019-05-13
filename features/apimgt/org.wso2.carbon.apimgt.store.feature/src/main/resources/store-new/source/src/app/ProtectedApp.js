@@ -155,6 +155,7 @@ export default class ProtectedApp extends Component {
                             <Switch>
                                 <Redirect exact from="/" to="/apis"/>
                                 <Route path={"/apis"} component={Apis}/>
+                                <Route path={"/applications"} component={Applications}/>
                                 <Route component={PageNotFound}/>
                             </Switch>
                         </Base>
