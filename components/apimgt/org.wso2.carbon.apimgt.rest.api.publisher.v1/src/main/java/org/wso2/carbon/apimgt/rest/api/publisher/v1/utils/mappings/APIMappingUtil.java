@@ -927,9 +927,9 @@ public class APIMappingUtil {
                         .append(endpoint.getInline().getEndPointConfig().getList().get(0).getTimeout())
                         .append("\"},");
             }
-            int indexToRemove = sb.lastIndexOf(",");
-            sb.delete(indexToRemove, indexToRemove + 1);
-            sb.append("}\n");
+            sb.append("\"endpoint_type\" : \"")
+                    .append(endpoints.get(0).getType())//assuming all the endpoints are same type
+                    .append("\"}\n");
         }
         return sb.toString();
     }
