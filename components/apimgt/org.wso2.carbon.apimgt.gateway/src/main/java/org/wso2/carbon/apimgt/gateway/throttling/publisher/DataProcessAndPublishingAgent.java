@@ -211,6 +211,16 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 }
             }
             jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, messageSizeInBytes);
+            if (!StringUtils.isEmpty(authenticationContext.getApplicationName())) {
+                jsonObMap.put(APIThrottleConstants.APPLICATION_NAME, authenticationContext.getApplicationName());
+            }
+            if (!StringUtils.isEmpty(authenticationContext.getProductName()) && !StringUtils
+                    .isEmpty(authenticationContext.getProductProvider())) {
+                jsonObMap.put(APIThrottleConstants.SUBSCRIPTION_TYPE, "APIProduct");
+            } else {
+                jsonObMap.put(APIThrottleConstants.SUBSCRIPTION_TYPE, "API");
+            }
+
         }
 
         Object[] objects = new Object[]{messageContext.getMessageID(),
