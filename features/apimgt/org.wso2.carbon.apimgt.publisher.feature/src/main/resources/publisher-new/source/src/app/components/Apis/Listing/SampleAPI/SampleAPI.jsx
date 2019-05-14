@@ -139,7 +139,15 @@ class SampleAPI extends Component {
                     inline: {
                         id: 'id',
                         name: 'name',
-                        endpointConfig: '{https://localhost:9443/am/sample/pizzashack/v1/api/, timeout: 1000}',
+                        endpointConfig: {
+                            list: [
+                                {
+                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
+                                    timeout: '1000',
+                                },
+                            ],
+                            endpointType: 'SINGLE',
+                        },
                         endpointSecurity: {
                             enabled: false,
                             type: 'basic',
@@ -156,7 +164,15 @@ class SampleAPI extends Component {
                     inline: {
                         id: 'id',
                         name: 'name',
-                        endpointConfig: '{https://localhost:9443/am/sample/pizzashack/v1/api/, timeout: 1000}',
+                        endpointConfig: {
+                            list: [
+                                {
+                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
+                                    timeout: '1000',
+                                },
+                            ],
+                            endpointType: 'SINGLE',
+                        },
                         endpointSecurity: {
                             enabled: false,
                             type: 'basic',

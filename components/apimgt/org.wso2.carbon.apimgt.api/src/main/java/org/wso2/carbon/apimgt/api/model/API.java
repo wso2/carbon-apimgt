@@ -872,10 +872,12 @@ public class API implements Serializable {
                         .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
                         .append("\",\"timeout\":\"")
                         .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
+                        .append("\",\"key\":\"")
+                        .append(endpoint.getKey())
                         .append("\"},");
             }
             sb.append("\"endpoint_type\" : \"")
-                    .append(endpoints.get(0).getType())//assuming all the endpoints are same type
+                    .append(endpoints.get(0).getInline().getType())//assuming all the endpoints are same type
                     .append("\"}\n");
         }
         return sb.toString();
