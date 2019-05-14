@@ -385,11 +385,13 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     }
 
     var roles_updated = false;
-    for (var i = 0; i < API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].length; i++) {
-        if (API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].key === newValue) {
-            obj["x-roles"] = API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].roles;
-            roles_updated = true;
-            break;
+    if (API_DESIGNER.api_doc['x-wso2-security'] != null) {
+        for (var i = 0; i < API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].length; i++) {
+            if (API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].key === newValue) {
+                obj["x-roles"] = API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'][i].roles;
+                roles_updated = true;
+                break;
+            }
         }
     }
     if (!roles_updated) {
