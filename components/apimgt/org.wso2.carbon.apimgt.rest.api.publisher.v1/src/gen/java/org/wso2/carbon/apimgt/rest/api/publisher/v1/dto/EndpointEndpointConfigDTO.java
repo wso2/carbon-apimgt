@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndPointConfigDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointConfigDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class EndPointEndPointConfigDTO  {
+public class EndpointEndpointConfigDTO  {
   
   
   public enum EndpointTypeEnum {
@@ -24,7 +24,7 @@ public class EndPointEndPointConfigDTO  {
   private EndpointTypeEnum endpointType = null;
   
   
-  private List<EndPointConfigDTO> list = new ArrayList<EndPointConfigDTO>();
+  private List<EndpointConfigDTO> list = new ArrayList<EndpointConfigDTO>();
 
   
   /**
@@ -43,10 +43,10 @@ public class EndPointEndPointConfigDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<EndPointConfigDTO> getList() {
+  public List<EndpointConfigDTO> getList() {
     return list;
   }
-  public void setList(List<EndPointConfigDTO> list) {
+  public void setList(List<EndpointConfigDTO> list) {
     this.list = list;
   }
 
@@ -55,7 +55,7 @@ public class EndPointEndPointConfigDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class EndPointEndPointConfigDTO {\n");
+    sb.append("class EndpointEndpointConfigDTO {\n");
     
     sb.append("  endpointType: ").append(endpointType).append("\n");
     sb.append("  list: ").append(list).append("\n");

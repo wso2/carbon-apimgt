@@ -23,7 +23,7 @@ public class Endpoint {
 
     private String name = null;
 
-    private EndPointEndPointConfig endpointConfig = null;
+    private EndpointEndpointConfig endpointConfig = null;
 
     private EndpointSecurity endpointSecurity = null;
 
@@ -51,12 +51,12 @@ public class Endpoint {
         this.name = name;
     }
 
-    public EndPointEndPointConfig getEndpointConfig() {
+    public EndpointEndpointConfig getEndpointConfig() {
 
         return endpointConfig;
     }
 
-    public void setEndpointConfig(EndPointEndPointConfig endpointConfig) {
+    public void setEndpointConfig(EndpointEndpointConfig endpointConfig) {
 
         this.endpointConfig = endpointConfig;
     }

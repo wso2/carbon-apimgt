@@ -19,7 +19,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ClientCertificatesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.EnvironmentsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ExportApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ImportApi"/>

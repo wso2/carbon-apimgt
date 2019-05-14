@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,20 +14,20 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class EndPointListDTO  {
+public class EndpointListDTO  {
   
   
   
   private Integer count = null;
   
   
-  private List<EndPointDTO> list = new ArrayList<EndPointDTO>();
+  private List<EndpointDTO> list = new ArrayList<EndpointDTO>();
 
   
   /**
-   * Number of EndPoints returned.\n
+   * Number of Endpoints returned.\n
    **/
-  @ApiModelProperty(value = "Number of EndPoints returned.\n")
+  @ApiModelProperty(value = "Number of Endpoints returned.\n")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -41,10 +41,10 @@ public class EndPointListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<EndPointDTO> getList() {
+  public List<EndpointDTO> getList() {
     return list;
   }
-  public void setList(List<EndPointDTO> list) {
+  public void setList(List<EndpointDTO> list) {
     this.list = list;
   }
 
@@ -53,7 +53,7 @@ public class EndPointListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class EndPointListDTO {\n");
+    sb.append("class EndpointListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  list: ").append(list).append("\n");

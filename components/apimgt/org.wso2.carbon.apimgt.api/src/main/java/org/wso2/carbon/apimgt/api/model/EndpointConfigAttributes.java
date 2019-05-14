@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
-public class EndPointConfigAttributes {
+public class EndpointConfigAttributes {
 
     private String name = null;
 
@@ -47,7 +47,7 @@ public class EndPointConfigAttributes {
     @Override
     public String toString() {
 
-        return "EndPointConfigAttributes{" +
+        return "EndpointConfigAttributes{" +
                 "name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 '}';

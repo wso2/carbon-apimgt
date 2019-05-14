@@ -32,7 +32,7 @@ public class EndpointConfig {
     private Boolean isPrimary = null;
 
 
-    private List<EndPointConfigAttributes> attributes = new ArrayList<EndPointConfigAttributes>();
+    private List<EndpointConfigAttributes> attributes = new ArrayList<EndpointConfigAttributes>();
 
     public String getUrl() {
 
@@ -64,12 +64,12 @@ public class EndpointConfig {
         isPrimary = primary;
     }
 
-    public List<EndPointConfigAttributes> getAttributes() {
+    public List<EndpointConfigAttributes> getAttributes() {
 
         return attributes;
     }
 
-    public void setAttributes(List<EndPointConfigAttributes> attributes) {
+    public void setAttributes(List<EndpointConfigAttributes> attributes) {
 
         this.attributes = attributes;
     }

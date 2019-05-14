@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EndPointEndPointConfig {
+public class EndpointEndpointConfig {
 
 
     public enum EndpointTypeEnum {
@@ -55,7 +55,7 @@ public class EndPointEndPointConfig {
     @Override
     public String toString() {
 
-        return "EndPointEndPointConfig{" +
+        return "EndpointEndpointConfig{" +
                 "endpointType=" + endpointType +
                 ", list=" + list +
                 '}';

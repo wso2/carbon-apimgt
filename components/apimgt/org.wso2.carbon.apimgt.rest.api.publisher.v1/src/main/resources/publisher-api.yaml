@@ -3654,325 +3654,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Endpoint Collection" resource API
-######################################################
-  /endpoints:
-
-#-----------------------------------------------------
-# Retrieve the list of endpoints
-#-----------------------------------------------------
-    get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"list\": [\n    {\n      \"id\": \"01234567-0123-0123-0123-012345678901\",\n      \"name\": \"Endpoint 1\",\n      \"endpointConfig\": {\n        \"serviceUrl\": \"http://192.168.56.1:8281\",\n        \"timeout\": 1000\n      },\n      \"endpointSecurity\": {\n        \"enabled\": false\n      },\n      \"maxTps\": 1000,\n      \"type\": \"http\"\n    }\n  ],\n  \"count\": 1\n}"
-      security:
-        - OAuth2Security:
-          - apim:api_view
-      summary: Get all endpoints
-      description: |
-        This operation can be used to retrieve the list of endpoints available.
-      parameters:
-        - $ref: '#/parameters/If-None-Match'
-      tags:
-        - Endpoint (Collection)
-      responses:
-        200:
-          description: |
-            OK.
-            Endpoint list is returned.
-          schema:
-             $ref: '#/definitions/EndPointList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-        404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Add a endpoint
-#-----------------------------------------------------
-    post:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints\""
-      x-wso2-request: ""
-      x-wso2-response: ""
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      summary: Add a new endpoint
-      description: |
-        This operation can be used to add a new endpoint.
-      parameters:
-        - in: body
-          name: body
-          description: |
-            EndPoint object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/EndPoint'
-        - $ref: '#/parameters/If-None-Match'
-      tags:
-        - Endpoint (Collection)
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created Document object as entity in the body.
-            Location header contains URL of newly added document.
-          schema:
-            $ref: '#/definitions/EndPoint'
-          headers:
-            Location:
-              description: |
-                Location to the newly created Document.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-
-#-----------------------------------------------------
-# The attibutes of the Endpoint existance check resource
-#-----------------------------------------------------
-    head:
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      summary: |
-        Check given Endpoint is already exist
-      description: |
-            Using this operation, you can check a given Endpoint name is already used. You need to provide the name you want to check.
-      parameters:
-        - name : name
-          in: query
-          type: string
-        - $ref : "#/parameters/If-None-Match"
-      tags:
-        - Endpoint (Collection)
-      responses:
-        200:
-          description: |
-            OK.
-            Requested Endpoint attibute status is returned
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-            description: |
-              Bad Request.
-              Requested Endpoint attribute does not meet requiremnts.
-        404:
-          description: |
-            Not Found.
-            Requested Endpoint does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-
-  /endpoints/{endpointId}:
-
-#-----------------------------------------------------
-# Retrieve the specific endpoint details
-#-----------------------------------------------------
-    get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/1234-123-2111-345\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/1234-123-2111-345
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}"
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      summary: Get specific endpoints
-      description: |
-        This operation can be used to retrieve endpoint specific details.
-      parameters:
-        - $ref: '#/parameters/endpointId'
-        - $ref: '#/parameters/If-Match'
-      tags:
-        - Endpoint (individual)
-      responses:
-        200:
-          description: |
-            OK.
-            Endpoint details returned.
-          schema:
-             $ref: '#/definitions/EndPoint'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-        404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Update a certain policy
-#-----------------------------------------------------
-    put:
-      x-wso2-curl: ""
-      x-wso2-request: ""
-      x-wso2-response: ""
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      summary: Update a Tier
-      description: |
-        This operation can be used to update an existing endpoint.
-        `PUT https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/api/Low`
-      parameters:
-        - $ref: '#/parameters/endpointId'
-        - in: body
-          name: body
-          description: |
-            Tier object that needs to be modified
-          required: true
-          schema:
-            $ref: '#/definitions/EndPoint'
-        - $ref: '#/parameters/If-Match'
-      tags:
-        - Endpoint (individual)
-      responses:
-        200:
-          description: |
-            OK.
-            Subscription updated.
-          schema:
-            $ref: '#/definitions/EndPoint'
-          headers:
-            Location:
-              description: |
-                The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Delete the endpoint
-#-----------------------------------------------------
-    delete:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/6fb74674-4ab8-4b52-9886-f9a376985060"
-      x-wso2-request: |
-        DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/6fb74674-4ab8-4b52-9886-f9a376985060
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      summary: Delete an endpoint
-      description: |
-        This operation can be used to delete an existing Endpoint proving the Id of the Endpoint.
-      parameters:
-        - $ref: '#/parameters/endpointId'
-        - $ref: '#/parameters/If-Match'
-      tags:
-        - Endpoint (individual)
-      responses:
-        200:
-          description: |
-            OK.
-            Resource successfully deleted.
-        403:
-          description: |
-            Forbidden.
-            The request must be conditional but no condition has been specified.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            Resource to be deleted does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
 
 ######################################################
 # Export Resource API
@@ -5171,7 +4852,7 @@ definitions:
            type: string
            example: "01234567-0123-0123-0123-012345678901"
           inline:
-           $ref: '#/definitions/EndPoint'
+           $ref: '#/definitions/Endpoint'
           type:
             type: string
             example: "Production"
@@ -5778,7 +5459,7 @@ definitions:
 #-----------------------------------------------------
 # The Environment Endpoint resource
 #-----------------------------------------------------
-  EndPoint :
+  Endpoint :
     title: Endpoints
     properties:
       id:
@@ -5791,7 +5472,7 @@ definitions:
         description: |
           name of the Endpoint entry
         example: "Endpoint 1"
-      endPointConfig:
+      endpointConfig:
         properties:
           endpointType:
             type: string
@@ -5803,7 +5484,7 @@ definitions:
           list:
             type: array
             items:
-               $ref: '#/definitions/EndPointConfig'
+               $ref: '#/definitions/EndpointConfig'
       endpointSecurity:
         properties:
           enabled:
@@ -5830,7 +5511,7 @@ definitions:
   #-----------------------------------------------------
   # The Endpoint Configuration resource
   #-----------------------------------------------------
-  EndPointConfig :
+  EndpointConfig :
     title: Endpoint Configuration
     properties:
       url:
@@ -5862,18 +5543,18 @@ definitions:
 #-----------------------------------------------------
 # The Environment List resource
 #-----------------------------------------------------
-  EndPointList:
-    title: EndPoint List
+  EndpointList:
+    title: Endpoint List
     properties:
       count:
         type: integer
         description: |
-          Number of EndPoints returned.
+          Number of Endpoints returned.
         example: 1
       list:
         type: array
         items:
-          $ref: '#/definitions/EndPoint'
+          $ref: '#/definitions/Endpoint'
 
 #-----------------------------------------------------
 # The Environment Endpoint resource

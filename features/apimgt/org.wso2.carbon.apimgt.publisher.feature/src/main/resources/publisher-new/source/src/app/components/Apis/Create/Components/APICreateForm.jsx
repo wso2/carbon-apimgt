@@ -96,7 +96,7 @@ class APICreateForm extends Component {
                     {
                         inline: {
                             name: `${api.name}_inline_prod`,
-                            endPointConfig: {
+                            endpointConfig: {
                                 list: [
                                     {
                                         url: value,
@@ -115,7 +115,7 @@ class APICreateForm extends Component {
                     {
                         inline: {
                             name: `${api.name}_inline_sandbx`,
-                            endPointConfig: {
+                            endpointConfig: {
                                 list: [
                                     {
                                         url: value,
