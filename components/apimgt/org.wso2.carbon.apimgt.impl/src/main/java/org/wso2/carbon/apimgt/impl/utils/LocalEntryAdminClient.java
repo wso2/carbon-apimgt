@@ -43,7 +43,7 @@ import java.rmi.RemoteException;
 public class LocalEntryAdminClient {
     private APILocalEntryAdminStub localEntryAdminServiceStub;
 
-    public LocalEntryAdminClient(APIIdentifier apiIdentifier, Environment environment) throws AxisFault {
+    public LocalEntryAdminClient(Environment environment) throws AxisFault {
         localEntryAdminServiceStub = new APILocalEntryAdminStub(null,
                 environment.getServerURL() + "APILocalEntryAdmin");
         setup(localEntryAdminServiceStub, environment);
