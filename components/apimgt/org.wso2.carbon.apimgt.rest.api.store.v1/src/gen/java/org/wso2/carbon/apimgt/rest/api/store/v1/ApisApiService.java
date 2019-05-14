@@ -36,7 +36,7 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdSwaggerGet(String apiId,String ifNoneMatch,String xWSO2Tenant);
     public abstract Response apisApiIdThumbnailGet(String apiId,String xWSO2Tenant,String ifNoneMatch);
     public abstract Response apisApiIdUserRatingPut(String apiId,RatingDTO body);
-    public abstract Response apisApiIdWsdlGet(String apiId,String ifNoneMatch);
+    public abstract Response apisApiIdWsdlGet(String apiId,String ifNoneMatch,String xWSO2Tenant);
     public abstract Response apisGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String ifNoneMatch);
 }
 

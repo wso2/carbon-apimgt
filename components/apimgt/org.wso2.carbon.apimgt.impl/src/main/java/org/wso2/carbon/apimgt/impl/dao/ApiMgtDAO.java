@@ -5427,6 +5427,7 @@ public class ApiMgtDAO {
                 info.applicationId = rs.getInt("APPLICATION_ID");
                 info.accessToken = rs.getString("ACCESS_TOKEN");  // no decryption needed.
                 info.tokenType = rs.getString("KEY_TYPE");
+                info.subscriptionStatus = rs.getString("SUB_STATUS");
                 subscriptionData.add(info);
             }
 
@@ -5437,8 +5438,11 @@ public class ApiMgtDAO {
                 try {
                     if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
                         apiId.setTier(info.tierId);
-                        int subscriptionId = addSubscription(apiId, context, info.applicationId, APIConstants
-                                .SubscriptionStatus.UNBLOCKED, provider);
+                        String subscriptionStatus = (APIConstants.SubscriptionStatus.BLOCKED
+                                .equalsIgnoreCase(info.subscriptionStatus)) ?
+                                APIConstants.SubscriptionStatus.BLOCKED : APIConstants.SubscriptionStatus.UNBLOCKED;
+                        int subscriptionId = addSubscription(apiId, context, info.applicationId, subscriptionStatus,
+                                provider);
                         if (subscriptionId == -1) {
                             String msg = "Unable to add a new subscription for the API: " + apiName +
                                     ":v" + newVersion;
@@ -6687,6 +6691,10 @@ public class ApiMgtDAO {
 
 
     public void updateAPI(API api, int tenantId) throws APIManagementException {
+        updateAPI(api, tenantId, null);
+    }
+
+    public void updateAPI(API api, int tenantId, String username) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
@@ -6709,8 +6717,7 @@ public class ApiMgtDAO {
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
             prepStmt.setString(2, contextTemplate);
-            //TODO Need to find who exactly does this update.
-            prepStmt.setString(3, null);
+            prepStmt.setString(3, username);
             prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(5, api.getApiLevelPolicy());
             prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -7832,6 +7839,7 @@ public class ApiMgtDAO {
         private int applicationId;
         private String accessToken;
         private String tokenType;
+        private String subscriptionStatus;
     }
 
     /**

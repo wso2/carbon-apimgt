@@ -89,13 +89,35 @@ class Publisher extends React.Component {
         this.loadLocale(locale);
         const user = AuthManager.getUser();
         if (user) {
-            this.setState({ user, userResolved: true });
+            const hasViewScope = user.scopes.includes('apim:api_view');
+            if (hasViewScope) {
+                this.setState({ user, userResolved: true });
+            } else {
+                console.log('No relevant scopes found, redirecting to login page');
+                this.setState({ userResolved: true });
+            }
         } else {
             // If no user data available , Get the user info from existing token information
             // This could happen when OAuth code authentication took place and could send
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
-            if (userPromise) userPromise.then(loggedUser => this.setState({ user: loggedUser, userResolved: true }));
+            userPromise.then((loggedUser) => {
+                if (loggedUser != null) {
+                    const hasViewScope = loggedUser.scopes.includes('apim:api_view');
+                    if (hasViewScope) {
+                        this.setState({ user: loggedUser, userResolved: true });
+                    } else {
+                        console.log('No relevant scopes found, redirecting to login page');
+                        this.setState({ userResolved: true });
+                    }
+                } else {
+                    console.log('User returned with null, redirect to login page');
+                    this.setState({ userResolved: true });
+                }
+            }).catch((error) => {
+                console.log('Error: ' + error + ',redirecting to login page');
+                this.setState({ userResolved: true });
+            });
         }
     }
 

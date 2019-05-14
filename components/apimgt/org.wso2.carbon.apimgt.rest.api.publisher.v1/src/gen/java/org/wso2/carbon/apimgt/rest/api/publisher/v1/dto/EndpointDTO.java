@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndPointEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointEndpointConfigDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointEndpointSecurityDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -12,7 +13,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class EndPointDTO  {
+public class EndpointDTO  {
   
   
   
@@ -22,10 +23,10 @@ public class EndPointDTO  {
   private String name = null;
   
   
-  private String endpointConfig = null;
+  private EndpointEndpointConfigDTO endpointConfig = null;
   
   
-  private EndPointEndpointSecurityDTO endpointSecurity = null;
+  private EndpointEndpointSecurityDTO endpointSecurity = null;
   
   
   private Long maxTps = null;
@@ -61,14 +62,13 @@ public class EndPointDTO  {
 
   
   /**
-   * Endpoint Configuration
    **/
-  @ApiModelProperty(value = "Endpoint Configuration")
+  @ApiModelProperty(value = "")
   @JsonProperty("endpointConfig")
-  public String getEndpointConfig() {
+  public EndpointEndpointConfigDTO getEndpointConfig() {
     return endpointConfig;
   }
-  public void setEndpointConfig(String endpointConfig) {
+  public void setEndpointConfig(EndpointEndpointConfigDTO endpointConfig) {
     this.endpointConfig = endpointConfig;
   }
 
@@ -77,10 +77,10 @@ public class EndPointDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("endpointSecurity")
-  public EndPointEndpointSecurityDTO getEndpointSecurity() {
+  public EndpointEndpointSecurityDTO getEndpointSecurity() {
     return endpointSecurity;
   }
-  public void setEndpointSecurity(EndPointEndpointSecurityDTO endpointSecurity) {
+  public void setEndpointSecurity(EndpointEndpointSecurityDTO endpointSecurity) {
     this.endpointSecurity = endpointSecurity;
   }
 
@@ -114,7 +114,7 @@ public class EndPointDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class EndPointDTO {\n");
+    sb.append("class EndpointDTO {\n");
     
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");

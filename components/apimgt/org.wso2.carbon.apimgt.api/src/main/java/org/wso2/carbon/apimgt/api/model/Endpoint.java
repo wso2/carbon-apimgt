@@ -23,7 +23,7 @@ public class Endpoint {
 
     private String name = null;
 
-    private String endpointConfig = null;
+    private EndpointEndpointConfig endpointConfig = null;
 
     private EndpointSecurity endpointSecurity = null;
 
@@ -51,12 +51,12 @@ public class Endpoint {
         this.name = name;
     }
 
-    public String getEndpointConfig() {
+    public EndpointEndpointConfig getEndpointConfig() {
 
         return endpointConfig;
     }
 
-    public void setEndpointConfig(String endpointConfig) {
+    public void setEndpointConfig(EndpointEndpointConfig endpointConfig) {
 
         this.endpointConfig = endpointConfig;
     }
@@ -97,7 +97,7 @@ public class Endpoint {
         return "Endpoint{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", endpointConfig='" + endpointConfig + '\'' +
+                ", endpointConfig=" + endpointConfig +
                 ", endpointSecurity=" + endpointSecurity +
                 ", maxTps=" + maxTps +
                 ", type='" + type + '\'' +

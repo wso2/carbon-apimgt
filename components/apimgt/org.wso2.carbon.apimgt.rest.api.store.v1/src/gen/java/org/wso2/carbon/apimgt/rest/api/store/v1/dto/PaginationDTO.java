@@ -22,6 +22,12 @@ public class PaginationDTO  {
   
   
   private Integer total = null;
+  
+  
+  private String next = null;
+  
+  
+  private String previous = null;
 
   
   /**
@@ -60,6 +66,32 @@ public class PaginationDTO  {
   }
 
   
+  /**
+   * Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n
+   **/
+  @ApiModelProperty(value = "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n")
+  @JsonProperty("next")
+  public String getNext() {
+    return next;
+  }
+  public void setNext(String next) {
+    this.next = next;
+  }
+
+  
+  /**
+   * Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n
+   **/
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n")
+  @JsonProperty("previous")
+  public String getPrevious() {
+    return previous;
+  }
+  public void setPrevious(String previous) {
+    this.previous = previous;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -69,6 +101,8 @@ public class PaginationDTO  {
     sb.append("  offset: ").append(offset).append("\n");
     sb.append("  limit: ").append(limit).append("\n");
     sb.append("  total: ").append(total).append("\n");
+    sb.append("  next: ").append(next).append("\n");
+    sb.append("  previous: ").append(previous).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

@@ -84,7 +84,7 @@ class API extends Resource {
                 'Content-Type': 'multipart/form-data'
             };
             promise_create = this.client.then((client) => {
-                return client.apis['API (Collection)'].post_apis_import_definition(
+                return client.apis['API (Individual)'].post_apis_import_definition(
                     payload,
                     this._requestMetaData({
                         'Content-Type': 'multipart/form-data'
@@ -97,7 +97,7 @@ class API extends Resource {
                 'Content-Type': 'multipart/form-data'
             };
             promise_create = this.client.then((client) => {
-                return client.apis['API (Collection)'].post_apis_import_definition(
+                return client.apis['API (Individual)'].post_apis_import_definition(
                     payload,
                     this._requestMetaData({
                         'Content-Type': 'multipart/form-data'
@@ -110,7 +110,7 @@ class API extends Resource {
                 'Content-Type': 'application/json'
             };
             promise_create = this.client.then((client) => {
-                return client.apis['API (Collection)'].post_apis(payload, this._requestMetaData());
+                return client.apis['API (Individual)'].post_apis(payload, this._requestMetaData());
             });
         }
         if (callback) {
@@ -129,9 +129,9 @@ class API extends Resource {
     getPolicies() {
         const promisedPolicies = this.policies.map(policy => {
             return this.client.then(
-                client => client.apis["Throttling Tier (Individual)"].get_policies__tierLevel___tierName_({
-                        tierLevel: 'subscription',
-                        tierName: policy
+                client => client.apis["Throttling Policies"].getThrottlingPolicyByName({
+                        policyLevel: 'subscription',
+                        policyName: policy
                     },
                     this._requestMetaData(),
                 )
@@ -187,7 +187,7 @@ class API extends Resource {
                 body: data,
                 'Content-Type': 'application/json'
             };
-            return client.apis['API (Collection)'].post_apis(payload, this._requestMetaData());
+            return client.apis['API (Individual)'].post_apis(payload, this._requestMetaData());
         });
         return promisedAPIResponse.then(response => {
             return new API(response.body);
@@ -460,7 +460,7 @@ class API extends Resource {
      */
     publish(checkedItems) {
         const payload = {
-            action: 'Published',
+            action: 'Publish',
             apiId: this.id,
             lifecycleChecklist: checkedItems,
             'Content-Type': 'application/json',
@@ -1168,16 +1168,16 @@ class API extends Resource {
 
     /**
      * Get the available policies information by tier level.
-     * @param {String} tierLevel List API or Application or Resource type policies.parameter should be one
+     * @param {String} policyLevel List API or Application or Resource type policies.parameter should be one
      * of api, application, subscription and resource
      * @returns {Promise}
      *
      */
-    static policies(tierLevel) {
+    static policies(policyLevel) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
-            return client.apis['Throttling Tier (Collection)'].get_policies__tierLevel_({
-                    tierLevel: 'subscription'
+            return client.apis["Throttling Policies"].getAllThrottlingPolicies({
+                    policyLevel: 'subscription'
                 },
                 this._requestMetaData(),
             );

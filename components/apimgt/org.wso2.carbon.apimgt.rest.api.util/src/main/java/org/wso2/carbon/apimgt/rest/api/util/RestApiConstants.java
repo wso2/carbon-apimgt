@@ -48,6 +48,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_CUSTOM_RULE = "custom rule";
     public static final String RESOURCE_BLOCK_CONDITION = "block condition";
     public static final String RESOURCE_TIER = "tier";
+    public static final String RESOURCE_THROTTLING_POLICY = "throttling policy";
     public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";
     public static final String RESOURCE_WORKFLOW = "workflow";
@@ -203,4 +204,13 @@ public final class RestApiConstants {
     public static final String SEQUENCE_CONTENT = "content";
     public static final String SEQUENCE_ARTIFACT_ID = "id";
     public static final String HTTP_METHOD = "method";
+    
+    public static final String[] SUPPORTED_METHODS = {"get", "put", "post", "delete", "patch"};
+
+    public static class ResourceAuthTypes {
+        public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
+        public static final String APPLICATION_USER = "Application User";
+        public static final String APPLICATION = "Application";
+        public static final String NONE = "None";
+    }
 }
