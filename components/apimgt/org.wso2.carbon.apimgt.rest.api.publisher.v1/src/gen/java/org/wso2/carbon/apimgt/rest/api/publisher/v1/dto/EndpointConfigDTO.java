@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndPointConfigAttributesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointConfigAttributesDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class EndPointConfigDTO  {
+public class EndpointConfigDTO  {
   
   
   
@@ -27,7 +27,7 @@ public class EndPointConfigDTO  {
   private Boolean isPrimary = null;
   
   
-  private List<EndPointConfigAttributesDTO> attributes = new ArrayList<EndPointConfigAttributesDTO>();
+  private List<EndpointConfigAttributesDTO> attributes = new ArrayList<EndpointConfigAttributesDTO>();
 
   
   /**
@@ -73,10 +73,10 @@ public class EndPointConfigDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("attributes")
-  public List<EndPointConfigAttributesDTO> getAttributes() {
+  public List<EndpointConfigAttributesDTO> getAttributes() {
     return attributes;
   }
-  public void setAttributes(List<EndPointConfigAttributesDTO> attributes) {
+  public void setAttributes(List<EndpointConfigAttributesDTO> attributes) {
     this.attributes = attributes;
   }
 
@@ -85,7 +85,7 @@ public class EndPointConfigDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class EndPointConfigDTO {\n");
+    sb.append("class EndpointConfigDTO {\n");
     
     sb.append("  url: ").append(url).append("\n");
     sb.append("  timeout: ").append(timeout).append("\n");

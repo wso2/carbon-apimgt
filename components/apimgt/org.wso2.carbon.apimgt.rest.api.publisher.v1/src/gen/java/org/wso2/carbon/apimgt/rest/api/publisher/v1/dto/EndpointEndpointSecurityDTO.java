@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class EndPointEndpointSecurityDTO  {
+public class EndpointEndpointSecurityDTO  {
   
   
   
@@ -79,7 +79,7 @@ public class EndPointEndpointSecurityDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class EndPointEndpointSecurityDTO {\n");
+    sb.append("class EndpointEndpointSecurityDTO {\n");
     
     sb.append("  password: ").append(password).append("\n");
     sb.append("  type: ").append(type).append("\n");

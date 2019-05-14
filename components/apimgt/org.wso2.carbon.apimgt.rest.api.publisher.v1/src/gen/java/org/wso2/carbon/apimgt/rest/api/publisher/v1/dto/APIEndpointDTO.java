@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EndpointDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -16,7 +16,7 @@ public class APIEndpointDTO  {
   
   
   
-  private EndPointDTO inline = null;
+  private EndpointDTO inline = null;
   
   
   private String type = null;
@@ -29,10 +29,10 @@ public class APIEndpointDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("inline")
-  public EndPointDTO getInline() {
+  public EndpointDTO getInline() {
     return inline;
   }
-  public void setInline(EndPointDTO inline) {
+  public void setInline(EndpointDTO inline) {
     this.inline = inline;
   }
 
