@@ -1486,7 +1486,7 @@
 
         <carbon.commons.version>4.6.65</carbon.commons.version>
         <carbon.registry.version>4.6.46</carbon.registry.version>
-        <carbon.mediation.version>4.6.130</carbon.mediation.version>
+        <carbon.mediation.version>4.6.149</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.12.368</carbon.identity.version>
@@ -1554,7 +1554,7 @@
         <jaggery.version>0.12.9</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v110</synapse.version>
+        <synapse.version>2.1.7-wso2v111</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
