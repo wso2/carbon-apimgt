@@ -111,7 +111,7 @@ class AuthManager {
     static getUserFromToken() {
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!partialToken) {
-            return new Promise(resolve => resolve(null));
+            return new Promise((resolve, reject) => reject(new Error('No partial token found')));
         }
         const promisedResponse = fetch('/publisher-new/services/auth/introspect', { credentials: 'same-origin' });
         return promisedResponse
@@ -376,8 +376,7 @@ class AuthManager {
 
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
-    USER_SCOPES:
-        'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
+    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
         'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
 export default AuthManager;
