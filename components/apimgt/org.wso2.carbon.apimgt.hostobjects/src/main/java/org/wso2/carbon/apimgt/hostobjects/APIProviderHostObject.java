@@ -2938,6 +2938,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
                 myn.put(58, myn, checkValue("oauth2", api.getApiSecurity()));
                 myn.put(59, myn, checkValue("mutualssl", api.getApiSecurity()));
+                myn.put(60, myn, checkValue("basic_auth", api.getApiSecurity()));
+                myn.put(61, myn, checkValue("mutualssl_mandatory", api.getApiSecurity()));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);

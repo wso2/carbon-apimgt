@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -41,6 +42,7 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -66,6 +68,7 @@ public class OAuthAuthenticator implements Authenticator {
     private boolean removeDefaultAPIHeaderFromOutMessage=true;
     private String clientDomainHeader = "referer";
     private String requestOrigin;
+    private String remainingAuthHeader;
 
     public OAuthAuthenticator() {
     }
@@ -112,10 +115,20 @@ public class OAuthAuthenticator implements Authenticator {
         }
 
         if(removeOAuthHeadersFromOutMessage){
-            headers.remove(securityHeader);
-            if(log.isDebugEnabled()){
-                log.debug("Removing Authorization header from headers");
+            //Remove authorization headers sent for authentication at the gateway and pass others to the backend
+            if (StringUtils.isNotBlank(remainingAuthHeader)) {
+                if(log.isDebugEnabled()){
+                    log.debug("Removing OAuth key from Authorization header");
+                }
+                headers.put(securityHeader, remainingAuthHeader);
+                remainingAuthHeader = "";
+            } else {
+                if(log.isDebugEnabled()){
+                    log.debug("Removing Authorization header from headers");
+                }
+                headers.remove(securityHeader);
             }
+
         }
         if(removeDefaultAPIHeaderFromOutMessage){
             headers.remove(defaultAPIHeader);
@@ -310,6 +323,9 @@ public class OAuthAuthenticator implements Authenticator {
             return null;
         }
 
+        ArrayList<String> remainingAuthHeaders = new ArrayList<>();
+        String consumerKey = null;
+        boolean consumerkeyFound = false;
         String[] headers = authHeader.split(oauthHeaderSplitter);
         if (headers != null) {
             for (int i = 0; i < headers.length; i++) {
@@ -322,15 +338,22 @@ public class OAuthAuthenticator implements Authenticator {
                             if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
                                 isConsumerKeyHeaderAvailable = true;
                             } else if (isConsumerKeyHeaderAvailable) {
-                                return removeLeadingAndTrailing(elements[j].trim());
+                                consumerKey = removeLeadingAndTrailing(elements[j].trim());
+                                consumerkeyFound = true;
                             }
                         }
                         j++;
                     }
                 }
+                if (!consumerkeyFound) {
+                    remainingAuthHeaders.add(headers[i]);
+                } else {
+                    consumerkeyFound = false;
+                }
             }
         }
-        return null;
+        remainingAuthHeader = String.join(oauthHeaderSplitter, remainingAuthHeaders);
+        return consumerKey;
     }
 
     private String removeLeadingAndTrailing(String base) {
