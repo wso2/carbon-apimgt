@@ -13778,6 +13778,7 @@ public class ApiMgtDAO {
                     product.setUuid(rs.getString("UUID"));
                     product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
                     product.setProductId(rs.getInt("API_PRODUCT_ID"));
+                    product.setDescription(rs.getString("DESCRIPTION"));
                     productList.add(product);
                 }
             }
