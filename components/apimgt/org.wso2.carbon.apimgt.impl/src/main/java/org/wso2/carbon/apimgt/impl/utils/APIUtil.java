@@ -737,7 +737,7 @@ public final class APIUtil {
      *                              "template_not_supported":false},"endpoint_type":"http"})
      * @return Set<String>
      */
-    private static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
+    public static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
             throws ParseException, ClassCastException {
         Set<String> environmentList = new HashSet<String>();
         if (endpointConfigs != null) {
@@ -761,7 +761,7 @@ public final class APIUtil {
      * @param endpoints (Eg: {"url":"http://www.test.com/v1/xxx","config":null,"template_not_supported":false})
      * @return boolean
      */
-    private static boolean isEndpointURLNonEmpty(Object endpoints) {
+    public static boolean isEndpointURLNonEmpty(Object endpoints) {
         if (endpoints instanceof JSONObject) {
             JSONObject endpointJson = (JSONObject) endpoints;
             if (endpointJson.containsKey(APIConstants.API_DATA_URL) &&
