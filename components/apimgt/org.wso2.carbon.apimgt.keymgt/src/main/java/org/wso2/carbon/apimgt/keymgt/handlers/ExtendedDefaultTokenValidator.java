@@ -27,7 +27,7 @@ public class ExtendedDefaultTokenValidator extends DefaultOAuth2TokenValidator {
      */
     @Override
     public boolean validateScope(OAuth2TokenValidationMessageContext messageContext) throws IdentityOAuth2Exception {
-        return true;    //scope validation happens in IS side always return true.
+        return true;    //scope validation is handled in DefaultKeyValidationHandler
     }
 
     // For validation of token profile specific items.
