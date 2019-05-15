@@ -32,7 +32,7 @@ const config = {
         publicPath: 'site/public/dist/',
     },
     watch: false,
-    // devtool: 'source-map', // todo: Commented out the source mapping for the time , to speed up the build time in travis-ci
+    // devtool: 'source-map', // todo: Commented out the source mapping for the time , to speed up the build time in travis-ci ~tmkb
     resolve: {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
