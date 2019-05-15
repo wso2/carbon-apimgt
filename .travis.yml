@@ -1,5 +1,7 @@
 language: java
-sudo: false
+# Use Ubuntu Trusty with sudo instead of new default Trusty because of higher resources availability
+sudo: required
+dist: trusty
 
 # Using -q Quiet output which only show errors, to overcome TravisCI log limit issue
 script: mvn clean install -q -B -V | grep -v DEBUG; exit "${PIPESTATUS[0]}";
@@ -7,3 +9,6 @@ script: mvn clean install -q -B -V | grep -v DEBUG; exit "${PIPESTATUS[0]}";
 cache:
   directories:
   - $HOME/.m2_1
+  - $HOME/.m2
+  - features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher-new/node_modules
+  - features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/store-new/node_modules
