@@ -22,6 +22,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -136,7 +137,10 @@ public class API implements Serializable {
     private String apiSecurity = "oauth2";
 
     private static final String NULL_VALUE = "NULL";
-    
+
+    private List<APIEndpoint> endpoints = new ArrayList<APIEndpoint>();
+
+
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
     }
@@ -669,6 +673,10 @@ public class API implements Serializable {
     }
 
     public String getEndpointConfig() {
+        // This is to support new Endpoint object
+        if ((endpointConfig == null || StringUtils.isAllEmpty(endpointConfig) && endpoints.size() > 0)) {
+            return getEndpointConfigString(endpoints);
+        }
         return endpointConfig;
     }
 
@@ -834,5 +842,44 @@ public class API implements Serializable {
 
     public void setWsdlArchive(ResourceFile wsdlArchive) {
         this.wsdlArchive = wsdlArchive;
+    }
+
+    public List<APIEndpoint> getEndpoint() {
+
+        return endpoints;
+    }
+
+    public void setEndpoint(List<APIEndpoint> endpoint) {
+
+        this.endpoints = endpoint;
+    }
+
+    /**
+     * This method returns endpoints according to the given endpoint config
+     *
+     * @param endpoints list of endpoints given
+     * @return String endpoint config
+     */
+    public static String getEndpointConfigString(List<APIEndpoint> endpoints) {
+        //todo improve this logic to support multiple endpoints such as failorver and load balance
+        StringBuilder sb = new StringBuilder();
+        if (endpoints != null && endpoints.size() > 0) {
+            sb.append("{");
+            for (APIEndpoint endpoint : endpoints) {
+                sb.append("\"")
+                        .append(endpoint.getType())
+                        .append("\": {\"url\":\"")
+                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
+                        .append("\",\"timeout\":\"")
+                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
+                        .append("\",\"key\":\"")
+                        .append(endpoint.getKey())
+                        .append("\"},");
+            }
+            sb.append("\"endpoint_type\" : \"")
+                    .append(endpoints.get(0).getInline().getType())//assuming all the endpoints are same type
+                    .append("\"}\n");
+        }
+        return sb.toString();
     }
 }

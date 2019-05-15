@@ -644,12 +644,14 @@ public class SQLConstants {
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
+            "   SUBS.UUID AS SUB_UUID, " +
             "   SUBS.SUBSCRIPTION_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
             "   API.API_VERSION AS API_VERSION, " +
             "   SUBS.TIER_ID AS TIER_ID, " +
             "   APP.APPLICATION_ID AS APP_ID, " +
+            "   APP.UUID AS APP_UUID, " +
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   APP.NAME AS APP_NAME, " +
@@ -3092,5 +3094,23 @@ public class SQLConstants {
 
         public static final String CERTIFICATE_COUNT_QUERY = "SELECT COUNT(*) AS count FROM AM_API_CLIENT_CERTIFICATE " +
                 "WHERE TENANT_ID=? AND REMOVED=?";
+    }
+
+    /**
+     * Static class to hold database queries related to AM_SYSTEM_APPS table
+     */
+    public static class SystemApplicationConstants {
+
+        public static final String INSERT_SYSTEM_APPLICATION =
+                "INSERT INTO AM_SYSTEM_APPS " + "(NAME,CONSUMER_KEY,CONSUMER_SECRET,CREATED_TIME) VALUES (?,?,?,?)";
+
+        public static final String GET_CLIENT_CREDENTIALS_FOR_APPLICATION =
+                "SELECT CONSUMER_KEY,CONSUMER_SECRET FROM " + "AM_SYSTEM_APPS WHERE NAME = ?";
+
+        public static final String DELETE_SYSTEM_APPLICATION = "DELETE FROM AM_SYSTEM_APPS WHERE NAME = ?";
+
+        public static final String CHECK_CLIENT_CREDENTIALS_EXISTS = "SELECT CONSUMER_KEY,CONSUMER_SECRET " +
+                "FROM AM_SYSTEM_APPS WHERE NAME = ?";
+
     }
 }
