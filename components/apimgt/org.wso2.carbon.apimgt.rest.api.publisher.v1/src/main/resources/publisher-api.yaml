@@ -5132,6 +5132,9 @@ definitions:
           - subscription
           - api
         example: api
+      displayName:
+        type: string
+        example: Platinum
       attributes:
         description: |
           Custom attributes added to the policy policy

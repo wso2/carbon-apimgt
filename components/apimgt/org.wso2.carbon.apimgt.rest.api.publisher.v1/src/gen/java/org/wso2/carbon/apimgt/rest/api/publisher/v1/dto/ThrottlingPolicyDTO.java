@@ -30,6 +30,9 @@ public class ThrottlingPolicyDTO  {
   private PolicyLevelEnum policyLevel = null;
   
   
+  private String displayName = null;
+  
+  
   private Map<String, String> attributes = new HashMap<String, String>();
   
   @NotNull
@@ -84,6 +87,18 @@ public class ThrottlingPolicyDTO  {
   }
   public void setPolicyLevel(PolicyLevelEnum policyLevel) {
     this.policyLevel = policyLevel;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   
@@ -172,6 +187,7 @@ public class ThrottlingPolicyDTO  {
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  policyLevel: ").append(policyLevel).append("\n");
+    sb.append("  displayName: ").append(displayName).append("\n");
     sb.append("  attributes: ").append(attributes).append("\n");
     sb.append("  requestCount: ").append(requestCount).append("\n");
     sb.append("  unitTime: ").append(unitTime).append("\n");
