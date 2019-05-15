@@ -868,13 +868,13 @@ public class APIMappingUtil {
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
-                if (RestApiConstants.ResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
+                if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
                     authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                } else if (RestApiConstants.ResourceAuthTypes.APPLICATION_USER.equals(authType)) {
+                } else if (APIConstants.OASResourceAuthTypes.APPLICATION_USER.equals(authType)) {
                     authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
-                } else if (RestApiConstants.ResourceAuthTypes.NONE.equals(authType)) {
+                } else if (APIConstants.OASResourceAuthTypes.NONE.equals(authType)) {
                     authType = APIConstants.AUTH_NO_AUTHENTICATION;
-                } else if (RestApiConstants.ResourceAuthTypes.APPLICATION.equals(authType)) {
+                } else if (APIConstants.OASResourceAuthTypes.APPLICATION.equals(authType)) {
                     authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
                 } else {
                     authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -1189,17 +1189,16 @@ public class APIMappingUtil {
         APIOperationsDTO operationsDTO = new APIOperationsDTO();
         operationsDTO.setId(""); //todo: Set ID properly
         if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(uriTemplate.getAuthType())) {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         } else if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(uriTemplate.getAuthType())) {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.APPLICATION_USER);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_USER);
         } else if (APIConstants.AUTH_NO_AUTHENTICATION.equals(uriTemplate.getAuthType())) {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.NONE);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.NONE);
         } else if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(uriTemplate.getAuthType())) {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.APPLICATION);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION);
         } else {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         }
-        operationsDTO.setAuthType(uriTemplate.getAuthType());
         operationsDTO.setHttpVerb(uriTemplate.getHTTPVerb());
         operationsDTO.setUritemplate(uriTemplate.getUriTemplate());
         if (uriTemplate.getScope() != null) {

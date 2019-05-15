@@ -109,102 +109,89 @@ class SampleAPI extends Component {
      */
     createSampleAPI() {
         const data = {
-            name: 'CalculatorAPI',
-            description: 'A calculator API that supports basic operations',
-            context: 'CalculatorAPI',
-            version: '1.0.0',
-            provider: 'admin',
-            lifeCycleStatus: 'CREATED',
-            responseCaching: 'Disabled',
-            cacheTimeout: 300,
-            destinationStatsEnabled: 'Disabled',
-            isDefaultVersion: false,
-            type: 'HTTP',
-            transport: ['http', 'https'],
-            tags: ['substract', 'add'],
-            policies: ['Unlimited'],
-            apiPolicy: 'Unlimited',
-            authorizationHeader: 'string',
-            securityScheme: ['string'],
-            maxTps: {
-                production: 1000,
-                sandbox: 1000,
+            "name": "PizzaShackAPI",
+            "description": "This is a simple API for Pizza Shack online pizza delivery store.",
+            "context": "/pizzashack",
+            "version": "1.0.0",
+            "transport":    [
+                "http",
+                "https"
+            ],
+            "tags": ["pizza"],
+            "policies": ["Unlimited"],
+            "securityScheme": ["oauth2"],
+            "visibility": "PUBLIC",
+            "gatewayEnvironments": ["Production and Sandbox"],
+            "businessInformation":    {
+                "businessOwner": "Jane Roe",
+                "businessOwnerEmail": "marketing@pizzashack.com",
+                "technicalOwner": "John Doe",
+                "technicalOwnerEmail": "architecture@pizzashack.com"
             },
-            visibility: 'PUBLIC',
-            visibleRoles: [],
-            visibleTenants: ['string'],
-            workflowStatus: 'APPROVED',
-            endpoint: [
+            "endpoint": [
                 {
-                    inline: {
-                        id: 'id',
-                        name: 'name',
-                        endpointConfig: {
-                            list: [
+                    "inline": {
+                        "endpointConfig": {
+                            "list": [
                                 {
-                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                                    timeout: '1000',
-                                },
+                                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/",
+                                    "timeout": "1000"
+                                }
                             ],
-                            endpointType: 'SINGLE',
+                            "endpointType": "SINGLE"
                         },
-                        endpointSecurity: {
-                            enabled: false,
-                            type: 'basic',
-                            username: 'basic',
-                            password: 'basic',
-                        },
-                        maxTps: 1000,
-                        type: 'http',
+                        "type": "http"
                     },
-                    type: 'production_endpoints',
-                    key: '01234567-0123-0123-0123-012345678903',
+                    "type": "production_endpoints"
                 },
                 {
-                    inline: {
-                        id: 'id',
-                        name: 'name',
-                        endpointConfig: {
-                            list: [
+                    "inline": {
+                        "endpointConfig": {
+                            "list": [
                                 {
-                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                                    timeout: '1000',
-                                },
+                                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/",
+                                    "timeout": "1000"
+                                }
                             ],
-                            endpointType: 'SINGLE',
+                            "endpointType": "SINGLE"
                         },
-                        endpointSecurity: {
-                            enabled: false,
-                            type: 'basic',
-                            username: 'basic',
-                            password: 'basic',
-                        },
-                        maxTps: 1000,
-                        type: 'http',
+                        "type": "http"
                     },
-                    type: 'sandbox_endpoints',
-                    key: '01234567-0123-0123-0123-012345678904',
-                },
+                    "type": "sandbox_endpoints"
+                }
             ],
-            scopes: [
+            "operations":    [
                 {
-                    name: 'newScopeForGET5',
-                    description: 'This Scope can be used to create Apis',
-                    bindings: {
-                        type: 'newRole',
-                        values: ['newRoleVal'],
-                    },
+                    "uritemplate": "/order/{orderId}",
+                    "httpVerb": "GET",
+                    "throttlingPolicy": "Unlimited",
+                    "authType": "Application & Application User"
                 },
-            ],
-            operations: [
                 {
-                    id: 'postapiresource1',
-                    uritemplate: '/*',
-                    httpVerb: 'GET',
-                    authType: 'Any',
-                    scopes: ['newScopeForGET'],
+                    "uritemplate": "/order/{orderId}",
+                    "httpVerb": "DELETE",
+                    "throttlingPolicy": "Unlimited",
+                    "authType": "Application & Application User"
                 },
-            ],
+                {
+                    "uritemplate": "/order/{orderId}",
+                    "httpVerb": "PUT",
+                    "throttlingPolicy": "Unlimited",
+                    "authType": "Application & Application User"
+                },
+                {
+                    "uritemplate": "/menu",
+                    "httpVerb": "GET",
+                    "throttlingPolicy": "Unlimited",
+                    "authType": "Application & Application User"
+                },
+                {
+                    "uritemplate": "/order",
+                    "httpVerb": "POST",
+                    "throttlingPolicy": "Unlimited",
+                    "authType": "Application & Application User"
+                }
+            ]
         };
 
         const sampleAPI = new API(data);
