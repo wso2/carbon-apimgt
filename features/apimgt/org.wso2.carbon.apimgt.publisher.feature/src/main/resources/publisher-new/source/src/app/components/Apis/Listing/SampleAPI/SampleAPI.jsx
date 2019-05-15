@@ -109,89 +109,89 @@ class SampleAPI extends Component {
      */
     createSampleAPI() {
         const data = {
-            "name": "PizzaShackAPI",
-            "description": "This is a simple API for Pizza Shack online pizza delivery store.",
-            "context": "/pizzashack",
-            "version": "1.0.0",
-            "transport":    [
-                "http",
-                "https"
+            name: 'PizzaShackAPI',
+            description: 'This is a simple API for Pizza Shack online pizza delivery store.',
+            context: '/pizzashack',
+            version: '1.0.0',
+            transport: [
+                'http',
+                'https',
             ],
-            "tags": ["pizza"],
-            "policies": ["Unlimited"],
-            "securityScheme": ["oauth2"],
-            "visibility": "PUBLIC",
-            "gatewayEnvironments": ["Production and Sandbox"],
-            "businessInformation":    {
-                "businessOwner": "Jane Roe",
-                "businessOwnerEmail": "marketing@pizzashack.com",
-                "technicalOwner": "John Doe",
-                "technicalOwnerEmail": "architecture@pizzashack.com"
+            tags: ['pizza'],
+            policies: ['Unlimited'],
+            securityScheme: ['oauth2'],
+            visibility: 'PUBLIC',
+            gatewayEnvironments: ['Production and Sandbox'],
+            businessInformation: {
+                businessOwner: 'Jane Roe',
+                businessOwnerEmail: 'marketing@pizzashack.com',
+                technicalOwner: 'John Doe',
+                technicalOwnerEmail: 'architecture@pizzashack.com',
             },
-            "endpoint": [
+            endpoint: [
                 {
-                    "inline": {
-                        "endpointConfig": {
-                            "list": [
+                    inline: {
+                        endpointConfig: {
+                            list: [
                                 {
-                                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/",
-                                    "timeout": "1000"
-                                }
+                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
+                                    timeout: '1000',
+                                },
                             ],
-                            "endpointType": "SINGLE"
+                            endpointType: 'SINGLE',
                         },
-                        "type": "http"
+                        type: 'http',
                     },
-                    "type": "production_endpoints"
+                    type: 'production_endpoints',
                 },
                 {
-                    "inline": {
-                        "endpointConfig": {
-                            "list": [
+                    inline: {
+                        endpointConfig: {
+                            list: [
                                 {
-                                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/",
-                                    "timeout": "1000"
-                                }
+                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
+                                    timeout: '1000',
+                                },
                             ],
-                            "endpointType": "SINGLE"
+                            endpointType: 'SINGLE',
                         },
-                        "type": "http"
+                        type: 'http',
                     },
-                    "type": "sandbox_endpoints"
-                }
+                    type: 'sandbox_endpoints',
+                },
             ],
-            "operations":    [
+            operations: [
                 {
-                    "uritemplate": "/order/{orderId}",
-                    "httpVerb": "GET",
-                    "throttlingPolicy": "Unlimited",
-                    "authType": "Application & Application User"
+                    uritemplate: '/order/{orderId}',
+                    httpVerb: 'GET',
+                    throttlingPolicy: 'Unlimited',
+                    authType: 'Application & Application User',
                 },
                 {
-                    "uritemplate": "/order/{orderId}",
-                    "httpVerb": "DELETE",
-                    "throttlingPolicy": "Unlimited",
-                    "authType": "Application & Application User"
+                    uritemplate: '/order/{orderId}',
+                    httpVerb: 'DELETE',
+                    throttlingPolicy: 'Unlimited',
+                    authType: 'Application & Application User',
                 },
                 {
-                    "uritemplate": "/order/{orderId}",
-                    "httpVerb": "PUT",
-                    "throttlingPolicy": "Unlimited",
-                    "authType": "Application & Application User"
+                    uritemplate: '/order/{orderId}',
+                    httpVerb: 'PUT',
+                    throttlingPolicy: 'Unlimited',
+                    authType: 'Application & Application User',
                 },
                 {
-                    "uritemplate": "/menu",
-                    "httpVerb": "GET",
-                    "throttlingPolicy": "Unlimited",
-                    "authType": "Application & Application User"
+                    uritemplate: '/menu',
+                    httpVerb: 'GET',
+                    throttlingPolicy: 'Unlimited',
+                    authType: 'Application & Application User',
                 },
                 {
-                    "uritemplate": "/order",
-                    "httpVerb": "POST",
-                    "throttlingPolicy": "Unlimited",
-                    "authType": "Application & Application User"
-                }
-            ]
+                    uritemplate: '/order',
+                    httpVerb: 'POST',
+                    throttlingPolicy: 'Unlimited',
+                    authType: 'Application & Application User',
+                },
+            ],
         };
 
         const sampleAPI = new API(data);
