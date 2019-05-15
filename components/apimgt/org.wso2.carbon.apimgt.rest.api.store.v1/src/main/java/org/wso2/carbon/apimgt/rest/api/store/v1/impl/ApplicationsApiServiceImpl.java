@@ -96,14 +96,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications);
-            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
-                    applications.length);
-
-            PaginationDTO paginationDTO = new PaginationDTO();
-            paginationDTO.setOffset(offset);
-            paginationDTO.setLimit(limit);
-            paginationDTO.setTotal(applicationCount);
-            applicationListDTO.setPagination(paginationDTO);
+            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset, applicationCount);
 
             return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
@@ -111,8 +104,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 //this is not an error of the user as he does not know the total number of applications available.
                 // Thus sends an empty response
                 applicationListDTO.setCount(0);
-                applicationListDTO.setNext("");
-                applicationListDTO.setPrevious("");
+                applicationListDTO.setPagination(new PaginationDTO());
                 return Response.ok().entity(applicationListDTO).build();
             } else {
                 String errorMessage = "Error while retrieving Applications";

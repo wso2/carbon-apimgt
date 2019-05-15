@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -155,6 +157,35 @@ public class APIMappingUtil {
     }
 
     /**
+     * Returns an API with minimal info given the uuid.
+     *
+     * @param apiUUID                 API uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
+            throws APIManagementException {
+        API api;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        return api;
+    }
+
+    /**
+     * Returns the APIIdentifier given the uuid
+     *
+     * @param apiId                 API uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return APIIdentifier which represents the given id
+     * @throws APIManagementException
+     */
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        return getAPIInfoFromUUID(apiId, requestedTenantDomain).getId();
+    }
+
+    /**
      * Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
      *
      * @param apiListDTO APIListDTO object to which pagination urls need to be set
@@ -181,8 +212,9 @@ public class APIMappingUtil {
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
-        apiListDTO.setNext(paginatedNext);
-        apiListDTO.setPrevious(paginatedPrevious);
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        apiListDTO.setPagination(paginationDTO);
     }
 
     /**

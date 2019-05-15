@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
@@ -110,19 +111,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             allMatchedApis.addAll(apis);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, expand);
-            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
 
             //Add pagination section in the response
             Object totalLength = result.get("length");
             Integer length = 0;
-            if(totalLength != null) {
+            if (totalLength != null) {
                 length = (Integer) totalLength;
             }
-            APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
-            paginationDTO.setOffset(offset);
-            paginationDTO.setLimit(limit);
-            paginationDTO.setTotal(length);
-            apiListDTO.setPagination(paginationDTO);
+
+            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, length);
 
             if (APIConstants.APPLICATION_GZIP.equals(accept)) {
                 try {
@@ -154,14 +151,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST == body.getType();
 
             // validate web socket api endpoint configurations
-            if (isWSAPI) {
-                if (!RestApiPublisherUtils.isValidWSAPI(body)) {
-                    RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
-                }
-            } else {
-//                if (body.getApiDefinition() == null) {todo
-//                    RestApiUtil.handleBadRequest("Parameter: \"apiDefinition\" cannot be null", log);
-//                }
+            if (isWSAPI && !RestApiPublisherUtils.isValidWSAPI(body)) {
+                RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
             }
 
             List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
@@ -286,9 +277,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                                     + "-" + body.getName() + "-" + body.getVersion();
                     RestApiUtil.handleInternalServerError(errorMessage, log);
                 }
-            } /*else if (!isWSAPI) {todo
-                apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
-            }*/
+            } else if (!isWSAPI) {
+                APIDefinitionUsingOASParser apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
+                String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
+                apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
+            }
+
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
@@ -818,36 +812,31 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationGet(String apiId, Integer limit, Integer offset, String query,
+    @Override public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query,
             String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationMediationPolicyIdDelete(String apiId, String mediationPolicyId,
+    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId,
             String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationMediationPolicyIdGet(String apiId, String mediationPolicyId,
+    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId,
             String ifNoneMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationMediationPolicyIdPut(String apiId, String mediationPolicyId,
+    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId,
             MediationDTO body, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override
-    public Response apisApiIdPoliciesMediationPost(MediationDTO body, String apiId, String ifMatch) {
+    @Override public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch) {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

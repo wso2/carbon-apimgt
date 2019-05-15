@@ -118,13 +118,13 @@ class Policies extends Component {
                     >
                         {policies.map(policy => (
                             <MenuItem
-                                key={policy.policyName}
-                                value={policy.policyName}
+                                key={policy.name}
+                                value={policy.name}
                                 style={{
-                                    fontWeight: policies.indexOf(policy.policyName) !== -1 ? '500' : '400',
+                                    fontWeight: policies.indexOf(policy.name) !== -1 ? '500' : '400',
                                 }}
                             >
-                                {policy.displayName}
+                                {policy.name}
                             </MenuItem>
                         ))}
                     </Select>

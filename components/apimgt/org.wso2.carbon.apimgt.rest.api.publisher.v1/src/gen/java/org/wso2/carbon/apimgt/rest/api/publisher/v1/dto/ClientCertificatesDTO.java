@@ -3,8 +3,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 import io.swagger.annotations.ApiModel;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -26,16 +26,10 @@ public class ClientCertificatesDTO  {
   private Integer count = null;
   
   
-  private String next = null;
-  
-  
-  private String previous = null;
-  
-  
   private List<ClientCertMetadataDTO> certificates = new ArrayList<ClientCertMetadataDTO>();
   
   
-  private APIListPaginationDTO pagination = null;
+  private PaginationDTO pagination = null;
 
   
   /**
@@ -47,30 +41,6 @@ public class ClientCertificatesDTO  {
   }
   public void setCount(Integer count) {
     this.count = count;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("next")
-  public String getNext() {
-    return next;
-  }
-  public void setNext(String next) {
-    this.next = next;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("previous")
-  public String getPrevious() {
-    return previous;
-  }
-  public void setPrevious(String previous) {
-    this.previous = previous;
   }
 
   
@@ -90,10 +60,10 @@ public class ClientCertificatesDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("pagination")
-  public APIListPaginationDTO getPagination() {
+  public PaginationDTO getPagination() {
     return pagination;
   }
-  public void setPagination(APIListPaginationDTO pagination) {
+  public void setPagination(PaginationDTO pagination) {
     this.pagination = pagination;
   }
 
@@ -105,8 +75,6 @@ public class ClientCertificatesDTO  {
     sb.append("class ClientCertificatesDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
-    sb.append("  next: ").append(next).append("\n");
-    sb.append("  previous: ").append(previous).append("\n");
     sb.append("  certificates: ").append(certificates).append("\n");
     sb.append("  pagination: ").append(pagination).append("\n");
     sb.append("}\n");

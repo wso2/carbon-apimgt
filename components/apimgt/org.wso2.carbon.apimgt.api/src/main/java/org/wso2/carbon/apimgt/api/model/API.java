@@ -673,7 +673,7 @@ public class API implements Serializable {
     }
 
     public String getEndpointConfig() {
-        // This is to support new Endpoint ob
+        // This is to support new Endpoint object
         if ((endpointConfig == null || StringUtils.isAllEmpty(endpointConfig) && endpoints.size() > 0)) {
             return getEndpointConfigString(endpoints);
         }
@@ -861,7 +861,7 @@ public class API implements Serializable {
      * @return String endpoint config
      */
     public static String getEndpointConfigString(List<APIEndpoint> endpoints) {
-
+        //todo improve this logic to support multiple endpoints such as failorver and load balance
         StringBuilder sb = new StringBuilder();
         if (endpoints != null && endpoints.size() > 0) {
             sb.append("{");
@@ -869,12 +869,16 @@ public class API implements Serializable {
                 sb.append("\"")
                         .append(endpoint.getType())
                         .append("\": {\"url\":\"")
-                        .append(endpoint.getInline().getEndpointConfig())
+                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
+                        .append("\",\"timeout\":\"")
+                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
+                        .append("\",\"key\":\"")
+                        .append(endpoint.getKey())
                         .append("\"},");
             }
-            int indexToRemove = sb.lastIndexOf(",");
-            sb.delete(indexToRemove, indexToRemove + 1);
-            sb.append("}\n");
+            sb.append("\"endpoint_type\" : \"")
+                    .append(endpoints.get(0).getInline().getType())//assuming all the endpoints are same type
+                    .append("\"}\n");
         }
         return sb.toString();
     }
