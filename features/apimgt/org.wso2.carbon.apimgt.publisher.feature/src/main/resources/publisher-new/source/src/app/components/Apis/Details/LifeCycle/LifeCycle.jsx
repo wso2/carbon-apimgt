@@ -22,10 +22,11 @@ import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import ConfigManager from 'AppData/ConfigManager';
-import LifeCycleUpdate from './LifeCycleUpdate';
 import { Progress } from 'AppComponents/Shared';
-import LifeCycleHistory from './LifeCycleHistory';
 import { withStyles } from '@material-ui/core/styles';
+
+import LifeCycleUpdate from './LifeCycleUpdate';
+import LifeCycleHistory from './LifeCycleHistory';
 
 const styles = theme => ({
     root: {
@@ -51,8 +52,8 @@ const styles = theme => ({
  */
 class LifeCycle extends Component {
     /**
-     *Creates an instance of LifeCycle.
-     * @param {*} props
+     * Creates an instance of LifeCycle.
+     * @param {Object} props
      * @memberof LifeCycle
      */
     constructor(props) {
@@ -66,34 +67,42 @@ class LifeCycle extends Component {
         this.handleChangeCheckList = this.handleChangeCheckList.bind(this);
     }
 
+
+    /**
+     *
+     * @inheritdoc
+     * @memberof LifeCycle
+     */
     componentDidMount() {
         this.updateData();
     }
+
     handleChangeCheckList = index => (event, checked) => {
         const checkList = this.state.checkList;
         checkList[index].checked = checked;
         this.setState({ checkList });
     };
+
     /**
      *
      *
      * @memberof LifeCycle
      */
     updateData() {
-        const { id } = this.props.api;
+        const { id } = this.props;
         const promised_api = Api.get(id);
         // const promised_tiers = Api.policies('api');
         const promised_lcState = this.api.getLcState(id);
         let privateJetModeEnabled = false;
 
-        ConfigManager.getConfigs().features.then(response => {
+        ConfigManager.getConfigs().features.then((response) => {
             privateJetModeEnabled = response.data.privateJetMode.isEnabled;
         });
 
         // const promised_lcHistory = this.api.getLcHistory(id);
         // const promised_labels = this.api.labels();
         Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels])
-            .then(response => {
+            .then((response) => {
                 const [api, tiers, lcState, lcHistory, labels] = response.map(data => data.obj);
 
                 if (privateJetModeEnabled) {
@@ -134,7 +143,7 @@ class LifeCycle extends Component {
                     checkList,
                 });
             })
-            .catch(error => {
+            .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
@@ -151,7 +160,9 @@ class LifeCycle extends Component {
      * @memberof LifeCycle
      */
     render() {
-        const { classes, api, lcState, checkList, privateJetModeEnabled } = this.props;
+        const {
+            classes, api, lcState, checkList, privateJetModeEnabled,
+        } = this.props;
         const { lcHistory } = this.state;
 
         if (!lcHistory) {
@@ -160,7 +171,7 @@ class LifeCycle extends Component {
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
-                    <Typography variant="h4" align="left" className={classes.mainTitle}>
+                    <Typography variant='h4' align='left' className={classes.mainTitle}>
                         Lifecycle
                     </Typography>
                 </div>
@@ -179,7 +190,7 @@ class LifeCycle extends Component {
                         <Grid item xs={12}>
                             {lcHistory.length > 1 && (
                                 <div>
-                                    <Typography variant="h6" gutterBottom className={classes.historyHead}>
+                                    <Typography variant='h6' gutterBottom className={classes.historyHead}>
                                         History
                                     </Typography>
                                     <LifeCycleHistory lcHistory={lcHistory} />

@@ -125,24 +125,19 @@ class DeleteApiButton extends React.Component {
             <React.Fragment>
                 {/* allowing delete based on scopes */}
                 <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
-                    <ApiPermissionValidation
-                        checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
-                        userPermissions={api.userPermissionsForApi}
-                    >
-                        <div className={classes.deleteWrapper}>
-                            <VerticalDivider height={70} />
-                            <a
-                                onClick={this.handleRequestOpen}
-                                onKeyDown={this.handleRequestOpen}
-                                className={classes.delete}
-                            >
-                                <div>
-                                    <DeleteIcon />
-                                </div>
-                                <div className={classes.linkText}>Delete</div>
-                            </a>
-                        </div>
-                    </ApiPermissionValidation>
+                    <div className={classes.deleteWrapper}>
+                        <VerticalDivider height={70} />
+                        <a
+                            onClick={this.handleRequestOpen}
+                            onKeyDown={this.handleRequestOpen}
+                            className={classes.delete}
+                        >
+                            <div>
+                                <DeleteIcon />
+                            </div>
+                            <div className={classes.linkText}>Delete</div>
+                        </a>
+                    </div>
                 </ScopeValidation>
                 <Dialog open={this.state.openMenu} transition={Slide}>
                     <DialogTitle>Confirm</DialogTitle>
