@@ -32,7 +32,6 @@ import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
 
-
 const styles = theme => ({
     buttonsWrapper: {
         marginTop: 40,
@@ -42,7 +41,6 @@ const styles = theme => ({
     },
 });
 
-
 /**
  *
  *
@@ -50,15 +48,14 @@ const styles = theme => ({
  * @extends {Component}
  */
 class LifeCycleUpdate extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.updateLifeCycleState = this.updateLifeCycleState.bind(this);
         this.api = new API();
         this.state = {
             newState: null,
         };
     }
-
 
     /**
      *
@@ -75,17 +72,19 @@ class LifeCycleUpdate extends Component {
         } else {
             promisedUpdate = this.api.updateLcState(apiUUID, newState);
         }
-        promisedUpdate.then((response) => { /* TODO: Handle IO erros ~tmkb */
-            this.props.handleUpdate(true);
-            this.setState({ newState });
-            Alert.info('Lifecycle state updated successfully');
-            /* TODO: add i18n ~tmkb */
-        }).catch((error_response) => {
-            console.log(error_response);
-            Alert.error(JSON.stringify(error_response));
-        });
+        promisedUpdate
+            .then(response => {
+                /* TODO: Handle IO erros ~tmkb */
+                this.props.handleUpdate(true);
+                this.setState({ newState });
+                Alert.info('Lifecycle state updated successfully');
+                /* TODO: add i18n ~tmkb */
+            })
+            .catch(error_response => {
+                console.log(error_response);
+                Alert.error(JSON.stringify(error_response));
+            });
     }
-
 
     /**
      *
@@ -98,153 +97,74 @@ class LifeCycleUpdate extends Component {
         let newState = event.currentTarget.getAttribute('data-value');
         const apiUUID = this.props.api.id;
         const { privateJetModeEnabled } = this.props;
-        if (privateJetModeEnabled) {
-            if (newState == 'Published In Private Jet Mode') {
-                const promised_hasOwnGatewayForAPI = this.api.getHasOwnGateway(apiUUID);
-
-                promised_hasOwnGatewayForAPI.then((getResponse) => {
-                    const hasOwnGatewayForAPI = getResponse.body.isEnabled;
-
-                    if (!hasOwnGatewayForAPI) {
-                        newState = 'Published';
-                        const body = { isEnabled: 'true' };
-                        const promisedUpdateDedicatedGW = this.api.updateHasOwnGateway(apiUUID, body);
-
-                        promisedUpdateDedicatedGW.then((response) => {
-                            Alert.info('Dedicated Gateway status updated successfully');
-                            this.updateLCStateOfAPI(apiUUID, newState);
-                        }).catch((error_response) => {
-                            console.log(error_response);
-                            Alert.error(JSON.stringify(error_response));
-                        });
-                    }
-                }).catch((error_response) => {
-                    console.log(error_response);
-                    Alert.error(JSON.stringify(error_response));
-                });
-            } else if (newState == 'Deprecated' || newState == 'Retired') {
-                this.updateLCStateOfAPI(apiUUID, newState);
-            } else {
-                let promisedUpdate;
-                const lifecycleChecklist = this.props.checkList.map(item => item.value + ':' + item.checked);
-                if (lifecycleChecklist.length > 0) {
-                    promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
-                } else {
-                    promisedUpdate = this.api.updateLcState(apiUUID, newState);
-                }
-                promisedUpdate.then((response) => {
-                    Alert.info('Lifecycle state updated successfully');
-
-                    const promised_hasOwnGatewayForAPI = this.api.getHasOwnGateway(apiUUID);
-                    const that = this;
-                    promised_hasOwnGatewayForAPI.then((result) => {
-                        const hasOwnGatewayForAPI = result.body.isEnabled;
-                        if (hasOwnGatewayForAPI) {
-                            const body = { 'isEnabled': 'false' };
-                            const promisedUpdateDedicatedGW = that.api.updateHasOwnGateway(apiUUID, body);
-
-                            promisedUpdateDedicatedGW.then((response) => {
-                                that.props.handleUpdate(true);
-                                Alert.info('Dedicated Gateway status updated successfully');
-                            }).catch((error_response) => {
-                                    console.log(error_response);
-                                    Alert.error(JSON.stringify(error_response));
-                                });
-                        }
-                        that.props.handleUpdate(true);
-                    }, (err) => {
-                        console.log(err);
-                    });
-                }).catch((error_response) => {
-                    console.log(error_response);
-                    Alert.error(JSON.stringify(error_response));
-                });
-            }
-        } else {
-            this.updateLCStateOfAPI(apiUUID, newState);
-        }
+        this.updateLCStateOfAPI(apiUUID, newState);
     }
 
-
     render() {
-        const {
-            api, lcState, classes, theme, handleChangeCheckList, checkList,
-        } = this.props;
+        const { api, lcState, classes, theme, handleChangeCheckList, checkList } = this.props;
         const { newState } = this.state;
-        const is_workflow_pending = api.workflowStatus.toLowerCase() === 'pending';
+        const is_workflow_pending = api.workflowStatus && api.workflowStatus.toLowerCase() === 'pending';
         return (
             <Grid container>
-                {
-                    is_workflow_pending ?
-                        (
-                            <Grid item xs={12}>
-                                <Typography variant='h5'>
-                                        Pending lifecycle state change.
-                                </Typography>
-                                <Typography>
-                                        adjective
-                                </Typography>
-                            </Grid>
-
-                        ) :
-                        (
-                            <Grid item xs={12}>
-                                {theme.custom.lifeCycleImage ?
-                                    <img src={theme.custom.lifeCycleImage} alt='Lifecycle image' />
-                                    :
-                                    <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
-                                }
-                            </Grid>
-
-                        )
-                }
+                {is_workflow_pending ? (
+                    <Grid item xs={12}>
+                        <Typography variant="h5">Pending lifecycle state change.</Typography>
+                        <Typography>adjective</Typography>
+                    </Grid>
+                ) : (
+                    <Grid item xs={12}>
+                        {theme.custom.lifeCycleImage ? (
+                            <img src={theme.custom.lifeCycleImage} alt="Lifecycle image" />
+                        ) : (
+                            <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
+                        )}
+                    </Grid>
+                )}
                 <Grid item xs={12}>
-                    {
-                        !is_workflow_pending &&
+                    {!is_workflow_pending && (
                         <FormGroup row>
-                        {checkList.map((checkItem, index) => (<FormControlLabel
-                            key={index}
-                            control={
-                                <Checkbox
-                                    checked={checkList[index].checked}
-                                    onChange={handleChangeCheckList(index)}
-                                    value={checkList[index].value}
+                            {checkList.map((checkItem, index) => (
+                                <FormControlLabel
+                                    key={index}
+                                    control={
+                                        <Checkbox
+                                            checked={checkList[index].checked}
+                                            onChange={handleChangeCheckList(index)}
+                                            value={checkList[index].value}
+                                        />
+                                    }
+                                    label={checkList[index].label}
                                 />
-                            }
-                            label={checkList[index].label}
-                        />))}
-
-                    </FormGroup>
-                    }
+                            ))}
+                        </FormGroup>
+                    )}
                     <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                        <ApiPermissionValidation userPermissions={api.userPermissionsForApi}>
-                                <div className={classes.buttonsWrapper}>
-                                {
-                                    is_workflow_pending ?
-                                        (
-                                            <div className='btn-group' role='group'>
-                                                <input
-                                                                                                        type='button'
-                                                                                                        className='btn btn-primary wf-cleanup-btn'
-                                                    defaultValue='Delete pending lifecycle state change request'
-                                                />
-                                            </div>
-                                        ) :
-                                        (
-                                            lcState.availableTransitionBeanList.map(transition_state => lcState.state !== transition_state.targetState &&
+                            <div className={classes.buttonsWrapper}>
+                                {is_workflow_pending ? (
+                                    <div className="btn-group" role="group">
+                                        <input
+                                            type="button"
+                                            className="btn btn-primary wf-cleanup-btn"
+                                            defaultValue="Delete pending lifecycle state change request"
+                                        />
+                                    </div>
+                                ) : (
+                                    lcState.availableTransitions.map(
+                                        transition_state =>
+                                            lcState.state !== transition_state.targetState && (
                                                 <Button
-                                                                                                        variant='outlined'
-                                                                                                        className={classes.stateButton}
-                                                                                                        key={transition_state.targetState}
-                                                                                                        data-value={transition_state.targetState}
+                                                    variant="outlined"
+                                                    className={classes.stateButton}
+                                                    key={transition_state.event}
+                                                    data-value={transition_state.event}
                                                     onClick={this.updateLifeCycleState}
                                                 >
                                                     {transition_state.event}
-                                                </Button> ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates */
-                                        )
-                                }
+                                                </Button>
+                                            ),
+                                    ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates */
+                                )}
                             </div>
-                            </ApiPermissionValidation>
                     </ScopeValidation>
                 </Grid>
             </Grid>

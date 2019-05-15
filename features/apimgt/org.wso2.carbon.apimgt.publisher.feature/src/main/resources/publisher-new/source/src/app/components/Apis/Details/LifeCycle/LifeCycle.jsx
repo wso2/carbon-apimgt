@@ -67,7 +67,6 @@ class LifeCycle extends Component {
         this.handleChangeCheckList = this.handleChangeCheckList.bind(this);
     }
 
-
     /**
      *
      * @inheritdoc
@@ -89,21 +88,22 @@ class LifeCycle extends Component {
      * @memberof LifeCycle
      */
     updateData() {
-        const { id } = this.props;
-        const promised_api = Api.get(id);
+        const { api } = this.props;
+        const promised_api = Api.get(api.id);
         // const promised_tiers = Api.policies('api');
-        const promised_lcState = this.api.getLcState(id);
+        const promised_lcState = this.api.getLcState(api.id);
         let privateJetModeEnabled = false;
 
-        ConfigManager.getConfigs().features.then((response) => {
+        ConfigManager.getConfigs().features.then(response => {
             privateJetModeEnabled = response.data.privateJetMode.isEnabled;
         });
 
         // const promised_lcHistory = this.api.getLcHistory(id);
         // const promised_labels = this.api.labels();
-        Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels])
-            .then((response) => {
-                const [api, tiers, lcState, lcHistory, labels] = response.map(data => data.obj);
+        Promise.all([promised_api, promised_lcState])
+            .then(response => {
+                const api = response[0];
+                const lcState = response[1].obj;
 
                 if (privateJetModeEnabled) {
                     if (!api.hasOwnGateway) {
@@ -124,7 +124,7 @@ class LifeCycle extends Component {
                 // Creating checklist
                 const checkList = [];
                 let index = 0;
-                for (const item of lcState.checkItemBeanList) {
+                for (const item of lcState.checkItems) {
                     checkList.push({
                         index,
                         label: item.name,
@@ -135,15 +135,12 @@ class LifeCycle extends Component {
                 }
                 this.setState({
                     api,
-                    policies: tiers,
                     lcState,
-                    lcHistory,
-                    labels,
                     privateJetModeEnabled,
                     checkList,
                 });
             })
-            .catch((error) => {
+            .catch(error => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
@@ -160,18 +157,16 @@ class LifeCycle extends Component {
      * @memberof LifeCycle
      */
     render() {
-        const {
-            classes, api, lcState, checkList, privateJetModeEnabled,
-        } = this.props;
-        const { lcHistory } = this.state;
+        const { classes } = this.props;
+        const { api, lcState, privateJetModeEnabled, checkList } = this.state;
 
-        if (!lcHistory) {
+        if (!lcState) {
             return <Progress />;
         }
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <Typography variant="h4" align="left" className={classes.mainTitle}>
                         Lifecycle
                     </Typography>
                 </div>
@@ -187,7 +182,7 @@ class LifeCycle extends Component {
                                 privateJetModeEnabled={privateJetModeEnabled}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        {/* <Grid item xs={12}>
                             {lcHistory.length > 1 && (
                                 <div>
                                     <Typography variant='h6' gutterBottom className={classes.historyHead}>
@@ -196,7 +191,7 @@ class LifeCycle extends Component {
                                     <LifeCycleHistory lcHistory={lcHistory} />
                                 </div>
                             )}
-                        </Grid>
+                        </Grid> */}
                     </Grid>
                 </div>
             </div>
