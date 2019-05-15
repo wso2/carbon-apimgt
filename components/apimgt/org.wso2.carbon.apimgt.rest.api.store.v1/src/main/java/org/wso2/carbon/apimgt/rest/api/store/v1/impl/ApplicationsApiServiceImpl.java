@@ -19,13 +19,14 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -41,6 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequest
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
@@ -282,10 +284,52 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
-            ApplicationKeyGenerateRequestDTO body) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO
+            body) {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                    String[] accessAllowDomainsArray = {"ALL"};
+                    JSONObject jsonParamObj = new JSONObject();
+                    jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+                    String grantTypes = StringUtils.join(body.getGrantTypesToBeSupported(), ',');
+                    if (!StringUtils.isEmpty(grantTypes)) {
+                        jsonParamObj.put(APIConstants.JSON_GRANT_TYPES, grantTypes);
+                    }
+
+                    String jsonParams = jsonParamObj.toString();
+                    String tokenScopes = StringUtils.join(body.getScopes(), " ");
+
+                    Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
+                            username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
+                            accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
+                            jsonParams);
+                    ApplicationKeyDTO applicationKeyDTO =
+                            ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
+
+                    return Response.ok().entity(applicationKeyDTO).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.rootCauseMessageMatches(e, "is already registered")) {
+                RestApiUtil
+                        .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
+                                e,
+                                log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while generating keys for application " + applicationId, e,
+                        log);
+            }
+        }
+        return null;
     }
 
     @Override

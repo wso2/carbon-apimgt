@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -18,7 +20,7 @@ public class ApplicationTokenDTO  {
   private String accessToken = null;
   
   
-  private String tokenScopes = null;
+  private List<String> tokenScopes = new ArrayList<String>();
   
   
   private Long validityTime = null;
@@ -42,10 +44,10 @@ public class ApplicationTokenDTO  {
    **/
   @ApiModelProperty(value = "Valid comma seperated scopes for the access token")
   @JsonProperty("tokenScopes")
-  public String getTokenScopes() {
+  public List<String> getTokenScopes() {
     return tokenScopes;
   }
-  public void setTokenScopes(String tokenScopes) {
+  public void setTokenScopes(List<String> tokenScopes) {
     this.tokenScopes = tokenScopes;
   }
 
