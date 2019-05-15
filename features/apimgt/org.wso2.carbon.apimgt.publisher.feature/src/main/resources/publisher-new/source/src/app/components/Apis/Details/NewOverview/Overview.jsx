@@ -105,7 +105,20 @@ class Overview extends React.Component {
             Alert.error('Error in fetching documents list of the API');
         });
     }
-
+    showEndpoint (api, type) {
+        if(api.endpoint.length > 0){
+            for(var i=0; i< api.endpoint.length; i++){
+                if( type === "prod" && api.endpoint[i].type === "http"){
+                    return api.endpoint[i].inline.endpointConfig.list[0].url;
+                } else if( type === "sand" && api.endpoint[i].type === "sandbox_endpoints"){
+                    return api.endpoint[i].inline.endpointConfig.list[0].url;
+                }
+            }
+            
+        } else {
+            return null;
+        }
+    }
     render() {
         const { documentsList } = this.state;
         const { classes } = this.props;
@@ -309,8 +322,8 @@ class Overview extends React.Component {
                                             Production Endpoint
                                         </Typography>
                                         <Typography component='p' variant='body1'>
-                                            {api.endpoint === 0 && <React.Fragment>{api.endpoint}</React.Fragment>}
-                                            {api.endpoint !== 0 && (
+                                            {this.showEndpoint(api,'prod') && <React.Fragment>{this.showEndpoint(api,'prod')}</React.Fragment>}
+                                            {!this.showEndpoint(api,'prod') && (
                                                 <React.Fragment>&lt;Not Configured&gt;</React.Fragment>
                                             )}
                                         </Typography>
@@ -320,8 +333,8 @@ class Overview extends React.Component {
                                             Sandbox Endpoint
                                         </Typography>
                                         <Typography component='p' variant='body1'>
-                                            {api.endpoint === 0 && <React.Fragment>{api.endpoint}</React.Fragment>}
-                                            {api.endpoint !== 0 && (
+                                            {this.showEndpoint(api,'sand')&& <React.Fragment>{this.showEndpoint(api,'sand')}</React.Fragment>}
+                                            {!this.showEndpoint(api,'sand')&& (
                                                 <React.Fragment>&lt;Not Configured&gt;</React.Fragment>
                                             )}
                                         </Typography>

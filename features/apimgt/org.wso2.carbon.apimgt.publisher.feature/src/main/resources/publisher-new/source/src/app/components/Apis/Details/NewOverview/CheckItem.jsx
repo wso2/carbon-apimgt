@@ -44,8 +44,8 @@ const styles = theme => ({
     },
 });
 
-function CheckItem() {
-    const { classes, itemLabel, itemSuccess } = this.props;
+function CheckItem(props) {
+    const { classes, itemLabel, itemSuccess } = props;
     const buttonClassname = classNames({
         [classes.buttonSuccess]: itemSuccess,
     });
