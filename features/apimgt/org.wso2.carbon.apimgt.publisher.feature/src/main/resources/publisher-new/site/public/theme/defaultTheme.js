@@ -97,7 +97,7 @@ const Configurations = {
             custom: {
                 starColor: '#f2c73a',
                 disableColor: '#D3D3D3',
-                leftMenuWidth: 120,
+                leftMenuWidth: 200,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
                 logo: '/publisher-new/site/public/images/logo.png',
@@ -105,8 +105,8 @@ const Configurations = {
                 title: 'WSO2 APIM Publisher',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
-                leftMenu: 'icon top', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-                leftMenuIconSize: 32,
+                leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
+                leftMenuIconSize: 24,
                 leftMenuIconMainSize: 52,
                 leftMenuTextStyle: 'uppercase',
                 resourceChipColors: {
