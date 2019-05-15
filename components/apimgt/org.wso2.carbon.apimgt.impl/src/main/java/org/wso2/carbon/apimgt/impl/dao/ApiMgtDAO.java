@@ -561,12 +561,8 @@ public class ApiMgtDAO {
                 } else {
                     // Allow to override previous infoDTO properties only if no API subscription was found and no previous
                     // product subscription was found
-                    // Order by API_NAME DESC in sql query assures the api subscriptions (where api_name is not null)
+                    // Order by API_PRODUCT_NAME ASC in sql query assures the api subscriptions (where api_product_name is null)
                     // appear first in the result set
-                    infoDTO.setApiName(null);
-                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                    infoDTO.setProductName(productName);
-                    infoDTO.setProductProvider(productProvider);
                     if (productSubscriptionCount > 0) {
                         //if the provided consumer key has more than one product subscriptions to the requested context
                         //log a warning and return subscription details for the first subscription
@@ -574,6 +570,10 @@ public class ApiMgtDAO {
                                 + "subscription from consumer key " + consumerKey );
                         return true;
                     }
+                    infoDTO.setApiName(null);
+                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                    infoDTO.setProductName(productName);
+                    infoDTO.setProductProvider(productProvider);
                     productSubscriptionCount++;
                 }
                 String subscriptionStatus = rs.getString("SUB_STATUS");
@@ -13547,9 +13547,6 @@ public class ApiMgtDAO {
 
         String queryAddProductResourceMappings =
                 "INSERT INTO AM_API_PRODUCT_MAPPING (API_PRODUCT_ID,URL_MAPPING_ID) " + "VALUES (?, ?)";
-        String queryAddScopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
-        String queryAddcopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
-        String queryAddScopeResourceMapping = SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL;
 
         PreparedStatement prepStmtAddProductResourceMappings = null;
 
@@ -13593,7 +13590,7 @@ public class ApiMgtDAO {
 
             connection.commit();
         } catch (SQLException e) {
-
+            handleException("Error while adding product mappings fro api " + api.getId(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddProductResourceMappings, connection, null);
         }
@@ -13713,8 +13710,8 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while adding product resource and scope mappings for api product ", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeEntry, connection, rs);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddcopeLink, connection, null);
+            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeEntry, null, rs);
+            APIMgtDBUtil.closeAllConnections(prepStmtAddcopeLink, null, null);
             APIMgtDBUtil.closeAllConnections(prepStmtAddScopeResourceMapping, connection, null);
         }
     }
