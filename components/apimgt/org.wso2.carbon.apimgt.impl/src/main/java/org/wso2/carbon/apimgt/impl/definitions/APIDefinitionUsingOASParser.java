@@ -203,6 +203,15 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                     && !APIConstants.AUTH_NO_AUTHENTICATION.equals(authType)) {
                 throw new APIManagementException("Invalid auth type provided.");
             }
+            if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)) {
+                authType = APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER;
+            }
+            if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)) {
+                authType = APIConstants.OASResourceAuthTypes.APPLICATION_USER;
+            }
+            if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authType)) {
+                authType = APIConstants.OASResourceAuthTypes.APPLICATION;
+            }
             operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
             operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
             

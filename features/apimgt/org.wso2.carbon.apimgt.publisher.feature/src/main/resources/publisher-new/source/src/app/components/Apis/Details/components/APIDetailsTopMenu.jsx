@@ -44,7 +44,7 @@ const styles = theme => ({
 });
 
 const DetailsTopMenu = ({ classes, api, theme }) => {
-    const storeURL = `${window.location.origin}/store/${api.id}/overview`; // todo: need to support rev proxy ~tmkb
+    const storeURL = `${window.location.origin}/store-new/apis/${api.id}/overview`; // todo: need to support rev proxy ~tmkb
     return (
         <div className={classes.root}>
             <Link to='/apis' className={classes.backLink}>

@@ -1502,4 +1502,11 @@ public final class APIConstants {
     public static final String DOCUMENT_INDEXER_INDICATOR = "document_indexed";
 
     public static final String KEY_SUFFIX = "_KEY";
+
+    public static class OASResourceAuthTypes {
+        public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
+        public static final String APPLICATION_USER = "Application User";
+        public static final String APPLICATION = "Application";
+        public static final String NONE = "None";
+    }
 }
