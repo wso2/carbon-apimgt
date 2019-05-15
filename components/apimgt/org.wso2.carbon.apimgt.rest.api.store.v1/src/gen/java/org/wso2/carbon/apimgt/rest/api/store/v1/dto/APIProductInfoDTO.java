@@ -1,8 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -31,9 +28,6 @@ public class APIProductInfoDTO  {
   
   
   private String thumbnailUri = null;
-  
-  
-  private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
 
   
   /**
@@ -97,18 +91,6 @@ public class APIProductInfoDTO  {
   }
 
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("scopes")
-  public List<ScopeInfoDTO> getScopes() {
-    return scopes;
-  }
-  public void setScopes(List<ScopeInfoDTO> scopes) {
-    this.scopes = scopes;
-  }
-
-  
 
   @Override
   public String toString()  {
@@ -120,7 +102,6 @@ public class APIProductInfoDTO  {
     sb.append("  description: ").append(description).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
-    sb.append("  scopes: ").append(scopes).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

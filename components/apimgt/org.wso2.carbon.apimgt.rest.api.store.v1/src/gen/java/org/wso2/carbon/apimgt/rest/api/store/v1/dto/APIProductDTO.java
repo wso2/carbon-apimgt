@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -45,6 +46,9 @@ public class APIProductDTO  {
   
   
   private APIProductBusinessInformationDTO businessInformation = null;
+  
+  
+  private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
 
   
   /**
@@ -162,6 +166,18 @@ public class APIProductDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("scopes")
+  public List<ScopeInfoDTO> getScopes() {
+    return scopes;
+  }
+  public void setScopes(List<ScopeInfoDTO> scopes) {
+    this.scopes = scopes;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -177,6 +193,7 @@ public class APIProductDTO  {
     sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
     sb.append("  additionalProperties: ").append(additionalProperties).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
+    sb.append("  scopes: ").append(scopes).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

@@ -190,10 +190,9 @@ class Details extends React.Component {
                 </Link>
                 <LeftMenuItem text="overview" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
                 <LeftMenuItem text="credentials" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                <LeftMenuItem text="comments" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+
                 <LeftMenuItem text="test" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
                 <LeftMenuItem text="docs" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                <LeftMenuItem text="sdk" handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
 
             </div>
               <div className={classes.content}>
@@ -202,11 +201,8 @@ class Details extends React.Component {
                     <Redirect exact from="/api-products/:api_uuid" to={redirect_url}/>
                     <Route path="/api-products/:api_uuid/overview" component={Overview}/>
                     <Route path="/api-products/:api_uuid/credentials" component={Credentials} />
-                    <Route path="/api-products/:api_uuid/comments" component={() => <Comments api={api} apiId={this.props.match.params.api_uuid} />} />
                     <Route path="/api-products/:api_uuid/test" component={ApiConsole}/>
                     <Route path="/api-products/:api_uuid/docs" component={Documentation}/>
-                    <Route path="/api-products/:api_uuid/forum" component={Forum}/>
-                    <Route path="/api-products/:api_uuid/sdk" component={Sdk}/>
                     <Route component={PageNotFound}/>
                 </Switch>
               </div>

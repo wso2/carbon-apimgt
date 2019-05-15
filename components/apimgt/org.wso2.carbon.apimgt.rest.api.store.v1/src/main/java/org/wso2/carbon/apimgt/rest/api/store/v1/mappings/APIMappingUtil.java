@@ -434,6 +434,17 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         dto.setTiers(tiersToReturn);
+        List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
+        //API product has only one scope.
+        ScopeInfoDTO productScope = new ScopeInfoDTO();
+        productScope.setKey(
+                APIUtil.getProductScope(new APIProductIdentifier(product.getName(), product.getProvider())));
+        productScope.setName("API Product Scope");
+        productScope.setRoles(new ArrayList<String>());
+        productScope
+                .setDescription("Scope of the token which is needed to access the API Product " + product.getName());
+        scopes.add(productScope);
+        dto.setScopes(scopes);
 
         return dto;
     }
@@ -451,18 +462,6 @@ public class APIMappingUtil {
         apiProductInfoDTO.setName(apiProduct.getName());
         String providerName = apiProduct.getProvider();
         apiProductInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
-        //API product has only one scope.
-        ScopeInfoDTO productScope = new ScopeInfoDTO();
-        productScope.setKey(
-                APIUtil.getProductScope(new APIProductIdentifier(apiProduct.getName(), apiProduct.getProvider())));
-        productScope.setName("API Product Scope");
-        productScope.setRoles(new ArrayList<String>());
-        productScope
-                .setDescription("Scope of the token which is needed to access the API Product " + apiProduct.getName());
-        scopes.add(productScope);
-        apiProductInfoDTO.setScopes(scopes);
-
         apiProductInfoDTO.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
 

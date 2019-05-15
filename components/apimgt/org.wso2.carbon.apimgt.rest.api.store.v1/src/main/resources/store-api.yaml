@@ -3651,10 +3651,6 @@ definitions:
       thumbnailUri:
         type: string
         example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
-      scopes:
-        type: array
-        items:
-          $ref: '#/definitions/ScopeInfo'
  
 #-----------------------------------------------------
 # The API resource
@@ -3713,6 +3709,10 @@ definitions:
           businessOwnerEmail:
             type: string
             example: businessowner@wso2.com
+      scopes:
+        type: array
+        items:
+          $ref: '#/definitions/ScopeInfo'
 
 #-----------------------------------------------------
 # The Label resource

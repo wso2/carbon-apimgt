@@ -160,65 +160,6 @@ class Overview extends React.Component {
             </Grid>
             <Grid item xs={6}>
               <ExpansionPanel defaultExpanded={true}>
-                <ExpansionPanelSummary>
-                  <CustomIcon
-                    strokeColor={theme.palette.secondary.main}
-                    className={classes.iconClass}
-                    width={24}
-                    height={24}
-                    icon="comments"
-                  />
-                  
-                  <Typography className={classes.heading} variant="h6">Comments</Typography>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.resourceWrapper}>
-                    {api && <Comments apiId={api.id} showLatest={true} />}
-                </ExpansionPanelDetails>
-                <Divider />
-                <ExpansionPanelActions className={classes.actionPanel}>
-                  <Button size="small" color="primary">
-                    Show More >> 
-                  </Button>
-                </ExpansionPanelActions>
-              </ExpansionPanel>
-            </Grid>
-            <Grid item xs={6}>
-              <ExpansionPanel defaultExpanded={true}>
-                <ExpansionPanelSummary>
-                  <CustomIcon
-                    strokeColor={theme.palette.secondary.main}
-                    className={classes.iconClass}
-                    width={24}
-                    height={24}
-                    icon="sdk"
-                  />
-                  
-                  <Typography className={classes.heading} variant="h6">SDK Generation</Typography>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.resourceWrapper}>
-                    
-
-                <Grid container className={classes.root} spacing={16}>
-                    {api && <Sdk apiId={api.id} onlyIcons={true}  />}
-                    <Grid item xs={12}>
-                      <Typography>
-                      If you wants to create a software application to consume the subscribed APIs, 
-                      you can generate client side SDK for a supported language/framework and use 
-                      it as a start point to write the software application.
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </ExpansionPanelDetails>
-                <Divider />
-                <ExpansionPanelActions className={classes.actionPanel}>
-                  <Button size="small" color="primary">
-                    Show More >> 
-                  </Button>
-                </ExpansionPanelActions>
-              </ExpansionPanel>
-            </Grid>
-            <Grid item xs={6}>
-              <ExpansionPanel defaultExpanded={true}>
                   <ExpansionPanelSummary>
                     <CustomIcon
                       strokeColor={theme.palette.secondary.main}
@@ -245,40 +186,6 @@ class Overview extends React.Component {
                         <div className={classes.subscriptionBox}>
                           <Link to="/" className={classes.linkStyle}>AboutmyApi.pdf</Link>
                           <Typography variant="caption">Last updated 21 minutes ago</Typography>
-                        </div>
-                      </Grid>
-                    </Grid>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-              </Grid>
-              <Grid item xs={6}>
-              <ExpansionPanel defaultExpanded={true}>
-                  <ExpansionPanelSummary>
-                    <CustomIcon
-                      strokeColor={theme.palette.secondary.main}
-                      className={classes.iconClass}
-                      width={24}
-                      height={24}
-                      icon="docs"
-                    />
-                    
-                    <Typography className={classes.heading} variant="h6">Forum</Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails>
-                    <Grid container className={classes.root} spacing={16}>
-                      <Grid item xs={12}>
-                        <div className={classes.subscriptionTop}>
-                          <div className={classes.boxBadge}>
-                            1
-                          </div>
-                          <Link to="/" className={classes.linkStyle}>Topic</Link>
-                        </div>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Typography variant="subtitle2">Last Updated</Typography>
-                        <div className={classes.subscriptionBox}>
-                          <Link to="/" className={classes.linkStyle}>Find pets fast</Link>
-                          <Typography variant="caption">Last updated 2 days ago</Typography>
                         </div>
                       </Grid>
                     </Grid>
