@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
@@ -107,10 +108,15 @@ public class ThrottlingPolicyMappingUtil {
      * @param tierLevel tier level (api/application or resource)
      * @return ThrottlingPolicyDTO corresponds to Tier object
      */
-    public static ThrottlingPolicyDTO fromTierToDTO(Tier tier, String tierLevel) {
+    public static ThrottlingPolicyDTO   fromTierToDTO(Tier tier, String tierLevel) {
         ThrottlingPolicyDTO dto = new ThrottlingPolicyDTO();
         dto.setName(tier.getName());
         dto.setDescription(tier.getDescription());
+        if (StringUtils.isEmpty(tier.getDisplayName())) {
+            dto.setDisplayName(tier.getName());
+        } else {
+            dto.setDisplayName(tier.getDisplayName());
+        }
         dto.setRequestCount(tier.getRequestCount());
         dto.setUnitTime(tier.getUnitTime());
         dto.setStopOnQuotaReach(tier.isStopOnQuotaReached());
