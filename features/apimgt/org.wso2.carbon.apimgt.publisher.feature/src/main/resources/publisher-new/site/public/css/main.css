@@ -388,3 +388,6 @@
       padding-top: 10px;
       padding-bottom: 10px;
   }
+  #react-root{
+    overflow-x: hidden; 
+  }
