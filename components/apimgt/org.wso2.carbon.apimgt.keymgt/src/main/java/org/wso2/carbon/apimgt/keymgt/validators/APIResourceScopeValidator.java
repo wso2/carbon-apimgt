@@ -120,13 +120,10 @@ public class APIResourceScopeValidator extends OAuth2ScopeValidator {
         List<String> tokenScopeList = new ArrayList<>(Arrays.asList(scopes));
         List<String> resourceScopeList = Arrays.asList(resourceScopes.split(","));
         String apiResourceScope = null;
-        List<String> productResourceScopes = new ArrayList<String>();
 
         //filter resource and product scopes
         for (String scope : resourceScopeList) {
-            if (scope.startsWith("productscope")) {
-                productResourceScopes.add(scope);
-            } else {
+            if (!scope.startsWith("productscope")) {
                 apiResourceScope = scope;
             }
         }
@@ -138,15 +135,9 @@ public class APIResourceScopeValidator extends OAuth2ScopeValidator {
             String apiProductName = "";
             String apiProductProvider = "";
             String productScope = "";
-            if (subscriptionDetails.length == 3) {
-                String apiProductID = subscriptionDetails[2];
-
-                String[] productNameProviderPair = apiProductID.split("-");
-                if (productNameProviderPair.length == 2) {
-                    apiProductProvider = productNameProviderPair[0];
-                    apiProductName = productNameProviderPair[1];
-                }
-
+            if (subscriptionDetails.length == 4) {
+                apiProductName = subscriptionDetails[2];
+                apiProductProvider = subscriptionDetails[3];
                 productScope = APIUtil.getProductScope(new APIProductIdentifier(apiProductProvider, apiProductName));
             }
 

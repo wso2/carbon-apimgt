@@ -354,7 +354,7 @@ public class SQLConstants {
             "   AND API.CONTEXT = ? " +
             "   AND AKM.CONSUMER_KEY = ? " +
             "   AND API.API_VERSION = ? " +
-            " ORDER BY API_NAME DESC";
+            " ORDER BY API_PRODUCT_NAME ASC";
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
@@ -468,7 +468,7 @@ public class SQLConstants {
             "   AND AKM.CONSUMER_KEY = ? " +
             "   AND APS.TENANT_ID = ? " +
             "   AND API.API_VERSION = ? " +
-            " ORDER BY API_NAME DESC";
+            " ORDER BY API_PRODUCT_NAME ASC";
 
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
