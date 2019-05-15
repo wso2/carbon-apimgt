@@ -23,6 +23,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import CalendarViewDay from '@material-ui/icons/CalendarViewDay';
 import AccountBalanceWallet from '@material-ui/icons/AccountBalanceWallet';
+import DeveloperMode from '@material-ui/icons/DeveloperMode';
 import ContactMail from '@material-ui/icons/ContactMail';
 import Person from '@material-ui/icons/Person';
 import AccountCircle from '@material-ui/icons/AccountCircle';
@@ -550,6 +551,15 @@ class InfoBar extends React.Component {
                         </div>
                         </TableCell>
                       <TableCell>{api.businessInformation.businessOwnerEmail}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell component="th" scope="row" className={classes.leftCol}>
+                        <div className={classes.iconAligner}>
+                          <DeveloperMode className={classes.iconOdd} /> 
+                          <span className={classes.iconTextWrapper}>Product Scope</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{api.scopes[0].key}</TableCell>
                     </TableRow>
                 </TableBody>
               </Table>
