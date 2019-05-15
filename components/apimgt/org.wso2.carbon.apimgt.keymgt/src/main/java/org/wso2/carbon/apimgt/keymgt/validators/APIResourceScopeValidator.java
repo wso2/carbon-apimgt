@@ -25,6 +25,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.identity.application.common.model.User;
@@ -109,7 +110,7 @@ public class APIResourceScopeValidator extends OAuth2ScopeValidator {
         }
 
         String[] subscriptionDetails =  accessTokenDO.getTokenType().split(":");
-        String subscriptionType = "API";
+        String subscriptionType = APIConstants.API_SUBSCRIPTION_TYPE;
         if (subscriptionDetails.length > 1) {
             subscriptionType = subscriptionDetails[1];
         } else {
@@ -123,13 +124,13 @@ public class APIResourceScopeValidator extends OAuth2ScopeValidator {
 
         //filter resource and product scopes
         for (String scope : resourceScopeList) {
-            if (!scope.startsWith("productscope")) {
+            if (!scope.startsWith(APIConstants.PRODUCTSCOPE_PREFIX)) {
                 apiResourceScope = scope;
             }
         }
 
         //if requset type is APIProduct add an additional scope validation step
-        if (subscriptionType.equals("APIProduct")) {
+        if (subscriptionType.equals(APIConstants.API_PRODUCT_SUBSCRIPTION_TYPE)) {
             //extract the api product identified in subscription validation phase and carry out scope validation for the
             //scope relevant to that product
             String apiProductName = "";

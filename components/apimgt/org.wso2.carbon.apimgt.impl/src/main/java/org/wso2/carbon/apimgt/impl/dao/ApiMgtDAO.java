@@ -13165,7 +13165,8 @@ public class ApiMgtDAO {
 
             //add product scope
             //TODO finalize format and move to constants
-            String productScopeKey = "productscope-" + apiproduct.getName() + ":" +apiproduct.getProvider();
+            String productScopeKey = APIUtil
+                    .getProductScope(new APIProductIdentifier(apiproduct.getProvider(), apiproduct.getName()));
             //for now use key for display name as well TODO check and modify
             String productScopeDisplayName = productScopeKey;
             Scope productScope = new Scope();
@@ -13651,7 +13652,8 @@ public class ApiMgtDAO {
             for (APIProduct apiProduct : apiProducts) {
                 //add product scope
                 //TODO finalize format and move to constants
-                String productScopeKey = "productscope-" + apiProduct.getName() + ":" + apiProduct.getProvider();
+                String productScopeKey = APIUtil
+                        .getProductScope(new APIProductIdentifier(apiProduct.getProvider(), apiProduct.getName()));
                 //for now use key for display name as well TODO check and modify
                 String productScopeDisplayName = productScopeKey;
                 Scope productScope = new Scope();
@@ -13832,7 +13834,8 @@ public class ApiMgtDAO {
             ps.executeUpdate();
 
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            String productScopeName = "productscope-" + product.getName() + ":" + product.getProvider();
+            String productScopeName = APIUtil.
+                    getProductScope(new APIProductIdentifier(product.getProvider(), product.getName()));
             int scopeId = getScopeIdByScopeName(productScopeName, conn);
             int productId = getAPIProductID(product.getName(), product.getProvider(), conn);
             updateAPIProductResourceMappings(product, productId, scopeId, tenantDomain, conn);

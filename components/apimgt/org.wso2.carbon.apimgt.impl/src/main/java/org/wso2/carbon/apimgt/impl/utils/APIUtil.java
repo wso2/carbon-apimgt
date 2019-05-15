@@ -8240,6 +8240,6 @@ public final class APIUtil {
      * @return product scope
      */
     public static String getProductScope(APIProductIdentifier productIdentifier) {
-        return "productscope-" + productIdentifier.getName() + ":" + productIdentifier.getProviderName();
+        return APIConstants.PRODUCTSCOPE_PREFIX + "-" + productIdentifier.getName() + ":" + productIdentifier.getProviderName();
     }
 }
