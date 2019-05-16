@@ -25,9 +25,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIEndpoint;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.EndpointConfigAttributes;
 import org.wso2.carbon.apimgt.api.model.EndpointEndpointConfig;
@@ -65,6 +68,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItems
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
@@ -1151,6 +1155,34 @@ public class APIMappingUtil {
 
         }
         return apiEndpointDTOList;
+    }
+
+    /**
+     * Returns workflow state DTO from the provided information
+     * 
+     * @param lifecycleStateDTO Lifecycle state DTO
+     * @param stateChangeResponse workflow response from API lifecycle change
+     * @return workflow state DTO
+     */
+    public static WorkflowResponseDTO toWorkflowResponseDTO(LifecycleStateDTO lifecycleStateDTO,
+            APIStateChangeResponse stateChangeResponse) {
+        WorkflowResponseDTO workflowResponseDTO = new WorkflowResponseDTO();
+
+        if (WorkflowStatus.APPROVED.toString().equals(stateChangeResponse.getStateChangeStatus())) {
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.APPROVED);
+        } else if (WorkflowStatus.CREATED.toString().equals(stateChangeResponse.getStateChangeStatus())) {
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.CREATED);
+        } else if ((WorkflowStatus.REGISTERED.toString().equals(stateChangeResponse.getStateChangeStatus()))) {
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.REGISTERED);
+        } else if ((WorkflowStatus.REJECTED.toString().equals(stateChangeResponse.getStateChangeStatus()))) {
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.REJECTED);
+        } else {
+            log.error("Unrecognized state : " + stateChangeResponse.getStateChangeStatus());
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.CREATED);
+        }
+
+        workflowResponseDTO.setLifecycleState(lifecycleStateDTO);
+        return workflowResponseDTO;
     }
 
     /**

@@ -61,22 +61,23 @@ class LifeCycleUpdate extends Component {
      *
      *
      * @param {*} apiUUID
-     * @param {*} newState
+     * @param {*} action
      * @memberof LifeCycleUpdate
      */
-    updateLCStateOfAPI(apiUUID, newState) {
+    updateLCStateOfAPI(apiUUID, action) {
         let promisedUpdate;
         const lifecycleChecklist = this.props.checkList.map(item => item.value + ':' + item.checked);
         if (lifecycleChecklist.length > 0) {
-            promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
+            promisedUpdate = this.api.updateLcState(apiUUID, action, lifecycleChecklist);
         } else {
-            promisedUpdate = this.api.updateLcState(apiUUID, newState);
+            promisedUpdate = this.api.updateLcState(apiUUID, action);
         }
         promisedUpdate
             .then(response => {
                 /* TODO: Handle IO erros ~tmkb */
                 this.props.handleUpdate(true);
-                this.setState({ newState });
+                let newState = response.body.lifecycleState.state;
+                this.setState({newState});
                 Alert.info('Lifecycle state updated successfully');
                 /* TODO: add i18n ~tmkb */
             })
@@ -94,10 +95,10 @@ class LifeCycleUpdate extends Component {
      */
     updateLifeCycleState(event) {
         event.preventDefault();
-        let newState = event.currentTarget.getAttribute('data-value');
+        let action = event.currentTarget.getAttribute('data-value');
         const apiUUID = this.props.api.id;
         const { privateJetModeEnabled } = this.props;
-        this.updateLCStateOfAPI(apiUUID, newState);
+        this.updateLCStateOfAPI(apiUUID, action);
     }
 
     render() {
