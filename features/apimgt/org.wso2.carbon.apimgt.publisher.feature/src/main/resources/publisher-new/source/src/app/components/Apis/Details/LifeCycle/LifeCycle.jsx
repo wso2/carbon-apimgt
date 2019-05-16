@@ -22,10 +22,11 @@ import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import ConfigManager from 'AppData/ConfigManager';
-import LifeCycleUpdate from './LifeCycleUpdate';
 import { Progress } from 'AppComponents/Shared';
-import LifeCycleHistory from './LifeCycleHistory';
 import { withStyles } from '@material-ui/core/styles';
+
+import LifeCycleUpdate from './LifeCycleUpdate';
+import LifeCycleHistory from './LifeCycleHistory';
 
 const styles = theme => ({
     root: {
@@ -51,8 +52,8 @@ const styles = theme => ({
  */
 class LifeCycle extends Component {
     /**
-     *Creates an instance of LifeCycle.
-     * @param {*} props
+     * Creates an instance of LifeCycle.
+     * @param {Object} props
      * @memberof LifeCycle
      */
     constructor(props) {
@@ -66,24 +67,31 @@ class LifeCycle extends Component {
         this.handleChangeCheckList = this.handleChangeCheckList.bind(this);
     }
 
+    /**
+     *
+     * @inheritdoc
+     * @memberof LifeCycle
+     */
     componentDidMount() {
         this.updateData();
     }
+
     handleChangeCheckList = index => (event, checked) => {
         const checkList = this.state.checkList;
         checkList[index].checked = checked;
         this.setState({ checkList });
     };
+
     /**
      *
      *
      * @memberof LifeCycle
      */
     updateData() {
-        const { id } = this.props.api;
-        const promised_api = Api.get(id);
+        const { api } = this.props;
+        const promised_api = Api.get(api.id);
         // const promised_tiers = Api.policies('api');
-        const promised_lcState = this.api.getLcState(id);
+        const promised_lcState = this.api.getLcState(api.id);
         let privateJetModeEnabled = false;
 
         ConfigManager.getConfigs().features.then(response => {
@@ -92,9 +100,10 @@ class LifeCycle extends Component {
 
         // const promised_lcHistory = this.api.getLcHistory(id);
         // const promised_labels = this.api.labels();
-        Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels])
+        Promise.all([promised_api, promised_lcState])
             .then(response => {
-                const [api, tiers, lcState, lcHistory, labels] = response.map(data => data.obj);
+                const api = response[0];
+                const lcState = response[1].obj;
 
                 if (privateJetModeEnabled) {
                     if (!api.hasOwnGateway) {
@@ -115,7 +124,7 @@ class LifeCycle extends Component {
                 // Creating checklist
                 const checkList = [];
                 let index = 0;
-                for (const item of lcState.checkItemBeanList) {
+                for (const item of lcState.checkItems) {
                     checkList.push({
                         index,
                         label: item.name,
@@ -126,10 +135,7 @@ class LifeCycle extends Component {
                 }
                 this.setState({
                     api,
-                    policies: tiers,
                     lcState,
-                    lcHistory,
-                    labels,
                     privateJetModeEnabled,
                     checkList,
                 });
@@ -151,10 +157,10 @@ class LifeCycle extends Component {
      * @memberof LifeCycle
      */
     render() {
-        const { classes, api, lcState, checkList, privateJetModeEnabled } = this.props;
-        const { lcHistory } = this.state;
+        const { classes } = this.props;
+        const { api, lcState, privateJetModeEnabled, checkList } = this.state;
 
-        if (!lcHistory) {
+        if (!lcState) {
             return <Progress />;
         }
         return (
@@ -176,16 +182,16 @@ class LifeCycle extends Component {
                                 privateJetModeEnabled={privateJetModeEnabled}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        {/* <Grid item xs={12}>
                             {lcHistory.length > 1 && (
                                 <div>
-                                    <Typography variant="h6" gutterBottom className={classes.historyHead}>
+                                    <Typography variant='h6' gutterBottom className={classes.historyHead}>
                                         History
                                     </Typography>
                                     <LifeCycleHistory lcHistory={lcHistory} />
                                 </div>
                             )}
-                        </Grid>
+                        </Grid> */}
                     </Grid>
                 </div>
             </div>
