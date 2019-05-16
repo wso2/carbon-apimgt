@@ -11978,6 +11978,16 @@ public class ApiMgtDAO {
             boolean subscriptionsExist = false;
             int productSubscriptionCount = 0;
             while (rs.next()) {
+                /*
+                 * Subscription validation happens according to the following rules
+                 * - If application is used to subscribe to both API and API product which has that API, precedence is
+                 *   given to API subscription. Validation results will contain info related to API
+                 * - If same API resource exists in two products and if same application is used to subscribe to those 
+                 *   two products, invoking the product would result in invalid results. It will return only one subscription
+                 *   information. This would be an unlikely scenario.
+                 * - Default version api invocation is not considered for API product. Resources in API product should 
+                 *   have the version in the resource when creating. 
+                 */
                 subscriptionsExist = true;
                 if (isAPISubscriptionExist) {
                     break;
@@ -11986,6 +11996,10 @@ public class ApiMgtDAO {
                 // check whether the current subscription is an api subscription and if yes allow to override previous
                 // infoDTO properties
                 String productName = rs.getString("API_PRODUCT_NAME");
+                String apiName = rs.getString("API_NAME");
+                if (log.isDebugEnabled()) {
+                    log.debug("Subscription validation: API " + apiName + "  API Product " + productName);
+                }
 
                 if (StringUtils.isEmpty(productName)) {
                     if (log.isDebugEnabled()) {
@@ -12004,7 +12018,8 @@ public class ApiMgtDAO {
                         //if the provided consumer key has more than one product subscriptions to the requested context
                         //log a warning and return subscription details for the first subscription
                         log.warn("Requested context " + context + " has more than one product "
-                                + "subscription from consumer key " + consumerKey );
+                                + "subscription from consumer key " + consumerKey + ". Use " + infoDTO.getProductName()
+                                + " as the valid subscription");
                         infoDTO.setAuthorized(true);
                         return infoDTO;
                     }
@@ -12047,7 +12062,7 @@ public class ApiMgtDAO {
                 infoDTO.setTier(SUB_TIER);
                 infoDTO.setSubscriber(rs.getString("USER_ID"));
                 infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
-                infoDTO.setApiName(rs.getString("API_NAME"));
+                infoDTO.setApiName(apiName);
                 infoDTO.setApiPublisher(API_PROVIDER);
                 infoDTO.setApplicationName(rs.getString("NAME"));
                 infoDTO.setApplicationTier(APP_TIER);
@@ -12109,6 +12124,9 @@ public class ApiMgtDAO {
                 log.error("Error occurred while fetching data: " + e.getMessage(), e);
             }
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription validation completed: " + infoDTO.toString());
+            }
         }
         return infoDTO;
     }
