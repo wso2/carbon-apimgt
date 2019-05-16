@@ -261,6 +261,8 @@ public class APIKeyValidationInfoDTO implements Serializable {
                 append(" , spikeArrestUnit:").append(spikeArrestUnit).
                 append(" , subscriberTenantDomain:").append(subscriberTenantDomain).
                 append(" , stopOnQuotaReach:").append(stopOnQuotaReach).
+                append(" , productName:").append(productName).
+                append(" , productProvider:").append(productProvider).
                 append(" , apiPublisher:").append(apiPublisher);
 
         if (authorizedDomains != null && !authorizedDomains.isEmpty()) {

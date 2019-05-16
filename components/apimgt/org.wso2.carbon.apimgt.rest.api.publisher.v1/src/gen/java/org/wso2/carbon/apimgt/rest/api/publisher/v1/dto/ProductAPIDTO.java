@@ -17,11 +17,26 @@ import javax.validation.constraints.NotNull;
 public class ProductAPIDTO  {
   
   
+  
+  private String name = null;
+  
   @NotNull
   private String apiId = null;
   
   
   private List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("name")
+  public String getName() {
+    return name;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
 
   
   /**
@@ -54,6 +69,7 @@ public class ProductAPIDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class ProductAPIDTO {\n");
     
+    sb.append("  name: ").append(name).append("\n");
     sb.append("  apiId: ").append(apiId).append("\n");
     sb.append("  operations: ").append(operations).append("\n");
     sb.append("}\n");

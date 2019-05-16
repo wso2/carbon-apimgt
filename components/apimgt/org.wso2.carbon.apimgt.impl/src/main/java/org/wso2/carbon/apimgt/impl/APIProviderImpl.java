@@ -6094,9 +6094,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public String createAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException {
-        
-        //TODO check if product already exists
-        
+
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
             API api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
@@ -6136,14 +6134,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
-        //TODO add validation for tenant and publisher visibility. currently no domain or user check is set
         APIProduct product = apiMgtDAO.getAPIProduct(uuid, tenantDomain);
         return product;
     }
 
     @Override
     public List<APIProduct> getAPIProducts(String tenantDomain, String apiProvider) throws APIManagementException {
-        //TODO add validation for user and publisher visibility. currently no domain or user check is set
         List<APIProduct> products = apiMgtDAO.getAPIProductsForTenantDomain(tenantDomain);
         return products;
 
