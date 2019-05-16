@@ -493,182 +493,9 @@ public class ApiMgtDAO {
             //Remove the prefix from the version.
             version = version.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
-        String sql;
-        boolean isAdvancedThrottleEnabled = APIUtil.isAdvanceThrottlingEnabled();
-        if (!isAdvancedThrottleEnabled) {
-            if (defaultVersionInvoked) {
-                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
-            } else {
-                sql = SQLConstants.VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
-            }
-        } else {
-            if (defaultVersionInvoked) {
-                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL;
-            } else {
-                sql = SQLConstants.ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL;
-            }
-        }
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, context);
-            ps.setString(2, consumerKey);
-            if (!isAdvancedThrottleEnabled) {
-                if (!defaultVersionInvoked) {
-                    ps.setString(3, version);
-                    ps.setString(4, context);
-                    ps.setString(5, consumerKey);
-                    ps.setString(6, version);
-                }
-            } else {
-                ps.setInt(3, apiOwnerTenantId);
-                if (!defaultVersionInvoked) {
-                    ps.setString(4, version);
-                    ps.setString(5, context);
-                    ps.setString(6, consumerKey);
-                    ps.setInt(7, apiOwnerTenantId);
-                    ps.setString(8, version);
-
-                }
-            }
-            rs = ps.executeQuery();
-            boolean isAPISubscriptionExist = false;
-            boolean subscriptionsExist = false;
-            int productSubscriptionCount = 0;
-            while (rs.next()) {
-                subscriptionsExist = true;
-                if (isAPISubscriptionExist) {
-                    break;
-                }
-
-                // check whether the current subscription is an api subscription and if yes allow to override previous
-                // infoDTO properties
-                String productName = rs.getString("API_PRODUCT_NAME");
-
-                if (StringUtils.isEmpty(productName)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("A valid API subscription was found for request to " + context + " through consumer"
-                                + " key " + consumerKey);
-                    }
-                    infoDTO.setProductName(null);
-                    infoDTO.setProductProvider(null);
-                    isAPISubscriptionExist = true;
-                } else {
-                    // Allow to override previous infoDTO properties only if no API subscription was found and no previous
-                    // product subscription was found
-                    // Order by API_PRODUCT_NAME ASC in sql query assures the api subscriptions (where api_product_name is null)
-                    // appear first in the result set
-                    if (productSubscriptionCount > 0) {
-                        //if the provided consumer key has more than one product subscriptions to the requested context
-                        //log a warning and return subscription details for the first subscription
-                        log.warn("Requested context " + context + " has more than one product "
-                                + "subscription from consumer key " + consumerKey );
-                        return true;
-                    }
-                    infoDTO.setApiName(null);
-                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                    infoDTO.setProductName(productName);
-                    infoDTO.setProductProvider(productProvider);
-                    productSubscriptionCount++;
-                }
-                String subscriptionStatus = rs.getString("SUB_STATUS");
-                String type = rs.getString("KEY_TYPE");
-                if (APIConstants.SubscriptionStatus.BLOCKED.equals(subscriptionStatus)) {
-                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
-                    infoDTO.setAuthorized(false);
-                    return false;
-                } else if (APIConstants.SubscriptionStatus.ON_HOLD.equals(subscriptionStatus) || APIConstants
-                        .SubscriptionStatus.REJECTED.equals(subscriptionStatus)) {
-                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.SUBSCRIPTION_INACTIVE);
-                    infoDTO.setAuthorized(false);
-                    return false;
-                } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subscriptionStatus) &&
-                        !APIConstants.API_KEY_TYPE_SANDBOX.equals(type)) {
-                    infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_BLOCKED);
-                    infoDTO.setType(type);
-                    infoDTO.setAuthorized(false);
-                    return false;
-                }
-
-                String tokenType = rs.getString("TOKEN_TYPE");
-                if (APIConstants.JWT.equals(tokenType)) {
-                    infoDTO.setAuthorized(false);
-                    return false;
-                }
-
-                String apiProvider = rs.getString("API_PROVIDER");
-                String subTier = rs.getString("TIER_ID");
-                String appTier = rs.getString("APPLICATION_TIER");
-                infoDTO.setTier(subTier);
-                infoDTO.setSubscriber(rs.getString("USER_ID"));
-                infoDTO.setApplicationId(rs.getString("APPLICATION_ID"));
-                infoDTO.setApiName(rs.getString("API_NAME"));
-                infoDTO.setApiPublisher(apiProvider);
-                infoDTO.setApplicationName(rs.getString("NAME"));
-                infoDTO.setApplicationTier(appTier);
-                infoDTO.setType(type);
-
-                //Advanced Level Throttling Related Properties
-                if (APIUtil.isAdvanceThrottlingEnabled()) {
-                    String apiTier = rs.getString("API_TIER");
-                    String subscriberUserId = rs.getString("USER_ID");
-                    String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
-                    int apiId = rs.getInt("API_ID");
-                    int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-                    int apiTenantId = APIUtil.getTenantId(apiProvider);
-                    //TODO isContentAware
-                    boolean isContentAware = isAnyPolicyContentAware(conn, apiTier, appTier, subTier, subscriberTenantId, apiTenantId, apiId);
-                    infoDTO.setContentAware(isContentAware);
-
-                    //TODO this must implement as a part of throttling implementation.
-                    int spikeArrest = 0;
-                    String apiLevelThrottlingKey = "api_level_throttling_key";
-                    if (rs.getInt("RATE_LIMIT_COUNT") > 0) {
-                        spikeArrest = rs.getInt("RATE_LIMIT_COUNT");
-                    }
-
-                    String spikeArrestUnit = null;
-                    if (rs.getString("RATE_LIMIT_TIME_UNIT") != null) {
-                        spikeArrestUnit = rs.getString("RATE_LIMIT_TIME_UNIT");
-                    }
-                    boolean stopOnQuotaReach = rs.getBoolean("STOP_ON_QUOTA_REACH");
-                    List<String> list = new ArrayList<String>();
-                    list.add(apiLevelThrottlingKey);
-                    infoDTO.setSpikeArrestLimit(spikeArrest);
-                    infoDTO.setSpikeArrestUnit(spikeArrestUnit);
-                    infoDTO.setStopOnQuotaReach(stopOnQuotaReach);
-                    infoDTO.setSubscriberTenantDomain(subscriberTenant);
-                    if (apiTier != null && apiTier.trim().length() > 0) {
-                        infoDTO.setApiTier(apiTier);
-                    }
-                    //We also need to set throttling data list associated with given API. This need to have policy id and
-                    // condition id list for all throttling tiers associated with this API.
-                    infoDTO.setThrottlingDataList(list);
-                }
-            }
-
-            if (subscriptionsExist) {
-                return true;
-            } else {
-                infoDTO.setAuthorized(false);
-                infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
-            }
-        } catch (SQLException e) {
-            handleException("Exception occurred while validating Subscription.", e);
-        } finally {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-
-            }
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return false;
+        validateSubscriptionDetails(infoDTO, context, version, consumerKey, defaultVersionInvoked);
+        return infoDTO.isAuthorized();
     }
 
     private boolean isAnyPolicyContentAware(Connection conn, String apiPolicy, String appPolicy,
@@ -12171,12 +11998,8 @@ public class ApiMgtDAO {
                 } else {
                     // Allow to override previous infoDTO properties only if no API subscription was found and no previous
                     // product subscription was found
-                    // Order by API_NAME DESC in sql query assures the api subscriptions (where api_name is not null)
+                    // Order by API_PRODUCT_NAME ASC in sql query assures the api subscriptions (where api_product_name is  null)
                     // appear first in the result set
-                    infoDTO.setApiName(null);
-                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                    infoDTO.setProductName(productName);
-                    infoDTO.setProductProvider(productProvider);
                     if (productSubscriptionCount > 0) {
                         //if the provided consumer key has more than one product subscriptions to the requested context
                         //log a warning and return subscription details for the first subscription
@@ -12185,6 +12008,10 @@ public class ApiMgtDAO {
                         infoDTO.setAuthorized(true);
                         return infoDTO;
                     }
+                    infoDTO.setApiName(null);
+                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                    infoDTO.setProductName(productName);
+                    infoDTO.setProductProvider(productProvider);
                     productSubscriptionCount++;
                 }
                 String subscriptionStatus = rs.getString("SUB_STATUS");
@@ -13165,7 +12992,8 @@ public class ApiMgtDAO {
 
             //add product scope
             //TODO finalize format and move to constants
-            String productScopeKey = "productscope-" + apiproduct.getName() + ":" +apiproduct.getProvider();
+            String productScopeKey = APIUtil
+                    .getProductScope(new APIProductIdentifier(apiproduct.getProvider(), apiproduct.getName()));
             //for now use key for display name as well TODO check and modify
             String productScopeDisplayName = productScopeKey;
             Scope productScope = new Scope();
@@ -13651,7 +13479,8 @@ public class ApiMgtDAO {
             for (APIProduct apiProduct : apiProducts) {
                 //add product scope
                 //TODO finalize format and move to constants
-                String productScopeKey = "productscope-" + apiProduct.getName() + ":" + apiProduct.getProvider();
+                String productScopeKey = APIUtil
+                        .getProductScope(new APIProductIdentifier(apiProduct.getProvider(), apiProduct.getName()));
                 //for now use key for display name as well TODO check and modify
                 String productScopeDisplayName = productScopeKey;
                 Scope productScope = new Scope();
@@ -13832,7 +13661,8 @@ public class ApiMgtDAO {
             ps.executeUpdate();
 
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            String productScopeName = "productscope-" + product.getName() + ":" + product.getProvider();
+            String productScopeName = APIUtil.
+                    getProductScope(new APIProductIdentifier(product.getProvider(), product.getName()));
             int scopeId = getScopeIdByScopeName(productScopeName, conn);
             int productId = getAPIProductID(product.getName(), product.getProvider(), conn);
             updateAPIProductResourceMappings(product, productId, scopeId, tenantDomain, conn);

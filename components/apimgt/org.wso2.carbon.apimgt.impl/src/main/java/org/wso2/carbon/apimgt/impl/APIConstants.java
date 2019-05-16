@@ -1505,4 +1505,7 @@ public final class APIConstants {
     public static final String KEY_SUFFIX = "_KEY";
 
     public static final String COLUMN_PRODUCT_DEFINITION = "DEFINITION";
+    public static final String PRODUCTSCOPE_PREFIX = "productscope";
+    public static final String API_PRODUCT_SUBSCRIPTION_TYPE = "APIProduct";
+    public static final String API_SUBSCRIPTION_TYPE = "API";
 }
