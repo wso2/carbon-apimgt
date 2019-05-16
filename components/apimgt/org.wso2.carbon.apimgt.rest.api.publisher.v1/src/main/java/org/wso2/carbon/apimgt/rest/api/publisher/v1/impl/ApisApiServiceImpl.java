@@ -781,6 +781,17 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch) {
+        LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId);
+        return Response.ok().entity(lifecycleStateDTO).build();
+    }
+
+    /**
+     * Retrieves API Lifecycle state information
+     *
+     * @param apiId API Id
+     * @return API Lifecycle state information
+     */
+    private LifecycleStateDTO getLifecycleState(String apiId) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -790,8 +801,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String errorMessage = "Error while getting lifecycle state for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
             }
-            LifecycleStateDTO stateDTO = APIMappingUtil.fromLifecycleModelToDTO(apiLCData);
-            return Response.ok().entity(stateDTO).build();
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -1045,8 +1055,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                     apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
                 }
             }
-            apiProvider.changeLifeCycleStatus(apiIdentifier, action);
-            return Response.ok().build();
+            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action);
+
+            //returns the current lifecycle state
+            LifecycleStateDTO stateDTO = getLifecycleState(apiId);;
+
+            WorkflowResponseDTO workflowResponseDTO = APIMappingUtil
+                    .toWorkflowResponseDTO(stateDTO, stateChangeResponse);
+            return Response.ok().entity(workflowResponseDTO).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

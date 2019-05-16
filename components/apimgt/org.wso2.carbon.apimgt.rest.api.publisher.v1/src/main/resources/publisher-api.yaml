@@ -4690,7 +4690,7 @@ definitions:
           If the provider value is not given user invoking the api will be used as the provider.
         type: string
         example: admin
-      lifeCycleStatus:
+      lifeCycleStatus:  # NEED TO RENAME AS lifeCycleState
         type: string
         example: CREATED
       wsdlUri:
@@ -5265,7 +5265,7 @@ definitions:
 # The Error resource
 #-----------------------------------------------------
   Error:
-    title: Error object returned with 4XX HTTP lifeCycleStatus
+    title: Error object returned with 4XX HTTP Status
     required:
       - code
       - message
@@ -5844,6 +5844,8 @@ definitions:
         description: |
           Attributes that returned after the workflow execution
         type: string
+      lifecycleState:
+        $ref: '#/definitions/LifecycleState'
 
 #-----------------------------------------------------
 # The api definition validation response
