@@ -418,7 +418,7 @@ class API extends Resource {
      */
     getLcState(id, callback = null) {
         const promise_lc_get = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__lifecycle({
+            return client.apis['API (Individual)'].get_apis__apiId__lifecycle_state({
                 apiId: id
             }, this._requestMetaData());
         });
