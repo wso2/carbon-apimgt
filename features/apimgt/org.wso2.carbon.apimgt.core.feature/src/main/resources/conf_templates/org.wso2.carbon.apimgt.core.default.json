@@ -9,7 +9,7 @@
   "database.apim_db.pool_options.defaultAutoCommit": "true",
   "apim.datasource.name": "jdbc/WSO2AM_DB",
   "apim.gateway_type": "Synapse",
-  "apim.secure_vault": "false",
+  "apim.enable_secure_vault": "false",
   "apim.jwt.enable": false,
   "apim.jwt.header": "X-JWT-Assertion",
   "apim.jwt.claim_dialect": "http://wso2.org/claims",
@@ -111,5 +111,13 @@
   "apim.sdk.artifact_id": "org.wso2.client.",
   "apim.sdk.model_package": "org.wso2.client.model.",
   "apim.sdk.api_package": "org.wso2.client.api.",
-  "apim.sdk.supported_languages": "android,java,scala,csharp,dart,flash,groovy,javascript,jmeter,nodejs,perl,php,python,ruby,swift,clojure,asyncScala,csharpDotNet2"
+  "apim.sdk.supported_languages": "android,java,scala,csharp,dart,flash,groovy,javascript,jmeter,nodejs,perl,php,python,ruby,swift,clojure,asyncScala,csharpDotNet2",
+  "apim.token.revocation.notifier_impl": "org.wso2.carbon.apimgt.keymgt.events.TokenRevocationNotifierImpl",
+  "apim.token.revocation.enable_realtime_notifier": true,
+  "apim.token.revocation.enable_persistent_notifier": true,
+  "apim.token.revocation.realtime_notifier.ttl": "5000",
+  "apim.token.revocation.persistent_notifier.hostname": "https://localhost:2379/v2/keys/jti/",
+  "apim.token.revocation.persistent_notifier.ttl": "5000",
+  "apim.token.revocation.persistent_notifier.username": "root",
+  "apim.token.revocation.persistent_notifier.password": "root"
 }
