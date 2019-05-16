@@ -132,7 +132,7 @@ class AuthManager {
     static getUserFromToken() {
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!partialToken) {
-            return new Promise(resolve => resolve(null));
+            return new Promise((resolve, reject) => reject(new Error('No partial token found')));
         }
         const promisedResponse = fetch('/store-new/services/auth/introspect', { credentials: 'same-origin' });
         return promisedResponse
@@ -142,6 +142,7 @@ class AuthManager {
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
                     user = new User(currentEnv.label, data.username);
+                    user.scopes = data.scope.split(' ');
                     AuthManager.setUser(user, currentEnv.label);
                 } else {
                     console.warn('User with ' + partialToken + ' is not active!');
