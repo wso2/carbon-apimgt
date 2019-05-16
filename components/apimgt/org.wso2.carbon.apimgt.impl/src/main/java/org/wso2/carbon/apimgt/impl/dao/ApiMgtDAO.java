@@ -12915,10 +12915,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         try {
             connection = APIMgtDBUtil.getConnection();
-            //TODO move to constant
-            String query = "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
-                    + "WHERE API.API_ID = URL.API_ID AND API.API_NAME =? "
-                    + "AND API.API_VERSION=? AND API.API_PROVIDER=?";
+            String query = SQLConstants.GET_URL_TEMPLATES_FOR_API;
 
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, api.getId().getApiName());
@@ -12962,13 +12959,7 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();   
             connection.setAutoCommit(false);
-            //TODO move to constant :version?
-            String queryAddAPIProduct = "INSERT INTO "
-                    + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
-                    + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
-                    + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION,"
-                    + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES, BUSINESS_OWNER, BUSINESS_OWNER_EMAIL) " 
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            String queryAddAPIProduct = SQLConstants.ADD_API_PRODUCT;
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_product_id"});
             prepStmtAddAPIProduct.setString(1, apiproduct.getProvider());
             prepStmtAddAPIProduct.setString(2, apiproduct.getName());
@@ -12979,7 +12970,7 @@ public class ApiMgtDAO {
                 tierList.add(tier.getName());
             }
             prepStmtAddAPIProduct.setString(4, StringUtils.join(tierList,","));
-            prepStmtAddAPIProduct.setString(5, apiproduct.getProvider()); //TODO get the created user
+            prepStmtAddAPIProduct.setString(5, apiproduct.getProvider());
             prepStmtAddAPIProduct.setString(6, apiproduct.getVisibility());
             prepStmtAddAPIProduct.setString(7, apiproduct.getSubscriptionAvailability());
             prepStmtAddAPIProduct.setString(8, apiproduct.getUuid());
@@ -13345,7 +13336,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
-        String querydeleteProductMappingsForAPI = "DELETE FROM AM_API_PRODUCT_MAPPING WHERE URL_MAPPING_ID = ?";
+        String querydeleteProductMappingsForAPI = SQLConstants.DELETE_PRODUCT_SCOPE_MAPPING;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -13391,8 +13382,7 @@ public class ApiMgtDAO {
     private void addProductMappingsForAPI(API api, List<APIProduct> apiProducts) throws APIManagementException {
         Connection connection = null;
 
-        String queryAddProductResourceMappings =
-                "INSERT INTO AM_API_PRODUCT_MAPPING (API_PRODUCT_ID,URL_MAPPING_ID) " + "VALUES (?, ?)";
+        String queryAddProductResourceMappings = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
 
         PreparedStatement prepStmtAddProductResourceMappings = null;
 
@@ -13421,7 +13411,6 @@ public class ApiMgtDAO {
                                 prepStmtAddProductResourceMappings.setInt(2, template.getId());
                                 prepStmtAddProductResourceMappings.addBatch();
                             } else {
-                                //ToDo : what if the resource had been deleted while updating API
                                 log.info("Resource " + key + " was deleted from API " + api.getId().toString()
                                         + " while updating the API. So it is no longer available with API product "
                                         + apiProduct.getName());
@@ -13444,9 +13433,7 @@ public class ApiMgtDAO {
 
     private int getAPIProductId(String productName, String provider, String version) throws APIManagementException {
         Connection conn = null;
-        //TODO: move query to constants. Use version for now I am not using version in the query since it is still set to null
-        String queryGetProductId = "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_NAME = ? AND "
-                + "API_PRODUCT_PROVIDER = ?";
+        String queryGetProductId = SQLConstants.GET_PRODUCT_BY_ID;
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         int productId = -1;
@@ -13496,7 +13483,6 @@ public class ApiMgtDAO {
 
             for (APIProduct apiProduct : apiProducts) {
                 //add product scope
-                //TODO finalize format and move to constants
                 String productScopeKey = APIUtil
                         .getProductScope(new APIProductIdentifier(apiProduct.getProvider(), apiProduct.getName()));
                 //for now use key for display name as well TODO check and modify

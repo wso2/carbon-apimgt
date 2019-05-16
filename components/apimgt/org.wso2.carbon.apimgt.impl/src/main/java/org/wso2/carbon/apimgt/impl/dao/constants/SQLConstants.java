@@ -3112,6 +3112,25 @@ public class SQLConstants {
     
     public static final String UPDATE_BLOB_API_PRODUCT_BY_COLUMN = 
             "UPDATE AM_API_PRODUCT SET {column} = ? WHERE UUID = ?";
+
+    public static final String GET_PRODUCT_BY_ID =
+            "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_NAME = ? AND API_PRODUCT_PROVIDER = ?";
+
+    public static final String DELETE_PRODUCT_SCOPE_MAPPING = 
+            "DELETE FROM AM_API_PRODUCT_MAPPING WHERE URL_MAPPING_ID = ?";
+
+    public static final String GET_URL_TEMPLATES_FOR_API = 
+            "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
+            + "WHERE API.API_ID = URL.API_ID AND API.API_NAME =? "
+            + "AND API.API_VERSION=? AND API.API_PROVIDER=?";
+
+    public static final String ADD_API_PRODUCT = 
+            "INSERT INTO "
+            + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
+            + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
+            + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION,"
+            + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES, BUSINESS_OWNER, BUSINESS_OWNER_EMAIL) " 
+            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";           
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{
