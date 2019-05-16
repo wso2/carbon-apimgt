@@ -1280,6 +1280,7 @@ public class APIMappingUtil {
         for (APIProductResource apiProductResource : resources) {
             ProductAPIDTO productAPI = new ProductAPIDTO();
             productAPI.setApiId(apiProductResource.getApiId());
+            productAPI.setName(apiProductResource.getApiName());
             List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
             List<URITemplate> templates = apiProductResource.getResources();
 
