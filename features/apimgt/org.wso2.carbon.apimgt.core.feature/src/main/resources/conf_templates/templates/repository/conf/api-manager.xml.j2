@@ -9,7 +9,7 @@
 
     <!-- This parameter is used to enable the securevault support when try to publish endpoint secured APIs. Values should be "true" or "false".
     By default secure vault is disabled.-->
-    <EnableSecureVault>{{apim.secure_vault}}</EnableSecureVault>
+    <EnableSecureVault>{{apim.enable_secure_vault}}</EnableSecureVault>
 
     <!-- This parameter is used to enable mutual tls based authentication support for APIs, when this is disabled,
     APIs will be protected with OAuth2 security-->
@@ -217,7 +217,7 @@
         <StreamProcessorPassword>{{apim.analytics.receiver_password}}</StreamProcessorPassword>
 
         <!-- For APIM implemented Statistic client for RDBMS -->
-        <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl</StatsProviderImpl>
+        <StatsProviderImpl>{{apim.analytics.provider_impl}}</StatsProviderImpl>
 
         <!-- StreamProcessor REST API configuration -->
         <StreamProcessorRestApiURL>{{apim.analytics.store_api_url}}</StreamProcessorRestApiURL>
@@ -346,16 +346,21 @@
         <EnableTokenHashMode>{{apim.oauth_config.enable_token_hashing}}</EnableTokenHashMode>
     </OAuthConfigurations>
 
-    <TokenRevocationNotifiers class="org.wso2.carbon.apimgt.keymgt.events.TokenRevocationNotifierImpl">
+    <TokenRevocationNotifiers class="{{apim.token.revocation.notifier_impl}}">
+        {% if apim.token.revocation.enable_realtime_notifier %}
         <RealtimeNotifier>
-            <Property name="ttl">5000</Property>
+            {% for key,value in apim.token.revocation.realtime_notifier.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
         </RealtimeNotifier>
+        {% endif %}
+        {% if apim.token.revocation.enable_persistent_notifier %}
         <PersistentNotifier>
-            <Property name="hostname">https://localhost:2379/v2/keys/jti/</Property>
-            <Property name="ttl">5000</Property>
-            <Property name="username">root</Property>
-            <Property name="password">root</Property>
+            {% for key,value in apim.token.revocation.persistent_notifier.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
         </PersistentNotifier>
+        {% endif %}
     </TokenRevocationNotifiers>
 
     <!-- Settings related to managing API access tiers. -->
