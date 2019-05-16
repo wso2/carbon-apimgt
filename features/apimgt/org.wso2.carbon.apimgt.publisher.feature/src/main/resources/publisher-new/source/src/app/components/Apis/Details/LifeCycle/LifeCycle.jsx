@@ -98,12 +98,13 @@ class LifeCycle extends Component {
             privateJetModeEnabled = response.data.privateJetMode.isEnabled;
         });
 
-        // const promised_lcHistory = this.api.getLcHistory(id);
+        const promised_lcHistory = this.api.getLcHistory(api.id);
         // const promised_labels = this.api.labels();
-        Promise.all([promised_api, promised_lcState])
+        Promise.all([promised_api, promised_lcState, promised_lcHistory])
             .then(response => {
                 const api = response[0];
-                const lcState = response[1].obj;
+                const lcState = response[1].body;
+                const lcHistory = response[2].body.list;
 
                 if (privateJetModeEnabled) {
                     if (!api.hasOwnGateway) {
@@ -136,6 +137,7 @@ class LifeCycle extends Component {
                 this.setState({
                     api,
                     lcState,
+                    lcHistory,
                     privateJetModeEnabled,
                     checkList,
                 });
@@ -158,7 +160,7 @@ class LifeCycle extends Component {
      */
     render() {
         const { classes } = this.props;
-        const { api, lcState, privateJetModeEnabled, checkList } = this.state;
+        const { api, lcState, privateJetModeEnabled, checkList, lcHistory } = this.state;
 
         if (!lcState) {
             return <Progress />;
@@ -182,16 +184,16 @@ class LifeCycle extends Component {
                                 privateJetModeEnabled={privateJetModeEnabled}
                             />
                         </Grid>
-                        {/* <Grid item xs={12}>
+                        <Grid item xs={12}>
                             {lcHistory.length > 1 && (
                                 <div>
-                                    <Typography variant='h6' gutterBottom className={classes.historyHead}>
+                                    <Typography variant="h6" gutterBottom className={classes.historyHead}>
                                         History
                                     </Typography>
                                     <LifeCycleHistory lcHistory={lcHistory} />
                                 </div>
                             )}
-                        </Grid> */}
+                        </Grid>
                     </Grid>
                 </div>
             </div>
