@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -22,6 +23,9 @@ public class WorkflowResponseDTO  {
   
   
   private String jsonPayload = null;
+  
+  
+  private LifecycleStateDTO lifecycleState = null;
 
   
   /**
@@ -50,6 +54,18 @@ public class WorkflowResponseDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("lifecycleState")
+  public LifecycleStateDTO getLifecycleState() {
+    return lifecycleState;
+  }
+  public void setLifecycleState(LifecycleStateDTO lifecycleState) {
+    this.lifecycleState = lifecycleState;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -58,6 +74,7 @@ public class WorkflowResponseDTO  {
     
     sb.append("  workflowStatus: ").append(workflowStatus).append("\n");
     sb.append("  jsonPayload: ").append(jsonPayload).append("\n");
+    sb.append("  lifecycleState: ").append(lifecycleState).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
