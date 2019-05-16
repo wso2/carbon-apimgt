@@ -27,17 +27,26 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 
 import java.util.Arrays;
 import java.util.Map;
 
+/**
+ * Utility class for application key generation related operations
+ */
 public class ApplicationKeyMappingUtil {
 
     private static final Log log = LogFactory.getLog(ApplicationKeyMappingUtil.class);
 
+    /**
+     * Insert the application related details to a DTO Object
+     *
+     * @param keyDetails application related details map
+     * @param applicationKeyType key type of the application
+     * @return DTO object with application related details
+     */
     @SuppressWarnings("unchecked")
     public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails, String applicationKeyType) {
         ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
@@ -62,9 +71,9 @@ public class ApplicationKeyMappingUtil {
             }
 
             ApplicationTokenDTO tokenDTO = new ApplicationTokenDTO();
-            tokenDTO.setValidityTime((Long)keyDetails.get(APIConstants.AccessTokenConstants.VALIDITY_TIME));
-            tokenDTO.setAccessToken((String)keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN));
-            String[] tokenScopes = (String[])keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_SCOPES);
+            tokenDTO.setValidityTime((Long) keyDetails.get(APIConstants.AccessTokenConstants.VALIDITY_TIME));
+            tokenDTO.setAccessToken((String) keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN));
+            String[] tokenScopes = (String[]) keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_SCOPES);
             if (tokenScopes != null) {
                 tokenDTO.setTokenScopes(Arrays.asList(tokenScopes));
             }
@@ -78,6 +87,12 @@ public class ApplicationKeyMappingUtil {
         return applicationKeyDTO;
     }
 
+    /**
+     * Insert the application related details to a DTO Object using api key
+     *
+     * @param apiKey object that contains details needed during token request
+     * @return DTO object with application related details
+     */
     public static ApplicationKeyDTO fromApplicationKeyToDTO(APIKey apiKey) {
         ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
         applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(apiKey.getType()));
@@ -100,5 +115,4 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setToken(tokenDTO);
         return applicationKeyDTO;
     }
-
 }
