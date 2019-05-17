@@ -182,7 +182,7 @@ export default class API extends Resource {
     getAllTiers(tierLevel, callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client.apis["Tier (Collection)"].get_policies__tierLevel_(
+                return client.apis["Throttling Policies"].get_throttlingPolicies__policyLevel_(
                     {tierLevel: tierLevel}, this._requestMetaData());
             }
         );
@@ -520,7 +520,7 @@ export default class API extends Resource {
     }
 
     /**
-     * Get details of a given Tier
+     * Get details of a given throttling policy
      * @param id {string} name of the tier.
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.

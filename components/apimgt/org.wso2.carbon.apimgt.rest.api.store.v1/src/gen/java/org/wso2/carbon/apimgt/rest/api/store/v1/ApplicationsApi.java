@@ -268,7 +268,7 @@ public class ApplicationsApi  {
 
     public Response applicationsGet(@ApiParam(value = "Application Group Id\n") @QueryParam("groupId")  String groupId,
     @ApiParam(value = "**Search condition**.\n\nYou can search for an application by specifying the name as \"query\" attribute.\n\nEg.\n\"app1\" will match an application if the name is exactly \"app1\".\n\nCurrently this does not support wildcards. Given name must exactly match the application name.\n") @QueryParam("query")  String query,
-    @ApiParam(value = "", allowableValues="{values=[name, throttlingTier, status]}") @QueryParam("sortBy")  String sortBy,
+    @ApiParam(value = "", allowableValues="{values=[name, throttlingPolicy, status]}") @QueryParam("sortBy")  String sortBy,
     @ApiParam(value = "", allowableValues="{values=[asc, desc]}") @QueryParam("sortOrder")  String sortOrder,
     @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,

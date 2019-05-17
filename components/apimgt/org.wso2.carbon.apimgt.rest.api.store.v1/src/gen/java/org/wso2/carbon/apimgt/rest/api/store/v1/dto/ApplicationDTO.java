@@ -29,7 +29,7 @@ public class ApplicationDTO  {
   private String subscriber = null;
   
   @NotNull
-  private String throttlingTier = null;
+  private String throttlingPolicy = null;
   
   
   private String description = null;
@@ -96,12 +96,12 @@ public class ApplicationDTO  {
   /**
    **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("throttlingTier")
-  public String getThrottlingTier() {
-    return throttlingTier;
+  @JsonProperty("throttlingPolicy")
+  public String getThrottlingPolicy() {
+    return throttlingPolicy;
   }
-  public void setThrottlingTier(String throttlingTier) {
-    this.throttlingTier = throttlingTier;
+  public void setThrottlingPolicy(String throttlingPolicy) {
+    this.throttlingPolicy = throttlingPolicy;
   }
 
   
@@ -199,7 +199,7 @@ public class ApplicationDTO  {
     sb.append("  applicationId: ").append(applicationId).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  subscriber: ").append(subscriber).append("\n");
-    sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
+    sb.append("  throttlingPolicy: ").append(throttlingPolicy).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  tokenType: ").append(tokenType).append("\n");
     sb.append("  status: ").append(status).append("\n");
