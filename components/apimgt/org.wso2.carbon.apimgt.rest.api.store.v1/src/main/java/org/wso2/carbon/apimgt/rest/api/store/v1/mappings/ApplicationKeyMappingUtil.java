@@ -43,8 +43,8 @@ public class ApplicationKeyMappingUtil {
     /**
      * Insert the application related details to a DTO Object
      *
-     * @param keyDetails application related details map
-     * @param applicationKeyType key type of the application
+     * @param keyDetails Application related details map
+     * @param applicationKeyType Key type of the application
      * @return DTO object with application related details
      */
     @SuppressWarnings("unchecked")
@@ -90,7 +90,7 @@ public class ApplicationKeyMappingUtil {
     /**
      * Insert the application related details to a DTO Object using api key
      *
-     * @param apiKey object that contains details needed during token request
+     * @param apiKey Object that contains details needed during token request
      * @return DTO object with application related details
      */
     public static ApplicationKeyDTO fromApplicationKeyToDTO(APIKey apiKey) {

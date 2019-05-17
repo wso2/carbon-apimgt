@@ -32,7 +32,7 @@ public class SubscriptionDTO  {
   private ApplicationInfoDTO applicationInfo = null;
   
   @NotNull
-  private String tier = null;
+  private String throttlingPolicy = null;
   
   public enum TypeEnum {
      api,  apiProduct, 
@@ -113,12 +113,12 @@ public class SubscriptionDTO  {
   /**
    **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("tier")
-  public String getTier() {
-    return tier;
+  @JsonProperty("throttlingPolicy")
+  public String getThrottlingPolicy() {
+    return throttlingPolicy;
   }
-  public void setTier(String tier) {
-    this.tier = tier;
+  public void setThrottlingPolicy(String throttlingPolicy) {
+    this.throttlingPolicy = throttlingPolicy;
   }
 
   
@@ -157,7 +157,7 @@ public class SubscriptionDTO  {
     sb.append("  apiId: ").append(apiId).append("\n");
     sb.append("  apiInfo: ").append(apiInfo).append("\n");
     sb.append("  applicationInfo: ").append(applicationInfo).append("\n");
-    sb.append("  tier: ").append(tier).append("\n");
+    sb.append("  throttlingPolicy: ").append(throttlingPolicy).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("}\n");

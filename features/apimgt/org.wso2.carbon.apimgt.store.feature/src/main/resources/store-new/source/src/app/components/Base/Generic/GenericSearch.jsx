@@ -17,7 +17,6 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import keycode from 'keycode';
 import Downshift from 'downshift';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -205,7 +204,7 @@ class GenericSearch extends React.Component {
 
     handleKeyDown = (event) => {
         const { inputValue, selectedItem } = this.state;
-        if (selectedItem.length && !inputValue.length && keycode(event) === 'backspace') {
+        if (selectedItem.length && !inputValue.length && event.keyCode === 8) {
             this.setState({
                 selectedItem: selectedItem.slice(0, selectedItem.length - 1),
             });

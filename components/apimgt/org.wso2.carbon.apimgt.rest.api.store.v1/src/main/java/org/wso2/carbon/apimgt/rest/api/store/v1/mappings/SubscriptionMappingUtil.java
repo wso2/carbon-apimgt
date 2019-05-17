@@ -56,7 +56,7 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setApiId(api.getUUID());
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
-        subscriptionDTO.setTier(subscription.getTier().getName());
+        subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
         subscriptionDTO.setType(SubscriptionDTO.TypeEnum.api);
 
         APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);

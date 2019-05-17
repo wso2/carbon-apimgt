@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
@@ -50,7 +52,9 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.Response;
@@ -130,7 +134,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
             //validate the tier specified for the application
-            String tierName = body.getThrottlingTier();
+            String tierName = body.getThrottlingPolicy();
             if (tierName == null) {
                 RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
             }
@@ -334,8 +338,48 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdKeysGet(String applicationId) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+        List<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
+        ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();
+        applicationKeyListDTO.setCount(0);
+
+        if (applicationKeys != null) {
+            for (APIKey apiKey : applicationKeys) {
+                ApplicationKeyDTO appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
+                keyDTOList.add(appKeyDTO);
+            }
+            applicationKeyListDTO.setList(keyDTOList);
+            applicationKeyListDTO.setCount(keyDTOList.size());
+        }
+        return Response.ok().entity(applicationKeyListDTO).build();
+    }
+
+    /**
+     * Used to get all keys of an application
+     *
+     * @param applicationId Id of the application
+     * @return List of application keys
+     */
+    private List<APIKey> getApplicationKeys(String applicationId) {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    return application.getKeys();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
+        }
+        return null;
     }
 
     @Override
