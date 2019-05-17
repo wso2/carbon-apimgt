@@ -437,8 +437,7 @@ public class APIMappingUtil {
         List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
         //API product has only one scope.
         ScopeInfoDTO productScope = new ScopeInfoDTO();
-        productScope.setKey(
-                APIUtil.getProductScope(new APIProductIdentifier(product.getName(), product.getProvider())));
+        productScope.setKey(product.getScope());
         productScope.setName("API Product Scope");
         productScope.setRoles(new ArrayList<String>());
         productScope

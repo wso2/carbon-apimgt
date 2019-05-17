@@ -44,6 +44,7 @@ public class APIProduct {
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
+    private String scope;
     
     public String getName() {
         return name;
@@ -185,6 +186,13 @@ public class APIProduct {
         return additionalProperties.get(key).toString();
     }
     
+    
+    public String getScope() {
+        return scope;
+    }
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
     @Override
     public String toString() {
         String tiers = "";
@@ -193,7 +201,7 @@ public class APIProduct {
         }
         return "APIProduct [name=" + name + ", uuid=" + uuid + ", productId=" + productId + ", provider=" + provider
                 + ", description=" + description + ", availableTiers=" + tiers + ", visibility=" + visibility
-                + ", visibleRoles=" + visibleRoles + ", visibleTenants=" + visibleTenants
+                + ", visibleRoles=" + visibleRoles + ", visibleTenants=" + visibleTenants + ", scope=" + scope
                 + ", subscriptionAvailability=" + subscriptionAvailability + ", subscriptionAvailableTenants="
                 + subscriptionAvailableTenants + ", state=" + state + ", businessOwner=" + businessOwner
                 + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain=" + tenantDomain
