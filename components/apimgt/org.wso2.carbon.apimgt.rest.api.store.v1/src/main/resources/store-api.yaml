@@ -3634,7 +3634,9 @@ definitions:
         description: Access token
         example: 01234567890123456789012345678901
       tokenScopes:
-        type: string
+        type: array
+        items:
+          type: string
         description: Valid comma seperated scopes for the access token
         example: default,read_api,write_api
       validityTime:
@@ -3738,7 +3740,15 @@ definitions:
       callbackUrl:
         type: string
         description: Callback URL
-
+      scopes:
+        type: array
+        items:
+          type: string
+        description: Allowed scopes for the access token
+        example: ["am_application_scope","default"]
+      validityTime:
+        type: string
+        example: 3600
 
 #-----------------------------------------------------
 # The Application Key Mapping Request schema
