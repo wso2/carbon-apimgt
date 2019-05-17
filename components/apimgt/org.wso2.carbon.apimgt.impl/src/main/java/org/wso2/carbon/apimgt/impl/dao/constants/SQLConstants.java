@@ -3038,7 +3038,7 @@ public class SQLConstants {
     public static final String GET_API_PRODUCT_SQL = 
             "SELECT API_PRODUCT_ID, UUID, DESCRIPTION, API_PRODUCT_PROVIDER, API_PRODUCT_NAME, API_PRODUCT_TIER, "
             + "BUSINESS_OWNER_EMAIL, VISIBILITY, VISIBILE_ROLES, BUSINESS_OWNER,SUBSCRIPTION_AVAILABILITY, STATE, "
-            + "SUBSCRIPTION_AVAILABILE_TENANTS, TENANT_DOMAIN, DEFINITION, PROPERTIES "
+            + "SUBSCRIPTION_AVAILABILE_TENANTS, TENANT_DOMAIN, DEFINITION, PROPERTIES, SCOPE "
             + "FROM AM_API_PRODUCT WHERE UUID = ? AND TENANT_DOMAIN = ?";
     
     public static final String GET_SCOPE_ID_BY_NAME = 
@@ -3084,12 +3084,14 @@ public class SQLConstants {
             "   BUSINESS_OWNER_EMAIL=?, " +
             "   SUBSCRIPTION_AVAILABILITY=?, " +
             "   SUBSCRIPTION_AVAILABILE_TENANTS=?, " +
-            "   PROPERTIES=? " +
+            "   PROPERTIES=?, " +
+            "   API_PRODUCT_NAME=?, " +
+            "   SCOPE=? " +
             " WHERE" +
             "   UUID=?";
 
     public static final String GET_PRODUCT_SCOPES_ROLES_OF_APPLICATION = "SELECT "
-            + "PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER  "
+            + "PRODUCT.API_PRODUCT_NAME, PRODUCT.API_PRODUCT_PROVIDER, PRODUCT.SCOPE  "
             + "FROM "
             + "AM_SUBSCRIPTION AS SUB, AM_APPLICATION_KEY_MAPPING AS AKM, AM_API_PRODUCT AS PRODUCT "
             + "WHERE "
@@ -3130,8 +3132,8 @@ public class SQLConstants {
             + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
             + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
             + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION,"
-            + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES, BUSINESS_OWNER, BUSINESS_OWNER_EMAIL, PROPERTIES) " 
-            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";           
+            + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES, BUSINESS_OWNER, BUSINESS_OWNER_EMAIL, PROPERTIES, SCOPE) " 
+            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";           
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

@@ -12992,6 +12992,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(15, apiproduct.getBusinessOwnerEmail());
             String additionalProperties = apiproduct.getAdditionalProperties().toJSONString();
             prepStmtAddAPIProduct.setBlob(16, new ByteArrayInputStream(additionalProperties.getBytes()));
+            prepStmtAddAPIProduct.setString(17, apiproduct.getScope());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -13005,9 +13006,8 @@ public class ApiMgtDAO {
             }
 
             //add product scope
-            //TODO finalize format and move to constants
-            String productScopeKey = APIUtil
-                    .getProductScope(new APIProductIdentifier(apiproduct.getProvider(), apiproduct.getName()));
+
+            String productScopeKey = apiproduct.getScope();
             //for now use key for display name as well TODO check and modify
             String productScopeDisplayName = productScopeKey;
             Scope productScope = new Scope();
@@ -13218,6 +13218,7 @@ public class ApiMgtDAO {
                 product.setState(rs.getString("STATE"));
                 product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));
                 product.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                product.setScope(rs.getString("SCOPE"));
                 productId = rs.getInt("API_PRODUCT_ID");
                 product.setProductId(productId);
             } else {
@@ -13331,8 +13332,7 @@ public class ApiMgtDAO {
 
             // remove productScope and its mappings
             psDeleteScope = connection.prepareStatement(deleteProductScopeQuery);
-            String productScope = APIUtil
-                    .getProductScope(new APIProductIdentifier(product.getProvider(), product.getName()));
+            String productScope = product.getScope();
             int scopeId = getScopeIdByScopeName(productScope, connection);
             psDeleteScope.setInt(1, scopeId);
             psDeleteScope.executeUpdate();
@@ -13497,8 +13497,7 @@ public class ApiMgtDAO {
 
             for (APIProduct apiProduct : apiProducts) {
                 //add product scope
-                String productScopeKey = APIUtil
-                        .getProductScope(new APIProductIdentifier(apiProduct.getProvider(), apiProduct.getName()));
+                String productScopeKey = apiProduct.getScope();
                 //for now use key for display name as well TODO check and modify
                 String productScopeDisplayName = productScopeKey;
                 Scope productScope = new Scope();
@@ -13578,11 +13577,7 @@ public class ApiMgtDAO {
             rs = prepStmt.executeQuery();
 
             while (rs.next()) {
-                String productName = rs.getString("API_PRODUCT_NAME");
-                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-
-                APIProductIdentifier productId = new APIProductIdentifier(productProvider, productName);
-                String scope = APIUtil.getProductScope(productId);
+                String scope = rs.getString("SCOPE");
                 scopes.put(scope, ""); //product scopes are not meant to be bound to any role, so the role list will be empty
             }
         } catch (SQLException e) {
@@ -13677,12 +13672,13 @@ public class ApiMgtDAO {
             ps.setString(11, product.getSubscriptionAvailableTenants());
             String additionalProperties = product.getAdditionalProperties().toJSONString();
             ps.setBlob(12, new ByteArrayInputStream(additionalProperties.getBytes()));
-            ps.setString(13, product.getUuid());
+            ps.setString(13, product.getName());
+            ps.setString(14, product.getScope());
+            ps.setString(15, product.getUuid());
             ps.executeUpdate();
 
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            String productScopeName = APIUtil.
-                    getProductScope(new APIProductIdentifier(product.getProvider(), product.getName()));
+            String productScopeName = product.getScope();
             int scopeId = getScopeIdByScopeName(productScopeName, conn);
             int productId = getAPIProductID(product.getName(), product.getProvider(), conn);
             updateAPIProductResourceMappings(product, productId, scopeId, tenantDomain, conn);

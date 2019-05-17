@@ -1331,6 +1331,7 @@ public class APIMappingUtil {
             }
             productDto.setAdditionalProperties(additionalPropertiesMap);
         }
+        productDto.setScope(product.getScope());
         return productDto;
     }
     
@@ -1425,6 +1426,7 @@ public class APIMappingUtil {
             productResources.add(resource);
         }
         product.setProductResources(productResources);
+        product.setScope(dto.getScope());
         return product;
     }
     
