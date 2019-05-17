@@ -20,38 +20,33 @@ package org.wso2.carbon.apimgt.keymgt.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.thrift.server.TServer;
-import org.apache.thrift.server.TThreadPoolServer;
-import org.apache.thrift.transport.TSSLTransportFactory;
-import org.apache.thrift.transport.TServerSocket;
-import org.apache.thrift.transport.TTransportException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
+import org.wso2.carbon.apimgt.keymgt.events.APIMOAuthEventInterceptor;
 import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.PermissionBasedScopeIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.RoleBasedScopesIssuer;
-import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
-import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
+import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
+import org.wso2.carbon.identity.oauth.event.OAuthEventInterceptor;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.utils.NetworkUtils;
-import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Map;
 
 /**
  * @scr.component name="api.keymgt.component" immediate="true"
@@ -65,45 +60,51 @@ import java.util.concurrent.Executors;
  * @scr.reference name="api.manager.config.service"
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- * @scr.reference name="org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent"
- * interface="org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService"
- * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
  * @scr.reference name="scope.issuer.service"
  * interface="org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer"
  * cardinality="0..n"
  * policy="dynamic"
  * bind="addScopeIssuer"
  * unbind="removeScopeIssuers"
+ * @scr.reference name="event.output.adapter.service"
+ * interface="org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService"
+ * cardinality="1..1" policy="dynamic"  bind="setOutputEventAdapterService"
+ * unbind="unsetOutputEventAdapterService"
  */
 public class APIKeyMgtServiceComponent {
 
     private static Log log = LogFactory.getLog(APIKeyMgtServiceComponent.class);
-    private ThriftAuthenticatorService thriftAuthenticationService;
-    private ExecutorService executor = Executors.newFixedThreadPool(1);
-    private boolean isThriftServerEnabled;
-
     private static KeyManagerUserOperationListener listener = null;
     private ServiceRegistration serviceRegistration = null;
+    private boolean tokenRevocationEnabled;
 
     protected void activate(ComponentContext ctxt) {
         try {
 
             APIKeyMgtDataHolder.initData();
 
-            //Based on configuration we have to decide thrift server run or not
-            if (APIKeyMgtDataHolder.getThriftServerEnabled()) {
-                APIKeyValidationServiceImpl.init(thriftAuthenticationService);
-                startThriftService();
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("API key validation thrift server is disabled");
-                }
-            }
-
             listener = new KeyManagerUserOperationListener();
             serviceRegistration = ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(),
                     listener, null);
             log.debug("Key Manager User Operation Listener is enabled.");
+
+            //Checking token revocation feature enabled config
+            tokenRevocationEnabled = APIManagerConfiguration.isTokenRevocationEnabled();
+            if (tokenRevocationEnabled) {
+
+                //object creation for implemented OAuthEventInterceptor interface in IS
+                APIMOAuthEventInterceptor interceptor = new APIMOAuthEventInterceptor();
+
+                //registering the interceptor class to the bundle
+                serviceRegistration = ctxt.getBundleContext()
+                        .registerService(OAuthEventInterceptor.class.getName(), interceptor, null);
+                //Creating an event adapter to receive token revocation messages
+                configureEventPublisherProperties();
+                log.debug("Key Manager OAuth Event Interceptor is enabled.");
+
+            } else {
+                log.debug("Token Revocation Notifier Feature is disabled.");
+            }
 
             // loading white listed scopes
             List<String> whitelist = null;
@@ -199,32 +200,6 @@ public class APIKeyMgtServiceComponent {
     }
 
     /**
-     * set Thrift authentication service
-     *
-     * @param authenticationService <code>ThriftAuthenticatorService</code>
-     */
-    protected void setThriftAuthenticationService(
-            ThriftAuthenticatorService authenticationService) {
-        if (log.isDebugEnabled()) {
-            log.debug("ThriftAuthenticatorService set in Entitlement bundle");
-        }
-        this.thriftAuthenticationService = authenticationService;
-    }
-
-    /**
-     * un-set Thrift authentication service
-     *
-     * @param //authenticationService <code>ThriftAuthenticatorService</code>
-     */
-    protected void unsetThriftAuthenticationService(
-            ThriftAuthenticatorService authenticationService) {
-        if (log.isDebugEnabled()) {
-            log.debug("ThriftAuthenticatorService unset in Entitlement bundle");
-        }
-        this.thriftAuthenticationService = null;
-    }
-
-    /**
      * Add scope issuer to the map.
      * @param scopesIssuer scope issuer.
      */
@@ -238,93 +213,6 @@ public class APIKeyMgtServiceComponent {
      */
     protected void removeScopeIssuers(AbstractScopesIssuer scopesIssuer) {
         APIKeyMgtDataHolder.setScopesIssuers(null);
-    }
-
-    private void startThriftService() throws Exception {
-        try {
-            TSSLTransportFactory.TSSLTransportParameters transportParam =
-                    new TSSLTransportFactory.TSSLTransportParameters();
-
-            //read the keystore and password used for ssl communication from config
-            String keyStorePath = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Location");
-            String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
-
-            String thriftPortString = APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration()
-                    .getFirstProperty(APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_PORT);
-
-            int thriftReceivePort;
-
-            if (thriftPortString == null) {
-                thriftReceivePort = APIConstants.DEFAULT_THRIFT_PORT + APIUtil.getPortOffset();
-            } else {
-                thriftReceivePort = Integer.parseInt(thriftPortString);
-            }
-
-            String thriftHostString =
-                    APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
-                            APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_HOST);
-
-            if (thriftHostString == null) {
-                thriftHostString = NetworkUtils.getLocalHostname();
-                log.info("Setting default carbon host for thrift key management service: " + thriftHostString);
-            }
-
-            String thriftClientTimeOut =
-                    APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
-                            APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
-            if (thriftClientTimeOut == null) {
-                throw new APIKeyMgtException("Port and Connection timeout not provided to start thrift key mgt service.");
-            }
-
-            int clientTimeOut = Integer.parseInt(thriftClientTimeOut);
-            //set it in parameters
-            transportParam.setKeyStore(keyStorePath, keyStorePassword);
-
-            TServerSocket serverTransport =
-                    TSSLTransportFactory.getServerSocket(thriftReceivePort,
-                            clientTimeOut,
-                            getHostAddress(thriftHostString),
-                            transportParam);
-
-
-            APIKeyValidationService.Processor processor = new APIKeyValidationService.Processor(
-                    new APIKeyValidationServiceImpl());
-
-            //TODO: have to decide on the protocol.
-            TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).
-                    processor(processor));
-            //TServer server = new TThreadPoolServer(new TThreadPoolServer.Args())
-
-            /*TServer server = new TThreadPoolServer(processor, serverTransport,
-            new TCompactProtocol.Factory());*/
-            Runnable serverThread = new ServerRunnable(server);
-            executor.submit(serverThread);
-
-            log.info("Started thrift key mgt service at port:" + thriftReceivePort);
-        } catch (TTransportException e) {
-            String transportErrorMsg = "Error in initializing thrift transport";
-            log.error(transportErrorMsg, e);
-            throw new Exception(transportErrorMsg);
-        } catch (UnknownHostException e) {
-            String hostErrorMsg = "Error in obtaining host name";
-            log.error(hostErrorMsg, e);
-            throw new Exception(hostErrorMsg);
-        }
-    }
-
-    /**
-     * Thread that starts thrift server
-     */
-    private static class ServerRunnable implements Runnable {
-        TServer server;
-
-        public ServerRunnable(TServer server) {
-            this.server = server;
-        }
-
-        public void run() {
-            server.serve();
-        }
     }
 
     /**
@@ -369,4 +257,52 @@ public class APIKeyMgtServiceComponent {
         }
         return true;
     }
+
+    /**
+     * Method to configure wso2event type event adapter to be used for token revocation.
+     */
+    private void configureEventPublisherProperties() {
+
+        OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
+        adapterConfiguration.setName(APIConstants.TOKEN_REVOCATION_EVENT_PUBLISHER);
+        adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
+        adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_TYPE);
+        Map<String, String> adapterParameters = new HashMap<>();
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        ThrottleProperties.TrafficManager trafficManager = configuration.getThrottleProperties().getTrafficManager();
+        adapterParameters.put(APIConstants.RECEIVER_URL, trafficManager.getReceiverUrlGroup());
+        adapterParameters.put(APIConstants.AUTHENTICATOR_URL, trafficManager.getAuthUrlGroup());
+        adapterParameters.put(APIConstants.USERNAME, trafficManager.getUsername());
+        adapterParameters.put(APIConstants.PASSWORD, trafficManager.getPassword());
+        adapterParameters.put(APIConstants.PROTOCOL, trafficManager.getType());
+        adapterParameters.put(APIConstants.PUBLISHING_MODE, APIConstants.NON_BLOCKING);
+        adapterParameters.put(APIConstants.PUBLISHING_TIME_OUT, "0");
+        adapterConfiguration.setStaticProperties(adapterParameters);
+        try {
+            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
+        } catch (OutputEventAdapterException e) {
+            log.warn("Exception occurred while creating token revocation event adapter. Token Revocation may not "
+                    + "work properly", e);
+        }
+    }
+
+    /**
+     * Initialize the Output EventAdapter Service dependency
+     *
+     * @param outputEventAdapterService Output EventAdapter Service reference
+     */
+    protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
+    }
+
+    /**
+     *  De-reference the Output EventAdapter Service dependency.
+     *
+     * @param outputEventAdapterService
+     */
+    protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
+    }
+
 }

@@ -296,8 +296,10 @@ GrantTypes.prototype.getMap = function(selected){
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
 	        selectedGrants = selected;
-            var scopes = $('#scopes option:selected')
-                            .map(function(){ return $( this ).val();}).get().join(" ");
+            var scopes = "";
+            if(this.element.find("select.scope_select").val() != null) {
+                scopes = this.element.find("select.scope_select").val().join(" ");
+            }
 
             this.element.find('.generatekeys').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
@@ -478,7 +480,7 @@ $("#subscription-actions").each(function(){
         "ajax": {
             "url": jagg.getBaseUrl()+ "/site/blocks/subscription/subscription-list/ajax/subscription-list.jag?action=getSubscriptionForApplicationById&app=" +
                 $("#subscription-table").attr('data-app') + "&appId=" + $("#subscription-table").attr('data-appid') +
-                "&groupId=" + $("#subscription-table").attr('data-grp'),
+                "&groupId=" + encodeURIComponent($("#subscription-table").attr('data-grp')),
             "dataSrc": function ( json ) {
             	if(json.apis.length > 0){
             		$('#subscription-table-wrap').removeClass("hide");            		

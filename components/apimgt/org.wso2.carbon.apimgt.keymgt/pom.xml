@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.wso2.carbon.apimgt</groupId>
 		<artifactId>apimgt</artifactId>
-		<version>6.4.120-SNAPSHOT</version>
+		<version>6.4.192-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -85,7 +85,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.4</version>
+            <version>1.12</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.metrics</groupId>
@@ -217,7 +217,6 @@
 							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
 							org.wso2.carbon.identity.base.*; version="${carbon.identity.imp.pkg.version}",
 							org.wso2.carbon.identity.core.*; version="${carbon.identity.imp.pkg.version}",
-							org.apache.thrift.*; version="${libthrift.import.version.range}",
 							*;resolution:=optional
 						</Import-Package>
 						<Export-Package>
@@ -226,7 +225,7 @@
 							!org.wso2.carbon.apimgt.keymgt.stub.subscriber,
 							!org.wso2.carbon.apimgt.keymgt.stub.types.axis2,
 							!org.wso2.carbon.apimgt.keymgt.stub.types.carbon,
-							!org.wso2.carbon.apimgt.keymgt.stub.useradmin
+							!org.wso2.carbon.apimgt.keymgt.stub.useradmin,
 							!org.wso2.carbon.apimgt.keymgt.client,
 							org.wso2.carbon.apimgt.keymgt.*
 						</Export-Package>

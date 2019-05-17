@@ -28,7 +28,7 @@ if(jagg.isCSRFTokenValid())
         result = mod.updateTierPermissions(tierPermission);
         if (result.error) {
             obj = {
-                error:result.error,
+                error:true,
                 message:result.message
             };
         } else {

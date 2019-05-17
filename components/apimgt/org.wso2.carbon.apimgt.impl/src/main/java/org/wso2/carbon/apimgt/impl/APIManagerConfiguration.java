@@ -22,7 +22,6 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -87,6 +86,26 @@ public class APIManagerConfiguration {
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
+    private static Properties realtimeNotifierProperties;
+    private static Properties persistentNotifierProperties;
+    private static String tokenRevocationClassName;
+
+    public static Properties getRealtimeTokenRevocationNotifierProperties() {
+        return realtimeNotifierProperties;
+    }
+
+    public static Properties getPersistentTokenRevocationNotifiersProperties() {
+        return persistentNotifierProperties;
+    }
+
+    public static String getTokenRevocationClassName() {
+        return tokenRevocationClassName;
+    }
+
+    public static boolean isTokenRevocationEnabled() {
+        return !tokenRevocationClassName.isEmpty();
+    }
+
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -179,7 +198,41 @@ public class APIManagerConfiguration {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
-            if (elementHasText(element)) {
+            if ("TokenRevocationNotifiers".equals(localName)) {
+                tokenRevocationClassName = element.getAttributeValue(new QName("class"));
+            } else if ("RealtimeNotifier".equals(localName)) {
+                Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
+                Properties properties = new Properties();
+                while (revocationPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) revocationPropertiesIterator.next();
+                    properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                            propertyElem.getText());
+                }
+                realtimeNotifierProperties = properties;
+            } else if ("PersistentNotifier".equals(localName)) {
+                Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
+                Properties properties = new Properties();
+                while (revocationPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) revocationPropertiesIterator.next();
+                    if (propertyElem.getAttributeValue(new QName("name")).
+                            equalsIgnoreCase("password")) {
+                        if (secretResolver.isInitialized() && secretResolver
+                                .isTokenProtected("TokenRevocationNotifiers.Notifier.Password")) {
+                            properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                    secretResolver.
+                                            resolve("TokenRevocationNotifiers.Notifier.Password"));
+                        } else {
+                            properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                    propertyElem.getText());
+                        }
+                    } else {
+                        properties
+                                .setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                        propertyElem.getText());
+                    }
+                }
+                persistentNotifierProperties = properties;
+            } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = element.getText();
                 if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
@@ -327,19 +380,18 @@ public class APIManagerConfiguration {
                 setThrottleProperties(serverConfig);
             } else if (APIConstants.WorkflowConfigConstants.WORKFLOW.equals(localName)){
                 setWorkflowProperties(serverConfig);
-            } else if (APIConstants.ApplicationAttributes.APPLICATION_ATTRIBUTES.equals(localName)){
+            } else if (APIConstants.ApplicationAttributes.APPLICATION_ATTRIBUTES.equals(localName)) {
                 Iterator iterator = element.getChildrenWithLocalName(APIConstants.ApplicationAttributes.ATTRIBUTE);
                 while (iterator.hasNext()) {
                     OMElement omElement = (OMElement) iterator.next();
                     Iterator attributes = omElement.getChildElements();
                     JSONObject jsonObject = new JSONObject();
-                    while(attributes.hasNext()){
+                    while (attributes.hasNext()) {
                         OMElement attribute = (OMElement) attributes.next();
-                        if(attribute.getLocalName().equals("Name")){
-                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE,attribute.getText());
-                        }
-                        else if(attribute.getLocalName().equals("Description")){
-                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION,attribute.getText());
+                        if (attribute.getLocalName().equals("Name")) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE, attribute.getText());
+                        } else if (attribute.getLocalName().equals("Description")) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION, attribute.getText());
                         }
                     }
                     String isRequired = omElement.getAttributeValue(new QName("required"));
@@ -404,7 +456,6 @@ public class APIManagerConfiguration {
 
         return key.toString();
     }
-
     private boolean elementHasText(OMElement element) {
         String text = element.getText();
         return text != null && text.trim().length() != 0;
@@ -995,9 +1046,18 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
                     blockConditionRetrieverConfiguration.setEnabled(JavaUtils.isTrueExplicitly
                             (blockingConditionEnabledElement.getText()));
-                    String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" + System
-                            .getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
-                    blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);
+                    OMElement blockConditionRetrieverServiceUrlElement = blockConditionRetrieverElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.SERVICE_URL));
+                    if (blockConditionRetrieverServiceUrlElement != null) {
+                        blockConditionRetrieverConfiguration.setServiceUrl(APIUtil
+                                .replaceSystemProperty(blockConditionRetrieverServiceUrlElement
+                                        .getText()));
+                    } else {
+                        String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                                System.getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
+                        blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);
+                    }
+
                     blockConditionRetrieverConfiguration.setUsername(getFirstProperty(APIConstants
                             .API_KEY_VALIDATOR_USERNAME));
                     OMElement blockConditionRetrieverThreadPoolSizeElement = blockConditionRetrieverElement

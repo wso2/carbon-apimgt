@@ -791,7 +791,7 @@
 								                <div class="form-group">
 								                    <label class="control-label col-sm-3" for="context"><%=i18n.localize("Implementation Method")%></label>
 								                    <div class="col-sm-8">
-								                        <%if(api.implementation && api.implementation == "INLINE"){
+								                        <%if(api.implementation && (api.implementation == "INLINE")){
 								                                var inline_impl = "checked='checked'";
 								                                var hide_endpoint="hide";
 								                            }else{

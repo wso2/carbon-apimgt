@@ -1720,7 +1720,8 @@ public class SQLConstants {
             "   AND API.API_NAME = ?" +
             "   AND API.API_VERSION = ?" +
             "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND API.API_ID = SUB.API_ID";
+            "   AND API.API_ID = SUB.API_ID" +
+            "   AND SUB.SUB_STATUS != '" + APIConstants.SubscriptionStatus.ON_HOLD + "'";
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY,CREATED_TIME, API_TIER)" +

@@ -2411,6 +2411,9 @@ definitions:
       groupId:
         type: string
         example: ""
+      owner:
+        type: string
+        example: ""
       keys:
         type: array
         items:
@@ -2450,6 +2453,9 @@ definitions:
       attributes:
         type: object
         example: External Reference ID, Billing Tier
+      owner:
+        type: string
+        example: ""
 
 #-----------------------------------------------------
 # The Document List resource
@@ -2513,6 +2519,7 @@ definitions:
         type: string
         enum:
           - INLINE
+          - MARKDOWN
           - URL
           - FILE
         example: INLINE

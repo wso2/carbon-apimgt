@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.util.utils;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +34,8 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
+import org.wso2.carbon.apimgt.api.LoginPostExecutor;
+import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
@@ -221,7 +223,6 @@ public class RestApiUtil {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         JSONObject loginInfoJsonObj = new JSONObject();
         try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             loginInfoJsonObj.put("user", username);
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 loginInfoJsonObj.put("isSuperTenant", true);
@@ -229,7 +230,7 @@ public class RestApiUtil {
                 loginInfoJsonObj.put("isSuperTenant", false);
             }
             String loginInfoString = loginInfoJsonObj.toJSONString();
-            String[] groupIdArr = apiConsumer.getGroupIds(loginInfoString);
+            String[] groupIdArr = getGroupIds(loginInfoString);
             String groupId = "";
             if (groupIdArr != null) {
                 for (int i = 0; i < groupIdArr.length; i++) {
@@ -248,6 +249,11 @@ public class RestApiUtil {
             handleInternalServerError(errorMsg, e, log);
             return null;
         }
+    }
+
+    private static String[] getGroupIds(String loginInfoString) throws APIManagementException {
+        String groupingExtractorClass = APIUtil.getRESTApiGroupingExtractorImplementation();
+        return APIUtil.getGroupIdsFromExtractor(loginInfoString, groupingExtractorClass);
     }
 
     /**

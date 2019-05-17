@@ -172,7 +172,6 @@ public final class APIConstants {
     public static final String WSDL_FILE = "wsdlFile";
     public static final String UPDATED_WSDL_ZIP = "updated.zip";
     public static final String FILE_URI_PREFIX = "file://";
-    
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
@@ -340,7 +339,6 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_TIME_CREATED = "TIME_CREATED";
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
     public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
-    
     public static final String DOT = ".";
     public static final String EXP = "exp";
     public static final String JWT = "JWT";
@@ -352,7 +350,6 @@ public final class APIConstants {
     public static final String CLAIMS_RETRIEVER_CLASS = JWT_CONFIGS + "ClaimsRetrieverImplClass";
     public static final String CONSUMER_DIALECT_URI = JWT_CONFIGS + "ConsumerDialectURI";
     public static final String JWT_SIGNATURE_ALGORITHM = JWT_CONFIGS + "SignatureAlgorithm";
-
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
     public static final String API_SECURITY = "APISecurity";
@@ -432,6 +429,7 @@ public final class APIConstants {
     public static final String PUBLISHING_TIME_OUT = "publishTimeout";
     public static final String NON_BLOCKING = "non-blocking";
     public static final String BLOCKING_CONDITIONS_STREAM_ID = "org.wso2.blocking.request.stream:1.0.0";
+    public static final String TOKEN_REVOCATION_STREAM_ID = "org.wso2.apimgt.token.revocation.stream:1.0.0";
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
 
     //Property for enabling scope sharing between APIs
@@ -532,12 +530,6 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
     public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
             + "ApplicationTokenDefaultValidityPeriod";
-    public static final int DEFAULT_THRIFT_PORT = 10397;
-    public static final int DEFAULT_THRIFT_CLIENT_CONNECTION_TIMEOUT = 10000;
-    public static final String API_KEY_VALIDATOR_THRIFT_CLIENT_PORT = API_KEY_VALIDATOR + "ThriftClientPort";
-    public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
-    public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
-    public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
 
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
@@ -573,11 +565,8 @@ public final class APIConstants {
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
     public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
 
-    public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
-    public static final String API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER = API_KEY_VALIDATOR + "EnableThriftServer";
-    public static final String API_KEY_VALIDATOR_THRIFT_CLIENT = "ThriftClient";
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
@@ -768,6 +757,7 @@ public final class APIConstants {
 
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     public static final String BLOCKING_EVENT_PUBLISHER = "blockingEventPublisher";
+    public static final String TOKEN_REVOCATION_EVENT_PUBLISHER = "tokenRevocationPublisher";
 
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
     public static final int AM_CREATOR_GOVERNANCE_EXECUTION_ID = 201;
@@ -1017,6 +1007,7 @@ public final class APIConstants {
     public static final String TENANTCOUNT_CACHEKEY = "apiProviderCacheKey";
 
     public static final String API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "GroupingExtractor";
+    public static final String API_STORE_REST_API_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "RESTApiGroupingExtractor";
     public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION =
             "repository" + File.separator + "resources" + File.separator + "customsequences";
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
@@ -1169,6 +1160,8 @@ public final class APIConstants {
     public static final long MAX_FILE_SIZE = 1024L;
 
     public static final String REGISTRY_RESOURCE_PREFIX = "/registry/resource";
+    public static final String REGISTRY_RESOURCE_URL_PREFIX =
+            "/registry/resource/_system/governance/apimgt/applicationdata/provider/";
 
     public enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
@@ -1350,7 +1343,7 @@ public final class APIConstants {
     /**
      * Parameter for adding custom attributes against application in API Store
      */
-    public static class ApplicationAttributes{
+    public static class ApplicationAttributes {
         public static final String APPLICATION_CONFIGURATIONS = "ApplicationConfigs";
         public static final String APPLICATION_ATTRIBUTES = "ApplicationAttributes";
         public static final String ATTRIBUTES = "Attributes";

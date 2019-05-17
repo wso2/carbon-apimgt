@@ -18,10 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -163,6 +164,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public static final String API_NAME = "apiName";
     public static final String API_VERSION = "apiVersion";
     public static final String API_PROVIDER = "apiProvider";
+    private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
 
     /* Map to Store APIs against Tag */
     private ConcurrentMap<String, Set<API>> taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
@@ -3644,6 +3646,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                   Set<Scope> reqScopeSet) {
         String[] userRoles = null;
         org.wso2.carbon.user.api.UserStoreManager userStoreManager = null;
+        String preservedCaseSensitiveValue = System.getProperty(PRESERVED_CASE_SENSITIVE_VARIABLE);
+        boolean preservedCaseSensitive = JavaUtils.isTrueExplicitly(preservedCaseSensitiveValue);
 
         List<Scope> authorizedScopes = new ArrayList<Scope>();
         try {
@@ -3660,7 +3664,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         List<String> userRoleList;
         if (userRoles != null) {
-            userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
+            if (preservedCaseSensitive) {
+                userRoleList = Arrays.asList(userRoles);
+            } else {
+                userRoleList = new ArrayList<String>();
+                for (String userRole : userRoles) {
+                    userRoleList.add(userRole.toLowerCase());
+                }
+            }
         } else {
             userRoleList = Collections.emptyList();
         }
@@ -3672,8 +3683,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             //If the scope has been defined in the context of the App and if roles have been defined for the scope
             if (roles != null && roles.length() != 0) {
-                List<String> roleList =
-                        new ArrayList<String>(Arrays.asList(roles.replaceAll(" ", EMPTY_STRING).split(",")));
+                List<String> roleList = new ArrayList<String>();
+                for (String scopeRole : roles.split(",")) {
+                    if (preservedCaseSensitive) {
+                        roleList.add(scopeRole.trim());
+                    } else {
+                        roleList.add(scopeRole.trim().toLowerCase());
+                    }
+                }
                 //Check if user has at least one of the roles associated with the scope
                 roleList.retainAll(userRoleList);
                 if (!roleList.isEmpty()) {
@@ -4057,38 +4074,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public String[] getGroupIds(String response) throws APIManagementException {
         String groupingExtractorClass = APIUtil.getGroupingExtractorImplementation();
-        if (groupingExtractorClass != null) {
-            try {
-                LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
-                        (groupingExtractorClass).newInstance();
-                //switching 2.1.0 and 2.2.0
-                if (APIUtil.isMultiGroupAppSharingEnabled()) {
-                    NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor) groupingExtractor;
-                    return newGroupIdListExtractor.getGroupingIdentifierList(response);
-                } else {
-                    String groupId = groupingExtractor.getGroupingIdentifiers(response);
-                    return new String[] {groupId};
-                }
-
-            } catch (ClassNotFoundException e) {
-                String msg = groupingExtractorClass + " is not found in runtime";
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            } catch (ClassCastException e) {
-                String msg = "Cannot cast " + groupingExtractorClass + " NewPostLoginExecutor";
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            } catch (IllegalAccessException e) {
-                String msg = "Error occurred while invocation of getGroupingIdentifier method";
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            } catch (InstantiationException e) {
-                String msg = "Error occurred while instantiating " + groupingExtractorClass + " class";
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            }
-        }
-        return null;
+        return APIUtil.getGroupIdsFromExtractor(response, groupingExtractorClass);
     }
 
     /**
@@ -4904,7 +4890,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         }
                         updatedWSDLContent = apimwsdlReader.getWSDL(definition);
                     } catch (APIManagementException e) {
-                        handleException("Error occurred while processing the wsdl for api: " + api.getId());
+                        handleException("Error occurred while processing the wsdl for api: [" + api.getId() + "]", e);
                     }
                 } else {
                     handleException("Error while getting API object for wsdl artifact");
@@ -4940,15 +4926,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         JSONArray applicationAttributes = null;
         JSONObject applicationConfig = APIUtil.getAppAttributeKeysFromRegistry(tenantId);
-        try {
-            if (applicationConfig != null) {
-                applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
-            } else {
-                APIManagerConfiguration configuration = getAPIManagerConfiguration();
-                applicationAttributes = configuration.getApplicationAttributes();
-            }
-        } catch (NullPointerException e){
-            handleException("Error in reading configuration " + e.getMessage(), e);
+        if (applicationConfig != null) {
+            applicationAttributes = (JSONArray) applicationConfig.get(APIConstants.ApplicationAttributes.ATTRIBUTES);
+        } else {
+            APIManagerConfiguration configuration = getAPIManagerConfiguration();
+            applicationAttributes = configuration.getApplicationAttributes();
         }
         return applicationAttributes;
     }

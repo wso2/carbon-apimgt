@@ -17,7 +17,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -76,7 +76,7 @@ public class ApplicationMappingUtil {
             application.setTokenType(applicationDTO.getTokenType().toString());
         }
         Object applicationAttributes = applicationDTO.getAttributes();
-        Map appAttributes = new ObjectMapper().convertValue(applicationAttributes,Map.class);
+        Map appAttributes = new ObjectMapper().convertValue(applicationAttributes, Map.class);
         application.setApplicationAttributes(appAttributes);
         application.setGroupId(applicationDTO.getGroupId());
         return application;
@@ -149,6 +149,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         applicationInfoDTO.setAttributes(application.getApplicationAttributes());
+        applicationInfoDTO.setOwner(application.getOwner());
         return applicationInfoDTO;
     }
 }

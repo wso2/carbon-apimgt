@@ -10,6 +10,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
@@ -37,6 +39,9 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdPoliciesMediationMediationPolicyIdPut(String apiId,String mediationPolicyId,MediationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdPoliciesMediationPost(MediationDTO body,String apiId,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdPut(String apiId,APIDetailedDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response apisApiIdResourcePoliciesGet(String apiId,String sequenceType,String resourcePath,String verb,String accept,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response apisApiIdResourcePoliciesResourceIdGet(String apiId,String resourceId,String accept,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response apisApiIdResourcePoliciesResourceIdPut(String apiId,String resourceId,ResourcePolicyInfoDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdSwaggerGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdSwaggerPut(String apiId,String apiDefinition,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdThumbnailGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);

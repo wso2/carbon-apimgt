@@ -41,7 +41,7 @@ include("/jagg/jagg.jag");
 
         if (result.error) {
             obj = {
-                error:result.error,
+                error: true,
                 message:msg.error.authError(action, username)
             };
         } else {
@@ -71,7 +71,7 @@ include("/jagg/jagg.jag");
 	result = mod.getAllDocumentations(apiData,username);
 	if (result.error) {
             obj = {
-                error:result.error,
+                error: true,
                 message:msg.error.authError(action, username)
             };
         } 
@@ -96,7 +96,7 @@ include("/jagg/jagg.jag");
 
               if (result.error) {
                   obj = {
-                      error:result.error,
+                      error: true,
                       message:msg.error.authError(action, username)
                   };
               } else {
@@ -125,7 +125,7 @@ include("/jagg/jagg.jag");
           result = mod.getAllPaginatedPublishedLightWeightAPIs(tenant, start, end, returnAPITags);
           if (result.error) {
               obj = {
-                  error:result.error,
+                  error: true,
                   message:msg.error.authError(action, username)
               };
           } else {

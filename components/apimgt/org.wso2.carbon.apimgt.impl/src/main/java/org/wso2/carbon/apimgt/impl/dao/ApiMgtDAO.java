@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -3663,7 +3663,7 @@ public class ApiMgtDAO {
             }
 
             //Adding data to AM_APPLICATION_ATTRIBUTES table
-            if( application.getApplicationAttributes() != null) {
+            if (application.getApplicationAttributes() != null) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
             }
         } catch (SQLException e) {
@@ -3734,7 +3734,7 @@ public class ApiMgtDAO {
             handleException("Failed to update OAuth Consumer Application", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
-            APIMgtDBUtil.closeAllConnections(preparedStatement,conn,null);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, conn, null);
         }
     }
 
@@ -5325,6 +5325,7 @@ public class ApiMgtDAO {
                 info.applicationId = rs.getInt("APPLICATION_ID");
                 info.accessToken = rs.getString("ACCESS_TOKEN");  // no decryption needed.
                 info.tokenType = rs.getString("KEY_TYPE");
+                info.subscriptionStatus = rs.getString("SUB_STATUS");
                 subscriptionData.add(info);
             }
 
@@ -5335,8 +5336,11 @@ public class ApiMgtDAO {
                 try {
                     if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
                         apiId.setTier(info.tierId);
-                        int subscriptionId = addSubscription(apiId, context, info.applicationId, APIConstants
-                                .SubscriptionStatus.UNBLOCKED, provider);
+                        String subscriptionStatus = (APIConstants.SubscriptionStatus.BLOCKED
+                                .equalsIgnoreCase(info.subscriptionStatus)) ?
+                                APIConstants.SubscriptionStatus.BLOCKED : APIConstants.SubscriptionStatus.UNBLOCKED;
+                        int subscriptionId = addSubscription(apiId, context, info.applicationId, subscriptionStatus,
+                                provider);
                         if (subscriptionId == -1) {
                             String msg = "Unable to add a new subscription for the API: " + apiName +
                                     ":v" + newVersion;
@@ -5368,7 +5372,8 @@ public class ApiMgtDAO {
             getAppSt.setString(2, apiName);
             getAppSt.setString(3, oldVersion);
             rs = getAppSt.executeQuery();
-            while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS")))) {
+
+            while (rs.next()) {
                 int applicationId = rs.getInt("APPLICATION_ID");
                 if (!subscribedApplications.contains(applicationId)) {
                     apiId.setTier(rs.getString("TIER_ID"));
@@ -5947,7 +5952,7 @@ public class ApiMgtDAO {
             String whereClauseWithGroupIdCaseInSensitive =
                     "  WHERE  (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
                             + " AND LOWER(SUB.USER_ID) = LOWER(?))) AND "
-                            + "APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+                            + "APP.NAME = ? AND LOWER(SUB.SUBSCRIBER_ID) = LOWER(APP.SUBSCRIBER_ID)";
 
             String whereClauseWithMultiGroupId = "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
                     "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR   SUB.USER_ID = ? " +
@@ -5958,7 +5963,7 @@ public class ApiMgtDAO {
                     + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  "
                     + "OR   LOWER(SUB.USER_ID) = LOWER(?)  "
                     + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) "
-                    + "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
+                    + "AND APP.NAME = ? AND LOWER(SUB.SUBSCRIBER_ID) = LOWER(APP.SUBSCRIBER_ID)";
 
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
@@ -6580,6 +6585,10 @@ public class ApiMgtDAO {
 
 
     public void updateAPI(API api, int tenantId) throws APIManagementException {
+        updateAPI(api, tenantId, null);
+    }
+
+    public void updateAPI(API api, int tenantId, String username) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
@@ -6602,8 +6611,7 @@ public class ApiMgtDAO {
                 contextTemplate = contextTemplate.split(Pattern.quote("/" + APIConstants.VERSION_PLACEHOLDER))[0];
             }
             prepStmt.setString(2, contextTemplate);
-            //TODO Need to find who exactly does this update.
-            prepStmt.setString(3, null);
+            prepStmt.setString(3, username);
             prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(5, api.getApiLevelPolicy());
             prepStmt.setString(6, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -7632,6 +7640,7 @@ public class ApiMgtDAO {
         private int applicationId;
         private String accessToken;
         private String tokenType;
+        private String subscriptionStatus;
     }
 
     /**
@@ -12582,7 +12591,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            if(attributes != null) {
+            if (attributes != null) {
                 ps = conn.prepareStatement(SQLConstants.ADD_APPLICATION_ATTRIBUTES_SQL);
                 for (String key : attributes.keySet()) {
                     ps.setInt(1, applicationId);

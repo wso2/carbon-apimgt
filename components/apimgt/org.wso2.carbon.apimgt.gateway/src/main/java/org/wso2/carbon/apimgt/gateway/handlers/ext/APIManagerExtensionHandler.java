@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -85,7 +86,15 @@ public class APIManagerExtensionHandler extends AbstractHandler {
             requestMediationSpan = Util.startSpan(APIMgtGatewayConstants.REQUEST_MEDIATION, responseLatencySpan, tracer);
         }
         try {
-            return mediate(messageContext, DIRECTION_IN);
+            boolean isMediated = mediate(messageContext, DIRECTION_IN);
+            if (isMediated) {
+                String requestDestination = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                        .getOptions().getTo().getAddress();
+                if (requestDestination != null) {
+                    messageContext.setProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS, requestDestination);
+                }
+            }
+            return isMediated;
         } catch (Exception e) {
             if (Util.tracingEnabled() && requestMediationSpan != null) {
                 Util.setTag(requestMediationSpan, APIMgtGatewayConstants.ERROR,

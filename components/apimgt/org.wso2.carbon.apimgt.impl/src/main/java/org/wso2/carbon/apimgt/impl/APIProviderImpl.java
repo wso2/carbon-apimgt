@@ -30,7 +30,7 @@ import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -146,6 +146,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -206,6 +207,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     protected String getUserNameWithoutChange() {
         return userNameWithoutChange;
+    }
+
+    @Override
+    public void addSwaggerToLocalEntry(API api, String jsonText) {
+        if (log.isDebugEnabled()) {
+            log.debug("Adding a new Local Entry for the API: " + api.getId().toString());
+        }
+        Map<String, Environment> environments;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        environments = config.getApiGatewayEnvironments();
+        LocalEntryAdminClient localEntryAdminClient;
+        for (String environmentName : api.getEnvironments()) {
+            Environment environment = environments.get(environmentName);
+            api.getEnvironments();
+            try {
+                localEntryAdminClient = new LocalEntryAdminClient(environment);
+                localEntryAdminClient.deleteEntry(api.getUUID());
+                localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
+                        jsonText.replaceAll("&(?!amp;)", "&amp;").
+                                replaceAll("<","&lt;").replaceAll(">","&gt;") + "</localEntry>");
+            } catch (AxisFault e) {
+                log.error("Error occurred while Deleting the local entry for the API: " + api.getId().toString(), e);
+            }
+        }
+    }
+
+    @Override
+    public void deleteSwaggerLocalEntry(API api) {
+        if (log.isDebugEnabled()) {
+            log.debug("Deleting the local entry for API: " + api.getId().toString());
+        }
+        Map<String, Environment> environments;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        environments = config.getApiGatewayEnvironments();
+        LocalEntryAdminClient localEntryAdminClient;
+        for (String environmentName : api.getEnvironments()) {
+            Environment environment = environments.get(environmentName);
+            try {
+                localEntryAdminClient = new LocalEntryAdminClient(environment);
+                localEntryAdminClient.deleteEntry(api.getUUID());
+            } catch (AxisFault e) {
+                log.error("Error occurred while Deleting the local entry ", e);
+            }
+        }
     }
 
     /**
@@ -1023,7 +1071,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
             }
             validateResourceThrottlingTiers(api, tenantDomain);
-            apiMgtDAO.updateAPI(api, tenantId);
+            apiMgtDAO.updateAPI(api, tenantId, userNameWithoutChange);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated the API: " + api.getId() + " in the database");
             }
@@ -1084,6 +1132,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         } else if (!APIConstants.CREATED.equals(api.getStatus()) && !APIConstants.RETIRED
                                 .equals(api.getStatus())) {
                             if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
+                                api.setEnvironments(
+                                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                            }
+                            if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
                                 api.setEnvironments(
                                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                                                 .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
@@ -1299,7 +1352,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             String documentationPath = APIUtil.getAPIDocPath(api.getId()) + doc.getName();
                             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                                     visibleRoles, documentationPath, registry);
-                            if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
+                            if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType()) || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
 
                                 String contentPath = APIUtil.getAPIDocContentPath(api.getId(), doc.getName());
                                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
@@ -1710,12 +1763,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String apiName = api.getId().getApiName();
         Set<String> versions = getAPIVersions(provider, apiName);
         APIVersionComparator comparator = new APIVersionComparator();
+        List<API> sortedAPIs = new ArrayList<API>();
         for (String version : versions) {
             API otherApi = getAPI(new APIIdentifier(provider, apiName, version));
-            if (comparator.compare(otherApi, api) < 0 && !(APIConstants.RETIRED.equals(otherApi.getStatus()))) {
-                apiMgtDAO.makeKeysForwardCompatible(provider, apiName, version,
-                        api.getId().getVersion(), api.getContext());
+            if (comparator.compare(otherApi, api) < 0 && !APIConstants.RETIRED.equals(otherApi.getStatus())) {
+                sortedAPIs.add(otherApi);
             }
+        }
+
+        // Get the subscriptions from the latest api version first
+        Collections.sort(sortedAPIs, comparator);
+        for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
+            String oldVersion = sortedAPIs.get(i).getId().getVersion();
+            apiMgtDAO.makeKeysForwardCompatible(provider, apiName, oldVersion, api.getId().getVersion(),
+                    api.getContext());
         }
     }
 
@@ -2013,7 +2074,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
                         APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
             }
-
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
             Map<String, String> properties = new HashMap<String, String>();
