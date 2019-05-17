@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.json.simple.JSONObject;
+
 public class APIProduct {
     // TODO add rest of the properties
     private String name;
@@ -41,6 +43,7 @@ public class APIProduct {
     private String tenantDomain;
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
+    private JSONObject additionalProperties = new JSONObject();
     
     public String getName() {
         return name;
@@ -144,6 +147,44 @@ public class APIProduct {
     public void setDefinition(String definition) {
         this.definition = definition;
     }
+    /**
+     * To get the additional properties
+     *
+     * @return additional properties of the API Product
+     */
+    public JSONObject getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    /**
+     * To assign a set of customized properties to the API Product
+     *
+     * @param properties Properties that need to be assigned to.
+     */
+    public void setAdditionalProperties(JSONObject properties) {
+        this.additionalProperties = properties;
+    }
+
+    /**
+     * To add a new property to additional properties list.
+     *
+     * @param key   Name of the property.
+     * @param value Value of the property.
+     */
+    public void addProperty(String key, String value) {
+        additionalProperties.put(key, value);
+    }
+
+    /**
+     * To get the value of the property.
+     *
+     * @param key Name of the property
+     * @return value of the property.
+     */
+    public String getProperty(String key) {
+        return additionalProperties.get(key).toString();
+    }
+    
     @Override
     public String toString() {
         String tiers = "";

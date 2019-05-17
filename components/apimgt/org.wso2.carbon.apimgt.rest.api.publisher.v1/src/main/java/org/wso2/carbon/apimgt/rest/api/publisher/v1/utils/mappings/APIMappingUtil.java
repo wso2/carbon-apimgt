@@ -1322,6 +1322,15 @@ public class APIMappingUtil {
         if (product.getVisibleTenants() != null) {
             productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
         }
+        if (product.getAdditionalProperties() != null) {
+            JSONObject additionalProperties = product.getAdditionalProperties();
+            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            for (Object propertyKey : additionalProperties.keySet()) {
+                String key = (String) propertyKey;
+                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+            }
+            productDto.setAdditionalProperties(additionalPropertiesMap);
+        }
         return productDto;
     }
     
@@ -1389,6 +1398,13 @@ public class APIMappingUtil {
         if (dto.getSubscriptionAvailability() != null) {
             product.setSubscriptionAvailability(
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
+        }
+        
+        Map<String, String> additionalProperties = dto.getAdditionalProperties();
+        if (additionalProperties != null) {
+            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+                product.addProperty(entry.getKey(), entry.getValue());
+            }
         }
         if (dto.getSubscriptionAvailableTenants() != null) {
             product.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
