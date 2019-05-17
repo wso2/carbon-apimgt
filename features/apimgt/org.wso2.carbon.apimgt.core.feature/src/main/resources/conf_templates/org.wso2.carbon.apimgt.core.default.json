@@ -118,6 +118,6 @@
   "apim.token.revocation.realtime_notifier.ttl": "5000",
   "apim.token.revocation.persistent_notifier.hostname": "https://localhost:2379/v2/keys/jti/",
   "apim.token.revocation.persistent_notifier.ttl": "5000",
-  "apim.token.revocation.persistent_notifier.username": "root",
-  "apim.token.revocation.persistent_notifier.password": "root"
+  "apim.token.revocation.persistent_notifier.username": "admin",
+  "apim.token.revocation.persistent_notifier.password": "admin"
 }
