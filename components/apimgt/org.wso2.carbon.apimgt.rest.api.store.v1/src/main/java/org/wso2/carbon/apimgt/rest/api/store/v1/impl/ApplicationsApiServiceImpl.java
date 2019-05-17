@@ -130,7 +130,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
             //validate the tier specified for the application
-            String tierName = body.getThrottlingTier();
+            String tierName = body.getThrottlingPolicy();
             if (tierName == null) {
                 RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
             }
