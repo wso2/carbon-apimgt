@@ -24,6 +24,9 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
@@ -12987,6 +12990,8 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(13, apiproduct.getVisibleRoles());
             prepStmtAddAPIProduct.setString(14, apiproduct.getBusinessOwner());
             prepStmtAddAPIProduct.setString(15, apiproduct.getBusinessOwnerEmail());
+            String additionalProperties = apiproduct.getAdditionalProperties().toJSONString();
+            prepStmtAddAPIProduct.setBlob(16, new ByteArrayInputStream(additionalProperties.getBytes()));
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -13198,6 +13203,13 @@ public class ApiMgtDAO {
                     String content = APIMgtDBUtil.getStringFromInputStream(inputStream);
                     product.setDefinition(content);                
                 }
+                
+                InputStream properties = rs.getBinaryStream("PROPERTIES");
+                if (properties != null) {
+                    String propertyString = APIMgtDBUtil.getStringFromInputStream(properties);
+                    JSONParser parser = new JSONParser();
+                    product.setAdditionalProperties((JSONObject) parser.parse(propertyString));
+                }
                 product.setVisibility(rs.getString("VISIBILITY"));
                 product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
                 product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
@@ -13244,6 +13256,8 @@ public class ApiMgtDAO {
             product.setProductResources(new ArrayList<APIProductResource>(resourceMap.values()));
         } catch (SQLException e) {
             handleException("Error while retrieving api product for UUID " + uuid , e);
+        } catch (ParseException e) {
+            handleException("Error while parsing api product properties for UUID " + uuid , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, null, rs);
             APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProductResource, connection, rs2);
@@ -13661,7 +13675,9 @@ public class ApiMgtDAO {
             ps.setString(9, product.getBusinessOwnerEmail());
             ps.setString(10, product.getSubscriptionAvailability());
             ps.setString(11, product.getSubscriptionAvailableTenants());
-            ps.setString(12, product.getUuid());
+            String additionalProperties = product.getAdditionalProperties().toJSONString();
+            ps.setBlob(12, new ByteArrayInputStream(additionalProperties.getBytes()));
+            ps.setString(13, product.getUuid());
             ps.executeUpdate();
 
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
