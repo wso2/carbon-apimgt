@@ -175,8 +175,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             
             
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
-            //We do not allow to modify provider and product name and uuid. Set the origial value
-            product.setName(retrievedProduct.getName());
+            //We do not allow to modify provider  and uuid. Set the origial value
             product.setProvider(retrievedProduct.getProvider());
             product.setUuid(apiProductId);
             apiProvider.updateAPIProduct(product, username);

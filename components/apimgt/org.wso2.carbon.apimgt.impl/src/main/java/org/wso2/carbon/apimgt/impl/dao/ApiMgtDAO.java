@@ -13677,7 +13677,8 @@ public class ApiMgtDAO {
             ps.setString(11, product.getSubscriptionAvailableTenants());
             String additionalProperties = product.getAdditionalProperties().toJSONString();
             ps.setBlob(12, new ByteArrayInputStream(additionalProperties.getBytes()));
-            ps.setString(13, product.getUuid());
+            ps.setString(13, product.getName());
+            ps.setString(14, product.getUuid());
             ps.executeUpdate();
 
             String tenantDomain = MultitenantUtils.getTenantDomain(username);

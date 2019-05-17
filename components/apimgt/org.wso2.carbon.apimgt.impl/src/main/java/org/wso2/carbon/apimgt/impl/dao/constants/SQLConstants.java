@@ -3084,7 +3084,8 @@ public class SQLConstants {
             "   BUSINESS_OWNER_EMAIL=?, " +
             "   SUBSCRIPTION_AVAILABILITY=?, " +
             "   SUBSCRIPTION_AVAILABILE_TENANTS=?, " +
-            "   PROPERTIES=? " +
+            "   PROPERTIES=?, " +
+            "   API_PRODUCT_NAME=? " +
             " WHERE" +
             "   UUID=?";
 
