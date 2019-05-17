@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-"use strict";
-import APIClientFactory from "./APIClientFactory";
-import Resource from "./Resource";
-import Utils from "./Utils";
+'use strict';
 
-/***
+import APIClientFactory from './APIClientFactory';
+import Resource from './Resource';
+import Utils from './Utils';
+
+/**
  * Class to expose Application {Resource} related operations i:e: Get all Application , Delete, Generate Keys ect..
+ * @param {string} name Application name
+ * @param {string} description Application description
+ * @param {string} throttlingTier Application throttling tier
+ * @param {string} kwargs Arguments
  */
 export default class Application extends Resource {
     constructor(name, description, throttlingTier, kwargs) {
@@ -29,9 +34,9 @@ export default class Application extends Resource {
         this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
         this.keys = new Map();
         this.tokens = new Map();
-        for (let key in kwargs) {
+        for (const key in kwargs) {
             if (kwargs.hasOwnProperty(key)) {
-                if (key === "keys") {
+                if (key === 'keys') {
                     this._setKeys(kwargs[key]);
                     continue;
                 }
@@ -40,145 +45,149 @@ export default class Application extends Resource {
         }
     }
 
-    /***
+    /** *
      * Set this.keys object by iterating the keys array received from REST API
-     * @param keys {Array} An array of keys object containing either PRODUCTION or/and SANDBOX key information
+     * @param {Array} keys  An array of keys object containing either PRODUCTION or/and SANDBOX key information
      * @private
      */
     _setKeys(keys) {
-        for (let key_obj of keys) {
-            this.keys.set(key_obj.keyType, key_obj);
+        for (const keyObj of keys) {
+            this.keys.set(keyObj.keyType, keyObj);
         }
     }
 
-    /***
+    /** *
      * Get keys of the current instance of an application
-     * @param key_type {string} Key type either `Production` or `SandBox`
+     * @param  {string} keyType Key type either `Production` or `SandBox`
      * @returns {promise} Set the fetched CS/CK into current instance and return keys array as Promise object
      */
-    getKeys(key_type) {
-        let promise_keys = this.client.then((client) => {
-            return client.apis["Applications"].get_applications__applicationId__keys({ applicationId: this.id });
+    getKeys(keyType) {
+        const promiseKeys = this.client.then((client) => {
+            return client.apis.Applications.get_applications__applicationId__keys({ applicationId: this.id });
         });
-        return promise_keys.then(keys_response => {
-            this._setKeys(keys_response.obj);
+        return promiseKeys.then((keysResponse) => {
+            this._setKeys(keysResponse.obj);
             return this.keys;
         });
     }
 
-    /***
+    /** *
      * Generate token for this application instance
-     * @returns {promise} Set the generated token into current instance and return tokenObject received as Promise object
+     * @param {string} type token type
+     * @returns {promise} Set the generated token into current
+     * instance and return tokenObject received as Promise object
      */
     generateToken(type) {
-        let promise_token = this.client.then((client) => {
-            let keys = this.keys.get(type);
-            let request_content = {
+        const promiseToken = this.client.then((client) => {
+            const keys = this.keys.get(type);
+            const requestContent = {
                 consumerKey: keys.consumerKey,
                 consumerSecret: keys.consumerSecret,
                 validityPeriod: 3600,
-                scopes: ""
+                scopes: '',
             };
-            let payload = { applicationId: this.id, body: request_content };
-            return client.apis["Applications"].post_applications__applicationId__generate_token(payload);
+            const payload = { applicationId: this.id, body: requestContent };
+            return client.apis.Applications.post_applications__applicationId__generate_token(payload);
         });
-        return promise_token.then(token_response => {
-            let token = token_response.obj;
+        return promiseToken.then((tokenResponse) => {
+            const token = tokenResponse.obj;
             this.tokens.set(type, token);
             return token;
         });
     }
 
-    /***
+    /** *
      * Generate Consumer Secret and Consumer Key for this application instance
-     * @param key_type {string} Key type either `Production` or `SandBox`
-     * @param supportedGrantTypes {string[]}
-     * @param callbackUrl {string}
-     * @param tokenType {string} Token type either `OAUTH` or `JWT`
-     * @returns {promise} Set the generated token into current instance and return tokenObject received as Promise object
+     * @param {string} keyType Key type either `Production` or `SandBox`
+     * @param {string[]} supportedGrantTypes Grant types supported
+     * @param  {string} callbackUrl callback url
+     * @param  {string} tokenType Token type either `OAUTH` or `JWT`
+     * @returns {promise} Set the generated token into current instance and return tokenObject
+     * received as Promise object
      */
-    generateKeys(key_type, supportedGrantTypes, callbackUrl, tokenType) {
-        let promised_keys = this.client.then((client) => {
-            let request_content =
-                {
-                    keyType: key_type, /* TODO: need to support dynamic key types ~tmkb*/
-                    grantTypesToBeSupported: supportedGrantTypes,
-                    callbackUrl: callbackUrl,
-                    tokenType: tokenType
-                };
-            let payload = { applicationId: this.id, body: request_content };
-            return client.apis["Applications"].post_applications__applicationId__generate_keys(payload);
+    generateKeys(keyType, supportedGrantTypes, callbackUrl, tokenType) {
+        const promisedKeys = this.client.then((client) => {
+            const requestContent = {
+                keyType, /* TODO: need to support dynamic key types ~tmkb */
+                grantTypesToBeSupported: supportedGrantTypes,
+                callbackUrl,
+                tokenType,
+            };
+            const payload = { applicationId: this.id, body: requestContent };
+            return client.apis.Applications.post_applications__applicationId__generate_keys(payload);
         });
-        return promised_keys.then(keys_response => {
-            this.keys.set(key_type, keys_response.obj);
-            return this.keys.get(key_type);
+        return promisedKeys.then((keysResponse) => {
+            this.keys.set(keyType, keysResponse.obj);
+            return this.keys.get(keyType);
         });
     }
 
-    /***
+    /** *
      * Generate Consumer Secret and Consumer Key for this application instance
-     * @param tokenType {string} Token Type either `OAUTH` or `JWT`
-     * @param key_type {string} Key type either `Production` or `SandBox`
-     * @param supportedGrantTypes {String []}
-     * @param callbackUrl {String}
-     * @param consumerKey {String}
-     * @param consumerSecret {String}
+     * @param  {string} tokenType Token Type either `OAUTH` or `JWT`
+     * @param  {string} keyType Key type either `Production` or `SandBox`
+     * @param {string[]} supportedGrantTypes Grant types supported
+     * @param  {string} callbackUrl callback url
+     * @param  {String} consumerKey Consumer key of application
+     * @param  {String} consumerSecret Consumer secret of application
      * @returns {promise} Update the callbackURL and/or supportedGrantTypes
      */
-    updateKeys(tokenType, key_type, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret) {
-        let promised_put = this.client.then((client) => {
-            let request_content =
-            {
-                consumerKey: consumerKey,
-                consumerSecret: consumerSecret,
-                supportedGrantTypes: supportedGrantTypes,
-                callbackUrl: callbackUrl,
-                keyType: key_type,
-                tokenType: tokenType
-              }
-            let payload = { applicationId: this.id, keyType: key_type, body: request_content };
-            return client.apis["Applications"].put_applications__applicationId__keys__keyType_(payload);
+    updateKeys(tokenType, keyType, supportedGrantTypes, callbackUrl, consumerKey, consumerSecret) {
+        const promisedPut = this.client.then((client) => {
+            const requestContent = {
+                consumerKey,
+                consumerSecret,
+                supportedGrantTypes,
+                callbackUrl,
+                keyType,
+                tokenType,
+            };
+            const payload = { applicationId: this.id, keyType, body: requestContent };
+            return client.apis.Applications.put_applications__applicationId__keys__keyType_(payload);
         });
-        return promised_put.then(keys_response => {
-            this.keys.set(key_type, keys_response.obj);
+        return promisedPut.then((keysResponse) => {
+            this.keys.set(keyType, keysResponse.obj);
             return this;
         });
     }
 
     static get(id) {
-        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
-        let promised_get = apiClient.client.then(
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
+        const promised_get = apiClient.client.then(
             (client) => {
-                return client.apis["Applications"].get_applications__applicationId_({ applicationId: id },
+                return client.apis.Applications.get_applications__applicationId_({ applicationId: id },
                     this._requestMetaData());
-            });
-        return promised_get.then(response => {
-            let app_json = response.obj;
+            }
+        );
+        return promised_get.then((response) => {
+            const app_json = response.obj;
             return new Application(app_json.name, app_json.description, app_json.throttlingTier, app_json);
         });
     }
 
     static all() {
-        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
-        let promised_all = apiClient.client.then(
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
+        const promised_all = apiClient.client.then(
             (client) => {
-                return client.apis["Applications"].get_applications({}, this._requestMetaData());
-            });
+                return client.apis.Applications.get_applications({}, this._requestMetaData());
+            }
+        );
         return promised_all.then(response => response.obj);
     }
 
     static deleteApp(id) {
-        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
-        let promised_delete = apiClient.client.then(
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
+        const promised_delete = apiClient.client.then(
             (client) => {
-                return client.apis["Applications"].delete_applications__applicationId_({ applicationId: id },
+                return client.apis.Applications.delete_applications__applicationId_({ applicationId: id },
                     this._requestMetaData());
-            });
+            }
+        );
         return promised_delete.then(response => response.ok);
     }
 }
 
 Application.KEY_TYPES = {
-    PRODUCTION: "PRODUCTION",
-    SANDBOX: "SANDBOX"
+    PRODUCTION: 'PRODUCTION',
+    SANDBOX: 'SANDBOX',
 };
