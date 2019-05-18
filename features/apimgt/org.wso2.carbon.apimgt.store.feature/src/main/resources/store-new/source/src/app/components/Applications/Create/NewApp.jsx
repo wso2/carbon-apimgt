@@ -28,6 +28,7 @@ import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
 import ApplicationCreate from '../../Shared/AppsAndKeys/ApplicationCreate';
+import Alert from '../../Shared/Alert';
 /**
  *
  *
@@ -96,18 +97,17 @@ class NewApp extends React.Component {
      * @memberof NewApp
      */
     saveApplication = () => {
-        const promised_create = this.applicationCreate.handleSubmit();
-        if (promised_create) {
-            const that = this;
-            promised_create
+        const promisedCreate = this.applicationCreate.handleSubmit();
+        if (promisedCreate !== null) {
+            promisedCreate
                 .then((response) => {
                     const appCreated = JSON.parse(response.data);
                     // Once application loading fixed this need to pass application ID and load app
                     console.log('Application created successfully.');
-                    that.setState({ open: false });
-                    that.props.updateApps();
+                    this.setState({ open: false });
+                    this.props.updateApps();
                 })
-                .catch((error_response) => {
+                .catch((errorResponse) => {
                     Alert.error('Application already exists.');
                     console.log('Error while creating the application');
                 });
