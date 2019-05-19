@@ -16,11 +16,9 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
-
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -35,12 +33,19 @@ import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
-import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -54,12 +59,13 @@ public class BasicAuthCredentialValidator {
     private static boolean gatewayBasicAuthResourceCacheInit = false;
 
     protected Log log = LogFactory.getLog(getClass());
-    private RemoteUserStoreManagerServiceStub remoteUserStoreManagerServiceStub;
+    private AuthenticationAdminStub authAdminStub;
+    private String host;
 
     /**
      * Initialize the validator.
      */
-    public BasicAuthCredentialValidator() {
+    BasicAuthCredentialValidator() {
     }
 
     /**
@@ -68,7 +74,7 @@ public class BasicAuthCredentialValidator {
      * @param env the synapse environment
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    public BasicAuthCredentialValidator(SynapseEnvironment env) throws APISecurityException {
+    BasicAuthCredentialValidator(SynapseEnvironment env) throws APISecurityException {
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
         this.getGatewayUsernameCache();
 
@@ -80,14 +86,17 @@ public class BasicAuthCredentialValidator {
         }
 
         try {
-            remoteUserStoreManagerServiceStub = new RemoteUserStoreManagerServiceStub(configurationContext, url +
-                    "RemoteUserStoreManagerService");
+            authAdminStub = new AuthenticationAdminStub(configurationContext, url +
+                    "AuthenticationAdmin");
         } catch (AxisFault axisFault) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage());
         }
-        ServiceClient svcClient = remoteUserStoreManagerServiceStub._getServiceClient();
-        CarbonUtils.setBasicAccessSecurityHeaders(config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME),
-                config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD), svcClient);
+
+        try {
+            host = new URL(url).getHost();
+        } catch (MalformedURLException e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+        }
     }
 
     /**
@@ -99,6 +108,13 @@ public class BasicAuthCredentialValidator {
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
     public boolean validate(String username, String password) throws APISecurityException { //TODO:observability
+        //validate tenant
+        String resourceTenant = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        if (!MultitenantUtils.getTenantDomain(username).equals(resourceTenant)) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                    APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+        }
+        
         String providedPasswordHash = null;
         if (gatewayKeyCacheEnabled) {
             providedPasswordHash = hashString(password);
@@ -115,8 +131,8 @@ public class BasicAuthCredentialValidator {
 
         boolean authenticated;
         try {
-            authenticated = remoteUserStoreManagerServiceStub.authenticate(username, password);
-        } catch (Exception e) {
+            authenticated = authAdminStub.login(username, password, host);
+        } catch (RemoteException | LoginAuthenticationExceptionException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
         }
 
@@ -157,25 +173,39 @@ public class BasicAuthCredentialValidator {
                 String resourceRoles = null;
                 Path path = swagger.getPath(apiElectedResource);
                 if (path != null) {
-                    if (httpMethod.equals(APIConstants.HTTP_GET)) {
-                        resourceRoles = (String) path.getGet().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
-                    } else if (httpMethod.equals(APIConstants.HTTP_POST)) {
-                        resourceRoles = (String) path.getPost().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
-                    } else if (httpMethod.equals(APIConstants.HTTP_PUT)) {
-                        resourceRoles = (String) path.getPut().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
-                    } else if (httpMethod.equals(APIConstants.HTTP_DELETE)) {
-                        resourceRoles = (String) path.getDelete().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
+                    switch (httpMethod) {
+                        case APIConstants.HTTP_GET:
+                            resourceRoles = (String) path.getGet().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
+                            break;
+                        case APIConstants.HTTP_POST:
+                            resourceRoles = (String) path.getPost().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
+                            break;
+                        case APIConstants.HTTP_PUT:
+                            resourceRoles = (String) path.getPut().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
+                            break;
+                        case APIConstants.HTTP_DELETE:
+                            resourceRoles = (String) path.getDelete().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
+                            break;
                     }
                 }
                 if (StringUtils.isNotBlank(resourceRoles)) {
-                    String[] user_roles;
+                    String[] userRoles;
+
+                    String tenantDomain = MultitenantUtils.getTenantDomain(username);
                     try {
-                        user_roles = remoteUserStoreManagerServiceStub.getRoleListOfUser(username);
-                    } catch (Exception e) {
+                        int tenantId = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+                                .getRealmService().getTenantManager().getTenantId(tenantDomain);
+
+                        UserStoreManager manager = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+                                .getInstance().getRealmService()
+                                .getTenantUserRealm(tenantId).getUserStoreManager();
+
+                        userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+                    } catch (UserStoreException e) {
                         throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
                     }
                     // check if the roles related to the API resource contains any of the role of the user
-                    for (String role : user_roles) {
+                    for (String role : userRoles) {
                         if (resourceRoles.contains(role)) {
                             if (gatewayKeyCacheEnabled) {
                                 getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
@@ -248,9 +278,9 @@ public class BasicAuthCredentialValidator {
             byte[] bytes = md.digest();
             //This bytes[] has bytes in decimal format;
             //Convert it to hexadecimal format
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < bytes.length; i++) {
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            StringBuilder sb = new StringBuilder();
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
             }
             //Get complete hashed str in hex format
             generatedHash = sb.toString();
@@ -270,12 +300,12 @@ public class BasicAuthCredentialValidator {
         if (!gatewayBasicAuthResourceCacheInit) {
             gatewayBasicAuthResourceCacheInit = true;
             if (apimGWCacheExpiry != null) {
-                return createCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME,
+                return createCache(APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME,
                         Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
             } else {
                 long defaultCacheTimeout =
                         getDefaultCacheTimeout();
-                return createCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME,
+                return createCache(APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME,
                         defaultCacheTimeout, defaultCacheTimeout);
             }
         }
@@ -292,12 +322,12 @@ public class BasicAuthCredentialValidator {
         if (!gatewayUsernameCacheInit) {
             gatewayUsernameCacheInit = true;
             if (apimGWCacheExpiry != null) {
-                return createCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_USERNAME_CACHE_NAME,
+                return createCache(APIConstants.GATEWAY_USERNAME_CACHE_NAME,
                         Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
             } else {
                 long defaultCacheTimeout =
                         getDefaultCacheTimeout();
-                return createCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_USERNAME_CACHE_NAME,
+                return createCache(APIConstants.GATEWAY_USERNAME_CACHE_NAME,
                         defaultCacheTimeout, defaultCacheTimeout);
             }
         }
@@ -316,11 +346,11 @@ public class BasicAuthCredentialValidator {
         if (!gatewayUsernameCacheInit) {
             gatewayUsernameCacheInit = true;
             if (apimGWCacheExpiry != null) {
-                return createCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME,
+                return createCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME,
                         Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
             } else {
                 long defaultCacheTimeout = getDefaultCacheTimeout();
-                return createCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME,
+                return createCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME,
                         defaultCacheTimeout, defaultCacheTimeout);
             }
         }
@@ -330,15 +360,14 @@ public class BasicAuthCredentialValidator {
     /**
      * Create the Cache object from the given parameters.
      *
-     * @param cacheManagerName name of the cache manager
-     * @param cacheName        name of the Cache
-     * @param modifiedExp      value of the modified expiry type
-     * @param accessExp        value of the accessed expiry type
+     * @param cacheName   name of the Cache
+     * @param modifiedExp value of the modified expiry type
+     * @param accessExp   value of the accessed expiry type
      * @return the cache object
      */
-    private Cache createCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
+    private Cache createCache(final String cacheName, final long modifiedExp,
                               long accessExp) {
-        return APIUtil.getCache(cacheManagerName, cacheName, modifiedExp, accessExp);
+        return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, cacheName, modifiedExp, accessExp);
     }
 
     /**
