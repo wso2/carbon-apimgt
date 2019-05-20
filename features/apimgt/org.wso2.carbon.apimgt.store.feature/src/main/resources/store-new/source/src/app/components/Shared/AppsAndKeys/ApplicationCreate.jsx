@@ -129,14 +129,13 @@ class ApplicationCreate extends Component {
     /**
      *
      *
-     * @returns
+     * @returns {promise}
      * @memberof ApplicationCreate
      */
     handleSubmit() {
         const { name, quota, description } = this.state;
         if (!name) {
-            Alert.error('Application name is required');
-            return null;
+            return Promise.reject(new Error('Application name is required'));
         } else {
             const applicationData = {
                 name,
@@ -151,7 +150,7 @@ class ApplicationCreate extends Component {
     /**
      *
      *
-     * @returns
+     * @returns {Component}
      * @memberof ApplicationCreate
      */
     render() {

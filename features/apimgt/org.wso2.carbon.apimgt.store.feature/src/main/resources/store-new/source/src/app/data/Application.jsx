@@ -63,10 +63,14 @@ export default class Application extends Resource {
      */
     getKeys(keyType) {
         const promiseKeys = this.client.then((client) => {
-            return client.apis.Applications.get_applications__applicationId__keys({ applicationId: this.id });
+            console.log(client.apis['Application Keys']);
+
+            return client.apis['Application Keys']
+                .get_applications__applicationId__keys({ applicationId: this.applicationId });
         });
         return promiseKeys.then((keysResponse) => {
-            this._setKeys(keysResponse.obj);
+            console.log(keysResponse);
+            this._setKeys(keysResponse.obj.list);
             return this.keys;
         });
     }
@@ -114,7 +118,7 @@ export default class Application extends Resource {
                 tokenType,
             };
             const payload = { applicationId: this.id, body: requestContent };
-            return client.apis.Applications.post_applications__applicationId__generate_keys(payload);
+            return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload);
         });
         return promisedKeys.then((keysResponse) => {
             this.keys.set(keyType, keysResponse.obj);

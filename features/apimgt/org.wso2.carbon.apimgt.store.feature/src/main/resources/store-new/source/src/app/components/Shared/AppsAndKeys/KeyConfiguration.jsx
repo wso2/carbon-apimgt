@@ -71,8 +71,9 @@ class KeyConfiguration extends React.Component {
             application: null,
             tokenType: 'OAUTH',
         };
-        if(this.props.selectedApp){
+        if (this.props.selectedApp) {
             this.appId = this.props.selectedApp.appId || this.props.selectedApp.value;
+            this.application = Application.get(this.appId);
         }
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
         this.handleTextChange = this.handleTextChange.bind(this);
@@ -82,7 +83,7 @@ class KeyConfiguration extends React.Component {
     /**
      *
      *
-     * @param {*} event
+     * @param {*} event onchange ecvent
      * @memberof KeyConfiguration
      */
     handleTextChange(event) {
@@ -102,7 +103,7 @@ class KeyConfiguration extends React.Component {
     /**
      *
      *
-     * @param {*} event
+     * @param {object} event onchange event
      * @memberof KeyConfiguration
      */
     handleCheckboxChange(event) {
@@ -130,7 +131,7 @@ class KeyConfiguration extends React.Component {
     /**
      *
      *
-     * @param {*} event
+     * @param {object} event onchange event
      * @memberof KeyConfiguration
      */
     handleTokenTypeChange(event) {
@@ -138,7 +139,7 @@ class KeyConfiguration extends React.Component {
         const { keyType } = this.props;
         const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
-            keyType: keyType,
+            keyType,
             tokenType: this.state.tokenType,
         };
         keys.tokenType = event.target.value;
@@ -150,7 +151,7 @@ class KeyConfiguration extends React.Component {
     /**
      *
      *
-     * @returns
+     * @returns {boolean}
      * @memberof KeyConfiguration
      */
     getKeyStatus() {
@@ -160,7 +161,7 @@ class KeyConfiguration extends React.Component {
     /**
      * We have to wrap the two update and generate methods in a single mehtod.
      *
-     * @returns
+     * @returns {promise}
      * @memberof KeyConfiguration
      */
     keygenWrapper() {
@@ -174,34 +175,34 @@ class KeyConfiguration extends React.Component {
     /**
      * Fetch Application object by ID coming from URL path params and fetch related keys to display
      *
-     * @returns
+     * @returns {promise}
      * @memberof KeyConfiguration
      */
     generateKeys() {
-        const { application } = this.state;
         const { keyType } = this.props;
-        const keys = application.keys.get(keyType) || {
-            supportedGrantTypes: ['client_credentials'],
-        };
-        if (!keys.callbackUrl) {
-            keys.callbackUrl = 'https://wso2.am.com';
-        }
-        const keyPromiss = application.generateKeys(keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.tokenType);
-        return keyPromiss;
+        return this.application.then((application) => {
+            const keys = application.keys.get(keyType) || {
+                supportedGrantTypes: ['client_credentials'],
+            };
+            if (!keys.callbackUrl) {
+                keys.callbackUrl = 'https://wso2.am.com';
+            }
+            return application.generateKeys(keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.tokenType);
+        });
     }
 
     /**
      *
      *
-     * @returns
+     * @returns {promise}
      * @memberof KeyConfiguration
      */
     updateKeys() {
         const { application } = this.state;
         const { keyType } = this.props;
         const keys = application.keys.get(keyType);
-        const updatePromiss = application.updateKeys(keys.tokenType, keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
-        return updatePromiss;
+        return application.updateKeys(keys.tokenType, keyType, keys.supportedGrantTypes,
+            keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
     }
 
     /**
@@ -210,18 +211,17 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     componentDidMount() {
-        if(this.appId) {
-            const promised_app = Application.get(this.appId);
-            promised_app
-                .then((application) => {
-                    application.getKeys().then(() => this.setState({ application }));
+        if (this.appId) {
+            this.application.then(application => application.getKeys())
+                .then((resp) => {
+                    console.log(resp);
+                    this.setState({ application });
                 })
                 .catch((error) => {
                     if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
+                        console.error(error);
                     }
-                    const status = error.status;
-                    if (status === 404) {
+                    if (error.status === 404) {
                         this.setState({ notFound: true });
                     }
                 });
@@ -231,7 +231,7 @@ class KeyConfiguration extends React.Component {
     /**
      *
      *
-     * @returns
+     * @returns {Component}
      * @memberof KeyConfiguration
      */
     render() {
@@ -243,8 +243,11 @@ class KeyConfiguration extends React.Component {
         // if (!this.state.application) {
         //     return <Loading />;
         // }
-        let csCkKeys, consumerKey, supportedGrantTypes, callbackUrl;
-        if(application){
+        let csCkKeys,
+            consumerKey,
+            supportedGrantTypes,
+            callbackUrl;
+        if (application) {
             csCkKeys = this.state.application.keys.get(keyType);
             consumerKey = csCkKeys && csCkKeys.consumerKey;
             supportedGrantTypes = csCkKeys && csCkKeys.supportedGrantTypes;
@@ -256,7 +259,7 @@ class KeyConfiguration extends React.Component {
                 this.hasKeys = false;
             }
         }
-        
+
         return (
             <React.Fragment>
                 <FormControl className={classes.FormControl} component='fieldset'>
