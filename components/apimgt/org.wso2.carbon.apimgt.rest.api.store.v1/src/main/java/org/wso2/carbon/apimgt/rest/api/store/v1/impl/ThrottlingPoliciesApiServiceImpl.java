@@ -5,6 +5,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ThrottlingPolicy;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -49,8 +50,53 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
     @Override
     public Response throttlingPoliciesPolicyLevelPolicyIdGet(String tierId, String tierLevel, String xWSO2Tenant,
             String ifNoneMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            }
+
+            TierDTO.TierLevelEnum tierType;
+            Tier foundTier = null;
+
+            if (StringUtils.isBlank(policyLevel)) {
+                RestApiUtil.handleBadRequest("policyLevel cannot be empty", log);
+            }
+
+            //retrieves the tier based on the given tier-level
+            if (ThrottlingPolicyDTO.PolicyLevelEnum.subscription.toString().equals(policyLevel)) {
+                tierType = TierDTO.TierLevelEnum.subscription;
+                foundTier = APIUtil.getTierFromCache(tierName, requestedTenantDomain);
+            } else if (TierDTO.TierLevelEnum.application.toString().equals(policyLevel)) {
+                tierType = TierDTO.TierLevelEnum.application;
+                Map<String, Tier> appTierMap = APIUtil
+                        .getTiers(APIConstants.TIER_APPLICATION_TYPE, requestedTenantDomain);
+                if (appTierMap != null) {
+                    foundTier = RestApiUtil.findTier(appTierMap.values(), tierName);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(
+                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), log);
+                return null;
+            }
+
+            //returns if the tier is found, otherwise send 404
+            if (foundTier != null) {
+                return Response.ok()
+                        .entity(ThrottlingPolicyMappingUtil.fromTierToDTO(foundTier, tierType.toString()))
+                        .build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, tierName, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the tier with name " + tierName;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     public List<ThrottlingPolicy> getThrottlingPolicyList(String policyLevel,String xWSO2Tenant) {
