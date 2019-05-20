@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.ThrottlingPolicy;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -41,7 +41,7 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
 
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
-            List<ThrottlingPolicy> throttlingPolicyList = new ArrayList<>();
+            List<Tier> throttlingPolicyList = new ArrayList<>();
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
@@ -53,7 +53,7 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
 
             //retrieves the tier based on the given tier-level
             if (ThrottlingPolicyDTO.PolicyLevelEnum.subscription.toString().equals(policyLevel)) {
-                Map<String, ThrottlingPolicy> apiTierMap = APIUtil.getThrottlingPolicies(
+                Map<String, Tier> apiTierMap = APIUtil.getTiers(
                         APIConstants.TIER_API_TYPE, requestedTenantDomain);
                 if (apiTierMap != null) {
 
@@ -62,8 +62,8 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
 
                     Set<TierPermission> TierPermissions = apiConsumer.getTierPermissions();
                     for (TierPermission tierPermission : TierPermissions) {
-                        ThrottlingPolicy tier = apiTierMap.get(tierPermission.getTierName());
-                        tier.setThrottlingPolicyPermission(tierPermission);
+                        Tier tier = apiTierMap.get(tierPermission.getTierName());
+                        tier.setTierPermission(tierPermission);
                         apiTierMap.put(tierPermission.getTierName(), tier);
                     }
 
@@ -77,8 +77,8 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
                     throttlingPolicyList.addAll(apiTierMap.values());
                 }
             } else if (TierDTO.TierLevelEnum.application.toString().equals(policyLevel)) {
-                Map<String, ThrottlingPolicy> appTierMap =
-                        APIUtil.getThrottlingPolicies(APIConstants.TIER_APPLICATION_TYPE, requestedTenantDomain);
+                Map<String, Tier> appTierMap =
+                        APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, requestedTenantDomain);
                 if (appTierMap != null) {
                     throttlingPolicyList.addAll(appTierMap.values());
                 }
@@ -101,8 +101,53 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
     }
 
     @Override
-    public Response throttlingPoliciesPolicyLevelPolicyIdGet(String tierId, String tierLevel, String xWSO2Tenant, String ifNoneMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response throttlingPoliciesPolicyLevelPolicyIdGet(String tierName, String policyLevel, String xWSO2Tenant, String ifNoneMatch) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            }
+
+            TierDTO.TierLevelEnum tierType;
+            Tier foundTier = null;
+
+            if (StringUtils.isBlank(policyLevel)) {
+                RestApiUtil.handleBadRequest("policyLevel cannot be empty", log);
+            }
+
+            //retrieves the tier based on the given tier-level
+            if (ThrottlingPolicyDTO.PolicyLevelEnum.subscription.toString().equals(policyLevel)) {
+                tierType = TierDTO.TierLevelEnum.subscription;
+                foundTier = APIUtil.getTierFromCache(tierName, requestedTenantDomain);
+            } else if (TierDTO.TierLevelEnum.application.toString().equals(policyLevel)) {
+                tierType = TierDTO.TierLevelEnum.application;
+                Map<String, Tier> appTierMap = APIUtil
+                        .getTiers(APIConstants.TIER_APPLICATION_TYPE, requestedTenantDomain);
+                if (appTierMap != null) {
+                    foundTier = RestApiUtil.findTier(appTierMap.values(), tierName);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(
+                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), log);
+                return null;
+            }
+
+            //returns if the tier is found, otherwise send 404
+            if (foundTier != null) {
+                return Response.ok()
+                        .entity(ThrottlingPolicyMappingUtil.fromTierToDTO(foundTier, tierType.toString()))
+                        .build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, tierName, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the tier with name " + tierName;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 }
