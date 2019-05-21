@@ -1187,9 +1187,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
-
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         List<APIResponseFaultCount> faultyData = this
-                .getAPIResponseFaultCountData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG, fromDate,
+                .getAPIResponseFaultCountData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG, tenantDomain, fromDate,
                         toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResponseFaultCountDTO> faultyCount = new ArrayList<APIResponseFaultCountDTO>();
@@ -1370,13 +1370,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method find the API fault count data
      *
      * @param tableName Name of the table data exist
+     * @param tenantDomain Tenant Domain
      * @param fromDate  starting data
      * @param toDate    ending date
      * @return list of APIResponseFaultCount
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIResponseFaultCount> getAPIResponseFaultCountData(String tableName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<APIResponseFaultCount> getAPIResponseFaultCountData(String tableName, String tenantDomain,
+            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
         List<APIResponseFaultCount> faultUsage = new ArrayList<APIResponseFaultCount>();
         try {
             String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
@@ -1391,8 +1392,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             String query =
-                    "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
-                            + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='"
+                            + tenantDomain + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
+                            + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_VERSION + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                             + APIUsageStatisticsClientConstants.API_CONTEXT + ", sum("
@@ -1400,7 +1402,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_VERSION + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                            + APIUsageStatisticsClientConstants.API_CONTEXT + "  order by " 
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + "  order by "
                             + APIUsageStatisticsClientConstants.API_NAME + " ASC ;";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_FAULT_SUMMARY_SIDDHI_APP,
