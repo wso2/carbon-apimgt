@@ -97,21 +97,22 @@ class NewApp extends React.Component {
      * @memberof NewApp
      */
     saveApplication = () => {
-        const promisedCreate = this.applicationCreate.handleSubmit();
-        if (promisedCreate !== null) {
-            promisedCreate
-                .then((response) => {
-                    const appCreated = JSON.parse(response.data);
-                    // Once application loading fixed this need to pass application ID and load app
-                    console.log('Application created successfully.');
-                    this.setState({ open: false });
-                    this.props.updateApps();
-                })
-                .catch((errorResponse) => {
-                    Alert.error('Application already exists.');
-                    console.log('Error while creating the application');
-                });
-        }
+        this.applicationCreate.handleSubmit()
+            .then((response) => {
+                const appCreated = JSON.parse(response.data);
+                // Once application loading fixed this need to pass application ID and load app
+                console.log('Application created successfully.');
+                this.setState({ open: false });
+                this.props.updateApps();
+            })
+            .catch((error) => {
+                if (error.message === 'Conflict') {
+                    Alert.error('Application already exists');
+                } else {
+                    Alert.error(error.message);
+                }
+                console.error('Error while creating the application');
+            });
     };
 
     /**
