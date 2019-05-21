@@ -22,8 +22,10 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -110,5 +112,20 @@ public class APIAdminImpl implements APIAdmin {
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication)
             throws APIManagementException {
         return apiMgtDAO.getApplicationsCount(tenantId, searchOwner, searchApplication);
+    }
+
+    /*
+    *get Honeypot API alerts from the database
+     */
+    public List<HoneyPotAPIAlertData> getAlert()throws APIManagementException{
+        return apiMgtDAO.getAlerts();
+    }
+
+    public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
+        apiMgtDAO.deleteHoneyPotAlert(messageID);
+    }
+
+    public void addHoneyPotAPiEmailAlertConfiguration(String username, String emailList) throws APIManagementException, SQLException {
+        apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(username,emailList);
     }
 }

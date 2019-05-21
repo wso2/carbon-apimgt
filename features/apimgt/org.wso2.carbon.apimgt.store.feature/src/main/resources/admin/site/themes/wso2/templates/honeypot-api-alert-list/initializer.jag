@@ -1,0 +1,7 @@
+<%
+jagg.initializer("honeypot-api-alert-list", {
+    preInitialize:function (){
+        jagg.addHeaderJS("honeypot-api-alert-list", "jagg", "templates/honeypot-api-alert-list/js/manage.js");
+    }
+});
+%>

@@ -1,0 +1,12 @@
+<%
+jagg.module("honeypot-api-alerts", {
+
+    getAlert:function () {
+        return jagg.require(jagg.getModulesDir() + "honeypot-api-alerts/alert-list.jag").getAlert.apply(this, arguments);
+    },
+    deleteHoneyPotAlert:function () {
+        return jagg.require(jagg.getModulesDir() + "honeypot-api-alerts/alert-list.jag").deleteAlert.apply(this, arguments);
+    }
+
+});
+%>
