@@ -246,9 +246,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
                 //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this
                 // will throw an APIMgtAuthorizationFailedException with the reason as the message
-                RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, subscriptionDTO.getTier());
+                RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, subscriptionDTO.getThrottlingPolicy());
 
-                apiIdentifier.setTier(subscriptionDTO.getTier());
+                apiIdentifier.setTier(subscriptionDTO.getThrottlingPolicy());
                 SubscriptionResponse subscriptionResponse = apiConsumer
                         .addSubscription(apiIdentifier, username, application.getId());
                 SubscribedAPI addedSubscribedAPI = apiConsumer
@@ -274,8 +274,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                     //unhandled exception
                     RestApiUtil.handleInternalServerError(
                             "Error while adding the subscription API:" + subscriptionDTO.getApiId() +
-                                    ", application:" + subscriptionDTO.getApplicationId() + ", tier:" +
-                                    subscriptionDTO.getTier(), e, log);
+                                    ", application:" + subscriptionDTO.getApplicationId() + ", throttling policy:" +
+                                    subscriptionDTO.getThrottlingPolicy(), e, log);
                 }
             }
         }
