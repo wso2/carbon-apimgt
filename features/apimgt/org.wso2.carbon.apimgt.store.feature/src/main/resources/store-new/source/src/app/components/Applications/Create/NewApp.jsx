@@ -108,8 +108,7 @@ class NewApp extends React.Component {
             .catch((error) => {
                 const { response } = error;
                 if (response && response.body) {
-                    const message = response.body.description ? response.body.description
-                        : 'Error while creating the application';
+                    const message = response.body.description || 'Error while creating the application';
                     Alert.error(message);
                 } else {
                     Alert.error(error.message);
