@@ -106,8 +106,11 @@ class NewApp extends React.Component {
                 this.props.updateApps();
             })
             .catch((error) => {
-                if (error.message === 'Conflict') {
-                    Alert.error('Application already exists');
+                const { response } = error;
+                if (response && response.body) {
+                    const message = response.body.description ? response.body.description
+                        : 'Error while creating the application';
+                    Alert.error(message);
                 } else {
                     Alert.error(error.message);
                 }
