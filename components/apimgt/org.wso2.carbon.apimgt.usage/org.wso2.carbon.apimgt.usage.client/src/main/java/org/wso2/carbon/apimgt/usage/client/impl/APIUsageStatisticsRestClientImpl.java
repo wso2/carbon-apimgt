@@ -772,8 +772,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_PER_APP_AGG,
-                fromDate, toDate);
+                tenantDomain, fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
         for (APIUsage usage : usageData) {
@@ -807,10 +808,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the usage data for a given API across all versions
      *
      * @param tableName name of the table in the database
+     * @param tenantDomain Tenant Domain
+     * @param fromDate From date
+     * @param toDate To date
      * @return a collection containing the API usage data
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<APIUsage> getAPIUsageData(String tableName, String fromDate, String toDate)
+    private Collection<APIUsage> getAPIUsageData(String tableName, String tenantDomain, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsage> usageDataList = new ArrayList<APIUsage>();
@@ -826,13 +830,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
-            String query = "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
-                    + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
-                    + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
-                    + APIUsageStatisticsClientConstants.API_VERSION + ", sum("
-                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as aggregateSum group by "
-                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CONTEXT
-                    + ", " + APIUsageStatisticsClientConstants.API_VERSION + ";";
+            String query =
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='"
+                            + tenantDomain + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
+                            + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                            + APIUsageStatisticsClientConstants.API_VERSION + ", sum("
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as aggregateSum group by "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                            + APIUsageStatisticsClientConstants.API_VERSION + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
