@@ -62,17 +62,12 @@ export default class Application extends Resource {
      * @returns {promise} Set the fetched CS/CK into current instance and return keys array as Promise object
      */
     getKeys(keyType) {
-        const promiseKeys = this.client.then((client) => {
-            console.log(client.apis['Application Keys']);
-
-            return client.apis['Application Keys']
-                .get_applications__applicationId__keys({ applicationId: this.applicationId });
-        });
-        return promiseKeys.then((keysResponse) => {
-            console.log(keysResponse);
-            this._setKeys(keysResponse.obj.list);
-            return this.keys;
-        });
+        return this.client.then(client => client.apis['Application Keys']
+            .get_applications__applicationId__keys({ applicationId: this.applicationId }))
+            .then((keysResponse) => {
+                this._setKeys(keysResponse.obj.list);
+                return this.keys;
+            });
     }
 
     /** *
