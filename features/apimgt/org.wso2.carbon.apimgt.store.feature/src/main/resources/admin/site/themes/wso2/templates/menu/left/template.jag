@@ -224,6 +224,17 @@
         </li>
         <% } %>
         <li class="nav-header">
+                  <a href="#"><i class="fw fw-configarations fw-2x" style="font-size:22px;"></i>HoneyPot API ALert List<i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
+                    <ul class="nav nav-pills secondary-nav collapse">
+                      <li <%if (reqUrl.match("honey-pot-api-alert-list")){%> class="active" <% } %>><a
+                        href="<%= jagg.url("/honey-pot-api-alert-list") %>"
+                        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                        <i class="fw fw-edit"></i>Alert List</a>
+                      </li>
+
+                    </ul>
+        </li>
+        <li class="nav-header">
           <a href="#"><i class="fw fw-statistics fw-2x" style="font-size:22px;"></i><%=i18n.localize("Analytics")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
           <ul class="nav nav-pills secondary-nav collapse">
             <li  <%if (reqUrl.match("analytics-api-availability")){%> class="active" <% } %>><a href="<%=apiAvailability%>"

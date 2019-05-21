@@ -25,12 +25,14 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -198,5 +200,19 @@ public class APIAdminImpl implements APIAdmin {
             log.error("Error while parsing the date ", e);
         }
         return time;
+    /*
+    *get Honeypot API alerts from the database
+     */
+    public List<HoneyPotAPIAlertData> getAlert()throws APIManagementException{
+        return apiMgtDAO.getAlerts();
+    }
+
+    public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
+        apiMgtDAO.deleteHoneyPotAlert(messageID);
+    }
+
+    public void addHoneyPotAPiEmailAlertConfiguration(String username, String emailList) throws APIManagementException, SQLException {
+        apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(username,emailList);
+
     }
 }

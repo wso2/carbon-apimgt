@@ -2772,7 +2772,7 @@ public class SQLConstants {
             "DELETE FROM AM_ALERT_TYPES_VALUES WHERE USER_NAME = ? AND STAKE_HOLDER = ?";
 
     public static final String DELETE_EMAILLIST_BY_EMAIL_LIST_ID  =
-            "DELETE FROM AM_ALERT_EMAILLIST_DETAILS   WHERE EMAIL_LIST_ID= ? ";
+                "DELETE FROM AM_ALERT_EMAILLIST_DETAILS   WHERE EMAIL_LIST_ID= ? ";
 
     public static final String GET_EMAILLISTID_BY_USERNAME_AND_STAKEHOLDER =
             " SELECT " +
@@ -3487,6 +3487,19 @@ public class SQLConstants {
 
         public static final String CHECK_CLIENT_CREDENTIALS_EXISTS = "SELECT CONSUMER_KEY,CONSUMER_SECRET " +
                 "FROM AM_SYSTEM_APPS WHERE NAME = ?";
+
+    public static class HoneyPotAPIDataConstants{
+        public static final String GET_HONEYPOT_API_ALERTS = " SELECT " + " * " + "FROM " + " HoneyPotAPIData ";
+
+        public static final String DELETE_HONEYPOT_API_ALERT_SQL = "DELETE FROM HoneyPotAPIData WHERE messageID = ?";
+
+        public static final String SAVE_EMAIL_LIST_DETAILS_QUERY =
+                " INSERT INTO AM_HONEYPOT_ALERT_EMAILLIST_DETAILS  (EMAIL_LIST_ID, EMAIL) " +
+                        " VALUES(?,?)";
+
+        public static final String ADD_ALERT_EMAIL_LIST =
+                " INSERT INTO AM_HONEYPOT_ALERT_EMAILLIST  (USER_NAME, STAKE_HOLDER) " +
+                        " VALUES(?,?)";
 
     }
 }

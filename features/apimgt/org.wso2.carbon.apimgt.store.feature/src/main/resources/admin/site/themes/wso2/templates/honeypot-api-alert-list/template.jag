@@ -1,0 +1,66 @@
+<% jagg.template("honeypot-api-alert-list", function(inputs, outputs, jagg) { %>
+
+<div id="listing">
+    <div class="page-header">
+        <h2>Honeypot API Alert List</h2>
+    </div>
+    <div class="content-section shadow-up">
+    <div class="content-data">
+
+    <%var log = new Log();
+      new Log('test').info(outputs);
+    if(outputs.alertData.size()) { %>
+    <table class="table table-responsive table-striped" >
+        <thead>
+            <tr>
+                <th class="">Record Number</th>
+                <th class="">Message ID</th>
+                <th class="">Api Method</th>
+                <th class="">Header Set</th>
+                <th class="">Message Body</th>
+                <th class="">Client IP</th>
+                <th class="">Remove</th>
+            </tr>
+        </thead>
+
+       <%
+         var log = new Log();
+         var ArrayList = Packages.java.util.ArrayList;
+         var alertInfo = outputs.alertData;
+         var AlertData =  Packages.org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
+
+        for(i=0; i < alertInfo.size(); i++) {
+            var alertData = new AlertData();
+            alertData = alertInfo.get(i);
+        %>
+
+        <tr>
+            <td><%print(i);%></td>
+            <td><%print(alertData.getMessageID());%></td>
+            <td><%print(alertData.getApiMethod());%></td>
+            <td><%print(alertData.getHeaderSet());%></td>
+            <td><%print(alertData.getMessageBody());%></td>
+            <td><%print(alertData.getClientIp());%></td>
+            <td class="text-right">
+            <a id="deleteButton" onclick="deleteAlert('<%=alertData.getMessageID()%>')" class="btn padding-reduce-on-grid-view">
+                    <span class="fw-stack">
+                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+                        <i class="fw fw-delete fw-stack-1x"></i>
+                    </span>
+                    <span class="hidden-xs"><%=i18n.localize("Delete")%></span>
+                </a>
+            </td>
+         </tr>
+         <%}%>
+    </table>
+    <%} else {%>
+    <div class="message message-info">
+   	    <h4><i class="icon fw fw-info"></i><%=i18n.localize("Microgateways are not defined")%></h4>
+   		<p><%=i18n.localize("Microgateways are not defined")%></p>
+   	</div>
+   <% }%>
+
+    </div>
+    </div>
+</div>
+<% }); %>
