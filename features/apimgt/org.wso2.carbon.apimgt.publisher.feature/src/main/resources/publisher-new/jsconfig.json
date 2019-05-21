@@ -13,5 +13,5 @@
     "include": [
         "./source"
     ],
-    "exclude": ["node_modules", "site", "services"]
+    "exclude": ["node_modules", "coverage" ,"site", "services"]
 }

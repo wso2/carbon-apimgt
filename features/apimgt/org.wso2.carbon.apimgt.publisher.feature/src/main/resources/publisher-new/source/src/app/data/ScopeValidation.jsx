@@ -107,7 +107,7 @@ ScopeValidation.propTypes = {
     resourceMethod: PropTypes.string.isRequired,
 };
 
-module.exports = {
+export {
     ScopeValidation,
     resourceMethod,
     resourcePath,
