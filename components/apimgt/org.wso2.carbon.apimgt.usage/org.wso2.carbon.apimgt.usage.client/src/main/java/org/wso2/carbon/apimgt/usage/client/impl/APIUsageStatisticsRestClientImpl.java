@@ -914,7 +914,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         Collection<APIUsageByResourcePath> usageData = this
                 .getAPIUsageByResourcePathData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
-                        fromDate, toDate);
+                        providerName, fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResourcePathUsageDTO> usageByResourcePath = new ArrayList<APIResourcePathUsageDTO>();
         for (APIUsageByResourcePath usage : usageData) {
@@ -1428,14 +1428,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method finds the Resource path usage of APIs
      *
      * @param tableName Name of the aggregation where the data exist
+     * @param providerName Name of the provider
      * @param fromDate  starting date
      * @param toDate    ending date
      * @return list of APIUsageByResourcePath
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String tableName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String tableName, String providerName,
+            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
         List<APIUsageByResourcePath> usage = new ArrayList<APIUsageByResourcePath>();
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         try {
             String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
@@ -1450,8 +1452,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
 
             String query =
-                    "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
-                            + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='"
+                            + tenantDomain + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
+                            + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_VERSION + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                             + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
