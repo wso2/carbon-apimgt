@@ -388,22 +388,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
 
             topApiUserQuery = new StringBuilder(
-                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on");
+                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on("
+                            + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                            + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName);
 
             if (!APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(version)) {
-                topApiUserQuery.append("(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' AND "
-                        + APIUsageStatisticsClientConstants.API_VERSION + "=='" + version + "') ");
-            } else {
-                topApiUserQuery.append(" " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' ");
+                topApiUserQuery.append("' AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + version);
             }
-
-            topApiUserQuery
-                    .append("within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
-                            + "' select " + APIUsageStatisticsClientConstants.USERNAME + ", "
-                            + APIUsageStatisticsClientConstants.API_CREATOR + ", sum("
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
-                            + ") as net_total_requests group by " + APIUsageStatisticsClientConstants.USERNAME + ", "
-                            + APIUsageStatisticsClientConstants.API_CREATOR + " order by net_total_requests DESC;");
+            topApiUserQuery.append("') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
+                    + granularity + "' select " + APIUsageStatisticsClientConstants.USERNAME + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", sum("
+                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as net_total_requests group by "
+                    + APIUsageStatisticsClientConstants.USERNAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
+                    + " order by net_total_requests DESC;");
 
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
@@ -878,10 +875,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate,
             String toDate) throws APIMgtUsageQueryServiceClientException {
-
+        String tenantDomain = null;
+        if (providerName != null) {
+            tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        }
         List<APIUsage> usageData = this
-                .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, fromDate, toDate,
-                        apiName);
+                .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, tenantDomain,
+                        fromDate, toDate, apiName);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
         for (APIUsage usage : usageData) {
@@ -1591,7 +1591,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private long getTotalRequestCountOfAPIVersion(String tableName, String apiName, String tenantDomain,
             String apiVersion, String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
-        List<APIUsage> apiUsages = getUsageByAPIVersionsData(tableName, fromDate, toDate, apiName);
+        List<APIUsage> apiUsages = getUsageByAPIVersionsData(tableName, tenantDomain, fromDate, toDate, apiName);
         long totalRequestCount = 0;
         Pattern tenantContextPattern;
         boolean match;
@@ -1626,8 +1626,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIUsage
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIUsage> getUsageByAPIVersionsData(String tableName, String fromDate, String toDate, String apiName)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<APIUsage> getUsageByAPIVersionsData(String tableName, String tenantDomain, String fromDate,
+            String toDate, String apiName) throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsage> usageDataList = new ArrayList<APIUsage>();
         try {
@@ -1645,8 +1645,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
 
-                query = "from " + tableName + " on " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName
-                        + "' within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
+                query = "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN
+                        + "=='" + tenantDomain + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName
+                        + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
                         + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
                         + APIUsageStatisticsClientConstants.API_VERSION + ", "
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
@@ -1657,8 +1658,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                         + APIUsageStatisticsClientConstants.API_CONTEXT + ";";
             } else {
-                query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on "
-                        + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'" + " within " + 0 + "L, "
+                query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on("
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain + "' AND "
+                        + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "') within " + 0 + "L, "
                         + new Date().getTime() + "L per 'months' select " + APIUsageStatisticsClientConstants.API_NAME
                         + ", " + APIUsageStatisticsClientConstants.API_VERSION + ", "
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
