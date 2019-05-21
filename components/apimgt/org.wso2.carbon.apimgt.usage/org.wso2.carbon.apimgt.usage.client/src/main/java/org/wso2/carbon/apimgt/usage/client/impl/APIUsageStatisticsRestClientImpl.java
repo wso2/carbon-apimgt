@@ -2013,9 +2013,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + "=='" + appName + "'");
             }
             query.append(") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
-                    + "' select " + APIUsageStatisticsClientConstants.TIME_STAMP + ", sum(coalesce("
-                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ",0L)) as success_request_count, sum(coalesce("
-                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ",0L)) as throttled_out_count group by "
+                    + "' select " + APIUsageStatisticsClientConstants.TIME_STAMP + ", sum("
+                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ") as success_request_count, sum("
+                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ") as throttled_out_count group by "
                     + APIUsageStatisticsClientConstants.TIME_STAMP + " order by "
                     + APIUsageStatisticsClientConstants.TIME_STAMP + " ASC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
@@ -2087,9 +2087,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
             query.append(") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
                     + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
-                    + APIUsageStatisticsClientConstants.API_CREATOR + ", sum(coalesce("
-                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ",0L)) as success_request_count, sum(coalesce("
-                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ",0L)) as throttleout_count group by "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", sum("
+                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ") as success_request_count, sum("
+                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ") as throttleout_count group by "
                     + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
                     + " order by " + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
