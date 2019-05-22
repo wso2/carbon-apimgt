@@ -129,29 +129,28 @@ class ApplicationCreate extends Component {
     /**
      *
      *
-     * @returns
+     * @returns {promise}
      * @memberof ApplicationCreate
      */
     handleSubmit() {
-        let promised_create;
-        if (!this.state.name) {
-            Alert.error('Application name is required');
+        const { name, quota, description } = this.state;
+        if (!name) {
+            return Promise.reject(new Error('Application name is required'));
         } else {
-            const application_data = {
-                name: this.state.name,
-                throttlingTier: this.state.quota,
-                description: this.state.description,
+            const applicationData = {
+                name,
+                throttlingPolicy: quota,
+                description,
             };
-            const new_api = new API();
-            promised_create = new_api.createApplication(application_data);
+            const newApi = new API();
+            return newApi.createApplication(applicationData);
         }
-        return promised_create;
     }
 
     /**
      *
      *
-     * @returns
+     * @returns {Component}
      * @memberof ApplicationCreate
      */
     render() {

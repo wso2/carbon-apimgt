@@ -22,7 +22,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 
-import GlobalNavBar from './Generic/GlobalNavBar';
+import GlobalNavBar from './Generic/GlobalNavbar';
 import GenericSearch from './Generic/GenericSearch';
 import Person from '@material-ui/icons/Person';
 import Popper from '@material-ui/core/Popper';

@@ -18,7 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -53,6 +55,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -265,6 +268,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
+    /**
+     * Deletes an application by id
+     *
+     * @param applicationId     application identifier
+     * @param ifMatch           If-Match header value
+     * @return 200 Response if successfully deleted the application
+     */
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -287,6 +297,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
+    /**
+     * Generate keys for a application
+     *
+     * @param applicationId     application identifier
+     * @param body              request body
+     * @return A response object containing application keys
+     */
     @Override
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO
             body) {
@@ -336,6 +353,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return null;
     }
 
+    /**
+     * Retrieve all keys of an application
+     *
+     * @param applicationId Application Id
+     * @return Application Key Information list
+     */
     @Override
     public Response applicationsApplicationIdKeysGet(String applicationId) {
 
@@ -389,25 +412,106 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
+    /**
+     * Retrieve Keys of an application by key type
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param groupId       Group id of application (if any)
+     * @return Application Key Information
+     */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType,
             String groupId) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+        List<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        for (APIKey apiKey : applicationKeys) {
+            if (keyType != null && keyType.equals(apiKey.getType())) {
+                ApplicationKeyDTO appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
+                return Response.ok().entity(appKeyDTO).build();
+            }
+        }
+        return null;
     }
 
+    /**
+     * Update grant types/callback URL
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param body          Grant type and callback URL information
+     * @return Updated Key Information
+     */
     @Override
     public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType,
             ApplicationKeyDTO body) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                    String grantTypes = StringUtils.join(body.getSupportedGrantTypes(), ',');
+                    JsonObject jsonParams = new JsonObject();
+                    jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
+                    jsonParams.addProperty(APIConstants.JSON_USERNAME, username);
+                    OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application.getName(),
+                            keyType, body.getCallbackUrl(), null, null, null, body.getGroupId(),
+                            new Gson().toJson(jsonParams));
+                    ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
+                    applicationKeyDTO.setCallbackUrl(updatedData.getCallBackURL());
+                    JsonObject json = new Gson().fromJson(updatedData.getJsonString(), JsonObject.class);
+                    if (json.get(APIConstants.JSON_GRANT_TYPES) != null) {
+                        String[] updatedGrantTypes = json.get(APIConstants.JSON_GRANT_TYPES).getAsString().split(" ");
+                        applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(updatedGrantTypes));
+                    }
+                    applicationKeyDTO.setConsumerKey(updatedData.getClientId());
+                    applicationKeyDTO.setConsumerSecret(updatedData.getClientSecret());
+                    applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(keyType));
+                    return Response.ok().entity(applicationKeyDTO).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
+        }
+        return null;
     }
 
+    /**
+     * Re generate consumer secret.
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @return A response object containing application keys.
+     */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId,
             String keyType) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            List<APIKey> applicationKeys = getApplicationKeys(applicationId);
+            for (APIKey apiKey : applicationKeys) {
+                if (keyType != null && keyType.equals(apiKey.getType())) {
+                    APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+                    String clientId = apiKey.getConsumerKey();
+                    String clientSecret = apiConsumer.renewConsumerSecret(clientId);
+
+                    ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
+                    applicationKeyDTO.setConsumerKey(clientId);
+                    applicationKeyDTO.setConsumerSecret(clientSecret);
+
+                    return Response.ok().entity(applicationKeyDTO).build();
+                }
+            }
+
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while re generating the consumer secret ", e, log);
+        }
+        return null;
     }
 
     @Override

@@ -184,14 +184,15 @@ class Credentials extends React.Component {
      *
      * @memberof Credentials
      */
-    handleSubscribe = () => {
+    handleSubscribe = (updateSubscriptionData) => {
         const promised_subscribe = this.subscribeToApi.createSubscription();
         if (promised_subscribe) {
             promised_subscribe
                 .then((response) => {
                     console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-                    this.setState({ open: false });
-                    alert('subscribed successfully');
+                    Alert.info('Subscribed successfully');
+                    if (updateSubscriptionData) updateSubscriptionData();
+                    this.setState({ 'openAvailable' : false });
                 })
                 .catch((error) => {
                     console.log('Error while creating the subscription.');
@@ -396,7 +397,7 @@ to
 Applications )
                                                             </Typography>
                                                         </div>
-                                                        <Button variant='contained' color='primary' className={classes.button} onClick={this.handleSubscribe}>
+                                                        <Button variant='contained' color='primary' className={classes.button} onClick={() => this.handleSubscribe(updateSubscriptionData)}>
                                                             Subscribe
                                                         </Button>
                                                     </Toolbar>
