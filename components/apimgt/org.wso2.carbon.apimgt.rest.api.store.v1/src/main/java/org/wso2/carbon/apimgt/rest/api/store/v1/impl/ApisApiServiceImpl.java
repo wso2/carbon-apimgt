@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -27,7 +28,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
@@ -49,12 +49,13 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.Response;
 
-public class ApisApiServiceImpl extends ApisApiService {
+public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     @Override
-    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch) {
+    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
+            MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
@@ -128,7 +129,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         APIDTO apiToReturn;
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
@@ -158,38 +159,38 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch) {
+    public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch) {
+    public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body, String ifMatch) {
+    public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset) {
+    public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdCommentsPost(String apiId, CommentDTO body) {
+    public Response apisApiIdCommentsPost(String apiId, CommentDTO body, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
-            String ifNoneMatch) {
+            String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
@@ -248,14 +249,14 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
-            String ifModifiedSince) {
+            String ifModifiedSince, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
-            String ifNoneMatch) {
+            String ifNoneMatch, MessageContext messageContext) {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -300,22 +301,21 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset) {
+    public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch
-    ) {
+    public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdSdksLanguageGet(String apiId, String language) {
+    public Response apisApiIdSdksLanguageGet(String apiId, String language, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     /**
@@ -327,7 +327,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String xWSO2Tenant) {
+    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
@@ -357,21 +357,22 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
-    @Override public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
+    @Override
+    public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdUserRatingPut(String apiId, RatingDTO body) {
+    public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant) {
+    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
 }

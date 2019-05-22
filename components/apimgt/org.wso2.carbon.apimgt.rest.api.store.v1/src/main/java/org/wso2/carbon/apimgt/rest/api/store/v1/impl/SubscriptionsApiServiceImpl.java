@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -52,7 +53,7 @@ import javax.ws.rs.core.Response;
 /**
  * This is the service implementation class for Store subscription related operations
  */
-public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
+public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
     private static final Log log = LogFactory.getLog(SubscriptionsApiServiceImpl.class);
 
@@ -71,7 +72,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsGet(String apiId, String applicationId, String apiType, Integer offset, Integer limit,
-            String ifNoneMatch) {
+            String ifNoneMatch, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
@@ -149,7 +150,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsPost(SubscriptionDTO body){
+    public Response subscriptionsPost(SubscriptionDTO body, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         APIConsumer apiConsumer;
@@ -219,7 +220,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @return list of newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsMultiplePost(List<SubscriptionDTO> body) {
+    public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
@@ -295,7 +296,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @return matched subscription as a SubscriptionDTO
      */
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch) {
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
+            MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
@@ -316,9 +318,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param subscriptionId    subscription identifier
      * @param ifMatch           If-Match header value
      * @return 200 response if successfully deleted the subscription
-     */    
+     */
     @Override
-    public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch) {
+    public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
+            MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
