@@ -212,26 +212,31 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return null;
     }
 
+    /**
+     * Create multiple new subscriptions with the list of subscription details specified in the body parameter
+     *
+     * @param body        list of new subscription details
+     * @return list of newly added subscription as a SubscriptionDTO if successful
+     */
     @Override
     public Response subscriptionsMultiplePost(List<SubscriptionDTO> body) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
         for (SubscriptionDTO subscriptionDTO : body) {
-            APIConsumer apiConsumer;
             try {
-                apiConsumer = RestApiUtil.getConsumer(username);
+                APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
                 String applicationId = subscriptionDTO.getApplicationId();
+                APIIdentifier apiIdentifier = APIMappingUtil
+                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), tenantDomain);
 
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
                 if (!org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils
-                        .isUserAccessAllowedForAPI(new APIIdentifier(subscriptionDTO.getApiId()))) {
+                        .isUserAccessAllowedForAPI(apiIdentifier)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API,
                             subscriptionDTO.getApiId(), log);
                 }
-                APIIdentifier apiIdentifier = APIMappingUtil
-                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), tenantDomain);
 
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
                 if (application == null) {
