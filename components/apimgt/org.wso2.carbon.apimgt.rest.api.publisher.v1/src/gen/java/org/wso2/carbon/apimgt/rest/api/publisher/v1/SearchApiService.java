@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
@@ -18,5 +19,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SearchApiService {
-      public Response searchGet(Integer limit, Integer offset, String query, String ifNoneMatch, SecurityContext securityContext);
+      public Response searchGet(Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext);
 }

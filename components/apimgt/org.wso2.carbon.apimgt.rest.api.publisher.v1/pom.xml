@@ -176,7 +176,7 @@
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                             </configOptions>
                             <output>.</output>
-                            <templateDirectory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-stub-templates</templateDirectory>
+                            <templateDirectory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates</templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
                         </configuration>

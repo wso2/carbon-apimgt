@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
@@ -14,15 +15,14 @@ import java.util.List;
 import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 
 public class ImportApiServiceImpl implements ImportApiService {
-      public Response importApisPost(InputStream fileInputStream, Attachment fileDetail, String provider, SecurityContext securityContext) {
+      public Response importApisPost(InputStream fileInputStream, Attachment fileDetail, String provider, MessageContext messageContext) {
       // do some magic!
       return Response.ok().entity("magic!").build();
   }
-      public Response importApisPut(InputStream fileInputStream, Attachment fileDetail, String provider, SecurityContext securityContext) {
+      public Response importApisPut(InputStream fileInputStream, Attachment fileDetail, String provider, MessageContext messageContext) {
       // do some magic!
       return Response.ok().entity("magic!").build();
   }

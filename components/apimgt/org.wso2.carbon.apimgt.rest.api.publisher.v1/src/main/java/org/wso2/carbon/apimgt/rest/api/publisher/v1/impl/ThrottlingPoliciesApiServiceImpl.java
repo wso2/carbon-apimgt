@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -37,7 +38,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * This is the service implementation class for Publisher throttling policies related operations
@@ -57,7 +57,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
      */
     @Override
     public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset,
-            String ifNoneMatch,SecurityContext context) {
+            String ifNoneMatch,MessageContext messageContext) {
 
         //pre-processing
         //setting default limit and offset if they are null
@@ -111,7 +111,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
      */
     @Override
     public Response getThrottlingPolicyByName(String policyName, String policyLevel, String ifNoneMatch,
-            SecurityContext context) {
+            MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             ThrottlingPolicyDTO.PolicyLevelEnum policyLevelEnum;
@@ -134,7 +134,8 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(
-                        "policyLevel should be one of " + Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()), log);
+                        "policyLevel should be one of " + Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()),
+                        log);
                 return null;
             }
 

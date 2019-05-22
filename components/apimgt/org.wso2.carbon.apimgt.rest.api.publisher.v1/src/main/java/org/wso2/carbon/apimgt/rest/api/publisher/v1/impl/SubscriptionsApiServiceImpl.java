@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
@@ -14,24 +15,29 @@ import java.util.List;
 import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 
 public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
-      public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch, SecurityContext securityContext) {
-      // do some magic!
-      return Response.ok().entity("magic!").build();
-  }
-      public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, SecurityContext securityContext) {
-      // do some magic!
-      return Response.ok().entity("magic!").build();
-  }
-      public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch, SecurityContext securityContext) {
-      // do some magic!
-      return Response.ok().entity("magic!").build();
-  }
-      public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, SecurityContext securityContext) {
-      // do some magic!
-      return Response.ok().entity("magic!").build();
-  }
+    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
+            MessageContext messageContext) {
+        // do some magic!
+        return Response.ok().entity("magic!").build();
+    }
+
+    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
+            MessageContext messageContext) {
+        // do some magic!
+        return Response.ok().entity("magic!").build();
+    }
+
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
+            MessageContext messageContext) {
+        // do some magic!
+        return Response.ok().entity("magic!").build();
+    }
+
+    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
+            MessageContext messageContext) {
+        // do some magic!
+        return Response.ok().entity("magic!").build();
+    }
 }

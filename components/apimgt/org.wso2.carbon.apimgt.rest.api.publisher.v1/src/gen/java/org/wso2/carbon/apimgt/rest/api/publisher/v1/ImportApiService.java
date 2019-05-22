@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
@@ -19,6 +20,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ImportApiService {
-      public Response importApisPost(InputStream fileInputStream, Attachment fileDetail, String provider, SecurityContext securityContext);
-      public Response importApisPut(InputStream fileInputStream, Attachment fileDetail, String provider, SecurityContext securityContext);
+      public Response importApisPost(InputStream fileInputStream, Attachment fileDetail, String provider, MessageContext messageContext);
+      public Response importApisPut(InputStream fileInputStream, Attachment fileDetail, String provider, MessageContext messageContext);
 }

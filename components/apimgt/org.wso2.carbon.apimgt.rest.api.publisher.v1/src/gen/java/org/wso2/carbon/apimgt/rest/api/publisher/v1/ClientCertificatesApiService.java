@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
@@ -21,10 +22,10 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ClientCertificatesApiService {
-      public Response clientCertificatesAliasContentGet(String alias, SecurityContext securityContext);
-      public Response clientCertificatesAliasDelete(String alias, SecurityContext securityContext);
-      public Response clientCertificatesAliasGet(String alias, SecurityContext securityContext);
-      public Response clientCertificatesAliasPut(String alias, InputStream certificateInputStream, Attachment certificateDetail, String tier, SecurityContext securityContext);
-      public Response clientCertificatesGet(Integer limit, Integer offset, String alias, String apiId, SecurityContext securityContext);
-      public Response clientCertificatesPost(InputStream certificateInputStream, Attachment certificateDetail, String alias, String apiId, String tier, SecurityContext securityContext);
+      public Response clientCertificatesAliasContentGet(String alias, MessageContext messageContext);
+      public Response clientCertificatesAliasDelete(String alias, MessageContext messageContext);
+      public Response clientCertificatesAliasGet(String alias, MessageContext messageContext);
+      public Response clientCertificatesAliasPut(String alias, InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext);
+      public Response clientCertificatesGet(Integer limit, Integer offset, String alias, String apiId, MessageContext messageContext);
+      public Response clientCertificatesPost(InputStream certificateInputStream, Attachment certificateDetail, String alias, String apiId, String tier, MessageContext messageContext);
 }

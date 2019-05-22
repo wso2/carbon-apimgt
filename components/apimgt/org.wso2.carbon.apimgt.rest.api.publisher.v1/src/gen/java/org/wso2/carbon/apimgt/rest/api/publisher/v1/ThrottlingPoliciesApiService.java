@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
@@ -19,6 +20,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ThrottlingPoliciesApiService {
-      public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset, String ifNoneMatch, SecurityContext securityContext);
-      public Response getThrottlingPolicyByName(String policyName, String policyLevel, String ifNoneMatch, SecurityContext securityContext);
+      public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext);
+      public Response getThrottlingPolicyByName(String policyName, String policyLevel, String ifNoneMatch, MessageContext messageContext);
 }

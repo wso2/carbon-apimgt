@@ -25,6 +25,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.json.JSONException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -62,7 +63,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -70,7 +70,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
-            String ifNoneMatch, Boolean expand, String accept ,String tenantDomain, SecurityContext context) {
+            String ifNoneMatch, Boolean expand, String accept ,String tenantDomain, MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
@@ -141,7 +141,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisPost(APIDTO body, SecurityContext context) {
+    public Response apisPost(APIDTO body, MessageContext messageContext) {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -307,7 +307,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, SecurityContext context) {
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         APIDTO apiToReturn;
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -338,7 +338,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Status of API Deletion
      */
     @Override
-    public Response apisApiIdDelete(String apiId, String ifMatch, SecurityContext context) {
+    public Response apisApiIdDelete(String apiId, String ifMatch, MessageContext messageContext) {
 
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -382,7 +382,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
-            String ifNoneMatch, SecurityContext context) {
+            String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -450,7 +450,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
             InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
-            SecurityContext context) {
+            MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -524,7 +524,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
-            SecurityContext context) {
+            MessageContext messageContext) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -555,7 +555,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
-            SecurityContext context) {
+            MessageContext messageContext) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -594,7 +594,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
-            String ifMatch, SecurityContext context) {
+            String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -654,7 +654,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
-            SecurityContext context) {
+            MessageContext messageContext) {
         // do some magic!
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -695,7 +695,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return created document DTO as response
      */
     @Override
-    public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch, SecurityContext context) {
+    public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
@@ -754,7 +754,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Lifecycle history information
      */
     @Override
-    public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch, SecurityContext context) {
+    public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -784,7 +784,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Lifecycle state information
      */
     @Override
-    public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch, SecurityContext context) {
+    public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId);
         return Response.ok().entity(lifecycleStateDTO).build();
     }
@@ -821,100 +821,100 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, SecurityContext context) {
+    public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override 
     public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query,
-            String ifNoneMatch, SecurityContext context) {
+            String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override 
     public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId,
-            String ifMatch, SecurityContext context) {
+            String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override 
     public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId,
-            String ifNoneMatch, SecurityContext context) {
+            String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override 
     public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId,
-            MediationDTO body, String ifMatch, SecurityContext context) {
+            MediationDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch,
-            SecurityContext context) {
+            MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, SecurityContext context) {
+    public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath,
-            String verb, String ifNoneMatch, SecurityContext context) {
+            String verb, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId,
-            String ifNoneMatch, SecurityContext context) {
+            String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId,
-            ResourcePolicyInfoDTO body, String ifMatch, SecurityContext context) {
+            ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesGet(String apiId, String ifNoneMatch, SecurityContext context) {
+    public Response apisApiIdScopesGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesNameDelete(String apiId, String name, String ifMatch, SecurityContext context) {
+    public Response apisApiIdScopesNameDelete(String apiId, String name, String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesNameGet(String apiId, String name, String ifNoneMatch, SecurityContext context) {
+    public Response apisApiIdScopesNameGet(String apiId, String name, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdScopesNamePut(String apiId, String name, ScopeDTO body, String ifMatch,
-            SecurityContext context) {
+            MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesPost(String apiId, ScopeDTO body, String ifMatch, SecurityContext context) {
+    public Response apisApiIdScopesPost(String apiId, ScopeDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
@@ -926,7 +926,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, SecurityContext context) {
+    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -958,7 +958,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, SecurityContext context) {
+    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
         try {
             APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -996,52 +996,52 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId, SecurityContext context) {
+    public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdThreatProtectionPoliciesGet(String apiId, SecurityContext context) {
+    public Response apisApiIdThreatProtectionPoliciesGet(String apiId, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId, SecurityContext context) {
+    public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, SecurityContext context) {
+    public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, Attachment fileDetail,
-            String ifMatch, SecurityContext context) {
+            String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, SecurityContext context) {
+    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, Attachment fileDetail,
-            String ifMatch, SecurityContext context) {
+            String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
-            String ifMatch, SecurityContext context) {
+            String ifMatch, MessageContext messageContext) {
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
@@ -1092,13 +1092,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisCopyApiPost(String newVersion, String apiId, SecurityContext context) {
+    public Response apisCopyApiPost(String newVersion, String apiId, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisHead(String query, String ifNoneMatch, SecurityContext context) {
+    public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
@@ -1106,14 +1106,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail,
             String url, String additionalProperties, String implementationType, String ifMatch,
-            SecurityContext context) {
+            MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream,
-            Attachment fileDetail, SecurityContext context) {
+            Attachment fileDetail, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }

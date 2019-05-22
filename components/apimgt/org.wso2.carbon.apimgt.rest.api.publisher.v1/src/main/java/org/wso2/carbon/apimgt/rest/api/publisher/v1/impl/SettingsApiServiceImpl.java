@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -29,14 +30,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SettingsMappi
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
     @Override
-    public Response settingsGet(SecurityContext context){
+    public Response settingsGet(MessageContext messageContext){
 
         try {
             String username = RestApiUtil.getLoggedInUsername();

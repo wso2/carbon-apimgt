@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
@@ -18,5 +19,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ExportApiService {
-      public Response exportApisGet(String query, Integer limit, Integer offset, SecurityContext securityContext);
+      public Response exportApisGet(String query, Integer limit, Integer offset, MessageContext messageContext);
 }

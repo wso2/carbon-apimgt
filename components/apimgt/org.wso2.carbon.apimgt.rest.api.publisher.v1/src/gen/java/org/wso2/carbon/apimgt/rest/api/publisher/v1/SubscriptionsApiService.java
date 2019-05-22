@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
@@ -19,8 +20,8 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SubscriptionsApiService {
-      public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch, SecurityContext securityContext);
-      public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, SecurityContext securityContext);
-      public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch, SecurityContext securityContext);
-      public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, SecurityContext securityContext);
+      public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch, MessageContext messageContext);
+      public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext);
+      public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch, MessageContext messageContext);
+      public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, MessageContext messageContext);
 }
