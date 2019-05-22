@@ -5,6 +5,8 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
+import Tooltip from '@material-ui/core/Tooltip';
+import HelpOutline from '@material-ui/icons/HelpOutline';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
 import ApiContext from '../components/ApiContext';
 
@@ -35,9 +37,6 @@ function Configuration(props) {
                     <div className={parentClasses.imageContainer}>
                         <div className={parentClasses.imageWrapper}>
                             {/* Thumbnail */}
-                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                API Thumbnail
-                            </Typography>
                             <ThumbnailView api={api} width={200} height={200} />
                             {/* Provider */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
@@ -101,13 +100,68 @@ function Configuration(props) {
                                 {api.lastUpdatedTime && <React.Fragment>{api.lastUpdatedTime}</React.Fragment>}
                                 {!api.lastUpdatedTime && <React.Fragment>?</React.Fragment>}
                             </Typography>
+                            {/* Access Control */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                Access Control
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <strong>All :</strong> The API is viewable, modifiable by all the publishers
+                                            and creators.
+                                            <br />
+                                            <strong>Restricted by roles :</strong> The API can be viewable and
+                                            modifiable by only specific publishers and creators with the roles that you
+                                            specify
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.accessControl && <React.Fragment>{api.accessControl}</React.Fragment>}
+                                {api.accessControl !== 'PUBLIC' && ' ( Visible to '}
+                                {api.accessControl !== 'PUBLIC' && api.accessControlRoles.join()}
+                                {api.accessControl !== 'PUBLIC' && ' ) '}
+                            </Typography>
                             {/* Visibility */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                Visibility
+                                Visibility on Store
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <strong>Public :</strong> The API is accessible to everyone and can be
+                                            advertised in multiple stores - a central store and/or non-WSO2 stores.
+                                            <br />
+                                            <strong>Restricted by roles :</strong> The API is visible only to specific
+                                            user roles in the tenant store that you specify.
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
                             </Typography>
                             <Typography component='p' variant='body1'>
                                 {api.visibility && <React.Fragment>{api.visibility}</React.Fragment>}
+                                {api.visibleRoles !== 'PUBLIC' && ' ( Visible to '}
+                                {api.visibleRoles !== 'PUBLIC' && api.visibleRoles.join()}
+                                {api.visibleRoles !== 'PUBLIC' && ' ) '}
                             </Typography>
+
                             {/* workflowStatus */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                 Workflow Status

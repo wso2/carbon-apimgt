@@ -39,7 +39,7 @@ import { Progress } from 'AppComponents/Shared';
 
 // import Overview from './Overview/Overview';
 import Overview from './NewOverview/Overview';
-import Configuration from './Overview/Overview';
+import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Resources from './Resources/Resources';
@@ -114,6 +114,7 @@ class Details extends Component {
             api: null,
             apiNotFound: false,
             active: active || 'overview',
+            updateAPI: this.updateAPI, // eslint-disable-line react/no-unused-state
         };
         this.setAPI = this.setAPI.bind(this);
     }
@@ -166,6 +167,23 @@ class Details extends Component {
     setAPI() {
         const { apiUUID } = this.props.match.params;
         const promisedApi = Api.get(apiUUID);
+        promisedApi
+            .then((api) => {
+                this.setState({ api });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ apiNotFound: true });
+                }
+            });
+    }
+    updateAPI(newAPI) {
+        const restAPI = new Api();
+        const promisedApi = restAPI.update(newAPI);
         promisedApi
             .then((api) => {
                 this.setState({ api });
