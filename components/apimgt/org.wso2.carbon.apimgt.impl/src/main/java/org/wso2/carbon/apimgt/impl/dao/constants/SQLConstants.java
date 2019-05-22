@@ -3508,7 +3508,7 @@ public class SQLConstants {
                         "   AM_HONEYPOT_ALERT_EMAILLIST, " +
                         "   AM_HONEYPOT_ALERT_EMAILLIST_DETAILS  " +
                         " WHERE " +
-                        "   AAM_HONEYPOT_ALERT_EMAILLIST.EMAIL_LIST_ID = AM_HONEYPOT_ALERT_EMAILLIST_DETAILS.EMAIL_LIST_ID" +
+                        "   AM_HONEYPOT_ALERT_EMAILLIST.EMAIL_LIST_ID = AM_HONEYPOT_ALERT_EMAILLIST_DETAILS.EMAIL_LIST_ID" +
                         "   AND USER_NAME = ? ";
 
     }
