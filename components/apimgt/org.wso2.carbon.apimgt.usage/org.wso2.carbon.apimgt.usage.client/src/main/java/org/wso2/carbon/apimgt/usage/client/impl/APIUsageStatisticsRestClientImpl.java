@@ -1152,8 +1152,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
-
-        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, null);
+        String tenantDomain = null;
+        if (providerName != null) {
+            tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        }
+        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, null, tenantDomain);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
@@ -1248,8 +1251,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
             int limit) throws APIMgtUsageQueryServiceClientException {
-
-        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, apiVersion);
+        String tenantDomain = null;
+        if (providerName != null) {
+            tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        }
+        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, apiVersion, tenantDomain);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
@@ -1927,18 +1933,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIUsageByUser
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
+    private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion, String tenantDomain)
             throws APIMgtUsageQueryServiceClientException {
         Collection<APIUsageByUser> usageData = new ArrayList<APIUsageByUser>();
         try {
-            StringBuilder query = new StringBuilder("from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG);
+            StringBuilder query = new StringBuilder(
+                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on("
+                            + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                            + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName);
             if (apiVersion != null) {
-                query.append(" on (" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' " + " AND "
-                        + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion + "') ");
-            } else {
-                query.append(" on " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' ");
+                query.append("' AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion);
             }
-            query.append("within " + 0 + "L, " + new Date().getTime() + "L per 'months' select "
+            query.append("') within " + 0 + "L, " + new Date().getTime() + "L per 'months' select "
                     + APIUsageStatisticsClientConstants.API_CONTEXT + ", " + APIUsageStatisticsClientConstants.USERNAME
                     + ", " + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ", "
                     + APIUsageStatisticsClientConstants.API_VERSION + ";");
