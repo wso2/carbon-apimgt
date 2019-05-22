@@ -469,7 +469,7 @@ export default class API extends Resource {
     subscribe(apiId, applicationId, policy, callback = null) {
         let promise_create_subscription = this.client.then(
             (client) => {
-                const subscriptionData = { apiIdentifier: apiId, applicationId, policy };
+                const subscriptionData = { apiId, applicationId, throttlingPolicy: policy };
                 const payload = { body: subscriptionData };
                 return client.apis.Subscriptions.post_subscriptions(
                     payload, { 'Content-Type': 'application/json' },
