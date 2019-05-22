@@ -11,6 +11,8 @@ public class {{classname}} {{#parent}}extends {{{parent}}}{{/parent}} {{#seriali
 {{>enumClass}}{{/isEnum}}{{#items.isEnum}}{{#items}}
 
 {{>enumClass}}{{/items}}{{/items.isEnum}}
+  {{#vendorExtensions.x-allowUpdatesFor}}//@Scope({{{scope}}}, {{{state}}})
+  {{/vendorExtensions.x-allowUpdatesFor}}
   private {{{datatypeWithEnum}}} {{name}} = {{{defaultValue}}};{{/vars}}
 
   {{#vars}}
