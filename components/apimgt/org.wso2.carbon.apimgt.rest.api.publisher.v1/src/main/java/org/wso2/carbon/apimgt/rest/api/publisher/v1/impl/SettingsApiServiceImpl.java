@@ -29,13 +29,14 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SettingsMappi
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
-public class SettingsApiServiceImpl extends SettingsApiService {
+public class SettingsApiServiceImpl implements SettingsApiService {
 
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
     @Override
-    public Response settingsGet(){
+    public Response settingsGet(SecurityContext context){
 
         try {
             String username = RestApiUtil.getLoggedInUsername();

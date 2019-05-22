@@ -1,70 +1,72 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.factories.ThrottlingPoliciesApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ThrottlingPoliciesApiServiceImpl;
 
-import java.util.List;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.inject.Inject;
 
+import io.swagger.annotations.*;
 import java.io.InputStream;
+
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
-
+import java.util.Map;
+import java.util.List;
+import javax.validation.constraints.*;
 @Path("/throttling-policies")
+
+@Api(description = "the throttling-policies API")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
-@io.swagger.annotations.Api(value = "/throttling-policies", description = "the throttling-policies API")
+
+
 public class ThrottlingPoliciesApi  {
 
-   private final ThrottlingPoliciesApiService delegate = ThrottlingPoliciesApiServiceFactory.getThrottlingPoliciesApi();
+  @Context SecurityContext securityContext;
+
+ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
+
 
     @GET
     @Path("/{policyLevel}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all throttling policies for the given type", notes = "This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `subscription` and `api`.\n", response = ThrottlingPolicyListDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nList of policies returned.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
-
-    public Response getAllThrottlingPolicies(@ApiParam(value = "List API or Application or Resource type policies.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("policyLevel")  String policyLevel,
-    @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    {
-    return delegate.getAllThrottlingPolicies(policyLevel,limit,offset,ifNoneMatch);
+    @ApiOperation(value = "Get all throttling policies for the given type", notes = "This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `subscription` and `api`. ", response = ThrottlingPolicyListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Throttling Policies",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of policies returned. ", response = ThrottlingPolicyListDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+    public Response getAllThrottlingPolicies(@ApiParam(value = "List API or Application or Resource type policies. ",required=true, allowableValues="api, application, resource") @PathParam("policyLevel") String policyLevel,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+        return delegate.getAllThrottlingPolicies(policyLevel, limit, offset, ifNoneMatch, securityContext);
     }
+
     @GET
     @Path("/{policyLevel}/{policyName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get details of a policy", notes = "This operation can be used to retrieve details of a single policy by specifying the policy level and policy name.\n", response = ThrottlingPolicyDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Tier does not exist.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
-
-    public Response getThrottlingPolicyByName(@ApiParam(value = "Tier name\n",required=true ) @PathParam("policyName")  String policyName,
-    @ApiParam(value = "List API or Application or Resource type policies.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("policyLevel")  String policyLevel,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    {
-    return delegate.getThrottlingPolicyByName(policyName,policyLevel,ifNoneMatch);
+    @ApiOperation(value = "Get details of a policy", notes = "This operation can be used to retrieve details of a single policy by specifying the policy level and policy name. ", response = ThrottlingPolicyDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Throttling Policies" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Tier returned ", response = ThrottlingPolicyDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Tier does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ErrorDTO.class) })
+    public Response getThrottlingPolicyByName(@ApiParam(value = "Tier name ",required=true) @PathParam("policyName") String policyName, @ApiParam(value = "List API or Application or Resource type policies. ",required=true, allowableValues="api, application, resource") @PathParam("policyLevel") String policyLevel, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+        return delegate.getThrottlingPolicyByName(policyName, policyLevel, ifNoneMatch, securityContext);
     }
 }
-

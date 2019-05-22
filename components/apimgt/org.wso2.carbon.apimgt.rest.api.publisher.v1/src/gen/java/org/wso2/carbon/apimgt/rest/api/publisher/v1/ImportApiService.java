@@ -3,19 +3,22 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 
 import java.util.List;
 
 import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
-public abstract class ImportApiService {
-    public abstract Response importApisPost(InputStream fileInputStream,Attachment fileDetail,String provider);
-    public abstract Response importApisPut(InputStream fileInputStream,Attachment fileDetail,String provider);
+
+public interface ImportApiService {
+      public Response importApisPost(InputStream fileInputStream, Attachment fileDetail, String provider, SecurityContext securityContext);
+      public Response importApisPut(InputStream fileInputStream, Attachment fileDetail, String provider, SecurityContext securityContext);
 }
-
