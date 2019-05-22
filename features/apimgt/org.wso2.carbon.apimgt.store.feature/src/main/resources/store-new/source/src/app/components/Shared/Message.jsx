@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -37,6 +37,9 @@ const styles = {
 };
 /**
  * Build the message which is displayed in the Alert content
+ *
+ * @param {*} props
+ * @returns {JSX}
  */
 const Message = (props) => {
     const {
@@ -55,20 +58,14 @@ const Message = (props) => {
                 SnackbarContentProps={{
                     'aria-describedby': 'message-id',
                 }}
-                message={
+                message={(
                     <span id='message-id'>
                         {Icon}
                         {message}
                     </span>
-                }
+                )}
                 action={[
-                    <IconButton
-                        key='close'
-                        aria-label='Close'
-                        color='default'
-                        className={classes.close}
-                        onClick={handleClose}
-                    >
+                    <IconButton key='close' aria-label='Close' color='default' className={classes.close} onClick={handleClose}>
                         <CloseIcon />
                     </IconButton>,
                 ]}

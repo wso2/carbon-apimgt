@@ -27,6 +27,12 @@ public class ApplicationKeyGenerateRequestDTO  {
   
   
   private String callbackUrl = null;
+  
+  
+  private List<String> scopes = new ArrayList<String>();
+  
+  
+  private String validityTime = null;
 
   
   /**
@@ -67,6 +73,31 @@ public class ApplicationKeyGenerateRequestDTO  {
   }
 
   
+  /**
+   * Allowed scopes for the access token
+   **/
+  @ApiModelProperty(value = "Allowed scopes for the access token")
+  @JsonProperty("scopes")
+  public List<String> getScopes() {
+    return scopes;
+  }
+  public void setScopes(List<String> scopes) {
+    this.scopes = scopes;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("validityTime")
+  public String getValidityTime() {
+    return validityTime;
+  }
+  public void setValidityTime(String validityTime) {
+    this.validityTime = validityTime;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -76,6 +107,8 @@ public class ApplicationKeyGenerateRequestDTO  {
     sb.append("  keyType: ").append(keyType).append("\n");
     sb.append("  grantTypesToBeSupported: ").append(grantTypesToBeSupported).append("\n");
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
+    sb.append("  scopes: ").append(scopes).append("\n");
+    sb.append("  validityTime: ").append(validityTime).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

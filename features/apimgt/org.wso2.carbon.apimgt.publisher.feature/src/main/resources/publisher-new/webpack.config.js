@@ -44,7 +44,7 @@ const config = {
         rules: [
             {
                 test: /\.(js|jsx)$/,
-                exclude: /node_modules/,
+                exclude: [/node_modules/, /coverage/],
                 use: [
                     {
                         loader: 'babel-loader',

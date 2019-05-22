@@ -34,7 +34,7 @@ function Footer(props) {
     const { classes } = props;
     return (
         <footer className={classes.footer}>
-            <Typography noWrap>WSO2 APIM v3.0.0 | © 2018 WSO2 Inc</Typography>
+            <Typography noWrap>WSO2 APIM v3.0.0 | © 2019 WSO2 Inc</Typography>
         </footer>
     );
 }

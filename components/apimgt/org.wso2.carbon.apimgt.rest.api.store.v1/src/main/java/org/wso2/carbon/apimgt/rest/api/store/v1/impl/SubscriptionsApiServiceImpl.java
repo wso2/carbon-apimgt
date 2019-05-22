@@ -31,10 +31,10 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
@@ -178,9 +178,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
-            RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, body.getTier());
+            RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, body.getThrottlingPolicy());
 
-            apiIdentifier.setTier(body.getTier());
+            apiIdentifier.setTier(body.getThrottlingPolicy());
             SubscriptionResponse subscriptionResponse = apiConsumer
                     .addSubscription(apiIdentifier, username, application.getId());
             SubscribedAPI addedSubscribedAPI = apiConsumer
@@ -206,16 +206,85 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 //unhandled exception
                 RestApiUtil.handleInternalServerError(
                         "Error while adding the subscription API:" + body.getApiId() + ", application:" + body
-                                .getApplicationId() + ", tier:" + body.getTier(), e, log);
+                                .getApplicationId() + ", tier:" + body.getThrottlingPolicy(), e, log);
             }
         }
         return null;
     }
 
+    /**
+     * Create multiple new subscriptions with the list of subscription details specified in the body parameter
+     *
+     * @param body        list of new subscription details
+     * @return list of newly added subscription as a SubscriptionDTO if successful
+     */
     @Override
     public Response subscriptionsMultiplePost(List<SubscriptionDTO> body) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        List<SubscriptionDTO> subscriptions = new ArrayList<>();
+        for (SubscriptionDTO subscriptionDTO : body) {
+            try {
+                APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+                String applicationId = subscriptionDTO.getApplicationId();
+                APIIdentifier apiIdentifier = APIMappingUtil
+                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), tenantDomain);
+
+                //check whether user is permitted to access the API. If the API does not exist,
+                // this will throw a APIMgtResourceNotFoundException
+                if (!org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils
+                        .isUserAccessAllowedForAPI(apiIdentifier)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API,
+                            subscriptionDTO.getApiId(), log);
+                }
+
+                Application application = apiConsumer.getApplicationByUUID(applicationId);
+                if (application == null) {
+                    //required application not found
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    //application access failure occurred
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+
+                //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this
+                // will throw an APIMgtAuthorizationFailedException with the reason as the message
+                RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, subscriptionDTO.getThrottlingPolicy());
+
+                apiIdentifier.setTier(subscriptionDTO.getThrottlingPolicy());
+                SubscriptionResponse subscriptionResponse = apiConsumer
+                        .addSubscription(apiIdentifier, username, application.getId());
+                SubscribedAPI addedSubscribedAPI = apiConsumer
+                        .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
+                SubscriptionDTO addedSubscriptionDTO =
+                        SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
+                subscriptions.add(addedSubscriptionDTO);
+
+            } catch (APIMgtAuthorizationFailedException e) {
+                //this occurs when the api:application:tier mapping is not allowed. The reason for the message is
+                // taken from the message of the exception e
+                RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
+            } catch (SubscriptionAlreadyExistingException e) {
+                RestApiUtil.handleResourceAlreadyExistsError(
+                        "Specified subscription already exists for API " + subscriptionDTO.getApiId() +
+                                " for application " + subscriptionDTO.getApplicationId(), e, log);
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e)) {
+                    //this happens when the specified API identifier does not exist
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, subscriptionDTO.getApiId(),
+                            e, log);
+                } else {
+                    //unhandled exception
+                    RestApiUtil.handleInternalServerError(
+                            "Error while adding the subscription API:" + subscriptionDTO.getApiId() +
+                                    ", application:" + subscriptionDTO.getApplicationId() + ", throttling policy:" +
+                                    subscriptionDTO.getThrottlingPolicy(), e, log);
+                }
+            }
+        }
+        return Response.ok().entity(subscriptions).build();
     }
 
     /**
