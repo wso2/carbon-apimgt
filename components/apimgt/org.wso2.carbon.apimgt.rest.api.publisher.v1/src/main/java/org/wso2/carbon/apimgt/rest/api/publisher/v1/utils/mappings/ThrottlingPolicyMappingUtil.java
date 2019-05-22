@@ -120,10 +120,10 @@ public class ThrottlingPolicyMappingUtil {
         dto.setRequestCount(tier.getRequestCount());
         dto.setUnitTime(tier.getUnitTime());
         dto.setStopOnQuotaReach(tier.isStopOnQuotaReached());
-        dto.setPolicyLevel((ThrottlingPolicyDTO.PolicyLevelEnum.valueOf(tierLevel)));
+        dto.setPolicyLevel((ThrottlingPolicyDTO.PolicyLevelEnum.fromValue(tierLevel)));
         dto.setTimeUnit(tier.getTimeUnit());
         if (tier.getTierPlan() != null) {
-            dto.setTierPlan(ThrottlingPolicyDTO.TierPlanEnum.valueOf(tier.getTierPlan()));
+            dto.setTierPlan(ThrottlingPolicyDTO.TierPlanEnum.fromValue(tier.getTierPlan()));
         }
         if (tier.getTierAttributes() != null) {
             Map<String, String> additionalProperties = new HashMap<>();

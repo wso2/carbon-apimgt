@@ -329,7 +329,7 @@ public class APIMappingUtil {
         apiInfoDTO.setVersion(apiId.getVersion());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        apiInfoDTO.setLifeCycleStatus(api.getStatus().toString());
+        apiInfoDTO.setLifeCycleStatus(api.getStatus());
         if (!StringUtils.isBlank(api.getThumbnailUrl())) {
             apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
         }
@@ -563,10 +563,10 @@ public class APIMappingUtil {
         if (model.getType() == null || model.getType().toLowerCase().equals("null")) {
             dto.setType(APIDTO.TypeEnum.HTTP);
         } else {
-            dto.setType(APIDTO.TypeEnum.valueOf(model.getType()));
+            dto.setType(APIDTO.TypeEnum.fromValue(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.equals(model.getType())) {
+        if (!APIConstants.APIType.WS.toString().equals(model.getType())) {
             if (StringUtils.isEmpty(model.getTransports())) {
                 List<String> transports = new ArrayList<>();
                 transports.add(APIConstants.HTTPS_PROTOCOL);
