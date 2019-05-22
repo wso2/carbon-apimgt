@@ -3500,6 +3500,16 @@ public class SQLConstants {
         public static final String ADD_ALERT_EMAIL_LIST =
                 " INSERT INTO AM_HONEYPOT_ALERT_EMAILLIST  (USER_NAME, STAKE_HOLDER) " +
                         " VALUES(?,?)";
+        public static final String GET_SAVED_ALERT_EMAILS =
+
+                " SELECT " +
+                        "   EMAIL " +
+                        " FROM " +
+                        "   AM_HONEYPOT_ALERT_EMAILLIST, " +
+                        "   AM_HONEYPOT_ALERT_EMAILLIST_DETAILS  " +
+                        " WHERE " +
+                        "   AAM_HONEYPOT_ALERT_EMAILLIST.EMAIL_LIST_ID = AM_HONEYPOT_ALERT_EMAILLIST_DETAILS.EMAIL_LIST_ID" +
+                        "   AND USER_NAME = ? ";
 
     }
 }
