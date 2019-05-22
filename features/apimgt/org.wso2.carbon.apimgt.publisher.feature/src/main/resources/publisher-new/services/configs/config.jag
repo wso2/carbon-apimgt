@@ -1,6 +1,5 @@
 <%
     var log = new Log("Services login DCR request");
-    log.info("Hit the service");
     var dcrUrl = 'https://localhost:9443/client-registration/v0.14/register'; // TODO: fetch from config
     var authorizeEndpoint = "https://localhost:8243/authorize"; // TODO: fetch from config
     var callbackUrl = "https://localhost:9443/publisher-new/services/auth/callback"; // TODO: fetch from config
@@ -28,7 +27,6 @@
         var clientId = result.data.clientId;
         var clientSecret = result.data.clientSecret;
 
-        log.info("Client ID = " + clientId);
 
         var addApplicationKey = systemApplicationDAO.addApplicationKey("admin_publisher", clientId, clientSecret);
         if (!addApplicationKey) {
@@ -37,7 +35,7 @@
         }
     }
     var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&redirect_uri=" + callbackUrl;
-    log.info("Redirecting to = " + authorizeEndpoint + authRequestParams);
+    log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     response.sendRedirect(authorizeEndpoint + authRequestParams);
 
 %>
