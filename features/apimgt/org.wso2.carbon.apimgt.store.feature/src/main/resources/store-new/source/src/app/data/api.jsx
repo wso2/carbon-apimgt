@@ -184,7 +184,6 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAllTiers(policyLevel, callback = null) {
-        console.log('hi');
         let promise_get_all = this.client.then(
             (client) => {
                 return client.apis['Throttling Policies'].get_throttlingPolicies__policyLevel_(
