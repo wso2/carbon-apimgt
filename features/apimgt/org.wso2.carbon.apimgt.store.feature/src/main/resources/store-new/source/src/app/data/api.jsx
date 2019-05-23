@@ -179,15 +179,15 @@ export default class API extends Resource {
 
     /**
      * Get application by id
-     * @param tierLevel
+     * @param policyLevel
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getAllTiers(tierLevel, callback = null) {
+    getAllTiers(policyLevel, callback = null) {
         let promise_get_all = this.client.then(
             (client) => {
                 return client.apis['Throttling Policies'].get_throttlingPolicies__policyLevel_(
-                    { tierLevel }, this._requestMetaData()
+                    { policyLevel }, this._requestMetaData()
                 );
             },
         );
