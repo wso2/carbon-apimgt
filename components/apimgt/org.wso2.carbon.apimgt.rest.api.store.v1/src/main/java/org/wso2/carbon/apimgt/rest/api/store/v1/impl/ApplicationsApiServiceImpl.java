@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -36,7 +37,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.Response;
 
-public class ApplicationsApiServiceImpl extends ApplicationsApiService {
+public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
 
     /**
@@ -77,7 +77,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     @Override
     public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder,
-            Integer limit, Integer offset, String ifNoneMatch) {
+            Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -130,7 +130,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return 201 response if successful
      */
     @Override
-    public Response applicationsPost(ApplicationDTO body){
+    public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -191,7 +191,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return response containing the required application object
      */
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch) {
+    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -221,7 +221,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return response containing the updated application object
      */
     @Override
-    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch) {
+    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -276,7 +276,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return 200 Response if successfully deleted the application
      */
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch) {
+    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -306,7 +306,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO
-            body) {
+            body, MessageContext messageContext) {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -360,7 +360,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return Application Key Information list
      */
     @Override
-    public Response applicationsApplicationIdKeysGet(String applicationId) {
+    public Response applicationsApplicationIdKeysGet(String applicationId, MessageContext messageContext) {
 
         List<APIKey> applicationKeys = getApplicationKeys(applicationId);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
@@ -407,9 +407,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId,
-            String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch) {
+            String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     /**
@@ -422,7 +422,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType,
-            String groupId) {
+            String groupId, MessageContext messageContext) {
 
         List<APIKey> applicationKeys = getApplicationKeys(applicationId);
         for (APIKey apiKey : applicationKeys) {
@@ -444,7 +444,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType,
-            ApplicationKeyDTO body) {
+            ApplicationKeyDTO body, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -490,7 +490,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId,
-            String keyType) {
+            String keyType, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             List<APIKey> applicationKeys = getApplicationKeys(applicationId);
@@ -516,15 +516,15 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdMapKeysPost(String applicationId,
-            ApplicationKeyMappingRequestDTO body) {
+            ApplicationKeyMappingRequestDTO body, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response applicationsApplicationIdScopesGet(String applicationId, Boolean filterByUserRoles,
-            String ifNoneMatch) {
+            String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 }

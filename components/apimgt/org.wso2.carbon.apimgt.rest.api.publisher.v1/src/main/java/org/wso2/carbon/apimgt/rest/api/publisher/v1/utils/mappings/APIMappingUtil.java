@@ -132,8 +132,8 @@ public class APIMappingUtil {
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
         }
-        if (dto.getIsDefaultVersion() != null) {
-            model.setAsDefaultVersion(dto.getIsDefaultVersion());
+        if (dto.isIsDefaultVersion() != null) {
+            model.setAsDefaultVersion(dto.isIsDefaultVersion());
         }
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
@@ -234,9 +234,9 @@ public class APIMappingUtil {
         CORSConfiguration corsConfiguration;
         if (apiCorsConfigurationDTO != null) {
             corsConfiguration =
-                    new CORSConfiguration(apiCorsConfigurationDTO.getCorsConfigurationEnabled(),
+                    new CORSConfiguration(apiCorsConfigurationDTO.isCorsConfigurationEnabled(),
                             apiCorsConfigurationDTO.getAccessControlAllowOrigins(),
-                            apiCorsConfigurationDTO.getAccessControlAllowCredentials(),
+                            apiCorsConfigurationDTO.isAccessControlAllowCredentials(),
                             apiCorsConfigurationDTO.getAccessControlAllowHeaders(),
                             apiCorsConfigurationDTO.getAccessControlAllowMethods());
 
@@ -329,7 +329,7 @@ public class APIMappingUtil {
         apiInfoDTO.setVersion(apiId.getVersion());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        apiInfoDTO.setLifeCycleStatus(api.getStatus().toString());
+        apiInfoDTO.setLifeCycleStatus(api.getStatus());
         if (!StringUtils.isBlank(api.getThumbnailUrl())) {
             apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
         }
@@ -406,14 +406,14 @@ public class APIMappingUtil {
             APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
 
         switch (subscriptionAvailability) {
-            case current_tenant:
-                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
-            case all_tenants:
-                return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
-            case specific_tenants:
-                return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
-            default:
-                return null; // how to handle this? 500 or 400
+        case CURRENT_TENANT:
+            return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
+        case ALL_TENANTS:
+            return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
+        case SPECIFIC_TENANTS:
+            return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
+        default:
+            return null; // how to handle this? 500 or 400
         }
 
     }
@@ -438,7 +438,7 @@ public class APIMappingUtil {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(securityDTO.getUsername());
             api.setEndpointUTPassword(securityDTO.getPassword());
-            if (APIEndpointSecurityDTO.TypeEnum.digest.equals(securityDTO.getType())) {
+            if (APIEndpointSecurityDTO.TypeEnum.DIGEST.equals(securityDTO.getType())) {
                 api.setEndpointAuthDigest(true);
             }
         }
@@ -563,10 +563,10 @@ public class APIMappingUtil {
         if (model.getType() == null || model.getType().toLowerCase().equals("null")) {
             dto.setType(APIDTO.TypeEnum.HTTP);
         } else {
-            dto.setType(APIDTO.TypeEnum.valueOf(model.getType()));
+            dto.setType(APIDTO.TypeEnum.fromValue(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.equals(model.getType())) {
+        if (!APIConstants.APIType.WS.toString().equals(model.getType())) {
             if (StringUtils.isEmpty(model.getTransports())) {
                 List<String> transports = new ArrayList<>();
                 transports.add(APIConstants.HTTPS_PROTOCOL);
@@ -670,11 +670,11 @@ public class APIMappingUtil {
 
         switch (subscriptionAvailability) {
             case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT:
-                return APIDTO.SubscriptionAvailabilityEnum.current_tenant;
+                return APIDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
             case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS:
-                return APIDTO.SubscriptionAvailabilityEnum.all_tenants;
+                return APIDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
             case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS:
-                return APIDTO.SubscriptionAvailabilityEnum.specific_tenants;
+                return APIDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
             default:
                 return null; // how to handle this?
         }
@@ -685,7 +685,7 @@ public class APIMappingUtil {
 
         if (api.isEndpointSecured()) {
             APIEndpointSecurityDTO securityDTO = new APIEndpointSecurityDTO();
-            securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.basic); //set default as basic
+            securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.BASIC); //set default as basic
             securityDTO.setUsername(api.getEndpointUTUsername());
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()));
@@ -695,7 +695,7 @@ public class APIMappingUtil {
                 securityDTO.setPassword(""); //Do not expose password
             }
             if (api.isEndpointAuthDigest()) {
-                securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.digest);
+                securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.DIGEST);
             }
             dto.setEndpointSecurity(securityDTO);
         }
@@ -1005,7 +1005,7 @@ public class APIMappingUtil {
             EndpointConfig endpointConfig1 = new EndpointConfig();
             endpointConfig1.setUrl(endpointConfigDTO.getUrl());
             endpointConfig1.setTimeout(endpointConfigDTO.getTimeout());
-            endpointConfig1.setPrimary(endpointConfigDTO.getIsPrimary());
+            endpointConfig1.setPrimary(endpointConfigDTO.isIsPrimary());
 
             //mapping attributes in EndpointConfigAttributesDTO to EndpointConfigAttributes model
             List<EndpointConfigAttributes> endpointConfigAttributesList = new ArrayList<>();

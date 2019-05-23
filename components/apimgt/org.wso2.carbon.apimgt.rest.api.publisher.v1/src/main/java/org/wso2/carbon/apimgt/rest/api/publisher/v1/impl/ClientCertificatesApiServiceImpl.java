@@ -1,51 +1,55 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+
+import java.io.File;
 
 import java.util.List;
 
 import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
 import javax.ws.rs.core.Response;
 
-public class ClientCertificatesApiServiceImpl extends ClientCertificatesApiService {
-    @Override
-    public Response clientCertificatesAliasContentGet(String alias){
+public class ClientCertificatesApiServiceImpl implements ClientCertificatesApiService {
+    public Response clientCertificatesAliasContentGet(String alias, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
-    @Override
-    public Response clientCertificatesAliasDelete(String alias){
+
+    public Response clientCertificatesAliasDelete(String alias, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
-    @Override
-    public Response clientCertificatesAliasGet(String alias){
+
+    public Response clientCertificatesAliasGet(String alias, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
-    @Override
-    public Response clientCertificatesAliasPut(String alias,InputStream certificateInputStream,Attachment certificateDetail,String tier){
+
+    public Response clientCertificatesAliasPut(String alias, InputStream certificateInputStream,
+            Attachment certificateDetail, String tier, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
-    @Override
-    public Response clientCertificatesGet(Integer limit,Integer offset,String alias,String apiId){
+
+    public Response clientCertificatesGet(Integer limit, Integer offset, String alias, String apiId,
+            MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
-    @Override
-    public Response clientCertificatesPost(InputStream certificateInputStream,Attachment certificateDetail,String alias,String apiId,String tier){
+
+    public Response clientCertificatesPost(InputStream certificateInputStream, Attachment certificateDetail,
+            String alias, String apiId, String tier, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 }

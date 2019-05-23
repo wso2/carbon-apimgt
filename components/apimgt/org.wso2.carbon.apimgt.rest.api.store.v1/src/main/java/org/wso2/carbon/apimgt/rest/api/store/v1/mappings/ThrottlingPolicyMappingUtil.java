@@ -15,7 +15,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.rest.api.store.v1.utils.mappings;
+package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.wso2.carbon.apimgt.api.model.ThrottlingPolicy;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;

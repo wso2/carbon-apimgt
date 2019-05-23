@@ -1,47 +1,50 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class EndpointEndpointSecurityDTO  {
+public class EndpointEndpointSecurityDTO   {
   
-  
-  
-  private String password = null;
-  
-  
-  private String type = null;
-  
-  
-  private Boolean enabled = null;
-  
-  
-  private String username = null;
+    private Boolean enabled = null;
+    private String type = null;
+    private String username = null;
+    private String password = null;
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("password")
-  public String getPassword() {
-    return password;
-  }
-  public void setPassword(String password) {
-    this.password = password;
+  public EndpointEndpointSecurityDTO enabled(Boolean enabled) {
+    this.enabled = enabled;
+    return this;
   }
 
   
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("enabled")
+  public Boolean isEnabled() {
+    return enabled;
+  }
+  public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
+  }
+
   /**
    **/
-  @ApiModelProperty(value = "")
+  public EndpointEndpointSecurityDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "basic", value = "")
   @JsonProperty("type")
   public String getType() {
     return type;
@@ -50,22 +53,15 @@ public class EndpointEndpointSecurityDTO  {
     this.type = type;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("enabled")
-  public Boolean getEnabled() {
-    return enabled;
-  }
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
+  public EndpointEndpointSecurityDTO username(String username) {
+    this.username = username;
+    return this;
   }
 
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "basic", value = "")
   @JsonProperty("username")
   public String getUsername() {
     return username;
@@ -74,18 +70,66 @@ public class EndpointEndpointSecurityDTO  {
     this.username = username;
   }
 
+  /**
+   **/
+  public EndpointEndpointSecurityDTO password(String password) {
+    this.password = password;
+    return this;
+  }
+
   
+  @ApiModelProperty(example = "basic", value = "")
+  @JsonProperty("password")
+  public String getPassword() {
+    return password;
+  }
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    EndpointEndpointSecurityDTO endpointEndpointSecurity = (EndpointEndpointSecurityDTO) o;
+    return Objects.equals(enabled, endpointEndpointSecurity.enabled) &&
+        Objects.equals(type, endpointEndpointSecurity.type) &&
+        Objects.equals(username, endpointEndpointSecurity.username) &&
+        Objects.equals(password, endpointEndpointSecurity.password);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(enabled, type, username, password);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class EndpointEndpointSecurityDTO {\n");
     
-    sb.append("  password: ").append(password).append("\n");
-    sb.append("  type: ").append(type).append("\n");
-    sb.append("  enabled: ").append(enabled).append("\n");
-    sb.append("  username: ").append(username).append("\n");
-    sb.append("}\n");
+    sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    username: ").append(toIndentedString(username)).append("\n");
+    sb.append("    password: ").append(toIndentedString(password)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

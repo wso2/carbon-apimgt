@@ -2318,7 +2318,7 @@ paths:
 ######################################################
 # The "Throttling Policy Collection" resource APIs
 ######################################################
-  /throttlingPolicies/{policyLevel}:
+  /throttling-policies/{policyLevel}:
 
 #-----------------------------------------------------
 # Retrieve the list of all available throttling Policies for given level
@@ -2366,7 +2366,7 @@ paths:
 ######################################################
 # The "Individual Throttling Policy" resource APIs
 ######################################################
-  '/throttlingPolicies/{policyLevel}/{policyId}':
+  '/throttling-policies/{policyLevel}/{policyId}':
 
 #-----------------------------------------------------
 # Retrieve a certain throttling policy
@@ -2374,10 +2374,10 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-curl: "curl \"https://localhost:9443/api/am/store/v1.0/throttlingPolicies/api/Bronze\""
+      x-wso2-curl: "curl \"https://localhost:9443/api/am/store/v1.0/throttling-policies/api/Bronze\""
       x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1.0/throttlingPolicies/api/Bronze
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1.0/throttlingPolicies/api/Bronze"
+        GET https://localhost:9443/api/am/store/v1.0/throttling-policies/api/Bronze
+      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1.0/throttling-policies/api/Bronze"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"stopOnQuotaReach\": true,\n   \"policyLevel\": \"api\",\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       summary: |
         Get details of a throttling policy
@@ -2702,7 +2702,6 @@ parameters:
     in: query
     description: |
       **API ID** consisting of the **UUID** of the API.
-    required: true
     type: string
 
 # SDK language
@@ -2751,7 +2750,6 @@ parameters:
     in: query
     description: |
       **Application Identifier** consisting of the UUID of the Application.
-    required: true
     type: string
 
 # Group Identifier of the application
@@ -3308,8 +3306,8 @@ definitions:
       pagination:
         $ref: '#/definitions/Pagination'
         # example:
-        #   next: "/throttlingPolicies/subscription?limit=1&offset=2"
-        #   previous: "/throttlingPolicies/subscription?limit=1&offset=0"
+        #   next: "/throttling-policies/subscription?limit=1&offset=2"
+        #   previous: "/throttling-policies/subscription?limit=1&offset=0"
 
 #-----------------------------------------------------
 # The Throttling Policy resource

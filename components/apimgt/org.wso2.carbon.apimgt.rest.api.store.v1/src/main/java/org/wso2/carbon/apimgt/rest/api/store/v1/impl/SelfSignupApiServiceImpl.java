@@ -18,16 +18,16 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SelfSignupApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.UserDTO;
 
 import javax.ws.rs.core.Response;
 
-public class SelfSignupApiServiceImpl extends SelfSignupApiService {
+public class SelfSignupApiServiceImpl implements SelfSignupApiService {
     @Override
-    public Response selfSignupPost(UserDTO body){
+    public Response selfSignupPost(UserDTO body, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 }

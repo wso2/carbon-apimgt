@@ -1,36 +1,34 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class CertificateInfoDTO  {
+public class CertificateInfoDTO   {
   
-  
-  
-  private String status = null;
-  
-  
-  private CertificateValidityDTO validity = null;
-  
-  
-  private String version = null;
-  
-  
-  private String subject = null;
+    private String status = null;
+    private CertificateValidityDTO validity = null;
+    private String version = null;
+    private String subject = null;
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public CertificateInfoDTO status(String status) {
+    this.status = status;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Active", value = "")
   @JsonProperty("status")
   public String getStatus() {
     return status;
@@ -39,9 +37,14 @@ public class CertificateInfoDTO  {
     this.status = status;
   }
 
-  
   /**
    **/
+  public CertificateInfoDTO validity(CertificateValidityDTO validity) {
+    this.validity = validity;
+    return this;
+  }
+
+  
   @ApiModelProperty(value = "")
   @JsonProperty("validity")
   public CertificateValidityDTO getValidity() {
@@ -51,10 +54,15 @@ public class CertificateInfoDTO  {
     this.validity = validity;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public CertificateInfoDTO version(String version) {
+    this.version = version;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "V3", value = "")
   @JsonProperty("version")
   public String getVersion() {
     return version;
@@ -63,10 +71,15 @@ public class CertificateInfoDTO  {
     this.version = version;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public CertificateInfoDTO subject(String subject) {
+    this.subject = subject;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CN=wso2.com, OU=wso2, O=wso2, L=Colombo, ST=Western, C=LK", value = "")
   @JsonProperty("subject")
   public String getSubject() {
     return subject;
@@ -75,18 +88,49 @@ public class CertificateInfoDTO  {
     this.subject = subject;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    CertificateInfoDTO certificateInfo = (CertificateInfoDTO) o;
+    return Objects.equals(status, certificateInfo.status) &&
+        Objects.equals(validity, certificateInfo.validity) &&
+        Objects.equals(version, certificateInfo.version) &&
+        Objects.equals(subject, certificateInfo.subject);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(status, validity, version, subject);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class CertificateInfoDTO {\n");
     
-    sb.append("  status: ").append(status).append("\n");
-    sb.append("  validity: ").append(validity).append("\n");
-    sb.append("  version: ").append(version).append("\n");
-    sb.append("  subject: ").append(subject).append("\n");
-    sb.append("}\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    validity: ").append(toIndentedString(validity)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    subject: ").append(toIndentedString(subject)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+
