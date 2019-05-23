@@ -429,4 +429,17 @@ public class GatewayUtils {
         }
         return hostname;
     }
+
+    /**
+     * This method extracts the endpoint address base path if query parameters are contained in endpoint
+     * @param mc The message context
+     * @return The endpoint address base path
+     */
+    public static String extractAddressBasePath(org.apache.synapse.MessageContext mc) {
+        String endpointAddress = (String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpointAddress.contains("?")) {
+            endpointAddress = endpointAddress.substring(0, endpointAddress.indexOf("?"));
+        }
+        return endpointAddress;
+    }
 }
