@@ -1020,10 +1020,10 @@ function checkTenants () {
     }
 }
 
-function getAPIUsageByApplications(apiName, version, fromDate, toDate) {
+function getAPIUsageByApplications(apiName, version, fromDate, toDate, providerName) {
     var usage;
     try {
-        usage = usageClient.getAPIUsageByApplications(apiName, version, fromDate, toDate);
+        usage = usageClient.getAPIUsageByApplications(apiName, version, fromDate, toDate, providerName);
         if (!usage) {
             return {
                 error:true
