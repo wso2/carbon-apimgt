@@ -126,8 +126,8 @@ class SubscribeToApi extends Component {
     getTiers(api) {
         const tiers = [];
 
-        if (api && api.policies) {
-            const apiTiers = api.policies;
+        if (api && api.tiers) {
+            const apiTiers = api.tiers;
             for (let i = 0; i < apiTiers.length; i++) {
                 const tierName = apiTiers[i];
                 tiers.push({ value: tierName, label: tierName });
