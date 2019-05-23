@@ -39,6 +39,7 @@ public class APIDTO   {
     private String responseCaching = null;
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
+    private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
 
 @XmlType(name="TypeEnum")
@@ -77,7 +78,7 @@ public enum TypeEnum {
     private List<String> transport = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
-    private String apiPolicy = null;
+    private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<>();
     private APIMaxTpsDTO maxTps = null;
@@ -397,6 +398,23 @@ public enum AccessControlEnum {
 
   /**
    **/
+  public APIDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
+  }
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+  }
+
+  /**
+   **/
   public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
     return this;
@@ -483,21 +501,21 @@ public enum AccessControlEnum {
   }
 
   /**
-   * The policy selected for the particular API
+   * The API level throttling policy selected for the particular API
    **/
-  public APIDTO apiPolicy(String apiPolicy) {
-    this.apiPolicy = apiPolicy;
+  public APIDTO apiThrottlingPolicy(String apiThrottlingPolicy) {
+    this.apiThrottlingPolicy = apiThrottlingPolicy;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Unlimited", value = "The policy selected for the particular API")
-  @JsonProperty("apiPolicy")
-  public String getApiPolicy() {
-    return apiPolicy;
+  @ApiModelProperty(example = "Unlimited", value = "The API level throttling policy selected for the particular API")
+  @JsonProperty("apiThrottlingPolicy")
+  public String getApiThrottlingPolicy() {
+    return apiThrottlingPolicy;
   }
-  public void setApiPolicy(String apiPolicy) {
-    this.apiPolicy = apiPolicy;
+  public void setApiThrottlingPolicy(String apiThrottlingPolicy) {
+    this.apiThrottlingPolicy = apiThrottlingPolicy;
   }
 
   /**
@@ -939,12 +957,13 @@ public enum AccessControlEnum {
         Objects.equals(responseCaching, API.responseCaching) &&
         Objects.equals(cacheTimeout, API.cacheTimeout) &&
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
+        Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(type, API.type) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(tags, API.tags) &&
         Objects.equals(policies, API.policies) &&
-        Objects.equals(apiPolicy, API.apiPolicy) &&
+        Objects.equals(apiThrottlingPolicy, API.apiThrottlingPolicy) &&
         Objects.equals(authorizationHeader, API.authorizationHeader) &&
         Objects.equals(securityScheme, API.securityScheme) &&
         Objects.equals(maxTps, API.maxTps) &&
@@ -973,7 +992,7 @@ public enum AccessControlEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, type, transport, tags, policies, apiPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpoint, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpoint, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -992,12 +1011,13 @@ public enum AccessControlEnum {
     sb.append("    responseCaching: ").append(toIndentedString(responseCaching)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
-    sb.append("    apiPolicy: ").append(toIndentedString(apiPolicy)).append("\n");
+    sb.append("    apiThrottlingPolicy: ").append(toIndentedString(apiThrottlingPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");

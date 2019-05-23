@@ -77,6 +77,20 @@ public abstract class APIDefinition {
     public abstract String generateAPIDefinition(API api) throws APIManagementException;
 
     /**
+     * This method generates API definition using the given api's URI templates and the swagger.
+     * It will alter the provided swagger definition based on the URI templates. For example: if there is a new
+     * URI template which is not included in the swagger, it will be added to the swagger as a basic resource. Any 
+     * additional resources inside the swagger will be removed from the swagger. Changes to scopes, throtting policies,
+     * on the resource will be updated on the swagger
+     *
+     * @param api api
+     * @param swagger swagger definition
+     * @return API definition in string format
+     * @throws APIManagementException
+     */
+    public abstract String generateAPIDefinition(API api, String swagger) throws APIManagementException;
+
+    /**
      * This method returns the timestamps for a given API
      * @param apiIdentifier
      * @param registry

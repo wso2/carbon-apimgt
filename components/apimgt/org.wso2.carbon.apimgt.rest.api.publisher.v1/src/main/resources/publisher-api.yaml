@@ -4650,9 +4650,9 @@ definitions:
       workflowStatus:
         type: string
         example: APPROVED
-      thumbnailUri:
-        type: string
-        example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+      hasThumbnail:
+        type: boolean
+        example: true
       securityScheme:
         type: array
         items:
@@ -4707,6 +4707,9 @@ definitions:
       destinationStatsEnabled:
         type: string
         example: Disabled
+      hasThumbnail:
+        type: boolean
+        example: true
       isDefaultVersion:
         type: boolean
         example: false
@@ -4736,8 +4739,8 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
-      apiPolicy:
-        description: The policy selected for the particular API
+      apiThrottlingPolicy:
+        description: The API level throttling policy selected for the particular API
         type: string
         example: "Unlimited"
       authorizationHeader:

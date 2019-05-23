@@ -184,7 +184,7 @@ public class APIMappingUtil {
             apiTiers.add(new Tier(tier));
         }
         model.addAvailableTiers(apiTiers);
-        model.setApiLevelPolicy(dto.getApiPolicy());
+        model.setApiLevelPolicy(dto.getApiThrottlingPolicy());
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
@@ -331,7 +331,9 @@ public class APIMappingUtil {
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
         if (!StringUtils.isBlank(api.getThumbnailUrl())) {
-            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
+            apiInfoDTO.setHasThumbnail(true);
+        } else {
+            apiInfoDTO.setHasThumbnail(false);
         }
         return apiInfoDTO;
     }
@@ -557,7 +559,7 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         dto.setPolicies(tiersToReturn);
-        dto.setApiPolicy(model.getApiLevelPolicy());
+        dto.setApiThrottlingPolicy(model.getApiLevelPolicy());
 
         //APIs created with type set to "NULL" will be considered as "HTTP"
         if (model.getType() == null || model.getType().toLowerCase().equals("null")) {

@@ -414,6 +414,11 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         return swaggerObject.toJSONString();
     }
 
+    @Override
+    public String generateAPIDefinition(API api, String swagger) throws APIManagementException {
+        return null;
+    }
+
     /**
      * gets the createdTime and updatedTime for the swagger definition
      *

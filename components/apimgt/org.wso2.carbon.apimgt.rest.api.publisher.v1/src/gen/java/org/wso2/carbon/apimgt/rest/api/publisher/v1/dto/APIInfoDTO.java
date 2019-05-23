@@ -24,7 +24,7 @@ public class APIInfoDTO   {
     private String provider = null;
     private String lifeCycleStatus = null;
     private String workflowStatus = null;
-    private String thumbnailUri = null;
+    private Boolean hasThumbnail = null;
     private List<String> securityScheme = new ArrayList<>();
 
   /**
@@ -166,19 +166,19 @@ public class APIInfoDTO   {
 
   /**
    **/
-  public APIInfoDTO thumbnailUri(String thumbnailUri) {
-    this.thumbnailUri = thumbnailUri;
+  public APIInfoDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
     return this;
   }
 
   
-  @ApiModelProperty(example = "/apis/01234567-0123-0123-0123-012345678901/thumbnail", value = "")
-  @JsonProperty("thumbnailUri")
-  public String getThumbnailUri() {
-    return thumbnailUri;
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
   }
-  public void setThumbnailUri(String thumbnailUri) {
-    this.thumbnailUri = thumbnailUri;
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
   }
 
   /**
@@ -216,13 +216,13 @@ public class APIInfoDTO   {
         Objects.equals(provider, apIInfo.provider) &&
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(workflowStatus, apIInfo.workflowStatus) &&
-        Objects.equals(thumbnailUri, apIInfo.thumbnailUri) &&
+        Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
         Objects.equals(securityScheme, apIInfo.securityScheme);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, thumbnailUri, securityScheme);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme);
   }
 
   @Override
@@ -238,7 +238,7 @@ public class APIInfoDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
-    sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("}");
     return sb.toString();
