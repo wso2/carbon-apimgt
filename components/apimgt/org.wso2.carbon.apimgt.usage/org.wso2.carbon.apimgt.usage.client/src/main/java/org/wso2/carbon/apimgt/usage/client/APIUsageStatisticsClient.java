@@ -965,9 +965,10 @@ public abstract class APIUsageStatisticsClient {
      * @param apiName : Name of the api.
      * @param apiVersion : Version of the api.
      * @param fromDate : Start date of the time span.
-     * @param toDate : End date of the time span
+     * @param toDate : End date of the time span.
+     * @param providerName API provider name.
      * @return List of ApiUsageByApplication objects.
      */
     public abstract List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
-                    String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException;
+                    String fromDate, String toDate, String providerName) throws APIMgtUsageQueryServiceClientException;
 }
