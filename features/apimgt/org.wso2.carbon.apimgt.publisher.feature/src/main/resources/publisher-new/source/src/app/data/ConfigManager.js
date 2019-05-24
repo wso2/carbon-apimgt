@@ -16,8 +16,6 @@
  * under the License.
  */
 
-import axios from 'axios';
-
 /**
  * Fetch the UI related configurations via the APIs, These configuration can be modified from the configuration files
  * reside in the API Manager server instance
@@ -49,7 +47,7 @@ class ConfigManager {
         const { origin } = window.location;
         const requestUrl = origin + configPath;
 
-        promisedConfig = axios.get(requestUrl);
+        promisedConfig = fetch(requestUrl);
         ConfigManager._promisedConfigMap.set(configPath, promisedConfig);
         return promisedConfig;
     }

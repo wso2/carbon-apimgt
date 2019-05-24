@@ -17,9 +17,7 @@
  *
  */
 
-/* eslint-disable */
-var path = require('path');
-var child_process = require('child_process');
+const path = require('path');
 
 const config = {
     entry: {
@@ -32,7 +30,8 @@ const config = {
         publicPath: 'site/public/dist/',
     },
     watch: false,
-    devtool: 'source-map',// todo: Commented out the source mapping in case need to speed up the build time & reduce size
+    devtool: 'source-map', // todo: Commented out the source
+    // mapping in case need to speed up the build time & reduce size
     resolve: {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
@@ -97,11 +96,10 @@ if (process.env.NODE_ENV === 'development') {
     config.module.rules.push(esLintLoader);
 }
 
-module.exports = function(env) {
+module.exports = function (env) {
     if (env && env.analysis) {
-        var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
         config.plugins.push(new BundleAnalyzerPlugin());
     }
     return config;
 };
-/* eslint-enable */

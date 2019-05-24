@@ -20,7 +20,7 @@ import 'typeface-roboto';
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import Publisher from './src/App.jsx';
+import Publisher from './src/Publisher';
 import './index.css';
 
 ReactDOM.render(

@@ -125,3 +125,5 @@ const Configurations = {
         },
     },
 };
+
+export default Configurations;

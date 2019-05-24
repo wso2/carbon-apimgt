@@ -5,6 +5,7 @@
     "main": "app.jsx",
     "scripts": {
         "test": "jest",
+        "test:coverage": "jest --coverage",
         "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
