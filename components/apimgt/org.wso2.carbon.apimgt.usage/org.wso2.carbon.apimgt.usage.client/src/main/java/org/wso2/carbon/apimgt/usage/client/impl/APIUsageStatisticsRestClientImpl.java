@@ -793,6 +793,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_PER_APP_AGG,
                 tenantDomain, fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
@@ -905,6 +908,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String tenantDomain = null;
         if (providerName != null) {
             tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+            if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+            }
         }
         List<APIUsage> usageData = this
                 .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, tenantDomain,
@@ -942,6 +948,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Collection<APIUsageByResourcePath> usageData = this
                 .getAPIUsageByResourcePathData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
                         providerName, fromDate, toDate);
+        if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResourcePathUsageDTO> usageByResourcePath = new ArrayList<APIResourcePathUsageDTO>();
         for (APIUsageByResourcePath usage : usageData) {
@@ -980,6 +989,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         List<APIUsageByDestination> usageData = this
                 .getAPIUsageByDestinationData(APIUsageStatisticsClientConstants.API_PER_DESTINATION_AGG, providerName,
                         fromDate, toDate);
+        if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIDestinationUsageDTO> usageByDestination = new ArrayList<APIDestinationUsageDTO>();
 
@@ -1175,6 +1187,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String tenantDomain = null;
         if (providerName != null) {
             tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+            if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+            }
         }
         Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, null, tenantDomain);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
@@ -1210,10 +1225,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        String tenantAwareProviderName = providerName;
+        String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareProviderName);
+        if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         List<APIResponseFaultCount> faultyData = this
-                .getAPIResponseFaultCountData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG, tenantDomain, fromDate,
-                        toDate);
+                .getAPIResponseFaultCountData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG, tenantDomain,
+                        fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResponseFaultCountDTO> faultyCount = new ArrayList<APIResponseFaultCountDTO>();
         List<APIVersionUsageDTO> apiVersionUsageList;
@@ -1228,7 +1247,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     faultyDTO.setVersion(fault.getApiVersion());
                     faultyDTO.setContext(fault.getContext());
                     faultyDTO.setCount(fault.getFaultCount());
-                    apiVersionUsageList = getUsageByAPIVersions(providerName, fault.getApiName(), fromDate, toDate);
+                    apiVersionUsageList = getUsageByAPIVersions(tenantAwareProviderName, fault.getApiName(), fromDate,
+                            toDate);
                     for (APIVersionUsageDTO apiVersionUsageDTO : apiVersionUsageList) {
                         if (apiVersionUsageDTO.getVersion().equals(fault.getApiVersion())) {
                             long requestCount = apiVersionUsageDTO.getCount();
