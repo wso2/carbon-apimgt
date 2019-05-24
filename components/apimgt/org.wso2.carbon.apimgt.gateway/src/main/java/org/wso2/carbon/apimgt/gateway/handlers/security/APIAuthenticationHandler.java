@@ -344,7 +344,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
         int apiSecurityErrorCode = 0;
         String errorMessage = "";
-        APISecurityException apiSecurityException = null;
         boolean isMutualSSLauthenticated = false;
 
         if (isMutualSSLProtected) {
@@ -356,7 +355,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     throw ex;
                 } else {
                     errorMessage = updateErrorMessage(errorMessage, ex);
-                    apiSecurityException = ex;
+                    apiSecurityErrorCode = ex.getErrorCode();
                 }
             }
         }
@@ -369,10 +368,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     return true;
                 }
                 errorMessage = updateErrorMessage(errorMessage, ex);
-                if (ex.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
-                    apiSecurityErrorCode = APISecurityConstants.API_AUTH_MISSING_CREDENTIALS;
+                if (apiSecurityErrorCode == 0) {
+                    apiSecurityErrorCode = ex.getErrorCode();
                 } else {
-                    apiSecurityException = apiSecurityException == null ? ex : null;
+                    apiSecurityErrorCode = APISecurityConstants.MULTI_AUTHENTICATION_FAILURE;
                 }
             }
         }
@@ -385,14 +384,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     return true;
                 }
                 errorMessage = updateErrorMessage(errorMessage, ex);
-                if (ex.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS) {
-                    if (apiSecurityErrorCode == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
-                        apiSecurityErrorCode = APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_AND_OAUTH_CREDENTIALS;
-                    } else {
-                        apiSecurityErrorCode = APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS;
-                    }
+                if (apiSecurityErrorCode == 0) {
+                    apiSecurityErrorCode = ex.getErrorCode();
                 } else {
-                    apiSecurityException = apiSecurityException == null ? ex : null;
+                    apiSecurityErrorCode = APISecurityConstants.MULTI_AUTHENTICATION_FAILURE;
                 }
             }
         }
@@ -402,21 +397,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             return true;
         }
 
-        if (apiSecurityException != null) {
-            // If only one authenticator has been used and it has failed
-            throw apiSecurityException;
-        } else if (apiSecurityErrorCode != 0) {
-            // If missing auth credentials exceptions have occurred
-            throw new APISecurityException(apiSecurityErrorCode, errorMessage);
-        } else {
-            // If multiple authenticators have failed
-            throw new APISecurityException(APISecurityConstants.MULTI_AUTHENTICATION_FAILURE, errorMessage);
-        }
+        throw new APISecurityException(apiSecurityErrorCode, errorMessage);
     }
 
     private String updateErrorMessage(String errorMessage, Exception e) {
         if (StringUtils.isNotEmpty(errorMessage)) {
-            errorMessage += " and ";
+            errorMessage += " | ";
         }
         errorMessage += e.getMessage();
         return errorMessage;
