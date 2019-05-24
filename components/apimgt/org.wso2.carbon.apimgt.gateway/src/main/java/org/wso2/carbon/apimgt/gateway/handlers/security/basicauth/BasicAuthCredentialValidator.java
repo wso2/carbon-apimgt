@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -137,7 +138,8 @@ public class BasicAuthCredentialValidator {
      * @return true if the validation passed
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    public boolean validate(String username, String password) throws APISecurityException { //TODO:observability
+    @MethodStats
+    public boolean validate(String username, String password) throws APISecurityException {
         //validate tenant
         String resourceTenant = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (!MultitenantUtils.getTenantDomain(username).equals(resourceTenant)) {
@@ -188,6 +190,7 @@ public class BasicAuthCredentialValidator {
      * @return true if the validation passed
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
+    @MethodStats
     public boolean validateScopes(String username, Swagger swagger, MessageContext synCtx) throws APISecurityException {
         if (swagger != null) {
             String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
