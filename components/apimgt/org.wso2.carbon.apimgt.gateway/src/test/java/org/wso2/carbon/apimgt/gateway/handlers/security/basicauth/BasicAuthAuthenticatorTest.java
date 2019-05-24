@@ -44,7 +44,7 @@ public class BasicAuthAuthenticatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
-        basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true, null);
+        basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, null);
         basicAuthAuthenticator.setBasicAuthCredentialValidator(new BasicAuthCredentialValidator() {
             @Override
             public boolean validate(String username, String password) {

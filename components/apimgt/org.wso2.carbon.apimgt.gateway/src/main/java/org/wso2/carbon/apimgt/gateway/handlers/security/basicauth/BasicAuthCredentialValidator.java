@@ -100,6 +100,36 @@ public class BasicAuthCredentialValidator {
     }
 
     /**
+     * Return the resource authentication scheme of the API resource.
+     *
+     * @param swagger  swagger of the API
+     * @param synCtx   The message to be authenticated
+     * @return the resource authentication scheme
+     */
+    public String getResourceAuthenticationScheme(Swagger swagger, MessageContext synCtx) {
+        if (swagger != null) {
+            String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
+            Path path = swagger.getPath(apiElectedResource);
+            if (path != null) {
+                switch (httpMethod) {
+                    case APIConstants.HTTP_GET:
+                        return (String) path.getGet().getVendorExtensions().get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                    case APIConstants.HTTP_POST:
+                        return (String) path.getPost().getVendorExtensions().get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                    case APIConstants.HTTP_PUT:
+                        return (String) path.getPut().getVendorExtensions().get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                    case APIConstants.HTTP_DELETE:
+                        return (String) path.getDelete().getVendorExtensions().get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                }
+            }
+        }
+        return APIConstants.NO_MATCHING_AUTH_SCHEME;
+    }
+
+    /**
      * Validates the given username and password against the users in the user store.
      *
      * @param username given username

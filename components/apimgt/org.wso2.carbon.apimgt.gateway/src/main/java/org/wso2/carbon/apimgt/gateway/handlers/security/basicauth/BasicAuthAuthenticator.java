@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -25,6 +26,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.ws.security.WSSecurityException;
 import org.apache.ws.security.util.Base64;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -33,6 +35,7 @@ import org.apache.synapse.config.Entry;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * An API consumer authenticator which authenticates user requests using
@@ -45,7 +48,6 @@ public class BasicAuthAuthenticator implements Authenticator {
 
     private String securityHeader;
     private String requestOrigin;
-    private boolean removeOAuthHeadersFromOutMessage;
     private BasicAuthCredentialValidator basicAuthCredentialValidator;
     private String apiUUID;
     private Swagger swagger = null;
@@ -55,12 +57,10 @@ public class BasicAuthAuthenticator implements Authenticator {
      * Initialize the authenticator with the required parameters.
      *
      * @param authorizationHeader the Authorization header
-     * @param removeOAuthHeader whether the OAuth header need to be removed before passing to the backend or not
      * @param apiUUID the API UUID
      */
-    public BasicAuthAuthenticator(String authorizationHeader, boolean removeOAuthHeader, String apiUUID) {
+    public BasicAuthAuthenticator(String authorizationHeader, String apiUUID) {
         this.securityHeader = authorizationHeader;
-        this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
         this.apiUUID = apiUUID;
     }
 
@@ -114,7 +114,60 @@ public class BasicAuthAuthenticator implements Authenticator {
             }
         }
 
-        String[] credentials = extractBasicAuthCredentials(synCtx);
+        // Extract basic authorization header while removing it from the authorization header
+        String basicAuthHeader = extractBasicAuthHeader(synCtx);
+
+        // Check for resource level authentication
+        String authenticationScheme = basicAuthCredentialValidator.getResourceAuthenticationScheme(swagger, synCtx);
+
+        if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
+            if(log.isDebugEnabled()){
+                log.debug("Found Resource Authentication Scheme: ".concat(authenticationScheme));
+            }
+
+            //using existing constant in Message context removing the additional constant in API Constants
+            String clientIP = null;
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
+                    getAxis2MessageContext();
+            TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
+                    axis2MessageContext.getProperty
+                            (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+            if (transportHeaderMap != null) {
+                clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+            }
+
+            //Setting IP of the client
+            if (clientIP != null && !clientIP.isEmpty()) {
+                if (clientIP.indexOf(",") > 0) {
+                    clientIP = clientIP.substring(0, clientIP.indexOf(","));
+                }
+            } else {
+                clientIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            }
+
+            //Create a dummy AuthenticationContext object with hard coded values for
+            // Tier and KeyType. This is because we cannot determine the Tier nor Key
+            // Type without subscription information..
+            AuthenticationContext authContext = new AuthenticationContext();
+            authContext.setAuthenticated(true);
+            authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
+            authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
+            //Requests are throttled by the ApiKey that is set here. In an unauthenticated scenario,
+            //we will use the client's IP address for throttling.
+            authContext.setApiKey(clientIP);
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            //This name is hardcoded as anonymous because there is no associated user token
+            authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
+            authContext.setCallerToken(null);
+            authContext.setApplicationName(null);
+            authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
+            authContext.setConsumerKey(null);
+            APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
+            return true;
+        }
+
+        String[] credentials = extractBasicAuthCredentials(basicAuthHeader);
         String username = credentials[0];
         String password = credentials[1];
 
@@ -157,78 +210,76 @@ public class BasicAuthAuthenticator implements Authenticator {
     }
 
     /**
-     * Extract the basic authentication credentials from the authorization header of the message
+     * Extract the basic authentication credentials from the basic authorization header via Base64 decoding.
      *
-     * @param synCtx The message to be authenticated
+     * @param basicAuthHeader the basic authorization header
      * @return an String array containing username and password
      * @throws APISecurityException in case of invalid authorization header or no header
      */
-    private String[] extractBasicAuthCredentials(MessageContext synCtx) throws APISecurityException {
+    private String[] extractBasicAuthCredentials(String basicAuthHeader) throws APISecurityException {
+        if (basicAuthHeader == null) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
+        } else {
+            if (basicAuthHeader.contains(basicAuthKeyHeaderSegment)) {
+                try {
+                    String basicAuthKey = new String(Base64.decode(
+                            basicAuthHeader.substring(basicAuthKeyHeaderSegment.length() + 1).trim()));
+                    if (basicAuthKey.contains(":")) {
+                        return basicAuthKey.split(":");
+                    } else {
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
+                    }
+                } catch (WSSecurityException e) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
+                }
+            } else {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Extract the Basic Auth header segment from the Auth header.
+     *
+     * @param synCtx The message to be authenticated
+     * @return an the basic auth header segment.
+     */
+    private String extractBasicAuthHeader(MessageContext synCtx) {
+        final String authHeaderSplitter = ",";
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (headers != null) {
             String authHeader = (String) headers.get(securityHeader);
             if (authHeader == null) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
+                return null;
             } else {
                 if (authHeader.contains(basicAuthKeyHeaderSegment)) {
-                    String[] authHeaderSegments = getAuthHeaderSegments(authHeader);
-                    String basicAuthHeader = authHeaderSegments[0];
-                    String remainingAuthHeader = authHeaderSegments[1];
-                    //Remove authorization headers sent for authentication at the gateway and pass others to the backend
-                    if (remainingAuthHeader != null && !remainingAuthHeader.equals("")) {
+                    String[] authHeaderArr = authHeader.split(authHeaderSplitter);
+                    ArrayList<String> remainingAuthHeaders = new ArrayList<>();
+                    String basicAuthHeader = null;
+                    for (String headerSegment: authHeaderArr) {
+                        if (headerSegment.trim().split(" ")[0].equals(basicAuthKeyHeaderSegment)) {
+                            basicAuthHeader = headerSegment.trim();
+                        } else {
+                            remainingAuthHeaders.add(headerSegment.trim());
+                        }
+                    }
+                    String remainingAuthHeader = String.join(authHeaderSplitter, remainingAuthHeaders);
+                    //Remove basic authorization header segment sent and pass others to the backend
+                    if (StringUtils.isNotBlank(remainingAuthHeader)) {
                         headers.put(securityHeader, remainingAuthHeader);
                     } else {
                         headers.remove(securityHeader);
                     }
-
-                    try {
-                        String basicAuthKey = new String(Base64.decode(
-                                basicAuthHeader.substring(basicAuthKeyHeaderSegment.length() + 1).trim()));
-                        if (basicAuthKey.contains(":")) {
-                            return basicAuthKey.split(":");
-                        } else {
-                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
-                                    APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
-                        }
-                    } catch (WSSecurityException e) {
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
-                                APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
-                    }
-                } else {
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
+                    return basicAuthHeader;
                 }
             }
         }
-        throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
-                APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
-    }
-
-    /**
-     * Separate the Basic Auth header segment from the Auth header.
-     *
-     * @param authHeader The authorization header
-     * @return an String array containing the basic auth header segment followed by
-     * the remaining authorization headers segments concatenated by the header splitter.
-     */
-    private String[] getAuthHeaderSegments(String authHeader) {
-        final String oauthKeyHeaderSegment = "Bearer";
-        final String authHeaderSplitter = ",";
-        String[] authHeaderArr = authHeader.split(authHeaderSplitter);
-        ArrayList<String> remainingAuthHeaders = new ArrayList<>();
-        String basicAuthHeader = "";
-        for (String headerSegment: authHeaderArr) {
-            if (headerSegment.trim().startsWith(basicAuthKeyHeaderSegment)) {
-                basicAuthHeader = headerSegment.trim();
-            } else if (headerSegment.trim().startsWith(oauthKeyHeaderSegment) && removeOAuthHeadersFromOutMessage) {
-                //If oauth header is configured to be removed at the gateway, remove it
-            } else {
-                remainingAuthHeaders.add(headerSegment.trim());
-            }
-        }
-        return new String[] {basicAuthHeader, String.join(authHeaderSplitter, remainingAuthHeaders)};
+        return null;
     }
 
     /**
