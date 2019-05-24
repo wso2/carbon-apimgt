@@ -242,10 +242,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
             }
-            APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiPolicy());
-            if (apiPolicy == null && body.getApiPolicy() != null) {
+            APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiThrottlingPolicy());
+            if (apiPolicy == null && body.getApiThrottlingPolicy() != null) {
                 RestApiUtil.handleBadRequest(
-                        "Specified policy " + body.getApiPolicy() + " is invalid", log);
+                        "Specified policy " + body.getApiThrottlingPolicy() + " is invalid", log);
             }
 //            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {todo check
 //                String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
@@ -326,6 +326,92 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
+        APIDTO updatedApiDTO;
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = originalAPI.getId();
+            boolean isWSAPI = originalAPI.getType() != null && APIConstants.APIType.WS == APIConstants.APIType
+                    .valueOf(originalAPI.getType());
+
+            //Overriding some properties:
+            body.setName(apiIdentifier.getApiName());
+            body.setVersion(apiIdentifier.getVersion());
+            body.setProvider(apiIdentifier.getProviderName());
+            body.setContext(originalAPI.getContextTemplate());
+            body.setLifeCycleStatus(originalAPI.getStatus());
+            body.setType(APIDTO.TypeEnum.fromValue(originalAPI.getType()));
+
+            // Validate API Security
+            List<String> apiSecurity = body.getSecurityScheme();
+            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
+                    .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                RestApiUtil.handleBadRequest("Mutual SSL based authentication is not supported in this server.", log);
+            }
+            //validation for tiers
+            List<String> tiersFromDTO = body.getPolicies();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                RestApiUtil.handleBadRequest("No tier defined for the API", log);
+            }
+            //check whether the added API's tiers are all valid
+            Set<Tier> definedTiers = apiProvider.getTiers();
+            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (invalidTiers.size() > 0) {
+                RestApiUtil.handleBadRequest(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+            }
+            if (body.getAccessControlRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
+            if (body.getAdditionalProperties() != null) {
+                String errorMessage = RestApiPublisherUtils
+                        .validateAdditionalProperties(body.getAdditionalProperties());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
+            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+            apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
+
+            //attach micro-geteway labels
+            apiToUpdate = assignLabelsToDTO(body,apiToUpdate);
+
+            apiProvider.updateAPI(apiToUpdate);
+
+            if (!isWSAPI) {
+                String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+                APIDefinitionUsingOASParser apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
+                String newDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToUpdate, oldDefinition);
+                apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
+            }
+            API updatedApi = apiProvider.getAPI(apiIdentifier);
+            updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
+            return Response.ok().entity(updatedApiDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -857,12 +943,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch,
             MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
-    }
-
-    @Override
-    public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
