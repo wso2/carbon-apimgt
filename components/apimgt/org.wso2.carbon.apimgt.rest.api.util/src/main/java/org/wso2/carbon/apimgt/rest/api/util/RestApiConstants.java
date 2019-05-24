@@ -42,6 +42,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_DOCUMENTATION = "documentation";
     public static final String RESOURCE_POLICY = "policy";
     public static final String RESOURCE_APP_POLICY = "application policy";
+    public static final String RESOURCE_APP_CONSUMER_KEY = "application consumer key";
     public static final String RESOURCE_ADVANCED_POLICY = "advanced policy";
     public static final String RESOURCE_SUBSCRIPTION_POLICY = "subcription policy";
     public static final String RESOURCE_CUSTOM_RULE = "custom rule";

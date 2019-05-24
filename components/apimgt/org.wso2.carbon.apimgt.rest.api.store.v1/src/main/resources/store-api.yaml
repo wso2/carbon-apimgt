@@ -3780,14 +3780,19 @@ definitions:
         type: string
         description: Consumer secret of the application
       validityPeriod:
-        type: integer
+        type: string
         description: Token validity period
       scopes:
-        type: string
+        type: array
+        items:
+          type: string
         description: Allowed scopes (space seperated) for the access token
       revokeToken:
         type: string
-        description: Token to be revoked, if any.
+        description: Token to be revoked, if any
+      jsonInput:
+        type: object
+        description: Additional parameters if Authorization server needs any
 
 
 #-----------------------------------------------------
