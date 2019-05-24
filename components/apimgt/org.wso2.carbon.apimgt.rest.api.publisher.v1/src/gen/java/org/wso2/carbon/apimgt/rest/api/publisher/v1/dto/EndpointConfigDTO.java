@@ -19,7 +19,6 @@ public class EndpointConfigDTO   {
   
     private String url = null;
     private String timeout = null;
-    private Boolean isPrimary = null;
     private List<EndpointConfigAttributesDTO> attributes = new ArrayList<>();
 
   /**
@@ -59,24 +58,6 @@ public class EndpointConfigDTO   {
   }
 
   /**
-   * Defines whether the endpoint is primary when used in fail over. 
-   **/
-  public EndpointConfigDTO isPrimary(Boolean isPrimary) {
-    this.isPrimary = isPrimary;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "Defines whether the endpoint is primary when used in fail over. ")
-  @JsonProperty("isPrimary")
-  public Boolean isIsPrimary() {
-    return isPrimary;
-  }
-  public void setIsPrimary(Boolean isPrimary) {
-    this.isPrimary = isPrimary;
-  }
-
-  /**
    **/
   public EndpointConfigDTO attributes(List<EndpointConfigAttributesDTO> attributes) {
     this.attributes = attributes;
@@ -105,13 +86,12 @@ public class EndpointConfigDTO   {
     EndpointConfigDTO endpointConfig = (EndpointConfigDTO) o;
     return Objects.equals(url, endpointConfig.url) &&
         Objects.equals(timeout, endpointConfig.timeout) &&
-        Objects.equals(isPrimary, endpointConfig.isPrimary) &&
         Objects.equals(attributes, endpointConfig.attributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, timeout, isPrimary, attributes);
+    return Objects.hash(url, timeout, attributes);
   }
 
   @Override
@@ -121,7 +101,6 @@ public class EndpointConfigDTO   {
     
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    timeout: ").append(toIndentedString(timeout)).append("\n");
-    sb.append("    isPrimary: ").append(toIndentedString(isPrimary)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("}");
     return sb.toString();
