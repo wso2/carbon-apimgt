@@ -1146,6 +1146,7 @@ public final class APIConstants {
     public static final String API_DATA_URL = "url";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
+    public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";

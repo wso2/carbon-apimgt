@@ -73,7 +73,6 @@ import java.util.regex.Pattern;
 public class APIDefinitionUsingOASParser extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(APIDefinitionUsingOASParser.class);
-    private final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
 
     @Override
     public Set<URITemplate> getURITemplates(API api, String apiDefinition)
@@ -205,15 +204,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
         //Generates below model using the API's URI template
         // path -> [verb1 -> template1, verb2 -> template2, ..]
-        Map<String, Map<String, URITemplate>> uriTemplateMap = new HashMap<>();
-        for (URITemplate uriTemplate : api.getUriTemplates()) {
-            Map<String, URITemplate> templates = uriTemplateMap.get(uriTemplate.getUriTemplate());
-            if (templates == null) {
-                templates = new HashMap<>();
-                uriTemplateMap.put(uriTemplate.getUriTemplate(), templates);
-            }
-            templates.put(uriTemplate.getHTTPVerb().toUpperCase(), uriTemplate);
-        }
+        Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
 
         for (Map.Entry<String, Path> pathEntry : swaggerObj.getPaths().entrySet()) {
             String pathName = pathEntry.getKey();
@@ -234,7 +225,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                     } else {
                         // if operation is available in URI templates, update swagger operation 
                         // with auth type, scope etc
-                        APIDefinitionUsingOASParser.this.updateOperationManagedInfo(template, operation);
+                        updateOperationManagedInfo(template, operation);
                     }
                 }
 
@@ -245,7 +236,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                     HttpMethod method = HttpMethod.valueOf(verb.toUpperCase());
                     Operation operation = path.getOperationMap().get(method);
                     if (operation == null) {
-                        operation = APIDefinitionUsingOASParser.this.createOperation(uriTemplate);
+                        operation = createOperation(uriTemplate);
                         path.set(uriTemplate.getHTTPVerb().toLowerCase(), operation);
                     }
                 }
@@ -265,22 +256,6 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         }
 
         return getSwaggerJsonString(swaggerObj);
-    }
-
-    /**
-     * Extract and return path parameters in the given URI template
-     * 
-     * @param uriTemplate URI Template value
-     * @return path parameters in the given URI template
-     */
-    private List<String> getPathParamNames(String uriTemplate) {
-        List<String> params = new ArrayList<>();
-
-        Matcher bracesMatcher = CURLY_BRACES_PATTERN.matcher(uriTemplate);
-        while (bracesMatcher.find()) {
-            params.add(bracesMatcher.group());
-        }
-        return params;
     }
 
     @Override

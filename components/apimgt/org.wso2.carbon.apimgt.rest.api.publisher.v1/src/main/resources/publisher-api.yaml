@@ -4851,14 +4851,11 @@ definitions:
         type: array
         items:
          properties:
-          key:
-           type: string
-           example: "01234567-0123-0123-0123-012345678901"
           inline:
            $ref: '#/definitions/Endpoint'
           type:
             type: string
-            example: "Production"
+            example: "production_endpoints"
       scopes:
         type: array
         items:
@@ -5530,11 +5527,6 @@ definitions:
         description: |
           Time out of the endpoint
         example: "1000"
-      isPrimary:
-        type: boolean
-        description: |
-          Defines whether the endpoint is primary when used in fail over.
-        example: true
       attributes:
         type: array
         items:

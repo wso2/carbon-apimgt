@@ -946,8 +946,6 @@ public class APIMappingUtil {
                         .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
                         .append("\",\"timeout\":\"")
                         .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
-                        .append("\",\"key\":\"")
-                        .append(endpoint.getKey())
                         .append("\"},");
             }
             sb.append("\"endpoint_type\" : \"")
@@ -973,7 +971,6 @@ public class APIMappingUtil {
         for (EndpointConfig endpointConfig : endpointEndpointConfig.getList()) {
             EndpointConfigDTO endpointConfigDTO = new EndpointConfigDTO();
             endpointConfigDTO.setUrl(endpointConfig.getUrl());
-            endpointConfigDTO.setIsPrimary(endpointConfig.getPrimary());
             endpointConfigDTO.setTimeout(endpointConfig.getTimeout());
 
             //map EndpointConfigAttributes model to EndpointConfigAttributesDTO
@@ -1007,7 +1004,6 @@ public class APIMappingUtil {
             EndpointConfig endpointConfig1 = new EndpointConfig();
             endpointConfig1.setUrl(endpointConfigDTO.getUrl());
             endpointConfig1.setTimeout(endpointConfigDTO.getTimeout());
-            endpointConfig1.setPrimary(endpointConfigDTO.isIsPrimary());
 
             //mapping attributes in EndpointConfigAttributesDTO to EndpointConfigAttributes model
             List<EndpointConfigAttributes> endpointConfigAttributesList = new ArrayList<>();
@@ -1088,7 +1084,6 @@ public class APIMappingUtil {
             endpointDTO.setType(endpoint.getType());
 
             apiEndpointDTO.setInline(endpointDTO);
-            apiEndpointDTO.setKey(apiEndpoint.getKey());
             apiEndpointDTO.setType(apiEndpoint.getType());
 
             apiEndpointDTOList.add(apiEndpointDTO);
@@ -1102,9 +1097,11 @@ public class APIMappingUtil {
      *
      * @param type           production_endpoints, sandbox_endpoints
      * @param endpointConfig endpoint config
+     * @param endpointProtocolType endpoint protocol type; eg: http
      * @return APIEndpointDTO apiEndpointDTO
      */
-    public static APIEndpointDTO convertToAPIEndpointDTO(String type, JSONObject endpointConfig) {
+    public static APIEndpointDTO convertToAPIEndpointDTO(String type, JSONObject endpointConfig,
+            String endpointProtocolType) {
 
         APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
         apiEndpointDTO.setType(type);
@@ -1120,7 +1117,12 @@ public class APIMappingUtil {
             }
             list.add(endpointConfigDTO);
             endpointEndpointConfigDTO.setList(list);
+            
+            //todo: fix for other types of endpoints eg: load balanced, failover 
+            endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.SINGLE);
+            
             endpointDTO.setEndpointConfig(endpointEndpointConfigDTO);
+            endpointDTO.setType(endpointProtocolType);
             apiEndpointDTO.setInline(endpointDTO);
         }
         return apiEndpointDTO;
@@ -1138,21 +1140,24 @@ public class APIMappingUtil {
         if (endpointConfig != null) {
             JSONParser parser = new JSONParser();
             JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
-            String endpointType = endpointConfigJson.get("endpoint_type").toString();
+            String endpointProtocolType = (String) endpointConfigJson
+                    .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
 
             if (endpointConfigJson.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) &&
                     isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS))) {
-                JSONObject prodEPConfig = (JSONObject) endpointConfigJson.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
-                APIEndpointDTO apiEndpointDTO = convertToAPIEndpointDTO(APIConstants.API_DATA_PRODUCTION_ENDPOINTS, prodEPConfig);
-                apiEndpointDTO.setType(endpointType);
+                JSONObject prodEPConfig = (JSONObject) endpointConfigJson
+                        .get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+                APIEndpointDTO apiEndpointDTO = convertToAPIEndpointDTO(APIConstants.API_DATA_PRODUCTION_ENDPOINTS,
+                        prodEPConfig, endpointProtocolType);
                 apiEndpointDTOList.add(apiEndpointDTO);
             }
             if (endpointConfigJson.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS) &&
                     isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS))) {
-                JSONObject sandboxEPConfig = (JSONObject) endpointConfigJson.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
-                APIEndpointDTO apiEndpointDTO = convertToAPIEndpointDTO(APIConstants.API_DATA_PRODUCTION_ENDPOINTS, sandboxEPConfig);
-                apiEndpointDTO.setType(endpointType);
-                apiEndpointDTOList.add(convertToAPIEndpointDTO(APIConstants.API_DATA_SANDBOX_ENDPOINTS, sandboxEPConfig));
+                JSONObject sandboxEPConfig = (JSONObject) endpointConfigJson
+                        .get(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+                APIEndpointDTO apiEndpointDTO = convertToAPIEndpointDTO(APIConstants.API_DATA_SANDBOX_ENDPOINTS,
+                        sandboxEPConfig, endpointProtocolType);
+                apiEndpointDTOList.add(apiEndpointDTO);
             }
 
         }

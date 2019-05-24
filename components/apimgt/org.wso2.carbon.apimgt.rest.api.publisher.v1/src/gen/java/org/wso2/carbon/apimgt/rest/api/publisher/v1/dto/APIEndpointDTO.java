@@ -15,26 +15,8 @@ import javax.xml.bind.annotation.*;
 
 public class APIEndpointDTO   {
   
-    private String key = null;
     private EndpointDTO inline = null;
     private String type = null;
-
-  /**
-   **/
-  public APIEndpointDTO key(String key) {
-    this.key = key;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  @JsonProperty("key")
-  public String getKey() {
-    return key;
-  }
-  public void setKey(String key) {
-    this.key = key;
-  }
 
   /**
    **/
@@ -61,7 +43,7 @@ public class APIEndpointDTO   {
   }
 
   
-  @ApiModelProperty(example = "Production", value = "")
+  @ApiModelProperty(example = "production_endpoints", value = "")
   @JsonProperty("type")
   public String getType() {
     return type;
@@ -80,14 +62,13 @@ public class APIEndpointDTO   {
       return false;
     }
     APIEndpointDTO apIEndpoint = (APIEndpointDTO) o;
-    return Objects.equals(key, apIEndpoint.key) &&
-        Objects.equals(inline, apIEndpoint.inline) &&
+    return Objects.equals(inline, apIEndpoint.inline) &&
         Objects.equals(type, apIEndpoint.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(key, inline, type);
+    return Objects.hash(inline, type);
   }
 
   @Override
@@ -95,7 +76,6 @@ public class APIEndpointDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIEndpointDTO {\n");
     
-    sb.append("    key: ").append(toIndentedString(key)).append("\n");
     sb.append("    inline: ").append(toIndentedString(inline)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");
