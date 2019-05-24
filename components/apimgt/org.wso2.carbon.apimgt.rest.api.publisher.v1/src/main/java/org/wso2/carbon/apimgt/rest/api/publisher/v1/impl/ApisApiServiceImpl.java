@@ -278,7 +278,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleInternalServerError(errorMessage, log);
                 }
             } else if (!isWSAPI) {
-                APIDefinitionUsingOASParser apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
+                APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
                 String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
                 apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
             }
@@ -391,8 +391,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-                APIDefinitionUsingOASParser apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
-                String newDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToUpdate, oldDefinition);
+                APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                String newDefinition = definitionFromOpenAPISpec.generateAPIDefinition(apiToUpdate, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
             }
             API updatedApi = apiProvider.getAPI(apiIdentifier);

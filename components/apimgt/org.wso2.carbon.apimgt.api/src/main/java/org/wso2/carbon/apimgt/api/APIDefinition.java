@@ -23,8 +23,13 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.registry.api.Registry;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * APIDefinition is responsible for providing uri templates, scopes and
@@ -33,6 +38,9 @@ import java.util.Set;
 
 @SuppressWarnings("unused")
 public abstract class APIDefinition {
+
+
+    private static final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
 
     /**
      * This method extracts the URI templates from the API definition
@@ -98,4 +106,43 @@ public abstract class APIDefinition {
      * @throws APIManagementException
      */
     public abstract Map<String ,String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
+
+    /**
+     * Extract and return path parameters in the given URI template
+     *
+     * @param uriTemplate URI Template value
+     * @return path parameters in the given URI template
+     */
+    public List<String> getPathParamNames(String uriTemplate) {
+        List<String> params = new ArrayList<>();
+
+        Matcher bracesMatcher = CURLY_BRACES_PATTERN.matcher(uriTemplate);
+        while (bracesMatcher.find()) {
+            params.add(bracesMatcher.group());
+        }
+        return params;
+    }
+
+    /**
+     * Creates a helper uri template map using provided API's URI templates. 
+     * Creates map in below format:
+     *      /order      -> [post -> template1]
+     *      /order/{id} -> [get -> template2, put -> template3, ..]
+     * 
+     * @param api API object
+     * @return a structured uri template map using provided API's URI templates
+     */
+    public Map<String, Map<String, URITemplate>> getURITemplateMap(API api) {
+        Map<String, Map<String, URITemplate>> uriTemplateMap = new HashMap<>();
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            Map<String, URITemplate> templates = uriTemplateMap.get(uriTemplate.getUriTemplate());
+            if (templates == null) {
+                templates = new HashMap<>();
+                uriTemplateMap.put(uriTemplate.getUriTemplate(), templates);
+            }
+            templates.put(uriTemplate.getHTTPVerb().toUpperCase(), uriTemplate);
+        }
+        return uriTemplateMap;
+    }
+
 }
