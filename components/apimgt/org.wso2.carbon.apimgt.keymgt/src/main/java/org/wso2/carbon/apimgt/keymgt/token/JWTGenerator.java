@@ -151,7 +151,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
                     String username = split[0].substring(0, split[0].length() - 1);
 
                     if (manager.isExistingUser(username)) {
-                        customClaims.putAll(claimsRetriever.getClaims(tenantAwareUserName));
+                        customClaims.putAll(claimsRetriever.getClaims(username));
                         return customClaims;
                     } else {
                         if (!customClaims.isEmpty()) {
