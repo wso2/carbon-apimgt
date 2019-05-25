@@ -6850,6 +6850,16 @@ public final class APIUtil {
     }
 
     /**
+     * Used to get access control expose headers define in api-manager.xml
+     *
+     * @return access control expose headers string
+     */
+    public static String getExposedHeaders() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_EXPOSE_HEADERS);
+    }
+
+    /**
      * Used to get access control allowed credential define in api-manager.xml
      *
      * @return true if access control allow credential enabled

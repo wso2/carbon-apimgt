@@ -381,6 +381,8 @@
         <!-- Configure Access-Control-Allow-Headers -->
         <Access-Control-Allow-Headers>authorization,Access-Control-Allow-Origin,Content-Type,SOAPAction</Access-Control-Allow-Headers>
 
+        <!--<Access-Control-Expose-Headers>Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma</Access-Control-Expose-Headers>-->
+
         <!-- Configure Access-Control-Allow-Credentials -->
         <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
