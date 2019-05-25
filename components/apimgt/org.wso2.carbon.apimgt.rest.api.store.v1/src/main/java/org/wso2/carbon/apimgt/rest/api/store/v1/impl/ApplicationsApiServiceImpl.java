@@ -428,9 +428,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 //                          verify that the provided validity period is a long
                             Long.parseLong(body.getValidityPeriod());
 //                          verify that the provided jsonInput is a valid json
-                            if (body.getJsonInput() != null && !body.getJsonInput().toString().isEmpty()) {
+                            if (body.getAdditionalProperties() != null
+                                    && !body.getAdditionalProperties().toString().isEmpty()) {
                                 ObjectMapper mapper = new ObjectMapper();
-                                jsonInput = mapper.writeValueAsString(body.getJsonInput());
+                                jsonInput = mapper.writeValueAsString(body.getAdditionalProperties());
                                 JSONParser parser = new JSONParser();
                                 JSONObject json = (JSONObject) parser.parse(jsonInput);
                             }
@@ -441,7 +442,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         } catch (JsonProcessingException | ParseException | ClassCastException e) {
                             RestApiUtil.handleBadRequest("Error while generating " + keyType + " token for " +
                                     "application " + applicationId + ". Invalid jsonInput \'"
-                                    + body.getJsonInput() + "\' provided.", log);
+                                    + body.getAdditionalProperties() + "\' provided.", log);
                         }
 
                         String[] scopes = body.getScopes().toArray(new String[0]);

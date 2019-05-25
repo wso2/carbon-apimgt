@@ -20,7 +20,7 @@ public class ApplicationTokenGenerateRequestDTO   {
     private String validityPeriod = null;
     private List<String> scopes = new ArrayList<>();
     private String revokeToken = null;
-    private Object jsonInput = null;
+    private Object additionalProperties = null;
 
   /**
    * Consumer secret of the application
@@ -97,19 +97,19 @@ public class ApplicationTokenGenerateRequestDTO   {
   /**
    * Additional parameters if Authorization server needs any
    **/
-  public ApplicationTokenGenerateRequestDTO jsonInput(Object jsonInput) {
-    this.jsonInput = jsonInput;
+  public ApplicationTokenGenerateRequestDTO additionalProperties(Object additionalProperties) {
+    this.additionalProperties = additionalProperties;
     return this;
   }
 
   
   @ApiModelProperty(value = "Additional parameters if Authorization server needs any")
-  @JsonProperty("jsonInput")
-  public Object getJsonInput() {
-    return jsonInput;
+  @JsonProperty("additionalProperties")
+  public Object getAdditionalProperties() {
+    return additionalProperties;
   }
-  public void setJsonInput(Object jsonInput) {
-    this.jsonInput = jsonInput;
+  public void setAdditionalProperties(Object additionalProperties) {
+    this.additionalProperties = additionalProperties;
   }
 
 
@@ -126,12 +126,12 @@ public class ApplicationTokenGenerateRequestDTO   {
         Objects.equals(validityPeriod, applicationTokenGenerateRequest.validityPeriod) &&
         Objects.equals(scopes, applicationTokenGenerateRequest.scopes) &&
         Objects.equals(revokeToken, applicationTokenGenerateRequest.revokeToken) &&
-        Objects.equals(jsonInput, applicationTokenGenerateRequest.jsonInput);
+        Objects.equals(additionalProperties, applicationTokenGenerateRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerSecret, validityPeriod, scopes, revokeToken, jsonInput);
+    return Objects.hash(consumerSecret, validityPeriod, scopes, revokeToken, additionalProperties);
   }
 
   @Override
@@ -143,7 +143,7 @@ public class ApplicationTokenGenerateRequestDTO   {
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    revokeToken: ").append(toIndentedString(revokeToken)).append("\n");
-    sb.append("    jsonInput: ").append(toIndentedString(jsonInput)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

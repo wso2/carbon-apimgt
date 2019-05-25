@@ -3790,7 +3790,7 @@ definitions:
       revokeToken:
         type: string
         description: Token to be revoked, if any
-      jsonInput:
+      additionalProperties:
         type: object
         description: Additional parameters if Authorization server needs any
 
