@@ -2433,7 +2433,7 @@ paths:
   '/throttling-policies/subscription/api/{apiId}':
 
 #-----------------------------------------------------
-# Retrieve a certain throttling policy
+# Retrieve subscription throttling policies of an API
 #-----------------------------------------------------
     get:
       security:
