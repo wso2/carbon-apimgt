@@ -7,8 +7,10 @@ jagg.block("application/application-view", {
     getOutputs:function (inputs) {
         user = jagg.getUser();
         var application = null;
+        var applicationId = null;
         var oauthapp = null;
         var scopes = [];
+        var scopeList = [];
         var grant_types = [];
         if (user) {
             username = user.username;
@@ -18,8 +20,14 @@ jagg.block("application/application-view", {
             mod = jagg.module("application");
             result = mod.getApplicationById(username, applicationId + '', groupId);
             application = result.application;
+            applicationId = application.id;
 
             var result2 = jagg.module("subscription").getAllSubscriptionsOfApplicationById(username, applicationId, 0, 10);
+            var scopesResult = jagg.module("subscription").getAllScopesOfApplicationSubscription(username, applicationId);
+
+            for (i = 0; i < scopesResult.result.size(); i++) {
+                scopeList.push({"scopeKey": scopesResult.result.get(i).get("scopeKey"), "scopeName": scopesResult.result.get(i).get("scopeName")});
+            }
 
             var log = new Log();
 
@@ -29,7 +37,7 @@ jagg.block("application/application-view", {
                 for(i=0;i < result2.applications.length;i++){
                     if(result2.applications[i].name == applicationName){
                         oauthapp = result2.applications[i];
-                        scopes = oauthapp.scopes;
+                        scopes = scopeList;
                     }
                 }
             }
