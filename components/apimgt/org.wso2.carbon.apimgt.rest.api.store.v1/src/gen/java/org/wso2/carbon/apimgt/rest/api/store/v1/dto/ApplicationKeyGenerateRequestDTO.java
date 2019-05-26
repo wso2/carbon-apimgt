@@ -54,6 +54,8 @@ public enum KeyTypeEnum {
     private String callbackUrl = null;
     private List<String> scopes = new ArrayList<>();
     private String validityTime = null;
+    private String clientId = null;
+    private String clientSecret = null;
 
   /**
    **/
@@ -145,6 +147,42 @@ public enum KeyTypeEnum {
     this.validityTime = validityTime;
   }
 
+  /**
+   * Client ID for generating access token.
+   **/
+  public ApplicationKeyGenerateRequestDTO clientId(String clientId) {
+    this.clientId = clientId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "", value = "Client ID for generating access token.")
+  @JsonProperty("clientId")
+  public String getClientId() {
+    return clientId;
+  }
+  public void setClientId(String clientId) {
+    this.clientId = clientId;
+  }
+
+  /**
+   * Client secret for generating access token. This is given together with the client Id.
+   **/
+  public ApplicationKeyGenerateRequestDTO clientSecret(String clientSecret) {
+    this.clientSecret = clientSecret;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "", value = "Client secret for generating access token. This is given together with the client Id.")
+  @JsonProperty("clientSecret")
+  public String getClientSecret() {
+    return clientSecret;
+  }
+  public void setClientSecret(String clientSecret) {
+    this.clientSecret = clientSecret;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -159,12 +197,14 @@ public enum KeyTypeEnum {
         Objects.equals(grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported) &&
         Objects.equals(callbackUrl, applicationKeyGenerateRequest.callbackUrl) &&
         Objects.equals(scopes, applicationKeyGenerateRequest.scopes) &&
-        Objects.equals(validityTime, applicationKeyGenerateRequest.validityTime);
+        Objects.equals(validityTime, applicationKeyGenerateRequest.validityTime) &&
+        Objects.equals(clientId, applicationKeyGenerateRequest.clientId) &&
+        Objects.equals(clientSecret, applicationKeyGenerateRequest.clientSecret);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyType, grantTypesToBeSupported, callbackUrl, scopes, validityTime);
+    return Objects.hash(keyType, grantTypesToBeSupported, callbackUrl, scopes, validityTime, clientId, clientSecret);
   }
 
   @Override
@@ -177,6 +217,8 @@ public enum KeyTypeEnum {
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
+    sb.append("    clientId: ").append(toIndentedString(clientId)).append("\n");
+    sb.append("    clientSecret: ").append(toIndentedString(clientSecret)).append("\n");
     sb.append("}");
     return sb.toString();
   }

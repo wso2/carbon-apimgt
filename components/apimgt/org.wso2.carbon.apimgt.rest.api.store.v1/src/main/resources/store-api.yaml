@@ -3748,6 +3748,14 @@ definitions:
       validityTime:
         type: string
         example: 3600
+      clientId:
+        type: string
+        description: Client ID for generating access token.
+        example: ""
+      clientSecret:
+        type: string
+        description: Client secret for generating access token. This is given together with the client Id.
+        example: ""
 
 #-----------------------------------------------------
 # The Application Key Mapping Request schema
