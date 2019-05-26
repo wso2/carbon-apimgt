@@ -2587,7 +2587,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             JSONObject scopeObj = new JSONObject();
             scopeObj.put("scopeKey", scope.getKey());
             scopeObj.put("scopeName", scope.getName());
-
             scopeArray.add(scopeObj);
         }
         return scopeArray;
