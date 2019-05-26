@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
@@ -25,8 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
@@ -44,6 +49,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateReques
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
@@ -416,8 +422,62 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId,
             String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyType(applicationId, keyType);
+                    if (appKey != null) {
+                        String jsonInput = null;
+                        try {
+//                          verify that the provided validity period is a long
+                            Long.parseLong(body.getValidityPeriod());
+//                          verify that the provided jsonInput is a valid json
+                            if (body.getAdditionalProperties() != null
+                                    && !body.getAdditionalProperties().toString().isEmpty()) {
+                                ObjectMapper mapper = new ObjectMapper();
+                                jsonInput = mapper.writeValueAsString(body.getAdditionalProperties());
+                                JSONParser parser = new JSONParser();
+                                JSONObject json = (JSONObject) parser.parse(jsonInput);
+                            }
+                        } catch (NumberFormatException e) {
+                            RestApiUtil.handleBadRequest("Error while generating " + keyType + " token for " +
+                                    "application " + applicationId + ". Invalid validity period \'"
+                                    + body.getValidityPeriod() + "\' provided.", log);
+                        } catch (JsonProcessingException | ParseException | ClassCastException e) {
+                            RestApiUtil.handleBadRequest("Error while generating " + keyType + " token for " +
+                                    "application " + applicationId + ". Invalid jsonInput \'"
+                                    + body.getAdditionalProperties() + "\' provided.", log);
+                        }
+
+                        String[] scopes = body.getScopes().toArray(new String[0]);
+                        AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
+                                appKey.getConsumerKey(), appKey.getConsumerSecret(),
+                                body.getValidityPeriod(), scopes, jsonInput);
+
+                        ApplicationTokenDTO appToken = new ApplicationTokenDTO();
+                        appToken.setAccessToken(response.getAccessToken());
+                        appToken.setTokenScopes(Arrays.asList(response.getScopes()));
+                        appToken.setValidityTime(response.getValidityPeriod());
+                        return Response.ok().entity(appToken).build();
+                    } else {
+                        RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APP_CONSUMER_KEY,
+                                keyType, log);
+                    }
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while generating " + keyType + " token for application "
+                    + applicationId, e, log);
+        }
+        return null;
     }
 
     /**
@@ -431,12 +491,23 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType,
             String groupId, MessageContext messageContext) {
+        return Response.ok().entity(getApplicationKeyByAppIDAndKeyType(applicationId, keyType)).build();
+    }
 
+    /**
+     * Returns Keys of an application by key type
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @return Application Key Information
+     */
+    private ApplicationKeyDTO getApplicationKeyByAppIDAndKeyType(String applicationId, String keyType) {
         List<APIKey> applicationKeys = getApplicationKeys(applicationId);
-        for (APIKey apiKey : applicationKeys) {
-            if (keyType != null && keyType.equals(apiKey.getType())) {
-                ApplicationKeyDTO appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
-                return Response.ok().entity(appKeyDTO).build();
+        if (applicationKeys!= null) {
+            for (APIKey apiKey : applicationKeys) {
+                if (keyType != null && keyType.equals(apiKey.getType())) {
+                    return ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
+                }
             }
         }
         return null;

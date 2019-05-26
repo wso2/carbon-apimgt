@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -15,9 +17,10 @@ import javax.xml.bind.annotation.*;
 public class ApplicationTokenGenerateRequestDTO   {
   
     private String consumerSecret = null;
-    private Integer validityPeriod = null;
-    private String scopes = null;
+    private String validityPeriod = null;
+    private List<String> scopes = new ArrayList<>();
     private String revokeToken = null;
+    private Object additionalProperties = null;
 
   /**
    * Consumer secret of the application
@@ -40,7 +43,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   /**
    * Token validity period
    **/
-  public ApplicationTokenGenerateRequestDTO validityPeriod(Integer validityPeriod) {
+  public ApplicationTokenGenerateRequestDTO validityPeriod(String validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
@@ -48,17 +51,17 @@ public class ApplicationTokenGenerateRequestDTO   {
   
   @ApiModelProperty(value = "Token validity period")
   @JsonProperty("validityPeriod")
-  public Integer getValidityPeriod() {
+  public String getValidityPeriod() {
     return validityPeriod;
   }
-  public void setValidityPeriod(Integer validityPeriod) {
+  public void setValidityPeriod(String validityPeriod) {
     this.validityPeriod = validityPeriod;
   }
 
   /**
    * Allowed scopes (space seperated) for the access token
    **/
-  public ApplicationTokenGenerateRequestDTO scopes(String scopes) {
+  public ApplicationTokenGenerateRequestDTO scopes(List<String> scopes) {
     this.scopes = scopes;
     return this;
   }
@@ -66,15 +69,15 @@ public class ApplicationTokenGenerateRequestDTO   {
   
   @ApiModelProperty(value = "Allowed scopes (space seperated) for the access token")
   @JsonProperty("scopes")
-  public String getScopes() {
+  public List<String> getScopes() {
     return scopes;
   }
-  public void setScopes(String scopes) {
+  public void setScopes(List<String> scopes) {
     this.scopes = scopes;
   }
 
   /**
-   * Token to be revoked, if any.
+   * Token to be revoked, if any
    **/
   public ApplicationTokenGenerateRequestDTO revokeToken(String revokeToken) {
     this.revokeToken = revokeToken;
@@ -82,13 +85,31 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Token to be revoked, if any.")
+  @ApiModelProperty(value = "Token to be revoked, if any")
   @JsonProperty("revokeToken")
   public String getRevokeToken() {
     return revokeToken;
   }
   public void setRevokeToken(String revokeToken) {
     this.revokeToken = revokeToken;
+  }
+
+  /**
+   * Additional parameters if Authorization server needs any
+   **/
+  public ApplicationTokenGenerateRequestDTO additionalProperties(Object additionalProperties) {
+    this.additionalProperties = additionalProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Additional parameters if Authorization server needs any")
+  @JsonProperty("additionalProperties")
+  public Object getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(Object additionalProperties) {
+    this.additionalProperties = additionalProperties;
   }
 
 
@@ -104,12 +125,13 @@ public class ApplicationTokenGenerateRequestDTO   {
     return Objects.equals(consumerSecret, applicationTokenGenerateRequest.consumerSecret) &&
         Objects.equals(validityPeriod, applicationTokenGenerateRequest.validityPeriod) &&
         Objects.equals(scopes, applicationTokenGenerateRequest.scopes) &&
-        Objects.equals(revokeToken, applicationTokenGenerateRequest.revokeToken);
+        Objects.equals(revokeToken, applicationTokenGenerateRequest.revokeToken) &&
+        Objects.equals(additionalProperties, applicationTokenGenerateRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerSecret, validityPeriod, scopes, revokeToken);
+    return Objects.hash(consumerSecret, validityPeriod, scopes, revokeToken, additionalProperties);
   }
 
   @Override
@@ -121,6 +143,7 @@ public class ApplicationTokenGenerateRequestDTO   {
     sb.append("    validityPeriod: ").append(toIndentedString(validityPeriod)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    revokeToken: ").append(toIndentedString(revokeToken)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }
