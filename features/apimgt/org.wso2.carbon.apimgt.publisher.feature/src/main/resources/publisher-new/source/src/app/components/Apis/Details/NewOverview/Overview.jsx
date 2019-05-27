@@ -31,6 +31,8 @@ import BusinessInformation from './BusinessInformation';
 import Scopes from './Scopes';
 import Documents from './Documents';
 import AdditionalProperties from './AdditionalProperties';
+import Lifecycle from './Lifecycle';
+
 
 const styles = theme => ({
     root: {
@@ -95,12 +97,21 @@ const styles = theme => ({
         backgroundColor: '#f5f5f9',
         color: 'rgba(0, 0, 0, 0.87)',
         maxWidth: 220,
-        fontSize: theme.typography.pxToRem(12),
+        fontSize: theme.typography.pxToRem(14),
         border: '1px solid #dadde9',
         '& b': {
           fontWeight: theme.typography.fontWeightMedium,
         },
-      },
+    },
+    lifecycleWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+    },
+    lifecycleIcon: {
+        fontSize: 36,
+        color: 'green',
+        marginRight: theme.spacing.unit,
+    },
 });
 
 function Overview(props) {
@@ -120,7 +131,6 @@ function Overview(props) {
                             <CheckItem itemSuccess={false} itemLabel='Description' />
                         </Grid>
                     </Grid>
-                    {console.info(api)}
                     <Grid item xs={12}>
                         <Grid container spacing={24}>
                             <Grid item xs={12} md={6} lg={6}>
@@ -130,6 +140,7 @@ function Overview(props) {
 
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>
+                                <Lifecycle parentClasses={classes} />
                                 <Endpoints parentClasses={classes} api={api} />
                                 <BusinessInformation parentClasses={classes} />
                                 <Scopes parentClasses={classes} />

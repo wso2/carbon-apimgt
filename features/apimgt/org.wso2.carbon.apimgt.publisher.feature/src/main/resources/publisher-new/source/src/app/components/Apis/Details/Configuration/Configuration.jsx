@@ -24,14 +24,19 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import Chip from '@material-ui/core/Chip';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import Checkbox from '@material-ui/core/Checkbox';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
-import InputLabel from '@material-ui/core/InputLabel';
+import Switch from '@material-ui/core/Switch';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import ChipInput from 'material-ui-chip-input';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
 import ApiContext from '../components/ApiContext';
@@ -97,7 +102,7 @@ const styles = theme => ({
         backgroundColor: '#f5f5f9',
         color: 'rgba(0, 0, 0, 0.87)',
         maxWidth: 220,
-        fontSize: theme.typography.pxToRem(12),
+        fontSize: theme.typography.pxToRem(14),
         border: '1px solid #dadde9',
         '& b': {
             fontWeight: theme.typography.fontWeightMedium,
@@ -124,11 +129,20 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'flex-end',
-        paddingBottom: 30,
+        paddingBottom: 12,
     },
     textFieldRoles: {
         padding: 0,
         margin: '0 0 0 10px',
+    },
+    group: {
+        flexDirection: 'row',
+    },
+    error: {
+        lineHeight: '31px',
+    },
+    authFormControl: {
+        marginTop: 0,
     },
 });
 
@@ -141,7 +155,15 @@ class Configuration extends React.Component {
             accessControlRoles: null,
             visibility: null,
             visibleRoles: null,
+            tags: null,
+            isDefaultVersion: null,
+            transport: null,
+            authorizationHeader: null,
+            responseCaching: null,
+            cacheTimeout: null,
         };
+        this.handleAddChip = this.handleAddChip.bind(this);
+        this.handleDeleteChip = this.handleDeleteChip.bind(this);
     }
     getAccessControlValue(accessControlRoles, apiAccessControlRoles) {
         if (accessControlRoles && accessControlRoles.length > 0) {
@@ -150,19 +172,82 @@ class Configuration extends React.Component {
             return apiAccessControlRoles.join();
         }
     }
+    getDefaultVersion(isDefaultVersion, apiIsDefaultVersion) {
+        if (isDefaultVersion === true) {
+            return 'yes';
+        } else if (isDefaultVersion === false) {
+            return 'no';
+        } else if (isDefaultVersion === null && apiIsDefaultVersion) {
+            return 'yes';
+        } else {
+            return 'no';
+        }
+    }
+    getTransportState(type, transport, apiTransport) {
+        if (transport) {
+            return transport.includes(type);
+        } else {
+            return apiTransport.includes(type);
+        }
+    }
     handleChange = name => (event) => {
         let { value } = event.target;
+        const { checked } = event.target;
         if (name === 'accessControlRoles' || name === 'visibleRoles') {
             value = value.split(',');
+        } else if (name === 'isDefaultVersion') {
+            value = value === 'yes';
+        } else if (name === 'responseCaching') {
+            value = checked ? 'Enabled' : 'Disabled';
         }
         this.setState({
             [name]: value,
         });
     };
+    handleTransportChange = apiTransport => (event) => {
+        const { value, checked } = event.target;
+        this.setState((oldState) => {
+            let { transport } = oldState;
+            if (!transport) transport = apiTransport;
+            if (checked && !transport.includes(value)) {
+                transport.push(value);
+            } else if (!checked && transport.includes(value)) {
+                transport.splice(transport.indexOf(value), 1);
+            }
+
+            return { transport };
+        });
+    };
+    handleAddChip(chip, apiTags) {
+        this.setState((oldState) => {
+            let { tags } = oldState;
+            if (!tags) tags = apiTags;
+            return { tags: [...tags, chip] };
+        });
+    }
+    handleDeleteChip(chip, index, apiTags) {
+        this.setState((oldState) => {
+            let { tags } = oldState;
+            if (!tags) tags = apiTags;
+            tags.splice(index, 1);
+            return { tags: [...tags] };
+        });
+    }
     handleSubmit(oldAPI, updateAPI) {
         const {
-            description, accessControl, accessControlRoles, visibility, visibleRoles,
+            description,
+            accessControl,
+            accessControlRoles,
+            visibility,
+            visibleRoles,
+            tags,
+            isDefaultVersion,
+            transport,
+            authorizationHeader,
+            responseCaching,
+            cacheTimeout,
         } = this.state;
+
         if (description) {
             oldAPI.description = description;
         }
@@ -178,13 +263,46 @@ class Configuration extends React.Component {
         if (visibleRoles) {
             oldAPI.visibleRoles = visibleRoles;
         }
+        if (tags) {
+            oldAPI.tags = tags;
+        }
+        if (isDefaultVersion !== null) {
+            oldAPI.isDefaultVersion = isDefaultVersion;
+        }
+        if (transport) {
+            oldAPI.transport = transport;
+        }
+        if (authorizationHeader) {
+            oldAPI.authorizationHeader = authorizationHeader;
+        }
+        if (responseCaching) {
+            oldAPI.responseCaching = responseCaching;
+        }
+        if (cacheTimeout) {
+            oldAPI.cacheTimeout = cacheTimeout;
+        }
         updateAPI(oldAPI);
     }
     render() {
         const { classes } = this.props;
         const {
-            description, accessControl, accessControlRoles, visibility, visibleRoles,
+            description,
+            accessControl,
+            accessControlRoles,
+            visibility,
+            visibleRoles,
+            tags,
+            isDefaultVersion,
+            transport,
+            authorizationHeader,
+            responseCaching,
+            cacheTimeout,
         } = this.state;
+        let error = false;
+        if (transport) {
+            error = transport.length === 0;
+        }
+
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
@@ -233,10 +351,136 @@ class Configuration extends React.Component {
                                             {/* Default Version */}
                                             <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                                 Default Version
+                                                <Tooltip
+                                                    placement='top'
+                                                    classes={{
+                                                        tooltip: classes.htmlTooltip,
+                                                    }}
+                                                    disableHoverListener
+                                                    title={
+                                                        <React.Fragment>
+                                                            Marks one API version in a group as the default so that it
+                                                            can be invoked without specifying the version number in the
+                                                            URL. For example, if you mark http://host:port/youtube/2.0
+                                                            as the default API, requests made to
+                                                            http://host:port/youtube/ are automatically routed to
+                                                            version 2.0. If you mark an unpublished API as the default,
+                                                            the previous default published API will still be used as the
+                                                            default until the new default API is published.
+                                                        </React.Fragment>
+                                                    }
+                                                >
+                                                    <Button className={classes.helpButton}>
+                                                        <HelpOutline className={classes.helpIcon} />
+                                                    </Button>
+                                                </Tooltip>
                                             </Typography>
                                             <Typography component='p' variant='body1'>
-                                                {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
-                                                {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
+                                                <RadioGroup
+                                                    name='isDefaultVersion'
+                                                    className={classes.group}
+                                                    value={this.getDefaultVersion(
+                                                        isDefaultVersion,
+                                                        api.isDefaultVersion,
+                                                    )}
+                                                    onChange={this.handleChange('isDefaultVersion')}
+                                                >
+                                                    <FormControlLabel value='yes' control={<Radio />} label='Yes' />
+                                                    <FormControlLabel value='no' control={<Radio />} label='No' />
+                                                </RadioGroup>
+                                            </Typography>
+                                            {/* Transports */}
+                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                Transports
+                                                <Tooltip
+                                                    placement='top'
+                                                    classes={{
+                                                        tooltip: classes.htmlTooltip,
+                                                    }}
+                                                    disableHoverListener
+                                                    title={
+                                                        <React.Fragment>
+                                                            HTTP is less secure than HTTPS and makes your API vulnerable
+                                                            to security threats.
+                                                        </React.Fragment>
+                                                    }
+                                                >
+                                                    <Button className={classes.helpButton}>
+                                                        <HelpOutline className={classes.helpIcon} />
+                                                    </Button>
+                                                </Tooltip>
+                                            </Typography>
+
+                                            <FormControl
+                                                required
+                                                error={error}
+                                                component='fieldset'
+                                                className={classes.formControl}
+                                            >
+                                                <FormGroup className={classes.group}>
+                                                    <FormControlLabel
+                                                        control={
+                                                            <Checkbox
+                                                                checked={this.getTransportState(
+                                                                    'http',
+                                                                    transport,
+                                                                    api.transport,
+                                                                )}
+                                                                onChange={this.handleTransportChange(api.transport)}
+                                                                value='http'
+                                                            />
+                                                        }
+                                                        label='HTTP'
+                                                    />
+                                                    <FormControlLabel
+                                                        control={
+                                                            <Checkbox
+                                                                checked={this.getTransportState(
+                                                                    'https',
+                                                                    transport,
+                                                                    api.transport,
+                                                                )}
+                                                                onChange={this.handleTransportChange(api.transport)}
+                                                                value='https'
+                                                            />
+                                                        }
+                                                        label='HTTPS'
+                                                    />
+                                                    {error && (
+                                                        <FormHelperText className={classes.error}>
+                                                            Please select at least one transport.
+                                                        </FormHelperText>
+                                                    )}
+                                                </FormGroup>
+                                            </FormControl>
+                                        </div>
+                                    </div>
+                                    <div className={classes.imageContainer}>
+                                        <div className={classes.imageWrapper}>
+                                            {/* Provider */}
+                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                Provider
+                                            </Typography>
+                                            <Typography component='p' variant='body1'>
+                                                {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
+                                            </Typography>
+                                            {/* Type */}
+                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                Type
+                                            </Typography>
+                                            <Typography component='p' variant='body1'>
+                                                {api.type && <React.Fragment>{api.type}</React.Fragment>}
+                                                {!api.type && <React.Fragment>?</React.Fragment>}
+                                            </Typography>
+                                            {/* workflowStatus */}
+                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                Workflow Status
+                                            </Typography>
+                                            <Typography component='p' variant='body1'>
+                                                {api.workflowStatus && (
+                                                    <React.Fragment>{api.workflowStatus}</React.Fragment>
+                                                )}
+                                                {!api.workflowStatus && <React.Fragment>?</React.Fragment>}
                                             </Typography>
                                             {/* Created Time */}
                                             <Typography component='p' variant='subtitle2' className={classes.subtitle}>
@@ -257,73 +501,113 @@ class Configuration extends React.Component {
                                                 {!api.lastUpdatedTime && <React.Fragment>?</React.Fragment>}
                                             </Typography>
                                         </div>
-                                    </div>
-                                    <div className={classes.imageContainer}>
-                                        <div className={classes.imageWrapper}>
-                                            {/* Provider */}
-                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                Provider
-                                            </Typography>
-                                            <Typography component='p' variant='body1'>
-                                                {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
-                                            </Typography>
-                                            {/* Type */}
-                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                Type
-                                            </Typography>
-                                            <Typography component='p' variant='body1'>
-                                                {api.type && <React.Fragment>{api.type}</React.Fragment>}
-                                                {!api.type && <React.Fragment>?</React.Fragment>}
-                                            </Typography>
+                                        <div className={classes.rightDataColum}>
                                             {/* Response Caching */}
                                             <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                                 Response Caching
+                                                <Tooltip
+                                                    placement='top'
+                                                    classes={{
+                                                        tooltip: classes.htmlTooltip,
+                                                    }}
+                                                    disableHoverListener
+                                                    title={
+                                                        <React.Fragment>
+                                                            This option determines whether to cache the response
+                                                            messages of the API. Caching improves performance because
+                                                            the backend server does not have to process the same data
+                                                            multiple times. To offset the risk of stale data in the
+                                                            cache, set an appropriate timeout period when prompted.
+                                                        </React.Fragment>
+                                                    }
+                                                >
+                                                    <Button className={classes.helpButton}>
+                                                        <HelpOutline className={classes.helpIcon} />
+                                                    </Button>
+                                                </Tooltip>
                                             </Typography>
-                                            <Typography component='p' variant='body1'>
-                                                {api.responseCaching && (
-                                                    <React.Fragment>{api.responseCaching}</React.Fragment>
+                                            <div className={classes.inlineForms}>
+                                                <FormControlLabel
+                                                    className={classes.formControlLeft}
+                                                    control={
+                                                        <Switch
+                                                            checked={(() => {
+                                                                if (responseCaching && responseCaching === 'Disabled') {
+                                                                    return false;
+                                                                } else if (
+                                                                    responseCaching &&
+                                                                    responseCaching === 'Enabled'
+                                                                ) {
+                                                                    return true;
+                                                                } else if (
+                                                                    !responseCaching &&
+                                                                    api.responseCaching === 'Disabled'
+                                                                ) {
+                                                                    return false;
+                                                                } else {
+                                                                    return true;
+                                                                }
+                                                            })()}
+                                                            onChange={this.handleChange('responseCaching')}
+                                                            value={responseCaching || api.responseCaching}
+                                                            color='primary'
+                                                        />
+                                                    }
+                                                    label={responseCaching || api.responseCaching}
+                                                />
+                                                {((responseCaching && responseCaching === 'Enabled') ||
+                                                    (!responseCaching && api.responseCaching === 'Enabled')) && (
+                                                    <FormControl className={classes.formControlRight}>
+                                                        <TextField
+                                                            id='cacheTimeout'
+                                                            className={classes.textFieldRoles}
+                                                            value={cacheTimeout || api.cacheTimeout}
+                                                            onChange={this.handleChange('cacheTimeout')}
+                                                            margin='normal'
+                                                            helperText='Cache Timeout (seconds)'
+                                                        />
+                                                    </FormControl>
                                                 )}
-                                                {!api.responseCaching && <React.Fragment>?</React.Fragment>}
-                                            </Typography>
-                                            {/* workflowStatus */}
-                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                Workflow Status
-                                            </Typography>
-                                            <Typography component='p' variant='body1'>
-                                                {api.workflowStatus && (
-                                                    <React.Fragment>{api.workflowStatus}</React.Fragment>
-                                                )}
-                                                {!api.workflowStatus && <React.Fragment>?</React.Fragment>}
-                                            </Typography>
-                                        </div>
-                                        <div className={classes.rightDataColum}>
-                                            {/* Transports */}
-                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                Transports
-                                            </Typography>
-                                            <Typography component='p' variant='body1'>
-                                                {api.transport && api.transport.length !== 0 && (
-                                                    <React.Fragment>
-                                                        {api.transport.map((item, index) => (
-                                                            <span>
-                                                                {item}
-                                                                {api.transport.length !== index + 1 && ', '}
-                                                            </span>
-                                                        ))}
-                                                    </React.Fragment>
-                                                )}
-                                                {!api.transport && <React.Fragment>?</React.Fragment>}
-                                            </Typography>
+                                            </div>
                                             {/* Authorization Header */}
                                             <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                                 Authorization Header
+                                                <Tooltip
+                                                    placement='top'
+                                                    classes={{
+                                                        tooltip: classes.htmlTooltip,
+                                                    }}
+                                                    disableHoverListener
+                                                    title={
+                                                        <React.Fragment>
+                                                            A custom authorization header can be defined as a
+                                                            replacement to the default <strong>Authorization</strong>
+                                                            header used to send a request. If a value is specified here,
+                                                            it will be used as the header field to send the access token
+                                                            in a request to consume the API
+                                                        </React.Fragment>
+                                                    }
+                                                >
+                                                    <Button className={classes.helpButton}>
+                                                        <HelpOutline className={classes.helpIcon} />
+                                                    </Button>
+                                                </Tooltip>
                                             </Typography>
-                                            <Typography component='p' variant='body1'>
-                                                {api.authorizationHeader && (
-                                                    <React.Fragment>{api.authorizationHeader}</React.Fragment>
-                                                )}
-                                                {!api.authorizationHeader && <React.Fragment>?</React.Fragment>}
-                                            </Typography>
+                                            <FormControl>
+                                                <TextField
+                                                    className={classes.authFormControl}
+                                                    id='authorizationHeader'
+                                                    value={(() => {
+                                                        if (authorizationHeader === null) {
+                                                            return api.authorizationHeader;
+                                                        } else {
+                                                            return authorizationHeader;
+                                                        }
+                                                    })()}
+                                                    onChange={this.handleChange('authorizationHeader')}
+                                                    margin='normal'
+                                                />
+                                            </FormControl>
                                             {/* Access Control */}
                                             <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                                 Access Control
@@ -351,7 +635,6 @@ class Configuration extends React.Component {
                                             </Typography>
                                             <div className={classes.inlineForms}>
                                                 <FormControl className={classes.formControlLeft}>
-                                                    <InputLabel htmlFor='age-native-simple' />
                                                     <Select
                                                         native
                                                         value={accessControl || api.accessControl}
@@ -371,7 +654,6 @@ class Configuration extends React.Component {
                                                     <FormControl className={classes.formControlRight}>
                                                         <TextField
                                                             id='standard-name'
-                                                            label='Roles'
                                                             className={classes.textFieldRoles}
                                                             value={this.getAccessControlValue(
                                                                 accessControlRoles,
@@ -379,7 +661,8 @@ class Configuration extends React.Component {
                                                             )}
                                                             onChange={this.handleChange('accessControlRoles')}
                                                             margin='normal'
-                                                            helperText='Comma seperated list (e.g:role1,role2,role3)'
+                                                            helperText='Comma seperated list of roles
+                                                            (e.g:role1,role2,role3)'
                                                         />
                                                     </FormControl>
                                                 )}
@@ -412,7 +695,6 @@ class Configuration extends React.Component {
                                             </Typography>
                                             <div className={classes.inlineForms}>
                                                 <FormControl className={classes.formControlLeft}>
-                                                    <InputLabel htmlFor='age-native-simple' />
                                                     <Select
                                                         native
                                                         value={visibility || api.visibility}
@@ -432,7 +714,6 @@ class Configuration extends React.Component {
                                                     <FormControl className={classes.formControlRight}>
                                                         <TextField
                                                             id='standard-name'
-                                                            label='Roles'
                                                             className={classes.textFieldRoles}
                                                             value={this.getAccessControlValue(
                                                                 visibleRoles,
@@ -440,7 +721,8 @@ class Configuration extends React.Component {
                                                             )}
                                                             onChange={this.handleChange('visibleRoles')}
                                                             margin='normal'
-                                                            helperText='Comma seperated list (e.g:role1,role2,role3)'
+                                                            helperText='Comma seperated list
+                                                            of roles (e.g:role1,role2,role3)'
                                                         />
                                                     </FormControl>
                                                 )}
@@ -450,12 +732,11 @@ class Configuration extends React.Component {
                                     <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                         Tags
                                     </Typography>
-                                    <Typography variant='body1'>
-                                        {api.tags &&
-                                            api.tags.map(tag => (
-                                                <Chip key={tag} label={tag} className={classes.chip} />
-                                            ))}
-                                    </Typography>
+                                    <ChipInput
+                                        value={tags || api.tags}
+                                        onAdd={chip => this.handleAddChip(chip, api.tags)}
+                                        onDelete={(chip, index) => this.handleDeleteChip(chip, index, api.tags)}
+                                    />
                                 </Paper>
                                 <div className={classes.buttonWrapper}>
                                     <Grid

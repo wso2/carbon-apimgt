@@ -44,7 +44,7 @@ function Endpoints(props) {
     return (
         <ApiContext.Consumer>
             {({ api }) => (
-                <Paper className={classNames({ [parentClasses.root]: true })}>
+                <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
                             Endpoints
