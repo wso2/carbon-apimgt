@@ -36,6 +36,7 @@ import ConfigManager from 'AppData/ConfigManager';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
+import Alert from 'AppComponents/Shared/Alert';
 
 // import Overview from './Overview/Overview';
 import Overview from './NewOverview/Overview';
@@ -183,9 +184,15 @@ class Details extends Component {
     }
     updateAPI(newAPI) {
         const restAPI = new Api();
-        const promisedApi = restAPI.update(newAPI);
+        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
+        /* eslint no-param-reassign: ["error", { "props": false }] */
+        if (newAPI._data) delete newAPI._data;
+        if (newAPI.client) delete newAPI.client;
+
+        const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
         promisedApi
             .then((api) => {
+                Alert.info(`${api.name} updated successfully.`);
                 this.setState({ api });
             })
             .catch((error) => {
