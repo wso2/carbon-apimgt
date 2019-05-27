@@ -1898,44 +1898,45 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         if (api.getApiSecurity() != null) {
             apiSecurity = api.getApiSecurity();
+            ArrayList<String> securityLevels = new ArrayList<>();
             String[] apiSecurityLevels = apiSecurity.split(",");
             boolean isOauth2 = false;
             boolean isMutualSSL = false;
             boolean isBasicAuth = false;
             boolean isMutualSSLMandatory = false;
+            boolean isOauthBasicAuthMandatory = false;
+
             for (String apiSecurityLevel : apiSecurityLevels) {
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
                     isOauth2 = true;
+                    securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
                 }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                     isMutualSSL = true;
+                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
                 }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
                     isBasicAuth = true;
+                    securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
                 }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
                     isMutualSSLMandatory = true;
+                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
+                    isOauthBasicAuthMandatory = true;
+                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
                 }
             }
-            apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
-            if (isOauth2 && isMutualSSL && isBasicAuth) {
-                apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2 + "," + APIConstants.API_SECURITY_MUTUAL_SSL
-                        + "," + APIConstants.API_SECURITY_BASIC_AUTH;
-            } else if (isOauth2 && isMutualSSL) {
-                apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2 + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            }  else if (isBasicAuth && isMutualSSL) {
-                apiSecurity = APIConstants.API_SECURITY_BASIC_AUTH + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            }  else if (isOauth2 && isBasicAuth) {
-                apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2 + "," + APIConstants.API_SECURITY_BASIC_AUTH;
-            } else if (isMutualSSL) {
-                apiSecurity = APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (isBasicAuth) {
-                apiSecurity = APIConstants.API_SECURITY_BASIC_AUTH;
+
+            if (!isMutualSSL && !isOauthBasicAuthMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+            }
+            if (!isBasicAuth && !isOauth2 && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
             }
 
-            if (isMutualSSLMandatory) {
-                apiSecurity += ("," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
-            }
+            apiSecurity = String.join(",", securityLevels);
         }
         if (log.isDebugEnabled()) {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);

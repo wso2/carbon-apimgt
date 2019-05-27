@@ -87,10 +87,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String certificateInformation;
     private String apiUUID;
 
-    private boolean isOAuthProtected;
-    private boolean isMutualSSLProtected;
-    private boolean isBasicAuthProtected;
-    private boolean isMutualSSLMandatory;
+    private boolean isOAuthProtected = false;
+    private boolean isMutualSSLProtected = false;
+    private boolean isBasicAuthProtected = false;
+    private boolean isMutualSSLMandatory = false;
+    private boolean isOAuthBasicAuthMandatory = false;
 
     public String getApiUUID() {
         return apiUUID;
@@ -143,14 +144,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (log.isDebugEnabled()) {
             log.debug("Initializing API authentication handler instance");
         }
-        isOAuthProtected =
-                apiSecurity == null || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-        isMutualSSLProtected =
-                apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_MUTUAL_SSL);
-        isBasicAuthProtected =
-                apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_BASIC_AUTH);
-        isMutualSSLMandatory =
-                apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+        if (apiSecurity == null) {
+            isOAuthProtected = true;
+        } else {
+            String[] apiSecurityLevels = apiSecurity.split(",");
+            for (String apiSecurityLevel : apiSecurityLevels) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                    isOAuthProtected = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                    isMutualSSLProtected = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
+                    isBasicAuthProtected = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
+                    isMutualSSLMandatory = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
+                    isOAuthBasicAuthMandatory = true;
+                }
+            }
+        }
         if (getApiManagerConfigurationService() != null) {
             initializeAuthenticators();
         }
@@ -359,36 +370,32 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
             }
         }
+
         if (isOAuthProtected) {
             try {
                 // If OAuth passes, authentication passes
                 return authenticators.get(APIConstants.DEFAULT_API_SECURITY_OAUTH2).authenticate(messageContext);
             } catch (APISecurityException ex) {
-                if (isMutualSSLauthenticated) { //TODO:check basic auth protected or not, check and/or between mutualSSL
+                if (isMutualSSLauthenticated && !isOAuthBasicAuthMandatory) {
+                    // If Mutual SSL authenticated and BasicAuth/OAuth is optional
                     return true;
                 }
                 errorMessage = updateErrorMessage(errorMessage, ex);
-                if (apiSecurityErrorCode == 0) {
-                    apiSecurityErrorCode = ex.getErrorCode();
-                } else {
-                    apiSecurityErrorCode = APISecurityConstants.MULTI_AUTHENTICATION_FAILURE;
-                }
+                apiSecurityErrorCode = updateErrorCode(apiSecurityErrorCode, ex);
             }
         }
+
         if (isBasicAuthProtected) {
             try {
                 // If Basic Auth passes, authentication passes
                 return authenticators.get(APIConstants.API_SECURITY_BASIC_AUTH).authenticate(messageContext);
             } catch (APISecurityException ex) {
-                if (isMutualSSLauthenticated) {//TODO:check and/or between mutualSSL
+                if (isMutualSSLauthenticated && !isOAuthBasicAuthMandatory) {
+                    // If Mutual SSL authenticated and BasicAuth/OAuth is optional
                     return true;
                 }
                 errorMessage = updateErrorMessage(errorMessage, ex);
-                if (apiSecurityErrorCode == 0) {
-                    apiSecurityErrorCode = ex.getErrorCode();
-                } else {
-                    apiSecurityErrorCode = APISecurityConstants.MULTI_AUTHENTICATION_FAILURE;
-                }
+                apiSecurityErrorCode = updateErrorCode(apiSecurityErrorCode, ex);
             }
         }
 
@@ -406,6 +413,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
         errorMessage += e.getMessage();
         return errorMessage;
+    }
+
+    private int updateErrorCode(int errorCode, APISecurityException e) {
+        if (errorCode == 0) {
+            errorCode = e.getErrorCode();
+        } else {
+            errorCode = APISecurityConstants.MULTI_AUTHENTICATION_FAILURE;
+        }
+        return errorCode;
     }
 
     private String getAuthenticatorsChallengeString() {
