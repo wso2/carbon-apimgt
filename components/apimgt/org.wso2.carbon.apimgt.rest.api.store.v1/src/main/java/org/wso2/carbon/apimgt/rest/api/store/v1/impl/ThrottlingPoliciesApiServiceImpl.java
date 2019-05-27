@@ -53,30 +53,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         return Response.ok().entity("magic!").build();
     }
 
-    @Override
-    public Response throttlingPoliciesSubscriptionApiApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                                              MessageContext messageContext) {
-        ApisApiServiceImpl apiService = new ApisApiServiceImpl();
-        APIDTO apiInfo = apiService.getAPIByAPIId(apiId, xWSO2Tenant);
-        List<ThrottlingPolicy> availableThrottlingPolicyList = getThrottlingPolicyList(
-                ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
-
-        if (apiInfo != null ) {
-            List<String> apiTiers = apiInfo.getTiers();
-            if (apiTiers != null && !apiTiers.isEmpty()) {
-                List<ThrottlingPolicy> apiThrottlingPolicies = new ArrayList<>();
-                for (ThrottlingPolicy policy : availableThrottlingPolicyList) {
-                    if (apiTiers.contains(policy.getName())) {
-                        apiThrottlingPolicies.add(policy);
-                    }
-                }
-                return Response.ok().entity(apiThrottlingPolicies).build();
-            }
-        }
-        return null;
-    }
-
-    private List<ThrottlingPolicy> getThrottlingPolicyList(String policyLevel,String xWSO2Tenant) {
+    public List<ThrottlingPolicy> getThrottlingPolicyList(String policyLevel,String xWSO2Tenant) {
         List<ThrottlingPolicy> throttlingPolicyList = new ArrayList<>();
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
 
