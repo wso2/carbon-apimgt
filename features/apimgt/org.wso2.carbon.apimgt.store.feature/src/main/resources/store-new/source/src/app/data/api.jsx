@@ -186,7 +186,7 @@ export default class API extends Resource {
     getAllTiers(policyLevel, callback = null) {
         let promise_get_all = this.client.then(
             (client) => {
-                return client.apis['Throttling Policies'].get_throttlingPolicies__policyLevel_(
+                return client.apis['Throttling Policies'].get_throttling_policies__policyLevel_(
                     { policyLevel }, this._requestMetaData()
                 );
             },

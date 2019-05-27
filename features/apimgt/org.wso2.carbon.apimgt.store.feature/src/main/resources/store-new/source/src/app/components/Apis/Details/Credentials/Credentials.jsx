@@ -206,7 +206,7 @@ class Credentials extends React.Component {
      *
      * @memberof Credentials
      */
-    handleClickToggle = (name, updateSubscriptionData) => (event) => {
+    handleClickToggle = (name, updateSubscriptionData) => {
         if (updateSubscriptionData) updateSubscriptionData();
         this.setState({ [name]: !this.state[name] });
     };
@@ -287,7 +287,7 @@ class Credentials extends React.Component {
                                     </div>
                                     {applicationsAvailable.length > 0 && (
                                         <div>
-                                            <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={this.handleClickToggle('openAvailable')}>
+                                            <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={()=>this.handleClickToggle('openAvailable')}>
                                                 Subscribe to Available App
                                             </Button>
                                             <Typography variant='caption' component='p' className={classes.buttonElmText}>
@@ -297,10 +297,10 @@ Available
                                             </Typography>
                                         </div>
                                     )}
-                                    <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={this.handleClickToggle('openNew')}>
+                                    <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={()=>this.handleClickToggle('openNew')}>
                                         Subscribe to New App
                                     </Button>
-                                    <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={this.handleClickToggle('openExpress')}>
+                                    <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={()=>this.handleClickToggle('openExpress')}>
                                         Express Mode
                                     </Button>
                                 </div>
@@ -370,13 +370,13 @@ Available
                                 ***************************
                                 */}
                                 {applicationsAvailable.length > 0 && (
-                                    <Dialog fullScreen open={this.state.openAvailable} onClose={this.handleClickToggle('openAvailable',updateSubscriptionData)} TransitionComponent={Transition}>
+                                    <Dialog fullScreen open={this.state.openAvailable} onClose={()=>this.handleClickToggle('openAvailable',updateSubscriptionData)} TransitionComponent={Transition}>
                                         {' '}
                                         <AppBar className={classes.appBar}>
                                             <Grid container spacing={0}>
                                                 <Grid item xs={6}>
                                                     <Toolbar className={classes.toolbar}>
-                                                        <IconButton color='inherit' onClick={this.handleClickToggle('openAvailable',updateSubscriptionData)} aria-label='Close'>
+                                                        <IconButton color='inherit' onClick={()=>this.handleClickToggle('openAvailable',updateSubscriptionData)} aria-label='Close'>
                                                             <CloseIcon />
                                                         </IconButton>
                                                         <div className={classes.subscribeTitle}>
@@ -414,13 +414,13 @@ Applications )
                                 Subscribe with new Mode
                                 ***************************************
                                 */}
-                                <Dialog fullScreen open={this.state.openNew} onClose={this.handleClickToggle('openNew',updateSubscriptionData)} TransitionComponent={Transition}>
+                                <Dialog fullScreen open={this.state.openNew} onClose={()=>this.handleClickToggle('openNew',updateSubscriptionData)} TransitionComponent={Transition}>
                                     {' '}
                                     <AppBar className={classes.appBar}>
                                         <Grid container spacing={0}>
                                             <Grid item xs={6}>
                                                 <Toolbar className={classes.toolbar}>
-                                                    <IconButton color='inherit' onClick={this.handleClickToggle('openNew',updateSubscriptionData)} aria-label='Close'>
+                                                    <IconButton color='inherit' onClick={()=>this.handleClickToggle('openNew',updateSubscriptionData)} aria-label='Close'>
                                                         <CloseIcon />
                                                     </IconButton>
                                                     <div className={classes.subscribeTitle}>
@@ -431,7 +431,7 @@ Applications )
                                         </Grid>
                                     </AppBar>
                                     <div className={classes.plainContent}>
-                                        <Wizard />
+                                        <Wizard onClickFunction={(a,b)=>this.handleClickToggle(a,b)} updateSubscriptionData={updateSubscriptionData}/>
                                     </div>
                                 </Dialog>
 
@@ -440,12 +440,12 @@ Applications )
                                 Subscribe with express Mode
                                 ***************************************
                                 */}
-                                <Dialog fullScreen open={this.state.openExpress} onClose={this.handleClickToggle('openExpress',updateSubscriptionData)}  TransitionComponent={Transition}>
+                                <Dialog fullScreen open={this.state.openExpress} onClose={()=>this.handleClickToggle('openExpress',updateSubscriptionData)}  TransitionComponent={Transition}>
                                     <AppBar className={classes.appBar}>
                                         <Grid container spacing={0}>
                                             <Grid item xs={6}>
                                                 <Toolbar className={classes.toolbar}>
-                                                    <IconButton color='inherit' onClick={this.handleClickToggle('openExpress',updateSubscriptionData)}  aria-label='Close'>
+                                                    <IconButton color='inherit' onClick={()=>this.handleClickToggle('openExpress',updateSubscriptionData)}  aria-label='Close'>
                                                         <CloseIcon />
                                                     </IconButton>
                                                     <div className={classes.subscribeTitle}>

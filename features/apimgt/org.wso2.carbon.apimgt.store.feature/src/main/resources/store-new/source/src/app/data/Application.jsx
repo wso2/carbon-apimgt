@@ -57,6 +57,17 @@ export default class Application extends Resource {
     }
 
     /** *
+     * Set this.tokens object by iterating the keys array received from REST API
+     * @param {Array} keys  An array of keys object containing either PRODUCTION or/and SANDBOX key information
+     * @private
+     */
+    _setTokens(keys) {
+        for (const keyObj of keys) {
+            this.tokens.set(keyObj.keyType, keyObj.token);
+        }
+    }
+
+    /** *
      * Get keys of the current instance of an application
      * @param  {string} keyType Key type either `Production` or `SandBox`
      * @returns {promise} Set the fetched CS/CK into current instance and return keys array as Promise object
@@ -65,7 +76,9 @@ export default class Application extends Resource {
         return this.client.then(client => client.apis['Application Keys']
             .get_applications__applicationId__keys({ applicationId: this.applicationId }))
             .then((keysResponse) => {
-                this._setKeys(keysResponse.obj.list);
+                let keys = keysResponse.obj.list;
+                this._setKeys(keys);
+                this._setTokens(keys);
                 return this.keys;
             });
     }
@@ -73,20 +86,25 @@ export default class Application extends Resource {
     /** *
      * Generate token for this application instance
      * @param {string} type token type
+     * @param {string} validityPeriod token validityPeriod
+     * @param {string} selectedScopes token scopes
      * @returns {promise} Set the generated token into current
      * instance and return tokenObject received as Promise object
      */
-    generateToken(type) {
+    generateToken(type, validityPeriod,  selectedScopes) {
         const promiseToken = this.client.then((client) => {
             const keys = this.keys.get(type);
+            const accessToken = this.tokens.get(type);
             const requestContent = {
-                consumerKey: keys.consumerKey,
                 consumerSecret: keys.consumerSecret,
-                validityPeriod: 3600,
-                scopes: '',
+                validityPeriod: validityPeriod,
+                revokeToken: accessToken.accessToken,
+                scopes: selectedScopes,
+                additionalProperties: ''
             };
-            const payload = { applicationId: this.id, body: requestContent };
-            return client.apis.Applications.post_applications__applicationId__generate_token(payload);
+            const payload = { applicationId: this.id, keyType: type, body: requestContent };
+            return client.apis['Application Tokens']
+                .post_applications__applicationId__keys__keyType__generate_token(payload);
         });
         return promiseToken.then((tokenResponse) => {
             const token = tokenResponse.obj;

@@ -104,6 +104,18 @@ class ViewToken extends React.Component {
     };
 
     /**
+     * Generate a comma separate string of token scopes
+     * @param {string} tokenScopes token scopes
+     * @returns {String} scopeString comma separated string of token scopes
+     * @memberof ViewToken
+     */
+    getTokeScopesString(tokenScopes) {
+        let scopeString = tokenScopes.splice(0,1);
+        tokenScopes.map(scope => scopeString +=  ", " + scope);
+        return scopeString;
+    }
+
+    /**
      *
      *
      * @returns
@@ -145,11 +157,11 @@ class ViewToken extends React.Component {
                 <FormHelperText>
                     Above token has a validity period of
                     {' '}
-                    {this.state.validityTime}
+                    {token.validityTime}
                     {' '}
 seconds. And the token has (
                     {' '}
-                    {this.state.tokenScopes}
+                    {this.getTokeScopesString(token.tokenScopes)}
                     {' '}
 ) scopes.
                 </FormHelperText>

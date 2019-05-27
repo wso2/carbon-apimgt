@@ -269,6 +269,10 @@ class Wizard extends React.Component {
                     }
                 });
         } else if (activeStep === 4) {
+            const { onClickFunction, updateSubscriptionData } = this.props;
+            if (onClickFunction) {
+                onClickFunction('openNew', updateSubscriptionData);
+            }
         }
     };
 
