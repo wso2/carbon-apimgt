@@ -2570,6 +2570,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
+    public JSONArray getScopesForApplicationSubscription(String username, int applicationId)
+            throws APIManagementException {
+        Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+        JSONObject scopeList = new JSONObject();
+        JSONArray scopeArray = new JSONArray();
+
+        Subscriber subscriber = new Subscriber(username);
+        scopeSet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
+
+        for (Scope scope : scopeSet) {
+            JSONObject scopeObj = new JSONObject();
+            scopeObj.put("scopeKey", scope.getKey());
+            scopeObj.put("scopeName", scope.getName());
+            scopeArray.add(scopeObj);
+        }
+        return scopeArray;
+    }
+
     /*
      *@see super.getSubscribedAPIsByApplicationId
      *
