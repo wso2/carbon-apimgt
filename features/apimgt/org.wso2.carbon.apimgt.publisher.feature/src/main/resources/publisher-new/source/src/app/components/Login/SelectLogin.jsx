@@ -32,22 +32,41 @@ import './login.css';
  * @extends {Component}
  */
 class SelectLogin extends Component {
+    /**
+     * Creates an instance of SelectLogin.
+     * @param {any} props @inheritDoc
+     * @memberof SelectLogin
+     */
     constructor(props) {
         super(props);
         this.doBasicLogin = this.doBasicLogin.bind(this);
         this.doIDPLogin = this.doIDPLogin.bind(this);
     }
 
+    /**
+     * Do Basic Authentication redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
+     */
     doBasicLogin = (e) => {
         e.preventDefault();
         window.location = '/publisher-new/login/basic';
     }
 
+    /**
+     * Do IDP Authentication redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
+     */
     doIDPLogin = (e) => {
         e.preventDefault();
         window.location = '/publisher-new/services/configs';
     }
 
+    /**
+     *
+     *
+     * @returns {React.Component} Render SelectLogin component
+     * @memberof SelectLogin
+     */
     render() {
         return (
             <div className='login-flex-container'>
