@@ -97,8 +97,9 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("keyType")
+  @NotNull
   public KeyTypeEnum getKeyType() {
     return keyType;
   }

@@ -593,11 +593,45 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         return null;
     }
 
+    /**
+     * Generate keys using existing consumer key and consumer secret
+     *
+     * @param applicationId Application id
+     * @param body          Contains consumer key, secret and key type information
+     * @return A response object containing application keys
+     */
     @Override
-    public Response applicationsApplicationIdMapKeysPost(String applicationId,
-            ApplicationKeyMappingRequestDTO body, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
+                                                         MessageContext messageContext) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            JSONObject jsonParamObj = new JSONObject();
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                String clientId = body.getConsumerKey();
+                String keyType = body.getKeyType().toString();
+                String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
+                jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
+                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
+                Map<String, Object> keyDetails = apiConsumer.mapExistingOAuthClient(jsonParamObj.toJSONString(),
+                        username, clientId, application.getName(), keyType, tokenType);
+                ApplicationKeyDTO applicationKeyDTO =
+                        ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
+                return Response.ok().entity(applicationKeyDTO).build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.rootCauseMessageMatches(e, "is already registered")) {
+                RestApiUtil.handleResourceAlreadyExistsError("Keys already generated for the application "
+                        + applicationId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while generating keys for application "
+                        + applicationId, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
