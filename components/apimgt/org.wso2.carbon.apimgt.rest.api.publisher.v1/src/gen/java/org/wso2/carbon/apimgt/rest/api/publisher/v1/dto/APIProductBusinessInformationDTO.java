@@ -1,29 +1,31 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class APIProductBusinessInformationDTO  {
+public class APIProductBusinessInformationDTO   {
   
-  
-  
-  private String businessOwner = null;
-  
-  
-  private String businessOwnerEmail = null;
+    private String businessOwner = null;
+    private String businessOwnerEmail = null;
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIProductBusinessInformationDTO businessOwner(String businessOwner) {
+    this.businessOwner = businessOwner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "businessowner", value = "")
   @JsonProperty("businessOwner")
   public String getBusinessOwner() {
     return businessOwner;
@@ -32,10 +34,15 @@ public class APIProductBusinessInformationDTO  {
     this.businessOwner = businessOwner;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIProductBusinessInformationDTO businessOwnerEmail(String businessOwnerEmail) {
+    this.businessOwnerEmail = businessOwnerEmail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "businessowner@wso2.com", value = "")
   @JsonProperty("businessOwnerEmail")
   public String getBusinessOwnerEmail() {
     return businessOwnerEmail;
@@ -44,16 +51,45 @@ public class APIProductBusinessInformationDTO  {
     this.businessOwnerEmail = businessOwnerEmail;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    APIProductBusinessInformationDTO apIProductBusinessInformation = (APIProductBusinessInformationDTO) o;
+    return Objects.equals(businessOwner, apIProductBusinessInformation.businessOwner) &&
+        Objects.equals(businessOwnerEmail, apIProductBusinessInformation.businessOwnerEmail);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(businessOwner, businessOwnerEmail);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIProductBusinessInformationDTO {\n");
     
-    sb.append("  businessOwner: ").append(businessOwner).append("\n");
-    sb.append("  businessOwnerEmail: ").append(businessOwnerEmail).append("\n");
-    sb.append("}\n");
+    sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");
+    sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

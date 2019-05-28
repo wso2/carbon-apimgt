@@ -5657,9 +5657,9 @@ definitions:
       workflowStatus:
         type: string
         example: APPROVED
-      thumbnailUri:
-        type: string
-        example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+      hasThumbnail:
+        type: boolean
+        example: true
       securityScheme:
         type: array
         items:
@@ -5697,7 +5697,7 @@ definitions:
           If the provider value is not given user invoking the api will be used as the provider.
         type: string
         example: admin
-      lifeCycleStatus:
+      lifeCycleStatus:  # NEED TO RENAME AS lifeCycleState
         type: string
         example: CREATED
       wsdlUri:
@@ -5714,6 +5714,9 @@ definitions:
       destinationStatsEnabled:
         type: string
         example: Disabled
+      hasThumbnail:
+        type: boolean
+        example: true
       isDefaultVersion:
         type: boolean
         example: false
@@ -5743,8 +5746,8 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
-      apiPolicy:
-        description: The policy selected for the particular API
+      apiThrottlingPolicy:
+        description: The API level throttling policy selected for the particular API
         type: string
         example: "Unlimited"
       authorizationHeader:
@@ -5855,14 +5858,11 @@ definitions:
         type: array
         items:
          properties:
-          key:
-           type: string
-           example: "01234567-0123-0123-0123-012345678901"
           inline:
            $ref: '#/definitions/Endpoint'
           type:
             type: string
-            example: "Production"
+            example: "production_endpoints"
       scopes:
         type: array
         items:
@@ -6311,6 +6311,9 @@ definitions:
           - subscription
           - api
         example: api
+      displayName:
+        type: string
+        example: Platinum
       attributes:
         description: |
           Custom attributes added to the policy policy
@@ -6441,7 +6444,7 @@ definitions:
 # The Error resource
 #-----------------------------------------------------
   Error:
-    title: Error object returned with 4XX HTTP lifeCycleStatus
+    title: Error object returned with 4XX HTTP Status
     required:
       - code
       - message
@@ -6703,11 +6706,6 @@ definitions:
         description: |
           Time out of the endpoint
         example: "1000"
-      isPrimary:
-        type: boolean
-        description: |
-          Defines whether the endpoint is primary when used in fail over.
-        example: true
       attributes:
         type: array
         items:
@@ -7020,6 +7018,8 @@ definitions:
         description: |
           Attributes that returned after the workflow execution
         type: string
+      lifecycleState:
+        $ref: '#/definitions/LifecycleState'
 
 #-----------------------------------------------------
 # The api definition validation response

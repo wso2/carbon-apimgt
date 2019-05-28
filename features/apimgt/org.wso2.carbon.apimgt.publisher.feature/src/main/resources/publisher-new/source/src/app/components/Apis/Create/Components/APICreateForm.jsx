@@ -95,7 +95,7 @@ class APICreateForm extends Component {
                 changes[name] = [
                     {
                         inline: {
-                            name: `${api.name}_inline_prod`,
+                            name: `${api.name}_inline_production`,
                             endpointConfig: {
                                 list: [
                                     {
@@ -105,16 +105,19 @@ class APICreateForm extends Component {
                                 ],
                                 endpointType: 'SINGLE',
                             },
-                            type,
                             endpointSecurity: {
                                 enabled: false,
+                                type: 'basic',
+                                username: 'basic',
+                                password: 'basic',
                             },
+                            type: 'http',
                         },
-                        type: 'Production',
+                        type: 'production_endpoints'
                     },
                     {
                         inline: {
-                            name: `${api.name}_inline_sandbx`,
+                            name: `${api.name}_inline_sandbox`,
                             endpointConfig: {
                                 list: [
                                     {
@@ -124,13 +127,16 @@ class APICreateForm extends Component {
                                 ],
                                 endpointType: 'SINGLE',
                             },
-                            type,
                             endpointSecurity: {
                                 enabled: false,
+                                type: 'basic',
+                                username: 'basic',
+                                password: 'basic',
                             },
+                            type: 'http',
                         },
-                        type: 'Sandbox',
-                    },
+                        type: 'sandbox_endpoints'
+                    }
                 ];
             } else {
                 changes[name] = value;

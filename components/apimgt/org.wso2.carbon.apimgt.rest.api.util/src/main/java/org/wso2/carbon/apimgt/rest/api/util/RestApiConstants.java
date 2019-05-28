@@ -43,6 +43,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_DOCUMENTATION = "documentation";
     public static final String RESOURCE_POLICY = "policy";
     public static final String RESOURCE_APP_POLICY = "application policy";
+    public static final String RESOURCE_APP_CONSUMER_KEY = "application consumer key";
     public static final String RESOURCE_ADVANCED_POLICY = "advanced policy";
     public static final String RESOURCE_SUBSCRIPTION_POLICY = "subcription policy";
     public static final String RESOURCE_CUSTOM_RULE = "custom rule";
@@ -206,11 +207,4 @@ public final class RestApiConstants {
     public static final String HTTP_METHOD = "method";
     
     public static final String[] SUPPORTED_METHODS = {"get", "put", "post", "delete", "patch"};
-
-    public static class ResourceAuthTypes {
-        public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
-        public static final String APPLICATION_USER = "Application User";
-        public static final String APPLICATION = "Application";
-        public static final String NONE = "None";
-    }
 }

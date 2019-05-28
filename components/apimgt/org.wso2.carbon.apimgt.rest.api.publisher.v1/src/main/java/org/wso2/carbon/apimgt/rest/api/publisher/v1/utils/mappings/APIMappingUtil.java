@@ -25,12 +25,14 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIEndpoint;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.EndpointConfigAttributes;
 import org.wso2.carbon.apimgt.api.model.EndpointEndpointConfig;
@@ -75,6 +77,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
@@ -138,8 +141,8 @@ public class APIMappingUtil {
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
         }
-        if (dto.getIsDefaultVersion() != null) {
-            model.setAsDefaultVersion(dto.getIsDefaultVersion());
+        if (dto.isIsDefaultVersion() != null) {
+            model.setAsDefaultVersion(dto.isIsDefaultVersion());
         }
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
@@ -190,7 +193,7 @@ public class APIMappingUtil {
             apiTiers.add(new Tier(tier));
         }
         model.addAvailableTiers(apiTiers);
-        model.setApiLevelPolicy(dto.getApiPolicy());
+        model.setApiLevelPolicy(dto.getApiThrottlingPolicy());
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
@@ -240,9 +243,9 @@ public class APIMappingUtil {
         CORSConfiguration corsConfiguration;
         if (apiCorsConfigurationDTO != null) {
             corsConfiguration =
-                    new CORSConfiguration(apiCorsConfigurationDTO.getCorsConfigurationEnabled(),
+                    new CORSConfiguration(apiCorsConfigurationDTO.isCorsConfigurationEnabled(),
                             apiCorsConfigurationDTO.getAccessControlAllowOrigins(),
-                            apiCorsConfigurationDTO.getAccessControlAllowCredentials(),
+                            apiCorsConfigurationDTO.isAccessControlAllowCredentials(),
                             apiCorsConfigurationDTO.getAccessControlAllowHeaders(),
                             apiCorsConfigurationDTO.getAccessControlAllowMethods());
 
@@ -335,9 +338,11 @@ public class APIMappingUtil {
         apiInfoDTO.setVersion(apiId.getVersion());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        apiInfoDTO.setLifeCycleStatus(api.getStatus().toString());
+        apiInfoDTO.setLifeCycleStatus(api.getStatus());
         if (!StringUtils.isBlank(api.getThumbnailUrl())) {
-            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
+            apiInfoDTO.setHasThumbnail(true);
+        } else {
+            apiInfoDTO.setHasThumbnail(false);
         }
         return apiInfoDTO;
     }
@@ -412,14 +417,14 @@ public class APIMappingUtil {
             APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
 
         switch (subscriptionAvailability) {
-            case current_tenant:
-                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
-            case all_tenants:
-                return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
-            case specific_tenants:
-                return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
-            default:
-                return null; // how to handle this? 500 or 400
+        case CURRENT_TENANT:
+            return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
+        case ALL_TENANTS:
+            return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
+        case SPECIFIC_TENANTS:
+            return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
+        default:
+            return null; // how to handle this? 500 or 400
         }
 
     }
@@ -444,7 +449,7 @@ public class APIMappingUtil {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(securityDTO.getUsername());
             api.setEndpointUTPassword(securityDTO.getPassword());
-            if (APIEndpointSecurityDTO.TypeEnum.digest.equals(securityDTO.getType())) {
+            if (APIEndpointSecurityDTO.TypeEnum.DIGEST.equals(securityDTO.getType())) {
                 api.setEndpointAuthDigest(true);
             }
         }
@@ -563,16 +568,16 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         dto.setPolicies(tiersToReturn);
-        dto.setApiPolicy(model.getApiLevelPolicy());
+        dto.setApiThrottlingPolicy(model.getApiLevelPolicy());
 
         //APIs created with type set to "NULL" will be considered as "HTTP"
         if (model.getType() == null || model.getType().toLowerCase().equals("null")) {
             dto.setType(APIDTO.TypeEnum.HTTP);
         } else {
-            dto.setType(APIDTO.TypeEnum.valueOf(model.getType()));
+            dto.setType(APIDTO.TypeEnum.fromValue(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.equals(model.getType())) {
+        if (!APIConstants.APIType.WS.toString().equals(model.getType())) {
             if (StringUtils.isEmpty(model.getTransports())) {
                 List<String> transports = new ArrayList<>();
                 transports.add(APIConstants.HTTPS_PROTOCOL);
@@ -676,11 +681,11 @@ public class APIMappingUtil {
 
         switch (subscriptionAvailability) {
             case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT:
-                return APIDTO.SubscriptionAvailabilityEnum.current_tenant;
+                return APIDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
             case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS:
-                return APIDTO.SubscriptionAvailabilityEnum.all_tenants;
+                return APIDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
             case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS:
-                return APIDTO.SubscriptionAvailabilityEnum.specific_tenants;
+                return APIDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
             default:
                 return null; // how to handle this?
         }
@@ -691,7 +696,7 @@ public class APIMappingUtil {
 
         if (api.isEndpointSecured()) {
             APIEndpointSecurityDTO securityDTO = new APIEndpointSecurityDTO();
-            securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.basic); //set default as basic
+            securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.BASIC); //set default as basic
             securityDTO.setUsername(api.getEndpointUTUsername());
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()));
@@ -701,7 +706,7 @@ public class APIMappingUtil {
                 securityDTO.setPassword(""); //Do not expose password
             }
             if (api.isEndpointAuthDigest()) {
-                securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.digest);
+                securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.DIGEST);
             }
             dto.setEndpointSecurity(securityDTO);
         }
@@ -878,13 +883,13 @@ public class APIMappingUtil {
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
-                if (RestApiConstants.ResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
+                if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
                     authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                } else if (RestApiConstants.ResourceAuthTypes.APPLICATION_USER.equals(authType)) {
+                } else if (APIConstants.OASResourceAuthTypes.APPLICATION_USER.equals(authType)) {
                     authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
-                } else if (RestApiConstants.ResourceAuthTypes.NONE.equals(authType)) {
+                } else if (APIConstants.OASResourceAuthTypes.NONE.equals(authType)) {
                     authType = APIConstants.AUTH_NO_AUTHENTICATION;
-                } else if (RestApiConstants.ResourceAuthTypes.APPLICATION.equals(authType)) {
+                } else if (APIConstants.OASResourceAuthTypes.APPLICATION.equals(authType)) {
                     authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
                 } else {
                     authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -950,8 +955,6 @@ public class APIMappingUtil {
                         .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
                         .append("\",\"timeout\":\"")
                         .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
-                        .append("\",\"key\":\"")
-                        .append(endpoint.getKey())
                         .append("\"},");
             }
             sb.append("\"endpoint_type\" : \"")
@@ -977,7 +980,6 @@ public class APIMappingUtil {
         for (EndpointConfig endpointConfig : endpointEndpointConfig.getList()) {
             EndpointConfigDTO endpointConfigDTO = new EndpointConfigDTO();
             endpointConfigDTO.setUrl(endpointConfig.getUrl());
-            endpointConfigDTO.setIsPrimary(endpointConfig.getPrimary());
             endpointConfigDTO.setTimeout(endpointConfig.getTimeout());
 
             //map EndpointConfigAttributes model to EndpointConfigAttributesDTO
@@ -1011,7 +1013,6 @@ public class APIMappingUtil {
             EndpointConfig endpointConfig1 = new EndpointConfig();
             endpointConfig1.setUrl(endpointConfigDTO.getUrl());
             endpointConfig1.setTimeout(endpointConfigDTO.getTimeout());
-            endpointConfig1.setPrimary(endpointConfigDTO.getIsPrimary());
 
             //mapping attributes in EndpointConfigAttributesDTO to EndpointConfigAttributes model
             List<EndpointConfigAttributes> endpointConfigAttributesList = new ArrayList<>();
@@ -1092,7 +1093,6 @@ public class APIMappingUtil {
             endpointDTO.setType(endpoint.getType());
 
             apiEndpointDTO.setInline(endpointDTO);
-            apiEndpointDTO.setKey(apiEndpoint.getKey());
             apiEndpointDTO.setType(apiEndpoint.getType());
 
             apiEndpointDTOList.add(apiEndpointDTO);
@@ -1106,9 +1106,11 @@ public class APIMappingUtil {
      *
      * @param type           production_endpoints, sandbox_endpoints
      * @param endpointConfig endpoint config
+     * @param endpointProtocolType endpoint protocol type; eg: http
      * @return APIEndpointDTO apiEndpointDTO
      */
-    public static APIEndpointDTO convertToAPIEndpointDTO(String type, JSONObject endpointConfig) {
+    public static APIEndpointDTO convertToAPIEndpointDTO(String type, JSONObject endpointConfig,
+            String endpointProtocolType) {
 
         APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
         apiEndpointDTO.setType(type);
@@ -1124,7 +1126,12 @@ public class APIMappingUtil {
             }
             list.add(endpointConfigDTO);
             endpointEndpointConfigDTO.setList(list);
+            
+            //todo: fix for other types of endpoints eg: load balanced, failover 
+            endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.SINGLE);
+            
             endpointDTO.setEndpointConfig(endpointEndpointConfigDTO);
+            endpointDTO.setType(endpointProtocolType);
             apiEndpointDTO.setInline(endpointDTO);
         }
         return apiEndpointDTO;
@@ -1142,25 +1149,56 @@ public class APIMappingUtil {
         if (endpointConfig != null) {
             JSONParser parser = new JSONParser();
             JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
-            String endpointType = endpointConfigJson.get("endpoint_type").toString();
+            String endpointProtocolType = (String) endpointConfigJson
+                    .get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
 
             if (endpointConfigJson.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) &&
                     isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS))) {
-                JSONObject prodEPConfig = (JSONObject) endpointConfigJson.get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
-                APIEndpointDTO apiEndpointDTO = convertToAPIEndpointDTO(APIConstants.API_DATA_PRODUCTION_ENDPOINTS, prodEPConfig);
-                apiEndpointDTO.setType(endpointType);
+                JSONObject prodEPConfig = (JSONObject) endpointConfigJson
+                        .get(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+                APIEndpointDTO apiEndpointDTO = convertToAPIEndpointDTO(APIConstants.API_DATA_PRODUCTION_ENDPOINTS,
+                        prodEPConfig, endpointProtocolType);
                 apiEndpointDTOList.add(apiEndpointDTO);
             }
             if (endpointConfigJson.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS) &&
                     isEndpointURLNonEmpty(endpointConfigJson.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS))) {
-                JSONObject sandboxEPConfig = (JSONObject) endpointConfigJson.get(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
-                APIEndpointDTO apiEndpointDTO = convertToAPIEndpointDTO(APIConstants.API_DATA_PRODUCTION_ENDPOINTS, sandboxEPConfig);
-                apiEndpointDTO.setType(endpointType);
-                apiEndpointDTOList.add(convertToAPIEndpointDTO(APIConstants.API_DATA_SANDBOX_ENDPOINTS, sandboxEPConfig));
+                JSONObject sandboxEPConfig = (JSONObject) endpointConfigJson
+                        .get(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+                APIEndpointDTO apiEndpointDTO = convertToAPIEndpointDTO(APIConstants.API_DATA_SANDBOX_ENDPOINTS,
+                        sandboxEPConfig, endpointProtocolType);
+                apiEndpointDTOList.add(apiEndpointDTO);
             }
 
         }
         return apiEndpointDTOList;
+    }
+
+    /**
+     * Returns workflow state DTO from the provided information
+     * 
+     * @param lifecycleStateDTO Lifecycle state DTO
+     * @param stateChangeResponse workflow response from API lifecycle change
+     * @return workflow state DTO
+     */
+    public static WorkflowResponseDTO toWorkflowResponseDTO(LifecycleStateDTO lifecycleStateDTO,
+            APIStateChangeResponse stateChangeResponse) {
+        WorkflowResponseDTO workflowResponseDTO = new WorkflowResponseDTO();
+
+        if (WorkflowStatus.APPROVED.toString().equals(stateChangeResponse.getStateChangeStatus())) {
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.APPROVED);
+        } else if (WorkflowStatus.CREATED.toString().equals(stateChangeResponse.getStateChangeStatus())) {
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.CREATED);
+        } else if ((WorkflowStatus.REGISTERED.toString().equals(stateChangeResponse.getStateChangeStatus()))) {
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.REGISTERED);
+        } else if ((WorkflowStatus.REJECTED.toString().equals(stateChangeResponse.getStateChangeStatus()))) {
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.REJECTED);
+        } else {
+            log.error("Unrecognized state : " + stateChangeResponse.getStateChangeStatus());
+            workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.CREATED);
+        }
+
+        workflowResponseDTO.setLifecycleState(lifecycleStateDTO);
+        return workflowResponseDTO;
     }
 
     /**
@@ -1199,17 +1237,16 @@ public class APIMappingUtil {
         APIOperationsDTO operationsDTO = new APIOperationsDTO();
         operationsDTO.setId(""); //todo: Set ID properly
         if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(uriTemplate.getAuthType())) {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         } else if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(uriTemplate.getAuthType())) {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.APPLICATION_USER);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_USER);
         } else if (APIConstants.AUTH_NO_AUTHENTICATION.equals(uriTemplate.getAuthType())) {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.NONE);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.NONE);
         } else if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(uriTemplate.getAuthType())) {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.APPLICATION);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION);
         } else {
-            operationsDTO.setAuthType(RestApiConstants.ResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
+            operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         }
-        operationsDTO.setAuthType(uriTemplate.getAuthType());
         operationsDTO.setHttpVerb(uriTemplate.getHTTPVerb());
         operationsDTO.setUritemplate(uriTemplate.getUriTemplate());
         if (uriTemplate.getScope() != null) {
@@ -1339,11 +1376,11 @@ public class APIMappingUtil {
 
         switch (subscriptionAvailability) {
             case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT :
-                return APIProductDTO.SubscriptionAvailabilityEnum.current_tenant;
+                return APIProductDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
             case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS :
-                return APIProductDTO.SubscriptionAvailabilityEnum.all_tenants;
+                return APIProductDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
             case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS :
-                return APIProductDTO.SubscriptionAvailabilityEnum.specific_tenants;
+                return APIProductDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
             default:
                 return null; // how to handle this?
         }
@@ -1444,11 +1481,11 @@ public class APIMappingUtil {
     private static String mapSubscriptionAvailabilityFromDTOtoAPIProduct(
             APIProductDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
         switch (subscriptionAvailability) {
-            case current_tenant:
+        case CURRENT_TENANT:
                 return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
-            case all_tenants:
+        case ALL_TENANTS:
                 return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
-            case specific_tenants:
+        case SPECIFIC_TENANTS:
                 return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
             default:
                 return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT; // default to current tenant

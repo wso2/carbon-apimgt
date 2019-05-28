@@ -24,6 +24,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Person from '@material-ui/icons/Person';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -43,7 +44,7 @@ const styles = theme => ({
         height: 25,
     },
 });
-const LifeCycleHistory = (props) => {
+const LifeCycleHistory = props => {
     const { classes } = props;
     return (
         <Paper>
@@ -56,19 +57,23 @@ const LifeCycleHistory = (props) => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {props.lcHistory.map(entry =>
-                        entry.previousState && (
-                            <TableRow key={entry.postState}>
-                                <TableCell component='th' scope='row'>
-                                    <Avatar className={classes.avatar}>
-                                        <Person className={classes.personIcon} />
-                                    </Avatar>
-                                    <div>{entry.user}</div>
-                                </TableCell>
-                                <TableCell>{'LC has changed from ' + entry.previousState + ' to ' + entry.postState}</TableCell>
-                                <TableCell>{entry.updatedTime}</TableCell>
-                            </TableRow>
-                        ))}
+                    {props.lcHistory.map(
+                        entry =>
+                            entry.previousState && (
+                                <TableRow key={entry.postState}>
+                                    <TableCell component="th" scope="row">
+                                        <Avatar className={classes.avatar}>
+                                            <Person className={classes.personIcon} />
+                                        </Avatar>
+                                        <div>{entry.user}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {'LC has changed from ' + entry.previousState + ' to ' + entry.postState}
+                                    </TableCell>
+                                    <TableCell>{moment(entry.updatedTime).fromNow()}</TableCell>
+                                </TableRow>
+                            ),
+                    )}
                 </TableBody>
             </Table>
         </Paper>

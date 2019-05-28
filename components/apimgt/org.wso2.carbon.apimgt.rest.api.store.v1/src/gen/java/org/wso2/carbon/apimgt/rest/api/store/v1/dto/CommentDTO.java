@@ -1,48 +1,39 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class CommentDTO  {
+public class CommentDTO   {
   
-  
-  @NotNull
-  private String commentId = null;
-  
-  @NotNull
-  private String apiId = null;
-  
-  @NotNull
-  private String username = null;
-  
-  @NotNull
-  private String commentText = null;
-  
-  
-  private String createdTime = null;
-  
-  
-  private String createdBy = null;
-  
-  
-  private String lastUpdatedTime = null;
-  
-  
-  private String lastUpdatedBy = null;
+    private String commentId = null;
+    private String apiId = null;
+    private String username = null;
+    private String commentText = null;
+    private String createdTime = null;
+    private String createdBy = null;
+    private String lastUpdatedTime = null;
+    private String lastUpdatedBy = null;
 
-  
   /**
    **/
+  public CommentDTO commentId(String commentId) {
+    this.commentId = commentId;
+    return this;
+  }
+
+  
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("commentId")
+  @NotNull
   public String getCommentId() {
     return commentId;
   }
@@ -50,11 +41,17 @@ public class CommentDTO  {
     this.commentId = commentId;
   }
 
-  
   /**
    **/
+  public CommentDTO apiId(String apiId) {
+    this.apiId = apiId;
+    return this;
+  }
+
+  
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("apiId")
+  @NotNull
   public String getApiId() {
     return apiId;
   }
@@ -62,12 +59,18 @@ public class CommentDTO  {
     this.apiId = apiId;
   }
 
-  
   /**
-   * If username is not given user invoking the API will be taken as the username.\n
+   * If username is not given user invoking the API will be taken as the username. 
    **/
-  @ApiModelProperty(required = true, value = "If username is not given user invoking the API will be taken as the username.\n")
+  public CommentDTO username(String username) {
+    this.username = username;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "If username is not given user invoking the API will be taken as the username. ")
   @JsonProperty("username")
+  @NotNull
   public String getUsername() {
     return username;
   }
@@ -75,11 +78,17 @@ public class CommentDTO  {
     this.username = username;
   }
 
-  
   /**
    **/
+  public CommentDTO commentText(String commentText) {
+    this.commentText = commentText;
+    return this;
+  }
+
+  
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("commentText")
+  @NotNull
   public String getCommentText() {
     return commentText;
   }
@@ -87,10 +96,15 @@ public class CommentDTO  {
     this.commentText = commentText;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public CommentDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
     return createdTime;
@@ -99,9 +113,14 @@ public class CommentDTO  {
     this.createdTime = createdTime;
   }
 
-  
   /**
    **/
+  public CommentDTO createdBy(String createdBy) {
+    this.createdBy = createdBy;
+    return this;
+  }
+
+  
   @ApiModelProperty(value = "")
   @JsonProperty("createdBy")
   public String getCreatedBy() {
@@ -111,10 +130,15 @@ public class CommentDTO  {
     this.createdBy = createdBy;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public CommentDTO lastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("lastUpdatedTime")
   public String getLastUpdatedTime() {
     return lastUpdatedTime;
@@ -123,9 +147,14 @@ public class CommentDTO  {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
-  
   /**
    **/
+  public CommentDTO lastUpdatedBy(String lastUpdatedBy) {
+    this.lastUpdatedBy = lastUpdatedBy;
+    return this;
+  }
+
+  
   @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedBy")
   public String getLastUpdatedBy() {
@@ -135,22 +164,57 @@ public class CommentDTO  {
     this.lastUpdatedBy = lastUpdatedBy;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    CommentDTO comment = (CommentDTO) o;
+    return Objects.equals(commentId, comment.commentId) &&
+        Objects.equals(apiId, comment.apiId) &&
+        Objects.equals(username, comment.username) &&
+        Objects.equals(commentText, comment.commentText) &&
+        Objects.equals(createdTime, comment.createdTime) &&
+        Objects.equals(createdBy, comment.createdBy) &&
+        Objects.equals(lastUpdatedTime, comment.lastUpdatedTime) &&
+        Objects.equals(lastUpdatedBy, comment.lastUpdatedBy);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(commentId, apiId, username, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class CommentDTO {\n");
     
-    sb.append("  commentId: ").append(commentId).append("\n");
-    sb.append("  apiId: ").append(apiId).append("\n");
-    sb.append("  username: ").append(username).append("\n");
-    sb.append("  commentText: ").append(commentText).append("\n");
-    sb.append("  createdTime: ").append(createdTime).append("\n");
-    sb.append("  createdBy: ").append(createdBy).append("\n");
-    sb.append("  lastUpdatedTime: ").append(lastUpdatedTime).append("\n");
-    sb.append("  lastUpdatedBy: ").append(lastUpdatedBy).append("\n");
-    sb.append("}\n");
+    sb.append("    commentId: ").append(toIndentedString(commentId)).append("\n");
+    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
+    sb.append("    username: ").append(toIndentedString(username)).append("\n");
+    sb.append("    commentText: ").append(toIndentedString(commentText)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
+    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    lastUpdatedBy: ").append(toIndentedString(lastUpdatedBy)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

@@ -25,7 +25,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TagsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TiersApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ThrottlingPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SwaggerYamlApi"/>
             
         </jaxrs:serviceBeans>

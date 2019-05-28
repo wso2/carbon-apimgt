@@ -651,6 +651,10 @@ public final class APIConstants {
             + "Access-Control-Allow-Headers";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS = CORS_CONFIGURATION
             + "Access-Control-Allow-Methods";
+
+    public static final String CORS_CONFIGURATION_ACCESS_CTL_EXPOSE_HEADERS = CORS_CONFIGURATION
+            + "Access-Control-Expose-Headers";
+
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
             + "Access-Control-Allow-Credentials";
 
@@ -896,6 +900,7 @@ public final class APIConstants {
     public static class CORSHeaders {
         public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
         public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+        public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
         public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
         public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
@@ -1146,6 +1151,7 @@ public final class APIConstants {
     public static final String API_DATA_URL = "url";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
+    public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
@@ -1508,4 +1514,11 @@ public final class APIConstants {
     public static final String PRODUCTSCOPE_PREFIX = "productscope";
     public static final String API_PRODUCT_SUBSCRIPTION_TYPE = "APIProduct";
     public static final String API_SUBSCRIPTION_TYPE = "API";
+
+    public static class OASResourceAuthTypes {
+        public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
+        public static final String APPLICATION_USER = "Application User";
+        public static final String APPLICATION = "Application";
+        public static final String NONE = "None";
+    }
 }

@@ -43,7 +43,7 @@ public class ApplicationMappingUtil {
     public static ApplicationDTO fromApplicationtoDTO (Application application) {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getUUID());
-        applicationDTO.setThrottlingTier(application.getTier());
+        applicationDTO.setThrottlingPolicy(application.getTier());
         applicationDTO.setDescription(application.getDescription());
         Map<String,String> applicationAttributes = application.getApplicationAttributes();
         applicationDTO.setAttributes(applicationAttributes);
@@ -74,7 +74,7 @@ public class ApplicationMappingUtil {
         //subscriber field of the body is not honored
         Subscriber subscriber = new Subscriber(username);
         Application application = new Application(applicationDTO.getName(), subscriber);
-        application.setTier(applicationDTO.getThrottlingTier());
+        application.setTier(applicationDTO.getThrottlingPolicy());
         application.setDescription(applicationDTO.getDescription());
         application.setUUID(applicationDTO.getApplicationId());
         application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
@@ -148,7 +148,7 @@ public class ApplicationMappingUtil {
     public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
         ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
         applicationInfoDTO.setApplicationId(application.getUUID());
-        applicationInfoDTO.setThrottlingTier(application.getTier());
+        applicationInfoDTO.setThrottlingPolicy(application.getTier());
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());

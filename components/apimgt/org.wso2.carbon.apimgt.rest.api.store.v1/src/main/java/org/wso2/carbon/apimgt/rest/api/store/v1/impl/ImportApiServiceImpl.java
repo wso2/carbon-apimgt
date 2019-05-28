@@ -19,21 +19,25 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 import java.io.InputStream;
+
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ImportApiService;
 
 import javax.ws.rs.core.Response;
 
-public class ImportApiServiceImpl extends ImportApiService {
+public class ImportApiServiceImpl implements ImportApiService {
     @Override
-    public Response importApplicationsPost(InputStream fileInputStream,Attachment fileDetail){
+    public Response importApplicationsPost(InputStream fileInputStream, Attachment fileDetail,
+            MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
+
     @Override
-    public Response importApplicationsPut(InputStream fileInputStream,Attachment fileDetail){
+    public Response importApplicationsPut(InputStream fileInputStream, Attachment fileDetail,
+            MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 }
