@@ -20,7 +20,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"HoneyPot API Alert List",
+            "title":"HoneyPot API Email Alert configuration",
              "header":{
                 "name":"menu/primary"
             },
@@ -29,7 +29,7 @@ i18n.init(request,localeResourcesBasePath);
                     "name":"layout/extended",
                     "inputs":{
                         "middle":{
-                            "name":"honeypot-api-alert-list"
+                            "name":"honeypot-api-email-alert-configuration"
                         }
                     }
                 }

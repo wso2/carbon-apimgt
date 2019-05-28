@@ -1,0 +1,14 @@
+<%
+jagg.initializer("honeypot-api-email-alert-configuration", {
+    preInitialize:function (){
+        jagg.addHeaderJS("honeypot-api-email-alert-configuration", "honeypot-api-email-alert-configuration",
+         "templates/honeypot-api-email-alert-configuration/js/manage.js");
+        jagg.addFooterJS("honeypot-api-email-alert-configuration", "honeypot-api-email-alert-configuration",
+         "templates/honeypot-api-email-alert-configuration/js/bootstrap-tagsinput.min.js");
+        jagg.addHeaderCSS("honeypot-api-email-alert-configuration", "honeypot-api-email-alert-configuration",
+        "templates/honeypot-api-email-alert-configuration/css/bootstrap-tagsinput.css");
+        jagg.addFooterCSS("honeypot-api-email-alert-configuration", "honeypot-api-email-alert-configuration",
+        "templates/honeypot-api-email-alert-configuration/css/manageAlerts.css");
+    }
+});
+%>

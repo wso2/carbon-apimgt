@@ -231,7 +231,11 @@
                         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
                         <i class="fw fw-edit"></i>Alert List</a>
                       </li>
-
+                      <li <%if (reqUrl.match("honey-pot-api-alert-configuring")){%> class="active" <% } %>><a
+                        href="<%= jagg.url("/honey-pot-api-alert-configuring") %>"
+                        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                        <i class="fw fw-edit"></i>Email Alert configuring</a>
+                      </li>
                     </ul>
         </li>
         <li class="nav-header">
