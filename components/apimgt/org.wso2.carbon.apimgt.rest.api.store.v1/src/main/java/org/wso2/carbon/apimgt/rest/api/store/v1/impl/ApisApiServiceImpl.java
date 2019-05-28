@@ -26,14 +26,13 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.ThrottlingPolicy;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -383,14 +382,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                      MessageContext messageContext) {
         ApisApiServiceImpl apiService = new ApisApiServiceImpl();
         APIDTO apiInfo = apiService.getAPIByAPIId(apiId, xWSO2Tenant);
-        List<ThrottlingPolicy> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
+        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
                 .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
 
         if (apiInfo != null ) {
             List<String> apiTiers = apiInfo.getTiers();
             if (apiTiers != null && !apiTiers.isEmpty()) {
-                List<ThrottlingPolicy> apiThrottlingPolicies = new ArrayList<>();
-                for (ThrottlingPolicy policy : availableThrottlingPolicyList) {
+                List<Tier> apiThrottlingPolicies = new ArrayList<>();
+                for (Tier policy : availableThrottlingPolicyList) {
                     if (apiTiers.contains(policy.getName())) {
                         apiThrottlingPolicies.add(policy);
                     }
