@@ -2446,7 +2446,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                     api.getId().getVersion(), api.getId().getProviderName());
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-
                 String apiDefinition = definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry);
                 LinkedHashMap map = new ObjectMapper().readValue(apiDefinition, LinkedHashMap.class);
                 String json = new ObjectMapper().writeValueAsString(map);
