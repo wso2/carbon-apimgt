@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,18 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React from 'react';
-import Enzyme, { shallow, render, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import TestRenderer from 'react-test-renderer';
-import Configs from '../../site/public/theme/defaultTheme';
+import APIs from './Apis';
 
-// React 16 Enzyme adapter
-Enzyme.configure({ adapter: new Adapter() });
-
-// Make Enzyme functions available in all test files without importing
-global.React = React;
-global.shallow = shallow;
-global.render = render;
-global.mount = mount;
-global.testRenderer = TestRenderer;
+describe('Test APIs main routing component', () => {
+    test('Should render the APIs routing component in smoke test', () => {
+        shallow(<APIs />);
+    });
+});
