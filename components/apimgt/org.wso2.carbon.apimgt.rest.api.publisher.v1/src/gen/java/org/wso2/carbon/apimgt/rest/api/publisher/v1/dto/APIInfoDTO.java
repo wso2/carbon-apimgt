@@ -1,55 +1,41 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class APIInfoDTO  {
+public class APIInfoDTO   {
   
-  
-  
-  private String id = null;
-  
-  
-  private String name = null;
-  
-  
-  private String description = null;
-  
-  
-  private String context = null;
-  
-  
-  private String version = null;
-  
-  
-  private String provider = null;
-  
-  
-  private String lifeCycleStatus = null;
-  
-  
-  private String workflowStatus = null;
-  
-  
-  private String thumbnailUri = null;
-  
-  
-  private List<String> securityScheme = new ArrayList<String>();
+    private String id = null;
+    private String name = null;
+    private String description = null;
+    private String context = null;
+    private String version = null;
+    private String provider = null;
+    private String lifeCycleStatus = null;
+    private String workflowStatus = null;
+    private Boolean hasThumbnail = null;
+    private List<String> securityScheme = new ArrayList<>();
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIInfoDTO id(String id) {
+    this.id = id;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -58,10 +44,15 @@ public class APIInfoDTO  {
     this.id = id;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIInfoDTO name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorAPI", value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -70,10 +61,15 @@ public class APIInfoDTO  {
     this.name = name;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIInfoDTO description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "A calculator API that supports basic operations", value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -82,10 +78,15 @@ public class APIInfoDTO  {
     this.description = description;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIInfoDTO context(String context) {
+    this.context = context;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorAPI", value = "")
   @JsonProperty("context")
   public String getContext() {
     return context;
@@ -94,10 +95,15 @@ public class APIInfoDTO  {
     this.context = context;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIInfoDTO version(String version) {
+    this.version = version;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1.0.0", value = "")
   @JsonProperty("version")
   public String getVersion() {
     return version;
@@ -106,11 +112,16 @@ public class APIInfoDTO  {
     this.version = version;
   }
 
-  
   /**
-   * If the provider value is not given, the user invoking the API will be used as the provider.\n
+   * If the provider value is not given, the user invoking the API will be used as the provider. 
    **/
-  @ApiModelProperty(value = "If the provider value is not given, the user invoking the API will be used as the provider.\n")
+  public APIInfoDTO provider(String provider) {
+    this.provider = provider;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "admin", value = "If the provider value is not given, the user invoking the API will be used as the provider. ")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;
@@ -119,10 +130,15 @@ public class APIInfoDTO  {
     this.provider = provider;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIInfoDTO lifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CREATED", value = "")
   @JsonProperty("lifeCycleStatus")
   public String getLifeCycleStatus() {
     return lifeCycleStatus;
@@ -131,10 +147,15 @@ public class APIInfoDTO  {
     this.lifeCycleStatus = lifeCycleStatus;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIInfoDTO workflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "APPROVED", value = "")
   @JsonProperty("workflowStatus")
   public String getWorkflowStatus() {
     return workflowStatus;
@@ -143,21 +164,31 @@ public class APIInfoDTO  {
     this.workflowStatus = workflowStatus;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("thumbnailUri")
-  public String getThumbnailUri() {
-    return thumbnailUri;
-  }
-  public void setThumbnailUri(String thumbnailUri) {
-    this.thumbnailUri = thumbnailUri;
+  public APIInfoDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+    return this;
   }
 
   
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
+  }
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
+  }
+
   /**
    **/
+  public APIInfoDTO securityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
+    return this;
+  }
+
+  
   @ApiModelProperty(value = "")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
@@ -167,24 +198,61 @@ public class APIInfoDTO  {
     this.securityScheme = securityScheme;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    APIInfoDTO apIInfo = (APIInfoDTO) o;
+    return Objects.equals(id, apIInfo.id) &&
+        Objects.equals(name, apIInfo.name) &&
+        Objects.equals(description, apIInfo.description) &&
+        Objects.equals(context, apIInfo.context) &&
+        Objects.equals(version, apIInfo.version) &&
+        Objects.equals(provider, apIInfo.provider) &&
+        Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
+        Objects.equals(workflowStatus, apIInfo.workflowStatus) &&
+        Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
+        Objects.equals(securityScheme, apIInfo.securityScheme);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIInfoDTO {\n");
     
-    sb.append("  id: ").append(id).append("\n");
-    sb.append("  name: ").append(name).append("\n");
-    sb.append("  description: ").append(description).append("\n");
-    sb.append("  context: ").append(context).append("\n");
-    sb.append("  version: ").append(version).append("\n");
-    sb.append("  provider: ").append(provider).append("\n");
-    sb.append("  lifeCycleStatus: ").append(lifeCycleStatus).append("\n");
-    sb.append("  workflowStatus: ").append(workflowStatus).append("\n");
-    sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
-    sb.append("  securityScheme: ").append(securityScheme).append("\n");
-    sb.append("}\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
+    sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

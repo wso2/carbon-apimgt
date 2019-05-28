@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ThrottlingPolicy;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
@@ -2392,6 +2393,67 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * Returns a map of API availability throttling policies of the tenant as defined in the underlying governance
+     * registry.
+     *
+     * @return a Map of throttling policy names and ThrottlingPolicy objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading from the registry
+     */
+    public static Map<String, ThrottlingPolicy> getThrottlingPolicies(int tierType, String tenantDomain) throws APIManagementException {
+        if (!APIUtil.isAdvanceThrottlingEnabled()) {
+            boolean isTenantFlowStarted = false;
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+                Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceSystemRegistry(tenantId);
+
+                if (tierType == APIConstants.TIER_API_TYPE) {
+                    return getThrottlingPolicies(registry, APIConstants.API_TIER_LOCATION, tenantId);
+                } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+                    return getThrottlingPolicies(registry, APIConstants.RES_TIER_LOCATION, tenantId);
+                } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+                    return getThrottlingPolicies(registry, APIConstants.APP_TIER_LOCATION, tenantId);
+                } else {
+                    throw new APIManagementException("No such a tier type : " + tierType);
+                }
+            } catch (RegistryException e) {
+                log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+                throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+        } else {
+            boolean isTenantFlowStarted = false;
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                if (tierType == APIConstants.TIER_API_TYPE) {
+                    return getThrottlingPoliciesFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
+                } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+                    return getThrottlingPoliciesFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantId);
+                } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+                    return getThrottlingPoliciesFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantId);
+                } else {
+                    throw new APIManagementException("No such a tier type : " + tierType);
+                }
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+        }
+    }
+
 
     /**
      * Retrieves unfiltered list of all available tiers from registry.
@@ -2526,6 +2588,137 @@ public final class APIUtil {
     }
 
     /**
+     * Retrieves unfiltered list of all available tiers from registry.
+     * Result will contains all the tiers including unauthenticated tier which is
+     * filtered out in   getTiers}
+     *
+     * @param registry                 registry to access tiers config
+     * @param throttlingPolicyLocation registry location of throttling policy config
+     * @return Map<String   ,       ThrottlingPolicy> containing all available throttling policies
+     * @throws RegistryException      when registry action fails
+     * @throws XMLStreamException     when xml parsing fails
+     * @throws APIManagementException when fails to retrieve tier attributes
+     */
+    private static Map<String, ThrottlingPolicy> getAllThrottlingPolicies(Registry registry, String throttlingPolicyLocation, int tenantId)
+            throws RegistryException, XMLStreamException, APIManagementException {
+        // We use a treeMap here to keep the order
+        Map<String, ThrottlingPolicy> throttlingPolicies = new TreeMap<>();
+
+        if (registry.resourceExists(throttlingPolicyLocation)) {
+            Resource resource = registry.get(throttlingPolicyLocation);
+            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+
+            OMElement element = AXIOMUtil.stringToOM(content);
+            OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
+            Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
+
+            while (policies.hasNext()) {
+                OMElement policy = (OMElement) policies.next();
+                OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
+
+                String policyName = id.getText();
+
+                // Constructing the ThrottlingPolicy object
+                ThrottlingPolicy throttlingPolicy = new ThrottlingPolicy(policyName);
+                throttlingPolicy.setPolicyContent(policy.toString().getBytes(Charset.defaultCharset()));
+
+                if (id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT) != null) {
+                    throttlingPolicy.setDisplayName(id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT));
+                } else {
+                    throttlingPolicy.setDisplayName(policyName);
+                }
+                String desc;
+                try {
+                    long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
+                    throttlingPolicy.setRequestsPerMin(requestPerMin);
+
+                    long requestCount = APIDescriptionGenUtil.getAllowedRequestCount(policy);
+                    throttlingPolicy.setRequestCount(requestCount);
+
+                    long unitTime = APIDescriptionGenUtil.getTimeDuration(policy);
+                    throttlingPolicy.setUnitTime(unitTime);
+
+                    if (requestPerMin >= 1) {
+                        desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
+                    } else {
+                        desc = DESCRIPTION;
+                    }
+                    throttlingPolicy.setDescription(desc);
+
+                } catch (APIManagementException ex) {
+                    // If there is any issue in getting the request counts or the time duration, that means this tier
+                    // information can not be used for throttling. Hence we log this exception and continue the flow
+                    // to the next tier.
+                    log.warn("Unable to get the request count/time duration information for : " + throttlingPolicy.getName() + ". "
+                            + ex.getMessage());
+                    continue;
+                }
+
+                // Get all the attributes of the throttling policy.
+                Map<String, Object> throttlingPolicyAttributes = APIDescriptionGenUtil.getTierAttributes(policy);
+                if (!throttlingPolicyAttributes.isEmpty()) {
+                    // The description, billing plan and the stop on quota reach properties are also stored as attributes
+                    // of the throttling policy attributes. Hence we extract them from the above attributes map.
+                    Iterator<Entry<String, Object>> attributeIterator = throttlingPolicyAttributes.entrySet().iterator();
+                    while (attributeIterator.hasNext()) {
+                        Entry<String, Object> entry = attributeIterator.next();
+
+                        if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equals(entry.getKey())
+                                && entry.getValue() instanceof String) {
+
+                            throttlingPolicy.setDescription((String) entry.getValue());
+
+                            // We remove the attribute from the map
+                            attributeIterator.remove();
+                            continue;
+
+                        }
+                        if (APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE.equals(entry.getKey())
+                                && entry.getValue() instanceof String) {
+
+                            throttlingPolicy.setTierPlan((String) entry.getValue());
+
+                            // We remove the attribute from the map
+                            attributeIterator.remove();
+                            continue;
+
+                        }
+                        if (APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE.equals(entry.getKey())
+                                && entry.getValue() instanceof String) {
+
+                            throttlingPolicy.setStopOnQuotaReached(Boolean.parseBoolean((String) entry.getValue()));
+
+                            // We remove the attribute from the map
+                            attributeIterator.remove();
+                            // We do not need a continue since this is the last statement.
+
+                        }
+                    }
+                    throttlingPolicy.setTierAttributes(throttlingPolicyAttributes);
+                }
+                throttlingPolicies.put(policyName, throttlingPolicy);
+            }
+        }
+
+        if (isEnabledUnlimitedTier()) {
+            ThrottlingPolicy tier = new ThrottlingPolicy(APIConstants.UNLIMITED_TIER);
+            tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
+            tier.setDisplayName(APIConstants.UNLIMITED_TIER);
+            tier.setRequestsPerMin(Long.MAX_VALUE);
+
+            if (isUnlimitedTierPaid(getTenantDomainFromTenantId(tenantId))) {
+                tier.setTierPlan(APIConstants.COMMERCIAL_TIER_PLAN);
+            } else {
+                tier.setTierPlan(APIConstants.BILLING_PLAN_FREE);
+            }
+
+            throttlingPolicies.put(tier.getName(), tier);
+        }
+
+        return throttlingPolicies;
+    }
+
+    /**
      * Retrieves filtered list of available tiers from registry. This method will not return Unauthenticated
      * tier in the list. Use  to retrieve all tiers without
      * any filtering.
@@ -2552,6 +2745,37 @@ public final class APIUtil {
             handleException("Unable to remove Unauthenticated tier from tiers list", e);
         }
         return tiers;
+    }
+
+    /**
+     * Retrieves filtered list of available throttling policies from registry. This method will not return Unauthenticated
+     * tier in the list. Use  to retrieve all throttling policies without
+     * any filtering.
+     *
+     * @param registry                 registry to access tiers config
+     * @param throttlingPolicyLocation registry location of tiers config
+     * @return map containing available tiers
+     * @throws APIManagementException when fails to retrieve tier attributes
+     */
+    private static Map<String, ThrottlingPolicy> getThrottlingPolicies(
+            Registry registry, String throttlingPolicyLocation, int tenantId) throws APIManagementException {
+
+        Map<String, ThrottlingPolicy> throttlingPolicyMap = new HashMap<>();
+        try {
+            throttlingPolicyMap = getAllThrottlingPolicies(registry, throttlingPolicyLocation, tenantId);
+            throttlingPolicyMap.remove(APIConstants.UNAUTHENTICATED_TIER);
+        } catch (RegistryException e) {
+            handleException(APIConstants.MSG_TIER_RET_ERROR, e);
+        } catch (XMLStreamException e) {
+            handleException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+        } catch (APIManagementException e) {
+            handleException("Unable to get tier attributes", e);
+        } catch (Exception e) {
+
+            // generic exception is caught to catch exceptions thrown from map remove method
+            handleException("Unable to remove Unauthenticated tier from tiers list", e);
+        }
+        return throttlingPolicyMap;
     }
 
     /**
@@ -6654,6 +6878,16 @@ public final class APIUtil {
     }
 
     /**
+     * Used to get access control expose headers define in api-manager.xml
+     *
+     * @return access control expose headers string
+     */
+    public static String getExposedHeaders() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_EXPOSE_HEADERS);
+    }
+
+    /**
      * Used to get access control allowed credential define in api-manager.xml
      *
      * @return true if access control allow credential enabled
@@ -7194,6 +7428,83 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to get the throttling policies to a given policy level
+     *
+     * @param policyLevel throttling policy level (application, subscription)
+     * @param tenantId    tenant domain id
+     * @return throttling policies in a given tenant space
+     * @throws APIManagementException if failed to fetch throttling policies
+     */
+    public static Map<String, ThrottlingPolicy> getThrottlingPoliciesFromPolicies(String policyLevel, int tenantId)
+            throws APIManagementException {
+
+        Map<String, ThrottlingPolicy> throttlingPolicyMap = new HashMap<>();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        Policy[] policies;
+        if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+            policies = apiMgtDAO.getSubscriptionPolicies(tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_API.equalsIgnoreCase(policyLevel)) {
+            policies = apiMgtDAO.getAPIPolicies(tenantId);
+        } else if (PolicyConstants.POLICY_LEVEL_APP.equalsIgnoreCase(policyLevel)) {
+            policies = apiMgtDAO.getApplicationPolicies(tenantId);
+        } else {
+            throw new APIManagementException("No such a policy type : " + policyLevel);
+        }
+
+        for (Policy policy : policies) {
+            if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policy.getPolicyName())) {
+                ThrottlingPolicy throttlingPolicy = new ThrottlingPolicy(policy.getPolicyName());
+                throttlingPolicy.setDescription(policy.getDescription());
+                throttlingPolicy.setDisplayName(policy.getDisplayName());
+                Limit limit = policy.getDefaultQuotaPolicy().getLimit();
+                throttlingPolicy.setTimeUnit(limit.getTimeUnit());
+                throttlingPolicy.setUnitTime(limit.getUnitTime());
+
+                //If the policy is a subscription policy
+                if (policy instanceof SubscriptionPolicy) {
+                    SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
+                    setBillingPlanAndCustomAttributesToThrottlingPolicy(subscriptionPolicy, throttlingPolicy);
+                }
+
+                if (limit instanceof RequestCountLimit) {
+
+                    RequestCountLimit countLimit = (RequestCountLimit) limit;
+                    throttlingPolicy.setRequestsPerMin(countLimit.getRequestCount());
+                    throttlingPolicy.setRequestCount(countLimit.getRequestCount());
+                } else {
+                    BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
+                    throttlingPolicy.setRequestsPerMin(bandwidthLimit.getDataAmount());
+                    throttlingPolicy.setRequestCount(bandwidthLimit.getDataAmount());
+                }
+                if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+                    throttlingPolicy.setTierPlan(((SubscriptionPolicy) policy).getBillingPlan());
+                }
+                throttlingPolicyMap.put(policy.getPolicyName(), throttlingPolicy);
+            } else {
+                if (APIUtil.isEnabledUnlimitedTier()) {
+                    ThrottlingPolicy throttlingPolicy = new ThrottlingPolicy(policy.getPolicyName());
+                    throttlingPolicy.setDescription(policy.getDescription());
+                    throttlingPolicy.setDisplayName(policy.getDisplayName());
+                    throttlingPolicy.setRequestsPerMin(Integer.MAX_VALUE);
+                    throttlingPolicy.setRequestCount(Integer.MAX_VALUE);
+                    if (isUnlimitedTierPaid(getTenantDomainFromTenantId(tenantId))) {
+                        throttlingPolicy.setTierPlan(APIConstants.COMMERCIAL_TIER_PLAN);
+                    } else {
+                        throttlingPolicy.setTierPlan(APIConstants.BILLING_PLAN_FREE);
+                    }
+
+                    throttlingPolicyMap.put(policy.getPolicyName(), throttlingPolicy);
+                }
+            }
+        }
+
+        if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
+            throttlingPolicyMap.remove(APIConstants.UNAUTHENTICATED_TIER);
+        }
+        return throttlingPolicyMap;
+    }
+
+    /**
      * Extract custom attributes and billing plan from subscription policy and set to tier.
      *
      * @param subscriptionPolicy - The SubscriptionPolicy object to extract details from
@@ -7225,6 +7536,43 @@ public final class APIUtil {
             } catch (UnsupportedEncodingException e) {
                 log.error("Custom attribute byte array does not use UTF-8 character set", e);
                 tier.setTierAttributes(null);
+            }
+        }
+    }
+
+    /**
+     * Extract custom attributes and billing plan from subscription policy and set to tier.
+     *
+     * @param subscriptionPolicy - The SubscriptionPolicy object to extract details from
+     * @param throttlingPolicy   - The ThrottlingPolicy to set information into
+     */
+    public static void setBillingPlanAndCustomAttributesToThrottlingPolicy(SubscriptionPolicy subscriptionPolicy,
+                                                                           ThrottlingPolicy throttlingPolicy) {
+
+        //set the billing plan.
+        throttlingPolicy.setTierPlan(subscriptionPolicy.getBillingPlan());
+
+        //If the tier has custom attributes
+        if (subscriptionPolicy.getCustomAttributes() != null &&
+                subscriptionPolicy.getCustomAttributes().length > 0) {
+
+            Map<String, Object> tierAttributes = new HashMap<String, Object>();
+            try {
+                String customAttr = new String(subscriptionPolicy.getCustomAttributes(), "UTF-8");
+                JSONParser parser = new JSONParser();
+                JSONArray jsonArr = (JSONArray) parser.parse(customAttr);
+                Iterator jsonArrIterator = jsonArr.iterator();
+                while (jsonArrIterator.hasNext()) {
+                    JSONObject json = (JSONObject) jsonArrIterator.next();
+                    tierAttributes.put(String.valueOf(json.get("name")), json.get("value"));
+                }
+                throttlingPolicy.setTierAttributes(tierAttributes);
+            } catch (ParseException e) {
+                log.error("Unable to convert String to Json", e);
+                throttlingPolicy.setTierAttributes(null);
+            } catch (UnsupportedEncodingException e) {
+                log.error("Custom attribute byte array does not use UTF-8 character set", e);
+                throttlingPolicy.setTierAttributes(null);
             }
         }
     }

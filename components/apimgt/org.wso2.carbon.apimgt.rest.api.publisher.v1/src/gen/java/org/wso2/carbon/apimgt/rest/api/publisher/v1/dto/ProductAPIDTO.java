@@ -1,35 +1,35 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class ProductAPIDTO  {
+public class ProductAPIDTO   {
   
-  
-  
-  private String name = null;
-  
-  @NotNull
-  private String apiId = null;
-  
-  
-  private List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
+    private String name = null;
+    private String apiId = null;
+    private List<ProductAPIOperationsDTO> operations = new ArrayList<>();
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public ProductAPIDTO name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorAPI", value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -38,11 +38,17 @@ public class ProductAPIDTO  {
     this.name = name;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  public ProductAPIDTO apiId(String apiId) {
+    this.apiId = apiId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
   @JsonProperty("apiId")
+  @NotNull
   public String getApiId() {
     return apiId;
   }
@@ -50,9 +56,14 @@ public class ProductAPIDTO  {
     this.apiId = apiId;
   }
 
-  
   /**
    **/
+  public ProductAPIDTO operations(List<ProductAPIOperationsDTO> operations) {
+    this.operations = operations;
+    return this;
+  }
+
+  
   @ApiModelProperty(value = "")
   @JsonProperty("operations")
   public List<ProductAPIOperationsDTO> getOperations() {
@@ -62,17 +73,47 @@ public class ProductAPIDTO  {
     this.operations = operations;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ProductAPIDTO productAPI = (ProductAPIDTO) o;
+    return Objects.equals(name, productAPI.name) &&
+        Objects.equals(apiId, productAPI.apiId) &&
+        Objects.equals(operations, productAPI.operations);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, apiId, operations);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ProductAPIDTO {\n");
     
-    sb.append("  name: ").append(name).append("\n");
-    sb.append("  apiId: ").append(apiId).append("\n");
-    sb.append("  operations: ").append(operations).append("\n");
-    sb.append("}\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
+    sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

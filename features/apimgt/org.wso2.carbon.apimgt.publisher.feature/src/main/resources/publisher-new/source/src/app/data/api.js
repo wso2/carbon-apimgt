@@ -48,7 +48,7 @@ class API extends Resource {
                         ]
                     }
                 },
-                type: 'Production'
+                type: 'production_endpoints'
             }]
         }
         this._data = properties;
@@ -152,7 +152,7 @@ class API extends Resource {
     }
 
     getProductionEndpoint() {
-        const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'production')[0];
+        const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'production_endpoints')[0];
         if (!productionEndpoint) {
             return null;
         } else if (productionEndpoint.inline) {
@@ -163,7 +163,7 @@ class API extends Resource {
     }
 
     getSandboxEndpoint() {
-        const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'sandbox')[0];
+        const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'sandbox_endpoints')[0];
         if (!sandboxEndpoint) {
             return null;
         } else if (sandboxEndpoint.inline) {
@@ -418,7 +418,7 @@ class API extends Resource {
      */
     getLcState(id, callback = null) {
         const promise_lc_get = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__lifecycle({
+            return client.apis['API (Individual)'].get_apis__apiId__lifecycle_state({
                 apiId: id
             }, this._requestMetaData());
         });

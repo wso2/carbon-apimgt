@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -38,11 +39,10 @@ import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
-
 /**
  * This is the service implementation class for Publisher throttling policies related operations
  */
-public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiService {
+public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiService {
 
     private static final Log log = LogFactory.getLog(ThrottlingPoliciesApiServiceImpl.class);
 
@@ -57,7 +57,7 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
      */
     @Override
     public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset,
-            String ifNoneMatch) {
+            String ifNoneMatch,MessageContext messageContext) {
 
         //pre-processing
         //setting default limit and offset if they are null
@@ -72,12 +72,12 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
             }
 
             //retrieves the tier based on the given tier-level
-            if (ThrottlingPolicyDTO.PolicyLevelEnum.subscription.toString().equals(policyLevel)) {
+            if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
                 Map<String, Tier> apiTiersMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
                 if (apiTiersMap != null) {
                     tierList.addAll(apiTiersMap.values());
                 }
-            } else if (ThrottlingPolicyDTO.PolicyLevelEnum.api.toString().equals(policyLevel)) {
+            } else if (ThrottlingPolicyDTO.PolicyLevelEnum.API.toString().equals(policyLevel)) {
                 Map<String, Tier> resourceTiersMap =
                         APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
                 if (resourceTiersMap != null) {
@@ -110,7 +110,8 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
      * @return ThrottlingPolicyDTO matched to the given throttling policy name
      */
     @Override
-    public Response getThrottlingPolicyByName(String policyName, String policyLevel, String ifNoneMatch) {
+    public Response getThrottlingPolicyByName(String policyName, String policyLevel, String ifNoneMatch,
+            MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             ThrottlingPolicyDTO.PolicyLevelEnum policyLevelEnum;
@@ -121,19 +122,20 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
             }
 
             //retrieves the tier based on the given tier-level
-            if (ThrottlingPolicyDTO.PolicyLevelEnum.subscription.toString().equals(policyLevel)) {
+            if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
                 foundTier = APIUtil.getTierFromCache(policyName, tenantDomain);
-                policyLevelEnum = ThrottlingPolicyDTO.PolicyLevelEnum.subscription;
-            } else if (ThrottlingPolicyDTO.PolicyLevelEnum.api.toString().equals(policyLevel)) {
+                policyLevelEnum = ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION;
+            } else if (ThrottlingPolicyDTO.PolicyLevelEnum.API.toString().equals(policyLevel)) {
                 Map<String, Tier> resourceTiersMap =
                         APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
-                policyLevelEnum = ThrottlingPolicyDTO.PolicyLevelEnum.api;
+                policyLevelEnum = ThrottlingPolicyDTO.PolicyLevelEnum.API;
                 if (resourceTiersMap != null) {
                     foundTier = RestApiUtil.findTier(resourceTiersMap.values(), policyName);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(
-                        "policyLevel should be one of " + Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()), log);
+                        "policyLevel should be one of " + Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()),
+                        log);
                 return null;
             }
 

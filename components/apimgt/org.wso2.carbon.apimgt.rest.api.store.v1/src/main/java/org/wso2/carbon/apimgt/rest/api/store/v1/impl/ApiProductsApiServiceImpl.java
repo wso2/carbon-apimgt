@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -47,25 +48,26 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
 import javax.ws.rs.core.Response;
 
-public class ApiProductsApiServiceImpl extends ApiProductsApiService {
+public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
-    @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,String documentId,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+    @Override public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,
+            String documentId, String ifNoneMatch, MessageContext messageContext) {
+        return null;
     }
-    @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId,String documentId,String xWSO2Tenant,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+    @Override public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId, String documentId,
+            String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+        return null;
     }
-    @Override
-    public Response apiProductsApiProductIdDocumentsGet(String apiProductId,Integer limit,Integer offset,String xWSO2Tenant,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+    @Override public Response apiProductsApiProductIdDocumentsGet(String apiProductId, Integer limit, Integer offset,
+            String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+        return null;
     }
-    @Override
-    public Response apiProductsApiProductIdGet(String apiProductId,String ifNoneMatch,String xWSO2Tenant){
+
+    @Override public Response apiProductsApiProductIdGet(String apiProductId, String ifNoneMatch, String xWSO2Tenant,
+            MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
@@ -89,12 +91,12 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } 
+        }
         return null;
     }
-    @Override
-    public Response apiProductsApiProductIdSwaggerGet(String apiProductId,String ifNoneMatch,String xWSO2Tenant){
 
+    @Override public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String ifNoneMatch,
+            String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
@@ -113,7 +115,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             String apiSwagger = "";
             if (!StringUtils.isEmpty(product.getDefinition())) {
                 apiSwagger = product.getDefinition();
-            } 
+            }
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API Product : " + apiProductId;
@@ -121,17 +123,17 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } 
+        }
         return null;
     }
-    @Override
-    public Response apiProductsApiProductIdThumbnailGet(String apiProductId,String xWSO2Tenant,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response apiProductsGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String ifNoneMatch){
 
+    @Override public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String xWSO2Tenant,
+            String ifNoneMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override public Response apiProductsGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
+            String ifNoneMatch, MessageContext messageContext) {
         //TODO implement pagination
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIProductListDTO apiProductListDTO = new APIProductListDTO();

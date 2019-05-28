@@ -19,23 +19,34 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.models.Contact;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Info;
+import io.swagger.models.Model;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
+import io.swagger.models.RefModel;
+import io.swagger.models.RefPath;
+import io.swagger.models.RefResponse;
 import io.swagger.models.Response;
 import io.swagger.models.SecurityRequirement;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
+import io.swagger.models.parameters.RefParameter;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
-import io.swagger.util.Json;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -46,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.registry.api.Registry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -61,7 +73,6 @@ import java.util.regex.Pattern;
 public class APIDefinitionUsingOASParser extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(APIDefinitionUsingOASParser.class);
-    private final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
 
     @Override
     public Set<URITemplate> getURITemplates(API api, String apiDefinition)
@@ -180,57 +191,71 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         swagger.setInfo(info);
 
         for (URITemplate uriTemplate : api.getUriTemplates()) {
-            Path path;
-            if (swagger.getPath(uriTemplate.getUriTemplate()) != null) {
-                path = swagger.getPath(uriTemplate.getUriTemplate());
-            } else {
-                path = new Path();
-            }
-
-            Operation operation = new Operation();
-            List<String> pathParams = getPathParamNames(uriTemplate.getUriTemplate());
-            for (String pathParam : pathParams) {
-                PathParameter pathParameter = new PathParameter();
-                pathParameter.setName(pathParam);
-                pathParameter.setType("string");
-                operation.addParameter(pathParameter);
-            }
-
-            String authType = uriTemplate.getAuthType();
-            if (!APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)
-                    && !APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)
-                    && !APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authType)
-                    && !APIConstants.AUTH_NO_AUTHENTICATION.equals(authType)) {
-                throw new APIManagementException("Invalid auth type provided.");
-            }
-            operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
-            operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
-            
-            Response response = new Response();
-            response.setDescription("OK");
-            operation.addResponse(APIConstants.SWAGGER_RESPONSE_200, response);
-            path.set(uriTemplate.getHTTPVerb().toLowerCase(), operation);
-
-            swagger.path(uriTemplate.getUriTemplate(), path);
+            addOrUpdatePathToSwagger(swagger, uriTemplate);
         }
 
-        return Json.pretty(swagger);
+        return getSwaggerJsonString(swagger);
     }
 
-    /**
-     * Extract and return path parameters in the given URI template
-     * 
-     * @param uriTemplate URI Template value
-     * @return path parameters in the given URI template
-     */
-    private List<String> getPathParamNames(String uriTemplate) {
-        List<String> params = new ArrayList<>();
+    @Override
+    public String generateAPIDefinition(API api, String apiDefinition) throws APIManagementException {
+        SwaggerParser parser = new SwaggerParser();
+        Swagger swaggerObj = parser.parse(apiDefinition);
 
-        Matcher bracesMatcher = CURLY_BRACES_PATTERN.matcher(uriTemplate);
-        while (bracesMatcher.find()) {
-            params.add(bracesMatcher.group());
+        //Generates below model using the API's URI template
+        // path -> [verb1 -> template1, verb2 -> template2, ..]
+        Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
+
+        for (Map.Entry<String, Path> pathEntry : swaggerObj.getPaths().entrySet()) {
+            String pathName = pathEntry.getKey();
+            Path path = pathEntry.getValue();
+            Map<String, URITemplate> uriTemplatesForPath = uriTemplateMap.get(pathName);
+            if (uriTemplatesForPath == null) {
+                //remove paths that are not in URI Templates
+                swaggerObj.getPaths().remove(pathName);
+            } else {
+                //If path is available in the URI template, then check for operations(verbs) 
+                for (Map.Entry<HttpMethod, Operation> operationEntry : path.getOperationMap().entrySet()) {
+                    HttpMethod httpMethod = operationEntry.getKey();
+                    Operation operation = operationEntry.getValue();
+                    URITemplate template = uriTemplatesForPath.get(httpMethod.toString().toUpperCase());
+                    if (template == null) {
+                        // if particular operation is not available in URI templates, then remove it from swagger
+                        path.set(httpMethod.toString().toLowerCase(), null);
+                    } else {
+                        // if operation is available in URI templates, update swagger operation 
+                        // with auth type, scope etc
+                        updateOperationManagedInfo(template, operation);
+                    }
+                }
+
+                // if there are any verbs (operations) not defined in swagger then add them
+                for (Map.Entry<String, URITemplate> uriTemplatesForPathEntry : uriTemplatesForPath.entrySet()) {
+                    String verb = uriTemplatesForPathEntry.getKey();
+                    URITemplate uriTemplate = uriTemplatesForPathEntry.getValue();
+                    HttpMethod method = HttpMethod.valueOf(verb.toUpperCase());
+                    Operation operation = path.getOperationMap().get(method);
+                    if (operation == null) {
+                        operation = createOperation(uriTemplate);
+                        path.set(uriTemplate.getHTTPVerb().toLowerCase(), operation);
+                    }
+                }
+            }
         }
-        return params;
+
+        // add to swagger if there are any new templates 
+        for (Map.Entry<String, Map<String, URITemplate>> uriTemplateMapEntry : uriTemplateMap.entrySet()) {
+            String path = uriTemplateMapEntry.getKey();
+            Map<String, URITemplate> verbMap = uriTemplateMapEntry.getValue();
+            if (swaggerObj.getPath(path) == null) {
+                for (Map.Entry<String, URITemplate> verbMapEntry : verbMap.entrySet()) {
+                    URITemplate uriTemplate = verbMapEntry.getValue();
+                    addOrUpdatePathToSwagger(swaggerObj, uriTemplate);   
+                }
+            }
+        }
+
+        return getSwaggerJsonString(swaggerObj);
     }
 
     @Override
@@ -314,5 +339,130 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
             template.setScopes(scopeObj);
         }
         return template;
+    }
+
+    /**
+     * Add a new path based on the provided URI template to swagger if it does not exists. If it exists,
+     * adds the respective operation to the existing path
+     * 
+     * @param swagger swagger object
+     * @param uriTemplate URI template
+     */
+    private void addOrUpdatePathToSwagger(Swagger swagger, URITemplate uriTemplate) {
+        Path path;
+        if (swagger.getPath(uriTemplate.getUriTemplate()) != null) {
+            path = swagger.getPath(uriTemplate.getUriTemplate());
+        } else {
+            path = new Path();
+        }
+
+        Operation operation = createOperation(uriTemplate);
+        path.set(uriTemplate.getHTTPVerb().toLowerCase(), operation);
+
+        swagger.path(uriTemplate.getUriTemplate(), path);
+    }
+
+    /**
+     * Creates a new operation object using the URI template object
+     * 
+     * @param uriTemplate URI template
+     * @return a new operation object using the URI template object
+     */
+    private Operation createOperation(URITemplate uriTemplate) {
+        Operation operation = new Operation();
+        List<String> pathParams = getPathParamNames(uriTemplate.getUriTemplate());
+        for (String pathParam : pathParams) {
+            PathParameter pathParameter = new PathParameter();
+            pathParameter.setName(pathParam);
+            pathParameter.setType("string");
+            operation.addParameter(pathParameter);
+        }
+
+        updateOperationManagedInfo(uriTemplate, operation);
+
+        Response response = new Response();
+        response.setDescription("OK");
+        operation.addResponse(APIConstants.SWAGGER_RESPONSE_200, response);
+        return operation;
+    }
+
+    /**
+     *  Updates managed info of a provided operation such as auth type and throttling
+     * 
+     * @param uriTemplate URI template
+     * @param operation swagger operation
+     */
+    private void updateOperationManagedInfo(URITemplate uriTemplate, Operation operation) {
+        String authType = uriTemplate.getAuthType();
+        if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)) {
+            authType = APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER;
+        }
+        if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)) {
+            authType = APIConstants.OASResourceAuthTypes.APPLICATION_USER;
+        }
+        if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authType)) {
+            authType = APIConstants.OASResourceAuthTypes.APPLICATION;
+        }
+        operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
+        operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
+    }
+
+    /**
+     * Creates a json string using the swagger object. 
+     *
+     * @param swaggerObj swagger object
+     * @return json string using the swagger object
+     * @throws APIManagementException error while creating swagger json
+     */
+    private String getSwaggerJsonString(Swagger swaggerObj) throws APIManagementException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        //this is to ignore "originalRef" in schema objects
+        mapper.addMixIn(RefModel.class, IgnoreOriginalRefMixin.class);
+        mapper.addMixIn(RefProperty.class, IgnoreOriginalRefMixin.class);
+        mapper.addMixIn(RefPath.class, IgnoreOriginalRefMixin.class);
+        mapper.addMixIn(RefParameter.class, IgnoreOriginalRefMixin.class);
+        mapper.addMixIn(RefResponse.class, IgnoreOriginalRefMixin.class);
+
+        //this is to ignore "responseSchema" in response schema objects
+        mapper.addMixIn(Response.class, ResponseSchemaMixin.class);
+        try {
+            return new String(mapper.writeValueAsBytes(swaggerObj));
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while generating Swagger json from model", e);
+        }
+    }
+
+    /**
+     * Used to ignore "originalRef" objects when generating the swagger
+     */
+    private abstract class IgnoreOriginalRefMixin {
+        public IgnoreOriginalRefMixin() {
+        }
+
+        @JsonIgnore
+        public abstract String getOriginalRef();
+    }
+
+    /**
+     * Used to ignore "responseSchema" objects when generating the swagger
+     */
+    private abstract class ResponseSchemaMixin {
+        public ResponseSchemaMixin() {
+        }
+
+        @JsonIgnore
+        public abstract Property getSchema();
+
+        @JsonIgnore
+        public abstract void setSchema(Property var1);
+
+        @JsonGetter("schema")
+        public abstract Model getResponseSchema();
+
+        @JsonSetter("schema")
+        public abstract void setResponseSchema(Model var1);
     }
 }

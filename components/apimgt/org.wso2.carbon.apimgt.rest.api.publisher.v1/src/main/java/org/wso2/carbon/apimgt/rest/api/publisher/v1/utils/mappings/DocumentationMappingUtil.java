@@ -47,13 +47,13 @@ public class DocumentationMappingUtil {
         documentDTO.setDocumentId(documentation.getId());
         documentDTO.setName(documentation.getName());
         documentDTO.setSummary(documentation.getSummary());
-        documentDTO.setType(DocumentDTO.TypeEnum.valueOf(documentation.getType().toString()));
+        documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentation.getType().toString()));
         documentDTO.setOtherTypeName(documentation.getOtherTypeName());
         if (documentation.getSourceType() != null)
-            documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(documentation.getSourceType().toString()));
+            documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.fromValue(documentation.getSourceType().toString()));
         documentDTO.setSourceUrl(documentation.getSourceUrl());
         if (documentation.getVisibility() != null)
-            documentDTO.setVisibility(DocumentDTO.VisibilityEnum.valueOf(documentation.getVisibility().toString()));
+            documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentation.getVisibility().toString()));
         return documentDTO;
     }
 

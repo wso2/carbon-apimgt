@@ -25,6 +25,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.json.JSONException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -40,7 +41,6 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
@@ -64,13 +64,13 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.Response;
 
-public class ApisApiServiceImpl extends ApisApiService {
+public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
-            String ifNoneMatch, Boolean expand, String accept ,String tenantDomain) {
+            String ifNoneMatch, Boolean expand, String accept ,String tenantDomain, MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
@@ -141,7 +141,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisPost(APIDTO body) {
+    public Response apisPost(APIDTO body, MessageContext messageContext) {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -242,10 +242,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
             }
-            APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiPolicy());
-            if (apiPolicy == null && body.getApiPolicy() != null) {
+            APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiThrottlingPolicy());
+            if (apiPolicy == null && body.getApiThrottlingPolicy() != null) {
                 RestApiUtil.handleBadRequest(
-                        "Specified policy " + body.getApiPolicy() + " is invalid", log);
+                        "Specified policy " + body.getApiThrottlingPolicy() + " is invalid", log);
             }
 //            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {todo check
 //                String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
@@ -278,7 +278,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     RestApiUtil.handleInternalServerError(errorMessage, log);
                 }
             } else if (!isWSAPI) {
-                APIDefinitionUsingOASParser apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
+                APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
                 String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
                 apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
             }
@@ -307,7 +307,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch) {
+    public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         APIDTO apiToReturn;
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -330,6 +330,92 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    @Override
+    public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
+        APIDTO updatedApiDTO;
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = originalAPI.getId();
+            boolean isWSAPI = originalAPI.getType() != null && APIConstants.APIType.WS == APIConstants.APIType
+                    .valueOf(originalAPI.getType());
+
+            //Overriding some properties:
+            body.setName(apiIdentifier.getApiName());
+            body.setVersion(apiIdentifier.getVersion());
+            body.setProvider(apiIdentifier.getProviderName());
+            body.setContext(originalAPI.getContextTemplate());
+            body.setLifeCycleStatus(originalAPI.getStatus());
+            body.setType(APIDTO.TypeEnum.fromValue(originalAPI.getType()));
+
+            // Validate API Security
+            List<String> apiSecurity = body.getSecurityScheme();
+            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
+                    .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                RestApiUtil.handleBadRequest("Mutual SSL based authentication is not supported in this server.", log);
+            }
+            //validation for tiers
+            List<String> tiersFromDTO = body.getPolicies();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                RestApiUtil.handleBadRequest("No tier defined for the API", log);
+            }
+            //check whether the added API's tiers are all valid
+            Set<Tier> definedTiers = apiProvider.getTiers();
+            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (invalidTiers.size() > 0) {
+                RestApiUtil.handleBadRequest(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+            }
+            if (body.getAccessControlRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
+            if (body.getAdditionalProperties() != null) {
+                String errorMessage = RestApiPublisherUtils
+                        .validateAdditionalProperties(body.getAdditionalProperties());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
+            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
+            apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
+
+            //attach micro-geteway labels
+            apiToUpdate = assignLabelsToDTO(body,apiToUpdate);
+
+            apiProvider.updateAPI(apiToUpdate);
+
+            if (!isWSAPI) {
+                String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+                APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                String newDefinition = definitionFromOpenAPISpec.generateAPIDefinition(apiToUpdate, oldDefinition);
+                apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
+            }
+            API updatedApi = apiProvider.getAPI(apiIdentifier);
+            updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
+            return Response.ok().entity(updatedApiDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
     /**
      * Delete API
      *
@@ -338,7 +424,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Status of API Deletion
      */
     @Override
-    public Response apisApiIdDelete(String apiId, String ifMatch) {
+    public Response apisApiIdDelete(String apiId, String ifMatch, MessageContext messageContext) {
 
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -382,7 +468,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
-            String ifNoneMatch) {
+            String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -449,7 +535,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-            InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch) {
+            InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
+            MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -522,7 +609,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return 200 response if deleted successfully
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch) {
+    public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
+            MessageContext messageContext) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -552,7 +640,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch) {
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
+            MessageContext messageContext) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -591,7 +680,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
-            String ifMatch) {
+            String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -650,7 +739,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return matched documents as a list if DocumentDTOs
      */
     @Override
-    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch) {
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
+            MessageContext messageContext) {
         // do some magic!
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -691,7 +781,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return created document DTO as response
      */
     @Override
-    public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch) {
+    public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
@@ -750,7 +840,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return API Lifecycle history information
      */
     @Override
-    public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch) {
+    public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -780,7 +870,18 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return API Lifecycle state information
      */
     @Override
-    public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch) {
+    public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
+        LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId);
+        return Response.ok().entity(lifecycleStateDTO).build();
+    }
+
+    /**
+     * Retrieves API Lifecycle state information
+     *
+     * @param apiId API Id
+     * @return API Lifecycle state information
+     */
+    private LifecycleStateDTO getLifecycleState(String apiId) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -790,8 +891,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String errorMessage = "Error while getting lifecycle state for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
             }
-            LifecycleStateDTO stateDTO = APIMappingUtil.fromLifecycleModelToDTO(apiLCData);
-            return Response.ok().entity(stateDTO).build();
+            return APIMappingUtil.fromLifecycleModelToDTO(apiLCData);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -807,95 +907,96 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId) {
+    public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
-    @Override public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query,
-            String ifNoneMatch) {
+    @Override 
+    public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query,
+            String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
-    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId,
-            String ifMatch) {
+    @Override 
+    public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId,
+            String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
-    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId,
-            String ifNoneMatch) {
+    @Override 
+    public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId,
+            String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
-    @Override public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId,
-            MediationDTO body, String ifMatch) {
+    @Override 
+    public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId,
+            MediationDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
-    @Override public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch) {
+    public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch,
+            MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath,
-            String verb, String ifNoneMatch) {
+            String verb, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId,
-            String ifNoneMatch) {
+            String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId,
-            ResourcePolicyInfoDTO body, String ifMatch) {
+            ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesGet(String apiId, String ifNoneMatch) {
+    public Response apisApiIdScopesGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesNameDelete(String apiId, String name, String ifMatch) {
+    public Response apisApiIdScopesNameDelete(String apiId, String name, String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesNameGet(String apiId, String name, String ifNoneMatch) {
+    public Response apisApiIdScopesNameGet(String apiId, String name, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesNamePut(String apiId, String name, ScopeDTO body, String ifMatch) {
+    public Response apisApiIdScopesNamePut(String apiId, String name, ScopeDTO body, String ifMatch,
+            MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdScopesPost(String apiId, ScopeDTO body, String ifMatch) {
+    public Response apisApiIdScopesPost(String apiId, ScopeDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
     /**
      * Retrieves the swagger document of an API
@@ -905,7 +1006,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch) {
+    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -937,7 +1038,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch) {
+    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
         try {
             APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -975,52 +1076,52 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId) {
+    public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdThreatProtectionPoliciesGet(String apiId) {
+    public Response apisApiIdThreatProtectionPoliciesGet(String apiId, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId) {
+    public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch) {
+    public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, Attachment fileDetail,
-            String ifMatch) {
+            String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch) {
+    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, Attachment fileDetail,
-            String ifMatch) {
+            String ifMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
-            String ifMatch) {
+            String ifMatch, MessageContext messageContext) {
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
@@ -1045,8 +1146,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                     apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
                 }
             }
-            apiProvider.changeLifeCycleStatus(apiIdentifier, action);
-            return Response.ok().build();
+            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action);
+
+            //returns the current lifecycle state
+            LifecycleStateDTO stateDTO = getLifecycleState(apiId);;
+
+            WorkflowResponseDTO workflowResponseDTO = APIMappingUtil
+                    .toWorkflowResponseDTO(stateDTO, stateChangeResponse);
+            return Response.ok().entity(workflowResponseDTO).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -1065,29 +1172,30 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisCopyApiPost(String newVersion, String apiId) {
+    public Response apisCopyApiPost(String newVersion, String apiId, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
-    public Response apisHead(String query, String ifNoneMatch) {
+    public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail,
-            String url, String additionalProperties, String implementationType, String ifMatch) {
+            String url, String additionalProperties, String implementationType, String ifMatch,
+            MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
     public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream,
-            Attachment fileDetail) {
+            Attachment fileDetail, MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
     /**
      * This method is used to assign micro gateway labels to the DTO

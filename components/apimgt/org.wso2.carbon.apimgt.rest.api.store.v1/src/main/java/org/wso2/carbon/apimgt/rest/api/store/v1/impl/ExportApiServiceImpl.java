@@ -18,15 +18,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ExportApiService;
 
 import javax.ws.rs.core.Response;
 
-public class ExportApiServiceImpl extends ExportApiService {
+public class ExportApiServiceImpl implements ExportApiService {
     @Override
-    public Response exportApplicationsGet(String appId){
+    public Response exportApplicationsGet(String appId, MessageContext messageContext){
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 }

@@ -15,7 +15,7 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import NightMode from '@material-ui/icons/Brightness2';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-import qs from 'qs';
+// import qs from 'qs';
 import PropTypes from 'prop-types';
 
 const styles = theme => ({
@@ -68,6 +68,15 @@ class Avatar extends Component {
     }
 
     /**
+     * Do OIDC logout redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
+     */
+    doOIDCLogout = (e) => {
+        e.preventDefault();
+        window.location = '/publisher-new/services/logout';
+    }
+
+    /**
      *
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
@@ -75,10 +84,10 @@ class Avatar extends Component {
      */
     render() {
         const { classes, user } = this.props;
-        const { pathname } = window.location;
-        const params = qs.stringify({
-            referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
-        });
+        // const { pathname } = window.location;
+        // const params = qs.stringify({
+        //     referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
+        // });
         const { openMenu, profileIcon } = this.state;
         return (
             <React.Fragment>
@@ -99,8 +108,8 @@ class Avatar extends Component {
                                     <MenuList>
                                         <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>
                                         <MenuItem onClick={this.toggleMenu}>My account</MenuItem>
-                                        <Link to={{ pathname: '/logout', search: params }}>
-                                            <MenuItem onClick={this.toggleMenu}>Logout</MenuItem>
+                                        <Link to={{ pathname: '/services/logout' }}>
+                                            <MenuItem onClick={this.doOIDCLogout}>Logout</MenuItem>
                                         </Link>
 
                                         <Divider />

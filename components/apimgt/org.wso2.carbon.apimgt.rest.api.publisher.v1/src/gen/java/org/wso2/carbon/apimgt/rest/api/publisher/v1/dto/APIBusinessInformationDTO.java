@@ -1,35 +1,33 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class APIBusinessInformationDTO  {
+public class APIBusinessInformationDTO   {
   
-  
-  
-  private String businessOwner = null;
-  
-  
-  private String businessOwnerEmail = null;
-  
-  
-  private String technicalOwner = null;
-  
-  
-  private String technicalOwnerEmail = null;
+    private String businessOwner = null;
+    private String businessOwnerEmail = null;
+    private String technicalOwner = null;
+    private String technicalOwnerEmail = null;
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIBusinessInformationDTO businessOwner(String businessOwner) {
+    this.businessOwner = businessOwner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "businessowner", value = "")
   @JsonProperty("businessOwner")
   public String getBusinessOwner() {
     return businessOwner;
@@ -38,10 +36,15 @@ public class APIBusinessInformationDTO  {
     this.businessOwner = businessOwner;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIBusinessInformationDTO businessOwnerEmail(String businessOwnerEmail) {
+    this.businessOwnerEmail = businessOwnerEmail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "businessowner@wso2.com", value = "")
   @JsonProperty("businessOwnerEmail")
   public String getBusinessOwnerEmail() {
     return businessOwnerEmail;
@@ -50,10 +53,15 @@ public class APIBusinessInformationDTO  {
     this.businessOwnerEmail = businessOwnerEmail;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIBusinessInformationDTO technicalOwner(String technicalOwner) {
+    this.technicalOwner = technicalOwner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "technicalowner", value = "")
   @JsonProperty("technicalOwner")
   public String getTechnicalOwner() {
     return technicalOwner;
@@ -62,10 +70,15 @@ public class APIBusinessInformationDTO  {
     this.technicalOwner = technicalOwner;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public APIBusinessInformationDTO technicalOwnerEmail(String technicalOwnerEmail) {
+    this.technicalOwnerEmail = technicalOwnerEmail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "technicalowner@wso2.com", value = "")
   @JsonProperty("technicalOwnerEmail")
   public String getTechnicalOwnerEmail() {
     return technicalOwnerEmail;
@@ -74,18 +87,49 @@ public class APIBusinessInformationDTO  {
     this.technicalOwnerEmail = technicalOwnerEmail;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    APIBusinessInformationDTO apIBusinessInformation = (APIBusinessInformationDTO) o;
+    return Objects.equals(businessOwner, apIBusinessInformation.businessOwner) &&
+        Objects.equals(businessOwnerEmail, apIBusinessInformation.businessOwnerEmail) &&
+        Objects.equals(technicalOwner, apIBusinessInformation.technicalOwner) &&
+        Objects.equals(technicalOwnerEmail, apIBusinessInformation.technicalOwnerEmail);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIBusinessInformationDTO {\n");
     
-    sb.append("  businessOwner: ").append(businessOwner).append("\n");
-    sb.append("  businessOwnerEmail: ").append(businessOwnerEmail).append("\n");
-    sb.append("  technicalOwner: ").append(technicalOwner).append("\n");
-    sb.append("  technicalOwnerEmail: ").append(technicalOwnerEmail).append("\n");
-    sb.append("}\n");
+    sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");
+    sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
+    sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
+    sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

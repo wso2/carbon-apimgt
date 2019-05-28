@@ -18,15 +18,16 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SearchApiService;
 
 import javax.ws.rs.core.Response;
 
-public class SearchApiServiceImpl extends SearchApiService {
+public class SearchApiServiceImpl implements SearchApiService {
     @Override
-    public Response searchGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String ifNoneMatch){
+    public Response searchGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
+            MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 }

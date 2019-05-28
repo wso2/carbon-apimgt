@@ -111,7 +111,7 @@ class AuthManager {
     static getUserFromToken() {
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!partialToken) {
-            return new Promise((resolve, reject) => reject(new Error('No partial token found')));
+            return new Promise((resolve, reject) => reject(new Error('No partial token found!')));
         }
         const promisedResponse = fetch('/publisher-new/services/auth/introspect', { credentials: 'same-origin' });
         return promisedResponse

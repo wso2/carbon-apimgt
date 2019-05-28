@@ -10,7 +10,7 @@ import ExpansionPanel, {
     ExpansionPanelDetails,
   } from '@material-ui/core/ExpansionPanel';
   import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import API from '../../../../data/api.js'
+import API from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
 import DocumentView from './DocumentView'
 

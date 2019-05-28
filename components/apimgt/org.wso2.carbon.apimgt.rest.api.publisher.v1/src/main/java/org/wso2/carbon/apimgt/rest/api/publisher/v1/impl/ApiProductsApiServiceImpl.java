@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -52,10 +53,11 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
 import javax.ws.rs.core.Response;
 
-public class ApiProductsApiServiceImpl extends ApiProductsApiService {
+public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
-    @Override
-    public Response apiProductsApiProductIdDelete(String apiProductId,String ifMatch){
+
+    @Override public Response apiProductsApiProductIdDelete(String apiProductId, String ifMatch,
+            MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -75,44 +77,45 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         }
         return null;
     }
-    @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,String documentId,String accept,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId,String documentId,InputStream fileInputStream,Attachment fileDetail,String inlineContent,String ifMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdDelete(String apiProductId,String documentId,String ifMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId,String documentId,String accept,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdPut(String apiProductId,String documentId,DocumentDTO body,String ifMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response apiProductsApiProductIdDocumentsGet(String apiProductId,Integer limit,Integer offset,String accept,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response apiProductsApiProductIdDocumentsPost(String apiProductId,DocumentDTO body){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    @Override
-    public Response apiProductsApiProductIdGet(String apiProductId,String accept,String ifNoneMatch){
 
+    @Override public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,
+            String documentId, String accept, String ifNoneMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId,
+            String documentId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch,
+            MessageContext messageContext) {
+        return null;
+    }
+
+    @Override public Response apiProductsApiProductIdDocumentsDocumentIdDelete(String apiProductId, String documentId,
+            String ifMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId, String documentId,
+            String accept, String ifNoneMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override public Response apiProductsApiProductIdDocumentsDocumentIdPut(String apiProductId, String documentId,
+            DocumentDTO body, String ifMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override public Response apiProductsApiProductIdDocumentsGet(String apiProductId, Integer limit, Integer offset,
+            String accept, String ifNoneMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override public Response apiProductsApiProductIdDocumentsPost(String apiProductId, DocumentDTO body,
+            MessageContext messageContext) {
+        return null;
+    }
+
+    @Override public Response apiProductsApiProductIdGet(String apiProductId, String accept, String ifNoneMatch,
+            MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
@@ -133,9 +136,9 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         }
         return null;
     }
-    @Override
-    public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch){
 
+    @Override public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch,
+            MessageContext messageContext) {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -164,8 +167,8 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             }
-            
-            //only publish api product if tiers are defined 
+
+            //only publish api product if tiers are defined
             if(StateEnum.PUBLISHED.equals(body.getState())) {
                 //if the already created API product does not have tiers defined and the update request also doesn't
                 //have tiers defined, then the product should not moved to PUBLISHED state.
@@ -173,8 +176,8 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                     RestApiUtil.handleBadRequest("Policy needs to be defined before publishing the API Product", log);
                 }
             }
-            
-            
+
+
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
             //We do not allow to modify provider  and uuid. Set the origial value
             product.setProvider(retrievedProduct.getProvider());
@@ -189,8 +192,9 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         }
         return null;
     }
-    @Override
-    public Response apiProductsApiProductIdSwaggerGet(String apiProductId,String accept,String ifNoneMatch){
+
+    @Override public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String accept, String ifNoneMatch,
+            MessageContext messageContext) {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -201,11 +205,11 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             }
             APIProduct productWithSwagger = apiProvider.getAPIDefinitionOfAPIProduct(apiProductId);
             //Implement visibility related tasks using the retrieved product if needed
-            
+
             String apiSwagger = "";
             if (!StringUtils.isEmpty(productWithSwagger.getDefinition())) {
                 apiSwagger = productWithSwagger.getDefinition();
-            } 
+            }
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId;
@@ -213,9 +217,9 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         }
         return null;
     }
-    
-    @Override
-    public Response apiProductsApiProductIdSwaggerPut(String apiProductId,String apiDefinition,String ifMatch){
+
+    @Override public Response apiProductsApiProductIdSwaggerPut(String apiProductId, String apiDefinition,
+            String ifMatch, MessageContext messageContext) {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -231,7 +235,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             String apiSwagger = "";
             if (!StringUtils.isEmpty(productWithSwagger.getDefinition())) {
                 apiSwagger = productWithSwagger.getDefinition();
-            } 
+            }
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId;
@@ -239,23 +243,19 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
         }
         return null;
     }
-    
-    @Override
-    public Response apiProductsApiProductIdThumbnailGet(String apiProductId,String accept,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-    
-    @Override
-    public Response apiProductsApiProductIdThumbnailPost(String apiProductId,InputStream fileInputStream,Attachment fileDetail,String ifMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+    @Override public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept,
+            String ifNoneMatch, MessageContext messageContext) {
+        return null;
     }
 
-    @Override
-    public Response apiProductsGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
-            Boolean expand) {
+    @Override public Response apiProductsApiProductIdThumbnailPost(String apiProductId, InputStream fileInputStream,
+            Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+        return null;
+    }
 
+    @Override public Response apiProductsGet(Integer limit, Integer offset, String query, String accept,
+            String ifNoneMatch, Boolean expand, MessageContext messageContext) {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
@@ -268,18 +268,16 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             APIProductListDTO apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(productList);
 
             //TODO implement pagination
-            
+
             return Response.ok().entity(apiProductListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API Products ";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-
     }
-    @Override
-    public Response apiProductsPost(APIProductDTO body) {
 
+    @Override public Response apiProductsPost(APIProductDTO body, MessageContext messageContext) {
         String provider = null;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -319,7 +317,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             }
-            
+
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
             String uuid = apiProvider.createAPIProduct(product, tenantDomain);
             APIProduct createdProduct = apiProvider.getAPIProduct(uuid, tenantDomain);
@@ -339,6 +337,5 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-
     }
 }

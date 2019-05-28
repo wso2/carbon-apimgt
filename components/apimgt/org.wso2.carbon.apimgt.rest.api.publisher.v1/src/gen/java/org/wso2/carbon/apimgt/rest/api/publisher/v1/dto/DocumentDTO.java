@@ -1,74 +1,142 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class DocumentDTO  {
+public class DocumentDTO   {
   
-  
-  
-  private String documentId = null;
-  
-  @NotNull
-  private String name = null;
-  
-  public enum TypeEnum {
-     HOWTO,  SAMPLES,  PUBLIC_FORUM,  SUPPORT_FORUM,  API_MESSAGE_FORMAT,  SWAGGER_DOC,  OTHER, 
-  };
-  @NotNull
-  private TypeEnum type = null;
-  
-  
-  private String summary = null;
-  
-  public enum SourceTypeEnum {
-     INLINE,  MARKDOWN,  URL,  FILE, 
-  };
-  @NotNull
-  private SourceTypeEnum sourceType = null;
-  
-  
-  private String sourceUrl = null;
-  
-  
-  private String fileName = null;
-  
-  
-  private String inlineContent = null;
-  
-  
-  private String otherTypeName = null;
-  
-  public enum VisibilityEnum {
-     OWNER_ONLY,  PRIVATE,  API_LEVEL, 
-  };
-  @NotNull
-  private VisibilityEnum visibility = null;
-  
-  
-  private String createdTime = null;
-  
-  
-  private String createdBy = null;
-  
-  
-  private String lastUpdatedTime = null;
-  
-  
-  private String lastUpdatedBy = null;
+    private String documentId = null;
+    private String name = null;
 
-  
+@XmlType(name="TypeEnum")
+@XmlEnum(String.class)
+public enum TypeEnum {
+
+    @XmlEnumValue("HOWTO") HOWTO(String.valueOf("HOWTO")), @XmlEnumValue("SAMPLES") SAMPLES(String.valueOf("SAMPLES")), @XmlEnumValue("PUBLIC_FORUM") PUBLIC_FORUM(String.valueOf("PUBLIC_FORUM")), @XmlEnumValue("SUPPORT_FORUM") SUPPORT_FORUM(String.valueOf("SUPPORT_FORUM")), @XmlEnumValue("API_MESSAGE_FORMAT") API_MESSAGE_FORMAT(String.valueOf("API_MESSAGE_FORMAT")), @XmlEnumValue("SWAGGER_DOC") SWAGGER_DOC(String.valueOf("SWAGGER_DOC")), @XmlEnumValue("OTHER") OTHER(String.valueOf("OTHER"));
+
+
+    private String value;
+
+    TypeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static TypeEnum fromValue(String v) {
+        for (TypeEnum b : TypeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private TypeEnum type = null;
+    private String summary = null;
+
+@XmlType(name="SourceTypeEnum")
+@XmlEnum(String.class)
+public enum SourceTypeEnum {
+
+    @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE")), @XmlEnumValue("MARKDOWN") MARKDOWN(String.valueOf("MARKDOWN")), @XmlEnumValue("URL") URL(String.valueOf("URL")), @XmlEnumValue("FILE") FILE(String.valueOf("FILE"));
+
+
+    private String value;
+
+    SourceTypeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static SourceTypeEnum fromValue(String v) {
+        for (SourceTypeEnum b : SourceTypeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private SourceTypeEnum sourceType = null;
+    private String sourceUrl = null;
+    private String fileName = null;
+    private String inlineContent = null;
+    private String otherTypeName = null;
+
+@XmlType(name="VisibilityEnum")
+@XmlEnum(String.class)
+public enum VisibilityEnum {
+
+    @XmlEnumValue("OWNER_ONLY") OWNER_ONLY(String.valueOf("OWNER_ONLY")), @XmlEnumValue("PRIVATE") PRIVATE(String.valueOf("PRIVATE")), @XmlEnumValue("API_LEVEL") API_LEVEL(String.valueOf("API_LEVEL"));
+
+
+    private String value;
+
+    VisibilityEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static VisibilityEnum fromValue(String v) {
+        for (VisibilityEnum b : VisibilityEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private VisibilityEnum visibility = null;
+    private String createdTime = null;
+    private String createdBy = null;
+    private String lastUpdatedTime = null;
+    private String lastUpdatedBy = null;
+
   /**
    **/
-  @ApiModelProperty(value = "")
+  public DocumentDTO documentId(String documentId) {
+    this.documentId = documentId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
   @JsonProperty("documentId")
   public String getDocumentId() {
     return documentId;
@@ -77,11 +145,17 @@ public class DocumentDTO  {
     this.documentId = documentId;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  public DocumentDTO name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorDoc", required = true, value = "")
   @JsonProperty("name")
+  @NotNull
   public String getName() {
     return name;
   }
@@ -89,11 +163,17 @@ public class DocumentDTO  {
     this.name = name;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  public DocumentDTO type(TypeEnum type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "HOWTO", required = true, value = "")
   @JsonProperty("type")
+  @NotNull
   public TypeEnum getType() {
     return type;
   }
@@ -101,10 +181,15 @@ public class DocumentDTO  {
     this.type = type;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public DocumentDTO summary(String summary) {
+    this.summary = summary;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Summary of Calculator Documentation", value = "")
   @JsonProperty("summary")
   public String getSummary() {
     return summary;
@@ -113,11 +198,17 @@ public class DocumentDTO  {
     this.summary = summary;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  public DocumentDTO sourceType(SourceTypeEnum sourceType) {
+    this.sourceType = sourceType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "INLINE", required = true, value = "")
   @JsonProperty("sourceType")
+  @NotNull
   public SourceTypeEnum getSourceType() {
     return sourceType;
   }
@@ -125,10 +216,15 @@ public class DocumentDTO  {
     this.sourceType = sourceType;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public DocumentDTO sourceUrl(String sourceUrl) {
+    this.sourceUrl = sourceUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "", value = "")
   @JsonProperty("sourceUrl")
   public String getSourceUrl() {
     return sourceUrl;
@@ -137,10 +233,15 @@ public class DocumentDTO  {
     this.sourceUrl = sourceUrl;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public DocumentDTO fileName(String fileName) {
+    this.fileName = fileName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "", value = "")
   @JsonProperty("fileName")
   public String getFileName() {
     return fileName;
@@ -149,10 +250,15 @@ public class DocumentDTO  {
     this.fileName = fileName;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public DocumentDTO inlineContent(String inlineContent) {
+    this.inlineContent = inlineContent;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "This is doc content. This can have many lines.", value = "")
   @JsonProperty("inlineContent")
   public String getInlineContent() {
     return inlineContent;
@@ -161,10 +267,15 @@ public class DocumentDTO  {
     this.inlineContent = inlineContent;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public DocumentDTO otherTypeName(String otherTypeName) {
+    this.otherTypeName = otherTypeName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "", value = "")
   @JsonProperty("otherTypeName")
   public String getOtherTypeName() {
     return otherTypeName;
@@ -173,11 +284,17 @@ public class DocumentDTO  {
     this.otherTypeName = otherTypeName;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  public DocumentDTO visibility(VisibilityEnum visibility) {
+    this.visibility = visibility;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "API_LEVEL", required = true, value = "")
   @JsonProperty("visibility")
+  @NotNull
   public VisibilityEnum getVisibility() {
     return visibility;
   }
@@ -185,10 +302,15 @@ public class DocumentDTO  {
     this.visibility = visibility;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public DocumentDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
     return createdTime;
@@ -197,9 +319,14 @@ public class DocumentDTO  {
     this.createdTime = createdTime;
   }
 
-  
   /**
    **/
+  public DocumentDTO createdBy(String createdBy) {
+    this.createdBy = createdBy;
+    return this;
+  }
+
+  
   @ApiModelProperty(value = "")
   @JsonProperty("createdBy")
   public String getCreatedBy() {
@@ -209,10 +336,15 @@ public class DocumentDTO  {
     this.createdBy = createdBy;
   }
 
-  
   /**
    **/
-  @ApiModelProperty(value = "")
+  public DocumentDTO lastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
   @JsonProperty("lastUpdatedTime")
   public String getLastUpdatedTime() {
     return lastUpdatedTime;
@@ -221,9 +353,14 @@ public class DocumentDTO  {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
-  
   /**
    **/
+  public DocumentDTO lastUpdatedBy(String lastUpdatedBy) {
+    this.lastUpdatedBy = lastUpdatedBy;
+    return this;
+  }
+
+  
   @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedBy")
   public String getLastUpdatedBy() {
@@ -233,28 +370,69 @@ public class DocumentDTO  {
     this.lastUpdatedBy = lastUpdatedBy;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DocumentDTO document = (DocumentDTO) o;
+    return Objects.equals(documentId, document.documentId) &&
+        Objects.equals(name, document.name) &&
+        Objects.equals(type, document.type) &&
+        Objects.equals(summary, document.summary) &&
+        Objects.equals(sourceType, document.sourceType) &&
+        Objects.equals(sourceUrl, document.sourceUrl) &&
+        Objects.equals(fileName, document.fileName) &&
+        Objects.equals(inlineContent, document.inlineContent) &&
+        Objects.equals(otherTypeName, document.otherTypeName) &&
+        Objects.equals(visibility, document.visibility) &&
+        Objects.equals(createdTime, document.createdTime) &&
+        Objects.equals(createdBy, document.createdBy) &&
+        Objects.equals(lastUpdatedTime, document.lastUpdatedTime) &&
+        Objects.equals(lastUpdatedBy, document.lastUpdatedBy);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, fileName, inlineContent, otherTypeName, visibility, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class DocumentDTO {\n");
     
-    sb.append("  documentId: ").append(documentId).append("\n");
-    sb.append("  name: ").append(name).append("\n");
-    sb.append("  type: ").append(type).append("\n");
-    sb.append("  summary: ").append(summary).append("\n");
-    sb.append("  sourceType: ").append(sourceType).append("\n");
-    sb.append("  sourceUrl: ").append(sourceUrl).append("\n");
-    sb.append("  fileName: ").append(fileName).append("\n");
-    sb.append("  inlineContent: ").append(inlineContent).append("\n");
-    sb.append("  otherTypeName: ").append(otherTypeName).append("\n");
-    sb.append("  visibility: ").append(visibility).append("\n");
-    sb.append("  createdTime: ").append(createdTime).append("\n");
-    sb.append("  createdBy: ").append(createdBy).append("\n");
-    sb.append("  lastUpdatedTime: ").append(lastUpdatedTime).append("\n");
-    sb.append("  lastUpdatedBy: ").append(lastUpdatedBy).append("\n");
-    sb.append("}\n");
+    sb.append("    documentId: ").append(toIndentedString(documentId)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
+    sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
+    sb.append("    sourceUrl: ").append(toIndentedString(sourceUrl)).append("\n");
+    sb.append("    fileName: ").append(toIndentedString(fileName)).append("\n");
+    sb.append("    inlineContent: ").append(toIndentedString(inlineContent)).append("\n");
+    sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
+    sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
+    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    lastUpdatedBy: ").append(toIndentedString(lastUpdatedBy)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+
