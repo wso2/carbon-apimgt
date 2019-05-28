@@ -207,7 +207,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        List<String> subscriberApps = getAppsWithIdBySubscriber(subscriberName, groupId);
+        if (log.isDebugEnabled()) {
+            if (subscriberApps.isEmpty()) {
+                log.debug("List of Subscriber Applications is empty");
+            }
+        }
         return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG,
                 subscriberApps, fromDate, toDate, limit);
     }
@@ -227,7 +232,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        List<String> subscriberApps = getAppsWithIdBySubscriber(subscriberName, groupId);
+        if (log.isDebugEnabled()) {
+            if (subscriberApps.isEmpty()) {
+                log.debug("List of Subscriber Applications is empty");
+            }
+        }
         return getTopAppUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG,
                 subscriberApps, fromDate, toDate, limit);
     }
@@ -546,7 +556,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        List<String> subscriberApps = getAppsWithIdBySubscriber(subscriberName, groupId);
+        if (log.isDebugEnabled()) {
+            if (subscriberApps.isEmpty()) {
+                log.debug("List of Subscriber Applications is empty");
+            }
+        }
         return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
                 subscriberApps, fromDate, toDate, limit);
     }
@@ -664,7 +679,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        List<String> subscriberApps = getAppsWithIdBySubscriber(subscriberName, groupId);
+        if (log.isDebugEnabled()) {
+            if (subscriberApps.isEmpty()) {
+                log.debug("List of Subscriber Applications is empty");
+            }
+        }
         return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, subscriberApps, fromDate,
                 toDate, limit);
     }
