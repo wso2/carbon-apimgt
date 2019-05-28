@@ -3827,6 +3827,7 @@ definitions:
     required:
       - consumerKey
       - consumerSecret
+      - keyType
     properties:
       consumerKey:
         type: string
