@@ -113,7 +113,7 @@ public class ThrottlingPolicyMappingUtil {
         dto.setRequestCount(throttlingPolicy.getRequestCount());
         dto.setUnitTime(throttlingPolicy.getUnitTime());
         dto.setStopOnQuotaReach(throttlingPolicy.isStopOnQuotaReached());
-        dto.setPolicyLevel(ThrottlingPolicyDTO.PolicyLevelEnum.valueOf(tierLevel));
+        dto.setPolicyLevel(ThrottlingPolicyDTO.PolicyLevelEnum.valueOf(tierLevel.toUpperCase()));
         dto = setTierPermissions(dto, throttlingPolicy);
         if (throttlingPolicy.getTierPlan() != null) {
             dto.setTierPlan(ThrottlingPolicyDTO.TierPlanEnum.valueOf(throttlingPolicy.getTierPlan()));
@@ -142,7 +142,7 @@ public class ThrottlingPolicyMappingUtil {
         // If no permission found for the tier, the default permission will be applied
         if (throttlingPolicy.getTierPermission() == null ||
                 throttlingPolicy.getTierPermission().getPermissionType() == null) {
-            tierPermission.setType(ThrottlingPolicyPermissionInfoDTO.TypeEnum.valueOf("allow"));
+            tierPermission.setType(ThrottlingPolicyPermissionInfoDTO.TypeEnum.valueOf("ALLOW"));
             List roles = new ArrayList<String>();
             roles.add("Internal/everyone");
             tierPermission.setRoles(roles);

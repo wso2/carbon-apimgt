@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public interface ApisApiService {
       public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, MessageContext messageContext);
       public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSdksLanguageGet(String apiId, String language, MessageContext messageContext);
+      public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext);
       public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, MessageContext messageContext);

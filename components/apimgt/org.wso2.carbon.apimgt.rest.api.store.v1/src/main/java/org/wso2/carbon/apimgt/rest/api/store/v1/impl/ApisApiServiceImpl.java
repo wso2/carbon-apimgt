@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.ThrottlingPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
@@ -130,7 +131,10 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
-        APIDTO apiToReturn;
+        return Response.ok().entity(getAPIByAPIId(apiId, xWSO2Tenant)).build();
+    }
+
+    public APIDTO getAPIByAPIId(String apiId, String xWSO2Tenant) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
@@ -140,8 +144,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
-            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
-            return Response.ok().entity(apiToReturn).build();
+            return APIMappingUtil.fromAPItoDTO(api);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -375,4 +378,26 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
+    @Override
+    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String ifNoneMatch, String xWSO2Tenant,
+                                                     MessageContext messageContext) {
+        ApisApiServiceImpl apiService = new ApisApiServiceImpl();
+        APIDTO apiInfo = apiService.getAPIByAPIId(apiId, xWSO2Tenant);
+        List<ThrottlingPolicy> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
+                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
+
+        if (apiInfo != null ) {
+            List<String> apiTiers = apiInfo.getTiers();
+            if (apiTiers != null && !apiTiers.isEmpty()) {
+                List<ThrottlingPolicy> apiThrottlingPolicies = new ArrayList<>();
+                for (ThrottlingPolicy policy : availableThrottlingPolicyList) {
+                    if (apiTiers.contains(policy.getName())) {
+                        apiThrottlingPolicies.add(policy);
+                    }
+                }
+                return Response.ok().entity(apiThrottlingPolicies).build();
+            }
+        }
+        return null;
+    }
 }
