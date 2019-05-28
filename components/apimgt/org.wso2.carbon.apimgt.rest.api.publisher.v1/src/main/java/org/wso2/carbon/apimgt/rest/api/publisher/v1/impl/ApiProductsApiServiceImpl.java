@@ -149,10 +149,7 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
             if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
                 RestApiUtil.handleBadRequest("No tier defined for the API Product", log);
             }
-            String scope = body.getScope();
-            if (StringUtils.isEmpty(scope)) {
-                RestApiUtil.handleBadRequest("No scope defined for the API Product", log);
-            }
+
             //check whether the added API Products's tiers are all valid
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
@@ -321,10 +318,6 @@ public class ApiProductsApiServiceImpl extends ApiProductsApiService {
                 if (!errorMessage.isEmpty()) {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
-            }
-            String scope = body.getScope();
-            if (StringUtils.isEmpty(scope)) {
-                RestApiUtil.handleBadRequest("No scope defined for the API Product", log);
             }
             
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, provider);

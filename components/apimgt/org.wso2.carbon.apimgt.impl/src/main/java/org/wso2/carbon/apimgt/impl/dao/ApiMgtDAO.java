@@ -6569,11 +6569,10 @@ public class ApiMgtDAO {
 
             //check whether there are any associated api products before updating url temaplates and scopes
             //TODO move to constants
-            String queryGetAssociatedAPIProducts =
-                    "SELECT AM_API_PRODUCT.UUID, AM_API_PRODUCT.TENANT_DOMAIN " + "FROM AM_API_PRODUCT_MAPPING, AM_API_URL_MAPPING, AM_API_PRODUCT "
-                            + "WHERE " + "AM_API_PRODUCT_MAPPING.URL_MAPPING_ID = AM_API_URL_MAPPING.URL_MAPPING_ID "
-                            + "AND AM_API_PRODUCT.API_PRODUCT_ID  = AM_API_PRODUCT_MAPPING.API_PRODUCT_ID "
-                            + "AND API_ID = ?";
+            String queryGetAssociatedAPIProducts = "SELECT DISTINCT AM_API_PRODUCT.UUID, AM_API_PRODUCT.TENANT_DOMAIN "
+                    + "FROM AM_API_PRODUCT_MAPPING, AM_API_URL_MAPPING, AM_API_PRODUCT " + "WHERE "
+                    + "AM_API_PRODUCT_MAPPING.URL_MAPPING_ID = AM_API_URL_MAPPING.URL_MAPPING_ID "
+                    + "AND AM_API_PRODUCT.API_PRODUCT_ID  = AM_API_PRODUCT_MAPPING.API_PRODUCT_ID " + "AND API_ID = ?";
             int apiId = getAPIID(api.getId(), connection);
             PreparedStatement prepStmtGetAssociatedAPIProducts = connection
                     .prepareStatement(queryGetAssociatedAPIProducts);
@@ -6598,7 +6597,6 @@ public class ApiMgtDAO {
                 after update url templates template ids will change. So we have to add product scopes and mappings again after
                 updating api templates */
                 addProductMappingsForAPI(api, apiProducts);
-                addProductScopes(apiProducts, tenantId);
             }
         } catch (SQLException e) {
             handleException("Error while updating the API: " + api.getId() + " in the database", e);
@@ -12992,7 +12990,6 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(15, apiproduct.getBusinessOwnerEmail());
             String additionalProperties = apiproduct.getAdditionalProperties().toJSONString();
             prepStmtAddAPIProduct.setBlob(16, new ByteArrayInputStream(additionalProperties.getBytes()));
-            prepStmtAddAPIProduct.setString(17, apiproduct.getScope());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -13005,35 +13002,6 @@ public class ApiMgtDAO {
                 throw new APIManagementException("Error while adding API product " + apiproduct.getUuid());
             }
 
-            //add product scope
-
-            String productScopeKey = apiproduct.getScope();
-            //for now use key for display name as well TODO check and modify
-            String productScopeDisplayName = productScopeKey;
-            Scope productScope = new Scope();
-            productScope.setKey(productScopeKey);
-            productScope.setName(productScopeDisplayName);
-
-            String queryAddScopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
-            prepStmtAddScopeEntry = connection.prepareStatement(queryAddScopeEntry, new String[]{"scope_id"});
-            prepStmtAddScopeEntry.setString(1, productScope.getKey());
-            prepStmtAddScopeEntry.setString(2, productScope.getName());
-            prepStmtAddScopeEntry.setString(3, productScope.getDescription());
-            prepStmtAddScopeEntry.setInt(4, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
-            prepStmtAddScopeEntry.execute();
-
-            rs = prepStmtAddScopeEntry.getGeneratedKeys();
-
-            if (rs.next()){
-                scopeId = rs.getInt(1);
-            }
-
-            //breaks the flow if product scope is not added to the db correctly
-            if (scopeId == 0) {
-                throw new APIManagementException("Error while adding scope for API product : " + apiproduct.getUuid());
-            }
-
-            productScope.setId(scopeId);
             addAPIProductResourceMappings(apiproduct, productId, scopeId, tenantDomain, connection);
             connection.commit();
         } catch (SQLException e) {
@@ -13059,60 +13027,32 @@ public class ApiMgtDAO {
     public void addAPIProductResourceMappings(APIProduct apiProduct, int productId, int scopeId, String tenantDomain,
             Connection connection)
             throws APIManagementException {
-        //add api-productscope mappings
-        PreparedStatement prepStmtAddScopeLink = null;
-        PreparedStatement prepStmtAddScopeResourceMapping = null;
+        //add product-api resource mappings
         PreparedStatement prepStmtAddResourceMapping = null;
 
-        String addScopeLinkSql = SQLConstants.ADD_SCOPE_LINK_SQL;
         String addProductResourceMappingSql = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
-        String addOauth2ResourceScopeSql = SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL;
 
         try {
-            prepStmtAddScopeLink = connection.prepareStatement(addScopeLinkSql);
             prepStmtAddResourceMapping = connection.prepareStatement(addProductResourceMappingSql);
-            prepStmtAddScopeResourceMapping = connection.prepareStatement(addOauth2ResourceScopeSql);
 
             //add the resources in each API in the API product.
             List<APIProductResource> productApis = apiProduct.getProductResources();
             for (APIProductResource apiProductResource : productApis) {
-                APIIdentifier apiIdentifier = apiProductResource.getApiIdentifier();
-                int apiID = getAPIID(apiIdentifier, connection);
-
-                prepStmtAddScopeLink.setInt(1, apiID);
-                prepStmtAddScopeLink.setInt(2, scopeId);
-                prepStmtAddScopeLink.addBatch();
-
                 List<URITemplate> uriTemplates = apiProductResource.getResources();
                 for (URITemplate uriTemplate : uriTemplates) {
                     prepStmtAddResourceMapping.setInt(1, productId);
                     prepStmtAddResourceMapping.setInt(2, uriTemplate.getId());
                     prepStmtAddResourceMapping.addBatch();
-
-                    //add scope uri temaplate mapping
-                    String resourceKey = APIUtil
-                            .getResourceKey(getAPIContext(apiIdentifier), apiIdentifier.getVersion(),
-                                    uriTemplate.getResourceURI(), uriTemplate.getHTTPVerb());
-                    prepStmtAddScopeResourceMapping.setString(1, resourceKey);
-                    prepStmtAddScopeResourceMapping.setInt(2, scopeId);
-                    prepStmtAddScopeResourceMapping.setInt(3, APIUtil.getTenantIdFromTenantDomain(tenantDomain));
-                    prepStmtAddScopeResourceMapping.addBatch();
                 }
             }
 
-            prepStmtAddScopeLink.executeBatch();
-            prepStmtAddScopeLink.clearBatch();
             prepStmtAddResourceMapping.executeBatch();
             prepStmtAddResourceMapping.clearBatch();
-            prepStmtAddScopeResourceMapping.executeBatch();
-            prepStmtAddScopeResourceMapping.clearBatch();
         } catch (SQLException e) {
             handleException("Error while adding API product " + apiProduct.getName() + " of provider " + apiProduct
                     .getProvider(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, null, null);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeLink, null, null);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeResourceMapping, null, null);
         }
     }
 
@@ -13127,34 +13067,20 @@ public class ApiMgtDAO {
     public void updateAPIProductResourceMappings(APIProduct apiProduct, int productId, int scopeId, String tenantDomain,
             Connection connection) throws APIManagementException {
 
-        PreparedStatement prepStmtRemoveApiToProductScopeMappings = null;
         PreparedStatement prepStmtRemoveResourceToProductMappings = null;
-        PreparedStatement prepStmtRemoveResourceToProductScopeMappings = null;
 
-        String removeApiToProductScopeMappingsSql = SQLConstants.REMOVE_FROM_API_SCOPES_BY_SCOPE_ID_SQL;
         String removeResourceToProductMappingsSql = SQLConstants.DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL;
-        String removeResourceToProductScopeMappingsSql = SQLConstants.REMOVE_FROM_OAUTH_RESOURCE_SQL;
 
         try {
-            prepStmtRemoveApiToProductScopeMappings = connection.prepareStatement(removeApiToProductScopeMappingsSql);
-            prepStmtRemoveApiToProductScopeMappings.setInt(1, scopeId);
-            prepStmtRemoveApiToProductScopeMappings.execute();
-
             prepStmtRemoveResourceToProductMappings = connection.prepareStatement(removeResourceToProductMappingsSql);
             prepStmtRemoveResourceToProductMappings.setInt(1, productId);
             prepStmtRemoveResourceToProductMappings.execute();
-
-            prepStmtRemoveResourceToProductScopeMappings = connection.prepareStatement(removeResourceToProductScopeMappingsSql);
-            prepStmtRemoveResourceToProductScopeMappings.setInt(1, scopeId);
-            prepStmtRemoveResourceToProductScopeMappings.execute();
 
             addAPIProductResourceMappings(apiProduct, productId, scopeId, tenantDomain, connection);
         } catch (SQLException e) {
             handleException("Error while updating API-Product Resources.", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtRemoveApiToProductScopeMappings, null, null);
             APIMgtDBUtil.closeAllConnections(prepStmtRemoveResourceToProductMappings, null, null);
-            APIMgtDBUtil.closeAllConnections(prepStmtRemoveResourceToProductScopeMappings, null, null);
         }
     }
     
@@ -13218,7 +13144,7 @@ public class ApiMgtDAO {
                 product.setState(rs.getString("STATE"));
                 product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));
                 product.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                product.setScope(rs.getString("SCOPE"));
+                //product.setScope(rs.getString("SCOPE"));
                 productId = rs.getInt("API_PRODUCT_ID");
                 product.setProductId(productId);
             } else {
@@ -13318,9 +13244,7 @@ public class ApiMgtDAO {
      */
     public void deleteAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException {
         String deleteQuery = SQLConstants.DELETE_API_PRODUCT_SQL;
-        String deleteProductScopeQuery = SQLConstants.DELETE_API_PRODUCT_SCOPE_SQL;
         PreparedStatement ps = null;
-        PreparedStatement psDeleteScope = null;
         Connection connection = null;
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -13330,19 +13254,11 @@ public class ApiMgtDAO {
             ps.setString(2, tenantDomain);
             ps.executeUpdate();
 
-            // remove productScope and its mappings
-            psDeleteScope = connection.prepareStatement(deleteProductScopeQuery);
-            String productScope = product.getScope();
-            int scopeId = getScopeIdByScopeName(productScope, connection);
-            psDeleteScope.setInt(1, scopeId);
-            psDeleteScope.executeUpdate();
-
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting api product " + product + " tenant " + tenantDomain, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
-            APIMgtDBUtil.closeAllConnections(psDeleteScope, connection, null);
         }
     }
 
@@ -13350,7 +13266,7 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
 
-        String querydeleteProductMappingsForAPI = SQLConstants.DELETE_PRODUCT_SCOPE_MAPPING;
+        String querydeleteProductMappingsForAPI = SQLConstants.DELETE_PRODUCT_RESOURCE_MAPPING;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -13477,91 +13393,6 @@ public class ApiMgtDAO {
         return productId;
     }
 
-    private void addProductScopes(List<APIProduct> apiProducts, int tenantID)
-            throws APIManagementException {
-        Connection connection = null;
-        String queryAddScopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
-        String queryAddcopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
-        String queryAddScopeResourceMapping = SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL;
-
-        PreparedStatement prepStmtAddScopeEntry = null;
-        PreparedStatement prepStmtAddcopeLink = null;
-        PreparedStatement prepStmtAddScopeResourceMapping = null;
-
-        ResultSet rs = null;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmtAddScopeEntry = connection.prepareStatement(queryAddScopeEntry, new String[] { "scope_id" });
-            prepStmtAddcopeLink = connection.prepareStatement(queryAddcopeLink);
-            prepStmtAddScopeResourceMapping = connection.prepareStatement(queryAddScopeResourceMapping);
-
-            for (APIProduct apiProduct : apiProducts) {
-                //add product scope
-                String productScopeKey = apiProduct.getScope();
-                //for now use key for display name as well TODO check and modify
-                String productScopeDisplayName = productScopeKey;
-                Scope productScope = new Scope();
-                productScope.setKey(productScopeKey);
-                productScope.setName(productScopeDisplayName);
-                int scopeId = 0;
-
-                prepStmtAddScopeEntry.setString(1, productScope.getKey());
-                prepStmtAddScopeEntry.setString(2, productScope.getName());
-                prepStmtAddScopeEntry.setString(3, productScope.getDescription());
-                prepStmtAddScopeEntry.setInt(4, tenantID);
-                prepStmtAddScopeEntry.execute();
-
-                rs = prepStmtAddScopeEntry.getGeneratedKeys();
-                if (rs.next()) {
-                    scopeId = rs.getInt(1);
-                }
-
-                //breaks the flow if product scope is not added to the db correctly
-                if (scopeId == 0) {
-                    throw new APIManagementException(
-                            "Error while adding scope for API product : " + apiProduct.getUuid());
-                }
-                productScope.setId(scopeId);
-
-                //attach product scope to each resource api
-                List<APIProductResource> productResources = apiProduct.getProductResources();
-                for (APIProductResource productResource : productResources) {
-                    APIIdentifier apiIdentifier = productResource.getApiIdentifier();
-                    prepStmtAddcopeLink.setInt(1, getAPIID(apiIdentifier, connection));
-                    prepStmtAddcopeLink.setInt(2, scopeId);
-                    prepStmtAddcopeLink.addBatch();
-
-                    //attach product scope to resource mappings
-                    List<URITemplate> templates = productResource.getResources();
-                    for (URITemplate template : templates) {
-                        //add scope uri temaplate mapping
-                        String resourceKey = APIUtil
-                                .getResourceKey(getAPIContext(apiIdentifier), apiIdentifier.getVersion(),
-                                        template.getResourceURI(), template.getHTTPVerb());
-                        prepStmtAddScopeResourceMapping.setString(1, resourceKey);
-                        prepStmtAddScopeResourceMapping.setInt(2, scopeId);
-                        prepStmtAddScopeResourceMapping.setInt(3, tenantID);
-                        prepStmtAddScopeResourceMapping.addBatch();
-                    }
-
-                }
-            }
-
-            prepStmtAddcopeLink.executeBatch();
-            prepStmtAddcopeLink.clearBatch();
-            prepStmtAddScopeResourceMapping.executeBatch();
-            prepStmtAddScopeResourceMapping.clearBatch();
-
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while adding product resource and scope mappings for api product ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeEntry, null, rs);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddcopeLink, null, null);
-            APIMgtDBUtil.closeAllConnections(prepStmtAddScopeResourceMapping, connection, null);
-        }
-    }
-
     public Map<String, String> getProductScopeRolesOfApplication(String consumerKey) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -13673,15 +13504,12 @@ public class ApiMgtDAO {
             String additionalProperties = product.getAdditionalProperties().toJSONString();
             ps.setBlob(12, new ByteArrayInputStream(additionalProperties.getBytes()));
             ps.setString(13, product.getName());
-            ps.setString(14, product.getScope());
-            ps.setString(15, product.getUuid());
+            ps.setString(14, product.getUuid());
             ps.executeUpdate();
 
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            String productScopeName = product.getScope();
-            int scopeId = getScopeIdByScopeName(productScopeName, conn);
             int productId = getAPIProductID(product.getName(), product.getProvider(), conn);
-            updateAPIProductResourceMappings(product, productId, scopeId, tenantDomain, conn);
+            updateAPIProductResourceMappings(product, productId, -1, tenantDomain, conn);
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {

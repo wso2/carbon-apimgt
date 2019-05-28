@@ -3085,8 +3085,7 @@ public class SQLConstants {
             "   SUBSCRIPTION_AVAILABILITY=?, " +
             "   SUBSCRIPTION_AVAILABILE_TENANTS=?, " +
             "   PROPERTIES=?, " +
-            "   API_PRODUCT_NAME=?, " +
-            "   SCOPE=? " +
+            "   API_PRODUCT_NAME=? " +
             " WHERE" +
             "   UUID=?";
 
@@ -3119,7 +3118,7 @@ public class SQLConstants {
     public static final String GET_PRODUCT_BY_ID =
             "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_NAME = ? AND API_PRODUCT_PROVIDER = ?";
 
-    public static final String DELETE_PRODUCT_SCOPE_MAPPING = 
+    public static final String DELETE_PRODUCT_RESOURCE_MAPPING =
             "DELETE FROM AM_API_PRODUCT_MAPPING WHERE URL_MAPPING_ID = ?";
 
     public static final String GET_URL_TEMPLATES_FOR_API = 
@@ -3132,8 +3131,8 @@ public class SQLConstants {
             + "AM_API_PRODUCT(API_PRODUCT_PROVIDER,API_PRODUCT_NAME,"
             + "DESCRIPTION, API_PRODUCT_TIER,CREATED_BY,"
             + "VISIBILITY,SUBSCRIPTION_AVAILABILITY,UUID,TENANT_DOMAIN,STATE,API_PRODUCT_VERSION,"
-            + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES, BUSINESS_OWNER, BUSINESS_OWNER_EMAIL, PROPERTIES, SCOPE) " 
-            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";           
+            + "SUBSCRIPTION_AVAILABILE_TENANTS, VISIBILE_ROLES, BUSINESS_OWNER, BUSINESS_OWNER_EMAIL, PROPERTIES) "
+            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{
