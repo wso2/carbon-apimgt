@@ -49,6 +49,7 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 /**
  * This class will validate the basic auth credentials.
@@ -108,24 +109,14 @@ public class BasicAuthCredentialValidator {
      * @return the resource authentication scheme
      */
     public String getResourceAuthenticationScheme(Swagger swagger, MessageContext synCtx) {
-        if (swagger != null) {
-            String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-            org.apache.axis2.context.MessageContext axis2MessageContext =
-                    ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-            String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
-            Path path = swagger.getPath(apiElectedResource);
-            if (path != null) {
-                switch (httpMethod) {
-                    case APIConstants.HTTP_GET:
-                        return (String) path.getGet().getVendorExtensions().get(APIConstants.SWAGGER_X_AUTH_TYPE);
-                    case APIConstants.HTTP_POST:
-                        return (String) path.getPost().getVendorExtensions().get(APIConstants.SWAGGER_X_AUTH_TYPE);
-                    case APIConstants.HTTP_PUT:
-                        return (String) path.getPut().getVendorExtensions().get(APIConstants.SWAGGER_X_AUTH_TYPE);
-                    case APIConstants.HTTP_DELETE:
-                        return (String) path.getDelete().getVendorExtensions().get(APIConstants.SWAGGER_X_AUTH_TYPE);
-                }
-            }
+        String authType = null;
+        Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+        if (vendorExtensions != null) {
+            authType = (String) vendorExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
+        }
+
+        if (StringUtils.isNotBlank(authType)) {
+            return authType;
         }
         return APIConstants.NO_MATCHING_AUTH_SCHEME;
     }
@@ -204,23 +195,11 @@ public class BasicAuthCredentialValidator {
             } else {
                 // retrieve the user roles related to the scope of the API resource
                 String resourceRoles = null;
-                Path path = swagger.getPath(apiElectedResource);
-                if (path != null) {
-                    switch (httpMethod) {
-                        case APIConstants.HTTP_GET:
-                            resourceRoles = (String) path.getGet().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
-                            break;
-                        case APIConstants.HTTP_POST:
-                            resourceRoles = (String) path.getPost().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
-                            break;
-                        case APIConstants.HTTP_PUT:
-                            resourceRoles = (String) path.getPut().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
-                            break;
-                        case APIConstants.HTTP_DELETE:
-                            resourceRoles = (String) path.getDelete().getVendorExtensions().get(APIConstants.SWAGGER_X_ROLES);
-                            break;
-                    }
+                Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+                if (vendorExtensions != null) {
+                    resourceRoles = (String) vendorExtensions.get(APIConstants.SWAGGER_X_ROLES);
                 }
+
                 if (StringUtils.isNotBlank(resourceRoles)) {
                     String[] userRoles;
 
@@ -270,6 +249,17 @@ public class BasicAuthCredentialValidator {
      */
     public String getResourceThrottlingTier(Swagger swagger, MessageContext synCtx) {
         String throttlingTier = null;
+        Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+        if (vendorExtensions != null) {
+            throttlingTier = (String) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
+        }
+        if (StringUtils.isNotBlank(throttlingTier)) {
+            return throttlingTier;
+        }
+        return APIConstants.UNLIMITED_TIER;
+    }
+
+    private Map<String, Object> getVendorExtensions(MessageContext synCtx, Swagger swagger) {
         if (swagger != null) {
             String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
             org.apache.axis2.context.MessageContext axis2MessageContext =
@@ -277,21 +267,25 @@ public class BasicAuthCredentialValidator {
             String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
             Path path = swagger.getPath(apiElectedResource);
             if (path != null) {
-                if (httpMethod.equals(APIConstants.HTTP_GET)) {
-                    throttlingTier = (String) path.getGet().getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER);
-                } else if (httpMethod.equals(APIConstants.HTTP_POST)) {
-                    throttlingTier = (String) path.getPost().getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER);
-                } else if (httpMethod.equals(APIConstants.HTTP_PUT)) {
-                    throttlingTier = (String) path.getPut().getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER);
-                } else if (httpMethod.equals(APIConstants.HTTP_DELETE)) {
-                    throttlingTier = (String) path.getDelete().getVendorExtensions().get(APIConstants.SWAGGER_X_THROTTLING_TIER);
+                switch (httpMethod) {
+                    case APIConstants.HTTP_GET:
+                        return path.getGet().getVendorExtensions();
+                    case APIConstants.HTTP_POST:
+                        return path.getPost().getVendorExtensions();
+                    case APIConstants.HTTP_PUT:
+                        return path.getPut().getVendorExtensions();
+                    case APIConstants.HTTP_DELETE:
+                        return path.getDelete().getVendorExtensions();
+                    case APIConstants.HTTP_HEAD:
+                        return path.getHead().getVendorExtensions();
+                    case APIConstants.HTTP_OPTIONS:
+                        return path.getOptions().getVendorExtensions();
+                    case APIConstants.HTTP_PATCH:
+                        return path.getPatch().getVendorExtensions();
                 }
             }
         }
-        if (StringUtils.isNotBlank(throttlingTier)) {
-            return throttlingTier;
-        }
-        return APIConstants.UNLIMITED_TIER;
+        return null;
     }
 
     /**
