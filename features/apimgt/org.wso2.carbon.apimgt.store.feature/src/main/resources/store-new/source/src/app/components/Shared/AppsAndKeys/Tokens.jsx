@@ -89,13 +89,20 @@ class Tokens extends React.Component {
     handleChangeInput = name => event => {
         this.setState({ [name]: event.target.value });
     };
-    generateToken() {
 
+    /**
+     * Generate an access token for the application instance
+     * @returns {promise} Set the generated token into current
+     * instance and return tokenObject received as Promise object
+     * @memberof Tokens
+     */
+    generateToken() {
         if (!this.state.application) {
             console.warn("No Application found!");
             return false;
         }
-        let promised_tokens = this.state.application.generateToken(this.key_type);
+        let promised_tokens = this.state.application.generateToken(this.key_type, this.state.timout,
+            this.state.scopesSelected);
         return promised_tokens;
     }
 
