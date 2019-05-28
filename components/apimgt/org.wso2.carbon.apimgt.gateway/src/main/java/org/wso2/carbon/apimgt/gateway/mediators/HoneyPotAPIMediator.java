@@ -21,10 +21,7 @@ public class HoneyPotAPIMediator extends APIMgtCommonExecutionPublisher {
     public boolean mediate(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext msgContext = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-//        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
-//        Calendar cal = Calendar.getInstance();
-//        long currentTime = System.currentTimeMillis();
-//        log.info("Time :"+ dateFormat.format(cal.getTime());
+
         long currentTime = System.currentTimeMillis();
         String messageId = messageContext.getMessageID();
         String apiName = (String) messageContext.getProperty("SYNAPSE_REST_API");
@@ -34,11 +31,11 @@ public class HoneyPotAPIMediator extends APIMgtCommonExecutionPublisher {
         String apiMethod = (String) msgContext.getProperty("HTTP_METHOD");
         String headerName = "";
         String headerValue = "";
-        String messageBody = String.valueOf(msgContext.getEnvelope().getBody());
+        String messageBody = String.valueOf(msgContext.getEnvelope().getBody().getFirstOMChild());
         String headerSet = "";
         String clientIp = "";
 
-        if (messageBody.equals(null)) {
+        if (messageBody.equals("null")) {
             messageBody = "No message body passed";
         }
 
@@ -81,7 +78,7 @@ public class HoneyPotAPIMediator extends APIMgtCommonExecutionPublisher {
             }
         }
         log.info("Started to publish data");
-        honeyAPIDataPublisher.publishEvent(messageId, apiMethod, headerSet, messageBody, clientIp);
+        honeyAPIDataPublisher.publishEvent(currentTime,messageId, apiMethod, headerSet, messageBody, clientIp);
         log.info("End to publish data");
         return true;
 

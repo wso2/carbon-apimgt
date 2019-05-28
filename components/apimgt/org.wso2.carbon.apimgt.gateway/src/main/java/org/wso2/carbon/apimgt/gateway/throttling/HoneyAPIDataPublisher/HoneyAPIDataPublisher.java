@@ -74,12 +74,12 @@ public class HoneyAPIDataPublisher{
         }
     }
 
-    public void publishEvent(String messageId, String apiMethod, String headerSet, String messageBody,
+    public void publishEvent(long currentTime, String messageId, String apiMethod, String headerSet, String messageBody,
                              String clientIp) {
         try {
             if (dataPublisherPool != null) {
                 HoneyAPIDataProcessAndPublishAgent agent = dataPublisherPool.get();
-                agent.setDataReference(messageId,apiMethod, headerSet,messageBody, clientIp);
+                agent.setDataReference(currentTime,messageId,apiMethod, headerSet,messageBody, clientIp);
                 if (log.isDebugEnabled()) {
                     log.debug("Publishing HoneyAPI data from gateway to traffic-manager for started at "
                             + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));

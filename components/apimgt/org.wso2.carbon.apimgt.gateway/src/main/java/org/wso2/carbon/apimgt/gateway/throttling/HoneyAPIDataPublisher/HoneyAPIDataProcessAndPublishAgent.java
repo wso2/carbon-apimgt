@@ -13,7 +13,7 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
     private static String streamID = "org.wso2.honeypotAPI.request.stream:1.0.0";
     private DataPublisher dataPublisher;
 
-    //long currentTime;
+    long currentTime;
     String messageId;
     String headerSet;
     String messageBody;
@@ -38,9 +38,9 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
     /**
      * This method will use to set message context.
      */
-    public void setDataReference( String messageId, String apiMethod,String headerSet, String messageBody, String clientIp) {
+    public void setDataReference(long currentTime, String messageId, String apiMethod, String headerSet, String messageBody, String clientIp) {
 
-        //this.currentTime = currentTime;
+        this.currentTime = currentTime;
         this.messageId = messageId;
         this.apiMethod = apiMethod;
         this.headerSet = headerSet;
@@ -51,7 +51,7 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
 
     public void run() {
 
-        Object[] objects = new Object[]{this.messageId, this.apiMethod, this.headerSet, this.messageBody,
+        Object[] objects = new Object[]{this.currentTime,this.messageId, this.apiMethod, this.headerSet, this.messageBody,
                 this.clientIp};
         org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(streamID,
                 System.currentTimeMillis(), null, null, objects);
