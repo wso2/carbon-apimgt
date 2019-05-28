@@ -16,6 +16,7 @@
  * under the License.
  */
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
@@ -90,6 +91,7 @@ class Wizard extends React.Component {
         activeStep: 0,
         appId: null,
         tab: 0,
+        redirect: false,
     };
 
     /**
@@ -311,10 +313,24 @@ class Wizard extends React.Component {
     /**
      *
      *
+     * @memberof Wizard
+     */
+    handleRedirectTest = () => {
+        this.setState({ redirect: true });
+
+    };
+
+    /**
+     *
+     *
      * @returns
      * @memberof Wizard
      */
     render() {
+        if (this.state.redirect) {
+            return <Redirect push to={'/apis/' + this.props.apiId + '/test'} />;
+        }
+
         const { classes } = this.props;
         const steps = getSteps();
         const { activeStep } = this.state;
@@ -349,7 +365,9 @@ class Wizard extends React.Component {
                                             <Button disabled={activeStep === 0} onClick={this.handleBack} className={classes.button} variant='outlined'>
                                                 Back
                                             </Button>
-
+                                            <Button disabled={activeStep < steps.length - 1} onClick={this.handleRedirectTest} className={classes.button} variant='outlined'>
+                                                Test
+                                            </Button>
                                             <Button variant='contained' color='primary' onClick={() => this.handleNext()} className={classes.button}>
                                                 {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                                             </Button>
