@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
 import io.swagger.models.Swagger;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,7 +47,8 @@ public class BasicAuthAuthenticatorTest {
         basicAuthAuthenticator.setBasicAuthCredentialValidator(new BasicAuthCredentialValidator() {
             @Override
             public boolean validate(String username, String password) {
-                if ((username.equals("test_username") || username.equals("test_username_blocked")) && password.equals("test_password")) {
+                if ((username.equals("test_username@carbon.super") ||
+                        username.equals("test_username_blocked@carbon.super")) && password.equals("test_password")) {
                     return true;
                 }
                 return false;
@@ -56,9 +56,9 @@ public class BasicAuthAuthenticatorTest {
 
             @Override
             public boolean validateScopes(String username, Swagger swagger, MessageContext synCtx) throws APISecurityException {
-                if (username.equals("test_username")) {
+                if (username.equals("test_username@carbon.super")) {
                     return true;
-                } else if (username.equals("test_username_blocked")) {
+                } else if (username.equals("test_username_blocked@carbon.super")) {
                     throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
                 }
                 return false;

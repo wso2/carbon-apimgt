@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.apache.synapse.config.Entry;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class BasicAuthAuthenticator implements Authenticator {
      * Initialize the authenticator with the required parameters.
      *
      * @param authorizationHeader the Authorization header
-     * @param apiUUID the API UUID
+     * @param apiUUID             the API UUID
      */
     public BasicAuthAuthenticator(String authorizationHeader, String apiUUID) {
         this.securityHeader = authorizationHeader;
@@ -90,7 +91,8 @@ public class BasicAuthAuthenticator implements Authenticator {
      * Destroys this authenticator and releases any resources allocated to it.
      */
     @java.lang.Override
-    public void destroy() {}
+    public void destroy() {
+    }
 
     /**
      * Authenticates the given request to see if an API consumer is allowed to access
@@ -120,11 +122,10 @@ public class BasicAuthAuthenticator implements Authenticator {
         // Check for resource level authentication
         String authenticationScheme = basicAuthCredentialValidator.getResourceAuthenticationScheme(swagger, synCtx);
 
-        if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
-            if(log.isDebugEnabled()){
-                log.debug("Found Resource Authentication Scheme: ".concat(authenticationScheme));
+        if (APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Basic Authentication: Found Resource Authentication Scheme: ".concat(authenticationScheme));
             }
-
             //using existing constant in Message context removing the additional constant in API Constants
             String clientIP = null;
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
@@ -164,18 +165,26 @@ public class BasicAuthAuthenticator implements Authenticator {
             authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
+
+            if (log.isDebugEnabled()) {
+                String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+                log.debug("Basic Authentication: Authentication succeeded by ignoring auth headers for API resource: "
+                        .concat(apiElectedResource));
+            }
             return true;
         }
 
         String[] credentials = extractBasicAuthCredentials(basicAuthHeader);
-        String username = credentials[0];
+        String username = getEndUserName(credentials[0]);
         String password = credentials[1];
 
         boolean authenticated = basicAuthCredentialValidator.validate(username, password);
         if (!authenticated) {
+            log.debug("Basic Authentication: Username and Password mismatch");
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
         } else { // username password matches
+            log.debug("Basic Authentication: Username and Password authenticated");
             //scope validation
             boolean scopesValid = basicAuthCredentialValidator.validateScopes(username, swagger, synCtx);
 
@@ -203,6 +212,7 @@ public class BasicAuthAuthenticator implements Authenticator {
                     authContext.setConsumerKey(null);
                     APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
                 }
+                log.debug("Basic Authentication: Scope validation passed");
                 return true;
             }
             throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
@@ -218,6 +228,7 @@ public class BasicAuthAuthenticator implements Authenticator {
      */
     private String[] extractBasicAuthCredentials(String basicAuthHeader) throws APISecurityException {
         if (basicAuthHeader == null) {
+            log.debug("Basic Authentication: No Basic Auth Header found");
             throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
                     APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
         } else {
@@ -228,14 +239,17 @@ public class BasicAuthAuthenticator implements Authenticator {
                     if (basicAuthKey.contains(":")) {
                         return basicAuthKey.split(":");
                     } else {
+                        log.debug("Basic Authentication: Invalid Basic Auth header");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
                     }
                 } catch (WSSecurityException e) {
+                    log.debug("Basic Authentication: Invalid Basic Auth header");
                     throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
                 }
             } else {
+                log.debug("Basic Authentication: No Basic Auth Header found");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
                         APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
             }
@@ -312,4 +326,7 @@ public class BasicAuthAuthenticator implements Authenticator {
         this.requestOrigin = requestOrigin;
     }
 
+    private String getEndUserName(String username) {
+        return MultitenantUtils.getTenantAwareUsername(username) + "@" + MultitenantUtils.getTenantDomain(username);
+    }
 }
