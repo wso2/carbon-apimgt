@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
-import org.wso2.carbon.apimgt.api.model.ThrottlingPolicy;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyListDTO;
@@ -36,12 +36,12 @@ public class ThrottlingPolicyMappingUtil {
     /**
      * Converts a List object of Tiers into a DTO
      *
-     * @param throttlingPolicyList a list of ThrottlingPolicy objects
+     * @param throttlingPolicyList a list of ThrottlingPolicy_ objects
      * @param limit                max number of objects returned
      * @param offset               starting index
      * @return TierListDTO object containing TierDTOs
      */
-    public static ThrottlingPolicyListDTO fromTierListToDTO(List<ThrottlingPolicy> throttlingPolicyList, String policyLevel, int limit,
+    public static ThrottlingPolicyListDTO fromTierListToDTO(List<Tier> throttlingPolicyList, String policyLevel, int limit,
                                                             int offset) {
 
         ThrottlingPolicyListDTO throttlingPolicyListDTO = new ThrottlingPolicyListDTO();
@@ -57,7 +57,7 @@ public class ThrottlingPolicyMappingUtil {
         int end = offset + limit - 1 <= size - 1 ? offset + limit - 1 : size - 1;
 
         for (int i = start; i <= end; i++) {
-            ThrottlingPolicy tier = throttlingPolicyList.get(i);
+            Tier tier = throttlingPolicyList.get(i);
             throttlingPolicyDTOs.add(fromTierToDTO(tier, policyLevel));
         }
         throttlingPolicyListDTO.setCount(throttlingPolicyDTOs.size());
@@ -101,11 +101,11 @@ public class ThrottlingPolicyMappingUtil {
     /**
      * Converts a Tier object into TierDTO
      *
-     * @param throttlingPolicy ThrottlingPolicy object
+     * @param throttlingPolicy ThrottlingPolicy_ object
      * @param tierLevel        tier level (api/application or resource)
      * @return TierDTO corresponds to Tier object
      */
-    public static ThrottlingPolicyDTO fromTierToDTO(ThrottlingPolicy throttlingPolicy, String tierLevel) {
+    public static ThrottlingPolicyDTO fromTierToDTO(Tier throttlingPolicy, String tierLevel) {
 
         ThrottlingPolicyDTO dto = new ThrottlingPolicyDTO();
         dto.setName(throttlingPolicy.getName());
@@ -135,7 +135,7 @@ public class ThrottlingPolicyMappingUtil {
      * @param throttlingPolicy    Throttling Policy object
      * @return ThrottlingPolicyDTO with permission info
      */
-    public static ThrottlingPolicyDTO setTierPermissions(ThrottlingPolicyDTO throttlingPolicyDTO, ThrottlingPolicy throttlingPolicy) {
+    public static ThrottlingPolicyDTO setTierPermissions(ThrottlingPolicyDTO throttlingPolicyDTO, Tier throttlingPolicy) {
 
         ThrottlingPolicyPermissionInfoDTO tierPermission = new ThrottlingPolicyPermissionInfoDTO();
 
