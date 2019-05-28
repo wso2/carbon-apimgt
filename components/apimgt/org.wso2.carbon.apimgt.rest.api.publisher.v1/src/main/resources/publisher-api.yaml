@@ -5980,10 +5980,6 @@ definitions:
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
         example: admin
-      scope:
-        description: Scope for the product. This should be unique for the tenant domain.
-        type: string
-        example: calculator
       thumbnailUri:
         type: string
         example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail

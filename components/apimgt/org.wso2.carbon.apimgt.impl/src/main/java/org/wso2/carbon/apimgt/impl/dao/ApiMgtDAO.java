@@ -13002,7 +13002,7 @@ public class ApiMgtDAO {
                 throw new APIManagementException("Error while adding API product " + apiproduct.getUuid());
             }
 
-            addAPIProductResourceMappings(apiproduct, productId, scopeId, tenantDomain, connection);
+            addAPIProductResourceMappings(apiproduct, productId, connection);
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding API product " + apiproduct.getName() + " of provider "
@@ -13020,12 +13020,9 @@ public class ApiMgtDAO {
      *    - product scope to url template mappings - IDN_OAUTH2_RESOURCE_SCOPES
      * @param apiProduct
      * @param productId
-     * @param scopeId
-     * @param tenantDomain
      * @throws APIManagementException
      */
-    public void addAPIProductResourceMappings(APIProduct apiProduct, int productId, int scopeId, String tenantDomain,
-            Connection connection)
+    public void addAPIProductResourceMappings(APIProduct apiProduct, int productId, Connection connection)
             throws APIManagementException {
         //add product-api resource mappings
         PreparedStatement prepStmtAddResourceMapping = null;
@@ -13060,12 +13057,9 @@ public class ApiMgtDAO {
      * Update Product scope and resource mappings
      * @param apiProduct
      * @param productId
-     * @param scopeId
-     * @param tenantDomain
      * @throws APIManagementException
      */
-    public void updateAPIProductResourceMappings(APIProduct apiProduct, int productId, int scopeId, String tenantDomain,
-            Connection connection) throws APIManagementException {
+    public void updateAPIProductResourceMappings(APIProduct apiProduct, int productId, Connection connection) throws APIManagementException {
 
         PreparedStatement prepStmtRemoveResourceToProductMappings = null;
 
@@ -13076,7 +13070,7 @@ public class ApiMgtDAO {
             prepStmtRemoveResourceToProductMappings.setInt(1, productId);
             prepStmtRemoveResourceToProductMappings.execute();
 
-            addAPIProductResourceMappings(apiProduct, productId, scopeId, tenantDomain, connection);
+            addAPIProductResourceMappings(apiProduct, productId, connection);
         } catch (SQLException e) {
             handleException("Error while updating API-Product Resources.", e);
         } finally {
@@ -13144,7 +13138,6 @@ public class ApiMgtDAO {
                 product.setState(rs.getString("STATE"));
                 product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));
                 product.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                //product.setScope(rs.getString("SCOPE"));
                 productId = rs.getInt("API_PRODUCT_ID");
                 product.setProductId(productId);
             } else {
@@ -13509,7 +13502,7 @@ public class ApiMgtDAO {
 
             String tenantDomain = MultitenantUtils.getTenantDomain(username);
             int productId = getAPIProductID(product.getName(), product.getProvider(), conn);
-            updateAPIProductResourceMappings(product, productId, -1, tenantDomain, conn);
+            updateAPIProductResourceMappings(product, productId, conn);
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {

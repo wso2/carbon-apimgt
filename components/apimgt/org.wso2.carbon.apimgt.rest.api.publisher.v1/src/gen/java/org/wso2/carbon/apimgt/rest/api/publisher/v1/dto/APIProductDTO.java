@@ -33,9 +33,6 @@ public class APIProductDTO  {
   private String provider = null;
   
   
-  private String scope = null;
-  
-  
   private String thumbnailUri = null;
   
   public enum StateEnum {
@@ -127,19 +124,6 @@ public class APIProductDTO  {
   }
   public void setProvider(String provider) {
     this.provider = provider;
-  }
-
-  
-  /**
-   * Scope for the product. This should be unique for the tenant domain.
-   **/
-  @ApiModelProperty(value = "Scope for the product. This should be unique for the tenant domain.")
-  @JsonProperty("scope")
-  public String getScope() {
-    return scope;
-  }
-  public void setScope(String scope) {
-    this.scope = scope;
   }
 
   
@@ -291,7 +275,6 @@ public class APIProductDTO  {
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
-    sb.append("  scope: ").append(scope).append("\n");
     sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("  state: ").append(state).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
