@@ -1,0 +1,42 @@
+.checkbox{
+
+    display: block;
+    cursor: pointer;
+    font-weight: 300;
+    padding: 10px 0 0 0;
+
+}
+
+#saveButtons{
+
+}
+
+.emailList{
+    padding: 10px 0 10px 0;
+}
+
+
+textarea {
+    width: 600px;
+    height: 150px;
+}
+
+.form-horizontal {
+    max-width: 100%;
+}
+
+.col-sm-1 {
+    width: 0px;
+    margin: 0 20px 0 0;
+}
+
+.email{
+    margin: 0 20px 0 0;
+}
+
+.bootstrap-tagsinput {
+    width: 100%;
+}
+.label {
+    line-height: 2 !important;
+}

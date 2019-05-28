@@ -1,7 +1,7 @@
 var deleteAlert = function (messageID) {
     $("#messageModal div.modal-footer").html("");
     jagg.message({
-        content:i18n.t('Are you sure you want to delete this label?'),
+        content:i18n.t('Are you sure you want to delete this record?'),
         title:i18n.t('Confirm Deletion'),
         type:'confirm',
         anotherDialog:true,
