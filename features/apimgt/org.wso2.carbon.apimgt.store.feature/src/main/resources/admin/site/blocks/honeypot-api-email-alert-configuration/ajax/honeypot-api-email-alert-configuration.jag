@@ -1,0 +1,87 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    var log = new Log();
+
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result, username,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag");
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'AuthenticateError'
+        });
+    } else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+           // new Log('testUserone').info(stringify(request.getMethod();));
+            error:true,
+            message: msg.error.csrfError
+        });
+    } else {
+        if (action === "saveEmailList" && request.getMethod() == 'POST') {
+            new Log('Hello').info('Hello');
+
+            var userName = jagg.getUser().username;
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+            if ("carbon.super" == tenantDomain) {
+                userName = userName + "@carbon.super";
+            }
+
+            mod = jagg.module("honeypot-api-email-alert-configuration");
+            var emailList = request.getParameter("emailList");
+            new Log('emailList').info(stringify(emailList));
+
+            var results = mod.saveEmailList(emailList, tenantDomain);
+            new Log('results').info(stringify(results));
+
+            if (results.error) {
+                obj = {
+                    error: results.error,
+                    message: results.message
+                };
+            } else {
+                obj = {
+                    error: false
+                }
+            }
+            print(obj);
+	   }else if(action === "deleteEmails"){
+
+                var userName = jagg.getUser().username;
+
+                var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+                if ("carbon.super" == tenantDomain) {
+                    userName = userName + "@carbon.super";
+                }
+
+                mod = jagg.module("honeypot-api-email-alert-configuration");
+
+                var results = mod.deleteEmails(userName);
+
+                if (results.error) {
+                    obj = {
+                        error: results.error,
+                        message: results.message
+                    };
+                } else {
+                    obj = {
+                        error: false
+                    }
+                }
+                print(obj);
+        } else {
+            print({
+                error: true,
+                message: msg.error.invalidAction(action)
+            });
+        }
+    }
+}());
+%>

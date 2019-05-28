@@ -1,0 +1,20 @@
+<%
+jagg.module("honeypot-api-email-alert-configuration", {
+
+    saveEmailList:function () {
+        return jagg.require(jagg.getModulesDir() + "honeypot-api-email-alert-configuration/honeypot-api-email-alert-configuration.jag")
+        .saveEmailList.apply(this, arguments);
+    },
+    retrieveSavedEmailList:function () {
+
+        return jagg.require(jagg.getModulesDir() + "honeypot-api-email-alert-configuration/honeypot-api-email-alert-configuration.jag")
+        .retrieveSavedEmailList.apply(this, arguments);
+    },
+    deleteEmails:function () {
+
+        return jagg.require(jagg.getModulesDir() + "honeypot-api-email-alert-configuration/honeypot-api-email-alert-configuration.jag")
+        .retrieveSavedEmailList.apply(this, arguments);
+    }
+
+});
+%>

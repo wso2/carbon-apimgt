@@ -1,0 +1,26 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("honeypot-api-email-alert-configuration", {
+
+    initializer: function (data) {
+    },
+
+    getInputs: function () {
+        return {};
+    },
+    getOutputs: function () {
+
+        var log = new Log()
+        var mod = jagg.module("honeypot-api-email-alert-configuration");
+
+        var savedEmaillList = mod.retrieveSavedEmailList();
+
+        return {
+            "emailList": savedEmaillList
+        };
+    }
+
+
+});
+%>

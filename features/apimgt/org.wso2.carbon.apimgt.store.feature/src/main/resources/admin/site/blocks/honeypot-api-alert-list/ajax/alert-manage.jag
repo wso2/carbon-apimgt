@@ -33,6 +33,6 @@ include("/jagg/jagg.jag");
             print(obj);
     }
 
-       }
+    }
  }());
 %>
