@@ -640,14 +640,16 @@ public class APIMappingUtil {
             for (Label label : gatewayLabels) {
                 LabelDTO labelDTO = new LabelDTO();
                 labelDTO.setName(label.getName());
-//                labelDTO.setDescription(label.getDescription()); todo check for description
+                labelDTO.setAccessUrls(label.getAccessUrls());
+                labelDTO.setDescription(label.getDescription());
                 labels.add(labelDTO);
             }
             dto.setLabels(labels);
         }
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
-        if (model.getApiSecurity() != null)
+        if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
+        }
         return dto;
     }
 
