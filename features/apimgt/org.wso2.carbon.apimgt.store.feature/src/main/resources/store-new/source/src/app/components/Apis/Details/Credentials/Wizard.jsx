@@ -312,7 +312,7 @@ class Wizard extends React.Component {
 
     /**
      *
-     *
+     * Set state.redirect to true to redirect to the API console page
      * @memberof Wizard
      */
     handleRedirectTest = () => {
