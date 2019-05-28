@@ -201,7 +201,7 @@ public class APIAdminImpl implements APIAdmin {
         }
         return time;
     /*
-    *get Honeypot API alerts from the database
+     *get Honeypot API alerts from the database
      */
     public List<HoneyPotAPIAlertData> getAlert()throws APIManagementException{
         return apiMgtDAO.getAlerts();
@@ -211,9 +211,8 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.deleteHoneyPotAlert(messageID);
     }
 
-    public void addHoneyPotAPiEmailAlertConfiguration(String username, String emailList) throws APIManagementException, SQLException {
-        apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(username,emailList);
-
+    public void addHoneyPotAPiEmailAlertConfiguration(String emailList, String tenantDomain) throws APIManagementException, SQLException {
+        apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(emailList, tenantDomain);
     }
 
     public static List<String> retrieveSavedHoneyPotAPIAlertEmailList(String userName) throws APIManagementException {
@@ -222,5 +221,9 @@ public class APIAdminImpl implements APIAdmin {
         list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(userName);
 
         return list;
+    }
+
+    public void deleteHoneyPotAPIAlertEmailList(String username) throws APIManagementException, SQLException {
+        apiMgtDAO.deleteHoneyPotAPIAlertEmailList(username);
     }
 }

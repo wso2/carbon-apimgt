@@ -4,14 +4,25 @@ import java.io.Serializable;
 
 public class HoneyPotAPIAlertData implements Serializable {
 
-   // private List<Pipeline> pipelines;
+    private long currentTime;
     private String messageID;
     private String apiMethod;
     private String headerSet;
     private String messageBody;
     private String clientIp;
-    private String userName;
+    private String tenantDomain;
     private String emails;
+
+    public HoneyPotAPIAlertData(){
+
+    }
+    public  long getCurrentTime(){
+        return currentTime;
+    }
+
+    public  void setCurrentTime(long currentTime){
+        this.currentTime = currentTime;
+    }
 
     public String getMessageID() {
         return messageID;
@@ -53,12 +64,12 @@ public class HoneyPotAPIAlertData implements Serializable {
         this.clientIp = clientIp;
     }
 
-    public String getUserName(){
-        return userName;
+    public String getTenantDomain(){
+        return tenantDomain;
     }
 
-    public void setUserName(String userName){
-        this.userName = userName;
+    public void setTenantDomain(String tenantDomain){
+        this.tenantDomain = tenantDomain;
     }
 
     public String getEmails(){
@@ -68,14 +79,6 @@ public class HoneyPotAPIAlertData implements Serializable {
     public void setEmails(String emails){
         this.emails = emails;
     }
-
-//    public List<Pipeline> getPipelines() {
-//        return pipelines;
-//    }
-//
-//    public void setPipelines(List<Pipeline> pipelines) {
-//        this.pipelines = pipelines;
-//    }
 
     @Override
     public String toString() {

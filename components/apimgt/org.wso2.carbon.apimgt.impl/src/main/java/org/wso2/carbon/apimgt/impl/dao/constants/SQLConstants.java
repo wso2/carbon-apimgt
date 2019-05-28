@@ -3489,7 +3489,8 @@ public class SQLConstants {
                 "FROM AM_SYSTEM_APPS WHERE NAME = ?";
 
     public static class HoneyPotAPIDataConstants{
-        public static final String GET_HONEYPOT_API_ALERTS = " SELECT " + " * " + "FROM " + " HoneyPotAPIData ";
+        public static final String GET_HONEYPOT_API_ALERTS = " SELECT " + " * " + "FROM " + " HoneyPotAPIData " +
+                "ORDER BY currentTime ASC";
 
         public static final String DELETE_HONEYPOT_API_ALERT_SQL = "DELETE FROM HoneyPotAPIData WHERE messageID = ?";
 
@@ -3498,18 +3499,30 @@ public class SQLConstants {
                         " VALUES(?,?)";
 
         public static final String ADD_ALERT_EMAIL_LIST =
-                " INSERT INTO AM_HONEYPOT_ALERT_EMAILLIST  (USER_NAME, STAKE_HOLDER) " +
-                        " VALUES(?,?)";
+                " INSERT INTO HONEYPOT_EMAILLIST  (TENANT_DOMAIN, EMAIL_LIST) " +
+                        " VALUES(?, ?)";
+
         public static final String GET_SAVED_ALERT_EMAILS =
 
                 " SELECT " +
-                        "   EMAIL " +
+                        "   EMAIL_LIST " +
                         " FROM " +
-                        "   AM_HONEYPOT_ALERT_EMAILLIST, " +
-                        "   AM_HONEYPOT_ALERT_EMAILLIST_DETAILS  " +
+                        "   HONEYPOT_EMAILLIST " +
+                        " WHERE " + " TENANT_DOMAIN = ? ";
+
+        public static final String GET_EMAILLISTID_BY_USERNAME =
+                " SELECT " +
+                        "   EMAIL_LIST_ID " +
+                        " FROM " +
+                        "   AM_HONEYPOT_ALERT_EMAILLIST " +
                         " WHERE " +
-                        "   AM_HONEYPOT_ALERT_EMAILLIST.EMAIL_LIST_ID = AM_HONEYPOT_ALERT_EMAILLIST_DETAILS.EMAIL_LIST_ID" +
-                        "   AND USER_NAME = ? ";
+                        "   USER_NAME = ? ";
+
+        public static final String UPDATE_EMAILLIST_BY_TENANT_ID  =
+                "UPDATE HONEYPOT_EMAILLIST SET EMAIL_LIST =?"+"WHERE TENANT_DOMAIN= ? ";
+
+        public static final String DELETE_EMAILLIST_BY_TENANT_ID =
+                "DELETE FROM HONEYPOT_EMAILLIST"+"WHERE TENANT_DOMAIN= ?";
 
     }
 }
