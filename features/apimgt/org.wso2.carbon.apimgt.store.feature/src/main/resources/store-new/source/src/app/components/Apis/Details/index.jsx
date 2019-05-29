@@ -272,8 +272,10 @@ class Details extends React.Component {
      * @memberof Details
      */
     updateActiveLink() {
+        const { active } = this.state;
         const currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
-        if (currentLink && currentLink.length > 0 && this.state.active !== currentLink[0]) {
+
+        if (currentLink && currentLink.length > 0 && active !== currentLink[0]) {
             this.setState({ active: currentLink[0] });
         }
     }

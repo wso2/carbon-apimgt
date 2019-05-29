@@ -84,6 +84,7 @@ class Wizard extends React.Component {
         super(props);
         this.getStepContent = this.getStepContent.bind(this);
         this.handleNext = this.handleNext.bind(this);
+        this.handleRedirectTest = this.handleRedirectTest.bind(this);
     }
 
     state = {
@@ -315,7 +316,7 @@ class Wizard extends React.Component {
      * Set state.redirect to true to redirect to the API console page
      * @memberof Wizard
      */
-    handleRedirectTest = () => {
+    handleRedirectTest() {
         this.setState({ redirect: true });
 
     };
