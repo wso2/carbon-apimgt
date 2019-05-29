@@ -20,16 +20,16 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
-
 import SwaggerUI from 'swagger-ui';
-import Api from '../../../../data/api';
-import AuthManager from '../../../../data/AuthManager';
 import 'swagger-ui/dist/swagger-ui.css';
-
 import Select from '@material-ui/core/Select';
-import Progress from '../../../Shared/Progress';
 import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
+
+import Progress from '../../../Shared/Progress';
+import Api from '../../../../data/api';
+import AuthManager from '../../../../data/AuthManager';
+
 /**
  *
  *
@@ -69,6 +69,11 @@ const styles = {
  * @extends {React.Component}
  */
 class ApiConsole extends React.Component {
+    /**
+     *Creates an instance of ApiConsole.
+     * @param {*} props
+     * @memberof ApiConsole
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -79,7 +84,6 @@ class ApiConsole extends React.Component {
             accessToken: '',
             setSwagger: null,
         };
-        this.api_uuid = this.props.match.params.api_uuid;
     }
 
     /**
@@ -89,6 +93,8 @@ class ApiConsole extends React.Component {
      */
     componentDidMount() {
         const api = new Api();
+        const { match } = this.props;
+
         const disableAuthorizeAndInfoPlugin = function () {
             return {
                 wrapComponents: {
@@ -104,20 +110,22 @@ class ApiConsole extends React.Component {
         apiGateways.push('Default');
 
         this.setState({
-            apiGateways, apiGateway: apiGateways[0], credentialTypes, credentialType: credentialTypes[0],
+            apiGateways,
+            apiGateway: apiGateways[0],
+            credentialTypes,
+            credentialType: credentialTypes[0],
         });
 
-        const promised_swagger = api.getSwaggerByAPIId(this.api_uuid);
+        const promisedSwagger = api.getSwaggerByAPIId(match.params.api_uuid);
 
-        Promise.all([promised_swagger])
-            .then((responses) => {
-                const swagger = responses[0];
-                const url = swagger.url;
+        promisedSwagger
+            .then((swagger) => {
+                const { url } = swagger;
                 this.setState({ setSwagger: true });
 
-                const swaggerUI = SwaggerUI({
+                SwaggerUI({
                     dom_id: '#ui',
-                    url: swagger.url,
+                    spec: swagger.body,
                     requestInterceptor: (req) => {
                         // Only set Authorization header if the request matches the spec URL
                         if (req.url === url) {
@@ -133,7 +141,7 @@ class ApiConsole extends React.Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -157,9 +165,9 @@ class ApiConsole extends React.Component {
      */
     render() {
         const { classes } = this.props;
-        const { handleInputs } = this.props;
+        const { setSwagger, apiGateway } = this.state;
 
-        if (this.state.setSwagger == null) {
+        if (setSwagger == null) {
             return <Progress />;
         }
 
@@ -170,7 +178,11 @@ class ApiConsole extends React.Component {
                         <div>
                             <Typography variant='subheading'>
                                 API Gateway
-                                <Select value={this.state.apiGateway} onChange={this.handleChange('apiGateway')} className={classes.gatewaySelect}>
+                                <Select
+                                    value={apiGateway}
+                                    onChange={this.handleChange('apiGateway')}
+                                    className={classes.gatewaySelect}
+                                >
                                     {this.state.apiGateways.map(apiGateway => (
                                         <option value={apiGateway} key={apiGateway}>
                                             {apiGateway}
@@ -182,7 +194,11 @@ class ApiConsole extends React.Component {
                         <div>
                             <Typography variant='subheading' gutterleft>
                                 API Credentials
-                                <Select value={this.state.credentialType} onChange={this.handleChange('credentialType')} className={classes.credentialSelect}>
+                                <Select
+                                    value={this.state.credentialType}
+                                    onChange={this.handleChange('credentialType')}
+                                    className={classes.credentialSelect}
+                                >
                                     {this.state.credentialTypes.map(type => (
                                         <option value={type} key={type}>
                                             {type}
