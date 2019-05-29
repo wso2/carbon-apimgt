@@ -1425,7 +1425,6 @@ public class ApiMgtDAO {
     public Set<Scope> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
             throws APIManagementException {
         Connection connection = null;
-        ResultSet resultSet = null;
         PreparedStatement ps = null;
         HashMap<String, Scope> scopeHashMap = new HashMap<>();
         int tenantId = APIUtil.getTenantId(subscriber.getName());
@@ -1442,8 +1441,8 @@ public class ApiMgtDAO {
             try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
                 statement.setInt(1, tenantId);
                 statement.setInt(2, applicationId);
-                try (ResultSet result = statement.executeQuery()) {
-                    while (result.next()) {
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
                         Scope scope;
                         String scopeKey = resultSet.getString(1);
                         if (scopeHashMap.containsKey(scopeKey)) {
