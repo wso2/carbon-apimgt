@@ -8204,12 +8204,35 @@ public final class APIUtil {
         return grantTypes;
     }
 
-    public static String getTokenUrl() throws APIManagementException {
+    public static String getDcrUrl()  {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.REVOKE_API_URL).
-                replace(REVOKE, TOKEN);
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.DCR_URL);
     }
 
+    public static String getAuthorizeUrl() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.AUTHORIZE_URL);
+    }
+
+    public static String getTokenUrl() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.TOKEN_API_URL);
+    }
+
+    public static String getRevokeTokenUrl() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.REVOKE_API_URL);
+    }
+
+    public static String getOidcLogoutUrl() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.OIDC_LOGOUT_URL);
+    }
+
+    public static Map<String, Environment> getEnvironments(){
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration().getApiGatewayEnvironments();
+    }
     private static QName getQNameWithIdentityNS(String localPart) {
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
