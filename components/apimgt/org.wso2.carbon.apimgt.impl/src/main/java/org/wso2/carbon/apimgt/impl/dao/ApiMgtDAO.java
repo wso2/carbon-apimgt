@@ -1443,7 +1443,7 @@ public class ApiMgtDAO {
                 statement.setInt(1, tenantId);
                 statement.setInt(2, applicationId);
                 try (ResultSet result = statement.executeQuery()) {
-                    while (resultSet.next()) {
+                    while (result.next()) {
                         Scope scope;
                         String scopeKey = resultSet.getString(1);
                         if (scopeHashMap.containsKey(scopeKey)) {
