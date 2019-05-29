@@ -13945,28 +13945,25 @@ public class ApiMgtDAO {
         }
         return alertData;
     }
-
     public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
 
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.HoneyPotAPIDataConstants.DELETE_HONEYPOT_API_ALERT_SQL)) {
-            try {
-                initialAutoCommit = connection.getAutoCommit();
-                connection.setAutoCommit(false);
-                statement.setString(1, messageID);
-                statement.executeUpdate();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to delete label : " + messageID, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            }
+        Connection connection = APIMgtDBUtil.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(SQLConstants.HoneyPotAPIDataConstants.DELETE_HONEYPOT_API_ALERT_SQL);
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            statement.setString(1, messageID);
+            statement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to delete label : " + messageID, e);
+            connection.rollback();
+            handleException("Failed to delete alert message : " + messageID, e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
         }
-    }
 
+    }
+    /* configuring email list */
     public void addHoneyPotAPiEmailAlertConfiguration(String emailList, String tenantDomain) throws SQLException, APIManagementException {
         Connection connection;
         PreparedStatement ps = null;
@@ -13974,39 +13971,32 @@ public class ApiMgtDAO {
         connection = APIMgtDBUtil.getConnection();
         connection.setAutoCommit(false);
         try {
-            if(!(emailList.equals(null) || emailList.isEmpty())) {
-                List<String> emailListData = Arrays.asList(emailList);
-                int listSize = emailListData.size();
-                log.info("++++++++++listSize:" + listSize);
-                if (listSize != 0) {
-                    String emailListUpdateQuery = SQLConstants.HoneyPotAPIDataConstants.UPDATE_EMAILLIST_BY_TENANT_ID;
-                    ps = connection.prepareStatement(emailListUpdateQuery);
-                    ps.setString(1, emailList);
-                    ps.setString(2, tenantDomain);
-                    ps.execute();
-                    //connection.commit();
-                } else {
-                    String emailListSaveQuery = SQLConstants.HoneyPotAPIDataConstants.ADD_ALERT_EMAIL_LIST;
-                    ps = connection.prepareStatement(emailListSaveQuery);
-                    ps.setString(1, tenantDomain);
-                    ps.setString(2, emailList);
-                    ps.execute();
-                }
-            }else {
-                String emailListDeleteQuery = SQLConstants.HoneyPotAPIDataConstants.DELETE_EMAILLIST_BY_TENANT_ID;
-                ps = connection.prepareStatement(emailListDeleteQuery);
-                ps.setString(1,tenantDomain);
+            List<String> emailListData = Arrays.asList(emailList);
+            int listSize = emailListData.size();
+            log.info("++++++++++listSize:" + listSize);
+            if (listSize != 0) {
+                String emailListUpdateQuery = SQLConstants.HoneyPotAPIDataConstants.UPDATE_EMAILLIST_BY_TENANT_ID;
+                ps = connection.prepareStatement(emailListUpdateQuery);
+                ps.setString(1, emailList);
+                ps.setString(2, tenantDomain);
                 ps.execute();
+                connection.commit();
+            } else {
+                String emailListSaveQuery = SQLConstants.HoneyPotAPIDataConstants.ADD_ALERT_EMAIL_LIST;
+                ps = connection.prepareStatement(emailListSaveQuery);
+                ps.setString(1, tenantDomain);
+                ps.setString(2, emailList);
+                ps.execute();
+                connection.commit();
             }
         }catch (SQLException e){
             handleException("Error while save email list.", e);
         }finally {
-            connection.close();
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
         }
 
     }
-
-
+    /* list the configured email list */
     public List<String> retrieveSavedHoneyPotAPIAlertEmailList(String userName)
             throws APIManagementException {
 
@@ -14043,7 +14033,6 @@ public class ApiMgtDAO {
         connection.setAutoCommit(false);
 
         try {
-            connection.setAutoCommit(false);
             String getEmailListIdByUserName = SQLConstants.HoneyPotAPIDataConstants.GET_EMAILLISTID_BY_USERNAME;
             ps = connection.prepareStatement(getEmailListIdByUserName);
             ps.setString(1, userName);
