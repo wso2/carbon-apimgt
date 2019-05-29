@@ -19,6 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
@@ -52,6 +53,7 @@ public interface ApisApiService {
       public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId, MediationDTO body, String ifMatch, MessageContext messageContext);
       public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch, MessageContext messageContext);
       public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext);
+      public Response apisApiIdResourcePathsGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId, ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext);

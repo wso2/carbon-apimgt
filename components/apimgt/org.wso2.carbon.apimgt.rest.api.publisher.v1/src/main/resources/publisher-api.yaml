@@ -2782,6 +2782,67 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The "Resource Paths" resource
+  ######################################################
+  /apis/{apiId}/resource-paths:
+
+    #-----------------------------------------------------
+    # Retrieve a particular API specific Resource Paths
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+          - apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23\" https://localhost:9443/api/am/publisher/v1.0/apis/40082986-6488-4b86-801a-b0b069d4588c/resource-paths"
+      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v1.0/apis/40082986-6488-4b86-801a-b0b069d4588c/resource-paths\r\nAuthorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23"
+      x-wso2-response: ""
+      summary: Get Resource Paths of an API
+      description: |
+        This operation can be used to retrieve resource paths defined for a specific api.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - API Resource Paths
+      responses:
+        200:
+          description: |
+            OK.
+            ResourcePaths returned.
+          schema:
+            $ref: '#/definitions/ResourcePathList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested Document does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # The "Subscription Collection" resource APIs
@@ -6061,6 +6122,35 @@ definitions:
             type: string
           httpVerb:
             type: string
+
+  #-----------------------------------------------------
+  # The Resource Path resource
+  #-----------------------------------------------------
+  ResourcePath:
+    title: ResourcePath
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        example: 1
+      resourcePath:
+        type: string
+        example: /menu
+      httpVerb:
+       type: string
+       example: GET
+
+  #-----------------------------------------------------
+  # The Resource Path List resource
+  #-----------------------------------------------------
+  ResourcePathList:
+    title: ResourcePath List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ResourcePath'
 
   #-----------------------------------------------------
   # API Business Information resource

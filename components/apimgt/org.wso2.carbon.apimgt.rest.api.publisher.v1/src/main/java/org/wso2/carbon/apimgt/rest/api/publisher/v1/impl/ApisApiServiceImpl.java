@@ -1107,6 +1107,30 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response apisApiIdResourcePathsGet(String apiId, String ifNoneMatch,
+            MessageContext messageContext) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            List<ResourcePath> apiResourcePaths = apiProvider.getResourcePathsOfAPI(apiIdentifier);
+            ResourcePathListDTO dto = APIMappingUtil.fromResourcePathListToDTO(apiResourcePaths);
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving resource paths of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving resource paths of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();

@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.EndpointConfig;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -76,6 +77,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -1491,6 +1494,20 @@ public class APIMappingUtil {
                 return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT; // default to current tenant
         }
 
+    }
+
+    public static ResourcePathListDTO fromResourcePathListToDTO(List<ResourcePath> resourcePathList) {
+        ResourcePathListDTO resourcePathListDTO = new ResourcePathListDTO();
+        List<ResourcePathDTO> resourcePathDTOs = new ArrayList<ResourcePathDTO>();
+        for (ResourcePath path : resourcePathList) {
+            ResourcePathDTO dto = new ResourcePathDTO();
+            dto.setId(path.getId());
+            dto.setResourcePath(path.getResourcePath());
+            dto.setHttpVerb(path.getHttpVerb());
+            resourcePathDTOs.add(dto);
+        }
+        resourcePathListDTO.setList(resourcePathDTOs);
+        return resourcePathListDTO;
     }
     
 
