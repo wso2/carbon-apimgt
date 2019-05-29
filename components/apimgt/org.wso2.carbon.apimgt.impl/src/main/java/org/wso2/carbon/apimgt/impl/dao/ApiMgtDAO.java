@@ -12948,31 +12948,27 @@ public class ApiMgtDAO {
     }
 
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException{
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         List<ResourcePath> resourcePathList = new ArrayList<ResourcePath>();
 
-        try {
+        try(Connection conn = APIMgtDBUtil.getConnection()) {
             String sql = SQLConstants.GET_URL_TEMPLATES_FOR_API;
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setString(1,  apiId.getApiName());
-            ps.setString(2, apiId.getVersion());
-            ps.setString(3, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            try(PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, apiId.getApiName());
+                ps.setString(2, apiId.getVersion());
+                ps.setString(3, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
 
-            rs = ps.executeQuery();
-            while(rs.next()){
-                ResourcePath resourcePath = new ResourcePath();
-                resourcePath.setId(rs.getInt("URL_MAPPING_ID"));
-                resourcePath.setResourcePath(rs.getString("HTTP_METHOD"));
-                resourcePath.setHttpVerb(rs.getString("URL_PATTERN"));
-                resourcePathList.add(resourcePath);
+                try(ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        ResourcePath resourcePath = new ResourcePath();
+                        resourcePath.setId(rs.getInt("URL_MAPPING_ID"));
+                        resourcePath.setResourcePath(rs.getString("HTTP_METHOD"));
+                        resourcePath.setHttpVerb(rs.getString("URL_PATTERN"));
+                        resourcePathList.add(resourcePath);
+                    }
+                }
             }
         } catch (SQLException e) {
             handleException("Error while obtaining Resource Paths of api " + apiId , e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return resourcePathList;
     }
