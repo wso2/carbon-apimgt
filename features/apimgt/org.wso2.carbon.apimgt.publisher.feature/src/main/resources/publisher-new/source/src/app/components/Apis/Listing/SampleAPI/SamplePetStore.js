@@ -60,7 +60,8 @@ const getSwagger = policyLevel => ({
                     },
                     304: {
                         description:
-                            'Not Modified. Empty body because the client has already the latest version of the requested resource.',
+                            'Not Modified. Empty body because the client has already the latest' +
+                            ' version of the requested resource.',
                     },
                     406: {
                         schema: { $ref: '#/definitions/Error' },
@@ -118,7 +119,8 @@ const getSwagger = policyLevel => ({
                     412: {
                         schema: { $ref: '#/definitions/Error' },
                         description:
-                            'Precondition Failed. The request has not been performed because one of the preconditions is not met.',
+                            'Precondition Failed. The request has not been performed because one ' +
+                            'of the preconditions is not met.',
                     },
                 },
                 security: [{ pizzashack_auth: ['write:order', 'read:order'] }],
@@ -145,7 +147,8 @@ const getSwagger = policyLevel => ({
                     },
                     304: {
                         description:
-                            'Not Modified. Empty body because the client has already the latest version of the requested resource.',
+                            'Not Modified. Empty body because the client has already the latest' +
+                            ' version of the requested resource.',
                     },
                     404: {
                         schema: { $ref: '#/definitions/Error' },
@@ -183,7 +186,8 @@ const getSwagger = policyLevel => ({
                     412: {
                         schema: { $ref: '#/definitions/Error' },
                         description:
-                            'Precondition Failed. The request has not been performed because one of the preconditions is not met.',
+                            'Precondition Failed. The request has not been performed because one of the' +
+                            ' preconditions is not met.',
                     },
                 },
                 security: [{ pizzashack_auth: ['write:order', 'read:order'] }],

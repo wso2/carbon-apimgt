@@ -33,7 +33,7 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import APICreateMenu from '../components/APICreateMenu';
-import getSwagger from './PetStore.js';
+import getSampleSwagger from './SamplePetStore.js';
 
 const styles = theme => ({
     buttonProgress: {
@@ -88,7 +88,7 @@ class SampleAPI extends Component {
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
-            return sampleAPI.updateSwagger(getSwagger('Unlimited'));
+            return sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
         });
         swaggerUpdatePromise.catch((error) => {
             console.error(error);
