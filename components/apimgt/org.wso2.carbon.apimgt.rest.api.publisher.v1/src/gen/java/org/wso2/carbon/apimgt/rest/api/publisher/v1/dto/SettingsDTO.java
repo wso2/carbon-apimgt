@@ -17,9 +17,47 @@ import javax.xml.bind.annotation.*;
 
 public class SettingsDTO   {
   
+    private String dcrUrl = null;
+    private String authorizeUrl = null;
     private String tokenUrl = null;
+    private String revokeTokenUrl = null;
+    private String oidcLogoutUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<>();
     private List<String> scopes = new ArrayList<>();
+
+  /**
+   **/
+  public SettingsDTO dcrUrl(String dcrUrl) {
+    this.dcrUrl = dcrUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:9443/client-registration/v0.14/register", value = "")
+  @JsonProperty("dcrUrl")
+  public String getDcrUrl() {
+    return dcrUrl;
+  }
+  public void setDcrUrl(String dcrUrl) {
+    this.dcrUrl = dcrUrl;
+  }
+
+  /**
+   **/
+  public SettingsDTO authorizeUrl(String authorizeUrl) {
+    this.authorizeUrl = authorizeUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:8243/authorize", value = "")
+  @JsonProperty("authorizeUrl")
+  public String getAuthorizeUrl() {
+    return authorizeUrl;
+  }
+  public void setAuthorizeUrl(String authorizeUrl) {
+    this.authorizeUrl = authorizeUrl;
+  }
 
   /**
    **/
@@ -29,13 +67,47 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "https://localhost:8243/token", value = "")
   @JsonProperty("tokenUrl")
   public String getTokenUrl() {
     return tokenUrl;
   }
   public void setTokenUrl(String tokenUrl) {
     this.tokenUrl = tokenUrl;
+  }
+
+  /**
+   **/
+  public SettingsDTO revokeTokenUrl(String revokeTokenUrl) {
+    this.revokeTokenUrl = revokeTokenUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://localhost:8243/revoke", value = "")
+  @JsonProperty("revokeTokenUrl")
+  public String getRevokeTokenUrl() {
+    return revokeTokenUrl;
+  }
+  public void setRevokeTokenUrl(String revokeTokenUrl) {
+    this.revokeTokenUrl = revokeTokenUrl;
+  }
+
+  /**
+   **/
+  public SettingsDTO oidcLogoutUrl(String oidcLogoutUrl) {
+    this.oidcLogoutUrl = oidcLogoutUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("oidcLogoutUrl")
+  public String getOidcLogoutUrl() {
+    return oidcLogoutUrl;
+  }
+  public void setOidcLogoutUrl(String oidcLogoutUrl) {
+    this.oidcLogoutUrl = oidcLogoutUrl;
   }
 
   /**
@@ -82,14 +154,18 @@ public class SettingsDTO   {
       return false;
     }
     SettingsDTO settings = (SettingsDTO) o;
-    return Objects.equals(tokenUrl, settings.tokenUrl) &&
+    return Objects.equals(dcrUrl, settings.dcrUrl) &&
+        Objects.equals(authorizeUrl, settings.authorizeUrl) &&
+        Objects.equals(tokenUrl, settings.tokenUrl) &&
+        Objects.equals(revokeTokenUrl, settings.revokeTokenUrl) &&
+        Objects.equals(oidcLogoutUrl, settings.oidcLogoutUrl) &&
         Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tokenUrl, environment, scopes);
+    return Objects.hash(dcrUrl, authorizeUrl, tokenUrl, revokeTokenUrl, oidcLogoutUrl, environment, scopes);
   }
 
   @Override
@@ -97,7 +173,11 @@ public class SettingsDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class SettingsDTO {\n");
     
+    sb.append("    dcrUrl: ").append(toIndentedString(dcrUrl)).append("\n");
+    sb.append("    authorizeUrl: ").append(toIndentedString(authorizeUrl)).append("\n");
     sb.append("    tokenUrl: ").append(toIndentedString(tokenUrl)).append("\n");
+    sb.append("    revokeTokenUrl: ").append(toIndentedString(revokeTokenUrl)).append("\n");
+    sb.append("    oidcLogoutUrl: ").append(toIndentedString(oidcLogoutUrl)).append("\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");
