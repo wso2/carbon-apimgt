@@ -19,6 +19,7 @@ import React from 'react';
 import Enzyme, { shallow, render, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import TestRenderer from 'react-test-renderer';
+import Configs from '../../site/public/theme/defaultTheme';
 
 // React 16 Enzyme adapter
 Enzyme.configure({ adapter: new Adapter() });

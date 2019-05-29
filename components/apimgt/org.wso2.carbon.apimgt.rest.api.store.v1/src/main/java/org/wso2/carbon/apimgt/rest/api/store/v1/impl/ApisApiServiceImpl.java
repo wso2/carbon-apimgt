@@ -133,33 +133,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(getAPIByAPIId(apiId, xWSO2Tenant)).build();
     }
 
-    public APIDTO getAPIByAPIId(String apiId, String xWSO2Tenant) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
-        try {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
-            }
-
-            API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
-            return APIMappingUtil.fromAPItoDTO(api);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
     @Override
     public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch, MessageContext messageContext) {
         // do some magic!
@@ -380,8 +353,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSubscriptionPoliciesGet(String apiId, String ifNoneMatch, String xWSO2Tenant,
                                                      MessageContext messageContext) {
-        ApisApiServiceImpl apiService = new ApisApiServiceImpl();
-        APIDTO apiInfo = apiService.getAPIByAPIId(apiId, xWSO2Tenant);
+        APIDTO apiInfo = getAPIByAPIId(apiId, xWSO2Tenant);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
                 .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
 
@@ -396,6 +368,33 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 return Response.ok().entity(apiThrottlingPolicies).build();
             }
+        }
+        return null;
+    }
+
+    private APIDTO getAPIByAPIId(String apiId, String xWSO2Tenant) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            }
+
+            API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
+            return APIMappingUtil.fromAPItoDTO(api,requestedTenantDomain);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

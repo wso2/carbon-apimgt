@@ -1080,7 +1080,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Throttling Policies
+        - APIs
       responses:
         200:
           description: |
@@ -3048,11 +3048,6 @@ definitions:
           If the provider value is not given user invoking the api will be used as the provider.
         type: string
         example: admin
-      apiDefinition:
-        description: |
-          Swagger definition of the API which contains details about URI templates and scopes
-        type: string
-        example: "{\"paths\":{\"\\/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"\\/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
       wsdlUri:
         description: |
           WSDL URL if the API is based on a WSDL endpoint
@@ -3077,10 +3072,13 @@ definitions:
         description: |
           Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
           in tenant or system level will be used.
-      apiSecurity :
-         type: string
-         description: |
-           Supported API security for the API ( mutualssl and/or oauth2)
+      securityScheme:
+        type: array
+        description: |
+          Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If
+          it is not set OAuth2 will be set as the security for the current API.
+        items:
+          type: string
       tags:
         type: array
         description: Search keywords related to the API
@@ -3093,9 +3091,10 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
-      thumbnailUrl:
-        type: string
-        example: ""
+      hasThumbnail:
+        type: boolean
+        example: true
+        default: false
       additionalProperties:
         description: |
           Custom(user defined) properties of API
@@ -3164,6 +3163,8 @@ definitions:
       name:
         type: string
         example: "Public"
+      description:
+        type: string
       accessUrls:
         type: array
         items:

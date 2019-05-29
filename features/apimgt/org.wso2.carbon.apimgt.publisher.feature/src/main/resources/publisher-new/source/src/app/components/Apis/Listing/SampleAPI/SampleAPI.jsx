@@ -33,6 +33,7 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import APICreateMenu from '../components/APICreateMenu';
+import getSampleSwagger from './SamplePetStore.js';
 
 const styles = theme => ({
     buttonProgress: {
@@ -86,12 +87,18 @@ class SampleAPI extends Component {
     handleDeploySample() {
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
-        promisedSampleAPI.then((sampleAPI) => {
-            sampleAPI
-                .publish()
+        const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
+            return sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
+        });
+        swaggerUpdatePromise.catch((error) => {
+            console.error(error);
+            Alert.error(error);
+        });
+        swaggerUpdatePromise.then((api) => {
+            api.publish()
                 .then(() => {
                     const message = 'Pet-Store API Published successfully';
-                    this.setState({ published: true, api: sampleAPI });
+                    this.setState({ published: true, api });
                     Alert.info(message);
                 })
                 .catch((error) => {
@@ -113,10 +120,7 @@ class SampleAPI extends Component {
             description: 'This is a simple API for Pizza Shack online pizza delivery store.',
             context: '/pizzashack',
             version: '1.0.0',
-            transport: [
-                'http',
-                'https',
-            ],
+            transport: ['http', 'https'],
             tags: ['pizza'],
             policies: ['Unlimited'],
             securityScheme: ['oauth2'],

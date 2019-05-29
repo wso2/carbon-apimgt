@@ -5,6 +5,7 @@
     "main": "app.jsx",
     "scripts": {
         "test": "jest",
+        "test:coverage": "jest --coverage",
         "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
@@ -68,6 +69,7 @@
         "eslint-config-airbnb": "^16.1.0",
         "eslint-loader": "^2.0.0",
         "eslint-plugin-import": "^2.9.0",
+        "eslint-plugin-jest": "^22.6.4",
         "eslint-plugin-jsx-a11y": "^6.0.3",
         "eslint-plugin-react": "^7.7.0",
         "jest": "^24.8.0",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,14 +16,11 @@
  * under the License.
  */
 
-import 'typeface-roboto';
-
-import ReactDOM from 'react-dom';
 import React from 'react';
-import Publisher from './src/Publisher';
-import './index.css';
+import APIs from './Apis';
 
-ReactDOM.render(
-    <Publisher />,
-    document.getElementById('react-root'),
-);
+describe('Test APIs main routing component', () => {
+    test('Should render the APIs routing component in smoke test', () => {
+        shallow(<APIs />);
+    });
+});

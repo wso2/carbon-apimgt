@@ -143,7 +143,7 @@ public class ThrottlingPolicyMappingUtil {
         if (throttlingPolicy.getTierPermission() == null ||
                 throttlingPolicy.getTierPermission().getPermissionType() == null) {
             tierPermission.setType(ThrottlingPolicyPermissionInfoDTO.TypeEnum.valueOf("ALLOW"));
-            List roles = new ArrayList<String>();
+            List<String> roles = new ArrayList<>();
             roles.add("Internal/everyone");
             tierPermission.setRoles(roles);
         } else {
