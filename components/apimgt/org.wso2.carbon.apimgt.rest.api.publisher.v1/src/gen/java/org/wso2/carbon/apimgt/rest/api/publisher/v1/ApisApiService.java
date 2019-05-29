@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 
 import java.util.List;
@@ -60,6 +61,7 @@ public interface ApisApiService {
       public Response apisApiIdScopesNameGet(String apiId, String name, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdScopesNamePut(String apiId, String name, ScopeDTO body, String ifMatch, MessageContext messageContext);
       public Response apisApiIdScopesPost(String apiId, ScopeDTO body, String ifMatch, MessageContext messageContext);
+      public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext);
       public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId, MessageContext messageContext);

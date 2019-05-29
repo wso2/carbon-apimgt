@@ -308,26 +308,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
-        APIDTO apiToReturn;
-        try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
-            return Response.ok().entity(apiToReturn).build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
-            } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
+        APIDTO apiToReturn = getAPIByID(apiId);
+        return Response.ok().entity(apiToReturn).build();
     }
 
     @Override
@@ -1197,6 +1179,50 @@ public class ApisApiServiceImpl implements ApisApiService {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
+
+    @Override
+    public Response apisApiIdSubscriptionPoliciesGet(String apiId, String ifNoneMatch, String xWSO2Tenant,
+                                                     MessageContext messageContext) {
+        APIDTO apiInfo = getAPIByID(apiId);
+        List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
+                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString());
+
+        if (apiInfo != null ) {
+            List<String> apiPolicies = apiInfo.getPolicies();
+            if (apiPolicies != null && !apiPolicies.isEmpty()) {
+                List<Tier> apiThrottlingPolicies = new ArrayList<>();
+                for (Tier tier : availableThrottlingPolicyList) {
+                    if (apiPolicies.contains(tier.getName())) {
+                        apiThrottlingPolicies.add(tier);
+                    }
+                }
+                return Response.ok().entity(apiThrottlingPolicies).build();
+            }
+        }
+        return null;
+    }
+
+    private APIDTO getAPIByID(String apiId) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            return APIMappingUtil.fromAPItoDTO(api);
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
     /**
      * This method is used to assign micro gateway labels to the DTO
      *

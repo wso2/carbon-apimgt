@@ -1080,7 +1080,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Throttling Policies
+        - APIs
       responses:
         200:
           description: |
