@@ -197,7 +197,7 @@ public class BasicAuthAuthenticator implements Authenticator {
                     authContext.setAuthenticated(true);
                     authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
                     authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
-                    //Resource level throttling is not considered, hence assigning the unlimited tier for that
+                    //Resource level throttling
                     VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
                     verbInfoDTO.setThrottling(basicAuthCredentialValidator.getResourceThrottlingTier(swagger, synCtx));
                     synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
@@ -223,7 +223,7 @@ public class BasicAuthAuthenticator implements Authenticator {
      * Extract the basic authentication credentials from the basic authorization header via Base64 decoding.
      *
      * @param basicAuthHeader the basic authorization header
-     * @return an String array containing username and password
+     * @return a String array containing username and password
      * @throws APISecurityException in case of invalid authorization header or no header
      */
     private String[] extractBasicAuthCredentials(String basicAuthHeader) throws APISecurityException {
@@ -239,12 +239,12 @@ public class BasicAuthAuthenticator implements Authenticator {
                     if (basicAuthKey.contains(":")) {
                         return basicAuthKey.split(":");
                     } else {
-                        log.debug("Basic Authentication: Invalid Basic Auth header");
+                        log.debug("Basic Authentication: Invalid Basic Auth token");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
                                 APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
                     }
                 } catch (WSSecurityException e) {
-                    log.debug("Basic Authentication: Invalid Basic Auth header");
+                    log.debug("Basic Authentication: Invalid Basic Auth token");
                     throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
                             APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
                 }
@@ -260,7 +260,7 @@ public class BasicAuthAuthenticator implements Authenticator {
      * Extract the Basic Auth header segment from the Auth header.
      *
      * @param synCtx The message to be authenticated
-     * @return an the basic auth header segment.
+     * @return the basic auth header segment.
      */
     private String extractBasicAuthHeader(MessageContext synCtx) {
         final String authHeaderSplitter = ",";
