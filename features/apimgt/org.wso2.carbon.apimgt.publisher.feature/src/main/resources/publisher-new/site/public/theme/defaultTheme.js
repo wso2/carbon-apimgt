@@ -126,4 +126,6 @@ const Configurations = {
     },
 };
 
-export default Configurations;
+// if (process && process.env.NODE_ENV) {
+//     export default Configurations;
+// }
