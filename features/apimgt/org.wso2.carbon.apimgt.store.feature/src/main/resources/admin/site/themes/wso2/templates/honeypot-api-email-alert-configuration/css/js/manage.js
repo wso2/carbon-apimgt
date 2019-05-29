@@ -114,18 +114,17 @@ $(document).ready(function () {
 
             });
 
-           if (checkedValues.length > 0) {
+           //if (checkedValues.length > 0) {
                  var emailList = $("#tokenfield").val();
                 if(emailList) {
                     saveEmailList(emailList);
                  }
-                 //else{
-                //     jagg.message({content: i18n.t("Please enter at least one email address") , type: "error"});
-                // }
+                 else{
+                    jagg.message({content: i18n.t("Please enter at least one email address") , type: "error"});
+                }
         //  } else {
         //         jagg.message({content: i18n.t("Please select at least one alert type") , type: "error"});
         //      }
-        }
         }
     });
 
