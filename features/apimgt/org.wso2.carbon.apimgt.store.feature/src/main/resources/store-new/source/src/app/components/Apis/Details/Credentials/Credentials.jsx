@@ -431,7 +431,7 @@ Applications )
                                         </Grid>
                                     </AppBar>
                                     <div className={classes.plainContent}>
-                                        <Wizard onClickFunction={(a,b)=>this.handleClickToggle(a,b)} updateSubscriptionData={updateSubscriptionData}/>
+                                        <Wizard apiId={api.id} onClickFunction={(a,b)=>this.handleClickToggle(a,b)} updateSubscriptionData={updateSubscriptionData}/>
                                     </div>
                                 </Dialog>
 
