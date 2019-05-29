@@ -5713,16 +5713,11 @@ definitions:
   Label:
     title: Label
     required:
-      - labelId
       - name
-      - type
-      - access_urls
     properties:
-      labelId:
-        type: string
       name:
         type: string
-      type:
+      description:
         type: string
       access_urls:
         type: array
