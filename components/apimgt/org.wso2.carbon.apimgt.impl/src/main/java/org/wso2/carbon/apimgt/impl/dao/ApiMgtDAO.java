@@ -13923,10 +13923,10 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String sqlQuery = SQLConstants.HoneyPotAPIDataConstants.GET_HONEYPOT_API_ALERTS;
+        String getHoneypotApiAlertsQuery = SQLConstants.HoneyPotAPIDataConstants.GET_HONEYPOT_API_ALERTS;
         try {
             conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+            ps = conn.prepareStatement(getHoneypotApiAlertsQuery);
             rs = ps.executeQuery();
             while (rs.next()){
                 HoneyPotAPIAlertData honeyPotAPIAlertData = new HoneyPotAPIAlertData();

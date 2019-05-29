@@ -90,10 +90,10 @@ public class HoneyAPIDataPublisher{
                             + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
                 }
             } else {
-                log.debug("Throttle data publisher pool is not initialized.");
+                log.debug("HoneyPot data publisher pool is not initialized.");
             }
         } catch (Exception e) {
-            log.error("Error while publishing throttling events to global policy server", e);
+            log.error("Error while publishing HoneyPotData events to TM", e);
         }
     }
 
@@ -121,7 +121,7 @@ public class HoneyAPIDataPublisher{
                 //agent.setDataReference(null);
                 HoneyAPIDataPublisher.dataPublisherPool.release(agent);
             } catch (Exception e) {
-                log.error("Error while returning Throttle data publishing agent back to pool" + e.getMessage());
+                log.error("Error while returning Honeypot data publishing agent back to pool" + e.getMessage());
             }
         }
     }

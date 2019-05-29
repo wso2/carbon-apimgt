@@ -1653,7 +1653,8 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v115</synapse.version>
+        <synapse.version>2.1.7-wso2v111</synapse.version>
+        <!--<synapse.version>2.1.7-wso2v80</synapse.version>-->
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 

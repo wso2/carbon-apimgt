@@ -28,7 +28,7 @@ public class HoneyDataPublisherPool {
             @Override
             public Object makeObject() throws Exception {
                 if(log.isDebugEnabled()) {
-                    log.debug("Initializing new ThrottleDataPublisher instance");
+                    log.debug("Initializing new HoneyPotAPIDataPublisher instance");
                 }
                 return new HoneyAPIDataProcessAndPublishAgent();
             }
