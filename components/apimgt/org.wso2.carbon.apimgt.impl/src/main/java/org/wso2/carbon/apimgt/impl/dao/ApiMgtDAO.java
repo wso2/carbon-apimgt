@@ -1424,8 +1424,6 @@ public class ApiMgtDAO {
 
     public Set<Scope> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
             throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
         HashMap<String, Scope> scopeHashMap = new HashMap<>();
         int tenantId = APIUtil.getTenantId(subscriber.getName());
 
