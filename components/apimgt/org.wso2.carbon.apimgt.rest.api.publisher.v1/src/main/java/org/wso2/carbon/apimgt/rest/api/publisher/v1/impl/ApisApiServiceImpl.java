@@ -1044,7 +1044,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            API existingAPI = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
+            API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, apiDefinition);
             Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
             existingAPI.setUriTemplates(uriTemplates);
