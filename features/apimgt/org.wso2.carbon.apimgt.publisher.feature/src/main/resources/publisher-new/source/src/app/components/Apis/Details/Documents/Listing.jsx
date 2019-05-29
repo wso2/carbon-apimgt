@@ -15,19 +15,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { message } from 'antd';
-
 import React, { Component, Fragment } from 'react';
 import API from 'AppData/api.js';
-import { Progress } from 'AppComponents/Shared/';
+import { Progress, Alert } from 'AppComponents/Shared/';
 import DocTableView from './DocTableView';
 import DocMenu from './DocMenu';
 import DocumentType from './DocumentType';
 
 /**
  * Documents tab related React components.
- * 
+ *
  * @class Listing
  * @extends {Component}
  */
@@ -82,7 +79,7 @@ class Listing extends Component {
                 const messageTxt =
                     'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
                 console.error(messageTxt);
-                message.error('Error in fetching documents list of the API');
+                Alert.error('Error in fetching documents list of the API');
             });
     }
 

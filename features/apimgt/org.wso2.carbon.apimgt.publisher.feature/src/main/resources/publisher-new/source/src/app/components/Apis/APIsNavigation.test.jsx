@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,14 +16,12 @@
  * under the License.
  */
 
-import 'typeface-roboto';
-
-import ReactDOM from 'react-dom';
 import React from 'react';
-import Publisher from './src/Publisher';
-import './index.css';
+import APIsNavigation from './APIsNavigation';
 
-ReactDOM.render(
-    <Publisher />,
-    document.getElementById('react-root'),
-);
+describe('APIs', () => {
+    test('should ', () => {
+        const a = shallow(<APIsNavigation />);
+        expect(a).type.to.be('WithStyles(PageNav)');
+    });
+});

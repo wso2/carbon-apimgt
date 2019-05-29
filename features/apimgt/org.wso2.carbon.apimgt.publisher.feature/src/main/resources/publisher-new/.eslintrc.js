@@ -27,8 +27,10 @@ module.exports = {
     env: {
         browser: true,
         es6: true,
+        'jest/globals': true,
+        jest: true
     },
-    extends: 'airbnb',
+    extends: ['airbnb','plugin:jest/recommended'],
     rules: {
         'max-len': ['error', { code: 120, tabWidth: 4 }],
         'require-jsdoc': [
@@ -83,5 +85,5 @@ module.exports = {
         'no-else-return': 'off',
         'no-unused-vars': ['error'],
     },
-    plugins: ['react'],
+    plugins: ['react','jest'],
 };
