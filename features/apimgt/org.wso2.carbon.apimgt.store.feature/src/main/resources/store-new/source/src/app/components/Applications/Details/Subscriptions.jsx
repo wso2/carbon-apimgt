@@ -113,6 +113,7 @@ class Subscriptions extends React.Component {
     handleSubscriptionDelete(subscriptionId) {
         const client = new Subscription();
         const promisedDelete = client.deleteSubscription(subscriptionId);
+
         promisedDelete.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
@@ -127,6 +128,7 @@ class Subscriptions extends React.Component {
                     break;
                 }
             }
+            this.setState({ subscriptions });
         });
     }
 
@@ -169,7 +171,7 @@ class Subscriptions extends React.Component {
                                         <TableBody>
                                             {subscriptions
                                                 && subscriptions.map((subscription) => {
-                                                    return <SubscriptionTableData subscription={subscription} key={subscription.subscriptionId} handleSubscriptionDelete={this.handleSubscriptionDelete} />;
+                                                    return <SubscriptionTableData subscription={subscription} handleSubscriptionDelete={this.handleSubscriptionDelete} />;
                                                 })}
                                         </TableBody>
                                     </Table>
