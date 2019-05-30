@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-
 import org.apache.axis2.Constants;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.logging.Log;
@@ -49,13 +48,15 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+import javax.cache.Cache;
+import javax.cache.Caching;
 
 /**
  * This class is used to validate a given API key against a given API context and a version.
@@ -73,11 +74,7 @@ public class APIKeyValidator {
 
     private boolean isGatewayAPIResourceValidationEnabled = true;
 
-    private static boolean gatewayKeyCacheInit = false;
-
-    private static boolean gatewayTokenCacheInit = false;
-
-    private static boolean resourceCacheInit = false;
+    private static final Map<String, CacheExpirationConfig> cacheMap = new HashMap<>();
 
     protected Log log = LogFactory.getLog(getClass());
 
@@ -105,8 +102,8 @@ public class APIKeyValidator {
 
     protected Cache getGatewayKeyCache() {
         String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if (!gatewayKeyCacheInit) {
-            gatewayKeyCacheInit = true;
+        if (!isGatewayKeyCacheInit(getTenantDomain())) {
+            initializeGatewayKeyCache(getTenantDomain());
             if (apimGWCacheExpiry != null) {
                 return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_KEY_CACHE_NAME, Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
             } else {
@@ -132,8 +129,8 @@ public class APIKeyValidator {
         String apimGWCacheExpiry = getApiManagerConfiguration().
                 getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
 
-        if (!gatewayTokenCacheInit) {
-            gatewayTokenCacheInit = true;
+        if (!isGatewayTokenCacheInit(getTenantDomain())) {
+            initializeGatewayTokenCache(getTenantDomain());
             if (apimGWCacheExpiry != null) {
                 return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_TOKEN_CACHE_NAME,
                         Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
@@ -150,8 +147,8 @@ public class APIKeyValidator {
         String apimGWCacheExpiry = getApiManagerConfiguration().
                 getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
 
-        if (!gatewayTokenCacheInit) {
-            gatewayTokenCacheInit = true;
+        if (!isInvalidTokenCacheInit(getTenantDomain())) {
+            initializeInvalidTokenCache(getTenantDomain());
             if (apimGWCacheExpiry != null) {
                 return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME,
                         Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
@@ -167,11 +164,18 @@ public class APIKeyValidator {
     @MethodStats
     protected Cache getResourceCache() {
 
-        if (!resourceCacheInit) {
-            resourceCacheInit = true;
-            long defaultCacheTimeout = getDefaultCacheTimeout();
-            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RESOURCE_CACHE_NAME,
-                    defaultCacheTimeout, defaultCacheTimeout);
+        if (!isResourceCacheInit(getTenantDomain())) {
+            initializeGatewayResourceCache(getTenantDomain());
+            APIManagerConfiguration config = getApiManagerConfiguration();
+            String gatewayTokenCacheExpiry = config.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_TIMEOUT);
+            if (gatewayTokenCacheExpiry != null) {
+                return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RESOURCE_CACHE_NAME,
+                        Long.parseLong(gatewayTokenCacheExpiry), Long.parseLong(gatewayTokenCacheExpiry));
+            } else {
+                long defaultCacheTimeout = getDefaultCacheTimeout();
+                return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RESOURCE_CACHE_NAME,
+                        defaultCacheTimeout, defaultCacheTimeout);
+            }
         }
         return getCacheFromCacheManager(APIConstants.RESOURCE_CACHE_NAME);
     }
@@ -822,5 +826,54 @@ public class APIKeyValidator {
 
     protected void setGatewayAPIResourceValidationEnabled(boolean gatewayAPIResourceValidationEnabled) {
         isGatewayAPIResourceValidationEnabled = gatewayAPIResourceValidationEnabled;
+    }
+
+    private boolean isGatewayKeyCacheInit(String tenantDomain) {
+        return cacheMap.containsKey(tenantDomain) && cacheMap.get(tenantDomain).gatewayKeyCacheInit;
+    }
+
+    private boolean isGatewayTokenCacheInit(String tenantDomain) {
+        return cacheMap.containsKey(tenantDomain) && cacheMap.get(tenantDomain).gatewayTokenCacheInit;
+    }
+
+    private boolean isResourceCacheInit(String tenantDomain) {
+        return cacheMap.containsKey(tenantDomain) && cacheMap.get(tenantDomain).resourceCacheInit;
+    }
+
+    private boolean isInvalidTokenCacheInit(String tenantDomain) {
+        return cacheMap.containsKey(tenantDomain) && cacheMap.get(tenantDomain).invalidTokenCacheInit;
+    }
+
+    private void initializeGatewayResourceCache(String tenantDomain) {
+        initializeCache(tenantDomain);
+        cacheMap.get(tenantDomain).resourceCacheInit = true;
+    }
+
+    private void initializeGatewayKeyCache(String tenantDomain) {
+        initializeCache(tenantDomain);
+        cacheMap.get(tenantDomain).gatewayKeyCacheInit = true;
+    }
+
+    private void initializeGatewayTokenCache(String tenantDomain) {
+        initializeCache(tenantDomain);
+        cacheMap.get(tenantDomain).gatewayTokenCacheInit = true;
+    }
+
+    private void initializeInvalidTokenCache(String tenantDomain) {
+        initializeCache(tenantDomain);
+        cacheMap.get(tenantDomain).invalidTokenCacheInit = true;
+    }
+
+    private void initializeCache(String tenantDomain) {
+        if (!cacheMap.containsKey(tenantDomain)) {
+            cacheMap.put(tenantDomain, new CacheExpirationConfig());
+        }
+    }
+
+    private class CacheExpirationConfig {
+        private boolean gatewayKeyCacheInit = false;
+        private boolean gatewayTokenCacheInit = false;
+        private boolean resourceCacheInit = false;
+        private boolean invalidTokenCacheInit = false;
     }
 }
