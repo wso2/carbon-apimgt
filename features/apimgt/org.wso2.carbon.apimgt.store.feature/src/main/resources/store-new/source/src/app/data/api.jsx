@@ -15,7 +15,6 @@
  */
 
 
-
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
 import Utils from './Utils';
@@ -445,17 +444,21 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSubscriptions(apiId, applicationId, callback = null) {
-        const promise_get = this.client.then(
+        const payload = { apiId };
+        if (applicationId) {
+            payload[applicationId] = applicationId;
+        }
+        const promisedGet = this.client.then(
             (client) => {
                 return client.apis.Subscriptions.get_subscriptions(
-                    { apiId, applicationId }, this._requestMetaData(),
+                    payload, this._requestMetaData(),
                 );
             },
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promisedGet.then(callback);
         } else {
-            return promise_get;
+            return promisedGet;
         }
     }
 
