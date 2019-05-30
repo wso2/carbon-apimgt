@@ -17,7 +17,7 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
     private String clientIp;
     private String apiMethod;
 
-    HoneyAPIDataProcessAndPublishAgent() {
+    public HoneyAPIDataProcessAndPublishAgent() {
 
         dataPublisher = getDataPublisher();
     }
@@ -26,7 +26,7 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
      * This method will clean data references. This method should call whenever we return data process and publish
      * agent back to pool. Every time when we add new property we need to implement cleaning logic as well.
      */
-    void clearDataReference() {
+    public void clearDataReference() {
 
         this.messageBody = null;
         this.apiMethod = null;
@@ -34,7 +34,7 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
         this.clientIp = null;
     }
 
-    void setDataReference(long currentTime, String messageId, String apiMethod, String headerSet, String messageBody, String clientIp) {
+    public void setDataReference(long currentTime, String messageId, String apiMethod, String headerSet, String messageBody, String clientIp) {
 
         this.currentTime = currentTime;
         this.messageId = messageId;
@@ -58,7 +58,7 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
         return ServiceReferenceHolder.getInstance().getThrottleProperties();
     }
 
-    private DataPublisher getDataPublisher() {
+    protected DataPublisher getDataPublisher() {
         return HoneyAPIDataPublisher.getDataPublisher();
     }
 }
