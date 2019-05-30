@@ -6152,7 +6152,7 @@ definitions:
       count:
         type: integer
         description: |
-          Number of API Products returned.
+          Number of API Resource Paths returned.
         example: 1
       list:
         type: array
