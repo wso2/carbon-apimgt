@@ -20,15 +20,13 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
-import SwaggerUI from 'swagger-ui';
 import 'swagger-ui/dist/swagger-ui.css';
-import Select from '@material-ui/core/Select';
 import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
-import AuthManager from '../../../../data/AuthManager';
+import SwaggerUI from './SwaggerUI';
 
 /**
  *
@@ -76,14 +74,8 @@ class ApiConsole extends React.Component {
      */
     constructor(props) {
         super(props);
-        this.state = {
-            apiGateways: null,
-            apiGateway: '',
-            credentialTypes: [],
-            credentialType: '',
-            accessToken: '',
-            setSwagger: null,
-        };
+        this.state = {};
+        this.handleChanges = this.handleChanges.bind(this);
     }
 
     /**
@@ -94,48 +86,18 @@ class ApiConsole extends React.Component {
     componentDidMount() {
         const api = new Api();
         const { match } = this.props;
+        const apiID = match.params.api_uuid;
+        const promisedSwagger = api.getSwaggerByAPIId(apiID);
+        const promisedAPI = api.getAPIById(apiID);
 
-        const disableAuthorizeAndInfoPlugin = function () {
-            return {
-                wrapComponents: {
-                    authorizeBtn: () => () => null,
-                    info: () => () => null,
-                },
-            };
-        };
-
-        const credentialTypes = [];
-        const apiGateways = [];
-        credentialTypes.push('OAuth2');
-        apiGateways.push('Default');
-
-        this.setState({
-            apiGateways,
-            apiGateway: apiGateways[0],
-            credentialTypes,
-            credentialType: credentialTypes[0],
-        });
-
-        const promisedSwagger = api.getSwaggerByAPIId(match.params.api_uuid);
-
-        promisedSwagger
-            .then((swagger) => {
-                const { url } = swagger;
-                this.setState({ setSwagger: true });
-
-                SwaggerUI({
-                    dom_id: '#ui',
-                    spec: swagger.body,
-                    requestInterceptor: (req) => {
-                        // Only set Authorization header if the request matches the spec URL
-                        if (req.url === url) {
-                            req.headers.Authorization = 'Bearer ' + AuthManager.getUser().getPartialToken();
-                        }
-                        return req;
-                    },
-                    presets: [SwaggerUI.presets.apis, disableAuthorizeAndInfoPlugin],
-                    plugins: [SwaggerUI.plugins.DownloadUrl],
-                });
+        Promise.all([promisedAPI, promisedSwagger])
+            .then((responses) => {
+                const data = responses.map(response => response.body);
+                const swagger = data[1];
+                const apiObj = data[0];
+                swagger.basePath = apiObj.context;
+                swagger.host = 'localhost:8243';
+                this.setState({ api: apiObj, swagger });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -153,9 +115,11 @@ class ApiConsole extends React.Component {
      *
      * @memberof ApiConsole
      */
-    handleChange = name => (event) => {
-        this.setState({ [name]: event.target.value });
-    };
+    handleChanges(event) {
+        const target = event.currentTarget;
+        const { name, value } = target;
+        this.setState({ [name]: value });
+    }
 
     /**
      *
@@ -165,79 +129,48 @@ class ApiConsole extends React.Component {
      */
     render() {
         const { classes } = this.props;
-        const { setSwagger, apiGateway } = this.state;
+        const { api, notFound, swagger } = this.state;
 
-        if (setSwagger == null) {
+        if (api == null || swagger == null) {
             return <Progress />;
+        }
+        if (notFound) {
+            return 'API Not found !';
         }
 
         return (
             <React.Fragment>
                 <Grid container className={classes.grid}>
                     <Grid item md={12}>
-                        <div>
-                            <Typography variant='subheading'>
-                                API Gateway
-                                <Select
-                                    value={apiGateway}
-                                    onChange={this.handleChange('apiGateway')}
-                                    className={classes.gatewaySelect}
-                                >
-                                    {this.state.apiGateways.map(apiGateway => (
-                                        <option value={apiGateway} key={apiGateway}>
-                                            {apiGateway}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </Typography>
-                        </div>
-                        <div>
-                            <Typography variant='subheading' gutterleft>
-                                API Credentials
-                                <Select
-                                    value={this.state.credentialType}
-                                    onChange={this.handleChange('credentialType')}
-                                    className={classes.credentialSelect}
-                                >
-                                    {this.state.credentialTypes.map(type => (
-                                        <option value={type} key={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </Typography>
-                        </div>
-                        <div>
-                            <Typography variant='subheading' gutterleft>
-                                Set Request Header
-                                <span className={classes.authHeader}>Authorization : Bearer</span>
-                                <TextField
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    className={classes.inputText}
-                                    label='Access Token'
-                                    name='accessToken'
-                                    defaultValue=''
-                                    onChange={this.handleChange('accessToken')}
-                                />
-                            </Typography>
-                        </div>
+                        <Typography variant='subheading' gutterleft>
+                            Set Request Header
+                            <span className={classes.authHeader}>Authorization : Bearer</span>
+                            <TextField
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                className={classes.inputText}
+                                label='Access Token'
+                                name='accessToken'
+                                defaultValue=''
+                                onChange={this.handleChanges}
+                            />
+                        </Typography>
                     </Grid>
                 </Grid>
-                <div id='ui' />
+                <SwaggerUI spec={swagger} />
             </React.Fragment>
         );
     }
 }
 
 ApiConsole.defaultProps = {
-    handleInputs: false,
+    // handleInputs: false,
 };
 
 ApiConsole.propTypes = {
-    handleInputs: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
-    classes: PropTypes.object.isRequired,
+    // handleInputs: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(ApiConsole);
