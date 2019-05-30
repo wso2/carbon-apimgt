@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import SwaggerUILib, { SwaggerUIStandalonePreset } from 'swagger-ui';
+import SwaggerUILib from 'swagger-ui';
 
 /**
  *
@@ -35,9 +35,8 @@ class SwaggerUI extends Component {
                 req.headers.Authorization = 'Bearer ' + accessTokenProvider();
                 return req;
             },
-            presets: [SwaggerUILib.presets.apis, disableAuthorizeAndInfoPlugin, SwaggerUIStandalonePreset],
+            presets: [SwaggerUILib.presets.apis, disableAuthorizeAndInfoPlugin],
             plugins: [SwaggerUILib.plugins.DownloadUrl],
-            layout: 'StandaloneLayout',
         });
     }
 
