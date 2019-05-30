@@ -2802,6 +2802,8 @@ paths:
         This operation can be used to retrieve resource paths defined for a specific api.
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - API Resource Paths
@@ -6147,10 +6149,17 @@ definitions:
   ResourcePathList:
     title: ResourcePath List
     properties:
+      count:
+        type: integer
+        description: |
+          Number of API Products returned.
+        example: 1
       list:
         type: array
         items:
           $ref: '#/definitions/ResourcePath'
+      pagination:
+        $ref: '#/definitions/Pagination'
 
   #-----------------------------------------------------
   # API Business Information resource

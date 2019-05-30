@@ -53,7 +53,7 @@ public interface ApisApiService {
       public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId, MediationDTO body, String ifMatch, MessageContext messageContext);
       public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch, MessageContext messageContext);
       public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext);
-      public Response apisApiIdResourcePathsGet(String apiId, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId, ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext);

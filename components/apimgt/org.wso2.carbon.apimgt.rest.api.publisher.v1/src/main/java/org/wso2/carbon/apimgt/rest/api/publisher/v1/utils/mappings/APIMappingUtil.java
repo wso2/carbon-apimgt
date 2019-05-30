@@ -1496,21 +1496,69 @@ public class APIMappingUtil {
 
     }
 
-    public static ResourcePathListDTO fromResourcePathListToDTO(List<ResourcePath> resourcePathList) {
+    /**
+     * Converts a List object of API resource paths into a DTO
+     *
+     * @param resourcePathList List of API resource paths
+     * @param limit   maximum number of API resource paths to be returned
+     * @param offset  starting index
+     * @return ResourcePathListDTO object containing ResourcePathDTOs
+     */
+    public static ResourcePathListDTO fromResourcePathListToDTO(List<ResourcePath> resourcePathList, int limit,
+            int offset) {
         ResourcePathListDTO resourcePathListDTO = new ResourcePathListDTO();
         List<ResourcePathDTO> resourcePathDTOs = new ArrayList<ResourcePathDTO>();
-        for (ResourcePath path : resourcePathList) {
+
+        //identifying the proper start and end indexes
+        int size =resourcePathList.size();
+        int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= size - 1 ? offset + limit -1 : size - 1;
+
+        for (int i = start; i <= end; i++) {
+            ResourcePath path = resourcePathList.get(i);
             ResourcePathDTO dto = new ResourcePathDTO();
             dto.setId(path.getId());
             dto.setResourcePath(path.getResourcePath());
             dto.setHttpVerb(path.getHttpVerb());
             resourcePathDTOs.add(dto);
         }
+
+        resourcePathListDTO.setCount(resourcePathDTOs.size());
         resourcePathListDTO.setList(resourcePathDTOs);
         return resourcePathListDTO;
     }
-    
 
+    /**
+     * Sets pagination urls for a ResourcePathListDTO object
+     *
+     * @param resourcePathListDTO ResourcePathListDTO object to which pagination urls need to be set
+     * @param offset     starting index
+     * @param limit      max number of returned objects
+     * @param size       max offset
+     */
+    public static void setPaginationParamsForAPIResourcePathList(ResourcePathListDTO resourcePathListDTO, int offset,
+            int limit, int size) {
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getResourcePathPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getResourcePathPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        resourcePathListDTO.setPagination(paginationDTO);
+    }
 
 }
 
