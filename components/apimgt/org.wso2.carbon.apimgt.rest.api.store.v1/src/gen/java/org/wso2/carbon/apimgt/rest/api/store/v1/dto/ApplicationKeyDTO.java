@@ -1,54 +1,74 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class ApplicationKeyDTO  {
+public class ApplicationKeyDTO   {
   
-  
-  
-  private String consumerKey = null;
-  
-  
-  private String consumerSecret = null;
-  
-  
-  private List<String> supportedGrantTypes = new ArrayList<String>();
-  
-  
-  private String callbackUrl = null;
-  
-  
-  private String keyState = null;
-  
-  public enum KeyTypeEnum {
-     PRODUCTION,  SANDBOX, 
-  };
-  
-  private KeyTypeEnum keyType = null;
-  
-  
-  private String groupId = null;
-  
-  
-  private ApplicationTokenDTO token = null;
+    private String consumerKey = null;
+    private String consumerSecret = null;
+    private List<String> supportedGrantTypes = new ArrayList<>();
+    private String callbackUrl = null;
+    private String keyState = null;
 
-  
+@XmlType(name="KeyTypeEnum")
+@XmlEnum(String.class)
+public enum KeyTypeEnum {
+
+    @XmlEnumValue("PRODUCTION") PRODUCTION(String.valueOf("PRODUCTION")), @XmlEnumValue("SANDBOX") SANDBOX(String.valueOf("SANDBOX"));
+
+
+    private String value;
+
+    KeyTypeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static KeyTypeEnum fromValue(String v) {
+        for (KeyTypeEnum b : KeyTypeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private KeyTypeEnum keyType = null;
+    private String groupId = null;
+    private ApplicationTokenDTO token = null;
+
   /**
    * Consumer key of the application
    **/
-  @ApiModelProperty(value = "Consumer key of the application")
+  public ApplicationKeyDTO consumerKey(String consumerKey) {
+    this.consumerKey = consumerKey;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "vYDoc9s7IgAFdkSyNDaswBX7ejoa", value = "Consumer key of the application")
   @JsonProperty("consumerKey")
   public String getConsumerKey() {
     return consumerKey;
@@ -57,11 +77,16 @@ public class ApplicationKeyDTO  {
     this.consumerKey = consumerKey;
   }
 
-  
   /**
    * Consumer secret of the application
    **/
-  @ApiModelProperty(value = "Consumer secret of the application")
+  public ApplicationKeyDTO consumerSecret(String consumerSecret) {
+    this.consumerSecret = consumerSecret;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "TIDlOFkpzB7WjufO3OJUhy1fsvAa", value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
   public String getConsumerSecret() {
     return consumerSecret;
@@ -70,11 +95,16 @@ public class ApplicationKeyDTO  {
     this.consumerSecret = consumerSecret;
   }
 
-  
   /**
    * The grant types that are supported by the application
    **/
-  @ApiModelProperty(value = "The grant types that are supported by the application")
+  public ApplicationKeyDTO supportedGrantTypes(List<String> supportedGrantTypes) {
+    this.supportedGrantTypes = supportedGrantTypes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"client_credentials\",\"password\"]", value = "The grant types that are supported by the application")
   @JsonProperty("supportedGrantTypes")
   public List<String> getSupportedGrantTypes() {
     return supportedGrantTypes;
@@ -83,11 +113,16 @@ public class ApplicationKeyDTO  {
     this.supportedGrantTypes = supportedGrantTypes;
   }
 
-  
   /**
    * Callback URL
    **/
-  @ApiModelProperty(value = "Callback URL")
+  public ApplicationKeyDTO callbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "http://sample.com/callback/url", value = "Callback URL")
   @JsonProperty("callbackUrl")
   public String getCallbackUrl() {
     return callbackUrl;
@@ -96,11 +131,16 @@ public class ApplicationKeyDTO  {
     this.callbackUrl = callbackUrl;
   }
 
-  
   /**
    * Describes the state of the key generation.
    **/
-  @ApiModelProperty(value = "Describes the state of the key generation.")
+  public ApplicationKeyDTO keyState(String keyState) {
+    this.keyState = keyState;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "APPROVED", value = "Describes the state of the key generation.")
   @JsonProperty("keyState")
   public String getKeyState() {
     return keyState;
@@ -109,11 +149,16 @@ public class ApplicationKeyDTO  {
     this.keyState = keyState;
   }
 
-  
   /**
    * Describes to which endpoint the key belongs
    **/
-  @ApiModelProperty(value = "Describes to which endpoint the key belongs")
+  public ApplicationKeyDTO keyType(KeyTypeEnum keyType) {
+    this.keyType = keyType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PRODUCTION", value = "Describes to which endpoint the key belongs")
   @JsonProperty("keyType")
   public KeyTypeEnum getKeyType() {
     return keyType;
@@ -122,11 +167,16 @@ public class ApplicationKeyDTO  {
     this.keyType = keyType;
   }
 
-  
   /**
    * Application group id (if any).
    **/
-  @ApiModelProperty(value = "Application group id (if any).")
+  public ApplicationKeyDTO groupId(String groupId) {
+    this.groupId = groupId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2", value = "Application group id (if any).")
   @JsonProperty("groupId")
   public String getGroupId() {
     return groupId;
@@ -135,9 +185,14 @@ public class ApplicationKeyDTO  {
     this.groupId = groupId;
   }
 
-  
   /**
    **/
+  public ApplicationKeyDTO token(ApplicationTokenDTO token) {
+    this.token = token;
+    return this;
+  }
+
+  
   @ApiModelProperty(value = "")
   @JsonProperty("token")
   public ApplicationTokenDTO getToken() {
@@ -147,22 +202,57 @@ public class ApplicationKeyDTO  {
     this.token = token;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ApplicationKeyDTO applicationKey = (ApplicationKeyDTO) o;
+    return Objects.equals(consumerKey, applicationKey.consumerKey) &&
+        Objects.equals(consumerSecret, applicationKey.consumerSecret) &&
+        Objects.equals(supportedGrantTypes, applicationKey.supportedGrantTypes) &&
+        Objects.equals(callbackUrl, applicationKey.callbackUrl) &&
+        Objects.equals(keyState, applicationKey.keyState) &&
+        Objects.equals(keyType, applicationKey.keyType) &&
+        Objects.equals(groupId, applicationKey.groupId) &&
+        Objects.equals(token, applicationKey.token);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyState, keyType, groupId, token);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationKeyDTO {\n");
     
-    sb.append("  consumerKey: ").append(consumerKey).append("\n");
-    sb.append("  consumerSecret: ").append(consumerSecret).append("\n");
-    sb.append("  supportedGrantTypes: ").append(supportedGrantTypes).append("\n");
-    sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
-    sb.append("  keyState: ").append(keyState).append("\n");
-    sb.append("  keyType: ").append(keyType).append("\n");
-    sb.append("  groupId: ").append(groupId).append("\n");
-    sb.append("  token: ").append(token).append("\n");
-    sb.append("}\n");
+    sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
+    sb.append("    consumerSecret: ").append(toIndentedString(consumerSecret)).append("\n");
+    sb.append("    supportedGrantTypes: ").append(toIndentedString(supportedGrantTypes)).append("\n");
+    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
+    sb.append("    keyState: ").append(toIndentedString(keyState)).append("\n");
+    sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
+    sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
+    sb.append("    token: ").append(toIndentedString(token)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

@@ -1,30 +1,33 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import javax.validation.constraints.*;
+
 
 import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
-
-
+import javax.xml.bind.annotation.*;
 
 
 
-@ApiModel(description = "")
-public class ErrorListItemDTO  {
+public class ErrorListItemDTO   {
   
-  
-  @NotNull
-  private String code = null;
-  
-  @NotNull
-  private String message = null;
+    private String code = null;
+    private String message = null;
 
-  
   /**
    **/
+  public ErrorListItemDTO code(String code) {
+    this.code = code;
+    return this;
+  }
+
+  
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("code")
+  @NotNull
   public String getCode() {
     return code;
   }
@@ -32,12 +35,18 @@ public class ErrorListItemDTO  {
     this.code = code;
   }
 
-  
   /**
-   * Description about individual errors occurred\n
+   * Description about individual errors occurred 
    **/
-  @ApiModelProperty(required = true, value = "Description about individual errors occurred\n")
+  public ErrorListItemDTO message(String message) {
+    this.message = message;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "Description about individual errors occurred ")
   @JsonProperty("message")
+  @NotNull
   public String getMessage() {
     return message;
   }
@@ -45,16 +54,45 @@ public class ErrorListItemDTO  {
     this.message = message;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ErrorListItemDTO errorListItem = (ErrorListItemDTO) o;
+    return Objects.equals(code, errorListItem.code) &&
+        Objects.equals(message, errorListItem.message);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(code, message);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ErrorListItemDTO {\n");
     
-    sb.append("  code: ").append(code).append("\n");
-    sb.append("  message: ").append(message).append("\n");
-    sb.append("}\n");
+    sb.append("    code: ").append(toIndentedString(code)).append("\n");
+    sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

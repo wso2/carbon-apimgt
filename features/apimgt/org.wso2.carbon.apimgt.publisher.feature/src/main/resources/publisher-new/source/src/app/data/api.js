@@ -379,6 +379,7 @@ class API extends Resource {
     /**
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated
+     * @deprecated
      */
     updateSwagger(id, swagger) {
         const promised_update = this.client.then((client) => {
@@ -395,6 +396,30 @@ class API extends Resource {
             );
         });
         return promised_update;
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     *
+     */
+    updateSwagger(swagger) {
+        const promised_update = this.client.then((client) => {
+            const payload = {
+                apiId: this.id,
+                apiDefinition: JSON.stringify(swagger),
+                'Content-Type': 'multipart/form-data',
+            };
+            return client.apis['API (Individual)'].put_apis__apiId__swagger(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        return promised_update.then(response => {
+            return this;
+        });
     }
 
     /**

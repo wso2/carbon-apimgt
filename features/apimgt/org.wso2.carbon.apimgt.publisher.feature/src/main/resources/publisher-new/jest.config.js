@@ -15,13 +15,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// Refer https://jestjs.io/docs/en/configuration for more information about jest configs
 module.exports = {
-    setupFiles: [
-        '<rootDir>/source/test/setupTests.js',
-    ],
+    setupFiles: ['<rootDir>/source/test/setupTests.js'],
     moduleNameMapper: {
         'AppComponents(.*)$': '<rootDir>/source/src/app/components/$1',
         'AppData(.*)$': '<rootDir>/source/src/app/data/$1',
-        '\\.(css|less)$': '<rootDir>/public/css/main',
+        '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+            '<rootDir>/source/test/__mocks__/fileMock.js',
+        '\\.(css|less)$': '<rootDir>/source/test/__mocks__/styleMock.js',
+        Config: '<rootDir>/site/public/theme/defaultTheme.js',
     },
+    transform: {
+        '^.+\\.jsx$': 'babel-jest',
+        '^.+\\.js$': 'babel-jest',
+    },
+
+    transformIgnorePatterns: ['<rootDir>/node_modules/'],
+
+    // Automatically clear mock calls and instances between every test
+    clearMocks: true,
+
+    // Indicates whether the coverage information should be collected while executing the test
+    collectCoverage: false,
+
+    // An array of glob patterns indicating a set of files for which coverage information should be collected
+    collectCoverageFrom: ['<rootDir>/source/src/**/*.{js,jsx}'],
+
+    // The directory where Jest should output its coverage files
+    coverageDirectory: 'coverage',
+
+    // A list of reporter names that Jest uses when writing coverage reports
+    coverageReporters: ['json', 'text', 'lcov', 'clover', 'html'],
+
+    // The test environment that will be used for testing,
+    // Default is JSDOM https://github.com/jest-community/vscode-jest/issues/165
+    // testEnvironment: 'node',
 };

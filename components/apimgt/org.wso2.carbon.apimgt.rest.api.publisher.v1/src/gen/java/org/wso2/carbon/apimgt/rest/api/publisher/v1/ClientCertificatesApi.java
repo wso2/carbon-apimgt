@@ -1,147 +1,146 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.ClientCertificatesApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.factories.ClientCertificatesApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ClientCertificatesApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ClientCertificatesApiServiceImpl;
 
-import java.util.List;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.inject.Inject;
 
+import io.swagger.annotations.*;
 import java.io.InputStream;
+
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
-
+import java.util.Map;
+import java.util.List;
+import javax.validation.constraints.*;
 @Path("/client-certificates")
+
+@Api(description = "the client-certificates API")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
-@io.swagger.annotations.Api(value = "/client-certificates", description = "the client-certificates API")
+
+
 public class ClientCertificatesApi  {
 
-   private final ClientCertificatesApiService delegate = ClientCertificatesApiServiceFactory.getClientCertificatesApi();
+  @Context MessageContext securityContext;
+
+ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
+
 
     @GET
     @Path("/{alias}/content")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Download a certificate.", notes = "This operation can be used to download a certificate which matches the given alias.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nAlias not provided or server is not configured to support mutual SSL authentication.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Certificate for the Alias not found.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n") })
-
-    public Response clientCertificatesAliasContentGet(@ApiParam(value = "",required=true ) @PathParam("alias")  String alias)
-    {
-    return delegate.clientCertificatesAliasContentGet(alias);
+    @ApiOperation(value = "Download a certificate.", notes = "This operation can be used to download a certificate which matches the given alias. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+        })
+    }, tags={ "ClientCertificates (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Alias not provided or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Certificate for the Alias not found. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response clientCertificatesAliasContentGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) {
+        return delegate.clientCertificatesAliasContentGet(alias, securityContext);
     }
+
     @DELETE
     @Path("/{alias}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a certificate.", notes = "This operation can be used to delete an uploaded certificate.\n", response = void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nThe Certificate deleted successfully.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nAlias not found or server is not configured to support mutual SSL authentication.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. |\nFailed to delete the certificate. Certificate could not found for\nthe given alias\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n") })
-
-    public Response clientCertificatesAliasDelete(@ApiParam(value = "The alias of the certificate that should be deleted.\n",required=true ) @PathParam("alias")  String alias)
-    {
-    return delegate.clientCertificatesAliasDelete(alias);
+    @ApiOperation(value = "Delete a certificate.", notes = "This operation can be used to delete an uploaded certificate. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates")
+        })
+    }, tags={ "ClientCertificates (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate deleted successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. | Failed to delete the certificate. Certificate could not found for the given alias ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response clientCertificatesAliasDelete(@ApiParam(value = "The alias of the certificate that should be deleted. ",required=true) @PathParam("alias") String alias) {
+        return delegate.clientCertificatesAliasDelete(alias, securityContext);
     }
+
     @GET
     @Path("/{alias}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get the certificate information.", notes = "This operation can be used to get the information about a certificate.\n", response = CertificateInfoDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nAlias not found or server is not configured to support mutual SSL authentication.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nAlias not found\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n") })
-
-    public Response clientCertificatesAliasGet(@ApiParam(value = "",required=true ) @PathParam("alias")  String alias)
-    {
-    return delegate.clientCertificatesAliasGet(alias);
+    @ApiOperation(value = "Get the certificate information.", notes = "This operation can be used to get the information about a certificate. ", response = CertificateInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+        })
+    }, tags={ "ClientCertificates (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = CertificateInfoDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Alias not found ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response clientCertificatesAliasGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) {
+        return delegate.clientCertificatesAliasGet(alias, securityContext);
     }
+
     @PUT
     @Path("/{alias}")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a certificate.", notes = "This operation can be used to update an uploaded certificate.\n", response = ClientCertMetadataDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nThe Certificate updated successfully.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nFailure due to not providing alias.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nUpdating certificate failed. Alias not found or server is not configured to support mutual SSL\nauthentication.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n") })
-
-    public Response clientCertificatesAliasPut(@ApiParam(value = "Alias for the certificate",required=true ) @PathParam("alias")  String alias,
-    @ApiParam(value = "The certificate that needs to be uploaded.") @Multipart(value = "certificate", required = false) InputStream certificateInputStream,
-    @ApiParam(value = "The certificate that needs to be uploaded. : details") @Multipart(value = "certificate" , required = false) Attachment certificateDetail,
-    @ApiParam(value = "The tier of the certificate" )@Multipart(value = "tier", required = false)  String tier)
-    {
-    return delegate.clientCertificatesAliasPut(alias,certificateInputStream,certificateDetail,tier);
+    @ApiOperation(value = "Update a certificate.", notes = "This operation can be used to update an uploaded certificate. ", response = ClientCertMetadataDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+        })
+    }, tags={ "ClientCertificates (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate updated successfully. ", response = ClientCertMetadataDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Updating certificate failed. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response clientCertificatesAliasPut(@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias,  @Multipart(value = "certificate", required = false) InputStream certificateInputStream, @Multipart(value = "certificate" , required = false) Attachment certificateDetail, @Multipart(value = "tier", required = false)  String tier) {
+        return delegate.clientCertificatesAliasPut(alias, certificateInputStream, certificateDetail, tier, securityContext);
     }
+
     @GET
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve/ Search uploaded Client Certificates.", notes = "This operation can be used to retrieve and search the uploaded client certificates.\n", response = ClientCertificatesDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nFailure due to not providing alias or server is not configured to support mutual SSL authentication.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\n") })
-
-    public Response clientCertificatesGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
-    @ApiParam(value = "Alias for the client certificate") @QueryParam("alias")  String alias,
-    @ApiParam(value = "UUID of the API") @QueryParam("apiId")  String apiId)
-    {
-    return delegate.clientCertificatesGet(limit,offset,alias,apiId);
+    @ApiOperation(value = "Retrieve/ Search uploaded Client Certificates.", notes = "This operation can be used to retrieve and search the uploaded client certificates. ", response = ClientCertificatesDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+        })
+    }, tags={ "ClientCertificates (Collection)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body. ", response = ClientCertificatesDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response clientCertificatesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the client certificate")  @QueryParam("alias") String alias,  @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId) {
+        return delegate.clientCertificatesGet(limit, offset, alias, apiId, securityContext);
     }
+
     @POST
     
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Upload a new certificate.", notes = "This operation can be used to upload a new certificate for an endpoint.\n", response = ClientCertMetadataDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nThe Certificate added successfully.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nFailures due to existing alias or expired certificate.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error\nFailed to add the Certificate due to an Internal Server Error\n") })
-
-    public Response clientCertificatesPost(@ApiParam(value = "The certificate that needs to be uploaded.") @Multipart(value = "certificate") InputStream certificateInputStream,
-    @ApiParam(value = "The certificate that needs to be uploaded. : details") @Multipart(value = "certificate" ) Attachment certificateDetail,
-    @ApiParam(value = "Alias for the certificate", required=true )@Multipart(value = "alias")  String alias,
-    @ApiParam(value = "apiId to which the certificate should be applied.", required=true )@Multipart(value = "apiId")  String apiId,
-    @ApiParam(value = "apiId to which the certificate should be applied.", required=true )@Multipart(value = "tier")  String tier)
-    {
-    return delegate.clientCertificatesPost(certificateInputStream,certificateDetail,alias,apiId,tier);
+    @ApiOperation(value = "Upload a new certificate.", notes = "This operation can be used to upload a new certificate for an endpoint. ", response = ClientCertMetadataDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_add", description = "Add client certificates")
+        })
+    }, tags={ "ClientCertificates (Individual)" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = ClientCertMetadataDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Failures due to existing alias or expired certificate. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error Failed to add the Certificate due to an Internal Server Error ", response = ErrorDTO.class) })
+    public Response clientCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "apiId")  String apiId, @Multipart(value = "tier")  String tier) {
+        return delegate.clientCertificatesPost(certificateInputStream, certificateDetail, alias, apiId, tier, securityContext);
     }
 }
-

@@ -3,40 +3,46 @@ package org.wso2.carbon.apimgt.rest.api.store.v1;
 import org.wso2.carbon.apimgt.rest.api.store.v1.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 
 import java.util.List;
 
 import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
-public abstract class ApisApiService {
-    public abstract Response apisApiIdCommentsCommentIdDelete(String commentId,String apiId,String ifMatch);
-    public abstract Response apisApiIdCommentsCommentIdGet(String commentId,String apiId,String ifNoneMatch);
-    public abstract Response apisApiIdCommentsCommentIdPut(String commentId,String apiId,CommentDTO body,String ifMatch);
-    public abstract Response apisApiIdCommentsGet(String apiId,Integer limit,Integer offset);
-    public abstract Response apisApiIdCommentsPost(String apiId,CommentDTO body);
-    public abstract Response apisApiIdDocumentsDocumentIdContentGet(String apiId,String documentId,String xWSO2Tenant,String ifNoneMatch);
-    public abstract Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String xWSO2Tenant,String ifNoneMatch);
-    public abstract Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String xWSO2Tenant,String ifNoneMatch);
-    public abstract Response apisApiIdGet(String apiId,String xWSO2Tenant,String ifNoneMatch);
-    public abstract Response apisApiIdRatingsGet(String apiId,Integer limit,Integer offset);
-    public abstract Response apisApiIdRatingsRatingIdGet(String apiId,String ratingId,String ifNoneMatch);
-    public abstract Response apisApiIdSdksLanguageGet(String apiId,String language);
-    public abstract Response apisApiIdSwaggerGet(String apiId,String ifNoneMatch,String xWSO2Tenant);
-    public abstract Response apisApiIdThumbnailGet(String apiId,String xWSO2Tenant,String ifNoneMatch);
-    public abstract Response apisApiIdUserRatingPut(String apiId,RatingDTO body);
-    public abstract Response apisApiIdWsdlGet(String apiId,String ifNoneMatch,String xWSO2Tenant);
-    public abstract Response apisGet(Integer limit,Integer offset,String xWSO2Tenant,String query,String ifNoneMatch);
+
+public interface ApisApiService {
+      public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch, MessageContext messageContext);
+      public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext);
+      public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, MessageContext messageContext);
+      public Response apisApiIdCommentsPost(String apiId, CommentDTO body, MessageContext messageContext);
+      public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, MessageContext messageContext);
+      public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdSdksLanguageGet(String apiId, String language, MessageContext messageContext);
+      public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext);
+      public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, MessageContext messageContext);
+      public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext);
+      public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, MessageContext messageContext);
 }
-

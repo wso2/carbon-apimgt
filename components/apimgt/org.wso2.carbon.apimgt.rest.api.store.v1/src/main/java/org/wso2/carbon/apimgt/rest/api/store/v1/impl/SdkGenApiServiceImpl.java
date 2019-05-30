@@ -18,15 +18,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApiResponseMessage;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApiService;
 
 import javax.ws.rs.core.Response;
 
-public class SdkGenApiServiceImpl extends SdkGenApiService {
+public class SdkGenApiServiceImpl implements SdkGenApiService {
     @Override
-    public Response sdkGenLanguagesGet(){
+    public Response sdkGenLanguagesGet(MessageContext messageContext) {
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity("magic!").build();
     }
 }

@@ -36,7 +36,6 @@ import Configurations from 'Config';
 import AppErrorBoundaryStyled from 'AppComponents/Shared/AppErrorBoundaryStyled';
 
 const themes = [];
-
 themes.push(createMuiTheme(Configurations.themes.light));
 themes.push(createMuiTheme(Configurations.themes.dark));
 
@@ -106,6 +105,7 @@ export default class Protected extends Component {
         if (!user) {
             const { pathname } = window.location;
             const params = qs.stringify({
+                // acc : Accumulated value, cv: Current value, ci: current index
                 referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
             });
             return (

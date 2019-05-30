@@ -36,10 +36,11 @@ import ConfigManager from 'AppData/ConfigManager';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
+import Alert from 'AppComponents/Shared/Alert';
 
 // import Overview from './Overview/Overview';
 import Overview from './NewOverview/Overview';
-import Configuration from './Overview/Overview';
+import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Resources from './Resources/Resources';
@@ -114,6 +115,7 @@ class Details extends Component {
             api: null,
             apiNotFound: false,
             active: active || 'overview',
+            updateAPI: this.updateAPI, // eslint-disable-line react/no-unused-state
         };
         this.setAPI = this.setAPI.bind(this);
     }
@@ -168,6 +170,29 @@ class Details extends Component {
         const promisedApi = Api.get(apiUUID);
         promisedApi
             .then((api) => {
+                this.setState({ api });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ apiNotFound: true });
+                }
+            });
+    }
+    updateAPI(newAPI) {
+        const restAPI = new Api();
+        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
+        /* eslint no-param-reassign: ["error", { "props": false }] */
+        if (newAPI._data) delete newAPI._data;
+        if (newAPI.client) delete newAPI.client;
+
+        const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
+        promisedApi
+            .then((api) => {
+                Alert.info(`${api.name} updated successfully.`);
                 this.setState({ api });
             })
             .catch((error) => {
