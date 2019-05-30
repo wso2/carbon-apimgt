@@ -18,7 +18,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class HoneyAPIDataPublisher {
+public class HoneyAPIDataPublisher{
     public static HoneyDataPublisherPool dataPublisherPool;
 
     public static final Log log = LogFactory.getLog(HoneyAPIDataPublisher.class);
@@ -31,7 +31,7 @@ public class HoneyAPIDataPublisher {
 
     Executor executor;
 
-    public HoneyAPIDataPublisher() {
+    public HoneyAPIDataPublisher(){
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance().getThrottleProperties();
         if (throttleProperties != null) {
             ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
@@ -54,10 +54,19 @@ public class HoneyAPIDataPublisher {
                             .getUsername(),
                             dataPublisherConfiguration.getPassword());
 
-                } catch (DataEndpointAgentConfigurationException | DataEndpointConfigurationException | DataEndpointAuthenticationException | TransportException e) {
+                } catch (DataEndpointAgentConfigurationException e) {
                     log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
                             e.getMessage(), e);
                 } catch (DataEndpointException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointConfigurationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (DataEndpointAuthenticationException e) {
+                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
+                            e.getMessage(), e);
+                } catch (TransportException e) {
                     log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
                             e.getMessage(), e);
                 }
@@ -70,7 +79,7 @@ public class HoneyAPIDataPublisher {
         try {
             if (dataPublisherPool != null) {
                 HoneyAPIDataProcessAndPublishAgent agent = dataPublisherPool.get();
-                agent.setDataReference(currentTime, messageId, apiMethod, headerSet, messageBody, clientIp);
+                agent.setDataReference(currentTime,messageId,apiMethod, headerSet,messageBody, clientIp);
                 if (log.isDebugEnabled()) {
                     log.debug("Publishing HoneyAPI data from gateway to traffic-manager for started at "
                             + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
@@ -84,7 +93,7 @@ public class HoneyAPIDataPublisher {
                 log.debug("HoneyPot data publisher pool is not initialized.");
             }
         } catch (Exception e) {
-            log.error("Error while publishing HoneyPotData events to TM", e);
+            log.error("Error while publishing data to TM", e);
         }
     }
 
@@ -112,7 +121,7 @@ public class HoneyAPIDataPublisher {
                 //agent.setDataReference(null);
                 HoneyAPIDataPublisher.dataPublisherPool.release(agent);
             } catch (Exception e) {
-                log.error("Error while returning Honeypot data publishing agent back to pool" + e.getMessage());
+                log.error("Error while returning HoneyPotAPI data publishing agent back to pool" + e.getMessage());
             }
         }
     }
