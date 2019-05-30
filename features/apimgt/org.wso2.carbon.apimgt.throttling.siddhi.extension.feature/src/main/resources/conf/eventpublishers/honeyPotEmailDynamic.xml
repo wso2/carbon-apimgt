@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventPublisher name="honeyPotEmailDynamic" processing="enable"
+                statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
+    <from streamName="org.wso2.apim.honeypotapi.emailAlertStream" version="1.0.0"/>
+    <mapping customMapping="enable" type="text">
+        <inline>
+            ************ Please do not reply this message ************
+            Hi Admin,
+
+            Identified an Anonymous Attack and that details are,
+
+
+            1. Message-Id = {{messageID}},
+            2. Invoked method = {{apiMethod}},
+            3. Passed header set in request = {{headerSet}},
+            4. Passed message body(if any) = {{messageBody}},
+            5. Clinet IP = {{clientIp}}
+
+            Thanks,
+            Super Admin
+            ************ Please do not reply this message ************
+        </inline>
+    </mapping>
+    <to eventAdapterType="email">
+        <property name="email.subject">Annonymous Attack</property>
+        <property name="email.address">{{emails}}</property>
+        <property name="email.type">text/plain</property>
+    </to>
+</eventPublisher>

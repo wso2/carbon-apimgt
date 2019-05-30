@@ -1,0 +1,21 @@
+/* Enter a unique ExecutionPlan */
+@Plan:name('honeypot_apim_email_alert_notification')
+
+/* Enter a unique description for ExecutionPlan */
+@Plan:description('Send email when honeypot api invoked')
+
+/* define streams/tables and write queries here ... */
+@Import('org.wso2.honeypotAPI.request.stream:1.0.0')
+define stream HoneypotDataStream (currentTime long,messageID string, apiMethod string, headerSet string, messageBody string, clientIp string);
+
+@Export('org.wso2.apim.honeypotapi.emailAlertStream:1.0.0')
+define stream emailAlertStream (currentTime long,messageID string, apiMethod string, headerSet string,messageBody string, clientIp string, emails string);
+
+
+@from(eventtable='rdbms', datasource.name = 'WSO2AM_DB', table.name = 'HONEYPOT_EMAIL_LIST')
+define table emailListable (TENANT_DOMAIN string, EMAIL_LIST string);
+
+@info(name = 'query1')
+from HoneypotDataStream#window.length(1) join emailListable
+select currentTime, messageID , apiMethod, headerSet,messageBody,clientIp,emailListable.EMAIL_LIST as emails
+insert into emailAlertStream;

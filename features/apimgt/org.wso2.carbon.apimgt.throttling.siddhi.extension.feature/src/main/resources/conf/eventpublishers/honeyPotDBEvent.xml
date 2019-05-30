@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventPublisher name="honeyPotDBEvent" processing="enable"
+                statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
+    <from streamName="org.wso2.honeypotAPI.request.stream" version="1.0.0"/>
+    <mapping customMapping="disable" type="map"/>
+    <to eventAdapterType="rdbms">
+        <property name="datasource.name">WSO2AM_DB</property>
+        <property name="execution.mode">insert</property>
+        <property name="table.name">HoneyPotAPIData</property>
+    </to>
+</eventPublisher>
