@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.impl.dao;
 
@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+<<<<<<< HEAD
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -74,25 +75,28 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+=======
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
+import org.wso2.carbon.apimgt.api.model.policy.*;
+>>>>>>> 6a2cb72309... added local part of UI
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+<<<<<<< HEAD
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
+=======
+import org.wso2.carbon.apimgt.impl.utils.*;
+>>>>>>> 6a2cb72309... added local part of UI
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
@@ -104,13 +108,13 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+<<<<<<< HEAD
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -133,6 +137,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+=======
+import java.sql.*;
+import java.util.*;
+>>>>>>> 6a2cb72309... added local part of UI
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1300,7 +1308,7 @@ public class ApiMgtDAO {
                         sqlQuery += whereClauseWithMultiGroupId;
                     }
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    String groupIdArr[] = groupingId.split(",");
+                    String[] groupIdArr = groupingId.split(",");
 
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
                     int tenantId = APIUtil.getTenantId(subscriber.getName());
@@ -1396,7 +1404,7 @@ public class ApiMgtDAO {
                         sqlQuery += whereClauseWithMultiGroupId;
                     }
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    String groupIdArr[] = groupingId.split(",");
+                    String[] groupIdArr = groupingId.split(",");
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
                     int tenantId = APIUtil.getTenantId(subscriber.getName());
                     ps.setInt(1, tenantId);
@@ -1713,6 +1721,7 @@ public class ApiMgtDAO {
                         subscribedAPIs.add(subscribedAPI);
                     }
 
+                    String[] groupIDArray = groupingId.split(",");
                     if (index == endSubIndex - 1) {
                         break;
                     }
@@ -1821,16 +1830,16 @@ public class ApiMgtDAO {
     /**
      * Gets the subscribed API's, by the group for the application.
      *
-     * @param subscriber      the subscriber subscribing for the api
+     * @param subscriber    the subscriber subscribing for the api
      * @param applicationId the application to which the api's are subscribed
-     * @param startSubIndex   the start index for pagination
-     * @param endSubIndex     end index for pagination
-     * @param groupingId      the group id of the application
+     * @param startSubIndex the start index for pagination
+     * @param endSubIndex   end index for pagination
+     * @param groupingId    the group id of the application
      * @return the set of subscribed API's.
      * @throws APIManagementException
      */
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, int applicationId,
-            int startSubIndex, int endSubIndex, String groupingId)
+                                                         int startSubIndex, int endSubIndex, String groupingId)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
         Connection connection = null;
@@ -1859,7 +1868,7 @@ public class ApiMgtDAO {
                     } else {
                         sqlQuery += whereClauseWithMultiGroupId;
                     }
-                    String groupIDArray[] = groupingId.split(",");
+                    String[] groupIDArray = groupingId.split(",");
                     ps = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
                     ps.setInt(1, tenantId);
                     ps.setInt(2, applicationId);
@@ -2486,7 +2495,7 @@ public class ApiMgtDAO {
                 tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
                 String roles = resultSet.getString("ROLES");
                 if (roles != null && !roles.isEmpty()) {
-                    String roleList[] = roles.split(",");
+                    String[] roleList = roles.split(",");
                     tierPermission.setRoles(roleList);
                 }
                 tierPermissions.add(tierPermission);
@@ -2520,7 +2529,7 @@ public class ApiMgtDAO {
                 tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
                 String roles = resultSet.getString("ROLES");
                 if (roles != null) {
-                    String roleList[] = roles.split(",");
+                    String[] roleList = roles.split(",");
                     tierPermission.setRoles(roleList);
                 }
             }
@@ -2553,7 +2562,7 @@ public class ApiMgtDAO {
                 tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
                 String roles = resultSet.getString("ROLES");
                 if (roles != null) {
-                    String roleList[] = roles.split(",");
+                    String[] roleList = roles.split(",");
                     tierPermission.setRoles(roleList);
                 }
             }
@@ -2635,7 +2644,7 @@ public class ApiMgtDAO {
                 tierPermission.setPermissionType(resultSet.getString("PERMISSIONS_TYPE"));
                 String roles = resultSet.getString("ROLES");
                 if (roles != null && !roles.isEmpty()) {
-                    String roleList[] = roles.split(",");
+                    String[] roleList = roles.split(",");
                     tierPermission.setRoles(roleList);
                 }
                 tierPermissions.add(tierPermission);
@@ -3245,7 +3254,7 @@ public class ApiMgtDAO {
     /**
      * @param apiName    Name of the API
      * @param apiVersion Version of the API
-     * @param provider Name of API creator
+     * @param provider   Name of API creator
      * @return All subscriptions of a given API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
@@ -4000,7 +4009,7 @@ public class ApiMgtDAO {
             int tenantId = IdentityTenantUtil.getTenantId(domain);
 
             preparedStatement = conn.prepareStatement(SQLConstants.REMOVE_APPLICATION_ATTRIBUTES_SQL);
-            preparedStatement.setInt(1,application.getId());
+            preparedStatement.setInt(1, application.getId());
             preparedStatement.execute();
 
             if (log.isDebugEnabled()) {
@@ -4703,7 +4712,7 @@ public class ApiMgtDAO {
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    String groupIDArray[] = groupingId.split(",");
+                    String[] groupIDArray = groupingId.split(",");
                     int paramIndex = groupIDArray.length;
                     prepStmt = fillQueryParams(connection, blockingFilerSql, groupIDArray, 1);
                     prepStmt.setString(++paramIndex, tenantDomain);
@@ -4721,7 +4730,7 @@ public class ApiMgtDAO {
             rs = prepStmt.executeQuery();
             ArrayList<Application> applicationsList = new ArrayList<Application>();
             Application application;
-            Map<String,String> applicationAttributes;
+            Map<String, String> applicationAttributes;
             int applicationId = 0;
             while (rs.next()) {
                 applicationId = rs.getInt("APPLICATION_ID");
@@ -4757,13 +4766,14 @@ public class ApiMgtDAO {
 
     /**
      * Returns applications within a tenant domain with pagination
-     * @param tenantId   The tenantId.
-     * @param start      The start index.
-     * @param offset     The offset.
-     * @param searchOwner     The search string.
-     * @param searchApplication     The search string.
-     * @param sortOrder  The sort order.
-     * @param sortColumn The sort column.
+     *
+     * @param tenantId          The tenantId.
+     * @param start             The start index.
+     * @param offset            The offset.
+     * @param searchOwner       The search string.
+     * @param searchApplication The search string.
+     * @param sortOrder         The sort order.
+     * @param sortColumn        The sort column.
      * @return Application[] The array of applications.
      * @throws APIManagementException
      */
@@ -4853,7 +4863,7 @@ public class ApiMgtDAO {
         String sqlQuery = SQLConstants.GET_SIMPLE_APPLICATIONS;
 
         String tenantFilter = "AND SUB.TENANT_ID=?";
-        sqlQuery += tenantFilter ;
+        sqlQuery += tenantFilter;
         try {
             connection = APIMgtDBUtil.getConnection();
 
@@ -5145,7 +5155,7 @@ public class ApiMgtDAO {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(subscriberId);
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    String groupIDArray[] = groupingId.split(",");
+                    String[] groupIDArray = groupingId.split(",");
                     sqlQuery += whereClauseWithMultiGroupId;
                     prepStmt = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
                     prepStmt.setString(1, applicationName);
@@ -5185,15 +5195,15 @@ public class ApiMgtDAO {
     /**
      * Returns the consumer Key for a given Application Name, Subscriber Name, Key Type, Grouping Id combination.
      *
-     * @param applicationId   Id of the Application.
-     * @param subscriberId    Name of Subscriber.
-     * @param keyType         PRODUCTION | SANDBOX.
-     * @param groupingId      Grouping ID. When set to null query will be performed using the other three values.
+     * @param applicationId Id of the Application.
+     * @param subscriberId  Name of Subscriber.
+     * @param keyType       PRODUCTION | SANDBOX.
+     * @param groupingId    Grouping ID. When set to null query will be performed using the other three values.
      * @return Consumer Key matching the provided combination.
      * @throws APIManagementException
      */
     public String getConsumerKeyForApplicationKeyType(int applicationId, String subscriberId, String keyType,
-            String groupingId) throws APIManagementException {
+                                                      String groupingId) throws APIManagementException {
         String consumerKey = null;
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -5216,7 +5226,7 @@ public class ApiMgtDAO {
                 if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(subscriberId);
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    String groupIDArray[] = groupingId.split(",");
+                    String[] groupIDArray = groupingId.split(",");
                     sqlQuery += whereClauseWithMultiGroupId;
                     prepStmt = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
                     prepStmt.setInt(1, applicationId);
@@ -5566,7 +5576,7 @@ public class ApiMgtDAO {
                 event.setApi(apiId);
                 String oldState = rs.getString("PREVIOUS_STATE");
                 //event.setOldStatus(oldState != null ? APIStatus.valueOf(oldState) : null);
-                event.setOldStatus(oldState != null ? oldState : null);
+                event.setOldStatus(oldState);
                 //event.setNewStatus(APIStatus.valueOf(rs.getString("NEW_STATE")));
                 event.setNewStatus(rs.getString("NEW_STATE"));
                 event.setUserId(rs.getString("USER_ID"));
@@ -6281,10 +6291,10 @@ public class ApiMgtDAO {
                     "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
             String whereClauseWithMultiGroupIdCaseInSensitive =
                     "  WHERE  ((APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM "
-                    + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  "
-                    + "OR   LOWER(SUB.USER_ID) = LOWER(?)  "
-                    + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) "
-                    + "AND APP.NAME = ? AND LOWER(SUB.SUBSCRIBER_ID) = LOWER(APP.SUBSCRIBER_ID)";
+                            + "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  "
+                            + "OR   LOWER(SUB.USER_ID) = LOWER(?)  "
+                            + "OR (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))) "
+                            + "AND APP.NAME = ? AND LOWER(SUB.SUBSCRIBER_ID) = LOWER(APP.SUBSCRIBER_ID)";
 
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
                 if (multiGroupAppSharingEnabled) {
@@ -6425,7 +6435,7 @@ public class ApiMgtDAO {
                 }
             }
             if (application != null) {
-                Map<String,String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
                 application.setApplicationAttributes(applicationAttributes);
             }
         } catch (SQLException e) {
@@ -6528,7 +6538,7 @@ public class ApiMgtDAO {
             }
 
             if (application != null) {
-                Map<String,String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
                 application.setApplicationAttributes(applicationAttributes);
             }
 
@@ -6875,7 +6885,7 @@ public class ApiMgtDAO {
         String apiProvider = null;
         String getAPIProviderQuery = null;
 
-        try(Connection connection = APIMgtDBUtil.getConnection()) {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenant)) {
                 //in this case, the API should be fetched from super tenant
                 getAPIProviderQuery = SQLConstants.GET_API_PROVIDER_WITH_NAME_VERSION_FOR_SUPER_TENANT;
@@ -8714,7 +8724,7 @@ public class ApiMgtDAO {
      * Returns all the scopes assigned for given apis
      *
      * @param apiIdsString list of api ids separated by commas
-     * @return Map<String, Set<Scope>> set of scopes for each apiId
+     * @return Map<String ,   Set < Scope>> set of scopes for each apiId
      * @throws APIManagementException
      */
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
@@ -9323,13 +9333,9 @@ public class ApiMgtDAO {
                     //If the API ID is different from the one being saved
                     if (apiID != resultSet2.getInt("API_ID")) {
                         //Check if the provider name and api name is same.
-                        if (provider.equals(APIUtil.replaceEmailDomainBack(identifier.getProviderName())) && apiName
-                                .equals(identifier.getApiName())) {
-
-                            //Return false since this means we're attaching the scope to another version of the API.
-                            return false;
-                        }
-                        return true;
+                        //Return false since this means we're attaching the scope to another version of the API.
+                        return !provider.equals(APIUtil.replaceEmailDomainBack(identifier.getProviderName())) || !apiName
+                                .equals(identifier.getApiName());
                     } else {
                         return false;
                     }
@@ -9756,7 +9762,7 @@ public class ApiMgtDAO {
 
             if (!StringUtils.isEmpty(alertTypesIDList)) {
 
-                List<String> alertTypeIdList = Arrays.asList(alertTypesIDList.split(","));
+                String[] alertTypeIdList = alertTypesIDList.split(",");
 
                 for (String alertTypeId : alertTypeIdList) {
                     PreparedStatement psAlertTypeId = null;
@@ -9793,7 +9799,7 @@ public class ApiMgtDAO {
 
                 if (!StringUtils.isEmpty(emailList)) {
 
-                    List<String> extractedEmailList = Arrays.asList(emailList.split(","));
+                    String[] extractedEmailList = emailList.split(",");
 
                     String saveEmailListDetailsQuery = SQLConstants.SAVE_EMAIL_LIST_DETAILS_QUERY;
 
@@ -9832,7 +9838,7 @@ public class ApiMgtDAO {
                     int generatedEmailIdList = rs.getInt(1);
                     if (!StringUtils.isEmpty(emailList)) {
 
-                        List<String> extractedEmailList = Arrays.asList(emailList.split(","));
+                        String[] extractedEmailList = emailList.split(",");
 
                         String saveEmailListDetailsQuery = SQLConstants.SAVE_EMAIL_LIST_DETAILS_QUERY;
 
@@ -11871,7 +11877,7 @@ public class ApiMgtDAO {
                             conditionValue);
                 }
             } else if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(conditionType)) {
-                String appArray[] = conditionValue.split(":");
+                String[] appArray = conditionValue.split(":");
                 if (appArray.length > 1) {
                     String appOwner = appArray[0];
                     String appName = appArray[1];
@@ -12330,7 +12336,7 @@ public class ApiMgtDAO {
         ResultSet checkIsResultSet = null;
         boolean status = false;
         try {
-             /*String apiProvider = tenantId;*/
+            /*String apiProvider = tenantId;*/
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(true);
             String isExistQuery = SQLConstants.ThrottleSQLConstants.TIER_HAS_SUBSCRIPTION;
@@ -12672,7 +12678,7 @@ public class ApiMgtDAO {
      * @return
      * @throws SQLException
      */
-    public PreparedStatement fillQueryParams(Connection conn, String query, String params[], int startingParamIndex)
+    public PreparedStatement fillQueryParams(Connection conn, String query, String[] params, int startingParamIndex)
             throws SQLException {
 
         String paramString = "";
@@ -13092,7 +13098,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get label list: " , e);
+            handleException("Failed to get label list: ", e);
         }
         return hostList;
     }
@@ -13248,7 +13254,7 @@ public class ApiMgtDAO {
                 int[] update = ps.executeBatch();
             }
         } catch (SQLException e) {
-            handleException("Error in adding attributes of application with id: " + applicationId , e);
+            handleException("Error in adding attributes of application with id: " + applicationId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
@@ -13257,7 +13263,7 @@ public class ApiMgtDAO {
     /**
      * Get all attributes stored against an Application
      *
-     * @param conn Database connection
+     * @param conn          Database connection
      * @param applicationId
      * @throws APIManagementException
      */
@@ -13286,7 +13292,7 @@ public class ApiMgtDAO {
     /**
      * Delete certain attribute stored against an Application
      *
-     * @param attributeKey User defined key of attribute
+     * @param attributeKey  User defined key of attribute
      * @param applicationId
      * @throws APIManagementException
      */
@@ -13314,8 +13320,8 @@ public class ApiMgtDAO {
      * Add new attributes against an Application in API Store
      *
      * @param applicationAttributes Map of key, value pair of attributes
-     * @param applicationId Id of Application against which attributes are getting stored
-     * @param tenantId Id of tenant
+     * @param applicationId         Id of Application against which attributes are getting stored
+     * @param tenantId              Id of tenant
      * @throws APIManagementException
      */
     public void addApplicationAttributes(Map<String, String> applicationAttributes, int applicationId, int tenantId)
@@ -13370,7 +13376,7 @@ public class ApiMgtDAO {
     /**
      * Retrieves the Application which is corresponding to the given UUID String
      *
-     * @param subscriberId subscriberId of the Application
+     * @param subscriberId    subscriberId of the Application
      * @param applicationName name of the Application
      * @return
      * @throws APIManagementException
@@ -13431,8 +13437,6 @@ public class ApiMgtDAO {
         }
         return application;
     }
-
-
     /**
      * Retrieve URI Templates for the given API
      * @param api API
@@ -13915,10 +13919,11 @@ public class ApiMgtDAO {
 
     /**
      * Get Honey API update list
+     *
      * @return HoneyPotAPIAlertdata ArrayList
-     *@throws APIManagementException
+     * @throws APIManagementException
      */
-    public List<HoneyPotAPIAlertData> getAlerts() throws APIManagementException{
+    public List<HoneyPotAPIAlertData> getAlerts() throws APIManagementException {
         List<HoneyPotAPIAlertData> alertData = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -13928,7 +13933,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(getHoneypotApiAlertsQuery);
             rs = ps.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 HoneyPotAPIAlertData honeyPotAPIAlertData = new HoneyPotAPIAlertData();
                 honeyPotAPIAlertData.setCurrentTime(rs.getLong("currentTime"));
                 honeyPotAPIAlertData.setMessageID(rs.getString("messageID"));
@@ -13945,6 +13950,12 @@ public class ApiMgtDAO {
         }
         return alertData;
     }
+
+    /**
+     * @param messageID
+     * @throws APIManagementException
+     * @throws SQLException
+     */
     public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
 
         Connection connection = APIMgtDBUtil.getConnection();
@@ -13963,7 +13974,13 @@ public class ApiMgtDAO {
         }
 
     }
-    /* configuring email list */
+
+    /**
+     * @param emailList
+     * @param tenantDomain
+     * @throws SQLException
+     * @throws APIManagementException
+     */
     public void addHoneyPotAPiEmailAlertConfiguration(String emailList, String tenantDomain) throws SQLException, APIManagementException {
         Connection connection;
         PreparedStatement ps = null;
@@ -13973,9 +13990,8 @@ public class ApiMgtDAO {
         try {
             List<String> emailListData = Arrays.asList(emailList);
             int listSize = emailListData.size();
-            log.info("++++++++++listSize:" + listSize);
-            if (listSize != 0) {
-                String emailListUpdateQuery = SQLConstants.HoneyPotAPIDataConstants.UPDATE_EMAILLIST_BY_TENANT_ID;
+            if (listSize != 1) {
+                String emailListUpdateQuery = SQLConstants.HoneyPotAPIDataConstants.UPDATE_EMAIL_LIST_BY_TENANT_ID;
                 ps = connection.prepareStatement(emailListUpdateQuery);
                 ps.setString(1, emailList);
                 ps.setString(2, tenantDomain);
@@ -13989,15 +14005,20 @@ public class ApiMgtDAO {
                 ps.execute();
                 connection.commit();
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             handleException("Error while save email list.", e);
-        }finally {
+        } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
         }
 
     }
-    /* list the configured email list */
-    public List<String> retrieveSavedHoneyPotAPIAlertEmailList(String userName)
+
+    /**
+     * @param tenantDomain
+     * @return
+     * @throws APIManagementException
+     */
+    public List<String> retrieveSavedHoneyPotAPIAlertEmailList(String tenantDomain)
             throws APIManagementException {
 
         Connection conn = null;
@@ -14010,13 +14031,13 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             sqlQuery = SQLConstants.HoneyPotAPIDataConstants.GET_SAVED_ALERT_EMAILS;
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, userName);
+            ps.setString(1, tenantDomain);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 list.add(resultSet.getString(1));
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve saved alert types by user name. ", e);
+            handleException("Failed to retrieve saved email types by tenant Name. ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
@@ -14024,7 +14045,7 @@ public class ApiMgtDAO {
 
     }
 
-    public void deleteHoneyPotAPIAlertEmailList(String userName) throws APIManagementException, SQLException {
+    public void deleteHoneyPotAPIAlertEmailList(String tenantDomain) throws APIManagementException, SQLException {
 
         Connection connection;
         PreparedStatement ps = null;
@@ -14033,10 +14054,13 @@ public class ApiMgtDAO {
         connection.setAutoCommit(false);
 
         try {
-            String getEmailListIdByUserName = SQLConstants.HoneyPotAPIDataConstants.GET_EMAILLISTID_BY_USERNAME;
-            ps = connection.prepareStatement(getEmailListIdByUserName);
-            ps.setString(1, userName);
+            connection.setAutoCommit(false);
+            String deleteEmailListIdByTenantDomain = SQLConstants.HoneyPotAPIDataConstants.DELETE_EMAIL_LIST_BY_TENANT_ID;
+            ps = connection.prepareStatement(deleteEmailListIdByTenantDomain);
+            ps.setString(1, tenantDomain);
             rs = ps.executeQuery();
+            connection.commit();
+
         } catch (SQLException e) {
             handleException("Failed to delete alert email data.", e);
         } finally {
