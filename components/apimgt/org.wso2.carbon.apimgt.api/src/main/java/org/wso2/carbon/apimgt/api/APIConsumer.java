@@ -759,6 +759,29 @@ public interface APIConsumer extends APIManager {
      */
     Map<String,Object> getAllPaginatedLightWeightAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
                                                    boolean returnAPITags) throws APIManagementException;
+
+    /**
+     * Returns the swagger definition of the API for the given gateway environment as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param environmentName API Gateway environment name
+     * @return swagger string
+     * @throws APIManagementException if error occurred while obtaining the swagger definition
+     */
+    String getOpenAPIDefinitionForEnvironment(APIIdentifier apiId, String environmentName)
+            throws APIManagementException;
+
+    /**
+     * Returns the swagger definition of the API for the given microgateway gateway label as a string
+     * 
+     * @param apiId id of the APIIdentifier
+     * @param labelName name of the microgateway label
+     * @return swagger string
+     * @throws APIManagementException if error occurred while obtaining the swagger definition
+     */
+    String getOpenAPIDefinitionForLabel(APIIdentifier apiId, String labelName)
+            throws APIManagementException;
+
     /**
      * Revokes the oldAccessToken generating a new one.
      *

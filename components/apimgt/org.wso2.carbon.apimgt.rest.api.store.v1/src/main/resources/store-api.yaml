@@ -238,6 +238,8 @@ paths:
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName'
+        - $ref: '#/parameters/environmentName'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/requestedTenant'
       tags:
@@ -2875,6 +2877,24 @@ parameters:
       - application
       - subscription
     required: true
+    
+# Label Name
+# Specified as part of the query string
+  labelName:
+    name: labelName
+    in: query
+    description: |
+      Name of the API microgateway label.
+    type: string
+
+# API Gateway Environment Name
+# Specified as part of the query string
+  environmentName:
+    name: environmentName
+    in: query
+    description: |
+      Name of the API gateway environment.
+    type: string
 
 # Used for pagination:
 # The maximum number of resoures to be returned by a GET

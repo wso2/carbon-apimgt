@@ -190,12 +190,10 @@ class Resource extends React.Component {
         e.preventDefault();
         const defaultParams = {
             name: this.state.newPropName,
-            description: 'Request Body',
-            required: 'false',
-            in: 'body',
-            schema: {
-                type: 'object',
-            },
+            description: '',
+            required: false,
+            in: 'query',
+            type: 'string',
         };
         this.state.method.parameters.push(defaultParams);
         this.props.updatePath(this.props.path, this.props.method, this.state.method);
@@ -316,7 +314,7 @@ class Resource extends React.Component {
                                             <SelectContentType value={this.state.method.consumes} onChange={this.changeContentTypes} fieldName="consumes"/>
                                         </TableCell>
                                         <TableCell>
-                                            <Select
+                                            {/* <Select
                                                 className={classes.scopeSelect}
                                                 margin='none'
                                                 multiple
@@ -341,7 +339,7 @@ class Resource extends React.Component {
                                                         {tempScope.name}
                                                     </MenuItem>
                                                 ))}
-                                            </Select>
+                                            </Select> */}
                                         </TableCell>
                                     </TableRow>
                                 </Table>
@@ -384,7 +382,7 @@ class Resource extends React.Component {
                                                             <InlineEditableField type="select" saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.in} defaultValues={['body', 'query', 'header', 'formData']} fieldName='param.in' />
                                                         </TableCell>
                                                         <TableCell>
-                                                            <InlineEditableField type="input" saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.type} fieldName='param.schema.type' />
+                                                            <InlineEditableField type="input" saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.type} fieldName='param.type' />
                                                         </TableCell>
                                                         <TableCell>
                                                             <InlineEditableField type="select" saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.required} defaultValues={['true', 'false']} fieldName='param.required' />

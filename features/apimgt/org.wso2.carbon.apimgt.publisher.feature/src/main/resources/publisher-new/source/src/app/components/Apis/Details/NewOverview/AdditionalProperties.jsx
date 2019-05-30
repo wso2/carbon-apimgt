@@ -46,7 +46,7 @@ function AdditionalProperties(props) {
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
                             Additional Properties
                         </Typography>
-                        <Link to={'/apis/' + api.id + '/documents'}>
+                        <Link to={'/apis/' + api.id + '/properties'}>
                             <Button variant='contained' color='default'>
                                 Edit
                             </Button>

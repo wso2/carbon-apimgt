@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
 
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
@@ -60,10 +59,10 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAPIById(id, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis.APIs.get_apis__apiId_(
-                    { apiId: id }, this._requestMetaData()
+                    { apiId: id }, this._requestMetaData(),
                 );
             },
         );
@@ -81,7 +80,7 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getDocumentsByAPIId(id, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis['API (Individual)'].get_apis__apiId__documents(
                     { apiId: id }, this._requestMetaData(),
@@ -103,11 +102,11 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getFileForDocument(api_id, docId) {
-        let promised_getDocContent = this.client.then(
+        const promised_getDocContent = this.client.then(
             (client) => {
                 const payload = { apiId: api_id, documentId: docId, Accept: 'application/octet-stream' };
                 return client.apis['API (Individual)'].get_apis__apiId__documents__documentId__content(
-                    payload, this._requestMetaData({ 'Content-Type': 'multipart/form-data' })
+                    payload, this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
                 );
             },
         );
@@ -121,10 +120,10 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSwaggerByAPIId(id, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis.APIs.get_apis__apiId__swagger(
-                    { apiId: id }, this._requestMetaData()
+                    { apiId: id }, this._requestMetaData(),
                 );
             },
         );
@@ -145,7 +144,7 @@ export default class API extends Resource {
         const promise_get = this.client.then(
             (client) => {
                 return client.apis.Applications.get_applications__applicationId_(
-                    { applicationId: id }, this._requestMetaData()
+                    { applicationId: id }, this._requestMetaData(),
                 );
             },
         );
@@ -166,7 +165,7 @@ export default class API extends Resource {
         const promise_get = this.client.then(
             (client) => {
                 return client.apis.Applications.get_applications(
-                    {}, this._requestMetaData()
+                    {}, this._requestMetaData(),
                 );
             },
         );
@@ -184,10 +183,10 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAllTiers(policyLevel, callback = null) {
-        let promise_get_all = this.client.then(
+        const promise_get_all = this.client.then(
             (client) => {
                 return client.apis['Throttling Policies'].get_throttling_policies__policyLevel_(
-                    { policyLevel }, this._requestMetaData()
+                    { policyLevel }, this._requestMetaData(),
                 );
             },
         );
@@ -218,11 +217,11 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     updateApplication(application, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 const payload = { applicationId: application.id, body: application };
                 return client.apis.Applications.put_applications__applicationId_(
-                    payload, this._requestMetaData()
+                    payload, this._requestMetaData(),
                 );
             },
         );
@@ -242,7 +241,7 @@ export default class API extends Resource {
         const promise = this.client.then(
             (client) => {
                 return client.apis['Comment (Individual)'].post_apis__apiId__comments(
-                    { apiId, body: commentInfo }, this._requestMetaData()
+                    { apiId, body: commentInfo }, this._requestMetaData(),
                 );
             },
         ).catch(
@@ -265,7 +264,7 @@ export default class API extends Resource {
         const promise_get = this.client.then(
             (client) => {
                 return client.apis['Comment (Collection)'].get_apis__apiId__comments(
-                    { apiId }, this._requestMetaData()
+                    { apiId }, this._requestMetaData(),
                 );
             },
         ).catch(
@@ -289,7 +288,7 @@ export default class API extends Resource {
         const promise = this.client.then(
             (client) => {
                 return client.apis['Comment (Individual)'].delete_apis__apiId__comments__commentId_(
-                    { apiId, commentId }, this._requestMetaData()
+                    { apiId, commentId }, this._requestMetaData(),
                 );
             },
         ).catch(
@@ -314,7 +313,7 @@ export default class API extends Resource {
         const promise = this.client.then(
             (client) => {
                 return client.apis['Comment (Individual)'].put_apis__apiId__comments__commentId_(
-                    { apiId, commentId, body: commentInfo }, this._requestMetaData()
+                    { apiId, commentId, body: commentInfo }, this._requestMetaData(),
                 );
             },
         ).catch(
@@ -330,10 +329,10 @@ export default class API extends Resource {
     }
 
     getRatingFromUser(api_id, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
-                return client.apis['API (Individual)'].get_apis__apiId__ratings(
-                    { apiId: api_id }, this._requestMetaData()
+                return client.apis.Ratings.get_apis__apiId__ratings(
+                    { apiId: api_id }, this._requestMetaData(),
                 );
             },
         ).catch(
@@ -350,10 +349,10 @@ export default class API extends Resource {
 
 
     addRating(api_id, ratingInfo, callback = null) {
-        let promise = this.client.then(
+        const promise = this.client.then(
             (client) => {
                 return client.apis['API (Individual)'].put_apis__apiId__user_rating(
-                    { apiId: api_id, body: ratingInfo }, this._requestMetaData()
+                    { apiId: api_id, body: ratingInfo }, this._requestMetaData(),
                 );
             },
         ).catch(
@@ -377,11 +376,11 @@ export default class API extends Resource {
      * @deprecated Use Application.generateKeys() instead
      */
     generateKeys(applicationId, request_content, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 const payload = { applicationId, body: request_content };
                 return client.apis.Applications.post_applications__applicationId__generate_keys(
-                    payload, this._requestMetaData()
+                    payload, this._requestMetaData(),
                 );
             },
         );
@@ -401,11 +400,11 @@ export default class API extends Resource {
      * @deprecated Use Application.generateToken() instead
      */
     generateToken(applicationId, request_content, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 const payload = { applicationId, body: request_content };
                 return client.apis.Applications.post_applications__applicationId__generate_token(
-                    payload, this._requestMetaData()
+                    payload, this._requestMetaData(),
                 );
             },
         );
@@ -424,10 +423,10 @@ export default class API extends Resource {
      * @deprecated Use Application.getKeys() instead
      */
     getKeys(applicationId, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis.Applications.get_applications__applicationId__keys(
-                    { applicationId }, this._requestMetaData()
+                    { applicationId }, this._requestMetaData(),
                 );
             },
         );
@@ -445,17 +444,21 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSubscriptions(apiId, applicationId, callback = null) {
-        let promise_get = this.client.then(
+        const payload = { apiId };
+        if (applicationId) {
+            payload[applicationId] = applicationId;
+        }
+        const promisedGet = this.client.then(
             (client) => {
                 return client.apis.Subscriptions.get_subscriptions(
-                    { apiId, applicationId }, this._requestMetaData()
+                    payload, this._requestMetaData(),
                 );
             },
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promisedGet.then(callback);
         } else {
-            return promise_get;
+            return promisedGet;
         }
     }
 
@@ -467,7 +470,7 @@ export default class API extends Resource {
      * @param callback callback url
      */
     subscribe(apiId, applicationId, policy, callback = null) {
-        let promise_create_subscription = this.client.then(
+        const promise_create_subscription = this.client.then(
             (client) => {
                 const subscriptionData = { apiId, applicationId, throttlingPolicy: policy };
                 const payload = { body: subscriptionData };
@@ -488,7 +491,7 @@ export default class API extends Resource {
      * @returns {Promise.<TResult>}
      */
     labels() {
-        let promise_labels = this.client.then(
+        const promise_labels = this.client.then(
             (client) => {
                 return client.apis['Label (Collection)'].get_labels({},
                     this._requestMetaData());
@@ -502,10 +505,10 @@ export default class API extends Resource {
      * @returns {Promise} List of languages that supports SDK generation by swagger-codegen
      */
     getSdkLanguages() {
-        let promise_languages = this.client.then(
+        const promise_languages = this.client.then(
             (client) => {
                 return client.apis['SDK Languages'].get_sdk_gen_languages(
-                    {}, this._requestMetaData()
+                    {}, this._requestMetaData(),
                 );
             },
         );
@@ -518,10 +521,10 @@ export default class API extends Resource {
      */
     getSdk(apiId, language) {
         const payload = { apiId, language };
-        let promise_sdk = this.client.then(
+        const promise_sdk = this.client.then(
             (client) => {
                 return client.apis['API (Individual)'].get_apis__apiId__sdks__language_(
-                    payload, this._requestMetaData()
+                    payload, this._requestMetaData(),
                 );
             },
         );
@@ -535,10 +538,10 @@ export default class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getTierByName(name, level, callback = null) {
-        let promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis['Tier (Individual)'].get_policies__tierLevel___tierName_(
-                    { tierName: name, tierLevel: level }, this._requestMetaData()
+                    { tierName: name, tierLevel: level }, this._requestMetaData(),
                 );
             },
         );

@@ -18,9 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -295,25 +297,43 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves the swagger document of an API
-     *
-     * @param apiId           API identifier
-     * @param ifNoneMatch     If-None-Match header value
-     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
-     * @return Swagger document of the API
+     * 
+     * @param apiId API identifier
+     * @param labelName name of the gateway label
+     * @param environmentName name of the gateway environment
+     * @param ifNoneMatch If-None-Match header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param messageContext CXF message context
+     * @return Swagger document of the API for the given label or gateway environment
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
+    public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName,
+            String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            if (StringUtils.isNotEmpty(labelName) && StringUtils.isNotEmpty(environmentName)) {
+                RestApiUtil.handleBadRequest("Only one of 'labelName' or 'environmentName' can be provided", log);
+            }
+
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);;
+
+            //gets the first available environment if neither label nor environment is not provided
+            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
+                environmentName = api.getEnvironments().iterator().next();
+            }
+
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
-
-            //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = RestAPIStoreUtils.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);;
-            String apiSwagger = apiConsumer.getOpenAPIDefinition(apiIdentifier);
-            apiSwagger = APIUtil.removeXMediationScriptsFromSwagger(apiSwagger);
+            
+            String apiSwagger = null;
+            if (StringUtils.isNotEmpty(environmentName)) {
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api.getId(), environmentName);
+            } else if (StringUtils.isNotEmpty(labelName)) {
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api.getId(), labelName);
+            }
 
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
