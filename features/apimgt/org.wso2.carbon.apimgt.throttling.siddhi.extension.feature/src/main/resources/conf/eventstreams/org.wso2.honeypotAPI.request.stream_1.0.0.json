@@ -1,0 +1,32 @@
+{
+  "name": "org.wso2.honeypotAPI.request.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name":"currentTime",
+      "type":"LONG"
+    },
+    {
+      "name": "messageID",
+      "type": "STRING"
+    },
+    {
+      "name": "apiMethod",
+      "type": "STRING"
+    },
+    {
+      "name":"headerSet",
+      "type": "STRING"
+    },
+    {
+      "name":"messageBody",
+      "type":"STRING"
+    },
+    {
+      "name":"clientIp",
+      "type":"STRING"
+    }
+  ]
+}

@@ -13990,7 +13990,7 @@ public class ApiMgtDAO {
         try {
             List<String> emailListData = Arrays.asList(emailList);
             int listSize = emailListData.size();
-            if (listSize != 1) {
+            if (!(listSize == 1)) {
                 String emailListUpdateQuery = SQLConstants.HoneyPotAPIDataConstants.UPDATE_EMAIL_LIST_BY_TENANT_ID;
                 ps = connection.prepareStatement(emailListUpdateQuery);
                 ps.setString(1, emailList);

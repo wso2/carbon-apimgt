@@ -1,0 +1,36 @@
+{
+  "name": "org.wso2.apim.honeypotapi.emailAlertStream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name":"currentTime",
+      "type":"LONG"
+    },
+    {
+      "name": "messageID",
+      "type": "STRING"
+    },
+    {
+      "name": "apiMethod",
+      "type": "STRING"
+    },
+    {
+      "name":"headerSet",
+      "type": "STRING"
+    },
+    {
+      "name":"messageBody",
+      "type":"STRING"
+    },
+    {
+      "name":"clientIp",
+      "type":"STRING"
+    },
+    {
+      "name":"emails",
+      "type":"STRING"
+    }
+  ]
+}

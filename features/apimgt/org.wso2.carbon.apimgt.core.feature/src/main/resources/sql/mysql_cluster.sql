@@ -1779,6 +1779,23 @@ CREATE TABLE IF NOT EXISTS AM_SYSTEM_APPS (
     PRIMARY KEY (ID)
  ) ENGINE=InnoDB;
 
+-- HoneyPot API tables --
+CREATE TABLE HoneyPotAPIData (
+    currentTime BIGINT,
+    messageID varchar(255) NOT NULL,
+    apiMethod varchar (255),
+    headerSet varchar(255),
+    messageBody varchar(255),
+    clientIp varchar(255),
+    PRIMARY KEY(messageID)
+
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS HONEYPOT_EMAIL_LIST (
+            TENANT_DOMAIN VARCHAR(255) NOT NULL ,
+            EMAIL_LIST VARCHAR(255),
+            PRIMARY KEY (TENANT_DOMAIN,EMAIL_LIST)
+) ENGINE=InnoDB;
 -- End of API-MGT Tables --
 
 -- Performance indexes start--

@@ -2622,8 +2622,24 @@ CREATE TABLE AM_APPLICATION_ATTRIBUTES (
   FOREIGN KEY (APPLICATION_ID) REFERENCES AM_APPLICATION (APPLICATION_ID) ON DELETE CASCADE
 )
 /
--- End of API-MGT Tables --
+CREATE TABLE HoneyPotAPIData (
+    currentTime NUMBER(19),
+    messageID varchar2(255) NOT NULL,
+    apiMethod varchar2 (255),
+    headerSet varchar2(255),
+    messageBody varchar2(255),
+    clientIp varchar2(255),
+    PRIMARY KEY(messageID)
 
+)
+/
+CREATE TABLE HONEYPOT_EMAIL_LIST (
+            TENANT_DOMAIN VARCHAR2(255) NOT NULL ,
+            EMAIL_LIST VARCHAR2(255),
+            PRIMARY KEY (TENANT_DOMAIN,EMAIL_LIST)
+)
+/
+-- End of API-MGT Tables --
 --permance indexes start--
 /
 create index IDX_ITS_LMT on IDN_THRIFT_SESSION (LAST_MODIFIED_TIME)

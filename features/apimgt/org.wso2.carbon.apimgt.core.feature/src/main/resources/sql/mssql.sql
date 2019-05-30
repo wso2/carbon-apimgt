@@ -1763,6 +1763,22 @@ CREATE TABLE AM_SYSTEM_APPS (
     UNIQUE (NAME),
     UNIQUE (CONSUMER_KEY),
     PRIMARY KEY (ID)
+
+-- HoneyPot API tables --
+CREATE TABLE HoneyPotAPIData (
+    currentTime BIGINT,
+    messageID varchar(255) NOT NULL,
+    apiMethod varchar (255),
+    headerSet varchar(255),
+    messageBody varchar(255),
+    clientIp varchar(255),
+    PRIMARY KEY(messageID)
+);
+
+CREATE TABLE IF NOT EXISTS HONEYPOT_EMAIL_LIST (
+            TENANT_DOMAIN VARCHAR(255) NOT NULL ,
+            EMAIL_LIST VARCHAR(255),
+            PRIMARY KEY (TENANT_DOMAIN,EMAIL_LIST)
 );
 -- End of API-MGT Tables --
 
