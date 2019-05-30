@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,8 +40,12 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceStub;
+import org.wso2.carbon.um.ws.api.stub.RemoteUserStoreManagerServiceUserStoreExceptionException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
@@ -63,6 +68,7 @@ public class BasicAuthCredentialValidator {
 
     protected Log log = LogFactory.getLog(getClass());
     private AuthenticationAdminStub authAdminStub;
+    private RemoteUserStoreManagerServiceStub remoteUserStoreManagerServiceStub;
     private String host;
 
     /**
@@ -95,6 +101,16 @@ public class BasicAuthCredentialValidator {
         } catch (AxisFault axisFault) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage());
         }
+
+        try {
+            remoteUserStoreManagerServiceStub = new RemoteUserStoreManagerServiceStub(configurationContext, url +
+                    "RemoteUserStoreManagerService");
+        } catch (AxisFault axisFault) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage());
+        }
+        ServiceClient svcClient = remoteUserStoreManagerServiceStub._getServiceClient();
+        CarbonUtils.setBasicAccessSecurityHeaders(config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME),
+                config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD), svcClient);
 
         try {
             host = new URL(url).getHost();
@@ -204,17 +220,26 @@ public class BasicAuthCredentialValidator {
                     String[] userRoles;
 
                     String tenantDomain = MultitenantUtils.getTenantDomain(username);
-                    try {
-                        int tenantId = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                                .getRealmService().getTenantManager().getTenantId(tenantDomain);
+                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                        try {
+                            userRoles = remoteUserStoreManagerServiceStub
+                                    .getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+                        } catch (RemoteException | RemoteUserStoreManagerServiceUserStoreExceptionException e) {
+                            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+                        }
+                    } else {
+                        try {
+                            int tenantId = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+                                    .getRealmService().getTenantManager().getTenantId(tenantDomain);//TODO:import ServiceReferenceHolder from gateway
 
-                        UserStoreManager manager = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
-                                .getInstance().getRealmService()
-                                .getTenantUserRealm(tenantId).getUserStoreManager();
+                            UserStoreManager manager = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+                                    .getInstance().getRealmService()
+                                    .getTenantUserRealm(tenantId).getUserStoreManager();//TODO:import ServiceReferenceHolder from gateway
 
-                        userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-                    } catch (UserStoreException e) {
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+                            userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+                        } catch (UserStoreException e) {
+                            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+                        }
                     }
                     // check if the roles related to the API resource contains any of the role of the user
                     for (String role : userRoles) {
