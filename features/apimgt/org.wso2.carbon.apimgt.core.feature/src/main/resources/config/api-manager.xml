@@ -135,6 +135,8 @@
           as 'false' to completely disable JWTClaimCache.
          -->
         <EnableJWTClaimCache>true</EnableJWTClaimCache>
+        <!-- Expiry time for resource cache-->
+        <!-- GatewayResourceCacheExpiry>3600</GatewayResourceCacheExpiry -->
     </CacheConfigurations>
 
     <!--
