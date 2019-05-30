@@ -1661,7 +1661,7 @@
         <apache.commons.version>2.6.1</apache.commons.version>
         <apache.commons.lang3.version>3.8.1</apache.commons.lang3.version>
         <io.swagger.codegen.version>2.4.5</io.swagger.codegen.version>
-        <commons.collections4.version>4.1</commons.collections4.version>
+        <commons.collections4.version>4.3</commons.collections4.version>
 
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
