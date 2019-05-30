@@ -25,7 +25,7 @@
                             <div class="" id="saveButtons">
                                 <button type="submit" class="btn btn-primary " id="saveBtn" ><%=i18n.localize("Save")%></button>
                                 <button type="submit" class="btn btn-primary " id="cancelBtn" ><%=i18n.localize("Cancel")%></button>
-                                <button type="submit" class="btn btn-primary " style="display: none" id="unsubscribeBtn" >Delete</button>
+                                <button type="submit" class="btn btn-primary " id="deleteBtn"><%=i18n.localize("Delete")%></button>
                             </div>
         </div>
     </div>
