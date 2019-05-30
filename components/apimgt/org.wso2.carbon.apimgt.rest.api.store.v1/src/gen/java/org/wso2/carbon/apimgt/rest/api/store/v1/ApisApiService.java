@@ -40,7 +40,7 @@ public interface ApisApiService {
       public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSdksLanguageGet(String apiId, String language, MessageContext messageContext);
       public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
-      public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext);
+      public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext);
       public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, MessageContext messageContext);
       public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext);
