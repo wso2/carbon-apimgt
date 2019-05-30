@@ -5,17 +5,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.throttling.HoneyAPIDataPublisher.HoneyAPIDataPublisher;
 
 import java.util.Arrays;
 import java.util.Map;
 
-public class HoneyPotAPIMediator extends APIMgtCommonExecutionPublisher {
+public class HoneyPotAPIMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(HoneyPotAPIMediator.class);
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
-    //private static volatile HoneyPotAPIDataPublisher honeyPotAPIDataPublisher = null;
-    private static volatile HoneyAPIDataPublisher honeyAPIDataPublisher = null;
-
+    private static volatile HoneyAPIDataPublisher honeyAPIDataPublisher = new HoneyAPIDataPublisher();
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -24,24 +23,33 @@ public class HoneyPotAPIMediator extends APIMgtCommonExecutionPublisher {
 
         long currentTime = System.currentTimeMillis();
         String messageId = messageContext.getMessageID();
-        String apiName = (String) messageContext.getProperty("SYNAPSE_REST_API");
-        String apiVersion = (String) messageContext.getProperty("SYNAPSE_REST_API_VERSION");
-        String apiContext = (String) messageContext.getProperty("REST_API_CONTEXT");
-        String fullRequestPath = (String) messageContext.getProperty("REST_FULL_REQUEST_PATH");
         String apiMethod = (String) msgContext.getProperty("HTTP_METHOD");
-        String headerName = "";
-        String headerValue = "";
+        String clientIP = getClientIp(messageContext);
         String messageBody = String.valueOf(msgContext.getEnvelope().getBody().getFirstOMChild());
-        String headerSet = "";
-        String clientIp = "";
-
         if (messageBody.equals("null")) {
             messageBody = "No message body passed";
         }
+        String headerSet = getPassedHeaderSet(messageContext);
 
-        Map<String, String> headers =
-                (Map) msgContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
+        log.info("Detected Anonymous User | MessageId :" + messageId + "|" + " Request Method :" + apiMethod + "|" +
+                " Message Body : " + messageBody + "|" + " client Ip :" + clientIP + "|" + "Headers set :" + headerSet);
+
+        honeyAPIDataPublisher.publishEvent(currentTime, messageId, apiMethod, headerSet, messageBody, clientIP);
+        return true;
+
+    }
+
+    /**
+     * Get clientIP from the message context.
+     */
+    private String getClientIp(MessageContext messageContext) {
+        String clientIp;
+
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map headers =
+                (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String xForwardForHeader = (String) headers.get(HEADER_X_FORWARDED_FOR);
         if (!StringUtils.isEmpty(xForwardForHeader)) {
             clientIp = xForwardForHeader;
@@ -50,38 +58,19 @@ public class HoneyPotAPIMediator extends APIMgtCommonExecutionPublisher {
                 clientIp = clientIp.substring(0, idx);
             }
         } else {
-            clientIp = (String) msgContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            clientIp = (String) axis2MsgContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Detected Anonymous User : MessageId :" + messageId + " API Name :" + apiName +
-                    " API Version :" + apiVersion + " API Context : " + apiContext + " full request path :"
-                    + fullRequestPath + " Request Method :" + apiMethod + " Message Body : " + messageBody +
-                    " client Ip :" + clientIp);
-        }
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            headerName = entry.getKey();
-            headerValue = entry.getValue();
-            log.debug("Headers Set of " + apiName + " api invocation :" + headerName + ": " + headerValue);
-        }
-        Object[] objectArray = headers.entrySet().toArray();
-        if (objectArray == null) {
-            headerSet = "No passed Header";
-        } else {
-            headerSet = Arrays.toString(objectArray);
-        }
-
-
-        if (honeyAPIDataPublisher == null) {
-            synchronized (this) {
-                honeyAPIDataPublisher = new HoneyAPIDataPublisher();
-            }
-        }
-        log.info("Started to publish data");
-        honeyAPIDataPublisher.publishEvent(currentTime,messageId, apiMethod, headerSet, messageBody, clientIp);
-        log.info("End to publish data");
-        return true;
-
+        return clientIp;
     }
 
+    private String getPassedHeaderSet(MessageContext messageContext) {
+        String headerSet;
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map headers =
+                (Map) (axis2MsgContext).getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Object[] headersArray = headers.entrySet().toArray();
+        headerSet = Arrays.toString(headersArray);
+        return headerSet;
+    }
 }
