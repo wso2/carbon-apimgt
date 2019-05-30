@@ -120,6 +120,7 @@ function Overview(props) {
         <ApiContext.Consumer>
             {({ api }) => (
                 <Grid container spacing={24}>
+                    {console.info(api)}
                     <Grid item xs={12}>
                         <Grid container>
                             <CheckItem itemSuccess itemLabel='Endpoints' />
@@ -137,7 +138,6 @@ function Overview(props) {
                                 <Configuration parentClasses={classes} />
                                 <Resources parentClasses={classes} api={api} />
                                 <AdditionalProperties parentClasses={classes} />
-
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Lifecycle parentClasses={classes} />

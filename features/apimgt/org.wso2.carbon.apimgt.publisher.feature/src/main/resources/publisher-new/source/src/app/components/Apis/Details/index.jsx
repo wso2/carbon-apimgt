@@ -27,8 +27,10 @@ import ScopesIcon from '@material-ui/icons/VpnKey';
 import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import CommentsIcon from '@material-ui/icons/CommentRounded';
+import BusinessIcon from '@material-ui/icons/Business';
 import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import ConfigurationIcon from '@material-ui/icons/Build';
+import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
 import { Redirect, Route, Switch, Link } from 'react-router-dom';
 import Utils from 'AppData/Utils';
@@ -37,8 +39,6 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
-
-// import Overview from './Overview/Overview';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
@@ -53,6 +53,8 @@ import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
+import BusinessInformation from './BusinessInformation/BusinessInformation';
+import Properties from './Properties/Properties';
 import ApiContext from './components/ApiContext';
 
 const styles = theme => ({
@@ -298,13 +300,25 @@ class Details extends Component {
                             active={active}
                             Icon={<CommentsIcon />}
                         />
+                        <LeftMenuItem
+                            text='business info'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<BusinessIcon />}
+                        />
+                        <LeftMenuItem
+                            text='properties'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<PropertiesIcon />}
+                        />
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} />
                         <div className={classes.contentInside}>
                             <Switch>
                                 <Redirect exact from='/apis/:api_uuid' to={redirectUrl} />
-                                <Route path='/apis/:api_uuid/overview' component={() => <Overview api={api} />} />
+                                <Route path='/apis/:api_uuid/overview' component={() => <Overview />} />
                                 <Route path='/apis/:api_uuid/lifecycle' component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path='/apis/:api_uuid/configuration'
@@ -320,6 +334,8 @@ class Details extends Component {
                                 />
                                 <Route path='/apis/:api_uuid/security' component={() => <Security api={api} />} />
                                 <Route path='/apis/:api_uuid/comments' component={() => <Comments api={api} />} />
+                                <Route path='/apis/:api_uuid/business info' component={() => <BusinessInformation />} />
+                                <Route path='/apis/:api_uuid/properties' component={() => <Properties />} />
                                 <Route component={PageNotFound} />
                             </Switch>
                         </div>
