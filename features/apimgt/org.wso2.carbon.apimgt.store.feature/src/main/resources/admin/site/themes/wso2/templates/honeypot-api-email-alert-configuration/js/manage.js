@@ -9,7 +9,7 @@ var saveEmailList = function (emailList) {
         if (!result.error) {
 
             jagg.message({content: i18n.t("Successfully saved"), type: "info"});
-          // $("#unsubscribeBtn").show();
+            //$("#deleteBtn").show();
 
         } else {
             jagg.message({content: result.message, type: "error"});
@@ -35,7 +35,7 @@ var deleteEmails = function() {
             });
 
             $("#tokenfield").tagsinput('removeAll');
-            $("#unsubscribeBtn").show();
+            $("#deleteBtn").show();
 
         }else {
             if (result.message == "AuthenticateError") {
@@ -91,7 +91,7 @@ $(document).ready(function () {
 
     });
 
-    $("#unsubscribeBtn").click(function () {
+    $("#deleteBtn").click(function () {
 
         deleteEmails();
 
@@ -114,17 +114,13 @@ $(document).ready(function () {
 
             });
 
-           //if (checkedValues.length > 0) {
-                 var emailList = $("#tokenfield").val();
+                var emailList = $("#tokenfield").val();
                 if(emailList) {
                     saveEmailList(emailList);
                  }
-                 else{
-                    jagg.message({content: i18n.t("Please enter at least one email address") , type: "error"});
-                }
-        //  } else {
-        //         jagg.message({content: i18n.t("Please select at least one alert type") , type: "error"});
-        //      }
+                  else{
+                      jagg.message({content: i18n.t("Please enter at least one email address") , type: "error"});
+                 }
         }
     });
 
