@@ -262,8 +262,8 @@ class StarRatingBar extends React.Component {
         const promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
         promised_rating.then((response) => {
             this.setState({
-                //rating: response.obj,
-                //dummyRateValue: response.obj.userRating,
+                // rating: response.obj,
+                // dummyRateValue: response.obj.userRating,
             });
         });
     }
@@ -459,7 +459,7 @@ class InfoBar extends React.Component {
             commentList: null,
             prodUrlCopied: false,
             sandboxUrlCopied: false,
-            showOverview: true,
+            showOverview: false,
             checked: false,
         };
         this.api_uuid = this.props.api_uuid;

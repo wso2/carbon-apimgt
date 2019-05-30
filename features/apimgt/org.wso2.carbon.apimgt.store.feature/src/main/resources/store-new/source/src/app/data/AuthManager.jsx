@@ -15,14 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
 
-import axios from 'axios'
-import qs from 'qs'
-import Utils from './Utils'
-import User from './User'
-import APIClientFactory from "./APIClientFactory";
 
+import axios from 'axios';
+import qs from 'qs';
+import Utils from './Utils';
+import User from './User';
+import APIClientFactory from './APIClientFactory';
+
+
+/**
+ * Manage the application authentication and authorization requirements.
+ *
+ * @class AuthManager
+ */
 class AuthManager {
     constructor() {
         this.isLogged = false;
@@ -30,41 +36,38 @@ class AuthManager {
     }
 
     static refreshTokenOnExpire() {
-        let timestampSkew = 100;
-        let currentTimestamp = Math.floor(Date.now() / 1000);
-        let tokenTimestamp = localStorage.getItem("expiresIn");
-        let rememberMe = (localStorage.getItem("rememberMe") === 'true');
-        if (rememberMe && (tokenTimestamp - currentTimestamp < timestampSkew)) {
-            let bearerToken = "Bearer " + Utils.getCookie("WSO2_AM_REFRESH_TOKEN_1");
-            let loginPromise = authManager.refresh(bearerToken);
-            loginPromise.then(function (data, status, xhr) {
+        const timestampSkew = 100;
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const tokenTimestamp = localStorage.getItem('expiresIn');
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
+        if (rememberMe && tokenTimestamp - currentTimestamp < timestampSkew) {
+            const bearerToken = 'Bearer ' + Utils.getCookie('WSO2_AM_REFRESH_TOKEN_1');
+            const loginPromise = authManager.refresh(bearerToken);
+            loginPromise.then((data, status, xhr) => {
                 authManager.setUser(true);
-                let expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
-                window.localStorage.setItem("expiresIn", expiresIn);
+                const expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
+                window.localStorage.setItem('expiresIn', expiresIn);
             });
-            loginPromise.error(
-                function (error) {
-                    let error_data = JSON.parse(error.responseText);
-                    let message = "Error while refreshing token" + "<br/> You will be redirect to the login page ...";
-                    noty({
-                        text: message,
-                        type: 'error',
-                        dismissQueue: true,
-                        modal: true,
-                        progressBar: true,
-                        timeout: 5000,
-                        layout: 'top',
-                        theme: 'relax',
-                        maxVisible: 10,
-                        callback: {
-                            afterClose: function () {
-                                window.location = loginPageUri;
-                            },
-                        }
-                    });
-
-                }
-            );
+            loginPromise.error((error) => {
+                const error_data = JSON.parse(error.responseText);
+                const message = 'Error while refreshing token' + '<br/> You will be redirect to the login page ...';
+                noty({
+                    text: message,
+                    type: 'error',
+                    dismissQueue: true,
+                    modal: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10,
+                    callback: {
+                        afterClose() {
+                            window.location = loginPageUri;
+                        },
+                    },
+                });
+            });
         }
     }
 
@@ -73,11 +76,12 @@ class AuthManager {
      * @param {object} error_response
      */
     static unauthorizedErrorHandler(error_response) {
-        if (error_response.status !== 401) { /* Skip unrelated response code to handle in unauthorizedErrorHandler*/
+        if (error_response.status !== 401) {
+            /* Skip unrelated response code to handle in unauthorizedErrorHandler */
             throw error_response;
-            /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
+            /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain */
         }
-        let message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
+        const message = 'The session has expired' + '.<br/> You will be redirect to the login page ...';
         if (typeof noty !== 'undefined') {
             noty({
                 text: message,
@@ -90,10 +94,10 @@ class AuthManager {
                 theme: 'relax',
                 maxVisible: 10,
                 callback: {
-                    afterClose: function () {
+                    afterClose() {
                         window.location = loginPageUri;
                     },
-                }
+                },
             });
         } else {
             throw error_response;
@@ -114,7 +118,7 @@ class AuthManager {
             return null;
         }
 
-        return User.fromJson(JSON.parse(userData),environmentName);
+        return User.fromJson(JSON.parse(userData), environmentName);
     }
 
     /**
@@ -159,8 +163,8 @@ class AuthManager {
      */
     static setUser(user, environmentName) {
         environmentName = environmentName || Utils.getEnvironment().label;
-        if (!user instanceof User) {
-            throw new Error("Invalid user object");
+        if (!(user instanceof User)) {
+            throw new Error('Invalid user object');
         }
 
         if (user) {
@@ -178,38 +182,40 @@ class AuthManager {
      */
     authenticateUser(username, password, environment) {
         const headers = {
-            'Authorization': 'Basic deidwe',
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
+            Authorization: 'Basic deidwe',
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
         };
         const data = {
-            username: username,
-            password: password,
+            username,
+            password,
             grant_type: 'password',
             validity_period: 3600,
-            scopes: 'apim:subscribe apim:signup apim:workflow_approve'
+            scopes: 'apim:subscribe apim:signup apim:workflow_approve',
         };
-        let promised_response = axios(Utils.getLoginTokenPath(environment), {
-            method: "POST",
+        const promised_response = axios(Utils.getLoginTokenPath(environment), {
+            method: 'POST',
             data: qs.stringify(data),
-            headers: headers,
-            withCredentials: true
+            headers,
+            withCredentials: true,
         });
-        //Set the environment that user tried to authenticate
-        let previous_environment = Utils.getEnvironment();
+        // Set the environment that user tried to authenticate
+        const previous_environment = Utils.getEnvironment();
         Utils.setEnvironment(environment);
 
-        promised_response.then(response => {
-            const validityPeriod = response.data.validityPeriod; // In seconds
-            const WSO2_AM_TOKEN_1 = response.data.partialToken;
-            const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
-            user.scopes = response.data.scopes.split(" ");
-            AuthManager.setUser(user);
-        }).catch(error => {
-            console.error("Authentication Error:\n", error);
-            Utils.setEnvironment(previous_environment);
-        });
+        promised_response
+            .then((response) => {
+                const validityPeriod = response.data.validityPeriod; // In seconds
+                const WSO2_AM_TOKEN_1 = response.data.partialToken;
+                const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
+                user.scopes = response.data.scopes.split(' ');
+                AuthManager.setUser(user);
+            })
+            .catch((error) => {
+                console.error('Authentication Error:\n', error);
+                Utils.setEnvironment(previous_environment);
+            });
         return promised_response;
     }
 
@@ -217,16 +223,16 @@ class AuthManager {
      * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
      */
     logout() {
-        let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
-        //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store-new, etc.)
-        let url = Utils.getAppLogoutURL();
-        let headers = {
-            'Accept': 'application/json',
+        const authHeader = 'Bearer ' + AuthManager.getUser().getPartialToken();
+        // TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store-new, etc.)
+        const url = Utils.getAppLogoutURL();
+        const headers = {
+            Accept: 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': authHeader
+            Authorization: authHeader,
         };
-        const promisedLogout = axios.post(url, null, {headers: headers});
-        return promisedLogout.then(response => {
+        const promisedLogout = axios.post(url, null, { headers });
+        return promisedLogout.then((response) => {
             Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
             new APIClientFactory().destroyAPIClient(Utils.getEnvironment().label); // Single client should be re initialize after log out
@@ -234,21 +240,21 @@ class AuthManager {
     }
 
     refresh(authzHeader) {
-        let params = {
+        const params = {
             grant_type: 'refresh_token',
             validity_period: '3600',
-            scopes: 'apim:subscribe apim:signup apim:workflow_approve'
+            scopes: 'apim:subscribe apim:signup apim:workflow_approve',
         };
-        let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
-        let url = Utils.CONST.CONTEXT_PATH + '/auth/apis/login/token';
-        /* TODO: Fetch this from configs ~tmkb*/
-        let headers = {
-            'Authorization': authzHeader,
-            'Accept': 'application/json',
+        const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
+        const url = Utils.CONST.CONTEXT_PATH + '/auth/apis/login/token';
+        /* TODO: Fetch this from configs ~tmkb */
+        const headers = {
+            Authorization: authzHeader,
+            Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Alt-Referer': referrer
+            'X-Alt-Referer': referrer,
         };
-        return axios.post(url, qs.stringify(params), {headers: headers});
+        return axios.post(url, qs.stringify(params), { headers });
     }
 
     /**
@@ -258,31 +264,33 @@ class AuthManager {
      */
     registerUser(environment) {
         const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
         };
         const data = {
             grant_type: 'client_credentials',
             validity_period: 3600,
-            scopes: 'apim:self-signup'
+            scopes: 'apim:self-signup',
         };
-        let promised_response = axios(Utils.getSignUpTokenPath(environment), {
-            method: "POST",
+        const promised_response = axios(Utils.getSignUpTokenPath(environment), {
+            method: 'POST',
             data: qs.stringify(data),
-            headers: headers,
-            withCredentials: false
+            headers,
+            withCredentials: false,
         });
 
-        promised_response.then(response => {
-            const validityPeriod = response.data.validityPeriod;
-            const WSO2_AM_TOKEN_1 = response.data.partialToken;
-            const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
-            user.scopes = response.data.scopes;
-            AuthManager.setUser(user);
-        }).catch(error => {
-            console.error("Authentication Error: ", error);
-        });
+        promised_response
+            .then((response) => {
+                const validityPeriod = response.data.validityPeriod;
+                const WSO2_AM_TOKEN_1 = response.data.partialToken;
+                const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
+                user.scopes = response.data.scopes;
+                AuthManager.setUser(user);
+            })
+            .catch((error) => {
+                console.error('Authentication Error: ', error);
+            });
         return promised_response;
     }
 }
