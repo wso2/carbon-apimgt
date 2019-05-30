@@ -58,47 +58,18 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
     @Override
     public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset,
             String ifNoneMatch,MessageContext messageContext) {
-
         //pre-processing
         //setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        try {
-            List<Tier> tierList = new ArrayList<>();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
-            if (StringUtils.isBlank(policyLevel)) {
-                RestApiUtil.handleBadRequest("policyLevel cannot be empty", log);
-            }
+        List<Tier> tierList = getThrottlingPolicyList(policyLevel);
+        ThrottlingPolicyListDTO policyListDTO = ThrottlingPolicyMappingUtil
+                .fromTierListToDTO(tierList, policyLevel, limit, offset);
 
-            //retrieves the tier based on the given tier-level
-            if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
-                Map<String, Tier> apiTiersMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
-                if (apiTiersMap != null) {
-                    tierList.addAll(apiTiersMap.values());
-                }
-            } else if (ThrottlingPolicyDTO.PolicyLevelEnum.API.toString().equals(policyLevel)) {
-                Map<String, Tier> resourceTiersMap =
-                        APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
-                if (resourceTiersMap != null) {
-                    tierList.addAll(resourceTiersMap.values());
-                }
-            } else {
-                RestApiUtil.handleResourceNotFoundError(
-                        "policyLevel should be one of " + Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()),
-                        log);
-            }
-            ThrottlingPolicyListDTO policyListDTO = ThrottlingPolicyMappingUtil
-                    .fromTierListToDTO(tierList, policyLevel, limit, offset);
-            
-            //todo: set total counts properly
-            ThrottlingPolicyMappingUtil.setPaginationParams(policyListDTO, policyLevel, limit, offset, tierList.size());
-            return Response.ok().entity(policyListDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving tiers";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
+        //todo: set total counts properly
+        ThrottlingPolicyMappingUtil.setPaginationParams(policyListDTO, policyLevel, limit, offset, tierList.size());
+        return Response.ok().entity(policyListDTO).build();
     }
 
     /**
@@ -153,4 +124,39 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         }
         return null;
     }
+
+    public List<Tier>  getThrottlingPolicyList(String policyLevel) {
+        try {
+            List<Tier> tierList = new ArrayList<>();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            if (StringUtils.isBlank(policyLevel)) {
+                RestApiUtil.handleBadRequest("policyLevel cannot be empty", log);
+            }
+
+            //retrieves the tier based on the given tier-level
+            if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
+                Map<String, Tier> apiTiersMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
+                if (apiTiersMap != null) {
+                    tierList.addAll(apiTiersMap.values());
+                }
+            } else if (ThrottlingPolicyDTO.PolicyLevelEnum.API.toString().equals(policyLevel)) {
+                Map<String, Tier> resourceTiersMap =
+                        APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                if (resourceTiersMap != null) {
+                    tierList.addAll(resourceTiersMap.values());
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(
+                        "policyLevel should be one of " +
+                                Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()), log);
+            }
+            return tierList;
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving tiers";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
 }

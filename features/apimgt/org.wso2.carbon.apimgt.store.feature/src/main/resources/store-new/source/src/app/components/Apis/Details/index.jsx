@@ -262,11 +262,22 @@ class Details extends React.Component {
      * @memberof Details
      */
     componentDidMount() {
+        this.updateActiveLink();
+        this.updateSubscriptionData();
+    }
+
+    /**
+     *
+     * Selects the active link for the side panel based on the URL
+     * @memberof Details
+     */
+    updateActiveLink() {
+        const { active } = this.state;
         const currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
-        if (currentLink && currentLink.length > 0) {
+
+        if (currentLink && currentLink.length > 0 && active !== currentLink[0]) {
             this.setState({ active: currentLink[0] });
         }
-        this.updateSubscriptionData();
     }
 
     /**
@@ -276,8 +287,10 @@ class Details extends React.Component {
      * @memberof Details
      */
     render() {
+        this.updateActiveLink();
+
         const { classes, theme } = this.props;
-        const { api } = this.state;
+        const { active } = this.state;
         const redirect_url = '/apis/' + this.props.match.params.api_uuid + '/overview';
         const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
@@ -291,12 +304,12 @@ class Details extends React.Component {
                             <Typography className={classes.leftLInkMainText}>ALL APIs</Typography>
                         </div>
                     </Link>
-                    <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                    <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>
                     <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />

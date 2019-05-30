@@ -17,9 +17,7 @@
  *
  */
 
-/* eslint-disable */
-var path = require('path');
-var child_process = require('child_process');
+const path = require('path');
 
 const config = {
     entry: {
@@ -32,7 +30,8 @@ const config = {
         publicPath: 'site/public/dist/',
     },
     watch: false,
-    // devtool: 'source-map', // todo: Commented out the source mapping for the time , to speed up the build time in travis-ci
+    devtool: 'source-map', // todo: Commented out the source
+    // mapping in case need to speed up the build time & reduce size
     resolve: {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
@@ -84,7 +83,7 @@ const config = {
 if (process.env.NODE_ENV === 'development') {
     config.watch = true;
 } else if (process.env.NODE_ENV === 'production') {
-    /* ESLint will only un in production build to increase the continues build(watch) time in the development mode */
+    /* ESLint will only run in production build to increase the continues build(watch) time in the development mode */
     const esLintLoader = {
         enforce: 'pre',
         test: /\.(js|jsx)$/,
@@ -97,11 +96,10 @@ if (process.env.NODE_ENV === 'development') {
     config.module.rules.push(esLintLoader);
 }
 
-module.exports = function(env) {
+module.exports = function (env) {
     if (env && env.analysis) {
-        var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
         config.plugins.push(new BundleAnalyzerPlugin());
     }
     return config;
 };
-/* eslint-enable */
