@@ -34,6 +34,7 @@ class API extends Resource {
             this.version = version;
             this.context = context;
             this.isDefaultVersion = false;
+            this.gatewayEnvironments = ["Production and Sandbox"]; //todo: load the environments from settings API
             this.transport = [
                 "http",
                 "https"
