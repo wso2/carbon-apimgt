@@ -363,11 +363,7 @@ public final class APIConstants {
     public static final String APPLICATION_TOKEN_SCOPE = OAUTH_CONFIGS + "ApplicationTokenScope";
     public static final String WHITELISTED_SCOPES = OAUTH_CONFIGS + "ScopeWhitelist.Scope";
     public static final String TOKEN_ENDPOINT_NAME = OAUTH_CONFIGS + "TokenEndPointName";
-    public static final String DCR_URL = OAUTH_CONFIGS + "DcrURL";
-    public static final String AUTHORIZE_URL = OAUTH_CONFIGS + "AuthorizeURL";
-    public static final String TOKEN_API_URL = OAUTH_CONFIGS + "TokenAPIURL";
     public static final String REVOKE_API_URL = OAUTH_CONFIGS + "RevokeAPIURL";
-    public static final String OIDC_LOGOUT_URL = OAUTH_CONFIGS + "OidcLogoutUrl";
     public static final String ENCRYPT_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EncryptPersistedTokens";
     public static final String HASH_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EnableTokenHashMode";
 
