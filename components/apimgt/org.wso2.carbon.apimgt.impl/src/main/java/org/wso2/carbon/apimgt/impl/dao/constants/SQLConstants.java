@@ -277,7 +277,9 @@ public class SQLConstants {
             "   APP.TOKEN_TYPE," +
             "   AKM.KEY_TYPE," +
             "   API.API_NAME," +
-            "   API.API_PROVIDER " +
+            "   API.API_PROVIDER," +
+            "   NULL AS API_PRODUCT_NAME," +
+            "   NULL AS API_PRODUCT_PROVIDER " +
             " FROM " +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_SUBSCRIBER SUBS," +
@@ -372,7 +374,9 @@ public class SQLConstants {
                     "   APS.RATE_LIMIT_COUNT," +
                     "   APS.RATE_LIMIT_TIME_UNIT," +
                     "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID" +
+                    "   API.API_ID," +
+                    "   NULL AS API_PRODUCT_NAME," +
+                    "   NULL AS API_PRODUCT_PROVIDER " +
                     " FROM " +
                     "   AM_SUBSCRIPTION SUB," +
                     "   AM_SUBSCRIBER SUBS," +
