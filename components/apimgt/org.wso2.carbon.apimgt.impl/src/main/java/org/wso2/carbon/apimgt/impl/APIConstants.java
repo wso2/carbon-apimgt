@@ -1092,6 +1092,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
     public static final String SWAGGER_SCOPE_KEY = "key";
     public static final String SWAGGER_NAME = "name";
+    public static final String SWAGGER_SCHEMES = "schemes";
     public static final String SWAGGER_DESCRIPTION = "description";
     public static final String SWAGGER_SERVERS = "servers";
     public static final String SWAGGER_SUMMARY = "summary";
@@ -1099,14 +1100,24 @@ public final class APIConstants {
     public static final String SWAGGER_TITLE = "title";
     public static final String SWAGGER_EMAIL = "email";
     public static final String SWAGGER_CONTACT = "contact";
+    public static final String SWAGGER_SECURITY_TYPE = "type";
+    public static final String SWAGGER_SECURITY_OAUTH2 = "oauth2";
+    public static final String SWAGGER_SECURITY_OAUTH2_IMPLICIT = "implicit";
+    public static final String SWAGGER_SECURITY_OAUTH2_PASSWORD = "password";
+    public static final String SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL = "authorizationUrl";
+    public static final String SWAGGER_SECURITY_OAUTH2_TOKEN_URL = "tokenUrl";
+    public static final String SWAGGER_SECURITY_OAUTH2_FLOW = "flow";
     public static final String SWAGGER_VER = "version";
     public static final String SWAGGER_OBJECT_NAME_APIM = "apim";
     public static final String SWAGGER_PATHS = "paths";
     public static final String SWAGGER_RESPONSES = "responses";
     public static final String SWAGGER = "swagger";
+    public static final String SWAGGER_HOST = "host";
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+    public static final String SWAGGER_SECURITY_DEFINITIONS = "securityDefinitions";
+    public static final String SWAGGER_APIM_DEFAULT_SECURITY = "default";
     public static final String OPEN_API_V3 = "3.0.0";
     public static final String OPEN_API = "openapi";
 
@@ -1116,6 +1127,7 @@ public final class APIConstants {
     public static final String SWAGGER_BASEPATH = "basePath";
     public static final String SWAGGER_OPERATIONS = "operations";
     public static final String SWAGGER_SCOPE = "scope";
+    public static final String SWAGGER_SCOPES = "scopes";
     public static final String SWAGGER_AUTH_TYPE = "auth_type";
     public static final String API_THROTTLING_TIER = "throttling_tier";
     public static final String API_MEDIATION_SCRIPT = "mediation_script";
@@ -1165,7 +1177,9 @@ public final class APIConstants {
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
 
     public static final String HTTPS_PROTOCOL = "https";
+    public static final String HTTPS_PROTOCOL_URL_PREFIX = "https://";
     public static final String HTTP_PROTOCOL = "http";
+    public static final String HTTP_PROTOCOL_URL_PREFIX = "http://";
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;
 
