@@ -6508,6 +6508,16 @@ public final class APIUtil {
         return false;
     }
 
+    public static int getManagementTransportPort (String mgtTransport){
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+        if (mgtTransportPort <= 0) {
+            mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+        }
+        return mgtTransportPort;
+    }
+
     public static String getServerURL() throws APIManagementException {
         String hostName = ServerConfiguration.getInstance().getFirstProperty(APIConstants.HOST_NAME);
 
@@ -6520,12 +6530,7 @@ public final class APIUtil {
         }
 
         String mgtTransport = CarbonUtils.getManagementTransport();
-        AxisConfiguration axisConfiguration = ServiceReferenceHolder
-                .getContextService().getServerConfigContext().getAxisConfiguration();
-        int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
-        if (mgtTransportPort <= 0) {
-            mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
-        }
+        int mgtTransportPort = getManagementTransportPort(mgtTransport);
         String serverUrl = mgtTransport + "://" + hostName.toLowerCase();
         // If it's well known HTTPS port, skip adding port
         if (mgtTransportPort != APIConstants.DEFAULT_HTTPS_PORT) {
@@ -8202,31 +8207,6 @@ public final class APIUtil {
                     GRANT_TYPE_NAME, GRANT_TYPE_NAME));
         }
         return grantTypes;
-    }
-
-    public static String getDcrUrl()  {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.DCR_URL);
-    }
-
-    public static String getAuthorizeUrl() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.AUTHORIZE_URL);
-    }
-
-    public static String getTokenUrl() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.TOKEN_API_URL);
-    }
-
-    public static String getRevokeTokenUrl() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.REVOKE_API_URL);
-    }
-
-    public static String getOidcLogoutUrl() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.OIDC_LOGOUT_URL);
     }
 
     public static Map<String, Environment> getEnvironments(){

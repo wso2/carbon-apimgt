@@ -2,8 +2,9 @@
 var log = new Log("Token Request Function");
 var state = request.getParameter("state", "UTF-8");
 log.debug("state: " + state);
-var settingsResponse = application.get("settingsResponse");
+include("/services/constants.jag");
 var site = require("/site/conf/site.json");
+var serverPort = application.get("serverPort");
 if (state !== null) {
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDTO();
@@ -14,7 +15,7 @@ if (state !== null) {
     var Base64 = org.apache.axiom.om.util.Base64;
     var String = Packages.java.lang.String;
     var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
-    var tokenRevokeEndpoint = settingsResponse.revokeTokenUrl;
+    var tokenRevokeEndpoint = MGT_TRANSPORT + HOST  + ":" + serverPort + REVOKE_URL_SUFFIX;
 
     var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default").value;
     var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value;
@@ -84,7 +85,7 @@ if (state !== null) {
     var tokenRequestData = {
         "grant_type": "authorization_code",
         "code": request.getParameter("code", "UTF-8"),
-        "redirect_uri": serverUrl + site.context + "/services/auth/callback",
+        "redirect_uri": serverUrl + site.context + CALLBACK_URL_SUFFIX
     };
 
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
@@ -97,7 +98,7 @@ if (state !== null) {
     var String = Packages.java.lang.String;
     var Integer = Packages.java.lang.Integer;
     var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = settingsResponse.tokenUrl;
+    var tokenEndpoint = MGT_TRANSPORT + HOST + ":" +  serverPort + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
     log.debug("Token response: " + result.data);

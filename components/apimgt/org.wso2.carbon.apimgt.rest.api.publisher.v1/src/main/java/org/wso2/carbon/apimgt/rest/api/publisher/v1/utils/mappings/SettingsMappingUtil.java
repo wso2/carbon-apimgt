@@ -60,11 +60,6 @@ public class SettingsMappingUtil {
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
         }
-        settingsDTO.setDcrUrl(APIUtil.getDcrUrl());
-        settingsDTO.setAuthorizeUrl(APIUtil.getAuthorizeUrl());
-        settingsDTO.setTokenUrl(APIUtil.getTokenUrl());
-        settingsDTO.setRevokeTokenUrl(APIUtil.getRevokeTokenUrl());
-        settingsDTO.setOidcLogoutUrl(APIUtil.getOidcLogoutUrl());
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
     }
