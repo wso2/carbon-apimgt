@@ -5423,11 +5423,11 @@ public final class APIUtil {
     }
 
 
-    public static boolean isSandboxEndpointsExists(API api) {
+    public static boolean isSandboxEndpointsExists(String endpointConfig) {
         JSONParser parser = new JSONParser();
         JSONObject config = null;
         try {
-            config = (JSONObject) parser.parse(api.getEndpointConfig());
+            config = (JSONObject) parser.parse(endpointConfig);
 
             if (config.containsKey("sandbox_endpoints")) {
                 return true;
@@ -5440,11 +5440,11 @@ public final class APIUtil {
         return false;
     }
 
-    public static boolean isProductionEndpointsExists(API api) {
+    public static boolean isProductionEndpointsExists(String endpointConfig) {
         JSONParser parser = new JSONParser();
         JSONObject config = null;
         try {
-            config = (JSONObject) parser.parse(api.getEndpointConfig());
+            config = (JSONObject) parser.parse(endpointConfig);
 
             if (config.containsKey("production_endpoints")) {
                 return true;
