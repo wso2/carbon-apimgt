@@ -229,12 +229,12 @@ public class BasicAuthCredentialValidator {
                         }
                     } else {
                         try {
-                            int tenantId = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                                    .getRealmService().getTenantManager().getTenantId(tenantDomain);//TODO:import ServiceReferenceHolder from gateway
+                            int tenantId = ServiceReferenceHolder.getInstance()
+                                    .getRealmService().getTenantManager().getTenantId(tenantDomain);
 
-                            UserStoreManager manager = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+                            UserStoreManager manager = ServiceReferenceHolder
                                     .getInstance().getRealmService()
-                                    .getTenantUserRealm(tenantId).getUserStoreManager();//TODO:import ServiceReferenceHolder from gateway
+                                    .getTenantUserRealm(tenantId).getUserStoreManager();
 
                             userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
                         } catch (UserStoreException e) {
