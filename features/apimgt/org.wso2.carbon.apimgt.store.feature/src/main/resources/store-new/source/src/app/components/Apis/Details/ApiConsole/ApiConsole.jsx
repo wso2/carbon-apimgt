@@ -33,14 +33,12 @@ import WarningIcon from '@material-ui/icons/Warning';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
-import GatewayEnvironment from './GatewayEnvironment';
 
 /**
  *
@@ -191,7 +189,7 @@ Notice
                             </Paper>
                         </Grid>
                     )}
-                    {subscriptions && (
+                    {subscriptions && subscriptions.list.length > 0 && (
                         <Grid container>
                             <Grid item md={3}>
                                 <Typography variant='subheading' gutterleft>

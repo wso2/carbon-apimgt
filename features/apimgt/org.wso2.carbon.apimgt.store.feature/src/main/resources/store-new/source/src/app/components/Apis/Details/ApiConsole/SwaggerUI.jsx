@@ -1,55 +1,35 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import SwaggerUILib from 'swagger-ui';
+import SwaggerUILib from 'swagger-ui-react';
 
+const disableAuthorizeAndInfoPlugin = function () {
+    return {
+        wrapComponents: {
+            authorizeBtn: () => () => null,
+            info: () => () => null,
+        },
+    };
+};
 /**
  *
  *
  * @class SwaggerUI
  * @extends {Component}
  */
-class SwaggerUI extends Component {
-    state = {};
+const SwaggerUI = (props) => {
+    const { spec, accessTokenProvider } = props;
 
-    /**
-     *
-     *
-     * @memberof SwaggerUI
-     */
-    componentDidMount() {
-        const { spec, accessTokenProvider } = this.props;
-
-        const disableAuthorizeAndInfoPlugin = function () {
-            return {
-                wrapComponents: {
-                    authorizeBtn: () => () => null,
-                    info: () => () => null,
-                },
-            };
-        };
-        SwaggerUILib({
-            dom_id: '#swagger-ui-root',
-            spec,
-            validatorUrl: null,
-            requestInterceptor: (req) => {
-                req.headers.Authorization = 'Bearer ' + accessTokenProvider();
-                return req;
-            },
-            presets: [SwaggerUILib.presets.apis, disableAuthorizeAndInfoPlugin],
-            plugins: [SwaggerUILib.plugins.DownloadUrl],
-        });
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof SwaggerUI
-     */
-    render() {
-        return <div id='swagger-ui-root' />;
-    }
-}
+    const componentProps = {
+        spec,
+        validatorUrl: null,
+        requestInterceptor: (req) => {
+            req.headers.Authorization = 'Bearer ' + accessTokenProvider();
+            return req;
+        },
+        presets: [disableAuthorizeAndInfoPlugin],
+    };
+    return <SwaggerUILib {...componentProps} />;
+};
 
 SwaggerUI.propTypes = {
     spec: PropTypes.shape({}).isRequired,
