@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -12944,6 +12945,32 @@ public class ApiMgtDAO {
         }
         
         return templatesMap;
+    }
+
+    public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException{
+        List<ResourcePath> resourcePathList = new ArrayList<ResourcePath>();
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            String sql = SQLConstants.GET_URL_TEMPLATES_FOR_API;
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, apiId.getApiName());
+                ps.setString(2, apiId.getVersion());
+                ps.setString(3, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        ResourcePath resourcePath = new ResourcePath();
+                        resourcePath.setId(rs.getInt("URL_MAPPING_ID"));
+                        resourcePath.setResourcePath(rs.getString("HTTP_METHOD"));
+                        resourcePath.setHttpVerb(rs.getString("URL_PATTERN"));
+                        resourcePathList.add(resourcePath);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while obtaining Resource Paths of api " + apiId , e);
+        }
+        return resourcePathList;
     }
 
     public void addAPIProduct(APIProduct apiproduct, String tenantDomain) throws APIManagementException {

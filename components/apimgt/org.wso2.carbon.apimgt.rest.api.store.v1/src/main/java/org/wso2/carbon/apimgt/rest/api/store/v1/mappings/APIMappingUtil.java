@@ -24,14 +24,12 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
@@ -434,16 +432,6 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         dto.setTiers(tiersToReturn);
-        List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
-        //API product has only one scope.
-        ScopeInfoDTO productScope = new ScopeInfoDTO();
-        productScope.setKey("");
-        productScope.setName("API Product Scope");
-        productScope.setRoles(new ArrayList<String>());
-        productScope
-                .setDescription("Scope of the token which is needed to access the API Product " + product.getName());
-        scopes.add(productScope);
-        dto.setScopes(scopes);
 
         return dto;
     }

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -29,7 +28,6 @@ public class APIProductDTO   {
     private String thumbnailUrl = null;
     private Map<String, String> additionalProperties = new HashMap<>();
     private APIProductBusinessInformationDTO businessInformation = null;
-    private List<ScopeInfoDTO> scopes = new ArrayList<>();
 
   /**
    * UUID of the api product 
@@ -194,23 +192,6 @@ public class APIProductDTO   {
     this.businessInformation = businessInformation;
   }
 
-  /**
-   **/
-  public APIProductDTO scopes(List<ScopeInfoDTO> scopes) {
-    this.scopes = scopes;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("scopes")
-  public List<ScopeInfoDTO> getScopes() {
-    return scopes;
-  }
-  public void setScopes(List<ScopeInfoDTO> scopes) {
-    this.scopes = scopes;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -229,13 +210,12 @@ public class APIProductDTO   {
         Objects.equals(tiers, apIProduct.tiers) &&
         Objects.equals(thumbnailUrl, apIProduct.thumbnailUrl) &&
         Objects.equals(additionalProperties, apIProduct.additionalProperties) &&
-        Objects.equals(businessInformation, apIProduct.businessInformation) &&
-        Objects.equals(scopes, apIProduct.scopes);
+        Objects.equals(businessInformation, apIProduct.businessInformation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, provider, apiDefinition, tiers, thumbnailUrl, additionalProperties, businessInformation, scopes);
+    return Objects.hash(id, name, description, provider, apiDefinition, tiers, thumbnailUrl, additionalProperties, businessInformation);
   }
 
   @Override
@@ -252,7 +232,6 @@ public class APIProductDTO   {
     sb.append("    thumbnailUrl: ").append(toIndentedString(thumbnailUrl)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
-    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

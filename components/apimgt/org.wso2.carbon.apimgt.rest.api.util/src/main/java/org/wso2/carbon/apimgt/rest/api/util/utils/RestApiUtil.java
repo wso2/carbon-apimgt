@@ -964,6 +964,19 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for tags
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getResourcePathPaginatedURL(Integer offset, Integer limit) {
+        String paginatedURL = RestApiConstants.RESOURCE_PATH_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
     /**
      * Checks whether the list of tiers are valid given the all valid tiers
      * 

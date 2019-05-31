@@ -3770,10 +3770,6 @@ definitions:
           businessOwnerEmail:
             type: string
             example: businessowner@wso2.com
-      scopes:
-        type: array
-        items:
-          $ref: '#/definitions/ScopeInfo'
 
 #-----------------------------------------------------
 # The Label resource

@@ -1179,4 +1179,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     APIProduct getAPIDefinitionOfAPIProduct(String uuid) throws APIManagementException;
+
+    List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
 }
