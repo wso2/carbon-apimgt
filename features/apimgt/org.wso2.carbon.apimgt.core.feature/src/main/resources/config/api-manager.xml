@@ -261,13 +261,6 @@
         </ScopeWhitelist-->
         <!-- Name of the token API -->
         <TokenEndPointName>/oauth2/token</TokenEndPointName>
-        <!-- Dynamic Client Registration endpoint url -->
-        <DcrURL>https://localhost:${mgt.transport.https.port}/client-registration/v0.14/register</DcrURL>
-        <!--Authorization api url -->
-        <AuthorizeURL>https://localhost:${https.nio.port}/authorize</AuthorizeURL>
-        <!--Token endpoint url -->
-        <TokenAPIURL>https://localhost:${https.nio.port}/token</TokenAPIURL>
-        <OidcLogoutUrl>https://localhost:${https.nio.port}/</OidcLogoutUrl>
         <!-- This the API URL for revoke API. When we revoke tokens revoke requests should go through this
              API deployed in API gateway. Then it will do cache invalidations related to revoked tokens.
              In distributed deployment we should configure this property in key manager node by pointing
