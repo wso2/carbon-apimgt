@@ -46,7 +46,7 @@
         "react-router-dom": "^4.4.0-alpha.1",
         "react-tap-event-plugin": "^2.0.1",
         "swagger-client": "3.4.8",
-        "swagger-ui": "^3.22.2"
+        "swagger-ui-react": "^3.22.2"
     },
     "devDependencies": {
         "babel-core": "^6.24.1",
