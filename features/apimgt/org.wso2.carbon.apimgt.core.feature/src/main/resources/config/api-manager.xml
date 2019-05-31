@@ -129,6 +129,8 @@
              only be created when this element is uncommented. When the specified
              time duration gets elapsed ,tag cache will get re-generated. -->
         <!--TagCacheDuration>120000</TagCacheDuration-->
+        <!-- Expiry time for resource cache -->
+        <!-- GatewayResourceCacheExpiry>3600</GatewayResourceCacheExpiry -->
         <!-- JWT Claim cache can be disabled only if below config <EnableJWTClaimCache> is set as 'false'. The default
           value is 'true'.
           Other than this config, also <EnableGatewayTokenCache> and <EnableKeyManagerTokenCache> should have been set
