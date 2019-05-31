@@ -429,4 +429,12 @@ public class GatewayUtils {
         }
         return hostname;
     }
+
+    public static String getQualifiedApiName(String apiProviderName, String apiName, String version) {
+        return apiProviderName + "--" + apiName + ":v" + version;
+    }
+
+    public static String getQualifiedDefaultApiName(String apiProviderName, String apiName) {
+        return apiProviderName + "--" + apiName;
+    }
 }

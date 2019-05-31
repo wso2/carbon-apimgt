@@ -75,7 +75,7 @@ public class GatewayCertificateManager {
     public Map<String, List<Environment>> addToGateways(String certificate, String alias) {
         for (Environment environment : environmentMap.values()) {
             try {
-                apiGatewayAdminClient = new APIGatewayAdminClient(null, environment);
+                apiGatewayAdminClient = new APIGatewayAdminClient(environment);
                 boolean result = apiGatewayAdminClient.addCertificate(certificate, alias);
                 if (result) {
                     successGateways.add(environment);
@@ -102,7 +102,7 @@ public class GatewayCertificateManager {
     public Map<String, List<Environment>> removeFromGateways(String alias) {
         for (Environment environment : environmentMap.values()) {
             try {
-                apiGatewayAdminClient = new APIGatewayAdminClient(null, environment);
+                apiGatewayAdminClient = new APIGatewayAdminClient(environment);
                 boolean result = apiGatewayAdminClient.deleteCertificate(alias);
                 if (result) {
                     successGateways.add(environment);
