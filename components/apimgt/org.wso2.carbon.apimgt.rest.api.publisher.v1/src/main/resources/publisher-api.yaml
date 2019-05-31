@@ -6153,20 +6153,6 @@ definitions:
   Settings:
     title: SettingsDTO
     properties:
-      dcrUrl:
-        type: string
-        example: 'https://localhost:9443/client-registration/v0.14/register'
-      authorizeUrl:
-        type: string
-        example: 'https://localhost:8243/authorize'
-      tokenUrl:
-        type: string
-        example: 'https://localhost:8243/token'
-      revokeTokenUrl:
-        type: string
-        example: 'https://localhost:8243/revoke'
-      oidcLogoutUrl:
-        type: string
       environment:
         type: array
         items:
