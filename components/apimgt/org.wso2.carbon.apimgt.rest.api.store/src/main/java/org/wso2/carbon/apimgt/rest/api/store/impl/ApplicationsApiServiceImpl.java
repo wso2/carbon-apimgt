@@ -146,8 +146,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
 
             if (applicationAttributes != null) {
-                Set<String> keySet = RestAPIStoreUtils.getValidApplicationAttributeKeys(applicationAttributes);
-                body.setAttributes(RestAPIStoreUtils.validateApplicationAttributes(applicationAttributes, keySet));
+                body.setAttributes(applicationAttributes);
             }
 
             //subscriber field of the body is not honored. It is taken from the context
@@ -412,16 +411,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     Object applicationAttributesFromUser = body.getAttributes();
                     Map<String, String> applicationAttributes = new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
 
-                    JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
-                    Set<String> keySet = new HashSet<>();
-
-                    for (Object object : attributeKeysFromConfig) {
-                        JSONObject jsonObject = (JSONObject) object;
-                        String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
-                        keySet.add(key);
-                    }
                     if (applicationAttributes != null) {
-                        body.setAttributes(RestAPIStoreUtils.validateApplicationAttributes(applicationAttributes, keySet));
+                        body.setAttributes(applicationAttributes);
                     }
                     //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
                     Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
