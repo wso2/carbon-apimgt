@@ -18,6 +18,7 @@ import org.apache.synapse.commons.throttle.core.*;
 import org.apache.synapse.commons.throttle.core.factory.ThrottleContextFactory;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -25,7 +26,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 
 import java.util.TreeMap;
 
-public class HoneyPotIPBasedThrottleHandler {
+public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(HoneyPotIPBasedThrottleHandler.class);
 
     private static final String IP_THROTTLE_KEY = "ip_throttle_context";
