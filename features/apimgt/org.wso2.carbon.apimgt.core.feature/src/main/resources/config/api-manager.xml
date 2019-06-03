@@ -678,6 +678,10 @@
         </ClientGeneration>
     </SwaggerCodegen>
 
+    <Monetization>
+        <MonetizationImpl>org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl</MonetizationImpl>
+    </Monetization>
+
     <OpenTracer>
         <RemoteTracer>
             <Enabled>false</Enabled>
