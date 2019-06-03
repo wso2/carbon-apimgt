@@ -195,7 +195,7 @@ class APIList extends React.Component {
      * @memberof APIList
      */
     render() {
-        const { APIsNotFound } = this.state;
+        const { APIsNotFound } = this.props;
 
         if (APIsNotFound) {
             return <ResourceNotFound />;
