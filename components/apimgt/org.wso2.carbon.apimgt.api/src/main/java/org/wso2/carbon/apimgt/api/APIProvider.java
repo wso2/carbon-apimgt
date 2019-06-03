@@ -48,7 +48,7 @@ public interface APIProvider extends APIManager {
     void addSwaggerToLocalEntry(API api, String jsonText);
 
     /**
-     * Method to remove the Local Entry from the synapse local entries.
+     * Method to remove the     Local Entry from the synapse local entries.
      *
      * @param api    API
      */
