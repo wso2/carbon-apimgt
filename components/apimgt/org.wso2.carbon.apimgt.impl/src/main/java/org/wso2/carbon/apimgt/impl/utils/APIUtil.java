@@ -679,6 +679,15 @@ public final class APIUtil {
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+            //set data and status related to monetization
+            api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
+                    (APIConstants.API_MONETIZATION_STATUS)));
+            String monetizationInfo = artifact.getAttribute(APIConstants.API_MONETIZATION_PROPERTIES);
+            if (StringUtils.isNotBlank(monetizationInfo)) {
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
+                api.setMonetizationProperties(jsonObj);
+            }
             //get labels from the artifact and set to API object
             String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
             if (labelArray != null && labelArray.length > 0) {
@@ -725,6 +734,9 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         } catch (UserStoreException e) {
             String msg = "Failed to get User Realm of API Provider";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Failed to get parse monetization information.";
             throw new APIManagementException(msg, e);
         }
         return api;
@@ -1225,6 +1237,14 @@ public final class APIUtil {
 
             //attaching micro-gateway labels to the API
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+
+            //set monetization status (i.e - enabled or disabled)
+            artifact.setAttribute(APIConstants.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
+            //set additional monetization data
+            if (api.getMonetizationProperties() != null) {
+                artifact.setAttribute(APIConstants.API_MONETIZATION_PROPERTIES,
+                        api.getMonetizationProperties().toJSONString());
+            }
 
             String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
             if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {

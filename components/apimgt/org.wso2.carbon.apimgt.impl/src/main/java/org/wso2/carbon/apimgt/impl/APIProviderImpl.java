@@ -29,6 +29,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -58,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -86,6 +88,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
@@ -4864,6 +4867,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String policyFile = subPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + subPolicy.getPolicyName();
                 executionFlows.put(policyFile, policyString);
                 apiMgtDAO.addSubscriptionPolicy(subPolicy);
+                String monetizationPlan = subPolicy.getMonetizationPlan();
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                    createMonetizationPlan(subPolicy);
+                }
                 policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -4911,6 +4919,126 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
             throw new PolicyDeploymentFailureException(msg, e);
         }
+    }
+
+    @Override
+    public void configureMonetizationInAPIArtifact(API api) throws APIManagementException {
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            if (artifactManager == null) {
+                handleException("Artifact manager is null when updating monetization data for API ID " + api.getId());
+            }
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            //set monetization status (i.e - enabled or disabled)
+            artifact.setAttribute(APIConstants.API_MONETIZATION_STATUS,
+                    Boolean.toString(api.getMonetizationStatus()));
+            //clear existing monetization properties
+            artifact.removeAttribute(APIConstants.API_MONETIZATION_PROPERTIES);
+            //set new additional monetization data
+            if (api.getMonetizationProperties() != null) {
+                artifact.setAttribute(APIConstants.API_MONETIZATION_PROPERTIES,
+                        api.getMonetizationProperties().toJSONString());
+            }
+            artifactManager.updateGenericArtifact(artifact);
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction (monetization status update) for API: " +
+                        api.getId().getApiName(), re);
+            }
+            handleException("Error while performing registry transaction (monetization status update) operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException e) {
+                handleException("Error occurred while rolling back the transaction (monetization status update).", e);
+            }
+        }
+    }
+
+    /**
+     * This methods creates a monetization plan for a given subscription policy
+     *
+     * @param subPolicy subscription policy
+     * @return true if successful, false otherwise
+     * @throws APIManagementException if failed to create a monetization plan
+     */
+    private boolean createMonetizationPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+
+        Monetization monetizationImplementation = getMonetizationImplClass();
+        if (monetizationImplementation != null) {
+            return monetizationImplementation.createBillingPlan(subPolicy);
+        }
+        return false;
+    }
+
+    /**
+     * This methods updates the monetization plan for a given subscription policy
+     *
+     * @param subPolicy subscription policy
+     * @return true if successful, false otherwise
+     * @throws APIManagementException if failed to update the plan
+     */
+    private boolean updateMonetizationPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+
+        Monetization monetizationImplementation = getMonetizationImplClass();
+        if (monetizationImplementation != null) {
+            return monetizationImplementation.updateBillingPlan(subPolicy);
+        }
+        return false;
+    }
+
+    /**
+     * This methods delete the monetization plan for a given subscription policy
+     *
+     * @param subPolicy subscription policy
+     * @return true if successful, false otherwise
+     * @throws APIManagementException if failed to delete the plan
+     */
+    private boolean deleteMonetizationPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+
+        Monetization monetizationImplementation = getMonetizationImplClass();
+        if (monetizationImplementation != null) {
+            return monetizationImplementation.deleteBillingPlan(subPolicy);
+        }
+        return false;
+    }
+
+    /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    public Monetization getMonetizationImplClass() throws APIManagementException {
+
+        APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        Monetization monetizationImpl = null;
+        if (configuration == null) {
+            log.error("API Manager configuration is not initialized.");
+        } else {
+            String monetizationImplClass = configuration.getFirstProperty(APIConstants.MONETIZATION_IMPL);
+            if (monetizationImplClass == null) {
+                monetizationImpl = new DefaultMonetizationImpl();
+            } else {
+                try {
+                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                    APIUtil.handleException("Failed to load monetization implementation class.", e);
+                }
+            }
+        }
+        return monetizationImpl;
     }
 
     public void updatePolicy(Policy policy) throws APIManagementException {
@@ -4998,6 +5126,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
                 apiMgtDAO.updateSubscriptionPolicy(subPolicy);
+                String monetizationPlan = subPolicy.getMonetizationPlan();
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                //call the monetization extension point to create plans (if any)
+                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                    updateMonetizationPlan(subPolicy);
+                }
                 String policyFile = subPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
                 policiesToUndeploy.add(policyFile);
                 executionFlows.put(policyFile, policyString);
@@ -5115,6 +5249,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         policyName;
                 policyFileNames.add(policyFile);
             }
+            //call the monetization extension point to delete plans if any
+            deleteMonetizationPlan(subscriptionPolicy);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
             if (globalPolicy.isDeployed()) {
