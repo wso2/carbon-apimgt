@@ -34,17 +34,23 @@ include("/jagg/jagg.jag");
             var stopOnQuotaReach =  request.getParameter("stopOnQuotaReach", "UTF-8");
             var tierPlan =  request.getParameter("tierPlan", "UTF-8");
             var attributes =  parse(request.getParameter("attributes", "UTF-8"));
-
+            var monetizationPlan = request.getParameter("monetizationPlan", "UTF-8");
+            var fixedRate = request.getParameter("fixedRate", "UTF-8");
+            var billingCycle = request.getParameter("billingCycle", "UTF-8");
+            var pricePerRequest = request.getParameter("pricePerRequest", "UTF-8");
             mod = jagg.module("policy");
 
-            result = mod.addSubscriptionPolicy(action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes);
-           
-            //add permissions            
+            result = mod.addSubscriptionPolicy(action, policyName, description, defaultQuotaPolicy,
+                                                defaultRequestCount, defaultBandwidth, defaultBandwidthUnit,
+                                                defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit,
+                                                stopOnQuotaReach, tierPlan, attributes, monetizationPlan, fixedRate,
+                                                billingCycle, pricePerRequest);
+            //add permissions
             var tierPermission = {};
             tierPermission.policyName = policyName;
             tierPermission.permissiontype = request.getParameter("permissionType", "UTF-8");
-            tierPermission.roles = request.getParameter("roles", "UTF-8");            
-            permissionResult = mod.updateThrottleTierPermissions(tierPermission);             
+            tierPermission.roles = request.getParameter("roles", "UTF-8");
+            permissionResult = mod.updateThrottleTierPermissions(tierPermission);
             session.remove("throttleTierPermissions");
 
             if (result.error) {
@@ -56,7 +62,7 @@ include("/jagg/jagg.jag");
                 obj = {
                     error:true,
                     message:msg.error.backendError(action)
-                   };                
+                   };
             } else {
                 obj = {
                     error:false,
