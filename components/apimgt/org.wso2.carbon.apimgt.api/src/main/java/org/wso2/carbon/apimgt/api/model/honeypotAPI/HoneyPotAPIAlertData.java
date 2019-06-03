@@ -77,7 +77,7 @@ public class HoneyPotAPIAlertData implements Serializable {
     }
 
     public void setEmails(String emails){
-        this.emails = emails;
+            this.emails = emails;
     }
 
     @Override

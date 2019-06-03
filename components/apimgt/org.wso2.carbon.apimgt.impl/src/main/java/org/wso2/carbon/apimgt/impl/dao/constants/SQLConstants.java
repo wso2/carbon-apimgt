@@ -3721,7 +3721,7 @@ public class SQLConstants {
         public static final String GET_HONEYPOT_API_ALERTS = " SELECT " + " * " + "FROM " + " HoneyPotAPIData " +
                 "ORDER BY currentTime ASC";
 
-        public static final String DELETE_HONEYPOT_API_ALERT_SQL = "DELETE FROM HoneyPotAPIData WHERE MESSAGE_ID = ?";
+        public static final String DELETE_HONEYPOT_API_ALERT_SQL = "DELETE FROM HoneyPotAPIData WHERE messageID = ?";
 
         public static final String ADD_ALERT_EMAIL_LIST =
                 " INSERT INTO HONEYPOT_EMAIL_LIST  (TENANT_DOMAIN, EMAIL_LIST) " +
@@ -3730,16 +3730,22 @@ public class SQLConstants {
         public static final String GET_SAVED_ALERT_EMAILS =
 
                 " SELECT " +
-                        "   EMAIL_LIST " +
+                        "  EMAIL_LIST " +
+                        " FROM " +
+                        "   HONEYPOT_EMAIL_LIST " +
+                        " WHERE " + " TENANT_DOMAIN = ? ";
+        public static final String GET_SAVED_ALERT_EMAIL_LISTID =
+                " SELECT " +
+                        "  EMAIL_LIST_ID " +
                         " FROM " +
                         "   HONEYPOT_EMAIL_LIST " +
                         " WHERE " + " TENANT_DOMAIN = ? ";
 
         public static final String UPDATE_EMAIL_LIST_BY_TENANT_ID =
-                "UPDATE HONEYPOT_EMAIL_LIST SET EMAIL_LIST =?" + "WHERE TENANT_DOMAIN= ? ";
+                "UPDATE HONEYPOT_EMAIL_LIST SET EMAIL_LIST =?" + " WHERE TENANT_DOMAIN= ? ";
 
         public static final String DELETE_EMAIL_LIST_BY_TENANT_ID =
-                "DELETE FROM HONEYPOT_EMAIL_LIST" + "WHERE TENANT_DOMAIN= ?";
+                "DELETE FROM HONEYPOT_EMAIL_LIST WHERE TENANT_DOMAIN= ?";
 
     }
 }
