@@ -24,6 +24,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import PropTypes from 'prop-types';
+import qs from 'qs';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
@@ -34,6 +35,7 @@ import Alert from '../../Shared/Alert';
 import SubscriptionTableData from './SubscriptionTableData';
 import APIList from '../../Apis/Listing/APIList';
 import Subscription from '../../../data/Subscription';
+import Api from '../../../data/api';
 /**
  *
  *
@@ -68,9 +70,12 @@ class Subscriptions extends React.Component {
         super(props);
         this.state = {
             subscriptions: null,
+            unsubscribedAPIList: [],
+            APIsNotFound: false
         };
         this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
         this.updateSubscriptions = this.updateSubscriptions.bind(this);
+        this.updateUnsubscribedAPIsList = this.updateUnsubscribedAPIsList.bind(this);
     }
 
     /**
@@ -84,7 +89,7 @@ class Subscriptions extends React.Component {
         const promisedSubscriptions = client.getSubscriptions(null, applicationId);
         promisedSubscriptions
             .then((response) => {
-                this.setState({ subscriptions: response.body.list });
+                this.setState({ subscriptions: response.body.list }, this.updateUnsubscribedAPIsList);
             })
             .catch((error) => {
                 const { status } = error;
@@ -102,7 +107,9 @@ class Subscriptions extends React.Component {
     componentDidMount() {
         const { applicationId } = this.props.match.params;
         this.updateSubscriptions(applicationId);
+        this.updateUnsubscribedAPIsList();
     }
+
 
     /**
      *
@@ -128,8 +135,45 @@ class Subscriptions extends React.Component {
                     break;
                 }
             }
-            this.setState({ subscriptions });
+            this.setState({ subscriptions }, this.updateUnsubscribedAPIsList);
         });
+    }
+
+    updateUnsubscribedAPIsList() {
+        const api = new Api();
+        const promisedGetApis = api.getAllAPIs();
+        const { subscriptions } = this.state;
+
+
+        promisedGetApis
+            .then((response) => {
+                // return response;
+                const {list} = response.obj;
+                const subscribedAPIIds = subscriptions.map(sub => sub.apiId);
+                const unsubscribedAPIList = list
+                    .filter(api => !subscribedAPIIds.includes(api.id))
+                    .map(api => {
+                        return {
+                            Id: api.id,
+                            Policy: api.throttlingPolicies,
+                            Name: api.name
+                        }
+                    });
+                this.setState({unsubscribedAPIList})
+            })
+            .catch((error) => {
+                const status = error.status;
+                if (status === 404) {
+                    this.setState({ APIsNotFound: true });
+                } else if (status === 401) {
+                    this.setState({ isAuthorize: false });
+                    const params = qs.stringify({
+                        reference: this.props.location.pathname,
+                    });
+                    this.props.history.push({ pathname: '/login', search: params });
+                }
+            });
+
     }
 
     /**
@@ -139,7 +183,7 @@ class Subscriptions extends React.Component {
      * @memberof Subscriptions
      */
     render() {
-        const { subscriptions } = this.state;
+        const { subscriptions, unsubscribedAPIList, APIsNotFound } = this.state;
         const { applicationId } = this.props.match.params;
         const { classes } = this.props;
         if (subscriptions) {
@@ -179,7 +223,7 @@ class Subscriptions extends React.Component {
                             </Card>
                         </Grid>
                         <Grid item xs={6} className={classes.cardGrid}>
-                            <APIList subscriptions={subscriptions} applicationId={applicationId} updateSubscriptions={this.updateSubscriptions} />
+                            <APIList APIsNotFound={APIsNotFound} unsubscribedAPIList={unsubscribedAPIList} applicationId={applicationId} updateSubscriptions={this.updateSubscriptions} />
                         </Grid>
                     </Grid>
                 </div>

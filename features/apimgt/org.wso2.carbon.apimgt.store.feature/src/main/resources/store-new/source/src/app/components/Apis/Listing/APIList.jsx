@@ -16,18 +16,17 @@
  * under the License.
  */
 import React from 'react';
-import qs from 'qs';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import MUIDataTable from 'mui-datatables';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Api from '../../../data/api';
 import Alert from '../../Shared/Alert';
 
-let applicationId;
-let updateSubscriptions;
+
 /**
  *
  *
@@ -41,6 +40,7 @@ const styles = theme => ({
         marginRight: 10,
     },
 });
+
 /**
  *
  *
@@ -48,78 +48,6 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class SubscribeItemObj extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            policies: null,
-            policy: null,
-        };
-        this.api = new Api();
-    }
-
-    /**
-     *
-     *
-     * @memberof SubscribeItemObj
-     */
-    componentDidMount() {
-        const apiId = this.props.apiId;
-        const promised_api = this.api.getAPIById(apiId);
-        promised_api
-            .then((response) => {
-                let policy = null;
-                if (response.obj.policies.length > 0) {
-                    policy = response.obj.policies[0];
-                }
-                this.setState({ policies: response.obj.policies, policy });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
-    /**
-     *
-     *
-     * @memberof SubscribeItemObj
-     */
-    handleChange = (event) => {
-        this.setState({ policy: event.target.value });
-    };
-
-    /**
-     *
-     *
-     * @memberof SubscribeItemObj
-     */
-    subscribe = (event) => {
-        const { apiId } = this.props;
-        const { policy } = this.state;
-        if (!policy) {
-            Alert.error('Select a policy to subscribe');
-            return;
-        }
-        const promisedSubscribe = this.api.subscribe(apiId, applicationId, policy);
-        promisedSubscribe
-            .then((response) => {
-                if (response.status !== 201) {
-                    Alert.error('subscription error');
-                } else {
-                    Alert.error('Subuscription successfull');
-                    updateSubscriptions(applicationId);
-                }
-            })
-            .catch((error) => {
-                Alert.error('subscription error');
-            });
-    };
-
     /**
      *
      *
@@ -127,52 +55,48 @@ class SubscribeItemObj extends React.Component {
      * @memberof SubscribeItemObj
      */
     render() {
-        const { classes } = this.props;
-        const { policies } = this.state;
+        const {
+            classes, policies, selectedPolicy, handleSelectedSubscriptionPolicyChange, apiId, subscribe,
+        } = this.props;
+
         return (
-            policies && (
-                <div className={classes.root}>
-                    <Button variant='contained' size='small' color='primary' className={classes.buttonGap} onClick={this.subscribe}>
-                        Subscribe
-                    </Button>
-                    <Select value={this.state.policy} onChange={this.handleChange}>
-                        {policies.map(policy => (
-                            <option value={policy} key={policy}>
-                                {policy}
-                            </option>
-                        ))}
-                    </Select>
-                </div>
-            )
+            policies &&
+            <div className={classes.root}>
+                <Button
+                    variant='contained'
+                    size='small'
+                    color='primary'
+                    className={classes.buttonGap}
+                    onClick={() => {
+                        subscribe(apiId);
+                    }}
+                >
+                    Subscribe
+                </Button>
+                <Select
+                    value={selectedPolicy}
+                    onChange={(e) => {
+                        handleSelectedSubscriptionPolicyChange(apiId, e.target.value);
+                    }}
+                >
+                    {policies.map(policy => (
+                        <MenuItem value={policy}>
+                            {policy}
+                        </MenuItem>
+                    ))}
+
+                </Select>
+            </div>
         );
     }
 }
+
 SubscribeItemObj.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
 const SubscribeItem = withStyles(styles)(SubscribeItemObj);
 
-const columns = [
-    {
-        name: 'id',
-        options: {
-            display: 'excluded',
-        },
-    },
-    {
-        name: 'Policy',
-        options: {
-            customBodyRender: (value, tableMeta, updateValue) => {
-                if (tableMeta.rowData) {
-                    const apiId = tableMeta.rowData[0];
-                    return <SubscribeItem apiId={apiId} />;
-                }
-            },
-        },
-    },
-    'name',
-];
 
 /**
  *
@@ -184,74 +108,85 @@ class APIList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            apis: null,
-            value: 1,
-            order: 'asc',
-            orderBy: 'name',
+            selectedSubscriptionPolicy: {},
         };
-        this.state.listType = this.props.theme.custom.defaultApiView;
-        this.api = new Api();
+        this.handleSelectedSubscriptionPolicyChange = this.handleSelectedSubscriptionPolicyChange.bind(this);
+        this.subscribe = this.subscribe.bind(this);
+        this.updateSelectedSubscriptionPolicy = this.updateSelectedSubscriptionPolicy.bind(this);
     }
 
     /**
      *
-     *
+     * Handle onClick of subscription policy select of an API
      * @memberof APIList
      */
-    setListType = (value) => {
-        this.setState({ listType: value });
-    };
+    handleSelectedSubscriptionPolicyChange(apiId, policy) {
+        const { selectedSubscriptionPolicy } = this.state;
 
-    /**
-     *
-     *
-     * @param {*} nextProps
-     * @memberof APIList
-     */
-    componentWillReceiveProps(nextProps) {
-        this.setState({ data: nextProps.data });
+        const newSelectedSubscriptionPolicy = { ...selectedSubscriptionPolicy };
+        newSelectedSubscriptionPolicy[apiId] = policy;
+        this.setState({ selectedSubscriptionPolicy: newSelectedSubscriptionPolicy }, this.print);
     }
 
     /**
      *
-     *
+     * Handle onClick of subscription to an API
      * @memberof APIList
      */
-    componentDidMount() {
-        applicationId = this.props.applicationId;
-        updateSubscriptions = this.props.updateSubscriptions;
-        const promised_apis = this.api.getAllAPIs();
-        promised_apis
+    subscribe(apiId) {
+        const api = new Api();
+        const { updateSubscriptions, applicationId } = this.props;
+        const { selectedSubscriptionPolicy } = this.state;
+        const policy = selectedSubscriptionPolicy[apiId];
+
+        if (!policy) {
+            Alert.error('Select a policy to subscribe');
+            return;
+        }
+        const promisedSubscribe = api.subscribe(apiId, applicationId, policy);
+        promisedSubscribe
             .then((response) => {
-                const { subscriptions } = this.props;
-                const { count, list } = response.obj;
-                const filteredApis = [];
-                for (let i = 0; i < count; i++) {
-                    let apiIsSubscribed = false;
-                    for (let j = 0; j < subscriptions.length; j++) {
-                        if (list[i].id === subscriptions[j].apiIdentifier) {
-                            apiIsSubscribed = true;
-                        }
-                    }
-                    if (!apiIsSubscribed) {
-                        filteredApis.push(list[i]);
+                if (response.status !== 201) {
+                    Alert.error('subscription error');
+                } else {
+                    Alert.info('Subscription successful');
+                    if (updateSubscriptions) {
+                        updateSubscriptions(applicationId);
                     }
                 }
-                this.setState({ apis: filteredApis });
             })
-            .catch((error) => {
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
-                    const params = qs.stringify({
-                        reference: this.props.location.pathname,
-                    });
-                    this.props.history.push({ pathname: '/login', search: params });
-                }
+            .catch(() => {
+                Alert.error('subscription error');
             });
     }
+
+    /**
+     *
+     * Update the selected subscription policy of APIs when new unsubscribed APIs are received
+     * @memberof APIList
+     */
+    updateSelectedSubscriptionPolicy() {
+        const { unsubscribedAPIList } = this.props;
+        const { selectedSubscriptionPolicy } = this.state;
+
+        if (unsubscribedAPIList && unsubscribedAPIList.length > 0) {
+            const newUnsubscribedAPISubscriptionPolicy = unsubscribedAPIList
+                .filter(api => selectedSubscriptionPolicy[api.Id] === undefined
+                    || api.Policy.indexOf(selectedSubscriptionPolicy[api.Id]) === -1)
+                .reduce((acc, cur) => {
+                    acc[cur.Id] = cur.Policy[0];
+                    return acc;
+                }, {});
+            if (Object.keys(newUnsubscribedAPISubscriptionPolicy).length !== 0) {
+                const newSelectedSubscriptionPolicy = {
+                    ...selectedSubscriptionPolicy,
+                    ...newUnsubscribedAPISubscriptionPolicy,
+                };
+                this.setState({ selectedSubscriptionPolicy: newSelectedSubscriptionPolicy }, this.print);
+            }
+        }
+    }
+
 
     /**
      *
@@ -260,14 +195,55 @@ class APIList extends React.Component {
      * @memberof APIList
      */
     render() {
-        if (this.state.notFound) {
+        const { APIsNotFound } = this.state;
+
+        if (APIsNotFound) {
             return <ResourceNotFound />;
         }
 
-        const { apis } = this.state;
-        const { theme } = this.props;
+        this.updateSelectedSubscriptionPolicy();
 
-        return apis && <MUIDataTable title='APIs' data={apis} columns={columns} options={{ selectableRows: false }} />;
+        const { selectedSubscriptionPolicy } = this.state;
+        const { theme, unsubscribedAPIList } = this.props;
+        const columns = [
+            {
+                name: 'Id',
+                options: {
+                    display: 'excluded',
+                },
+            },
+            {
+                name: 'Policy',
+                options: {
+                    customBodyRender: (value, tableMeta, updateValue) => {
+                        if (tableMeta.rowData) {
+                            const apiId = tableMeta.rowData[0];
+                            const policies = value;
+                            const selectedPolicy = selectedSubscriptionPolicy[apiId];
+                            return (
+                                <SubscribeItem
+                                    selectedPolicy={selectedPolicy}
+                                    policies={policies}
+                                    apiId={apiId}
+                                    subscribe={this.subscribe}
+                                    handleSelectedSubscriptionPolicyChange={this.handleSelectedSubscriptionPolicyChange}
+                                />
+                            );
+                        }
+                    },
+                },
+            },
+            'Name',
+        ];
+
+        return (
+            <MUIDataTable
+                title='APIs'
+                data={unsubscribedAPIList}
+                columns={columns}
+                options={{ selectableRows: false }}
+            />
+        );
     }
 }
 
