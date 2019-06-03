@@ -7,9 +7,9 @@ var getAlert = function(){
         var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
         var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
         var apiAdmin = new APIAdminImpl();
-        new Log('test2').info(stringify(APIAdminImpl));
+        //new Log('test2').info(stringify(APIAdminImpl));
         var alertData = apiAdmin.getAlert();
-        new Log('test3').info(alertData);
+        //new Log('test3').info(alertData);
         return {
             error: false,
             alertData:alertData

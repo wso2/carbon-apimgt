@@ -22,7 +22,7 @@ include("/jagg/jagg.jag");
         });
     } else {
         if (action === "saveEmailList" && request.getMethod() == 'POST') {
-            new Log('Hello').info('Hello');
+            //new Log('Hello').info('Hello');
 
             var userName = jagg.getUser().username;
             var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -34,10 +34,10 @@ include("/jagg/jagg.jag");
 
             mod = jagg.module("honeypot-api-email-alert-configuration");
             var emailList = request.getParameter("emailList");
-            new Log('emailList').info(stringify(emailList));
+            //new Log('emailList').info(stringify(emailList));
 
             var results = mod.saveEmailList(emailList, tenantDomain);
-            new Log('results').info(stringify(results));
+            //new Log('results').info(stringify(results));
 
             if (results.error) {
                 obj = {

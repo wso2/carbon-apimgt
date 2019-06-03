@@ -7,8 +7,8 @@
     <div class="content-section shadow-up">
     <div class="content-data">
 
-    <%var log = new Log();
-      new Log('test').info(outputs);
+    <%
+    var log = new Log();
     if(outputs.alertData.size()) { %>
     <table class="table table-responsive table-striped" >
         <thead>
@@ -58,8 +58,8 @@
     </table>
     <%} else {%>
     <div class="message message-info">
-   	    <h4><i class="icon fw fw-info"></i><%=i18n.localize("Microgateways are not defined")%></h4>
-   		<p><%=i18n.localize("Microgateways are not defined")%></p>
+   	    <h4><i class="icon fw fw-info"></i><%=i18n.localize("No Alert triggered")%></h4>
+   		<p><%=i18n.localize("No Alert triggered")%></p>
    	</div>
    <% }%>
 
