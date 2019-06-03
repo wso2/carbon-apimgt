@@ -2471,6 +2471,8 @@ definitions:
       - properties:
           defaultLimit:
             $ref: '#/definitions/ThrottleLimit'
+          monetization:
+            $ref: '#/definitions/MonetizationInfo'
           rateLimitCount:
             type: integer
             default: 0
@@ -2734,6 +2736,28 @@ definitions:
         default: 0
         description: Time limit that the throttling limit applies.
         example: 10
+
+#-----------------------------------------------------
+# The Monetization Info resource
+#-----------------------------------------------------
+  MonetizationInfo:
+    title: API monetization details object
+    required:
+      - monetizationPlan
+      - properties
+    properties:
+      monetizationPlan:
+        type: string
+        description: Flag to indicate the monetization plan
+        enum:
+          - FixedRate
+          - DynamicRate
+        example: FixedRate
+      properties:
+        type: object
+        description: Map of custom properties related to each monetization plan
+        additionalProperties:
+          type: string
 
 #-----------------------------------------------------
 # The Throttling Bandwidth Limit resource
