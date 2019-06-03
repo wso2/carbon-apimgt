@@ -97,7 +97,6 @@ $(document).ready(function () {
 
     });
     $("#saveBtn").click(function () {
-        //alert($("#tokenfield").val());
 
         if ($(".token").hasClass("invalid")) {
             jagg.message({content: i18n.t("Could not save. You have entered an invalid email address.") , type: "error"});
@@ -115,12 +114,13 @@ $(document).ready(function () {
             });
 
                 var emailList = $("#tokenfield").val();
-                if(emailList) {
-                    saveEmailList(emailList);
-                 }
-                  else{
-                      jagg.message({content: i18n.t("Please enter at least one email address") , type: "error"});
-                 }
+                saveEmailList(emailList);
+//                if(emailList) {
+//                    saveEmailList(emailList);
+//                 }
+//                  else{
+//                      jagg.message({content: i18n.t("Please enter at least one email address") , type: "error"});
+//                 }
         }
     });
 

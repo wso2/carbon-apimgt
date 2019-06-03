@@ -17,8 +17,8 @@ include("/jagg/jagg.jag");
         if (action == "deleteAlert" )  {
             mod = jagg.module("honeypot-api-alerts");
             result = mod.deleteHoneyPotAlert(request.getParameter("messageID"));
-            var log = new Log();
-            new Log('test35').info(result);
+            //var log = new Log();
+            //new Log('test35').info(result);
             if (result.error) {
                 obj = {
                     error:true,

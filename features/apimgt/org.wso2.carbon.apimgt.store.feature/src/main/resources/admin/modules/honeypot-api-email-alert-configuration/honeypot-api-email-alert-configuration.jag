@@ -13,13 +13,13 @@ var saveEmailList  = function (emailList, tenantDomain) {
 
     try {
         var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
-        new Log('APIAdminImpl').info(stringify(APIAdminImpl));
+        //new Log('APIAdminImpl').info(stringify(APIAdminImpl));
 
         var addEmailList = new APIAdminImpl();
         //new Log('addEmailList').info(stringify(emailList));
 
         var addEmailListDB = addEmailList.addHoneyPotAPiEmailAlertConfiguration(emailList, tenantDomain);
-        new Log('addEmailListDB').info(stringify(addEmailListDB));
+        //new Log('addEmailListDB').info(stringify(addEmailListDB));
 
         //apiDatapublisherInstance.saveAndPublishAlertTypesEvent(emailList, tenantDomain);
 
