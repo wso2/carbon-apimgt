@@ -40,7 +40,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
 
         try {
             String username = RestApiUtil.getLoggedInUsername();
-            Boolean isUserAvailable = false;
+            boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
             }

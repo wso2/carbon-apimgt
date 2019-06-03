@@ -73,6 +73,7 @@ securityDefinitions:
     flow: password
     tokenUrl: https://localhost:9443/token
     scopes:
+      openid: Authorize access to user details
       apim:api_view: View API
       apim:api_create: Create API
       apim:api_update: Update API
@@ -6150,10 +6151,8 @@ definitions:
   # The settings resource
   #-----------------------------------------------------
   Settings:
-    title: Settings
+    title: SettingsDTO
     properties:
-      tokenUrl:
-        type: string
       environment:
         type: array
         items:
