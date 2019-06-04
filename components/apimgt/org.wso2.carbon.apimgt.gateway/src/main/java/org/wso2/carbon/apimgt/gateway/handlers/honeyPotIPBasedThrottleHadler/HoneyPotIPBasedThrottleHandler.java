@@ -105,12 +105,12 @@ public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
 
     private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
         if (policyKey == null) {
-            log.info("+++++ Throttle policy unspecified for the API ++++++++");
+            //log.info("+++++ Throttle policy unspecified for the API ++++++++");
             throw new SynapseException("Throttle policy unspecified for the API");
         }
         Entry entry = synCtx.getConfiguration().getEntryDefinition(policyKey);
         if (entry == null) {
-            log.info("++++ Cannot find throttling policy using key+++" + policyKey);
+            //log.info("++++ Cannot find throttling policy using key+++" + policyKey);
             handleException("Cannot find throttling policy using key: " + policyKey);
             return;
         }
@@ -121,7 +121,7 @@ public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
                 log.info("++++++++++++Is dynamic ++++");
                 entryValue = synCtx.getEntry(this.policyKey);
                 if (this.version != entry.getVersion()) {
-                    log.info("++++++++++++Is dynamic and isCached+++++");
+                    //log.info("++++++++++++Is dynamic and isCached+++++");
                     reCreate = true;
                 }
             }
@@ -130,7 +130,7 @@ public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
         }
         if (reCreate || throttle == null) {
             if (entryValue == null || !(entryValue instanceof OMElement)) {
-                log.info("Unable to load throttling policy using key: " + policyKey);
+                //log.info("Unable to load throttling policy using key: " + policyKey);
                 handleException("Unable to load throttling policy using key: " + policyKey);
                 return;
             }
@@ -161,7 +161,7 @@ public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
                 }
 
             } catch (ThrottleException e) {
-                log.info("++++Error processing the throttling policy++", e);
+               // log.info("++++Error processing the throttling policy++", e);
                 handleException("Error processing the throttling policy", e);
             }
         }
@@ -237,7 +237,7 @@ public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
             Utils.setFaultPayload(messageContext, getFaultPayload());
         } else {
-            log.info("Throttled out++++++++++++++");
+           // log.info("Throttled out++++++++++++++");
             Utils.setSOAPFault(messageContext, "Server", "##############Message Throttled Out@@@@@@@@@@@@@@@@",
                     "You have exceeded your quota");
         }

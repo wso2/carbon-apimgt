@@ -7,9 +7,15 @@
     <context:property-placeholder/>
     <context:annotation-config/>
     <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+<<<<<<< HEAD
 	  <property name="environment">
 	    <bean class="org.springframework.web.context.support.StandardServletEnvironment" />
 	  </property>
+=======
+        <property name="environment">
+            <bean class="org.springframework.web.context.support.StandardServletEnvironment" />
+        </property>
+>>>>>>> 317e1ff4e8... added rest apis for admin UI
     </bean>
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
     <jaxrs:server id="services" address="/">
@@ -20,6 +26,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.ApplicationsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.ExportApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.HoneyPotApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.ImportApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.MonetizationApi"/>
         </jaxrs:serviceBeans>

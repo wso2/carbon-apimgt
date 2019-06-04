@@ -2283,6 +2283,155 @@
         }
       }
     },
+    "/honeyPot/getAlertData": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get all Honeypot API alert data\n",
+        "description": "Get all triggered Honeypot API alert data\n",
+        "responses": {
+          "200": {
+            "description": "OK.\nExport Successful.\n"
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested Data does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/honeyPot/deleteAlertData": {
+      "delete": {
+        "summary": "Delete an alert data.",
+        "description": "Get a alert record by the messageID and remove it from DB.\n",
+        "parameters": [
+          {
+            "name": "messageID",
+            "in": "query",
+            "description": "Pass the messageID to remove the record\n",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nResource successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found.\nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/honeyPot/getEmailList": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get all configured email list\n",
+        "description": "Get all email list which configured to trigger for Honeypot api email alert\n",
+        "parameters": [
+          {
+            "name": "tenantDomain",
+            "in": "query",
+            "description": "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nExport Successful.\n"
+          },
+          "400": {
+            "description": "Bad Request.messageID\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested Data does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/honeyPot/updateEmailList": {
+      "put": {
+        "summary": "Update Email list",
+        "description": "Here we can configure email as first time, as well as update the existing email list my adding more or removing\n",
+        "parameters": [
+          {
+            "name": "tenantDomain",
+            "in": "query",
+            "description": "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Email list\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EmailList"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nEmail List updated.\n",
+            "schema": {
+              "$ref": "#/definitions/EmailList"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/labels/{labelId}": {
       "put": {
         "x-scope": "apim:label_manage",
@@ -2663,6 +2812,18 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/AdvancedThrottlePolicyInfo"
+          }
+        }
+      }
+    },
+    "EmailList": {
+      "title": "Email List",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "s@.com,g@.com"
           }
         }
       }

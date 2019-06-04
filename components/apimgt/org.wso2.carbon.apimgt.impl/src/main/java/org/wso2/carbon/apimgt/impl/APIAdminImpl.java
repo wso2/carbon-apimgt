@@ -180,6 +180,13 @@ public class APIAdminImpl implements APIAdmin {
     public void addMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws APIManagementException {
         apiMgtDAO.addMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
+
+    public List<String> retrieveSavedHoneyPotAPIAlertEmailList(String userName) throws APIManagementException {
+
+        List<String> list;
+        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(userName);
+
+        return list;
     }
 
     /**
