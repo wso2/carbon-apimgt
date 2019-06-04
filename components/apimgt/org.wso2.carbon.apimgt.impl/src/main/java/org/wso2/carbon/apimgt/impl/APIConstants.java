@@ -376,7 +376,7 @@ public final class APIConstants {
     //Monetization related constants
     public static final String MONETIZATION_IMPL = "Monetization." + "MonetizationImpl";
     public static final String TYPE = "type";
-    public static final String CURRENCY = "currency";
+    public static final String CURRENCY = "currencyType";
     public static final String BILLING_CYCLE = "billingCycle";
     public static final String FIXED_RATE = "fixedRate";
     public static final String FIXED_PRICE = "fixedPrice";
