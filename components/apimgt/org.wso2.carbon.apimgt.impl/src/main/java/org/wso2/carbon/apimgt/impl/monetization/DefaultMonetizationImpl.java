@@ -19,10 +19,10 @@
 package org.wso2.carbon.apimgt.impl.monetization;
 
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,40 +30,40 @@ import java.util.Map;
 public class DefaultMonetizationImpl implements Monetization {
 
     @Override
-    public boolean createBillingPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+    public boolean createBillingPlan(SubscriptionPolicy subPolicy) throws MonetizationException {
         return true;
     }
 
     @Override
-    public boolean updateBillingPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+    public boolean updateBillingPlan(SubscriptionPolicy subPolicy) throws MonetizationException {
         return true;
     }
 
     @Override
-    public boolean deleteBillingPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+    public boolean deleteBillingPlan(SubscriptionPolicy subPolicy) throws MonetizationException {
         return true;
     }
 
     @Override
     public boolean enableMonetization(String tenantDomain, API api, Map<String, String> monetizationProperties)
-            throws APIManagementException {
+            throws MonetizationException {
         return true;
     }
 
     @Override
     public boolean disableMonetization(String tenantDomain, API api, Map<String, String> monetizationProperties)
-            throws APIManagementException {
+            throws MonetizationException {
         return true;
     }
 
     @Override
-    public Map<String, String> getMonetizedPoliciesToPlanMapping(API api) throws APIManagementException {
+    public Map<String, String> getMonetizedPoliciesToPlanMapping(API api) throws MonetizationException {
         return new HashMap<>();
     }
 
     @Override
     public Map<String, String> getCurrentUsage(String subscriptionUUID, APIProvider apiProvider)
-            throws APIManagementException {
+            throws MonetizationException {
         return new HashMap<>();
     }
 }

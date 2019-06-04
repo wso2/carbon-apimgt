@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
@@ -67,6 +68,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             return Response.ok().entity(apiMonetizationUsageDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Failed to retrieve billing engine usage data for subscription ID : " + subscriptionId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        } catch (MonetizationException e) {
+            String errorMessage = "Failed to get current usage for subscription ID : " + subscriptionId;
             RestApiUtil.handleInternalServerError(errorMessage, log);
         }
         return null;

@@ -42,6 +42,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
@@ -4976,7 +4977,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Monetization monetizationImplementation = getMonetizationImplClass();
         if (monetizationImplementation != null) {
-            return monetizationImplementation.createBillingPlan(subPolicy);
+            try {
+                return monetizationImplementation.createBillingPlan(subPolicy);
+            } catch (MonetizationException e) {
+                APIUtil.handleException("Failed to create monetization plan for : " + subPolicy.getPolicyName(), e);
+            }
         }
         return false;
     }
@@ -4992,7 +4997,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Monetization monetizationImplementation = getMonetizationImplClass();
         if (monetizationImplementation != null) {
-            return monetizationImplementation.updateBillingPlan(subPolicy);
+            try {
+                return monetizationImplementation.updateBillingPlan(subPolicy);
+            } catch (MonetizationException e) {
+                APIUtil.handleException("Failed to update monetization plan for : " + subPolicy.getPolicyName(), e);
+            }
         }
         return false;
     }
@@ -5008,7 +5017,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Monetization monetizationImplementation = getMonetizationImplClass();
         if (monetizationImplementation != null) {
-            return monetizationImplementation.deleteBillingPlan(subPolicy);
+            try {
+                return monetizationImplementation.deleteBillingPlan(subPolicy);
+            } catch (MonetizationException e) {
+                APIUtil.handleException("Failed to delete monetization plan of : " + subPolicy.getPolicyName(), e);
+            }
         }
         return false;
     }

@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -959,6 +960,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Failed to retrieve monetized plans for API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, log);
+        } catch (MonetizationException e) {
+            String errorMessage = "Failed to fetch monetized plans of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
         }
         return Response.serverError().build();
     }
@@ -1005,17 +1009,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.configureMonetizationInAPIArtifact(api);
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             HashMap monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(), HashMap.class);
-            boolean isMonetizationStateChangeSuccessful;
+            boolean isMonetizationStateChangeSuccessful = false;
             if (MapUtils.isEmpty(monetizationDataMap)) {
                 String errorMessage = "Monetization data map is empty for API ID " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
             }
-            if (monetizationEnabled) {
-                isMonetizationStateChangeSuccessful = monetizationImplementation.enableMonetization
-                        (tenantDomain, api, monetizationDataMap);
-            } else {
-                isMonetizationStateChangeSuccessful = monetizationImplementation.disableMonetization
-                        (tenantDomain, api, monetizationDataMap);
+            try {
+                if (monetizationEnabled) {
+                    isMonetizationStateChangeSuccessful = monetizationImplementation.enableMonetization
+                            (tenantDomain, api, monetizationDataMap);
+                } else {
+                    isMonetizationStateChangeSuccessful = monetizationImplementation.disableMonetization
+                            (tenantDomain, api, monetizationDataMap);
+                }
+            } catch (MonetizationException e) {
+                String errorMessage = "Error while changing monetization status for API ID : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
             if (isMonetizationStateChangeSuccessful) {
                 APIMonetizationInfoDTO monetizationInfoDTO = APIMappingUtil.getMonetizationInfoDTO(apiIdentifier);
