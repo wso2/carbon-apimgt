@@ -1,10 +1,13 @@
 <%
     var log = new Log("Token Request Function");
-
+    include("/services/constants.jag");
+    var site = require("/site/conf/site.json");
+    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var serverUrl = utils.getServerURL();
     var tokenRequestData = {
         "grant_type": "authorization_code",
         "code": request.getParameter("code","UTF-8"),
-        "redirect_uri": "https://localhost:9443/store-new/services/auth/callback",
+        "redirect_uri": serverUrl + site.context + CALLBACK_URL_SUFFIX
     };
 
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
@@ -17,9 +20,8 @@
     var String = Packages.java.lang.String;
     var Integer = Packages.java.lang.Integer;
     var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = "https://localhost:8243/token";
+    var tokenEndpoint = MGT_TRANSPORT + HOST + ":" +  application.get("serverPort") + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData,{"Authorization": "Basic " + base64encoded});
-
     log.debug("Token response: " + result.data);
     response.contentType = "application/json";
     var token_response = JSON.parse(result.data);
@@ -47,18 +49,18 @@
     // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/store
     // because partial HTTP only cookie is required for get the user information from access token,
     // hence setting the HTTP only access token path to /store-new/
-    var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': access_token_token_part_2, 'path': "/store-new/", "HttpOnly": true, "secure": true, "maxAge": Integer(token_response.expires_in)};
+    var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': access_token_token_part_2, 'path': site.context + "/", "HttpOnly": true, "secure": true, "maxAge": Integer(token_response.expires_in)};
     response.addCookie(cookie);
 
     cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': access_token_token_part_2, 'path': "/api/am/store/", "HttpOnly": true, "secure": true, "maxAge": Integer(token_response.expires_in)};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refresh_token_token_part_2, 'path': "/store-new/", "HttpOnly": true, "secure": true, "maxAge": -1};
+    cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refresh_token_token_part_2, 'path': site.context + "/", "HttpOnly": true, "secure": true, "maxAge": -1};
     response.addCookie(cookie);
 
-    cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': access_token_token_part_1, 'path': "/store-new/", "secure": true, "maxAge": Integer(token_response.expires_in)}; 
+    cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': access_token_token_part_1, 'path': site.context + "/", "secure": true, "maxAge": Integer(token_response.expires_in)};
     response.addCookie(cookie);
 
-    response.sendRedirect("/store-new/apis");
+    response.sendRedirect(site.context + "/apis");
 
 %>
