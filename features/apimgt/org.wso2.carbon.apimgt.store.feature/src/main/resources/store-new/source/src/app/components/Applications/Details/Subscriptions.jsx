@@ -173,7 +173,33 @@ class Subscriptions extends React.Component {
                     this.props.history.push({ pathname: '/login', search: params });
                 }
             });
+    }
 
+    /**
+     *
+     * Handle onClick of subscription to an API
+     * @memberof Subscriptions
+     */
+    handleSubscribe(applicationId, apiId, policy) {
+        const api = new Api();
+
+        if (!policy) {
+            Alert.error('Select a policy to subscribe');
+            return;
+        }
+        const promisedSubscribe = api.subscribe(apiId, applicationId, policy);
+        promisedSubscribe
+            .then((response) => {
+                if (response.status !== 201) {
+                    Alert.error('subscription error');
+                } else {
+                    Alert.info('Subscription successful');
+                    this.updateSubscriptions(applicationId);
+                }
+            })
+            .catch(() => {
+                Alert.error('subscription error');
+            });
     }
 
     /**
@@ -186,6 +212,7 @@ class Subscriptions extends React.Component {
         const { subscriptions, unsubscribedAPIList, APIsNotFound } = this.state;
         const { applicationId } = this.props.match.params;
         const { classes } = this.props;
+
         if (subscriptions) {
             return (
                 <div className={classes.root}>
@@ -223,7 +250,7 @@ class Subscriptions extends React.Component {
                             </Card>
                         </Grid>
                         <Grid item xs={6} className={classes.cardGrid}>
-                            <APIList APIsNotFound={APIsNotFound} unsubscribedAPIList={unsubscribedAPIList} applicationId={applicationId} updateSubscriptions={this.updateSubscriptions} />
+                            <APIList APIsNotFound={APIsNotFound} unsubscribedAPIList={unsubscribedAPIList} applicationId={applicationId} handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)} />
                         </Grid>
                     </Grid>
                 </div>

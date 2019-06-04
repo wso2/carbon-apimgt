@@ -48,6 +48,19 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class SubscribeItemObj extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedPolicy: null,
+        };
+    }
+
+    componentDidMount() {
+        const { policies } = this.props;
+
+        this.setState({ selectedPolicy: policies[0] });
+    }
+
     /**
      *
      *
@@ -56,8 +69,9 @@ class SubscribeItemObj extends React.Component {
      */
     render() {
         const {
-            classes, policies, selectedPolicy, handleSelectedSubscriptionPolicyChange, apiId, subscribe,
+            classes, policies, apiId, handleSubscribe, applicationId,
         } = this.props;
+        const { selectedPolicy } = this.state;
 
         return (
             policies &&
@@ -68,7 +82,7 @@ class SubscribeItemObj extends React.Component {
                     color='primary'
                     className={classes.buttonGap}
                     onClick={() => {
-                        subscribe(apiId);
+                        handleSubscribe(applicationId, apiId, selectedPolicy);
                     }}
                 >
                     Subscribe
@@ -76,7 +90,7 @@ class SubscribeItemObj extends React.Component {
                 <Select
                     value={selectedPolicy}
                     onChange={(e) => {
-                        handleSelectedSubscriptionPolicyChange(apiId, e.target.value);
+                        this.setState({ selectedPolicy: e.target.value });
                     }}
                 >
                     {policies.map(policy => (
@@ -105,89 +119,6 @@ const SubscribeItem = withStyles(styles)(SubscribeItemObj);
  * @extends {React.Component}
  */
 class APIList extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectedSubscriptionPolicy: {},
-        };
-        this.handleSelectedSubscriptionPolicyChange = this.handleSelectedSubscriptionPolicyChange.bind(this);
-        this.subscribe = this.subscribe.bind(this);
-        this.updateSelectedSubscriptionPolicy = this.updateSelectedSubscriptionPolicy.bind(this);
-    }
-
-    /**
-     *
-     * Handle onClick of subscription policy select of an API
-     * @memberof APIList
-     */
-    handleSelectedSubscriptionPolicyChange(apiId, policy) {
-        const { selectedSubscriptionPolicy } = this.state;
-
-        const newSelectedSubscriptionPolicy = { ...selectedSubscriptionPolicy };
-        newSelectedSubscriptionPolicy[apiId] = policy;
-        this.setState({ selectedSubscriptionPolicy: newSelectedSubscriptionPolicy }, this.print);
-    }
-
-    /**
-     *
-     * Handle onClick of subscription to an API
-     * @memberof APIList
-     */
-    subscribe(apiId) {
-        const api = new Api();
-        const { updateSubscriptions, applicationId } = this.props;
-        const { selectedSubscriptionPolicy } = this.state;
-        const policy = selectedSubscriptionPolicy[apiId];
-
-        if (!policy) {
-            Alert.error('Select a policy to subscribe');
-            return;
-        }
-        const promisedSubscribe = api.subscribe(apiId, applicationId, policy);
-        promisedSubscribe
-            .then((response) => {
-                if (response.status !== 201) {
-                    Alert.error('subscription error');
-                } else {
-                    Alert.info('Subscription successful');
-                    if (updateSubscriptions) {
-                        updateSubscriptions(applicationId);
-                    }
-                }
-            })
-            .catch(() => {
-                Alert.error('subscription error');
-            });
-    }
-
-    /**
-     *
-     * Update the selected subscription policy of APIs when new unsubscribed APIs are received
-     * @memberof APIList
-     */
-    updateSelectedSubscriptionPolicy() {
-        const { unsubscribedAPIList } = this.props;
-        const { selectedSubscriptionPolicy } = this.state;
-
-        if (unsubscribedAPIList && unsubscribedAPIList.length > 0) {
-            const newUnsubscribedAPISubscriptionPolicy = unsubscribedAPIList
-                .filter(api => selectedSubscriptionPolicy[api.Id] === undefined
-                    || api.Policy.indexOf(selectedSubscriptionPolicy[api.Id]) === -1)
-                .reduce((acc, cur) => {
-                    acc[cur.Id] = cur.Policy[0];
-                    return acc;
-                }, {});
-            if (Object.keys(newUnsubscribedAPISubscriptionPolicy).length !== 0) {
-                const newSelectedSubscriptionPolicy = {
-                    ...selectedSubscriptionPolicy,
-                    ...newUnsubscribedAPISubscriptionPolicy,
-                };
-                this.setState({ selectedSubscriptionPolicy: newSelectedSubscriptionPolicy }, this.print);
-            }
-        }
-    }
-
-
     /**
      *
      *
@@ -201,10 +132,7 @@ class APIList extends React.Component {
             return <ResourceNotFound />;
         }
 
-        this.updateSelectedSubscriptionPolicy();
-
-        const { selectedSubscriptionPolicy } = this.state;
-        const { theme, unsubscribedAPIList } = this.props;
+        const { theme, unsubscribedAPIList, handleSubscribe, applicationId } = this.props;
         const columns = [
             {
                 name: 'Id',
@@ -219,14 +147,13 @@ class APIList extends React.Component {
                         if (tableMeta.rowData) {
                             const apiId = tableMeta.rowData[0];
                             const policies = value;
-                            const selectedPolicy = selectedSubscriptionPolicy[apiId];
                             return (
                                 <SubscribeItem
-                                    selectedPolicy={selectedPolicy}
+                                    key={apiId}
                                     policies={policies}
                                     apiId={apiId}
-                                    subscribe={this.subscribe}
-                                    handleSelectedSubscriptionPolicyChange={this.handleSelectedSubscriptionPolicyChange}
+                                    handleSubscribe={(app, api, policy) => handleSubscribe(app, api, policy)}
+                                    applicationId={applicationId}
                                 />
                             );
                         }
