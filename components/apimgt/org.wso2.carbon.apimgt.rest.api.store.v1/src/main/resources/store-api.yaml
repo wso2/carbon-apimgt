@@ -73,6 +73,7 @@ securityDefinitions:
     flow: password
     tokenUrl: https://localhost:9443/token
     scopes:
+      openid: Authorize access to user details
       apim:subscribe: Subscribe API
       apim:self-signup: Self Sign-up
       apim:dedicated_gateway: Updating dedicated Gateway
@@ -4133,8 +4134,6 @@ definitions:
   Settings:
     title: Settings
     properties:
-      tokenUrl:
-        type: string
       grantTypes:
         type: array
         items:

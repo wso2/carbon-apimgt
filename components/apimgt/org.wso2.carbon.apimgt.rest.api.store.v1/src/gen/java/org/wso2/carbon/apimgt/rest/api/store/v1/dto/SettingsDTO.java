@@ -16,26 +16,8 @@ import javax.xml.bind.annotation.*;
 
 public class SettingsDTO   {
   
-    private String tokenUrl = null;
     private List<String> grantTypes = new ArrayList<>();
     private List<String> scopes = new ArrayList<>();
-
-  /**
-   **/
-  public SettingsDTO tokenUrl(String tokenUrl) {
-    this.tokenUrl = tokenUrl;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("tokenUrl")
-  public String getTokenUrl() {
-    return tokenUrl;
-  }
-  public void setTokenUrl(String tokenUrl) {
-    this.tokenUrl = tokenUrl;
-  }
 
   /**
    **/
@@ -81,14 +63,13 @@ public class SettingsDTO   {
       return false;
     }
     SettingsDTO settings = (SettingsDTO) o;
-    return Objects.equals(tokenUrl, settings.tokenUrl) &&
-        Objects.equals(grantTypes, settings.grantTypes) &&
+    return Objects.equals(grantTypes, settings.grantTypes) &&
         Objects.equals(scopes, settings.scopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tokenUrl, grantTypes, scopes);
+    return Objects.hash(grantTypes, scopes);
   }
 
   @Override
@@ -96,7 +77,6 @@ public class SettingsDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class SettingsDTO {\n");
     
-    sb.append("    tokenUrl: ").append(toIndentedString(tokenUrl)).append("\n");
     sb.append("    grantTypes: ").append(toIndentedString(grantTypes)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");
