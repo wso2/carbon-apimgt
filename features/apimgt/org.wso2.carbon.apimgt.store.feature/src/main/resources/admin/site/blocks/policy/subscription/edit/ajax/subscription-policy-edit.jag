@@ -38,13 +38,14 @@ include("/jagg/jagg.jag");
             var fixedRate = request.getParameter("fixedRate", "UTF-8");
             var billingCycle = request.getParameter("billingCycle", "UTF-8");
             var pricePerRequest = request.getParameter("pricePerRequest", "UTF-8");
+            var currencyType = request.getParameter("currencyType", "UTF-8");
             mod = jagg.module("policy");
 
             result = mod.addSubscriptionPolicy(action, policyName, description, defaultQuotaPolicy,
                                                 defaultRequestCount, defaultBandwidth, defaultBandwidthUnit,
                                                 defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit,
                                                 stopOnQuotaReach, tierPlan, attributes, monetizationPlan, fixedRate,
-                                                billingCycle, pricePerRequest);
+                                                billingCycle, pricePerRequest, currencyType);
             //add permissions
             var tierPermission = {};
             tierPermission.policyName = policyName;
