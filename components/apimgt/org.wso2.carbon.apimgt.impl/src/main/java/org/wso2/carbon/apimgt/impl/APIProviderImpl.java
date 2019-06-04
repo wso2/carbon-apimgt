@@ -224,7 +224,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Environment environment = environments.get(environmentName);
             api.getEnvironments();
             try {
-                localEntryAdminClient = new LocalEntryAdminClient(environment);
+                localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
                 localEntryAdminClient.deleteEntry(api.getUUID());
                 localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
                         jsonText.replaceAll("&(?!amp;)", "&amp;").
@@ -248,7 +248,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (String environmentName : api.getEnvironments()) {
             Environment environment = environments.get(environmentName);
             try {
-                localEntryAdminClient = new LocalEntryAdminClient(environment);
+                localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
                 localEntryAdminClient.deleteEntry(api.getUUID());
             } catch (AxisFault e) {
                 log.error("Error occurred while Deleting the local entry ", e);
