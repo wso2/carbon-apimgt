@@ -12760,7 +12760,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      * @throws SQLException
      */
-    public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
+    public void deleteHoneyPotAlert(String messageID) throws SQLException, APIManagementException {
 
         Connection connection = APIMgtDBUtil.getConnection();
         try {

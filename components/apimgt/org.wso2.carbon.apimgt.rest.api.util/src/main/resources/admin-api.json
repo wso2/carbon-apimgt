@@ -2045,8 +2045,8 @@
     "/labels": {
       "get": {
         "x-scope": "apim:label_read",
-        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.13/labels\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.13/labels\"",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.14/labels\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.14/labels\"",
         "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 1,\r\n  \"list\": [\r\n  {\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}",
         "summary": "Get all registered Labels",
         "description": "Get all registered Labels\n",
@@ -2064,8 +2064,8 @@
       },
       "post": {
         "x-scope": "apim:label_manage",
-        "x-wso2-curl": "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.13/labels -d @data.json",
-        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.13/labels\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
+        "x-wso2-curl": "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.14/labels -d @data.json",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.14/labels\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
         "x-wso2-response": "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}",
         "summary": "Add a Label",
         "description": "Add a new gateway Label\n",
@@ -2099,10 +2099,161 @@
         }
       }
     },
+    "/honeyPot/getAlertData": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get all Honeypot API alert data\n",
+        "description": "Get all triggered Honeypot API alert data\n",
+        "responses": {
+          "200": {
+            "description": "OK.\nExport Successful.\n"
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested Data does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/honeyPot/deleteAlertData": {
+      "delete": {
+        "summary": "Delete an alert data.",
+        "description": "Get a alert record by the messageID and remove it from DB.\n",
+        "parameters": [
+          {
+            "name": "messageID",
+            "in": "query",
+            "description": "Pass the messageID to remove the record\n",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nResource successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found.\nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/honeyPot/getEmailList": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get all configured email list\n",
+        "description": "Get all email list which configured to trigger for Honeypot api email alert\n",
+        "parameters": [
+          {
+            "name": "tenantDomain",
+            "in": "query",
+            "description": "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nExport Successful.\n"
+          },
+          "400": {
+            "description": "Bad Request.messageID\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested Data does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/honeyPot/updateEmailList": {
+      "put": {
+        "summary": "Update Email list",
+        "description": "Here we can configure email as first time, as well as update the existing email list my adding more or removing\n",
+        "parameters": [
+          {
+            "name": "tenantDomain",
+            "in": "query",
+            "description": "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Email list\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EmailList"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nEmail List updated.\n",
+            "schema": {
+              "$ref": "#/definitions/EmailList"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/labels/{labelId}": {
       "put": {
         "x-scope": "apim:label_manage",
-        "x-wso2-response": "HTTP/1.1 200 OK",
+        "x-wso2-curl": "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.14/labels/d7cf8523-9180-4255-84fa-6cb171c1f779 -d @data.json",
+        "x-wso2-request": "PUT https://localhost:9443/api/am/admin/v0.14/labels/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
+        "x-wso2-response": "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"updated_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}",
         "summary": "Update a Label",
         "description": "Update a Label by label Id\n",
         "parameters": [
@@ -2417,6 +2568,18 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/AdvancedThrottlePolicyInfo"
+          }
+        }
+      }
+    },
+    "EmailList": {
+      "title": "Email List",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "s@.com,g@.com"
           }
         }
       }
