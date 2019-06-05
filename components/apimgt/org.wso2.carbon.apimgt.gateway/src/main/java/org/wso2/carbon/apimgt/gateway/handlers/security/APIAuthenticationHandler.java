@@ -194,7 +194,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     public void destroy() {
         if (authenticators != null) {
-            for (Authenticator authenticator: authenticators) {
+            for (Authenticator authenticator : authenticators) {
                 authenticator.destroy();
             }
         } else {
@@ -521,13 +521,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             String errorDescription =
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
                             + authorizationHeader + " : Basic ACCESS_TOKEN" + "'";
-            errorDetail.setText(errorDescription);
-        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_AND_OAUTH_CREDENTIALS) {
-            String errorDescription =
-                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
-                            + authorizationHeader + " : Bearer ACCESS_TOKEN' or '"
-                            + authorizationHeader + " : Basic ACCESS_TOKEN' or '"
-                            + authorizationHeader + " : Bearer ACCESS_TOKEN, Basic ACCESS_TOKEN'";
             errorDetail.setText(errorDescription);
         }
 

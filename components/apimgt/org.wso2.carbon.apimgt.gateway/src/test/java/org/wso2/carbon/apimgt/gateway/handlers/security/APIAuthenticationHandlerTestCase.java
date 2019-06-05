@@ -190,8 +190,7 @@ public class APIAuthenticationHandlerTestCase {
     * */
     private APIAuthenticationHandler createAPIAuthenticationHandler() {
         return new APIAuthenticationHandler() {
-
-
+            
             @Override
             protected APIManagerConfigurationService getApiManagerConfigurationService() {
                 return Mockito.mock(APIManagerConfigurationService.class);

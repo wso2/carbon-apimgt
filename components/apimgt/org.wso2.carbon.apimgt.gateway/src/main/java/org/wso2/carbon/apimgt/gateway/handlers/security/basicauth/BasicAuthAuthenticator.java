@@ -286,6 +286,10 @@ public class BasicAuthAuthenticator implements Authenticator {
         if (headers != null) {
             String authHeader = (String) headers.get(securityHeader);
             if (authHeader == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Basic Authentication: Expected authorization header with the name '"
+                            .concat(securityHeader).concat("' was not found."));
+                }
                 return null;
             } else {
                 if (authHeader.contains(basicAuthKeyHeaderSegment)) {

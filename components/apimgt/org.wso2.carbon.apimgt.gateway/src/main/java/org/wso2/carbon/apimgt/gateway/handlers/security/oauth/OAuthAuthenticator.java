@@ -332,6 +332,10 @@ public class OAuthAuthenticator implements Authenticator {
         // the message is configurable. So we dont need to remove headers at this point.
         String authHeader = (String) headersMap.get(securityHeader);
         if (authHeader == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("OAuth2 Authentication: Expected authorization header with the name '"
+                        .concat(securityHeader).concat("' was not found."));
+            }
             return null;
         }
 
