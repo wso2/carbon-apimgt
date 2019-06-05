@@ -17,12 +17,13 @@ var authorizeEndpoint = MGT_TRANSPORT + HOST + ":" + serverPort + AUTHORIZE_ENDP
 var callbackUrl = serverUrl + site.context + CALLBACK_URL_SUFFIX;
 var scopes = settingsResponse.data.scopes.join(" ");
 
+var authorizationHeader = "Basic " + utils.getBase64EncodedAdminCredentials();
 var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
 var systemApplicationDAO = new SystemApplicationDAO();
-
+var clientId;
 systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
 if (systemApplicationDTO !== null) {
-    var clientId = systemApplicationDTO.getConsumerKey();
+    clientId = systemApplicationDTO.getConsumerKey();
 } else {
     var dcrRequestData = {
         "callbackUrl": callbackUrl,
@@ -33,10 +34,11 @@ if (systemApplicationDTO !== null) {
     };
 
     var result = post(dcrUrl, JSON.stringify(dcrRequestData), {
-        "Authorization": "Basic YWRtaW46YWRtaW4=",
+        "Authorization": authorizationHeader,
         "Content-Type": "application/json"
     }, "json");
-    var clientId = result.data.clientId;
+
+    clientId = result.data.clientId;
     var clientSecret = result.data.clientSecret;
 
 

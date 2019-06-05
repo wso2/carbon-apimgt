@@ -8216,4 +8216,69 @@ public final class APIUtil {
     private static QName getQNameWithIdentityNS(String localPart) {
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
+
+    /**
+     * Return the admin username read from the user-mgt.xml
+     * @return
+     * @throws APIMgtInternalException
+     */
+    public static String getAdminUsername () throws APIMgtInternalException {
+        String adminName = "admin";
+        try {
+            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+
+            adminName = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getRealmConfiguration().getAdminUserName();
+
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting admin username from user-mgt.xml", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        return adminName;
+    }
+
+    /**
+     * Return the admin password read from the user-mgt.xml
+     * @return
+     * @throws APIMgtInternalException
+     */
+    public static String getAdminPassword () throws APIMgtInternalException {
+        String adminPassword = "admin";
+        try {
+            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+
+            adminPassword = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getRealmConfiguration().getAdminUserName();
+
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting admin password from user-mgt.xml", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        return adminPassword;
+    }
+
+    /**
+     * This method returns the base64 encoded for the given username and password
+     * @return base64 encoded username and password
+     */
+    public static String getBase64EncodedAdminCredentials() throws APIMgtInternalException {
+        String credentials = getAdminUsername() + ":" + getAdminPassword();
+        byte[] encodedCredentials = Base64.encodeBase64(
+                credentials.getBytes(Charset.forName( "UTF-8")));
+        return new String(encodedCredentials, Charset.forName("UTF-8"));
+    }
 }
