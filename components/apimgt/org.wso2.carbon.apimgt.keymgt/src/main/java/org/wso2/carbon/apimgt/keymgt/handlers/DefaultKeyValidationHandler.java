@@ -46,6 +46,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
@@ -189,7 +190,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         try {
             appInfo = oAuthAppDAO.getAppInformation(clientId);
             scopeValidators = appInfo.getScopeValidators();     //get scope validators from the DB
-            ArrayList<String> appScopeValidators = new ArrayList<>(Arrays.asList(scopeValidators));
+            List<String> appScopeValidators=  new ArrayList<>(Arrays.asList(scopeValidators));
 
             if (ArrayUtils.isEmpty(scopeValidators)) {
                 log.debug(String.format("There is no scope validator registered for %s@%s", appInfo.getApplicationName(),
