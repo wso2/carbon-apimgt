@@ -1653,7 +1653,7 @@ paths:
         - in: body
           name: body
           description: |
-            Document object that needs to be added
+            Monetization data object
           required: true
           schema:
             $ref: '#/definitions/APIMonetizationInfo'

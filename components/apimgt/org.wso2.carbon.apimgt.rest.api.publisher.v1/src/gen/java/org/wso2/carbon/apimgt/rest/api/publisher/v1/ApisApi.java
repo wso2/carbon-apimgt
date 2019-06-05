@@ -387,7 +387,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested resource does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apisApiIdMonetizePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Document object that needs to be added " ,required=true) APIMonetizationInfoDTO body) {
+    public Response apisApiIdMonetizePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Monetization data object " ,required=true) APIMonetizationInfoDTO body) {
         return delegate.apisApiIdMonetizePost(apiId, body, securityContext);
     }
 
