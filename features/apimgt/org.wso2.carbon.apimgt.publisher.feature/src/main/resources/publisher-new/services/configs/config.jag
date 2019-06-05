@@ -13,7 +13,7 @@ var settingsAPIUrl = serverUrl + SETTINGS_REST_API_URL_SUFFIX;
 var settingsResponse = get(settingsAPIUrl, {}, "json");
 
 var dcrUrl = MGT_TRANSPORT + HOST + ":" + serverPort + DCR_URL_SUFFIX;
-var authorizeEndpoint = MGT_TRANSPORT + HOST + ":" + serverPort + AUTHORIZE_ENDPOINT_SUFFIX;
+var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
 var callbackUrl = serverUrl + site.context + CALLBACK_URL_SUFFIX;
 var scopes = settingsResponse.data.scopes.join(" ");
 
