@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -159,6 +160,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -2444,12 +2446,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                     api.getId().getVersion(), api.getId().getProviderName());
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                JSONObject swaggerObject = (JSONObject) new JSONParser()
-                        .parse(definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry));
-                JSONObject infoObject = (JSONObject) swaggerObject.get("info");
+                String apiDefinition = definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry);
+                LinkedHashMap map = new ObjectMapper().readValue(apiDefinition, LinkedHashMap.class);
+                Map infoObject = (Map) map.get("info");
                 infoObject.remove("version");
                 infoObject.put("version", newAPI.getId().getVersion());
-                definitionFromOpenAPISpec.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
+                String json = new ObjectMapper().writeValueAsString(map);
+                definitionFromOpenAPISpec.saveAPIDefinition(newAPI, json, registry);
             }
 
             // copy wsdl in case of a SOAP API
