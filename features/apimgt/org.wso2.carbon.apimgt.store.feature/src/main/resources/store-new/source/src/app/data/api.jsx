@@ -540,8 +540,8 @@ export default class API extends Resource {
     getTierByName(name, level, callback = null) {
         const promise_get = this.client.then(
             (client) => {
-                return client.apis['Tier (Individual)'].get_policies__tierLevel___tierName_(
-                    { tierName: name, tierLevel: level }, this._requestMetaData(),
+                return client.apis['Throttling Policies'].get_throttling_policies__policyLevel___policyId_(
+                    { policyId: name, policyLevel: level }, this._requestMetaData()
                 );
             },
         );
