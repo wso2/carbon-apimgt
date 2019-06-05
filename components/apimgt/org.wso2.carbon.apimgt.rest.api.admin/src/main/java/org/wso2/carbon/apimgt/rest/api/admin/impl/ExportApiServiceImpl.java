@@ -100,7 +100,6 @@ public class ExportApiServiceImpl extends ExportApiService {
         return responseBuilder.build();
     }
 
-    @Override
     public String exportApplicationsGetGetLastUpdatedTime(String appName, String appOwner) {
         return null;
     }
