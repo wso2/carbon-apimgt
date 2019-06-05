@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 
 import java.util.TreeMap;
 
@@ -43,7 +44,7 @@ public class BasicAuthAuthenticatorTest {
         Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
-        basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, null);
+        basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true, null);
         basicAuthAuthenticator.setBasicAuthCredentialValidator(new BasicAuthCredentialValidator() {
             @Override
             public boolean validate(String username, String password) {
@@ -72,12 +73,9 @@ public class BasicAuthAuthenticatorTest {
         transportHeaders.put(APIMgtGatewayConstants.AUTHORIZATION, "gsu64r874tcin7ry8oe");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
 
-        try {
-            basicAuthAuthenticator.authenticate(messageContext);
-            Assert.fail();
-        } catch (APISecurityException e) {
-            Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
-        }
+        AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
+        Assert.assertFalse(authenticationResponse.isAuthenticated());
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
     }
 
     @Test
@@ -85,12 +83,9 @@ public class BasicAuthAuthenticatorTest {
         TreeMap transportHeaders = new TreeMap();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
 
-        try {
-            basicAuthAuthenticator.authenticate(messageContext);
-            Assert.fail();
-        } catch (APISecurityException e) {
-            Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
-        }
+        AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
+        Assert.assertFalse(authenticationResponse.isAuthenticated());
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
     }
 
     @Test
@@ -99,12 +94,9 @@ public class BasicAuthAuthenticatorTest {
         transportHeaders.put(CUSTOM_AUTH_HEADER, "Basic xxxxxxx"); //Throw Decode64 exception
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
 
-        try {
-            basicAuthAuthenticator.authenticate(messageContext);
-            Assert.fail();
-        } catch (APISecurityException e) {
-            Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS);
-        }
+        AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
+        Assert.assertFalse(authenticationResponse.isAuthenticated());
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS);
     }
 
     @Test
@@ -113,12 +105,9 @@ public class BasicAuthAuthenticatorTest {
         transportHeaders.put(CUSTOM_AUTH_HEADER, "Basic eHh4eA=="); // encode64(xxxx)='eHh4eA=='
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
 
-        try {
-            basicAuthAuthenticator.authenticate(messageContext);
-            Assert.fail();
-        } catch (APISecurityException e) {
-            Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS);
-        }
+        AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
+        Assert.assertFalse(authenticationResponse.isAuthenticated());
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS);
     }
 
     @Test
@@ -128,12 +117,9 @@ public class BasicAuthAuthenticatorTest {
         transportHeaders.put(CUSTOM_AUTH_HEADER, "Basic dGVzdF91c2VybmFtZV9ibG9ja2VkOnRlc3RfcGFzc3dvcmQ=");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
 
-        try {
-            basicAuthAuthenticator.authenticate(messageContext);
-            Assert.fail();
-        } catch (APISecurityException e) {
-            Assert.assertEquals(e.getErrorCode(), APISecurityConstants.INVALID_SCOPE);
-        }
+        AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
+        Assert.assertFalse(authenticationResponse.isAuthenticated());
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.INVALID_SCOPE);
     }
 
     @Test
@@ -143,11 +129,7 @@ public class BasicAuthAuthenticatorTest {
         transportHeaders.put(CUSTOM_AUTH_HEADER, "Basic dGVzdF91c2VybmFtZTp0ZXN0X3Bhc3N3b3Jk");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
 
-        try {
-            Assert.assertTrue(basicAuthAuthenticator.authenticate(messageContext));
-        } catch (APISecurityException e) {
-            Assert.fail();
-        }
+        Assert.assertTrue(basicAuthAuthenticator.authenticate(messageContext).isAuthenticated());
     }
 
     @Test
@@ -159,11 +141,8 @@ public class BasicAuthAuthenticatorTest {
         transportHeaders.put(APIMgtGatewayConstants.AUTHORIZATION, "Basic dGVzdF91c2VybmFtZTp0ZXN0X3Bhc3N3b3Jk");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
 
-        try {
-            basicAuthAuthenticator.authenticate(messageContext);
-            Assert.fail();
-        } catch (APISecurityException e) {
-            Assert.assertEquals(e.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
-        }
+        AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
+        Assert.assertFalse(authenticationResponse.isAuthenticated());
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
     }
 }

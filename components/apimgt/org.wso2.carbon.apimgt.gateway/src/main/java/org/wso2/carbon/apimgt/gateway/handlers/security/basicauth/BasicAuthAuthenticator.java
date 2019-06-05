@@ -52,7 +52,7 @@ public class BasicAuthAuthenticator implements Authenticator {
     private BasicAuthCredentialValidator basicAuthCredentialValidator;
     private String apiUUID;
     private Swagger swagger = null;
-
+    private boolean isMandatory;
 
     /**
      * Initialize the authenticator with the required parameters.
@@ -60,9 +60,10 @@ public class BasicAuthAuthenticator implements Authenticator {
      * @param authorizationHeader the Authorization header
      * @param apiUUID             the API UUID
      */
-    public BasicAuthAuthenticator(String authorizationHeader, String apiUUID) {
+    public BasicAuthAuthenticator(String authorizationHeader, boolean isMandatory, String apiUUID) {
         this.securityHeader = authorizationHeader;
         this.apiUUID = apiUUID;
+        this.isMandatory = isMandatory;
     }
 
     /**
@@ -99,11 +100,10 @@ public class BasicAuthAuthenticator implements Authenticator {
      * a particular API or not.
      *
      * @param synCtx The message to be authenticated
-     * @return true if the authentication is successful (never returns false)
-     * @throws APISecurityException If an authentication failure or some other error occurs
+     * @return an AuthenticationResponse object which contains the authentication status
      */
     @MethodStats
-    public boolean authenticate(MessageContext synCtx) throws APISecurityException {
+    public AuthenticationResponse authenticate(MessageContext synCtx) {
         if (log.isDebugEnabled()) {
             log.info("Basic Authentication initialized");
         }
@@ -171,22 +171,38 @@ public class BasicAuthAuthenticator implements Authenticator {
                 log.debug("Basic Authentication: Authentication succeeded by ignoring auth headers for API resource: "
                         .concat(apiElectedResource));
             }
-            return true;
+            return new AuthenticationResponse(true, isMandatory, false, 0, null);
         }
 
-        String[] credentials = extractBasicAuthCredentials(basicAuthHeader);
+        String[] credentials;
+        try {
+            credentials = extractBasicAuthCredentials(basicAuthHeader);
+        } catch (APISecurityException ex) {
+            return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+        }
         String username = getEndUserName(credentials[0]);
         String password = credentials[1];
 
-        boolean authenticated = basicAuthCredentialValidator.validate(username, password);
+        boolean authenticated = false;
+        try {
+            authenticated = basicAuthCredentialValidator.validate(username, password);
+        } catch (APISecurityException ex) {
+            return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+        }
         if (!authenticated) {
             log.debug("Basic Authentication: Username and Password mismatch");
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
         } else { // username password matches
             log.debug("Basic Authentication: Username and Password authenticated");
             //scope validation
-            boolean scopesValid = basicAuthCredentialValidator.validateScopes(username, swagger, synCtx);
+            boolean scopesValid = false;
+            try {
+                scopesValid = basicAuthCredentialValidator.validateScopes(username, swagger, synCtx);
+            } catch (APISecurityException ex) {
+                return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+            }
 
             if (scopesValid) {
                 if (APISecurityUtils.getAuthenticationContext(synCtx) == null) {
@@ -213,9 +229,10 @@ public class BasicAuthAuthenticator implements Authenticator {
                     APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
                 }
                 log.debug("Basic Authentication: Scope validation passed");
-                return true;
+                return new AuthenticationResponse(true, isMandatory, false,0, null);
             }
-            throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
         }
     }
 
@@ -328,5 +345,10 @@ public class BasicAuthAuthenticator implements Authenticator {
 
     private String getEndUserName(String username) {
         return MultitenantUtils.getTenantAwareUsername(username) + "@" + MultitenantUtils.getTenantDomain(username);
+    }
+
+    @Override
+    public int getPriority() {
+        return 20;
     }
 }
