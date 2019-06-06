@@ -131,10 +131,10 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(emailList, tenantDomain);
     }
 
-    public List<String> retrieveSavedHoneyPotAPIAlertEmailList(String userName) throws APIManagementException {
+    public static List<String> retrieveSavedHoneyPotAPIAlertEmailList(String tenantDomain) throws APIManagementException {
 
         List<String> list;
-        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(userName);
+        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(tenantDomain);
 
         return list;
     }
