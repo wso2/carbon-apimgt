@@ -16,6 +16,8 @@
     var callbackUrl = serverUrl + site.context + CALLBACK_URL_SUFFIX;
     var scopes = settingsResponse.data.scopes.join(" ");
     var referer = request.getHeader("Referer");
+    // get the pathname excluding the 'store/publisher' segment
+    // todo: remove (-new) section when store-new is replaced with store
     var state = referer.replace(/(https?:\/\/.*):(\d*)\/?(store|publisher)(-new)?/g, '');
 
     var authorizationHeader = "Basic " + utils.getBase64EncodedAdminCredentials();
