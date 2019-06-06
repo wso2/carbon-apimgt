@@ -3729,11 +3729,7 @@ public class SQLConstants {
 
         public static final String GET_SAVED_ALERT_EMAILS =
 
-                " SELECT " +
-                        "  EMAIL_LIST " +
-                        " FROM " +
-                        "   HONEYPOT_EMAIL_LIST " +
-                        " WHERE " + " TENANT_DOMAIN = ? ";
+                " SELECT EMAIL_LIST FROM HONEYPOT_EMAIL_LIST WHERE TENANT_DOMAIN= ? ";
         public static final String GET_SAVED_ALERT_EMAIL_LISTID =
                 " SELECT " +
                         "  EMAIL_LIST_ID " +

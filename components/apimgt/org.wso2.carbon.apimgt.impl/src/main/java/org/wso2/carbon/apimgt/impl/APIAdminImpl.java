@@ -184,7 +184,7 @@ public class APIAdminImpl implements APIAdmin {
     public List<String> retrieveSavedHoneyPotAPIAlertEmailList(String userName) throws APIManagementException {
 
         List<String> list;
-        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(userName);
+        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(tenantDomain);
 
         return list;
     }

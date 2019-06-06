@@ -2250,6 +2250,8 @@ paths:
   /honeyPot/getAlertData:
 
     get:
+      x-scope: apim:honey_api
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" -H \"accept: application/json\" https://localhost:9443/api/am/admin/v0.14/honeyPot/getAlertData"
       produces:
         - application/json
       summary: |
@@ -2286,6 +2288,8 @@ paths:
   /honeyPot/deleteAlertData:
 
     delete:
+      x-scope: apim:honey_api
+      x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v0.14/honeyPot/deleteAlertData?messageID=urn:uuid:f44c5ad5-c5af-42b3-8823-360b72afa27b -H \"accept: application/json\""
       summary: Delete an alert data.
       description: |
         Get a alert record by the messageID and remove it from DB.
@@ -2320,6 +2324,8 @@ paths:
   /honeyPot/getEmailList:
 
     get:
+      x-scope: apim:honey_api
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" https://localhost:9443/api/am/admin/v0.14/honeyPot/getEmailList -H \"accept: application/json\""
       produces:
         - application/json
       summary: |
@@ -2363,6 +2369,8 @@ paths:
   /honeyPot/updateEmailList:
 
     put:
+      x-scope: apim:honey_api
+      x-wso2-curl: "curl -X PUT -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" \"https://localhost:9443/api/am/admin/v0.14/honeyPot/updateEmailList?tenantDomain=test\" -H \"accept: application/json\" -H \"Content-Type: application/json\" -d \"{ \"list\": [ \"abc@gmail,cde@gmail.com\" ]}\" -kv"
       summary: Update Email list
       description: |
         Here we can configure email as first time, as well as update the existing email list my adding more or removing
@@ -2831,7 +2839,7 @@ definitions:
         type: array
         items:
           type: string
-          example: "s@.com,g@.com"
+          example: "abc@.com,cde@.com"
 
 #-----------------------------------------------------
 # The Application Throttling Policy resource
