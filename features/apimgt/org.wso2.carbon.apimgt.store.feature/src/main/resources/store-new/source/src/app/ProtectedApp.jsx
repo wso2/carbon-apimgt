@@ -17,33 +17,21 @@
  */
 
 import React, { Component } from 'react';
-import {
-    BrowserRouter as Router,
-    Redirect,
-    Route,
-    Switch
-} from 'react-router-dom';
-import {
-    Apis,
-    ApplicationCreate,
-    Applications,
-    Base,
-    Login,
-    Logout
-} from './components';
-import { PageNotFound } from './components/Base/Errors';
-import { ScopeNotFound } from './components/Base/Errors';
-import AuthManager from './data/AuthManager';
 import qs from 'qs';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
+import Configurations from 'Config';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { Apis, Applications, Base } from './components';
+import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreate';
+import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
+import AuthManager from './data/AuthManager';
 import ApplicationEdit from './components/Applications/Edit/ApplicationEdit';
-
+import Loading from './components/Base/Loading/Loading';
 // import 'typeface-roboto'
 import Utils from './data/Utils';
 import ConfigManager from './data/ConfigManager';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import AnonymousView from './components/AnonymousView/AnonymousView';
-import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
-import Configurations from 'Config';
+
 
 const themes = [];
 
@@ -54,10 +42,8 @@ themes.push(createMuiTheme(Configurations.themes.dark));
  * Language.
  * @type {string}
  */
-const language =
-    (navigator.languages && navigator.languages[0]) ||
-    navigator.language ||
-    navigator.userLanguage;
+const language = (navigator.languages && navigator.languages[0])
+    || navigator.language || navigator.userLanguage;
 
 /**
  * Language without region code.
@@ -70,19 +56,43 @@ const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
  * Render protected application paths
  */
 export default class ProtectedApp extends Component {
+    /**
+     *  constructor
+     * @param {*} props props passed to constructor
+     */
     constructor(props) {
         super(props);
         this.state = {
-            showLeftMenu: false,
             themeIndex: 0,
             messages: {},
             userResolved: false,
-            user: AuthManager.getUser(),
-            scopesFound: false
+            scopesFound: false,
         };
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
-        /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
+        /* TODO: need to fix the header to avoid conflicting with messages ~tmkb */
+    }
+
+    /**
+     * Change the theme index incrementally
+     */
+    componentWillMount() {
+        let storedThemeIndex = localStorage.getItem('themeIndex');
+        if (storedThemeIndex) {
+            this.setState({ themeIndex: parseInt(storedThemeIndex) });
+        }
+        const locale = languageWithoutRegionCode || language || 'en';
+        this.loadLocale(locale);
+    }
+
+    /**
+     *  Update the state of the theme
+     */
+    setTheme() {
+        this.setState({ theme: themes[this.state.themeIndex % 3] });
+        let { themeIndex } = this.state;
+        themeIndex++;
+        localStorage.setItem('themeIndex', themeIndex);
     }
 
     /**
@@ -100,12 +110,11 @@ export default class ProtectedApp extends Component {
                 this.setState({ messages: defineMessages(data) });
             });
     }
-
     componentDidMount() {
         ConfigManager.getConfigs()
             .environments.then(response => {
                 this.environments = response.data.environments;
-                //this.handleEnvironmentQueryParam(); todo: do we really need to handle environment query params here ?
+                // this.handleEnvironmentQueryParam(); todo: do we really need to handle environment query params here ?
             })
             .catch(error => {
                 console.error(
@@ -191,32 +200,15 @@ export default class ProtectedApp extends Component {
         Utils.setEnvironment(environment);
         return environmentName;
     }
-    /**
-     * Change the theme index incrementally
-     */
-    componentWillMount() {
-        let storedThemeIndex = localStorage.getItem('themeIndex');
-        if (storedThemeIndex) {
-            this.setState({ themeIndex: parseInt(storedThemeIndex) });
-        }
-        const locale = languageWithoutRegionCode || language || 'en';
-        this.loadLocale(locale);
-    }
-    setTheme() {
-        this.setState({ theme: themes[this.state.themeIndex % 3] });
-        this.state.themeIndex++;
-        localStorage.setItem('themeIndex', this.state.themeIndex);
-    }
+
 
     render() {
-        const environmentName = this.handleEnvironmentQueryParam();
-        var isScopesFound = this.state.scopesFound;
-        var isUserFound = AuthManager.getUser();
-        var isAuthenticated = false;
+        const isScopesFound = this.state.scopesFound;
+        const isUserFound = AuthManager.getUser();
+        let isAuthenticated = false;
         if (isScopesFound && isUserFound) {
             isAuthenticated = true;
         }
-    
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
         return (
@@ -242,38 +234,38 @@ export default class ProtectedApp extends Component {
                                     />
                                 </React.Fragment>
                             ) : [
-                                isUserFound ? (
-                                    <React.Fragment> 
-                                        <Route
-                                            path={'/applications'}
-                                            component={ScopeNotFound}
-                                        />
-                                        <Route
-                                            path={'/application/create'}
-                                            component={ScopeNotFound}
-                                        />
-                                        <Route
-                                            path={'/application/edit/:application_id'}
-                                            component={ScopeNotFound}
-                                        />
-                                    </React.Fragment>    
-                                ) : (
-                                    <React.Fragment>
-                                        <Route
-                                            path={'/applications'}
-                                            component={PageNotFound}
-                                        />
-                                        <Route
-                                            path={'/application/create'}
-                                            component={PageNotFound}
-                                        />
-                                        <Route
-                                            path={'/application/edit/:application_id'}
-                                            component={PageNotFound}
-                                        />
-                                        </React.Fragment> 
-                                )
-                            ]}
+                                    isUserFound ? (
+                                        <React.Fragment>
+                                            <Route
+                                                path={'/applications'}
+                                                component={ScopeNotFound}
+                                            />
+                                            <Route
+                                                path={'/application/create'}
+                                                component={ScopeNotFound}
+                                            />
+                                            <Route
+                                                path={'/application/edit/:application_id'}
+                                                component={ScopeNotFound}
+                                            />
+                                        </React.Fragment>
+                                    ) : (
+                                            <React.Fragment>
+                                                <Route
+                                                    path={'/applications'}
+                                                    component={PageNotFound}
+                                                />
+                                                <Route
+                                                    path={'/application/create'}
+                                                    component={PageNotFound}
+                                                />
+                                                <Route
+                                                    path={'/application/edit/:application_id'}
+                                                    component={PageNotFound}
+                                                />
+                                            </React.Fragment>
+                                        )
+                                ]}
                             <Route component={PageNotFound} />
                         </Switch>
                     </Base>
