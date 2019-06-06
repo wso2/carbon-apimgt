@@ -218,7 +218,15 @@
                         </div>
 
 				        <div id="monetizationPlanData" class="form-group">
-                            <label class="col-sm-3 control-label"><%=i18n.localize("Monetization Plan")%></label>
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Monetization Plan")%>
+                                <a class="help_popup" help_data="monetization_plan_help" data-trigger="hover" data-placement="bottom" data-original-title="" title="">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
+                                    </span>
+                                </a>
+                                <p id="monetization_plan_help" class="hide"><%=i18n.localize("Monetization category type")%></p>
+                            </label>
                             <div class="col-sm-3">
                                 <select class="form-control select required" id="monetizationPlan" name="monetizationPlan" onchange="populateMonetizationData()">
                                     <option value="FixedRate"><%=i18n.localize("Fixed Rate")%></option>
@@ -228,14 +236,30 @@
                         </div>
 
                         <div id="fixedRatePlanData" class="form-group">
-                            <label class="col-sm-3 control-label"><%=i18n.localize("Fixed Rate")%></label>
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Fixed Rate")%>
+                                <a class="help_popup" help_data="fixed_rate_help" data-trigger="hover" data-placement="bottom" data-original-title="" title="">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
+                                    </span>
+                                </a>
+                                <p id="fixed_rate_help" class="hide"><%=i18n.localize("Fixed rate for the given billing cycle")%></p>
+                            </label>
                             <div class="col-sm-3">
                                 <input class="form-control" type="number" min="0" step=".01" id="fixedRate" name="fixedRate"/>
                             </div>
                         </div>
 
                         <div id="dynamicRatePlanData" class="form-group">
-                            <label class="col-sm-3 control-label"><%=i18n.localize("Price Per Request")%></label>
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Price Per Request")%>
+                                <a class="help_popup" help_data="price_per_request_help" data-trigger="hover" data-placement="bottom" data-original-title="" title="">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
+                                    </span>
+                                </a>
+                                <p id="price_per_request_help" class="hide"><%=i18n.localize("Price per request for the given billing cycle in the given currency")%></p>
+                            </label>
                             <div class="col-sm-3">
                                 <input class="form-control" type="number" min="0" step=".01" id="pricePerRequest" name="pricePerRequest"/>
                             </div>
