@@ -76,25 +76,23 @@ const styles = theme => ({
         flexDirection: 'row',
     },
 });
-const restApi = new API();
 
 class ExpressMode extends Component {
     constructor(props) {
         super(props);
         this.state = {
             newApp: null,
-
-
             tiers: null,
             quota: 'Unlimited',
             appName: null,
             appDescription: 'Auto generated application',
             apiPolicyName: null,
-            tokenType: "OAUTH",
-            callBackURL: "http://localhost",
+            tokenType: 'OAUTH',
+            callBackURL: 'http://localhost',
             supportedGrantTypes: ['client_credentials'],
             restApplication: null,
         };
+        this.restApi = new API();
     }
 
     /**
@@ -104,7 +102,7 @@ class ExpressMode extends Component {
      */
     componentDidMount() {
         // Get all the tires to populate the drop down.
-        const promised_tiers = restApi.getAllTiers('application');
+        const promised_tiers = this.restApi.getAllTiers('application');
         promised_tiers
             .then((response) => {
                 const tierResponseObj = response.body;
@@ -148,7 +146,7 @@ class ExpressMode extends Component {
             throttlingTier: quota,
             description: description,
         };
-        restApi.createApplication(application_data).then((response) => {
+        this.restApi.createApplication(application_data).then((response) => {
             const appCreated = JSON.parse(response.data);
             // Once application loading fixed this need to pass application ID and load app
             console.log('Application created successfully.', appCreated, api);

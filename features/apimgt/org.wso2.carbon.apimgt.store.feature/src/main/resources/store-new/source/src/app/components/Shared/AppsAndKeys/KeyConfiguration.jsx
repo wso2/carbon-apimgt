@@ -213,7 +213,7 @@ class KeyConfiguration extends React.Component {
     componentDidMount() {
         if (this.appId) {
             this.application.then(application => application.getKeys())
-                .then((resp) => {
+                .then((keys) => {
                     this.setState({ application });
                 })
                 .catch((error) => {

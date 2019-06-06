@@ -7,7 +7,6 @@ import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import API from '../../../data/api';
 
-const api = new API();
 function LinkGenerator(props){
     return <Link to={"/apis/" + props.apiId}>{props.apiName}</Link>
 }
@@ -18,10 +17,11 @@ class StarRatingColumn extends React.Component {
         this.state = {
             rating: null,
         };
+        this.api = new API();
     }
 
     componentDidMount() {
-        const promised_rating = api.getRatingFromUser(this.props.apiId, null);
+        const promised_rating = this.api.getRatingFromUser(this.props.apiId, null);
         promised_rating
             .then((response) => {
                 const rating = response.obj;

@@ -26,7 +26,6 @@ import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Api from '../../../data/api';
 import Alert from '../../Shared/Alert';
 
-const api = new Api();
 let applicationId;
 let updateSubscriptions;
 /**
@@ -55,6 +54,7 @@ class SubscribeItemObj extends React.Component {
             policies: null,
             policy: null,
         };
+        this.api = new Api();
     }
 
     /**
@@ -64,7 +64,7 @@ class SubscribeItemObj extends React.Component {
      */
     componentDidMount() {
         const apiId = this.props.apiId;
-        const promised_api = api.getAPIById(apiId);
+        const promised_api = this.api.getAPIById(apiId);
         promised_api
             .then((response) => {
                 let policy = null;
@@ -105,8 +105,8 @@ class SubscribeItemObj extends React.Component {
             Alert.error('Select a policy to subscribe');
             return;
         }
-        const promised_subscribe = api.subscribe(apiId, applicationId, policy);
-        promised_subscribe
+        const promisedSubscribe = this.api.subscribe(apiId, applicationId, policy);
+        promisedSubscribe
             .then((response) => {
                 if (response.status !== 201) {
                     Alert.error('subscription error');
@@ -219,7 +219,7 @@ class APIList extends React.Component {
     componentDidMount() {
         applicationId = this.props.applicationId;
         updateSubscriptions = this.props.updateSubscriptions;
-        const promised_apis = api.getAllAPIs();
+        const promised_apis = this.api.getAllAPIs();
         promised_apis
             .then((response) => {
                 const { subscriptions } = this.props;

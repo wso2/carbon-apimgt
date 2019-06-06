@@ -201,12 +201,19 @@ export default class ProtectedApp extends Component {
         return environmentName;
     }
 
-
+    /**
+     *  renders the compopnent
+     * @returns {Component}
+     */
     render() {
-        const isScopesFound = this.state.scopesFound;
+        const { userResolved } = this.state;
+        if (!userResolved) {
+            return <Loading />;
+        }
+        const { scopesFound } = this.state;
         const isUserFound = AuthManager.getUser();
         let isAuthenticated = false;
-        if (isScopesFound && isUserFound) {
+        if (scopesFound && isUserFound) {
             isAuthenticated = true;
         }
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
