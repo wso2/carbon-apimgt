@@ -190,6 +190,7 @@ class APIList extends React.Component {
             orderBy: 'name',
         };
         this.state.listType = this.props.theme.custom.defaultApiView;
+        this.api = new Api();
     }
 
     /**

@@ -77,7 +77,7 @@ export default class ProtectedApp extends Component {
      * Change the theme index incrementally
      */
     componentWillMount() {
-        let storedThemeIndex = localStorage.getItem('themeIndex');
+        const storedThemeIndex = localStorage.getItem('themeIndex');
         if (storedThemeIndex) {
             this.setState({ themeIndex: parseInt(storedThemeIndex) });
         }
@@ -86,8 +86,72 @@ export default class ProtectedApp extends Component {
     }
 
     /**
-     *  Update the state of the theme
+     *  Check if data available ,if not get the user info from existing token information
      */
+    componentDidMount() {
+        ConfigManager.getConfigs()
+            .environments.then((response) => {
+                this.environments = response.data.environments;
+                // this.handleEnvironmentQueryParam(); todo: do we really need to handle environment query params here ?
+            })
+            .catch((error) => {
+                console.error(
+                    'Error while receiving environment configurations : ',
+                    error,
+                );
+            });
+        const user = AuthManager.getUser();
+        if (user) {
+            const hasViewScope = user.scopes.includes('apim:subscribe');
+            if (hasViewScope) {
+                this.setState({ userResolved: true, scopesFound: true });
+            } else {
+                console.log(
+                    'No relevant scopes found, redirecting to Anonymous View',
+                );
+                this.setState({ userResolved: true });
+            }
+        } else {
+            // If no user data available , Get the user info from existing token information
+            // This could happen when OAuth code authentication took place and could send
+            // user information via redirection
+            const userPromise = AuthManager.getUserFromToken();
+            userPromise
+                .then((loggedUser) => {
+                    if (loggedUser != null) {
+                        const hasViewScope = loggedUser.scopes.includes(
+                            'apim:subscribe',
+                        );
+                        if (hasViewScope) {
+                            this.setState({
+                                userResolved: true,
+                                scopesFound: true,
+                            });
+                        } else {
+                            console.log(
+                                'No relevant scopes found, redirecting to Anonymous View',
+                            );
+                            this.setState({ userResolved: true });
+                        }
+                    } else {
+                        console.log(
+                            'User returned with null, redirect to Anonymous View',
+                        );
+                        this.setState({ userResolved: true });
+                    }
+                })
+                .catch((error) => {
+                    console.log(
+                        'Error: ' + error + ',redirecting to Anonymous View',
+                    );
+                    this.setState({ userResolved: true });
+                });
+        }
+    }
+
+    /**
+    *  Update the state of the theme
+    */
     setTheme() {
         this.setState({ theme: themes[this.state.themeIndex % 3] });
         let { themeIndex } = this.state;
@@ -99,77 +163,15 @@ export default class ProtectedApp extends Component {
      * Load locale file.
      *
      * @param {string} locale Locale name
-     * @returns {Promise} Promise
      */
     loadLocale(locale = 'en') {
         fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
             .then(resp => resp.json())
-            .then(data => {
+            .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
                 this.setState({ messages: defineMessages(data) });
             });
-    }
-    componentDidMount() {
-        ConfigManager.getConfigs()
-            .environments.then(response => {
-                this.environments = response.data.environments;
-                // this.handleEnvironmentQueryParam(); todo: do we really need to handle environment query params here ?
-            })
-            .catch(error => {
-                console.error(
-                    'Error while receiving environment configurations : ',
-                    error
-                );
-            });
-        const user = AuthManager.getUser();
-        if (user) {
-            const hasViewScope = user.scopes.includes('apim:subscribe');
-            if (hasViewScope) {
-                this.setState({ user, userResolved: true, scopesFound: true });
-            } else {
-                console.log(
-                    'No relevant scopes found, redirecting to Anonymous View'
-                );
-                this.setState({ userResolved: true });
-            }
-        } else {
-            // If no user data available , Get the user info from existing token information
-            // This could happen when OAuth code authentication took place and could send
-            // user information via redirection
-            const userPromise = AuthManager.getUserFromToken();
-            userPromise
-                .then(loggedUser => {
-                    if (loggedUser != null) {
-                        const hasViewScope = loggedUser.scopes.includes(
-                            'apim:subscribe'
-                        );
-                        if (hasViewScope) {
-                            this.setState({
-                                user: loggedUser,
-                                userResolved: true,
-                                scopesFound: true
-                            });
-                        } else {
-                            console.log(
-                                'No relevant scopes found, redirecting to Anonymous View'
-                            );
-                            this.setState({ userResolved: true });
-                        }
-                    } else {
-                        console.log(
-                            'User returned with null, redirect to Anonymous View'
-                        );
-                        this.setState({ userResolved: true });
-                    }
-                })
-                .catch(error => {
-                    console.log(
-                        'Error: ' + error + ',redirecting to Anonymous View'
-                    );
-                    this.setState({ userResolved: true });
-                });
-        }
     }
 
     /**
@@ -177,10 +179,11 @@ export default class ProtectedApp extends Component {
      * @return {String} environment name in the query param
      */
     handleEnvironmentQueryParam() {
-        let queryString = this.props.location.search;
+        const { location } = this.props;
+        let queryString = location.search;
         queryString = queryString.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-        let queryParams = qs.parse(queryString);
+        const queryParams = qs.parse(queryString);
         const environmentName = queryParams.environment;
 
         if (!environmentName || Utils.getEnvironment() === environmentName) {
@@ -188,15 +191,15 @@ export default class ProtectedApp extends Component {
             return environmentName;
         }
 
-        let environmentId = Utils.getEnvironmentID(
+        const environmentId = Utils.getEnvironmentID(
             this.environments,
-            environmentName
+            environmentName,
         );
         if (environmentId === -1) {
             return environmentName;
         }
 
-        let environment = this.environments[environmentId];
+        const environment = this.environments[environmentId];
         Utils.setEnvironment(environment);
         return environmentName;
     }
@@ -210,77 +213,77 @@ export default class ProtectedApp extends Component {
         if (!userResolved) {
             return <Loading />;
         }
-        const { scopesFound } = this.state;
+        const { scopesFound, messages, themeIndex } = this.state;
         const isUserFound = AuthManager.getUser();
         let isAuthenticated = false;
         if (scopesFound && isUserFound) {
             isAuthenticated = true;
         }
-        // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
-        // Not actively check validity of access token from backend
+        /**
+         * Note: AuthManager.getUser() method is a passive check, which simply
+         * check the user availability in browser storage,
+         * Not actively check validity of access token from backend
+         * @returns {Component}
+         */
         return (
-            <IntlProvider locale={language} messages={this.state.messages}>
-                <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
+            <IntlProvider locale={language} messages={messages}>
+                <MuiThemeProvider theme={themes[themeIndex % 2]}>
                     <Base setTheme={() => this.setTheme()}>
                         <Switch>
-                            <Redirect exact from="/" to="/apis" />
-                            <Route path={'/apis'} component={Apis} />
+                            <Redirect exact from='/' to='/apis' />
+                            <Route path='/apis' component={Apis} />
                             {isAuthenticated ? (
                                 <React.Fragment>
                                     <Route
-                                        path={'/applications'}
+                                        path='/applications'
                                         component={Applications}
                                     />
                                     <Route
-                                        path={'/application/create'}
+                                        path='/application/create'
                                         component={ApplicationCreate}
                                     />
                                     <Route
-                                        path={'/application/edit/:application_id'}
+                                        path='/application/edit/:application_id'
                                         component={ApplicationEdit}
                                     />
                                 </React.Fragment>
-                            ) : [
-                                    isUserFound ? (
-                                        <React.Fragment>
-                                            <Route
-                                                path={'/applications'}
-                                                component={ScopeNotFound}
-                                            />
-                                            <Route
-                                                path={'/application/create'}
-                                                component={ScopeNotFound}
-                                            />
-                                            <Route
-                                                path={'/application/edit/:application_id'}
-                                                component={ScopeNotFound}
-                                            />
-                                        </React.Fragment>
-                                    ) : (
-                                            <React.Fragment>
-                                                <Route
-                                                    path={'/applications'}
-                                                    component={PageNotFound}
-                                                />
-                                                <Route
-                                                    path={'/application/create'}
-                                                    component={PageNotFound}
-                                                />
-                                                <Route
-                                                    path={'/application/edit/:application_id'}
-                                                    component={PageNotFound}
-                                                />
-                                            </React.Fragment>
-                                        )
-                                ]}
+                            ) : [isUserFound ? (
+                                <React.Fragment>
+                                    <Route
+                                        path='/applications'
+                                        component={ScopeNotFound}
+                                    />
+                                    <Route
+                                        path='/application/create'
+                                        component={ScopeNotFound}
+                                    />
+                                    <Route
+                                        path='/application/edit/:application_id'
+                                        component={ScopeNotFound}
+                                    />
+                                </React.Fragment>
+                            ) : (
+                                <React.Fragment>
+                                    <Route
+                                        path='/applications'
+                                        component={PageNotFound}
+                                    />
+                                    <Route
+                                        path='/application/create'
+                                        component={PageNotFound}
+                                    />
+                                    <Route
+                                        path='/application/edit/:application_id'
+                                        component={PageNotFound}
+                                    />
+                                </React.Fragment>
+                            ),
+                            ]}
                             <Route component={PageNotFound} />
                         </Switch>
                     </Base>
                 </MuiThemeProvider>
             </IntlProvider>
         );
-
-        let params = qs.stringify({ referrer: this.props.location.pathname });
-        return <Redirect to={{ pathname: '/login', search: params }} />;
     }
 }
