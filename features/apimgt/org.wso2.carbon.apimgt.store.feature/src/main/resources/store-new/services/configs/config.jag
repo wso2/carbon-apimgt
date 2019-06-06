@@ -15,6 +15,7 @@
     var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
     var callbackUrl = serverUrl + site.context + CALLBACK_URL_SUFFIX;
     var scopes = settingsResponse.data.scopes.join(" ");
+    var state = request.getHeader("Referer");
 
     var authorizationHeader = "Basic " + utils.getBase64EncodedAdminCredentials();
 
@@ -49,7 +50,7 @@
             log.error("Client ID = " + clientId);
         }
     }
-    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&redirect_uri=" + callbackUrl;
+    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + callbackUrl;
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     response.sendRedirect(authorizeEndpoint + authRequestParams);
 

@@ -61,6 +61,11 @@
     cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': access_token_token_part_1, 'path': site.context + "/", "secure": true, "maxAge": Integer(token_response.expires_in)};
     response.addCookie(cookie);
 
-    response.sendRedirect(site.context + "/apis");
+    var state = request.getParameter("state");
+    if (state !== null && state !== "null" && state.length > 0) {
+      response.sendRedirect(state);
+    } else {
+      response.sendRedirect(site.context + "/apis");
+    }
 
 %>
