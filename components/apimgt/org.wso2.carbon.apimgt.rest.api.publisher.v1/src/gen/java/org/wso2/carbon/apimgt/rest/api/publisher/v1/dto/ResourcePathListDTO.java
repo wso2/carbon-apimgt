@@ -23,15 +23,15 @@ public class ResourcePathListDTO   {
     private PaginationDTO pagination = null;
 
   /**
-   * Number of API Products returned.
+   * Number of API Resource Paths returned. 
    **/
   public ResourcePathListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
-
-  @ApiModelProperty(example = "1", value = "Number of API Products returned. ")
+  
+  @ApiModelProperty(example = "1", value = "Number of API Resource Paths returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -64,7 +64,7 @@ public class ResourcePathListDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
   @JsonProperty("pagination")
   public PaginationDTO getPagination() {

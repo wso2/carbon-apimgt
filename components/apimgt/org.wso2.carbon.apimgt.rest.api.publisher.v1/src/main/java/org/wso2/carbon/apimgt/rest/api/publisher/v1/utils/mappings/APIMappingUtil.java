@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIEndpoint;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
@@ -1285,8 +1286,8 @@ public class APIMappingUtil {
         List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
         for (APIProduct apiProduct : productList) {
             APIProductInfoDTO productDto = new APIProductInfoDTO();
-            productDto.setName(apiProduct.getName());
-            productDto.setProvider(apiProduct.getProvider());
+            productDto.setName(apiProduct.getId().getName());
+            productDto.setProvider(apiProduct.getId().getProviderName());
             productDto.setDescription(apiProduct.getDescription());
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
@@ -1302,8 +1303,8 @@ public class APIMappingUtil {
     }
     public static APIProductDTO fromAPIProducttoDTO(APIProduct product) {
         APIProductDTO productDto = new APIProductDTO();
-        productDto.setName(product.getName());
-        productDto.setProvider(product.getProvider());
+        productDto.setName(product.getId().getName());
+        productDto.setProvider(product.getId().getProviderName());
         productDto.setId(product.getUuid());
         productDto.setDescription(product.getDescription());
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
@@ -1406,8 +1407,8 @@ public class APIMappingUtil {
     public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider)
             throws APIManagementException {
         APIProduct product = new APIProduct();
-        product.setName(dto.getName());
-        product.setProvider(provider);
+        APIProductIdentifier id = new APIProductIdentifier(provider, dto.getName(), ""); //todo: replace this with dto.getVersion
+        product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
         if(dto.getBusinessInformation() != null) {

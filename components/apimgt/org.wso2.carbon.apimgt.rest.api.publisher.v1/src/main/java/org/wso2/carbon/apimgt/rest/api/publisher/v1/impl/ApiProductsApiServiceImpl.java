@@ -22,6 +22,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -179,9 +180,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
 
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
-            //We do not allow to modify provider  and uuid. Set the origial value
-            product.setProvider(retrievedProduct.getProvider());
+            //We do not allow to modify provider,name,version  and uuid. Set the origial value
+            product.setID(retrievedProduct.getId());
             product.setUuid(apiProductId);
+
             apiProvider.updateAPIProduct(product, username);
             APIProduct updatedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);

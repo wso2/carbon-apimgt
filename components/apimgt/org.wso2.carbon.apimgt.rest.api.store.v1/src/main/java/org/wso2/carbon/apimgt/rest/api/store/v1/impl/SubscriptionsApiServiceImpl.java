@@ -182,8 +182,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 if (!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
                 }
-      
-                APIProductIdentifier prodIdentifier = new  APIProductIdentifier(product.getProvider(), product.getName());
+
+                APIProductIdentifier prodIdentifier = new APIProductIdentifier(product.getId().getProviderName(),
+                        product.getId().getName(), product.getId().getVersion());
                 prodIdentifier.setUUID(uuid);
                 prodIdentifier.setProductId(product.getProductId());
                 identifier = prodIdentifier;

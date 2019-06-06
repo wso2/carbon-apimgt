@@ -140,7 +140,7 @@ public class APIResourceScopeValidator extends OAuth2ScopeValidator {
                 apiProductName = subscriptionDetails[2];
                 apiProductProvider = subscriptionDetails[3];
                 //TODO fix this to get the product scope
-                productScope = APIUtil.getProductScope(new APIProductIdentifier(apiProductProvider, apiProductName));
+                productScope = APIUtil.getProductScope(new APIProductIdentifier(apiProductProvider, apiProductName, null));
             }
 
             if (StringUtils.isNotEmpty(productScope)) {
