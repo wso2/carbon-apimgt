@@ -115,30 +115,41 @@ public class APIAdminImpl implements APIAdmin {
         return apiMgtDAO.getApplicationsCount(tenantId, searchOwner, searchApplication);
     }
 
-
-    /*
-     *get Honeypot API alerts from the database
+    /**
+     * Get alert list which cominf from honeypot API
      */
     public List<HoneyPotAPIAlertData> getAlert() throws APIManagementException {
         return apiMgtDAO.getAlerts();
     }
 
+    /**
+     * delete honeypot api alert my using the messageID
+     */
     public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
         apiMgtDAO.deleteHoneyPotAlert(messageID);
     }
 
+    /**
+     * configure email list which need to send alert
+     * update email list as adding more or remove
+     */
     public void addHoneyPotAPiEmailAlertConfiguration(String emailList, String tenantDomain) throws APIManagementException, SQLException {
         apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(emailList, tenantDomain);
     }
 
+    /**
+     * retrieve email lit which configured above
+     */
     public static List<String> retrieveSavedHoneyPotAPIAlertEmailList(String tenantDomain) throws APIManagementException {
 
         List<String> list;
         list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(tenantDomain);
-
         return list;
     }
 
+    /**
+     * remove all configured email list
+     */
     public void deleteHoneyPotAPIAlertEmailList(String tenantDomain) throws APIManagementException, SQLException {
         apiMgtDAO.deleteHoneyPotAPIAlertEmailList(tenantDomain);
     }

@@ -14,7 +14,7 @@ public class HoneyDataPublisherPool {
     private ObjectPool clientPool;
 
     private HoneyDataPublisherPool() {
-        //Using stack object pool to handle high concurrency scenarios without droping any messages.
+        //Using stack object pool to handle high concurrency scenarios without dropping any messages.
         //Tuning this pool is mandatory according to use cases.
         //A finite number of "sleeping" or idle instances is enforced, but when the pool is empty, new instances
         // are created to support the new load. Hence this following data stricture places no limit on the number of "
@@ -26,7 +26,7 @@ public class HoneyDataPublisherPool {
 
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
-            public Object makeObject() throws Exception {
+            public Object makeObject() {
                 if(log.isDebugEnabled()) {
                     log.debug("Initializing new HoneyPotAPIDataPublisher instance");
                 }
@@ -49,7 +49,7 @@ public class HoneyDataPublisherPool {
         return (HoneyAPIDataProcessAndPublishAgent) clientPool.borrowObject();
     }
 
-    public void release(HoneyAPIDataProcessAndPublishAgent client) throws Exception {
+    void release(HoneyAPIDataProcessAndPublishAgent client) throws Exception {
         //We must clean data references as it can caused to pass old data to global policy server.
         client.clearDataReference();
         clientPool.returnObject(client);

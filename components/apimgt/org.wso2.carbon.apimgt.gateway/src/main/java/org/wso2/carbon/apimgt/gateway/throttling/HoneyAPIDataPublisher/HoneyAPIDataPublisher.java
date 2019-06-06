@@ -19,17 +19,17 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class HoneyAPIDataPublisher{
-    public static HoneyDataPublisherPool dataPublisherPool;
+    private  static HoneyDataPublisherPool dataPublisherPool;
 
     public static final Log log = LogFactory.getLog(HoneyAPIDataPublisher.class);
 
-    public static DataPublisher getDataPublisher() {
+    static DataPublisher getDataPublisher() {
         return dataPublisher;
     }
 
     private static volatile DataPublisher dataPublisher = null;
 
-    Executor executor;
+    private Executor executor;
 
     public HoneyAPIDataPublisher(){
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance().getThrottleProperties();
@@ -54,19 +54,7 @@ public class HoneyAPIDataPublisher{
                             .getUsername(),
                             dataPublisherConfiguration.getPassword());
 
-                } catch (DataEndpointAgentConfigurationException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                } catch (DataEndpointException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                } catch (DataEndpointConfigurationException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                } catch (DataEndpointAuthenticationException e) {
-                    log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
-                            e.getMessage(), e);
-                } catch (TransportException e) {
+                } catch (DataEndpointAgentConfigurationException | DataEndpointException | DataEndpointConfigurationException | DataEndpointAuthenticationException | TransportException e) {
                     log.error("Error in initializing binary data-publisher to send requests to global throttling engine " +
                             e.getMessage(), e);
                 }
@@ -74,6 +62,9 @@ public class HoneyAPIDataPublisher{
         }
     }
 
+    /**
+     * Initiating the data publishing from GW to TM when invoking the HoneyPot API
+     */
     public void publishEvent(long currentTime, String messageId, String apiMethod, String headerSet, String messageBody,
                              String clientIp) {
         try {
@@ -110,8 +101,8 @@ public class HoneyAPIDataPublisher{
      * Also no task will be rejected in Threadpool until the threadpool was shutdown.
      */
     private class DataPublisherThreadPoolExecutor extends ThreadPoolExecutor {
-        public DataPublisherThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
-                                               TimeUnit unit, LinkedBlockingDeque<Runnable> workQueue) {
+        DataPublisherThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
+                                        TimeUnit unit, LinkedBlockingDeque<Runnable> workQueue) {
             super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
         }
 
