@@ -63,7 +63,7 @@
 
     var state = request.getParameter("state");
     if (state !== null && state !== "null" && state.length > 0) {
-      response.sendRedirect(state);
+      response.sendRedirect(site.context + state);
     } else {
       response.sendRedirect(site.context + "/apis");
     }

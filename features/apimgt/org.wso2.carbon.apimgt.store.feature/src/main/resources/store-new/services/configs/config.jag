@@ -15,7 +15,8 @@
     var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
     var callbackUrl = serverUrl + site.context + CALLBACK_URL_SUFFIX;
     var scopes = settingsResponse.data.scopes.join(" ");
-    var state = request.getHeader("Referer");
+    var referer = request.getHeader("Referer");
+    var state = referer.replace(/(https?:\/\/.*):(\d*)\/?(store|publisher)(-new)?/g, '');
 
     var authorizationHeader = "Basic " + utils.getBase64EncodedAdminCredentials();
 
