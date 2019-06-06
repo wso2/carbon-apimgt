@@ -182,10 +182,8 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.addMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
 
     public List<String> retrieveSavedHoneyPotAPIAlertEmailList(String userName) throws APIManagementException {
-
         List<String> list;
         list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(tenantDomain);
-
         return list;
     }
 

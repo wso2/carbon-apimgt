@@ -8724,7 +8724,7 @@ public class ApiMgtDAO {
      * Returns all the scopes assigned for given apis
      *
      * @param apiIdsString list of api ids separated by commas
-     * @return Map<String   ,       Set   <   Scope>> set of scopes for each apiId
+     * @return Map<String       ,               Set       <       Scope>> set of scopes for each apiId
      * @throws APIManagementException
      */
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString) throws APIManagementException {
@@ -13922,7 +13922,6 @@ public class ApiMgtDAO {
      * Get Honey API update list
      *
      * @return HoneyPotAPIAlertdata ArrayList
-     * @throws APIManagementException
      */
     public List<HoneyPotAPIAlertData> getAlerts() throws APIManagementException {
         List<HoneyPotAPIAlertData> alertData = new ArrayList<>();
@@ -13953,9 +13952,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param messageID
-     * @throws APIManagementException
-     * @throws SQLException
+     * Delete NoneyPot API alert basd on mesageID from the DB
      */
     public void deleteHoneyPotAlert(String messageID) throws SQLException, APIManagementException {
 
@@ -13977,16 +13974,8 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param emailList
-     * @param tenantDomain
-     * @throws SQLException
-     * @throws APIManagementException
-     */
-    /**
-     * @param emailList
-     * @param tenantDomain
-     * @throws SQLException
-     * @throws APIManagementException
+     * Configure email list
+     * modify email list by adding or removing emails
      */
     public void addHoneyPotAPiEmailAlertConfiguration(String emailList, String tenantDomain) throws SQLException, APIManagementException {
         Connection connection;
@@ -14032,9 +14021,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param tenantDomain
-     * @return
-     * @throws APIManagementException
+     * retrieve email list which configured for HoneyPot Api alert
      */
     public List<String> retrieveSavedHoneyPotAPIAlertEmailList(String tenantDomain)
             throws APIManagementException {
@@ -14063,6 +14050,9 @@ public class ApiMgtDAO {
 
     }
 
+    /**
+     * Delete email list from the database by using the tenantDomain
+     */
     public void deleteHoneyPotAPIAlertEmailList(String tenantDomain) throws APIManagementException, SQLException {
 
         Connection connection;
@@ -14085,7 +14075,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
 
         }
-
 
     }
 }

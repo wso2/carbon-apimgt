@@ -17,7 +17,10 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
     private String clientIp;
     private String apiMethod;
 
-    public HoneyAPIDataProcessAndPublishAgent() {
+    /**
+     * constructor of data agent
+     */
+    HoneyAPIDataProcessAndPublishAgent() {
 
         dataPublisher = getDataPublisher();
     }
@@ -26,7 +29,7 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
      * This method will clean data references. This method should call whenever we return data process and publish
      * agent back to pool. Every time when we add new property we need to implement cleaning logic as well.
      */
-    public void clearDataReference() {
+    void clearDataReference() {
 
         this.messageBody = null;
         this.apiMethod = null;
@@ -34,7 +37,11 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
         this.clientIp = null;
     }
 
-    public void setDataReference(long currentTime, String messageId, String apiMethod, String headerSet, String messageBody, String clientIp) {
+    /**
+     * set required parameters which needs to publish from GW to TM
+     * They are currentTime, messageId, apiMethod, headerSet, messageBody, clientIp
+     */
+    void setDataReference(long currentTime, String messageId, String apiMethod, String headerSet, String messageBody, String clientIp) {
 
         this.currentTime = currentTime;
         this.messageId = messageId;
@@ -45,6 +52,9 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
 
     }
 
+    /**
+     * Finally publish data to TM side
+     */
     public void run() {
 
         Object[] objects = new Object[]{this.currentTime, this.messageId, this.apiMethod, this.headerSet, this.messageBody,
@@ -54,11 +64,17 @@ public class HoneyAPIDataProcessAndPublishAgent implements Runnable {
         dataPublisher.tryPublish(event);
     }
 
+    /**
+     * gete throttle properties to initiate the publishing
+     */
     protected ThrottleProperties getThrottleProperties() {
         return ServiceReferenceHolder.getInstance().getThrottleProperties();
     }
 
-    protected DataPublisher getDataPublisher() {
+    /**
+     * get data publisher
+     */
+    private DataPublisher getDataPublisher() {
         return HoneyAPIDataPublisher.getDataPublisher();
     }
 }

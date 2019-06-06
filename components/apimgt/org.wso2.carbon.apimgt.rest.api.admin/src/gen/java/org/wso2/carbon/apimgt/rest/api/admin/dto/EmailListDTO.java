@@ -20,7 +20,7 @@ public class EmailListDTO  {
   private List<String> list = new ArrayList<String>();
 
   
-  /**
+  /**Set the email list
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
