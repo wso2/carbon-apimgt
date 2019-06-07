@@ -1539,7 +1539,7 @@
         <wsdl4j.version.range>[1.6.3.wso2v3, 1.7.0)</wsdl4j.version.range>
 
         <!-- P2 Plugin Version -->
-        <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
+        <carbon.p2.plugin.version>5.2.3</carbon.p2.plugin.version>
 
         <maven-scr-plugin.version>1.7.2</maven-scr-plugin.version>
         <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
