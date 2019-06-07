@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -680,4 +682,36 @@ public interface APIManager {
      * @throws APIManagementException
      */
     Application getApplicationBySubscriberIdAndName(int subscriberId, String applicationName) throws APIManagementException;
+
+    /**
+     * Returns details of an APIProduct
+     *
+     * @param uuid                  UUID of the API Product's registry artifact
+     * @param requestedTenantDomain tenantDomain for the registry
+     * @return An API Product object related to the given artifact id or null
+     * @throws APIManagementException if failed get APIProduct from UUID
+     */
+    APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+
+    /**
+     * Returns details of an APIProduct
+     *
+     * @param identifier APIProductIdentifier
+     * @return An APIProduct object related to the given identifier or null
+     * @throws APIManagementException if failed get APIProduct from APIProductIdentifier
+     */
+    APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Returns APIProduct Search result based on the provided query.
+     *
+     * @param searchQuery     search query. Ex: provider=*admin*
+     * @param tenantDomain    tenant domain
+     * @param start           starting number
+     * @param end             ending number
+     * @return APIProduct result
+     * @throws APIManagementException if search is failed
+     */
+    Map<String,Object> searchPaginatedAPIProducts(String searchQuery, String tenantDomain,int start,int end) throws
+            APIManagementException;
 }

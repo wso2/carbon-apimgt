@@ -6094,7 +6094,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String createAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException {
+    public String addAPIProduct(APIProduct product) throws APIManagementException {
+        validateApiProductInfo(product);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
+        createAPIProduct(product);
+
+        if (log.isDebugEnabled()) {
+            log.debug("API Product details successfully added to the registry. API Product Name: " + product.getId().getName()
+                    + ", API Product Version : " + product.getId().getVersion() + ", API Product context : " + "change"); //todo: log context
+        }
 
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
@@ -6126,10 +6135,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
            
         //now we have validated APIs and it's resources inside the API product. Add it to database
-
         String uuid = UUID.randomUUID().toString();
         product.setUuid(uuid);
         apiMgtDAO.addAPIProduct(product, tenantDomain);
+
+        JSONObject apiLogObject = new JSONObject();
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, product.getId().getName());
+        //apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, product.getContext());
+        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, product.getId().getVersion());
+        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, product.getId().getProviderName());
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.CREATED, this.username);
+
+        if (log.isDebugEnabled()) {
+            log.debug("API details successfully added to the API Manager Database. API Name: " + product.getId()
+                    .getName() + ", API Version : " + product.getId().getVersion() + ", API context : " + "change"); //todo : log context
+        }
+
         return uuid;
     }
 
@@ -6210,5 +6233,85 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);
+    }
+
+    /**
+     * Validates the name of api product against illegal characters.
+     *
+     * @param product APIProduct info object
+     * @throws APIManagementException
+     */
+    private void validateApiProductInfo(APIProduct product) throws APIManagementException {
+        String apiName = product.getId().getName();
+        if (apiName == null) {
+            handleException("API Name is required.");
+        } else if (containsIllegals(apiName)) {
+            handleException("API Name contains one or more illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
+        }
+        //version is not a mandatory filed for now
+    }
+
+    /**
+     * Create an Api Product
+     *
+     * @param apiProduct API Product
+     * @throws APIManagementException if failed to create APIProduct
+     */
+    protected void createAPIProduct(APIProduct apiProduct) throws APIManagementException {
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+
+        if (artifactManager == null) {
+            String errorMessage = "Failed to retrieve artifact manager when creating API Product" + apiProduct.getId().getName();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            GenericArtifact genericArtifact =
+                    artifactManager.newGovernanceArtifact(new QName(apiProduct.getId().getName()));
+            if (genericArtifact == null) {
+                String errorMessage = "Generic artifact is null when creating API Product" + apiProduct.getId().getName();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+            GenericArtifact artifact = APIUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
+            artifactManager.addGenericArtifact(artifact);
+
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
+            //provider ------provides----> API
+            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+
+            registry.commitTransaction();
+            transactionCommitted = true;
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Product Name: " + apiProduct.getId().getName() + ", API Product Version " + apiProduct.getId().getVersion()
+                                + " created";
+                log.debug(logMessage);
+            }
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } catch (APIManagementException e) {
+            handleException("Error while creating API Product", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), ex);
+            }
+        }
     }
 }

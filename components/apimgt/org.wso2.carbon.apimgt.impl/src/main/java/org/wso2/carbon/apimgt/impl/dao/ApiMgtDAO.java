@@ -6649,13 +6649,12 @@ public class ApiMgtDAO {
     
     /**
      * Get product Id from the product name and the provider. 
-     * @param productName product name
-     * @param provider provider
+     * @param identifier product identifier
      * @param connection db connection
      * @return product id 
      * @throws APIManagementException exception
      */
-    public int getAPIProductID(String productName, String provider, Connection connection)
+    public int getAPIProductID(APIProductIdentifier identifier, Connection connection)
             throws APIManagementException {
         boolean created = false;
         PreparedStatement prepStmt = null;
@@ -6673,19 +6672,22 @@ public class ApiMgtDAO {
             }
 
             prepStmt = connection.prepareStatement(getAPIQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
-            prepStmt.setString(2, productName);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getName());
+            prepStmt.setString(3, identifier.getVersion());
             rs = prepStmt.executeQuery();
             if (rs.next()) {
                 id = rs.getInt("API_PRODUCT_ID");
             }
             if (id == -1) {
-                String msg = "Unable to find the API Product : " + productName + "-" + provider + " in the database";
+                String msg = "Unable to find the API Product : " + identifier.getName() + "-" +
+                        identifier.getProviderName() + "-" + identifier.getVersion() + " in the database";
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
-            handleException("Error while locating API: " + productName + "-" + provider + " from the database", e);
+            handleException("Error while locating API Product: " + identifier.getName() + "-" + identifier.getProviderName()
+                    + "-" + identifier.getVersion() + " from the database", e);
         } finally {
             if (created) {
                 APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
@@ -13536,8 +13538,7 @@ public class ApiMgtDAO {
             ps.setString(14, product.getUuid());
             ps.executeUpdate();
 
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            int productId = getAPIProductID(product.getId().getName(), product.getId().getProviderName(), conn);
+            int productId = getAPIProductID(product.getId(), conn);
             updateAPIProductResourceMappings(product, productId, conn);
             conn.commit();
         } catch (SQLException e) {

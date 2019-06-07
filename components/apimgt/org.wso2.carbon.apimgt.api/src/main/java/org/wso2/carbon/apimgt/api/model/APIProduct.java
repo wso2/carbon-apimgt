@@ -46,6 +46,12 @@ public class APIProduct {
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
 
+    public APIProduct(){}
+
+    public APIProduct(APIProductIdentifier id) {
+        this.id = id;
+    }
+
     /*todo : temporary method until proper constructer is added*/
     public void setID(APIProductIdentifier id) {
         this.id = id;

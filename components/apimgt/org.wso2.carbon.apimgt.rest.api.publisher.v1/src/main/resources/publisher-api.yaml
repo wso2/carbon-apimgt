@@ -4386,7 +4386,6 @@ paths:
           type: string
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
-        - $ref : "#/parameters/expand"
       tags:
         - API Product (Collection)
       responses:
