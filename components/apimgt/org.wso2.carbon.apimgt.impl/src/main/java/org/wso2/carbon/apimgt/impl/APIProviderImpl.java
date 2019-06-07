@@ -6249,7 +6249,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("API Name contains one or more illegal characters  " +
                     "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
         }
-        //version is not a mandatory filed for now
+        //version is not a mandatory field for now
     }
 
     /**
@@ -6282,7 +6282,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
-            //provider ------provides----> API
+            //provider ------provides----> APIProduct
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
 
             registry.commitTransaction();

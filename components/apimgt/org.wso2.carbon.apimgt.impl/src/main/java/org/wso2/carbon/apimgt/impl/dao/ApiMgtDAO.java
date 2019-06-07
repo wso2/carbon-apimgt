@@ -13137,7 +13137,7 @@ public class ApiMgtDAO {
                 String productProvider = rs.getString("API_PRODUCT_PROVIDER");
                 String productVersion = rs.getString("API_PRODUCT_VERSION");
                 APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
-                product.setID(id); //todo : fix with cinstructor call
+                product.setID(id); //todo : fix with constructor call
                 product.setUuid(rs.getString("UUID"));
                 product.setDescription(rs.getString("DESCRIPTION"));
                 String productTiers = rs.getString("API_PRODUCT_TIER");
