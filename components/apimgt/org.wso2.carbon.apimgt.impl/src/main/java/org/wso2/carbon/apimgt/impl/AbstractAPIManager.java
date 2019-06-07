@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -71,6 +72,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
@@ -2953,5 +2955,251 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         return application;
+    }
+
+    /**
+     * Get API Product by registry artifact id
+     *
+     * @param uuid                  Registry artifact id
+     * @param requestedTenantDomain tenantDomain for the registry
+     * @return API Product of the provided artifact id
+     * @throws APIManagementException
+     */
+    public APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        try {
+            Registry registry;
+            if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
+                    (requestedTenantDomain)) {
+                int id = getTenantManager()
+                        .getTenantId(requestedTenantDomain);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
+                    // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
+                    registry = getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    // both requested tenant and logged in user's tenant are carbon.super
+                    registry = this.registry;
+                }
+            }
+
+            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
+                    APIConstants.API_PRODUCT_KEY);
+
+            GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(uuid);
+            if (apiProductArtifact != null) {
+                return getApiProduct(registry, apiProductArtifact);
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                log.error(msg);
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to get API";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get API";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Get API Product by product identifier
+     *
+     * @param identifier APIProductIdentifier
+     * @return API product identified by provider identifier
+     * @throws APIManagementException
+     */
+    public APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+        String apiProductPath = APIUtil.getAPIProductPath(identifier);
+        Registry registry;
+        try {
+            String productTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            int productTenantId = getTenantManager()
+                    .getTenantId(productTenantDomain);
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(productTenantDomain)) {
+                APIUtil.loadTenantRegistry(productTenantId);
+            }
+
+            if (this.tenantDomain == null || !this.tenantDomain.equals(productTenantDomain)) { //cross tenant scenario
+                registry = getRegistryService().getGovernanceUserRegistry(
+                        getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())), productTenantId);
+            } else {
+                registry = this.registry;
+            }
+            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
+                    APIConstants.API_PRODUCT_KEY);
+            Resource productResource = registry.get(apiProductPath);
+            String artifactId = productResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiProductPath);
+            }
+            GenericArtifact productArtifact = artifactManager.getGenericArtifact(artifactId);
+
+            APIProduct apiProduct = APIUtil.getAPIProduct(productArtifact, registry);
+
+            //todo : implement visibility
+
+            return apiProduct;
+
+        } catch (RegistryException e) {
+            String msg = "Failed to get API Product from : " + apiProductPath;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get API Product from : " + apiProductPath;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIProducts(String searchQuery, String requestedTenantDomain,
+            int start, int end) throws APIManagementException {
+        Map<String, Object> result = new HashMap<String, Object>();
+        boolean isTenantFlowStarted = false;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+
+        try {
+            boolean isTenantMode = (requestedTenantDomain != null);
+            if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
+                isTenantFlowStarted = true;
+                startTenantFlow(requestedTenantDomain);
+            } else {
+                requestedTenantDomain = org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                isTenantFlowStarted = true;
+                startTenantFlow(requestedTenantDomain);
+
+            }
+
+            Registry userRegistry;
+            int tenantIDLocal = 0;
+            String userNameLocal = this.username;
+            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
+                tenantIDLocal = getTenantManager()
+                        .getTenantId(requestedTenantDomain);
+                userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
+                userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
+            } else {
+                userRegistry = this.registry;
+                tenantIDLocal = tenantId;
+            }
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+
+            result = searchPaginatedAPIProducts(userRegistry, searchQuery, start, end);
+
+        } catch (Exception e) {
+            String msg = "Failed to Search APIs";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns APIProduct Search result based on the provided query.
+     *
+     * @param registry
+     * @param searchQuery Ex: provider=*admin*
+     * @return APIProduct result
+     * @throws APIManagementException
+     */
+
+    public Map<String, Object> searchPaginatedAPIProducts(Registry registry, String searchQuery, int start, int end)
+            throws APIManagementException {
+        SortedSet<APIProduct> productSet = new TreeSet<APIProduct>(new APIProductNameComparator());
+        List<APIProduct> productList = new ArrayList<APIProduct>();
+        Map<String, Object> result = new HashMap<String, Object>();
+        int totalLength = 0;
+        boolean isMore = false;
+        try {
+            //for now will use the same config for api products too todo: change this
+            String paginationLimit = getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
+
+            // If the Config exists use it to set the pagination limit
+            final int maxPaginationLimit;
+            if (paginationLimit != null) {
+                // The additional 1 added to the maxPaginationLimit is to help us determine if more
+                // APIs may exist so that we know that we are unable to determine the actual total
+                // API count. We will subtract this 1 later on so that it does not interfere with
+                // the logic of the rest of the application
+                int pagination = Integer.parseInt(paginationLimit);
+
+                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
+                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
+                // leading to some of the APIs not being displayed
+                if (pagination < 11) {
+                    pagination = 11;
+                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
+                }
+                maxPaginationLimit = start + pagination + 1;
+            }
+            // Else if the config is not specified we go with default functionality and load all
+            else {
+                maxPaginationLimit = Integer.MAX_VALUE;
+            }
+            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+
+            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
+                    .findGovernanceArtifacts(getSearchQuery(searchQuery), registry, APIConstants.API_PRODUCT_RXT_MEDIA_TYPE,
+                            true);
+            totalLength = PaginationContext.getInstance().getLength();
+            boolean isFound = true;
+
+            if (!isFound) {
+                result.put("products", productSet);
+                result.put("length", 0);
+                result.put("isMore", isMore);
+                return result;
+            }
+
+            // Check to see if we can speculate that there are more APIs to be loaded
+            if (maxPaginationLimit == totalLength) {
+                isMore = true;  // More APIs exist, cannot determine total API count without incurring perf hit
+                --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
+            }
+
+            int tempLength = 0;
+            for (GovernanceArtifact artifact : governanceArtifacts) {
+                APIProduct resultAPIProduct = APIUtil.getAPIProduct(artifact, registry);
+                if (resultAPIProduct != null) {
+                    productList.add(resultAPIProduct);
+                }
+
+                // Ensure the APIs returned matches the length, there could be an additional API
+                // returned due incrementing the pagination limit when getting from registry
+                tempLength++;
+                if (tempLength >= totalLength) {
+                    break;
+                }
+            }
+
+            productSet.addAll(productList);
+        } catch (RegistryException e) {
+            String msg = "Failed to search APIProducts with type";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } finally {
+            PaginationContext.destroy();
+        }
+        result.put("products", productSet);
+        result.put("length", totalLength);
+        result.put("isMore", isMore);
+        return result;
+    }
+
+    protected APIProduct getApiProduct(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
+        return APIUtil.getAPIProduct(apiArtifact, registry);
     }
 }

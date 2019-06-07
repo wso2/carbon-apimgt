@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIEndpoint;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
@@ -1285,8 +1286,8 @@ public class APIMappingUtil {
         List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
         for (APIProduct apiProduct : productList) {
             APIProductInfoDTO productDto = new APIProductInfoDTO();
-            productDto.setName(apiProduct.getName());
-            productDto.setProvider(apiProduct.getProvider());
+            productDto.setName(apiProduct.getId().getName());
+            productDto.setProvider(apiProduct.getId().getProviderName());
             productDto.setDescription(apiProduct.getDescription());
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
@@ -1297,13 +1298,13 @@ public class APIMappingUtil {
         }
         
         listDto.setList(list);
-       
+        listDto.setCount(list.size());
         return listDto;
     }
     public static APIProductDTO fromAPIProducttoDTO(APIProduct product) {
         APIProductDTO productDto = new APIProductDTO();
-        productDto.setName(product.getName());
-        productDto.setProvider(product.getProvider());
+        productDto.setName(product.getId().getName());
+        productDto.setProvider(product.getId().getProviderName());
         productDto.setId(product.getUuid());
         productDto.setDescription(product.getDescription());
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
@@ -1362,6 +1363,9 @@ public class APIMappingUtil {
         if (product.getVisibleTenants() != null) {
             productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
         }
+        List<String> environmentsList = new ArrayList<String>();
+        environmentsList.addAll(product.getEnvironments());
+        productDto.setGatewayEnvironments(environmentsList);
         if (product.getAdditionalProperties() != null) {
             JSONObject additionalProperties = product.getAdditionalProperties();
             Map<String, String> additionalPropertiesMap = new HashMap<>();
@@ -1406,8 +1410,8 @@ public class APIMappingUtil {
     public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider)
             throws APIManagementException {
         APIProduct product = new APIProduct();
-        product.setName(dto.getName());
-        product.setProvider(provider);
+        APIProductIdentifier id = new APIProductIdentifier(provider, dto.getName(), ""); //todo: replace this with dto.getVersion
+        product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
         if(dto.getBusinessInformation() != null) {
@@ -1449,6 +1453,15 @@ public class APIMappingUtil {
         if (dto.getSubscriptionAvailableTenants() != null) {
             product.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
+
+        if (dto.getGatewayEnvironments().size() > 0) {
+            List<String> gatewaysList = dto.getGatewayEnvironments();
+            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
+        } else if (dto.getGatewayEnvironments() != null) {
+            //this means the provided gatewayEnvironments is "" (empty)
+            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
+        }
+
         List<APIProductResource> productResources = new ArrayList<APIProductResource>();
 
         for (int i = 0; i < dto.getApis().size(); i++) {
@@ -1558,6 +1571,39 @@ public class APIMappingUtil {
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
         resourcePathListDTO.setPagination(paginationDTO);
+    }
+
+    /**
+     * Sets pagination urls for a APIProductListDTO object given pagination parameters and url parameters
+     *
+     * @param apiProductListDTO a APIProductListDTO object
+     * @param query      search condition
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
+     */
+    public static void setPaginationParams(APIProductListDTO apiProductListDTO, String query, int offset, int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        apiProductListDTO.setPagination(paginationDTO);
     }
 
 }

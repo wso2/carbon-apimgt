@@ -1107,11 +1107,10 @@ public interface APIProvider extends APIManager {
     /**
      * Create API product
      * @param product product object containing details of the prouct
-     * @param tenantDomain tenant domain of the product
      * @return UUID of the api product
      * @throws APIManagementException exception
      */
-    String createAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException;
+    String addAPIProduct(APIProduct product) throws APIManagementException;
     
     /**
      * Return the API product based on the UUID and tenant domain

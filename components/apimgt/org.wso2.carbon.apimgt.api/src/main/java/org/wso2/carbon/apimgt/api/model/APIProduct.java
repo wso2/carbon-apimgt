@@ -26,10 +26,9 @@ import org.json.simple.JSONObject;
 
 public class APIProduct {
     // TODO add rest of the properties
-    private String name;
+    private APIProductIdentifier id;
     private String uuid;
     private int productId;
-    private String provider;
     private String description;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
     private String visibility;
@@ -43,25 +42,27 @@ public class APIProduct {
     private String tenantDomain;
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
+    private Set<String> environments;
     private JSONObject additionalProperties = new JSONObject();
-    
-    public String getName() {
-        return name;
+
+    public APIProduct(){}
+
+    public APIProduct(APIProductIdentifier id) {
+        this.id = id;
     }
-    public void setName(String name) {
-        this.name = name;
+
+    /*todo : temporary method until proper constructer is added*/
+    public void setID(APIProductIdentifier id) {
+        this.id = id;
+    }
+    public APIProductIdentifier getId() {
+        return id;
     }
     public String getUuid() {
         return uuid;
     }
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-    public String getProvider() {
-        return provider;
-    }
-    public void setProvider(String provider) {
-        this.provider = provider;
     }
     public List<APIProductResource> getProductResources() {
         return productResources;
@@ -147,6 +148,15 @@ public class APIProduct {
     public void setDefinition(String definition) {
         this.definition = definition;
     }
+
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
+    }
+
+    public Set<String> getEnvironments() {
+        return environments;
+    }
+
     /**
      * To get the additional properties
      *
@@ -192,9 +202,14 @@ public class APIProduct {
         for (Tier tier : availableTiers) {
             tiers += tier.getName() + " ";
         }
-        return "APIProduct [name=" + name + ", uuid=" + uuid + ", productId=" + productId + ", provider=" + provider
-                + ", description=" + description + ", availableTiers=" + tiers + ", visibility=" + visibility
-                + ", visibleRoles=" + visibleRoles + ", visibleTenants=" + visibleTenants + ", subscriptionAvailability="
+        String env = "";
+        for (String environment : environments ) {
+            env += environment + " ";
+        }
+        return "APIProduct [name=" + id.getName() + ", version=" + id.getVersion() + ", uuid=" + uuid + ", productId="
+                + productId + ", provider=" + id.getProviderName() + ", description=" + description
+                + ", availableTiers=" + tiers + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
+                + ", visibleTenants=" + visibleTenants + ", environments=" + env + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableTenants=" + subscriptionAvailableTenants
                 + ", state=" + state + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail
                 + ", tenantDomain=" + tenantDomain + ", productResources=" + productResources + "]";

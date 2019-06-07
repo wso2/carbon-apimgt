@@ -22,6 +22,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -39,7 +40,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.io.File;
 import java.io.InputStream;
@@ -123,7 +126,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (log.isDebugEnabled()) {
                 log.debug("API Product request: Id " +apiProductId + " by " + username);
             }
-            APIProduct apiProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             if (apiProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
@@ -179,9 +182,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
 
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
-            //We do not allow to modify provider  and uuid. Set the origial value
-            product.setProvider(retrievedProduct.getProvider());
+            //We do not allow to modify provider,name,version  and uuid. Set the origial value
+            product.setID(retrievedProduct.getId());
             product.setUuid(apiProductId);
+
             apiProvider.updateAPIProduct(product, username);
             APIProduct updatedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
@@ -254,20 +258,42 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsGet(Integer limit, Integer offset, String query, String accept,
-            String ifNoneMatch, Boolean expand, MessageContext messageContext) {
+    @Override
+    public Response apiProductsGet(Integer limit, Integer offset, String query, String accept,
+            String ifNoneMatch, MessageContext messageContext) {
+
+        List<APIProduct> allMatchedProducts = new ArrayList<>();
+        APIProductListDTO apiProductListDTO;
+
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        query = query == null ? "" : query;
+
         try {
+            //for now one criterea is supported
+            String searchQuery = StringUtils.replace(query, ":", "=");
+
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (log.isDebugEnabled()) {
                 log.debug("API Product list request by " + username);
             }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            List<APIProduct> productList = apiProvider.getAPIProducts(tenantDomain, username);
+            Map<String, Object> result = apiProvider.searchPaginatedAPIProducts(searchQuery, tenantDomain, offset, limit);
 
-            APIProductListDTO apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(productList);
+            Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");
+            allMatchedProducts.addAll(apiProducts);
 
-            //TODO implement pagination
+            apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(allMatchedProducts);
+
+            //Add pagination section in the response
+            Object totalLength = result.get("length");
+            Integer length = 0;
+            if (totalLength != null) {
+                length = (Integer) totalLength;
+            }
+            APIMappingUtil.setPaginationParams(apiProductListDTO, query, offset, limit, length);
 
             return Response.ok().entity(apiProductListDTO).build();
         } catch (APIManagementException e) {
@@ -318,9 +344,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 }
             }
 
-            APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
-            String uuid = apiProvider.createAPIProduct(product, tenantDomain);
-            APIProduct createdProduct = apiProvider.getAPIProduct(uuid, tenantDomain);
+            APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
+            String uuid = apiProvider.addAPIProduct(productToBeAdded);
+            APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
+            APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
 
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(

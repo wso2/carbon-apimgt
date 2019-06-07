@@ -482,6 +482,7 @@ public final class APIConstants {
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
     public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
     public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
+    public static final String API_PRODUCT_RXT_MEDIA_TYPE = "application/vnd.wso2-product+xml";
     public static final int TOP_TATE_MARGIN = 4;
 
     public static final class Permissions {
@@ -1303,6 +1304,11 @@ public final class APIConstants {
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
 
+    //api-product related constants
+    public static final String API_PRODUCT_KEY = "product";
+    public static final String API_PRODUCT_RESOURCE_COLLECTION = "products";
+    public static final String API_PRODUCT_RESOURCE_NAME = "/product";
+
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
         public static final String ENABLE_ADVANCE_THROTTLING = "EnableAdvanceThrottling";
@@ -1375,6 +1381,7 @@ public final class APIConstants {
         public static final String DELETED = "deleted";
 
         public static final String API = "API";
+        public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
 

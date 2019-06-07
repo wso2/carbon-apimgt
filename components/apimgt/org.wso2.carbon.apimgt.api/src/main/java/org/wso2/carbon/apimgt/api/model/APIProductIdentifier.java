@@ -30,14 +30,18 @@ public class APIProductIdentifier implements Serializable, Identifier {
     
     private final String providerName;
     private final String apiProductName;
+    //In this initial api product implementation versioning is not supported, we are setting a default version to all api products
+    //however we will create these models in such a way so that versioning can be easily introduced later.
+    private final String version;
     private String tier;
     private String applicationId;
     private String uuid;
     private int productId;
     
-    public APIProductIdentifier(String providerName, String apiProductName){
+    public APIProductIdentifier(String providerName, String apiProductName, String version){
         this.apiProductName = apiProductName;
         this.providerName = providerName;
+        this.version = "1.0.0";
     }
 
     public String getTier() {
@@ -98,8 +102,7 @@ public class APIProductIdentifier implements Serializable, Identifier {
 
     @Override
     public String getVersion() {
-        // Version is not implemented yet
-        return "";
+        return version;
     }
 
     @Override

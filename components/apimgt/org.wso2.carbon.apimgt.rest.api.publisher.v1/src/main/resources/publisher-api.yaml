@@ -4386,7 +4386,6 @@ paths:
           type: string
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
-        - $ref : "#/parameters/expand"
       tags:
         - API Product (Collection)
       responses:
@@ -6071,6 +6070,13 @@ definitions:
         type: array
         items:
           type: string
+      gatewayEnvironments:
+        description: |
+          List of gateway environments the API Product is available
+        type: array
+        items:
+          type: string
+        example: ["Production and Sandbox"]
       policies:
         type: array
         items:

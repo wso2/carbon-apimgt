@@ -162,6 +162,10 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_PAGINATION_URL =
             RESOURCE_PATH_RESOURCE_PATHS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
+    public static final String API_PRODUCTS_GET_PAGINATION_URL =
+            RESOURCE_PATH_API_PRODUCTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
+
+
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
 

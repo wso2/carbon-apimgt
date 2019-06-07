@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
@@ -1241,6 +1242,51 @@ public final class APIUtil {
     }
 
     /**
+     * Create Governance artifact from given attributes
+     *
+     * @param artifact initial governance artifact
+     * @param apiProduct     APIProduct object with the attributes value
+     * @return GenericArtifact
+     * @throws APIManagementException if failed to create API Product
+     */
+    public static GenericArtifact createAPIProductArtifactContent(GenericArtifact artifact, APIProduct apiProduct)
+            throws APIManagementException {
+        try {
+            //todo : review and add missing fields
+            artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, apiProduct.getId().getName());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, apiProduct.getId().getVersion());
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, apiProduct.getId().getProviderName());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, apiProduct.getDescription());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiProduct.getState());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER, apiProduct.getBusinessOwner());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, apiProduct.getBusinessOwnerEmail());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, apiProduct.getSubscriptionAvailability());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, apiProduct.getSubscriptionAvailableTenants());
+
+            StringBuilder policyBuilder = new StringBuilder();
+            for (Tier tier : apiProduct.getAvailableTiers()) {
+                policyBuilder.append(tier.getName());
+                policyBuilder.append("||");
+            }
+
+            String policies = policyBuilder.toString();
+
+            if (!"".equals(policies)) {
+                policies = policies.substring(0, policies.length() - 2);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, policies);
+            }
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(apiProduct));
+        } catch (GovernanceException e) {
+            String msg = "Failed to create API for : " + apiProduct.getId().getName();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return artifact;
+    }
+
+    /**
      * This method is used to attach micro-gateway labels to the given API
      *
      * @param artifact genereic artifact
@@ -1543,6 +1589,19 @@ public final class APIUtil {
     }
 
     /**
+     * Utility method to get api product path from APIProductIdentifier
+     *
+     * @param identifier APIProductIdentifier
+     * @return APIProduct path
+     */
+    public static String getAPIProductPath(APIProductIdentifier identifier) {
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
+                + RegistryConstants.PATH_SEPARATOR + APIConstants.API_PRODUCT_RESOURCE_COLLECTION
+                + RegistryConstants.PATH_SEPARATOR + identifier.getName() + RegistryConstants.PATH_SEPARATOR
+                + identifier.getVersion() + APIConstants.API_PRODUCT_RESOURCE_NAME;
+    }
+
+    /**
      * Utility method to get api identifier from api path.
      *
      * @param apiPath Path of the API in registry
@@ -1571,6 +1630,16 @@ public final class APIUtil {
      * @return API provider path
      */
     public static String getAPIProviderPath(APIIdentifier identifier) {
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
+    }
+
+    /**
+     * Utility method to get API Product provider path
+     *
+     * @param identifier APIProductIdentifier
+     * @return API Product provider path
+     */
+    public static String getAPIProductProviderPath(APIProductIdentifier identifier) {
         return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
     }
 
@@ -6117,6 +6186,30 @@ public final class APIUtil {
     }
 
     /**
+     * This method used to set environment values to governance artifact of APIProduct .
+     *
+     * @param apiProduct API object with the attributes value
+     */
+    public static String writeEnvironmentsToArtifact(APIProduct apiProduct) {
+        StringBuilder publishedEnvironments = new StringBuilder();
+        Set<String> apiEnvironments = apiProduct.getEnvironments();
+        if (apiEnvironments != null) {
+            for (String environmentName : apiEnvironments) {
+                publishedEnvironments.append(environmentName).append(',');
+            }
+
+            if (apiEnvironments.isEmpty()) {
+                publishedEnvironments.append("none,");
+            }
+
+            if (!publishedEnvironments.toString().isEmpty()) {
+                publishedEnvironments.deleteCharAt(publishedEnvironments.length() - 1);
+            }
+        }
+        return publishedEnvironments.toString();
+    }
+
+    /**
      * This method used to get the currently published gateway environments of an API .
      *
      * @param api API object with the attributes value
@@ -8590,4 +8683,60 @@ public final class APIUtil {
     public static String getProductScope(APIProductIdentifier productIdentifier) {
         return APIConstants.PRODUCTSCOPE_PREFIX + "-" + productIdentifier.getName() + ":" + productIdentifier.getProviderName();
     }
+
+    /**
+     * Retrieves api product artifact from registry
+     *
+     * @param artifact
+     * @param registry
+     * @return APIProduct
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static APIProduct getAPIProduct(GovernanceArtifact artifact, Registry registry)
+            throws APIManagementException {
+
+        APIProduct apiProduct;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName, productVersion);
+            int apiId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
+
+            if (apiId == -1) {
+                return null;
+            }
+
+            apiProduct = new APIProduct(apiProductIdentifier);
+            //set uuid
+            apiProduct.setUuid(artifact.getId());
+            //set description
+            apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            apiProduct.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            apiProduct.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+            apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+
+            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomainName);
+
+            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+            Map<String, Tier> definedTiers = getTiers(tenantId);
+            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, productName);
+            apiProduct.setAvailableTiers(availableTier);
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API Product for artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Failed to get User Realm of API Product Provider";
+            throw new APIManagementException(msg, e);
+        }
+        return apiProduct;
+    }
+
 }

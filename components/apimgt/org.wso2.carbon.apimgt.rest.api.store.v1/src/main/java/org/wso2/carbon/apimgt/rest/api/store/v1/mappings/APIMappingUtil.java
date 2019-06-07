@@ -416,9 +416,9 @@ public class APIMappingUtil {
     public static APIProductDTO fromAPIProductToDTO(APIProduct product) throws APIManagementException {
         APIProductDTO dto = new APIProductDTO();
         dto.setId(product.getUuid());
-        dto.setName(product.getName());
+        dto.setName(product.getId().getName());
         dto.setDescription(product.getDescription());
-        dto.setProvider(product.getProvider());
+        dto.setProvider(product.getId().getProviderName());
         dto.setApiDefinition(product.getDefinition());
         dto.setThumbnailUrl(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
@@ -446,8 +446,8 @@ public class APIMappingUtil {
         APIProductInfoDTO apiProductInfoDTO = new APIProductInfoDTO();
         apiProductInfoDTO.setDescription(apiProduct.getDescription());
         apiProductInfoDTO.setId(apiProduct.getUuid());
-        apiProductInfoDTO.setName(apiProduct.getName());
-        String providerName = apiProduct.getProvider();
+        apiProductInfoDTO.setName(apiProduct.getId().getName());
+        String providerName = apiProduct.getId().getProviderName();
         apiProductInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiProductInfoDTO.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));

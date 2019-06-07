@@ -987,7 +987,7 @@ public class ApiMgtDAO {
                 if(!StringUtils.isEmpty(resultSet.getString("API_PRODUCT_NAME"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PRODUCT_PROVIDER")),
-                            resultSet.getString("API_PRODUCT_NAME"));
+                            resultSet.getString("API_PRODUCT_NAME"), resultSet.getString("API_PRODUCT_VERSION"));
                     apiProductIdentifier.setUUID(resultSet.getString("PRODUCT_UUID"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_PRODUCT_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
@@ -1040,7 +1040,7 @@ public class ApiMgtDAO {
                 if(!StringUtils.isEmpty(resultSet.getString("API_PRODUCT_NAME"))) {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PRODUCT_PROVIDER")),
-                            resultSet.getString("API_PRODUCT_NAME"));
+                            resultSet.getString("API_PRODUCT_NAME"), resultSet.getString("API_PRODUCT_VERSION"));
                     apiProductIdentifier.setUUID(resultSet.getString("PRODUCT_UUID"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_PRODUCT_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
@@ -6649,13 +6649,12 @@ public class ApiMgtDAO {
     
     /**
      * Get product Id from the product name and the provider. 
-     * @param productName product name
-     * @param provider provider
+     * @param identifier product identifier
      * @param connection db connection
      * @return product id 
      * @throws APIManagementException exception
      */
-    public int getAPIProductID(String productName, String provider, Connection connection)
+    public int getAPIProductID(APIProductIdentifier identifier, Connection connection)
             throws APIManagementException {
         boolean created = false;
         PreparedStatement prepStmt = null;
@@ -6673,19 +6672,22 @@ public class ApiMgtDAO {
             }
 
             prepStmt = connection.prepareStatement(getAPIQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
-            prepStmt.setString(2, productName);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getName());
+            prepStmt.setString(3, identifier.getVersion());
             rs = prepStmt.executeQuery();
             if (rs.next()) {
                 id = rs.getInt("API_PRODUCT_ID");
             }
             if (id == -1) {
-                String msg = "Unable to find the API Product : " + productName + "-" + provider + " in the database";
+                String msg = "Unable to find the API Product : " + identifier.getName() + "-" +
+                        identifier.getProviderName() + "-" + identifier.getVersion() + " in the database";
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
-            handleException("Error while locating API: " + productName + "-" + provider + " from the database", e);
+            handleException("Error while locating API Product: " + identifier.getName() + "-" + identifier.getProviderName()
+                    + "-" + identifier.getVersion() + " from the database", e);
         } finally {
             if (created) {
                 APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
@@ -12989,8 +12991,8 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             String queryAddAPIProduct = SQLConstants.ADD_API_PRODUCT;
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_product_id"});
-            prepStmtAddAPIProduct.setString(1, apiproduct.getProvider());
-            prepStmtAddAPIProduct.setString(2, apiproduct.getName());
+            prepStmtAddAPIProduct.setString(1, apiproduct.getId().getProviderName());
+            prepStmtAddAPIProduct.setString(2, apiproduct.getId().getName());
             prepStmtAddAPIProduct.setString(3, apiproduct.getDescription());
             List<String> tierList = new ArrayList<String>();
             Set<Tier> tiers = apiproduct.getAvailableTiers();
@@ -12998,7 +13000,7 @@ public class ApiMgtDAO {
                 tierList.add(tier.getName());
             }
             prepStmtAddAPIProduct.setString(4, StringUtils.join(tierList,","));
-            prepStmtAddAPIProduct.setString(5, apiproduct.getProvider());
+            prepStmtAddAPIProduct.setString(5, apiproduct.getId().getProviderName());
             prepStmtAddAPIProduct.setString(6, apiproduct.getVisibility());
             prepStmtAddAPIProduct.setString(7, apiproduct.getSubscriptionAvailability());
             prepStmtAddAPIProduct.setString(8, apiproduct.getUuid());
@@ -13006,7 +13008,7 @@ public class ApiMgtDAO {
                     StringUtils.isEmpty(tenantDomain) ? MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
             prepStmtAddAPIProduct.setString(10,
                     apiproduct.getState() == null ? APIConstants.CREATED : apiproduct.getState());
-            prepStmtAddAPIProduct.setString(11, ""); //version is not supported atm
+            prepStmtAddAPIProduct.setString(11, apiproduct.getId().getVersion());
             String subscriptionAvailableTenants = "";
             if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(apiproduct.getSubscriptionAvailability())) {
                 subscriptionAvailableTenants = apiproduct.getSubscriptionAvailableTenants();
@@ -13032,8 +13034,8 @@ public class ApiMgtDAO {
             addAPIProductResourceMappings(apiproduct, productId, connection);
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while adding API product " + apiproduct.getName() + " of provider "
-                    + apiproduct.getProvider(), e);
+            handleException("Error while adding API product " + apiproduct.getId().getName() + " of provider "
+                    + apiproduct.getId().getProviderName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddAPIProduct, null, null);
             APIMgtDBUtil.closeAllConnections(prepStmtAddScopeEntry, connection, null);
@@ -13073,8 +13075,8 @@ public class ApiMgtDAO {
             prepStmtAddResourceMapping.executeBatch();
             prepStmtAddResourceMapping.clearBatch();
         } catch (SQLException e) {
-            handleException("Error while adding API product " + apiProduct.getName() + " of provider " + apiProduct
-                    .getProvider(), e);
+            handleException("Error while adding API product " + apiProduct.getId().getName() + " of provider " + apiProduct.
+                    getId().getProviderName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, null, null);
         }
@@ -13131,10 +13133,13 @@ public class ApiMgtDAO {
             rs = prepStmtGetAPIProduct.executeQuery();
             if (rs.next()) {
                 product = new APIProduct();
+                String productName = rs.getString("API_PRODUCT_NAME");
+                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                String productVersion = rs.getString("API_PRODUCT_VERSION");
+                APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
+                product.setID(id); //todo : fix with constructor call
                 product.setUuid(rs.getString("UUID"));
                 product.setDescription(rs.getString("DESCRIPTION"));
-                product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
-                product.setName(rs.getString("API_PRODUCT_NAME"));
                 String productTiers = rs.getString("API_PRODUCT_TIER");
                 if (!StringUtils.isEmpty(productTiers)) {
                     String[] tierArray = productTiers.split(",");
@@ -13237,9 +13242,12 @@ public class ApiMgtDAO {
 
             while (rs.next()) {
                 APIProduct product = new APIProduct();
-                product.setName(rs.getString("API_PRODUCT_NAME"));
+                String productName = rs.getString("API_PRODUCT_NAME");
+                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                String productVersion = rs.getString("API_PRODUCT_VERSION");
+                APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
+                product.setID(id); //todo : replace with proper constructor
                 product.setUuid(rs.getString("UUID"));
-                product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
                 product.setState(rs.getString("STATE"));
                 product.setProductId(rs.getInt("API_PRODUCT_ID"));
                 product.setDescription(rs.getString("DESCRIPTION"));
@@ -13300,7 +13308,7 @@ public class ApiMgtDAO {
                         if (mappedAPIResources.size() > 0 && log.isDebugEnabled()) {
                             log.debug(
                                     "Removing url mappings from API : " + api.getId().toString() + " on API product : "
-                                            + apiProduct.getName());
+                                            + apiProduct.getId().getName());
                         }
                         for (URITemplate template : mappedAPIResources) {
                             preparedStatement.setInt(1, template.getId());
@@ -13345,7 +13353,7 @@ public class ApiMgtDAO {
             Map<String, URITemplate> templateMap = getURITemplatesForAPI(api);
             int productId;
             for (APIProduct apiProduct : apiProducts) {
-                productId = getAPIProductId(apiProduct.getName(), apiProduct.getProvider(), null);
+                productId = getAPIProductId(apiProduct.getId().getName(), apiProduct.getId().getProviderName(), apiProduct.getId().getVersion());
                 List<APIProductResource> productResources = apiProduct.getProductResources();
                 for (APIProductResource productResource : productResources) {
                     if (api.getId().equals(productResource.getApiIdentifier())) {
@@ -13363,7 +13371,7 @@ public class ApiMgtDAO {
                             } else {
                                 log.info("Resource " + key + " was deleted from API " + api.getId().toString()
                                         + " while updating the API. So it is no longer available with API product "
-                                        + apiProduct.getName());
+                                        + apiProduct.getId().getName());
 
                             }
                         }
@@ -13476,9 +13484,12 @@ public class ApiMgtDAO {
                                 && tenantDomain.equals(productTenant))) {
 
                     APIProduct product = new APIProduct();
-                    product.setName(rs.getString("API_PRODUCT_NAME"));
+                    String productName = rs.getString("API_PRODUCT_NAME");
+                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                    String productVersion = rs.getString("API_PRODUCT_VERSION");
+                    APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
+                    product.setID(id); //todo : replace with proper constructor
                     product.setUuid(rs.getString("UUID"));
-                    product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
                     product.setProductId(rs.getInt("API_PRODUCT_ID"));
                     product.setDescription(rs.getString("DESCRIPTION"));
                     productList.add(product);
@@ -13523,12 +13534,11 @@ public class ApiMgtDAO {
             ps.setString(11, product.getSubscriptionAvailableTenants());
             String additionalProperties = product.getAdditionalProperties().toJSONString();
             ps.setBlob(12, new ByteArrayInputStream(additionalProperties.getBytes()));
-            ps.setString(13, product.getName());
+            ps.setString(13, product.getId().getName());
             ps.setString(14, product.getUuid());
             ps.executeUpdate();
 
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
-            int productId = getAPIProductID(product.getName(), product.getProvider(), conn);
+            int productId = getAPIProductID(product.getId(), conn);
             updateAPIProductResourceMappings(product, productId, conn);
             conn.commit();
         } catch (SQLException e) {
@@ -13590,10 +13600,13 @@ public class ApiMgtDAO {
             prepStmtGetAPIProduct.setString(1, uuid);
             rs = prepStmtGetAPIProduct.executeQuery();
             if (rs.next()) {
+                String productName = rs.getString("API_PRODUCT_NAME");
+                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                String productVersion = rs.getString("API_PRODUCT_VERSION");
+                APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
+                product.setID(id); //todo : replace with proper constructor
                 product.setUuid(rs.getString("UUID"));
                 product.setDescription(rs.getString("DESCRIPTION"));
-                product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
-                product.setName(rs.getString("API_PRODUCT_NAME"));
                 String productTiers = rs.getString("API_PRODUCT_TIER");
                 if (!StringUtils.isEmpty(productTiers)) {
                     String[] tierArray = productTiers.split(",");
