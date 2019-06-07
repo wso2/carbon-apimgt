@@ -1276,6 +1276,8 @@ public final class APIUtil {
                 policies = policies.substring(0, policies.length() - 2);
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, policies);
             }
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(apiProduct));
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -6167,6 +6169,30 @@ public final class APIUtil {
     public static String writeEnvironmentsToArtifact(API api) {
         StringBuilder publishedEnvironments = new StringBuilder();
         Set<String> apiEnvironments = api.getEnvironments();
+        if (apiEnvironments != null) {
+            for (String environmentName : apiEnvironments) {
+                publishedEnvironments.append(environmentName).append(',');
+            }
+
+            if (apiEnvironments.isEmpty()) {
+                publishedEnvironments.append("none,");
+            }
+
+            if (!publishedEnvironments.toString().isEmpty()) {
+                publishedEnvironments.deleteCharAt(publishedEnvironments.length() - 1);
+            }
+        }
+        return publishedEnvironments.toString();
+    }
+
+    /**
+     * This method used to set environment values to governance artifact of APIProduct .
+     *
+     * @param apiProduct API object with the attributes value
+     */
+    public static String writeEnvironmentsToArtifact(APIProduct apiProduct) {
+        StringBuilder publishedEnvironments = new StringBuilder();
+        Set<String> apiEnvironments = apiProduct.getEnvironments();
         if (apiEnvironments != null) {
             for (String environmentName : apiEnvironments) {
                 publishedEnvironments.append(environmentName).append(',');

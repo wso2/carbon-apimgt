@@ -44,6 +44,7 @@ public class APIProduct {
     private String tenantDomain;
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
+    private Set<String> environments;
     private JSONObject additionalProperties = new JSONObject();
 
     public APIProduct(){}
@@ -149,6 +150,15 @@ public class APIProduct {
     public void setDefinition(String definition) {
         this.definition = definition;
     }
+
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
+    }
+
+    public Set<String> getEnvironments() {
+        return environments;
+    }
+
     /**
      * To get the additional properties
      *
@@ -194,13 +204,17 @@ public class APIProduct {
         for (Tier tier : availableTiers) {
             tiers += tier.getName() + " ";
         }
+        String env = "";
+        for (String environment : environments ) {
+            env += environment + " ";
+        }
         return "APIProduct [name=" + id.getName() + ", version=" + id.getVersion() + ", uuid=" + uuid + ", productId="
                 + productId + ", provider=" + id.getProviderName() + ", description=" + description
                 + ", availableTiers=" + tiers + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
-                + ", visibleTenants=" + visibleTenants + ", subscriptionAvailability=" + subscriptionAvailability
-                + ", subscriptionAvailableTenants=" + subscriptionAvailableTenants + ", state=" + state
-                + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain="
-                + tenantDomain + ", productResources=" + productResources + "]";
+                + ", visibleTenants=" + visibleTenants + ", environments=" + env + ", subscriptionAvailability="
+                + subscriptionAvailability + ", subscriptionAvailableTenants=" + subscriptionAvailableTenants
+                + ", state=" + state + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail
+                + ", tenantDomain=" + tenantDomain + ", productResources=" + productResources + "]";
     }
 
 }

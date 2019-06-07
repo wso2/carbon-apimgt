@@ -1363,6 +1363,9 @@ public class APIMappingUtil {
         if (product.getVisibleTenants() != null) {
             productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
         }
+        List<String> environmentsList = new ArrayList<String>();
+        environmentsList.addAll(product.getEnvironments());
+        productDto.setGatewayEnvironments(environmentsList);
         if (product.getAdditionalProperties() != null) {
             JSONObject additionalProperties = product.getAdditionalProperties();
             Map<String, String> additionalPropertiesMap = new HashMap<>();
@@ -1450,6 +1453,15 @@ public class APIMappingUtil {
         if (dto.getSubscriptionAvailableTenants() != null) {
             product.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
+
+        if (dto.getGatewayEnvironments().size() > 0) {
+            List<String> gatewaysList = dto.getGatewayEnvironments();
+            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
+        } else if (dto.getGatewayEnvironments() != null) {
+            //this means the provided gatewayEnvironments is "" (empty)
+            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
+        }
+
         List<APIProductResource> productResources = new ArrayList<APIProductResource>();
 
         for (int i = 0; i < dto.getApis().size(); i++) {

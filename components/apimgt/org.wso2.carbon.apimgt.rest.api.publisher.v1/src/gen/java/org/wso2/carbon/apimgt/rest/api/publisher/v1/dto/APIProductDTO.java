@@ -95,6 +95,7 @@ public enum VisibilityEnum {
     private VisibilityEnum visibility = null;
     private List<String> visibleRoles = new ArrayList<>();
     private List<String> visibleTenants = new ArrayList<>();
+    private List<String> gatewayEnvironments = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
 
 @XmlType(name="SubscriptionAvailabilityEnum")
@@ -297,6 +298,24 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   * List of gateway environments the API Product is available
+   **/
+  public APIProductDTO gatewayEnvironments(List<String> gatewayEnvironments) {
+    this.gatewayEnvironments = gatewayEnvironments;
+    return this;
+  }
+
+
+  @ApiModelProperty(example = "[\"Production and Sandbox\"]", value = "List of gateway environments the API Product is available ")
+  @JsonProperty("gatewayEnvironments")
+  public List<String> getGatewayEnvironments() {
+    return gatewayEnvironments;
+  }
+  public void setGatewayEnvironments(List<String> gatewayEnvironments) {
+    this.gatewayEnvironments = gatewayEnvironments;
+  }
+
+  /**
    **/
   public APIProductDTO policies(List<String> policies) {
     this.policies = policies;
@@ -420,6 +439,7 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(visibility, apIProduct.visibility) &&
         Objects.equals(visibleRoles, apIProduct.visibleRoles) &&
         Objects.equals(visibleTenants, apIProduct.visibleTenants) &&
+        Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
         Objects.equals(policies, apIProduct.policies) &&
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, apIProduct.subscriptionAvailableTenants) &&
@@ -430,7 +450,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, policies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
+    return Objects.hash(id, name, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, gatewayEnvironments, policies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
   }
 
   @Override
@@ -447,6 +467,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
+    sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");

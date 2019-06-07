@@ -74,6 +74,9 @@
             <field type="text">
                 <name>Tenants</name>
             </field>
+            <field type="text">
+                <name>Environments</name>
+            </field>
     </table>
 </content>
 
