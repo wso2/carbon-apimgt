@@ -1061,6 +1061,45 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
+    /**
+     * Get total revenue for a given API from all its' subscriptions
+     *
+     * @param apiId API ID
+     * @param messageContext message context
+     * @return revenue data for a given API
+     */
+    @Override
+    public Response apisApiIdRevenueGet(String apiId, MessageContext messageContext) {
+
+        if (StringUtils.isBlank(apiId)) {
+            String errorMessage = "API ID cannot be empty or null when getting revenue details.";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPI(apiIdentifier);
+            if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
+                String errorMessage = "API " + apiIdentifier.getApiName() +
+                        " should be in published state to get total revenue.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            Map<String, String> revenueUsageData = monetizationImplementation.getTotalRevenue(api);
+            APIRevenueDTO apiRevenueDTO = new APIRevenueDTO();
+            apiRevenueDTO.setProperties(revenueUsageData);
+            return Response.ok().entity(apiRevenueDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Failed to retrieve revenue data for API ID : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        } catch (MonetizationException e) {
+            String errorMessage = "Failed to get current revenue data for API ID : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        }
+        return null;
+    }
+
     @Override
     public Response apisApiIdScopesGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
