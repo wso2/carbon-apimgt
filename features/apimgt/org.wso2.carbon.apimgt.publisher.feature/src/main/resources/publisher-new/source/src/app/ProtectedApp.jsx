@@ -33,9 +33,10 @@ import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
 import Configurations from 'Config';
-import AppErrorBoundaryStyled from 'AppComponents/Shared/AppErrorBoundaryStyled';
+import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 
 const themes = [];
+console.log(Configurations);
 themes.push(createMuiTheme(Configurations.themes.light));
 themes.push(createMuiTheme(Configurations.themes.dark));
 
@@ -116,7 +117,7 @@ export default class Protected extends Component {
         }
         return (
             <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
-                <AppErrorBoundaryStyled>
+                <AppErrorBoundary>
                     <Base header={header}>
                         <Switch>
                             <Redirect exact from='/' to='/apis' />
@@ -125,7 +126,7 @@ export default class Protected extends Component {
                             <Route component={PageNotFound} />
                         </Switch>
                     </Base>
-                </AppErrorBoundaryStyled>
+                </AppErrorBoundary>
             </MuiThemeProvider>
         );
     }
