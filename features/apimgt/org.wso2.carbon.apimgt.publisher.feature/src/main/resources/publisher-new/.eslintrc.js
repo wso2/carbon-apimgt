@@ -28,7 +28,8 @@ module.exports = {
         browser: true,
         es6: true,
         'jest/globals': true,
-        jest: true
+        jest: true,
+        node: true
     },
     extends: ['airbnb','plugin:jest/recommended'],
     rules: {
