@@ -1476,6 +1476,16 @@
                 <artifactId>org.wso2.carbon.apimgt.localentry.stub</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.openapitools</groupId>
+                <artifactId>openapi-generator</artifactId>
+                <version>${openapi.generator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.openapitools.swagger.parser</groupId>
+                <artifactId>swagger-parser</artifactId>
+                <version>${openapitools.swagger.parser.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1611,6 +1621,8 @@
         <swagger-jaxrs.version>1.5.22</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
+        <openapi.generator.version>4.0.1.wso2v1</openapi.generator.version>
+        <openapitools.swagger.parser.version>2.0.13.OpenAPITools.wso2v1</openapitools.swagger.parser.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1, 1.7.0)</imp.pkg.version.axis2>

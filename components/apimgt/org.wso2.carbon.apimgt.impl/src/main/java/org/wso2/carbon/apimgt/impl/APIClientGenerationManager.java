@@ -18,17 +18,19 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import io.swagger.codegen.ClientOptInput;
-import io.swagger.codegen.DefaultGenerator;
-import io.swagger.codegen.config.CodegenConfigurator;
 import io.swagger.models.Swagger;
+import io.swagger.parser.OpenAPIParser;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openapitools.codegen.ClientOptInput;
+import org.openapitools.codegen.DefaultGenerator;
+import org.openapitools.codegen.config.CodegenConfigurator;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -145,9 +147,9 @@ public class APIClientGenerationManager {
             PrivilegedCarbonContext.endTenantFlow();
         }
 
-        Swagger swaggerDoc = new SwaggerParser().parse(swaggerAPIDefinition);
+        SwaggerParseResult swaggerDoc = new OpenAPIParser().readContents(swaggerAPIDefinition, null, null);
         //format the swagger definition as a string before writing to the file
-        String formattedSwaggerAPIDefinition = Json.pretty(swaggerDoc);
+        String formattedSwaggerAPIDefinition = Json.pretty(swaggerDoc.getOpenAPI());
         //create a temporary directory with a random name to store files created during generating the SDK
         String tempDirectoryLocation = APIConstants.TEMP_DIRECTORY_NAME + File.separator + UUID.randomUUID().toString();
         File tempDirectory = new File(tempDirectoryLocation);
@@ -242,7 +244,7 @@ public class APIClientGenerationManager {
                 .setModelPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_MODAL_PACKAGE) + apiName);
         codegenConfigurator.setApiPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_API_PACKAGE) + apiName);
         codegenConfigurator.setInputSpec(specLocation);
-        codegenConfigurator.setLang(langCodeGen.get(sdkLanguage));
+        codegenConfigurator.setGeneratorName(sdkLanguage);
         codegenConfigurator.setOutputDir(temporaryOutputPath);
         final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
         new DefaultGenerator().opts(clientOptInput).generate();
