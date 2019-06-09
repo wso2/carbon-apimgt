@@ -107,36 +107,6 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         return super.doPostDeleteUser(userName, userStoreManager);
     }
 
-    @Override
-    public boolean doPostAddRole(String roleName, String[] userList, Permission[] permissions, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
-        clearGatewayUsernameCache(userList);
-        return super.doPostAddRole(roleName, userList, permissions, userStoreManager);
-    }
-
-    @Override
-    public boolean doPostAddInternalRole(String roleName, String[] userList, Permission[] permissions, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
-        clearGatewayUsernameCache(userList);
-        return super.doPostAddInternalRole(roleName, userList, permissions, userStoreManager);
-    }
-
-    @Override
-    public boolean doPreDeleteInternalRole(String roleName, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
-        clearGatewayUsernameCache(userStoreManager.getUserListOfRole(roleName));
-        return super.doPostDeleteInternalRole(roleName, userStoreManager);
-    }
-
-    @Override
-    public boolean doPreDeleteRole(String roleName, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
-        clearGatewayUsernameCache(userStoreManager.getUserListOfRole(roleName));
-        return super.doPostDeleteRole(roleName, userStoreManager);
-    }
-
-    @Override
-    public boolean doPostUpdatePermissionsOfRole(String roleName, Permission[] permissions, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
-        clearGatewayUsernameCache(userStoreManager.getUserListOfRole(roleName));
-        return super.doPostUpdatePermissionsOfRole(roleName, permissions, userStoreManager);
-    }
-
     /**
      * Deleting user from the identity database prerequisites. Remove pending approval requests for the user and remove
      * the gateway key cache.
@@ -268,7 +238,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             }
             try {
                 APIAuthenticationAdminClient client = getApiAuthenticationAdminClient(environment);
-                client.invalidateCachedUsername(username);
+                client.invalidateCachedUsername(getEndUserName(username));
 
                 log.debug("Removed cached usernames of the Gateway.");
             } catch (AxisFault axisFault) {
@@ -294,6 +264,9 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             }
             try {
                 APIAuthenticationAdminClient client = getApiAuthenticationAdminClient(environment);
+                for (int i = 0; i < username_list.length; i++) {
+                    username_list[i] = getEndUserName(username_list[i]);
+                }
                 client.invalidateCachedUsernames(username_list);
 
                 log.debug("Removed cached usernames of the Gateway.");
@@ -303,6 +276,10 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                         environment.getName() + "'", axisFault);
             }
         }
+    }
+
+    private String getEndUserName(String username) {
+        return username + "@" + getTenantDomain();
     }
 
     protected APIAuthenticationAdminClient getApiAuthenticationAdminClient(Environment environment) throws AxisFault {
