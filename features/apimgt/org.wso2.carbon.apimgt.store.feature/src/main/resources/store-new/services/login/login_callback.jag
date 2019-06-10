@@ -7,7 +7,7 @@
     var tokenRequestData = {
         "grant_type": "authorization_code",
         "code": request.getParameter("code","UTF-8"),
-        "redirect_uri": serverUrl + site.context + CALLBACK_URL_SUFFIX
+        "redirect_uri": serverUrl + site.context + LOGIN_CALLBACK_URL_SUFFIX
     };
 
     var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
@@ -29,6 +29,11 @@
     var token_length = token_response.access_token.length;
     var access_token = String(token_response.access_token);
 
+    var id_token_length = token_response.id_token.length;
+    var id_token = String(token_response.id_token);
+
+    var id_token_part_1 = id_token.substring(0,id_token_length/2);
+    var id_token_part_2 = id_token.substring(id_token_length/2,id_token_length);
 
     var access_token_token_part_1 = access_token.substring(0, token_length/2);
     var access_token_token_part_2 = access_token.substring(token_length/2, token_length);
@@ -61,8 +66,15 @@
     cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': access_token_token_part_1, 'path': site.context + "/", "secure": true, "maxAge": Integer(token_response.expires_in)};
     response.addCookie(cookie);
 
+    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':id_token_part_2, 'path': "/store-new/services/logout", "secure": true, "maxAge": Integer(token_response.expires_in)};
+    response.addCookie(cookie);
+
+    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':id_token_part_1, 'path': "/store-new/services/logout", "secure": true, "maxAge": Integer(token_response.expires_in)};
+    response.addCookie(cookie);
+
     var state = request.getParameter("state");
     if (state !== null) {
+        state = decodeURI(state);
         response.sendRedirect(site.context + state);
     } else {
         response.sendRedirect(site.context + "/apis");

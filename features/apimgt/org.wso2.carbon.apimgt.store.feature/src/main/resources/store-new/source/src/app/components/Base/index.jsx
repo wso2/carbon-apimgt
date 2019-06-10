@@ -14,6 +14,14 @@ import { Menu as MenuIcon } from '@material-ui/icons';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import {
+    MenuItem,
+    MenuList,
+    ListItemIcon,
+    ListItemText,
+    Divider,
+} from '@material-ui/core';
+import NightMode from '@material-ui/icons/Brightness2';
 
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -143,6 +151,15 @@ class Layout extends React.Component {
         this.setState({ environmentId });
     };
 
+    /**
+     * Do OIDC logout redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
+     */
+    doOIDCLogout = (e) => {
+        e.preventDefault();
+        window.location = '/store-new/services/logout';
+    }
+
     handleClickButton = key => {
         this.setState({
             [key]: true,
@@ -257,55 +274,19 @@ class Layout extends React.Component {
                                                                 .handleCloseUserMenu
                                                         }
                                                     >
-                                                        <Card>
-                                                            <CardContent>
-                                                                <ListItem
-                                                                    button
-                                                                    className={
-                                                                        classes.listItem
-                                                                    }
-                                                                >
-                                                                    <FormControlLabel
-                                                                        control={
-                                                                            <Switch
-                                                                                checked={
-                                                                                    this
-                                                                                        .state
-                                                                                        .nightMode
-                                                                                }
-                                                                                onChange={this.handleSwitch(
-                                                                                    'nightMode'
-                                                                                )}
-                                                                                value="checkedB"
-                                                                                color="primary"
-                                                                            />
-                                                                        }
-                                                                        label="Night Mode"
-                                                                    />
-                                                                </ListItem>
-                                                                <Link
-                                                                    to={'/user'}
-                                                                >
-                                                                    Change
-                                                                    Password
-                                                                </Link>
-                                                                <Link
-                                                                    to={
-                                                                        '/profile'
-                                                                    }
-                                                                    className={
-                                                                        classes.textDisplayLink
-                                                                    }
-                                                                >
-                                                                    Profile
-                                                                </Link>
-                                                            </CardContent>
-                                                            <CardActions>
-                                                                <Link to="/logout">
-                                                                    Logout
-                                                                </Link>
-                                                            </CardActions>
-                                                        </Card>
+                                                        <MenuList>
+                                                            <MenuItem onClick={this.handleCloseUserMenu}>Profile</MenuItem>
+                                                            <MenuItem onClick={this.handleCloseUserMenu}>My account</MenuItem>
+                                                            <MenuItem onClick={this.doOIDCLogout}>Logout</MenuItem>
+                                                            <Divider />
+                                                            <MenuItem className={classes.menuItem} onClick={this.handleCloseUserMenu}>
+                                                                <ListItemText primary='Night Mode' />
+                                                                <ListItemIcon className={classes.icon}>
+                                                                    <NightMode />
+                                                                </ListItemIcon>
+                                                            </MenuItem>
+
+                                                        </MenuList>
                                                     </ClickAwayListener>
                                                 </Paper>
                                             </Grow>
