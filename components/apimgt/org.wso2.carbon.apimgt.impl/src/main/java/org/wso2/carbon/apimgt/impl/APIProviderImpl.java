@@ -6204,6 +6204,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
+        //todo : check whether permissions need to be updated and pass it along
+        updateApiProductArtifact(product, true, true);
         apiMgtDAO.updateAPIProduct(product, user);
     }
 
@@ -6311,6 +6313,58 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), ex);
+            }
+        }
+    }
+
+    /**
+     * Update API Product Artifact in Registry
+     *
+     * @param apiProduct
+     * @param updateMetadata
+     * @param updatePermissions
+     * @throws APIManagementException
+     */
+    private void updateApiProductArtifact(APIProduct apiProduct, boolean updateMetadata, boolean updatePermissions)
+            throws APIManagementException {
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String productArtifactId = registry.get(APIUtil.getAPIProductPath(apiProduct.getId())).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(productArtifactId);
+            if (artifactManager == null) {
+                String errorMessage =
+                        "Artifact manager is null when updating API Product with artifact ID " + apiProduct.getId();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+
+            Resource apiResource = registry.get(artifact.getPath());
+            GenericArtifact updateApiProductArtifact = APIUtil.createAPIProductArtifactContent(artifact, apiProduct);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiProductArtifact.getId());
+
+            artifactManager.updateGenericArtifact(updateApiProductArtifact);
+
+            //todo: implement visibility and access control and set permissions accordingly
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error from this level will mask the original exception
+                log.error("Error while rolling back the transaction for API Product: " + apiProduct.getId().getName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error occurred while rolling back the transaction.", ex);
             }
         }
     }
