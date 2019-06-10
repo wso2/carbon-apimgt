@@ -143,13 +143,14 @@ public class APIClientGenerationManager {
             }
         }
 
+        if (StringUtils.isEmpty(swaggerAPIDefinition)) {
+            handleSDKGenException("Error loading the Swagger definition. Swagger file is empty.");
+        }
+
         if (isTenantFlowStarted) {
             PrivilegedCarbonContext.endTenantFlow();
         }
 
-        SwaggerParseResult swaggerDoc = new OpenAPIParser().readContents(swaggerAPIDefinition, null, null);
-        //format the swagger definition as a string before writing to the file
-        String formattedSwaggerAPIDefinition = Json.pretty(swaggerDoc.getOpenAPI());
         //create a temporary directory with a random name to store files created during generating the SDK
         String tempDirectoryLocation = APIConstants.TEMP_DIRECTORY_NAME + File.separator + UUID.randomUUID().toString();
         File tempDirectory = new File(tempDirectoryLocation);
@@ -174,7 +175,7 @@ public class APIClientGenerationManager {
             }
             fileWriter = new FileWriter(swaggerSpecFile.getAbsoluteFile());
             bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(formattedSwaggerAPIDefinition);
+            bufferedWriter.write(swaggerAPIDefinition);
         } catch (IOException e) {
             handleSDKGenException("Error while storing the temporary swagger file in : " + specFileLocation, e);
         } finally {
