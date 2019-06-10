@@ -185,9 +185,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         //validate scope for filtered validators from db
         String[] scopeValidators;
         OAuthAppDO appInfo;
-        OAuthAppDAO oAuthAppDAO = new OAuthAppDAO();
-
         try {
+            OAuthAppDAO oAuthAppDAO = new OAuthAppDAO();
             appInfo = oAuthAppDAO.getAppInformation(clientId);
             scopeValidators = appInfo.getScopeValidators();     //get scope validators from the DB
             List<String> appScopeValidators=  new ArrayList<>(Arrays.asList(scopeValidators));
