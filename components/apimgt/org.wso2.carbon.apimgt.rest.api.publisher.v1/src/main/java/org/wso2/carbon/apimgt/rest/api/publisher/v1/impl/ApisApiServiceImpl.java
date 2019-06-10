@@ -1313,11 +1313,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
-
             if (defaultVersion) {
                 api.setAsDefaultVersion(true);
             }
-
             //creates the new version
             apiProvider.createNewAPIVersion(api, newVersion);
 
