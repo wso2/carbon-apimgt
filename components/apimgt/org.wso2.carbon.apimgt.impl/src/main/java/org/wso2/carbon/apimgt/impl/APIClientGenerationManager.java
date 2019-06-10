@@ -62,29 +62,28 @@ public class APIClientGenerationManager {
     private static final Map<String, String> langCodeGen = new HashMap<String, String>();
 
     public APIClientGenerationManager() {
-        langCodeGen.put("java", "io.swagger.codegen.languages.JavaClientCodegen");
-        langCodeGen.put("android", "io.swagger.codegen.languages.AndroidClientCodegen");
-        langCodeGen.put("csharp", "io.swagger.codegen.languages.CSharpClientCodegen");
-        langCodeGen.put("cpp", "io.swagger.codegen.languages.CppRestClientCodegen");
-        langCodeGen.put("dart", "io.swagger.codegen.languages.DartClientCodegen");
-        langCodeGen.put("flash", "io.swagger.codegen.languages.FlashClientCodegen");
-        langCodeGen.put("go", "io.swagger.codegen.languages.GoClientCodegen");
-        langCodeGen.put("groovy", "io.swagger.codegen.languages.GroovyClientCodegen");
-        langCodeGen.put("javascript", "io.swagger.codegen.languages.JavascriptClientCodegen");
-        langCodeGen.put("jmeter", "io.swagger.codegen.languages.JMeterCodegen");
-        langCodeGen.put("nodejs", "io.swagger.codegen.languages.NodeJSServerCodegen");
-        langCodeGen.put("perl", "io.swagger.codegen.languages.PerlClientCodegen");
-        langCodeGen.put("php", "io.swagger.codegen.languages.PhpClientCodegen");
-        langCodeGen.put("python", "io.swagger.codegen.languages.PythonClientCodegen");
-        langCodeGen.put("ruby", "io.swagger.codegen.languages.RubyClientCodegen");
-        langCodeGen.put("scala", "io.swagger.codegen.languages.ScalaClientCodegen");
-        langCodeGen.put("swift", "io.swagger.codegen.languages.SwiftCodegen");
-        langCodeGen.put("clojure", "io.swagger.codegen.languages.ClojureClientCodegen");
-        langCodeGen.put("aspNet5", "io.swagger.codegen.languages.AspNet5ServerCodegen");
-        langCodeGen.put("asyncScala", "io.swagger.codegen.languages.AsyncScalaClientCodegen");
-        langCodeGen.put("spring", "io.swagger.codegen.languages.SpringCodegen");
-        langCodeGen.put("csharpDotNet2", "io.swagger.codegen.languages.CsharpDotNet2ClientCodegen");
-        langCodeGen.put("haskell", "io.swagger.codegen.languages.HaskellServantCodegen");
+        langCodeGen.put("java", "org.openapitools.codegen.languages.JavaClientCodegen");
+        langCodeGen.put("android", "org.openapitools.codegen.languages.AndroidClientCodegen");
+        langCodeGen.put("csharp", "org.openapitools.codegen.languages.CSharpClientCodegen");
+        langCodeGen.put("cpp", "org.openapitools.codegen.languages.CppRestClientCodegen");
+        langCodeGen.put("dart", "org.openapitools.codegen.languages.DartClientCodegen");
+        langCodeGen.put("flash", "org.openapitools.codegen.languages.FlashClientCodegen");
+        langCodeGen.put("go", "org.openapitools.codegen.languages.GoClientCodegen");
+        langCodeGen.put("groovy", "org.openapitools.codegen.languages.GroovyClientCodegen");
+        langCodeGen.put("javascript", "org.openapitools.codegen.languages.JavascriptClientCodegen");
+        langCodeGen.put("jmeter", "org.openapitools.codegen.languages.JMeterCodegen");
+        langCodeGen.put("nodejs", "org.openapitools.codegen.languages.NodeJSServerCodegen");
+        langCodeGen.put("perl", "org.openapitools.codegen.languages.PerlClientCodegen");
+        langCodeGen.put("php", "org.openapitools.codegen.languages.PhpClientCodegen");
+        langCodeGen.put("python", "org.openapitools.codegen.languages.PythonClientCodegen");
+        langCodeGen.put("ruby", "org.openapitools.codegen.languages.RubyClientCodegen");
+        langCodeGen.put("swift", "org.openapitools.codegen.languages.SwiftCodegen");
+        langCodeGen.put("clojure", "org.openapitools.codegen.languages.ClojureClientCodegen");
+        langCodeGen.put("aspNet5", "org.openapitools.codegen.languages.AspNet5ServerCodegen");
+        langCodeGen.put("scala-akka-client", "org.openapitools.codegen.languages.ScalaAkkaClientCodegen");
+        langCodeGen.put("spring", "org.openapitools.codegen.languages.SpringCodegen");
+        langCodeGen.put("csharpDotNet2", "org.openapitools.codegen.languages.CsharpDotNet2ClientCodegen");
+        langCodeGen.put("haskell", "org.openapitools.codegen.languages.HaskellServantCodegen");
     }
 
     /**
