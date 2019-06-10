@@ -51,50 +51,35 @@ const styles = theme => ({
 });
 
 /**
- * Handle Creation a new version of an API from API Overview/Details page
  *
- * @class CreateNewVersionButton
- * @extends {React.Component}
+ * Function to create a 'CreateNewVersion' button
+ *
+ * @param props props
+ * @returns {*} React CreateNewVersion function component
+ * @constructor
  */
-class CreateNewVersionButton extends React.Component {
-    /**
-     *Creates an instance of CreateNewVersionButton.
-     * @param {*} props @inheritDoc
-     * @memberof CreateNewVersionButton
-     */
-    constructor(props) {
-        super(props);
-    }
+function CreateNewVersionButton(props) {
+    const { api, classes } = props;
+    return (
+        <React.Fragment>
+            {/* allowing create new version based on scopes */}
+            <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.API_COPY}>
+                <div className={classes.createNewVersionWrapper}>
+                    <VerticalDivider height={70} />
+                    <Link
+                        className={classes.createNewVersion}
+                        to={'/apis/' + api.id + '/new_version'}
+                    >
 
-    /**
-     *
-     * @inheritDoc
-     * @returns {React.Component} inherit docs
-     * @memberof CreateNewVersionButton
-     */
-    render() {
-        const { api, classes } = this.props;
-        return (
-            <React.Fragment>
-                {/* allowing create new version based on scopes */}
-                <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.API_COPY}>
-                    <div className={classes.createNewVersionWrapper}>
-                        <VerticalDivider height={70} />
-                        <Link
-                            className={classes.createNewVersion}
-                            to={'/apis/' + api.id + '/new_version'}
-                        >
-
-                            <div>
-                                <LibraryAdd />
-                            </div>
-                            <div className={classes.linkText}>Create New Version</div>
-                        </Link>
-                    </div>
-                </ScopeValidation>
-            </React.Fragment>
-        );
-    }
+                        <div>
+                            <LibraryAdd />
+                        </div>
+                        <div className={classes.linkText}>Create New Version</div>
+                    </Link>
+                </div>
+            </ScopeValidation>
+        </React.Fragment>
+    );
 }
 
 CreateNewVersionButton.propTypes = {
