@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway.handlers.honeyPotIPBasedThrottleHadler;
+package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -22,7 +22,6 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 
 import java.util.TreeMap;
 
@@ -161,7 +160,7 @@ public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
                 }
 
             } catch (ThrottleException e) {
-               // log.info("++++Error processing the throttling policy++", e);
+                // log.info("++++Error processing the throttling policy++", e);
                 handleException("Error processing the throttling policy", e);
             }
         }
@@ -237,7 +236,7 @@ public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
             Utils.setFaultPayload(messageContext, getFaultPayload());
         } else {
-           // log.info("Throttled out++++++++++++++");
+            // log.info("Throttled out++++++++++++++");
             Utils.setSOAPFault(messageContext, "Server", "##############Message Throttled Out@@@@@@@@@@@@@@@@",
                     "You have exceeded your quota");
         }
