@@ -2990,16 +2990,16 @@ public abstract class AbstractAPIManager implements APIManager {
             if (apiProductArtifact != null) {
                 return getApiProduct(registry, apiProductArtifact);
             } else {
-                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid + " does not exist";
                 log.error(msg);
                 throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (RegistryException e) {
-            String msg = "Failed to get API";
+            String msg = "Failed to get API Product";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API";
+            String msg = "Failed to get API Product";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
