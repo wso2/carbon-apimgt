@@ -8,9 +8,13 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.throttling.HoneyAPIDataPublisher.HoneyAPIDataPublisher;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
+/**
+ * This @HoneyPotAPIMediator mediator refers at the HoneyPot api
+ */
 public class HoneyPotAPIMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(HoneyPotAPIMediator.class);
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
@@ -21,13 +25,19 @@ public class HoneyPotAPIMediator extends AbstractMediator {
         org.apache.axis2.context.MessageContext msgContext = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
 
+        String messageBody = null;
+
         long currentTime = System.currentTimeMillis();
         String messageId = messageContext.getMessageID();
         String apiMethod = (String) msgContext.getProperty("HTTP_METHOD");
         String clientIP = getClientIp(messageContext);
-        String messageBody = String.valueOf(msgContext.getEnvelope().getBody().getFirstOMChild());
-        if (messageBody.equals("null")) {
-            messageBody = "No message body passed";
+        try {
+            messageBody = String.valueOf(msgContext.getEnvelope().getBody().getFirstOMChild());
+            if (messageBody.equals("null")) {
+                messageBody = "No message body passed";
+            }
+        } catch (Exception e) {
+            messageBody = "200 OK";
         }
         String headerSet = getPassedHeaderSet(messageContext);
 
@@ -63,6 +73,10 @@ public class HoneyPotAPIMediator extends AbstractMediator {
         return clientIp;
     }
 
+    /**
+     * @param messageContext  get message context to get the header set
+     * @return passed header set
+     */
     private String getPassedHeaderSet(MessageContext messageContext) {
         String headerSet;
         org.apache.axis2.context.MessageContext axis2MsgContext =
