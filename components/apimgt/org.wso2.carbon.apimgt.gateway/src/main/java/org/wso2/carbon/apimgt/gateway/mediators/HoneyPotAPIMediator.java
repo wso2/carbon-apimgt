@@ -37,7 +37,7 @@ public class HoneyPotAPIMediator extends AbstractMediator {
                 messageBody = "No message body passed";
             }
         } catch (Exception e) {
-            messageBody = "200 OK";
+            messageBody = "Malformed message body";
         }
         String headerSet = getPassedHeaderSet(messageContext);
 
