@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.codec.binary.Base64;
@@ -46,6 +47,7 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -216,7 +218,18 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                     String claimURI = it.next();
                     String claimVal = standardClaims.get(claimURI);
                     List<String> claimList = new ArrayList<String>();
-                    if (userAttributeSeparator != null && claimVal != null && claimVal.contains(userAttributeSeparator)) {
+                    if (claimVal != null && claimVal.contains("{")) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        try {
+                            Map<String, String> map = mapper.readValue(claimVal, Map.class);
+                            jwtClaimsSetBuilder.claim(claimURI, map);
+                        } catch (IOException e) {
+                            // Exception isn't thrown in order to generate jwt without claim, even if an error is
+                            // occurred during the retrieving claims.
+                            log.error("Error while reading claim values", e);
+                        }
+                    } else if (userAttributeSeparator != null && claimVal != null &&
+                            claimVal.contains(userAttributeSeparator)) {
                         StringTokenizer st = new StringTokenizer(claimVal, userAttributeSeparator);
                         while (st.hasMoreElements()) {
                             String attValue = st.nextElement().toString();
