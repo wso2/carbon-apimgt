@@ -96,6 +96,15 @@ public interface Monetization {
      * @return current usage for a subscription
      * @throws MonetizationException if failed to get current usage for a subscription
      */
-    Map<String, String> getCurrentUsage(String subscriptionUUID, APIProvider apiProvider) throws MonetizationException;
+    Map<String, String> getCurrentUsageForSubscription(String subscriptionUUID, APIProvider apiProvider) throws MonetizationException;
+
+    /**
+     * Get total revenue for a given API from all subscriptions
+     *
+     * @param api API
+     * @return total revenue data for a given API from all subscriptions
+     * @throws MonetizationException if failed to get total revenue data for a given API
+     */
+    Map<String, String> getTotalRevenue(API api) throws MonetizationException;
 
 }
