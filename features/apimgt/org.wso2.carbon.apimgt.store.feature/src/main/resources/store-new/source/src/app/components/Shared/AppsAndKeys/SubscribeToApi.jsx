@@ -49,6 +49,7 @@ const styles = theme => ({
     buttonRight: {
         alignSelf: 'flex-end',
         display: 'flex',
+        marginLeft: 20,
     },
     title: {
         display: 'inline-block',
@@ -65,9 +66,6 @@ const styles = theme => ({
     },
     inputText: {
         marginTop: 20,
-    },
-    buttonRight: {
-        marginLeft: 20,
     },
     buttonRightLink: {
         textDecoration: 'none',
@@ -100,8 +98,6 @@ class SubscribeToApi extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            age: '',
-            name: 'hai',
             appSelected: null,
             tierSelected: null,
         };
@@ -112,9 +108,18 @@ class SubscribeToApi extends Component {
      *
      * @memberof SubscribeToApi
      */
-    handleChange = (event) => {
-        this.setState({ [event.target.name]: event.target.value });
-    };
+    componentDidMount() {
+        const { newApp, applicationsAvailable, api } = this.props;
+        if (newApp) {
+            this.state.appSelected = this.props.newApp.value;
+        } else {
+            this.state.appSelected = applicationsAvailable[0].value;
+        }
+        this.state.tiers = this.getTiers(api);
+        if (this.state.tiers.length > 0) {
+            this.setState({ tierSelected: this.state.tiers[0].value });
+        }
+    }
 
     /**
      *
@@ -139,35 +144,25 @@ class SubscribeToApi extends Component {
     /**
      *
      *
-     * @returns
      * @memberof SubscribeToApi
      */
-    createSubscription() {
-        const api_uuid = this.props.api.id;
-
-        const applicationId = this.state.appSelected;
-        const policy = this.state.tierSelected;
-        const api = new Api();
-        const promised_subscribe = api.subscribe(api_uuid, applicationId, policy);
-        return promised_subscribe;
-    }
+    handleChange = (event) => {
+        this.setState({ [event.target.name]: event.target.value });
+    };
 
     /**
      *
      *
+     * @returns
      * @memberof SubscribeToApi
      */
-    componentDidMount() {
-        const { newApp, applicationsAvailable, api } = this.props;
-        if (newApp) {
-            this.state.appSelected = this.props.newApp.value;
-        } else {
-            this.state.appSelected = applicationsAvailable[0].value;
-        }
-        this.state.tiers = this.getTiers(api);
-        if (this.state.tiers.length > 0) {
-            this.setState({ tierSelected: this.state.tiers[0].value });
-        }
+    createSubscription() {
+        const apiUuid = this.props.api.id;
+
+        const applicationId = this.state.appSelected;
+        const policy = this.state.tierSelected;
+        const api = new Api();
+        return api.subscribe(apiUuid, applicationId, policy);
     }
 
     /**
@@ -193,7 +188,14 @@ class SubscribeToApi extends Component {
                                 Application
                             </InputLabel>
 
-                            <Select value={this.state.appSelected} onChange={this.handleChange} input={<Input name='appSelected' id='app-label-placeholder' />} displayEmpty name='appSelected' className={classes.selectEmpty}>
+                            <Select
+                                value={this.state.appSelected}
+                                onChange={this.handleChange}
+                                input={<Input name='appSelected' id='app-label-placeholder' />}
+                                displayEmpty
+                                name='appSelected'
+                                className={classes.selectEmpty}
+                            >
                                 {applicationsAvailable.map(app => (
                                     <MenuItem value={app.value} key={app.value}>
                                         {app.label}
@@ -208,7 +210,14 @@ class SubscribeToApi extends Component {
                             <InputLabel shrink htmlFor='tier-label-placeholder' className={classes.quotaHelp}>
                                 Throttling Tier
                             </InputLabel>
-                            <Select value={this.state.tierSelected} onChange={this.handleChange} input={<Input name='tierSelected' id='tier-label-placeholder' />} displayEmpty name='tierSelected' className={classes.selectEmpty}>
+                            <Select
+                                value={this.state.tierSelected}
+                                onChange={this.handleChange}
+                                input={<Input name='tierSelected' id='tier-label-placeholder' />}
+                                displayEmpty
+                                name='tierSelected'
+                                className={classes.selectEmpty}
+                            >
                                 {this.state.tiers.map(tier => (
                                     <MenuItem value={tier.value} key={tier.value}>
                                         {tier.label}
@@ -221,7 +230,7 @@ class SubscribeToApi extends Component {
                                 {this.state.tiers.map((tier, index) => (
                                     <span key={tier.value}>
                                         {tier.label}
-                                        {index != this.state.tiers.length - 1 && <span>,</span>}
+                                        {index !== this.state.tiers.length - 1 && <span>,</span>}
                                     </span>
                                 ))}
                             </FormHelperText>
