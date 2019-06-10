@@ -35,7 +35,7 @@ const styles = theme => ({
         fontFamily: theme.typography.fontFamily,
     },
     deleteWrapper: {
-        flex: 1,
+        flex: 0,
         display: 'flex',
         justifyContent: 'flex-end',
         paddingRight: theme.spacing.unit * 2,

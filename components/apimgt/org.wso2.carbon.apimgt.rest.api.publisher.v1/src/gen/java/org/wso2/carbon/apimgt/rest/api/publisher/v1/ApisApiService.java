@@ -77,7 +77,7 @@ public interface ApisApiService {
       public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);
       public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext);
-      public Response apisCopyApiPost(String newVersion, String apiId, MessageContext messageContext);
+      public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext);
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, String tenantDomain, MessageContext messageContext);
       public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext);
       public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, String ifMatch, MessageContext messageContext);
