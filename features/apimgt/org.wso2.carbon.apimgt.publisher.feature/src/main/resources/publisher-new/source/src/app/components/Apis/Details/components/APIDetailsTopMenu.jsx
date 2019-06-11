@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import DeleteApiButton from './DeleteApiButton';
+import CreateNewVersionButton from './CreateNewVersionButton';
 
 const styles = theme => ({
     root: {
@@ -84,6 +85,7 @@ const DetailsTopMenu = ({ classes, api, theme }) => {
                 <div className={classes.linkText}>View In store</div>
             </a>
             <VerticalDivider height={70} />
+            <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />
             <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} />
         </div>
     );

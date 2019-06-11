@@ -1173,6 +1173,11 @@ paths:
           type: string
           in: query
           required: true
+        - name: defaultVersion
+          description: Specifies whether new API should be added as default version.
+          type: boolean
+          default: false
+          in: query
         - $ref: '#/parameters/apiId-Q'
       tags:
         - API (Individual)
