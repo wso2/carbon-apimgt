@@ -3056,7 +3056,7 @@ public class SQLConstants {
             + "FROM AM_API_PRODUCT WHERE UUID = ?";
     
     public static final String DELETE_API_PRODUCT_SQL = 
-            "DELETE FROM AM_API_PRODUCT WHERE UUID = ? AND TENANT_DOMAIN = ?";
+            "DELETE FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? AND API_PRODUCT_NAME = ? AND API_PRODUCT_VERSION = ?";
     
     public static final String DELETE_API_PRODUCT_SCOPE_SQL = 
             "DELETE FROM IDN_OAUTH2_SCOPE WHERE SCOPE_ID = ? ";

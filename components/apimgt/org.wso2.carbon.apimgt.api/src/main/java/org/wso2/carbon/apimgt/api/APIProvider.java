@@ -1131,12 +1131,12 @@ public interface APIProvider extends APIManager {
     List<APIProduct> getAPIProducts(String tenantDomain, String apiProvider) throws APIManagementException;
 
     /**
-     * Delete API product
-     * @param apiProduct product api product
-     * @param tenantDomain tenant domain.
-     * @throws APIManagementException
+     * Delete an API Product
+     *
+     * @param identifier APIProductIdentifier
+     * @throws APIManagementException if failed to remove the API Product
      */
-    void deleteAPIProduct(APIProduct apiProduct, String tenantDomain) throws APIManagementException;
+    void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
 
     /**
      * Update API Product

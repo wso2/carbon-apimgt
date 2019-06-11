@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
@@ -6168,9 +6169,102 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return products;
 
     }
-    
-    public void deleteAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException {
-        apiMgtDAO.deleteAPIProduct(product, tenantDomain);
+
+    @Override
+    public void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+        //this is the product resource collection path
+        String productResourcePath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
+                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+
+        //this is the product rxt instance path
+        String apiProductArtifactPath = APIUtil.getAPIProductPath(identifier);
+
+        //todo : check whether there are any subscriptions for this api
+
+        try {
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Failed to retrieve artifact manager when deleting API Product" + identifier;
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+
+            Resource apiProductResource = registry.get(productResourcePath);
+            String productResourceUUID = apiProductResource.getUUID();
+
+            if (productResourceUUID == null) {
+                throw new APIManagementException("artifact id is null for : " + productResourcePath);
+            }
+
+            Resource apiArtifactResource = registry.get(apiProductArtifactPath);
+            String apiArtifactResourceUUID = apiArtifactResource.getUUID();
+
+            if (apiArtifactResourceUUID == null) {
+                throw new APIManagementException("artifact id is null for : " + apiProductArtifactPath);
+            }
+
+            GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiArtifactResourceUUID);
+            //Delete the dependencies associated  with the api product artifact
+            GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
+            if (dependenciesArray.length > 0) {
+                for (GovernanceArtifact artifact : dependenciesArray) {
+                    registry.delete(artifact.getPath());
+                }
+            }
+
+            //delete registry resources
+            artifactManager.removeGenericArtifact(productResourceUUID);
+
+            //todo : remove from gateways
+
+            apiMgtDAO.deleteAPIProduct(identifier);
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Product Name: " + identifier.getName() + ", API Product Version " + identifier.getVersion()
+                                + " successfully removed from the database.";
+                log.debug(logMessage);
+            }
+
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, identifier.getName());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, identifier.getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
+             /*remove empty directories*/
+            String apiProductCollectionPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                    .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
+            if (registry.resourceExists(apiProductCollectionPath)) {
+                //at the moment product versioning is not supported so we are directly deleting this collection as
+                // this is known to be empty
+                registry.delete(apiProductCollectionPath);
+            }
+
+            String productProviderPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                    .getProviderName();
+
+            if (registry.resourceExists(productProviderPath)) {
+                Resource providerCollection = registry.get(productProviderPath);
+                CollectionImpl collection = (CollectionImpl) providerCollection;
+                //if there is no api product for given provider delete the provider directory
+                if (collection.getChildCount() == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No more API Products from the provider " + identifier.getProviderName() + " found. " +
+                                "Removing provider collection from registry");
+                    }
+                    registry.delete(productProviderPath);
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to remove the API from : " + productResourcePath, e);
+        }
     }
 
     @Override

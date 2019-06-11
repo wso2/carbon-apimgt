@@ -13266,11 +13266,10 @@ public class ApiMgtDAO {
 
     /**
      * Delete API product and its related scopes
-     * @param product
-     * @param tenantDomain
+     * @param productIdentifier product ID
      * @throws APIManagementException
      */
-    public void deleteAPIProduct(APIProduct product, String tenantDomain) throws APIManagementException {
+    public void deleteAPIProduct(APIProductIdentifier productIdentifier) throws APIManagementException {
         String deleteQuery = SQLConstants.DELETE_API_PRODUCT_SQL;
         PreparedStatement ps = null;
         Connection connection = null;
@@ -13278,13 +13277,14 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             ps = connection.prepareStatement(deleteQuery);
-            ps.setString(1, product.getUuid());
-            ps.setString(2, tenantDomain);
+            ps.setString(1, productIdentifier.getProviderName());
+            ps.setString(2, productIdentifier.getName());
+            ps.setString(3, productIdentifier.getVersion());
             ps.executeUpdate();
 
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while deleting api product " + product + " tenant " + tenantDomain, e);
+            handleException("Error while deleting api product " + productIdentifier , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, null);
         }
