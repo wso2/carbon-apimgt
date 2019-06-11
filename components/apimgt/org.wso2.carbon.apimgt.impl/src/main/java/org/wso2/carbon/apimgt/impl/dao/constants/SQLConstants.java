@@ -285,7 +285,6 @@ public class SQLConstants {
     //we are not expecting api product calls through default version todo:reviw
     public static final String VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
-<<<<<<< HEAD
             "   SUB.TIER_ID," +
             "   SUBS.USER_ID," +
             "   SUB.SUB_STATUS," +
@@ -375,58 +374,6 @@ public class SQLConstants {
             "   AND AKM.CONSUMER_KEY = ? " +
             "   AND API.API_VERSION = ? " +
             " ORDER BY API_PRODUCT_NAME ASC";
-=======
-                    "   SUB.TIER_ID," +
-                    "   SUBS.USER_ID," +
-                    "   SUB.SUB_STATUS," +
-                    "   APP.APPLICATION_ID," +
-                    "   APP.NAME," +
-                    "   APP.APPLICATION_TIER," +
-                    "   APP.TOKEN_TYPE," +
-                    "   AKM.KEY_TYPE," +
-                    "   API.API_NAME," +
-                    "   API.API_PROVIDER " +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION SUB," +
-                    "   AM_SUBSCRIBER SUBS," +
-                    "   AM_APPLICATION APP," +
-                    "   AM_APPLICATION_KEY_MAPPING AKM," +
-                    "   AM_API API " +
-                    " WHERE " +
-                    "   API.CONTEXT = ? " +
-                    "   AND AKM.CONSUMER_KEY = ? " +
-                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-                    "   AND API.API_ID = SUB.API_ID" +
-                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
-
-    public static final String VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
-            " SELECT " +
-                    "   SUB.TIER_ID," +
-                    "   SUBS.USER_ID," +
-                    "   SUB.SUB_STATUS," +
-                    "   APP.APPLICATION_ID," +
-                    "   APP.NAME," +
-                    "   APP.APPLICATION_TIER," +
-                    "   APP.TOKEN_TYPE," +
-                    "   AKM.KEY_TYPE," +
-                    "   API.API_NAME," +
-                    "   API.API_PROVIDER" +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION SUB," +
-                    "   AM_SUBSCRIBER SUBS," +
-                    "   AM_APPLICATION APP," +
-                    "   AM_APPLICATION_KEY_MAPPING AKM," +
-                    "   AM_API API" +
-                    " WHERE " +
-                    "   API.CONTEXT = ? " +
-                    "   AND AKM.CONSUMER_KEY = ? " +
-                    "   AND API.API_VERSION = ? " +
-                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-                    "   AND API.API_ID = SUB.API_ID" +
-                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
->>>>>>> 6a2cb72309... added local part of UI
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
             " SELECT " +
@@ -466,7 +413,6 @@ public class SQLConstants {
 
     public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
             " SELECT " +
-<<<<<<< HEAD
             "   SUB.TIER_ID," +
             "   SUBS.USER_ID," +
             "   SUB.SUB_STATUS," +
@@ -539,41 +485,6 @@ public class SQLConstants {
             "AND APS.NAME = SUB.TIER_ID " +
             "AND APS.TENANT_ID = ? " +
             "ORDER BY API_PRODUCT_NAME ASC";
-=======
-                    "   SUB.TIER_ID," +
-                    "   SUBS.USER_ID," +
-                    "   SUB.SUB_STATUS," +
-                    "   APP.APPLICATION_ID," +
-                    "   APP.NAME," +
-                    "   APP.APPLICATION_TIER," +
-                    "   APP.TOKEN_TYPE," +
-                    "   AKM.KEY_TYPE," +
-                    "   API.API_NAME," +
-                    "   API.API_TIER," +
-                    "   API.API_PROVIDER," +
-                    "   APS.RATE_LIMIT_COUNT," +
-                    "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID" +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION SUB," +
-                    "   AM_SUBSCRIBER SUBS," +
-                    "   AM_APPLICATION APP," +
-                    "   AM_APPLICATION_KEY_MAPPING AKM," +
-                    "   AM_API API," +
-                    "   AM_POLICY_SUBSCRIPTION APS" +
-                    " WHERE " +
-                    "   API.CONTEXT = ? " +
-                    "   AND AKM.CONSUMER_KEY = ? " +
-                    "   AND APS.TENANT_ID = ? " +
-                    "   AND API.API_VERSION = ? " +
-                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-                    "   AND API.API_ID = SUB.API_ID" +
-                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-                    "   AND APS.NAME = SUB.TIER_ID";
->>>>>>> 6a2cb72309... added local part of UI
-
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
 
@@ -647,7 +558,6 @@ public class SQLConstants {
             " INSERT INTO " +
                     "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
                     "UPDATED_TIME, UUID) " +
-<<<<<<< HEAD
             " VALUES (?,?,?,?,?,?,?,?,?)";
     
     public static final String ADD_PRODUCT_SUBSCRIPTION_SQL =
@@ -668,18 +578,7 @@ public class SQLConstants {
             " WHERE " +
             "   API_PRODUCT_ID = ? " +
             "   AND APPLICATION_ID = ?";
-    
-=======
-                    " VALUES (?,?,?,?,?,?,?,?,?)";
 
-    public static final String GET_SUBSCRIPTION_UUID_SQL =
-            " SELECT UUID " +
-                    " FROM AM_SUBSCRIPTION " +
-                    " WHERE " +
-                    "   API_ID = ? " +
-                    "   AND APPLICATION_ID = ?";
-
->>>>>>> 6a2cb72309... added local part of UI
     public static final String GET_SUBSCRIPTION_STATUS_BY_UUID_SQL =
             " SELECT SUB_STATUS " +
                     " FROM AM_SUBSCRIPTION " +
@@ -703,7 +602,6 @@ public class SQLConstants {
             " SELECT SUB_STATUS FROM AM_SUBSCRIPTION WHERE SUBSCRIPTION_ID = ?";
 
     public static final String GET_SUBSCRIPTION_BY_ID_SQL =
-<<<<<<< HEAD
             "SELECT "
             + "  T.SUBSCRIPTION_ID, T.API_PRODUCT_PROVIDER, T.API_PRODUCT_NAME, T.API_PRODUCT_VERSION, T.APPLICATION_ID, T.TIER_ID, "
             + "  T.SUB_STATUS, T.SUBS_CREATE_STATE, T.UUID, T.API_PROVIDER, T.API_NAME, T.API_VERSION, "
@@ -747,44 +645,6 @@ public class SQLConstants {
             "    WHERE SUBS.API_PRODUCT_ID = PRODUCT.API_PRODUCT_ID " + 
             "  ) T " +
             "WHERE T.UUID  = ?";
-=======
-            " SELECT " +
-                    "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
-                    "   API.API_PROVIDER AS API_PROVIDER, " +
-                    "   API.API_NAME AS API_NAME, " +
-                    "   API.API_VERSION AS API_VERSION, " +
-                    "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
-                    "   SUBS.TIER_ID AS TIER_ID, " +
-                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-                    "   SUBS.UUID AS UUID " +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION SUBS," +
-                    "   AM_API API " +
-                    " WHERE " +
-                    "   API.API_ID = SUBS.API_ID " +
-                    "   AND SUBSCRIPTION_ID = ?";
-
-    public static final String GET_SUBSCRIPTION_BY_UUID_SQL =
-            " SELECT " +
-                    "   SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
-                    "   API.API_PROVIDER AS API_PROVIDER, " +
-                    "   API.API_NAME AS API_NAME, " +
-                    "   API.API_VERSION AS API_VERSION, " +
-                    "   SUBS.APPLICATION_ID AS APPLICATION_ID, " +
-                    "   SUBS.TIER_ID AS TIER_ID, " +
-                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-                    "   SUBS.CREATED_TIME AS CREATED_TIME, " +
-                    "   SUBS.UPDATED_TIME AS UPDATED_TIME, " +
-                    "   SUBS.UUID AS UUID " +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION SUBS," +
-                    "   AM_API API " +
-                    " WHERE " +
-                    "   API.API_ID = SUBS.API_ID " +
-                    "   AND UUID = ?";
->>>>>>> 6a2cb72309... added local part of UI
 
     public static final String GET_TENANT_SUBSCRIBER_SQL =
             " SELECT " +
@@ -925,7 +785,6 @@ public class SQLConstants {
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
-<<<<<<< HEAD
             "'" + APIType.API.toString() + "' AS TYPE, " +
             "   SUBS.UUID AS SUB_UUID, " +
             "   SUBS.SUBSCRIPTION_ID, " +
@@ -951,30 +810,6 @@ public class SQLConstants {
             "   AND API.API_ID=SUBS.API_ID" +
             "   AND APP.NAME= ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
-=======
-                    "   SUBS.SUBSCRIPTION_ID, " +
-                    "   API.API_PROVIDER AS API_PROVIDER, " +
-                    "   API.API_NAME AS API_NAME, " +
-                    "   API.API_VERSION AS API_VERSION, " +
-                    "   SUBS.TIER_ID AS TIER_ID, " +
-                    "   APP.APPLICATION_ID AS APP_ID, " +
-                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-                    "   APP.NAME AS APP_NAME, " +
-                    "   APP.CALLBACK_URL AS CALLBACK_URL " +
-                    " FROM " +
-                    "   AM_SUBSCRIBER SUB," +
-                    "   AM_APPLICATION APP, " +
-                    "   AM_SUBSCRIPTION SUBS, " +
-                    "   AM_API API " +
-                    " WHERE " +
-                    "   SUB.TENANT_ID = ? " +
-                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
-                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
-                    "   AND API.API_ID=SUBS.API_ID" +
-                    "   AND APP.NAME= ? " +
-                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
->>>>>>> 6a2cb72309... added local part of UI
 
     public static final String GET_PAGINATED_SUBSCRIBED_API_PRODUCTS_SQL =
             " SELECT " +
@@ -1031,7 +866,6 @@ public class SQLConstants {
 
     public static final String GET_SUBSCRIBED_APIS_OF_SUBSCRIBER_SQL =
             " SELECT " +
-<<<<<<< HEAD
             "'" + APIType.API.toString() + "' AS TYPE, " +
             "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
@@ -1087,33 +921,6 @@ public class SQLConstants {
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
             "   AND API_PRODUCT.API_PRODUCT_ID=SUBS.API_PRODUCT_ID " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
-=======
-                    "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
-                    "   API.API_PROVIDER AS API_PROVIDER, " +
-                    "   API.API_NAME AS API_NAME, " +
-                    "   API.API_VERSION AS API_VERSION, " +
-                    "   SUBS.TIER_ID AS TIER_ID, " +
-                    "   APP.APPLICATION_ID AS APP_ID, " +
-                    "   SUBS.SUB_STATUS AS SUB_STATUS, " +
-                    "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-                    "   APP.NAME AS APP_NAME, " +
-                    "   APP.TOKEN_TYPE AS APP_TOKEN_TYPE, " +
-                    "   APP.CALLBACK_URL AS CALLBACK_URL, " +
-                    "   SUBS.UUID AS SUB_UUID, " +
-                    "   APP.UUID AS APP_UUID, " +
-                    "   APP.CREATED_BY AS OWNER" +
-                    " FROM " +
-                    "   AM_SUBSCRIBER SUB," +
-                    "   AM_APPLICATION APP, " +
-                    "   AM_SUBSCRIPTION SUBS, " +
-                    "   AM_API API " +
-                    " WHERE " +
-                    "   SUB.TENANT_ID = ? " +
-                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
-                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
-                    "   AND API.API_ID=SUBS.API_ID" +
-                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
->>>>>>> 6a2cb72309... added local part of UI
 
     public static final String GET_API_KEY_BY_SUBSCRIPTION_SQL =
             " SELECT " +
@@ -2510,7 +2317,6 @@ public class SQLConstants {
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL =
             "SELECT " +
-<<<<<<< HEAD
             "   AW.WF_EXTERNAL_REFERENCE " +
             " FROM" +
             "   AM_WORKFLOWS AW, " +
@@ -2531,17 +2337,6 @@ public class SQLConstants {
             "   AND ASUB.APPLICATION_ID=? " +
             "   AND AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID " +
             "   AND AW.WF_TYPE=?";
-=======
-                    "   AW.WF_EXTERNAL_REFERENCE " +
-                    " FROM" +
-                    "   AM_WORKFLOWS AW, " +
-                    "   AM_SUBSCRIPTION ASUB " +
-                    " WHERE" +
-                    "   ASUB.API_ID=? " +
-                    "   AND ASUB.APPLICATION_ID=? " +
-                    "   AND AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID " +
-                    "   AND AW.WF_TYPE=?";
->>>>>>> 6a2cb72309... added local part of UI
 
     public static final String GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_SQL =
             "SELECT" +
@@ -3012,14 +2807,9 @@ public class SQLConstants {
     public static final String INSERT_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIB_SQL =
             "INSERT INTO AM_POLICY_SUBSCRIPTION (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, QUOTA_TYPE, QUOTA, \n" +
                     " QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, UUID,  RATE_LIMIT_COUNT, \n" +
-<<<<<<< HEAD
                     " RATE_LIMIT_TIME_UNIT, STOP_ON_QUOTA_REACH, BILLING_PLAN, CUSTOM_ATTRIBUTES, MONETIZATION_PLAN, \n" +
                     " FIXED_RATE, BILLING_CYCLE, PRICE_PER_REQUEST, CURRENCY) \n" +
                     " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-=======
-                    " RATE_LIMIT_TIME_UNIT,STOP_ON_QUOTA_REACH,BILLING_PLAN,CUSTOM_ATTRIBUTES) \n" +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
->>>>>>> 6a2cb72309... added local part of UI
 
 
     public static final String INSERT_GLOBAL_POLICY_SQL =
@@ -3224,7 +3014,6 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
-<<<<<<< HEAD
                     "BILLING_PLAN = ?, " +
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
@@ -3232,10 +3021,6 @@ public class SQLConstants {
                     "PRICE_PER_REQUEST = ?, " +
                     "CURRENCY = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
-=======
-                    "BILLING_PLAN = ? " +
-                    "WHERE NAME = ? AND TENANT_ID = ?";
->>>>>>> 6a2cb72309... added local part of UI
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_SQL =
             "UPDATE AM_POLICY_SUBSCRIPTION " +
@@ -3250,7 +3035,6 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
-<<<<<<< HEAD
                     "BILLING_PLAN = ?, "+
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
@@ -3259,11 +3043,6 @@ public class SQLConstants {
                     "PRICE_PER_REQUEST = ?, " +
                     "CURRENCY = ? " +
             "WHERE NAME = ? AND TENANT_ID = ?";
-=======
-                    "BILLING_PLAN = ?, " +
-                    " CUSTOM_ATTRIBUTES = ? " +
-                    "WHERE NAME = ? AND TENANT_ID = ?";
->>>>>>> 6a2cb72309... added local part of UI
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_BY_UUID_SQL =
             "UPDATE AM_POLICY_SUBSCRIPTION " +
@@ -3278,16 +3057,12 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
-<<<<<<< HEAD
                     "BILLING_PLAN = ?, "+
                     "MONETIZATION_PLAN = ?," +
                     "FIXED_RATE = ?," +
                     "BILLING_CYCLE = ?," +
                     "PRICE_PER_REQUEST = ?, " +
                     "CURRENCY = ? " +
-=======
-                    "BILLING_PLAN = ? " +
->>>>>>> 6a2cb72309... added local part of UI
                     "WHERE UUID = ?";
 
     public static final String UPDATE_SUBSCRIPTION_POLICY_WITH_CUSTOM_ATTRIBUTES_BY_UUID_SQL =
@@ -3303,7 +3078,6 @@ public class SQLConstants {
                     "RATE_LIMIT_COUNT = ?," +
                     "RATE_LIMIT_TIME_UNIT = ?, " +
                     "STOP_ON_QUOTA_REACH = ?, " +
-<<<<<<< HEAD
                     "BILLING_PLAN = ?, "+
                     "CUSTOM_ATTRIBUTES = ?, "+
                     "MONETIZATION_PLAN = ?," +
@@ -3311,10 +3085,6 @@ public class SQLConstants {
                     "BILLING_CYCLE = ?," +
                     "PRICE_PER_REQUEST = ?, " +
                     "CURRENCY = ? " +
-=======
-                    "BILLING_PLAN = ?, " +
-                    "CUSTOM_ATTRIBUTES = ? " +
->>>>>>> 6a2cb72309... added local part of UI
                     "WHERE UUID = ?";
 
     public static final String UPDATE_GLOBAL_POLICY_SQL =
@@ -3396,7 +3166,6 @@ public class SQLConstants {
 
     public static final String UPDATE_LABEL_SQL = "UPDATE AM_LABELS SET NAME = ?, DESCRIPTION = ?  WHERE LABEL_ID = ?";
 
-<<<<<<< HEAD
     public static final String GET_PUBLISHED_PRODUCT_SQL = 
             "SELECT API_PRODUCT_ID,UUID,TENANT_DOMAIN,API_PRODUCT_PROVIDER,API_PRODUCT_NAME,VISIBILITY,"
             + " VISIBILE_ROLES, DESCRIPTION "
@@ -3477,11 +3246,6 @@ public class SQLConstants {
             + "AND PRO.API_PRODUCT_VERSION = ?";
 
     /** Throttle related constants**/
-=======
-    /**
-     * Throttle related constants
-     **/
->>>>>>> 6a2cb72309... added local part of UI
 
     public static class ThrottleSQLConstants {
 
@@ -3696,7 +3460,6 @@ public class SQLConstants {
                 "WHERE TENANT_ID=? AND REMOVED=?";
     }
 
-<<<<<<< HEAD
     /**
      * Static class to hold database queries related to AM_SYSTEM_APPS table
      */
@@ -3714,22 +3477,19 @@ public class SQLConstants {
                 "FROM AM_SYSTEM_APPS WHERE NAME = ?";
 
     public static class HoneyPotAPIDataConstants{
-=======
-    public static class HoneyPotAPIDataConstants {
+        public static final String GET_HONEYPOT_API_ALERTS = " SELECT " + " * " + "FROM " + " AM_BOT_DATA " +
+                "ORDER BY REQUEST_TIME DESC";
 
->>>>>>> 6a2cb72309... added local part of UI
-        public static final String GET_HONEYPOT_API_ALERTS = " SELECT " + " * " + "FROM " + " HoneyPotAPIData " +
-                "ORDER BY currentTime ASC";
+        public static final String DELETE_HONEYPOT_API_ALERT_SQL = "DELETE FROM AM_BOT_DATA WHERE MESSAGE_ID = ?";
 
-        public static final String DELETE_HONEYPOT_API_ALERT_SQL = "DELETE FROM HoneyPotAPIData WHERE messageID = ?";
-
-        public static final String ADD_ALERT_EMAIL_LIST =
-                " INSERT INTO HONEYPOT_EMAIL_LIST  (TENANT_DOMAIN, EMAIL_LIST) " +
-                        " VALUES(?, ?)";
+//        public static final String ADD_ALERT_EMAIL_LIST =
+//                " INSERT INTO HONEYPOT_EMAIL_LIST  (TENANT_DOMAIN, EMAIL_LIST) " +
+//                        " VALUES(?, ?)";
+        public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION_BOT (UUID, NOTIFICATION_TYPE, VALUE)" +
+                            " VALUES(?,?,?)";
 
         public static final String GET_SAVED_ALERT_EMAILS =
-
-                " SELECT EMAIL_LIST FROM HONEYPOT_EMAIL_LIST WHERE TENANT_DOMAIN= ? ";
+                " SELECT UUID, VALUE FROM AM_NOTIFICATION_BOT";
         public static final String GET_SAVED_ALERT_EMAIL_LISTID =
                 " SELECT " +
                         "  EMAIL_LIST_ID " +
@@ -3740,8 +3500,8 @@ public class SQLConstants {
         public static final String UPDATE_EMAIL_LIST_BY_TENANT_ID =
                 "UPDATE HONEYPOT_EMAIL_LIST SET EMAIL_LIST =?" + " WHERE TENANT_DOMAIN= ? ";
 
-        public static final String DELETE_EMAIL_LIST_BY_TENANT_ID =
-                "DELETE FROM HONEYPOT_EMAIL_LIST WHERE TENANT_DOMAIN= ?";
+        public static final String DELETE_EMAIL_BY_UUID =
+                "DELETE FROM AM_NOTIFICATION_BOT WHERE UUID= ?";
 
     }
 }

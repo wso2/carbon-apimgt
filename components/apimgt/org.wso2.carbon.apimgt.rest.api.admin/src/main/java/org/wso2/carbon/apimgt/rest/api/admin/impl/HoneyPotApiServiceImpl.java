@@ -19,9 +19,23 @@ import javax.ws.rs.core.Response;
 
 public class HoneyPotApiServiceImpl extends HoneyPotApiService {
     @Override
+    public Response honeyPotAddEmailPost(EmailDTO body) throws APIManagementException, SQLException {
+        APIAdminImpl apiAdminImpl = new APIAdminImpl();
+        apiAdminImpl.addHoneyPotAPiEmailAlertConfiguration(body.getEmail());
+        return Response.ok().build();
+    }
+
+    @Override
     public Response honeyPotDeleteAlertDataDelete(String messageID) throws APIManagementException, SQLException {
         APIAdminImpl apiAdminImpl = new APIAdminImpl();
         apiAdminImpl.deleteHoneyPotAlert(messageID);
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response honeyPotEmailDelete(String uuid) throws APIManagementException, SQLException {
+        APIAdminImpl apiAdminImpl = new APIAdminImpl();
+        apiAdminImpl.deleteHoneyPotAPIAlertEmailList(uuid);
         return Response.ok().build();
     }
 
@@ -34,19 +48,7 @@ public class HoneyPotApiServiceImpl extends HoneyPotApiService {
 
     @Override
     public Response honeyPotGetEmailListGet(String tenantDomain) throws APIManagementException {
-        String user = RestApiUtil.getLoggedInUsername();
-        tenantDomain = MultitenantUtils.getTenantDomain(user);
-        List<String> emailList = APIAdminImpl.retrieveSavedHoneyPotAPIAlertEmailList(tenantDomain);
+        List<HoneyPotAPIAlertData> emailList = APIAdminImpl.retrieveSavedHoneyPotAPIAlertEmailList();
         return Response.ok().entity(emailList).build();
-    }
-
-    @Override
-    public Response honeyPotUpdateEmailListPut(EmailListDTO body, String tenantDomain) throws APIManagementException,
-            SQLException {
-        String user = RestApiUtil.getLoggedInUsername();
-        tenantDomain = MultitenantUtils.getTenantDomain(user);
-        APIAdminImpl apiAdminImpl = new APIAdminImpl();
-        apiAdminImpl.addHoneyPotAPiEmailAlertConfiguration(StringUtils.join(body.getList(), ","), tenantDomain);
-        return Response.ok().build();
     }
 }

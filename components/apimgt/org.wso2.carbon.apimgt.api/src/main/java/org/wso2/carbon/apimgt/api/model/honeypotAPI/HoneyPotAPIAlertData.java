@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.api.model.honeypotAPI;
 
 import java.io.Serializable;
 
-public class HoneyPotAPIAlertData implements Serializable {
+public class HoneyPotAPIAlertData {
 
     private long currentTime;
     private String messageID;
@@ -11,7 +11,9 @@ public class HoneyPotAPIAlertData implements Serializable {
     private String messageBody;
     private String clientIp;
     private String tenantDomain;
-    private String emails;
+    private String email;
+    private String uuid;
+    private String notificationType;
 
     public HoneyPotAPIAlertData(){
 
@@ -72,18 +74,35 @@ public class HoneyPotAPIAlertData implements Serializable {
         this.tenantDomain = tenantDomain;
     }
 
-    public String getEmails(){
-        return emails;
+    public String getEmail(){
+
+        return email;
     }
 
-    public void setEmails(String emails){
-            this.emails = emails;
+    public void setEmail(String email){
+            this.email = email;
     }
 
-    @Override
-    public String toString() {
-        return "HoneyPotAPIAlertData [messageID=" + getMessageID() + ", apiMethod=" + getApiMethod()
-                + ", headerSet=" + getHeaderSet() + ", messageBody=" + getMessageBody() + ", clientIp="
-                + getClientIp() + "]";
+    public void setUuid(String uuid){
+        this.uuid = uuid;
     }
+
+    public String getUuid(){
+        return uuid;
+    }
+
+    public void setNotificationType(String notificationType){
+        this.notificationType = notificationType;
+    }
+
+    public String getNotificationType(){
+        return notificationType;
+    }
+
+//    @Override
+//    public String toString() {
+//        return "HoneyPotAPIAlertData [messageID=" + getMessageID() + ", apiMethod=" + getApiMethod()
+//                + ", headerSet=" + getHeaderSet() + ", messageBody=" + getMessageBody() + ", clientIp="
+//                + getClientIp() + "email=" + getEmail() +"]";
+//    }
 }

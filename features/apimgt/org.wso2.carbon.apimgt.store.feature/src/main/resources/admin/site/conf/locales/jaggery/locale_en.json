@@ -308,5 +308,7 @@
     "No Alert triggered" : "No Alert triggered",
     "HoneyPot API ALert List": "HoneyPot API ALert List",
     "Alert List": "Alert List",
-    "Email Alert configuring": "Email Alert configuring"
+    "Email Alert configuring": "Email Alert configuring",
+    "Notification": "Notification",
+    "Bot Detection": "Bot Detection"
 }

@@ -2362,39 +2362,66 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+#-----------------------------------------------------
+  # Delete email
+#-----------------------------------------------------
+  /honeyPot/email:
 
-  #-----------------------------------------------------
-  # Update existing email list- add or remove emails
-  #-----------------------------------------------------
-  /honeyPot/updateEmailList:
-
-    put:
+    delete:
       x-scope: apim:honey_api
-      x-wso2-curl: "curl -X PUT -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" \"https://localhost:9443/api/am/admin/v0.14/honeyPot/updateEmailList?tenantDomain=test\" -H \"accept: application/json\" -H \"Content-Type: application/json\" -d \"{ \"list\": [ \"abc@gmail,cde@gmail.com\" ]}\" -kv"
-      summary: Update Email list
+      x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v0.14/honeyPot/email?uuid=23a2a896-bd58-46ec-83c7-2f2b5cc09284 -H \"accept: application/json\""
+      summary: Delete an configured email.
       description: |
-        Here we can configure email as first time, as well as update the existing email list my adding more or removing
+        Delete an configured email from DB by pasing uuid.
       parameters:
-        - name: tenantDomain
+        - name: uuid
           in: query
           description: |
-            Pass the tenantDomain to get the email list and if not passed it will get from the logged user.
-          required: false
+            Pass the uuid to remove the email
+          required: true
           type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Email successfully deleted.
+        404:
+          description: |
+            Not Found.
+            Resource to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+#-----------------------------------------------------
+  # Add email
+#-----------------------------------------------------
+  /honeyPot/addEmail:
+
+    post:
+      x-scope: apim:honey_api
+      summary: Add an Email
+      description: |
+          Here we can use this to configure email
+      parameters:
         - in: body
           name: body
           description: |
-            Email list
+              A email
           required: true
           schema:
-            $ref: '#/definitions/EmailList'
+            $ref: '#/definitions/Email'
       responses:
         200:
           description: |
             OK.
             Email List updated.
           schema:
-            $ref: '#/definitions/EmailList'
+            $ref: '#/definitions/Email'
         400:
           description: |
             Bad Request.
@@ -2407,6 +2434,7 @@ paths:
             The resource to be updated does not exist.
           schema:
             $ref: '#/definitions/Error'
+
 ######################################################
 # The "Individual label" resource APIs
 ######################################################
@@ -2832,14 +2860,13 @@ definitions:
   #-----------------------------------------------------
   # The Email list
   #-----------------------------------------------------
-  EmailList:
-    title: Email List
+  Email:
+    title: Email
     properties:
-      list:
-        type: array
-        items:
-          type: string
-          example: "abc@.com,cde@.com"
+      email:
+        type: string
+        description: email value
+        example: "abc@.com"
 
 #-----------------------------------------------------
 # The Application Throttling Policy resource

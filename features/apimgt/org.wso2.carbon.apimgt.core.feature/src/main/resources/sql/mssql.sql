@@ -1765,14 +1765,14 @@ CREATE TABLE AM_SYSTEM_APPS (
     PRIMARY KEY (ID)
 
 -- HoneyPot API tables --
-CREATE TABLE IF NOT EXISTS HoneyPotAPIData (
-    currentTime BIGINT,
-    messageID varchar(255) NOT NULL,
-    apiMethod varchar (255),
-    headerSet varchar(255),
-    messageBody varchar(255),
-    clientIp varchar(255),
-    PRIMARY KEY(messageID)
+CREATE TABLE IF NOT EXISTS AM_BOT_DATA (
+    REQUEST_TIME BIGINT,
+    MESSAGE_ID VARCHAR(255),
+    HTTP_METHOD VARCHAR(255),
+    HEADERS BLOB,
+    MESSAGE_BODY BLOB,
+    CLIENT_IP VARCHAR(255),
+    PRIMARY KEY(MESSAGE_ID)
 );
 
 CREATE TABLE IF NOT EXISTS HONEYPOT_EMAIL_LIST (

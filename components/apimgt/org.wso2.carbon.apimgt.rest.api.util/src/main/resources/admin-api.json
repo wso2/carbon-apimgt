@@ -2394,27 +2394,53 @@
         }
       }
     },
-    "/honeyPot/updateEmailList": {
-      "put": {
+    "/honeyPot/email": {
+      "delete": {
         "x-scope": "apim:honey_api",
-        "x-wso2-curl": "curl -X PUT -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" \"https://localhost:9443/api/am/admin/v0.14/honeyPot/updateEmailList?tenantDomain=test\" -H \"accept: application/json\" -H \"Content-Type: application/json\" -d \"{ \"list\": [ \"abc@gmail,cde@gmail.com\" ]}\" -kv",
-        "summary": "Update Email list",
-        "description": "Here we can configure email as first time, as well as update the existing email list my adding more or removing\n",
+        "x-wso2-curl": "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v0.14/honeyPot/email?uuid=23a2a896-bd58-46ec-83c7-2f2b5cc09284 -H \"accept: application/json\"",
+        "summary": "Delete an configured email.",
+        "description": "Delete an configured email from DB by pasing uuid.\n",
         "parameters": [
           {
-            "name": "tenantDomain",
+            "name": "uuid",
             "in": "query",
-            "description": "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n",
-            "required": false,
+            "description": "Pass the uuid to remove the email\n",
+            "required": true,
             "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nEmail successfully deleted.\n"
           },
+          "404": {
+            "description": "Not Found.\nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/honeyPot/addEmail": {
+      "post": {
+        "x-scope": "apim:honey_api",
+        "summary": "Add an Email",
+        "description": "Here we can use this to configure email\n",
+        "parameters": [
           {
             "in": "body",
             "name": "body",
-            "description": "Email list\n",
+            "description": "A email\n",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/EmailList"
+              "$ref": "#/definitions/Email"
             }
           }
         ],
@@ -2422,7 +2448,7 @@
           "200": {
             "description": "OK.\nEmail List updated.\n",
             "schema": {
-              "$ref": "#/definitions/EmailList"
+              "$ref": "#/definitions/Email"
             }
           },
           "400": {
@@ -2824,15 +2850,13 @@
         }
       }
     },
-    "EmailList": {
-      "title": "Email List",
+    "Email": {
+      "title": "Email",
       "properties": {
-        "list": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "example": "abc@.com,cde@.com"
-          }
+        "email": {
+          "type": "string",
+          "description": "email value",
+          "example": "abc@.com"
         }
       }
     },
