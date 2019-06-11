@@ -207,9 +207,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
                         boolean isValid = validator.validateScope(accessTokenDO, resource);
                         if (!isValid) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Scope validation failed for " + validator);
-                            }
+                            log.debug(String.format("Scope validation failed for %s", validator.getValidatorName()));
                             apiKeyValidationInfoDTO.setAuthorized(false);
                             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
                             return false;
