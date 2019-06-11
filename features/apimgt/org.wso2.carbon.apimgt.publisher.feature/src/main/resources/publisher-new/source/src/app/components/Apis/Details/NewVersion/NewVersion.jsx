@@ -32,7 +32,8 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
-import { FormHelperText, FormLabel } from '@material-ui/core';
+import FormLabel from '@material-ui/core/FormLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import Alert from 'AppComponents/Shared/Alert';
 
 import ApiContext from '../components/ApiContext';
@@ -82,8 +83,17 @@ const styles = theme => ({
     },
 });
 
-
+/**
+ * React component to create a new version of an API
+ * @class CreateNewVersion
+ * @extends {Component}
+ */
 class CreateNewVersion extends React.Component {
+    /**
+     * Creates an instance of CreateNewVersion.
+     * @param {any} props @inheritDoc
+     * @memberof CreateNewVersion
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -107,6 +117,13 @@ class CreateNewVersion extends React.Component {
         });
     };
 
+    /**
+     * Handles the submit action for new version creation
+     *
+     * @param {API} api current API
+     * @param {string} newVersion new version to create
+     * @param {string} isDefaultVersion specifies whether the new API should be marked as default version ('yes' | 'no')
+     */
     handleSubmit(api, newVersion, isDefaultVersion) {
         if (!newVersion) {
             this.setState({ valid: { version: { empty: true } } });
@@ -130,6 +147,11 @@ class CreateNewVersion extends React.Component {
             });
     }
 
+    /**
+     * Renders the CreateNewVersion component.
+     * Once new version is created, redirects to the overview page of the new API.
+     * @returns {*} CreateNewVersion component
+     */
     render() {
         const { classes } = this.props;
         const {

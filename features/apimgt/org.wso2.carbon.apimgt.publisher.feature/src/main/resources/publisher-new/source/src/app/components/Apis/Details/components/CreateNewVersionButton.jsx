@@ -72,7 +72,7 @@ const styles = theme => ({
  *
  * Function to create a 'CreateNewVersion' button
  *
- * @param props props
+ * @param {any} props props
  * @returns {*} React CreateNewVersion function component
  * @constructor
  */
