@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <artifactType type="application/vnd.wso2-product+xml" shortName="product" singularLabel="Product" pluralLabel="Products" hasNamespace="false" iconSet="7">
-	<storagePath>/apimgt/applicationdata/provider/@{overview_provider}/products/@{overview_name}/@{overview_version}/product</storagePath>
+	<storagePath>/apimgt/applicationdata/products/@{overview_provider}/@{overview_name}/@{overview_version}/product</storagePath>
 	<nameAttribute>overview_name</nameAttribute>
 	<ui>
         <list>
