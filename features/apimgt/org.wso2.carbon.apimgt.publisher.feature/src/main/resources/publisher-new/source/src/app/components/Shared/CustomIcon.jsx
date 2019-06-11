@@ -1,16 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 /**
- * Render the APIs Listing page, This is the Default Publisher Landing page as well
  *
  * @class CustomIcon
  * @extends {React.Component}
  */
 export default function CustomIcon(props) {
-    const strokeColor = props.strokeColor !== undefined ? props.strokeColor : '#8b8e95';
-    const width = props.width !== undefined ? props.width : 32;
-    const height = props.height !== undefined ? props.height : 32;
-    const icon = props.icon !== undefined ? props.icon : 'api';
-    const className = props.className !== undefined ? props.className : '';
+    const {
+        className, icon, height, width, strokeColor,
+    } = props;
     if (icon === 'overview') {
         return (
             <svg
@@ -158,4 +156,21 @@ export default function CustomIcon(props) {
             </svg>
         );
     }
+    return null;
 }
+
+CustomIcon.defaultProps = {
+    strokeColor: '#8b8e95',
+    width: 32,
+    height: 32,
+    icon: 'api',
+    className: '',
+};
+
+CustomIcon.propTypes = {
+    strokeColor: PropTypes.string,
+    width: PropTypes.number,
+    height: PropTypes.number,
+    icon: PropTypes.oneOf(['overview', 'api']),
+    className: '',
+};

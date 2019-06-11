@@ -17,10 +17,12 @@
  */
 
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Redirecting from './Redirecting';
 
-const Progress = (props) => {
-    return <CircularProgress {...props} style={{ margin: 'auto', display: 'block' }} />;
-};
-
-export default Progress;
+describe('<Redirecting/> component tests', () => {
+    test('should render the redirect component with message', () => {
+        const testMessage = "Kasun's test message";
+        const wrapper = mount(<Redirecting message={testMessage} />);
+        expect(wrapper.text().includes(testMessage)).toBeTruthy();
+    });
+});

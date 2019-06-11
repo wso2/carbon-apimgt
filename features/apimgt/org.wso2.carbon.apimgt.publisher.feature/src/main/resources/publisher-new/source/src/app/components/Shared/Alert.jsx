@@ -35,7 +35,7 @@ class Alert {
      * @memberof Alert
      */
     constructor(message, type, duration, onClose) {
-        this.defaultTop = 1;
+        this.defaultTop = Alert.defaultTop;
         this.key = Alert.count++;
         this.type = type;
         this.message = message;
@@ -96,7 +96,10 @@ class Alert {
                     {
                         transitionName: 'move-down',
                         style: {
-                            zIndex: '2000', bottom: 0, marginLeft: '2%', position: 'fixed',
+                            zIndex: '2000',
+                            bottom: 0,
+                            marginLeft: '2%',
+                            position: 'fixed',
                         },
                     },
                     (instance) => {
@@ -115,12 +118,13 @@ class Alert {
      * @param {Object} options i:e {top: '10px', duration: 30}
      */
     static config(options) {
-        if (options.top !== undefined) {
-            Alert.defaultTop = options.top;
+        const { top, duration } = options;
+        if (top !== undefined) {
+            Alert.defaultTop = top;
             Alert.messageInstance = null; // delete messageInstance for new defaultTop
         }
-        if (options.duration !== undefined) {
-            Alert.defaultDuration = options.duration;
+        if (duration !== undefined) {
+            Alert.defaultDuration = duration;
         }
     }
 }
@@ -132,32 +136,36 @@ Alert.count = 1;
 Alert.defaultDuration = 5;
 /* In seconds */
 Alert.defaultTop = 0;
-
+Alert.CONSTS = {
+    INFO: 'info', SUCCESS: 'success', ERROR: 'error', WARN: 'warning', LOADING: 'loading',
+};
+Object.freeze(Alert.CONSTS);
 export default {
     info: (message, duration, onClose) => {
-        const msg = new Alert(message, 'info', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.INFO, duration, onClose);
         msg.show();
         return msg;
     },
     success: (message, duration, onClose) => {
-        const msg = new Alert(message, 'success', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.SUCCESS, duration, onClose);
         msg.show();
         return msg;
     },
     error: (message, duration, onClose) => {
-        const msg = new Alert(message, 'error', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.ERROR, duration, onClose);
         msg.show();
         return msg;
     },
     warning: (message, duration, onClose) => {
-        const msg = new Alert(message, 'warning', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.WARN, duration, onClose);
         msg.show();
         return msg;
     },
     loading: (message, duration, onClose) => {
-        const msg = new Alert(message, 'loading', duration, onClose);
+        const msg = new Alert(message, Alert.CONSTS.LOADING, duration, onClose);
         msg.show();
         return msg;
     },
     configs: Alert.config,
+    CONSTS: Alert.CONSTS,
 };
