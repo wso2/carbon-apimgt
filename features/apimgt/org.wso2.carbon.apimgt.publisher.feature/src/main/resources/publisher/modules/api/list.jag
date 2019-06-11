@@ -74,6 +74,7 @@ var getAPI = function (api) {
             gatewayLabels:result[57],
             apisecurity_oauth2:result[58],
             apisecurity_mutualssl:result[59]
+            enableSchemaValidation:result[60]
         };
         return {
             error:false,

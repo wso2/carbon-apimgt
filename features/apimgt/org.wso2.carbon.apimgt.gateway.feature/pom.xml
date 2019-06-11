@@ -115,6 +115,14 @@
             <groupId>org.wso2.orbit.re2j</groupId>
             <artifactId>re2j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -200,6 +208,8 @@
                                 <bundleDef>org.apache.commons:commons-lang3:${apache.commons.lang3.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.re2j:re2j:${re2j.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</importBundleDef>

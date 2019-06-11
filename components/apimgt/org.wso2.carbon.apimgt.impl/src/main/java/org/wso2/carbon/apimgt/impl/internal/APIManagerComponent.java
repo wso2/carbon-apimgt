@@ -136,6 +136,7 @@ public class APIManagerComponent {
     public static final String AUTHORIZATION_HEADER =  "Authorization Header";
     public static final String LABELS =  "Labels";
     public static final String API_SECURITY = "API Security";
+    public static final String ENABLE_SCHEMA_VALIDATION = "enable Schema Validation";
 
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
@@ -378,12 +379,12 @@ public class APIManagerComponent {
             try {
                 if (systemRegistry.resourceExists(resourcePath)) {
                     // Adding Authorization header to the template if not exist
-                    if (API_RXT.equals(rxtPath )) {
+                    if (API_RXT.equals(rxtPath)) {
                         //get Registry resource
                         Resource resource = systemRegistry.get(resourcePath);
-                        if(resource.getContent() != null) {
+                        if (resource.getContent() != null) {
                             // check whether the resource contains a field called authorization header.
-                            if(!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
                                     contains(AUTHORIZATION_HEADER)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
@@ -395,6 +396,12 @@ public class APIManagerComponent {
                             // check whether the resource contains a section called 'API Security' and add it
                             if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
                                     contains(API_SECURITY)) {
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
+                            }
+                            // check whether the resource contains a section called 'enable Schema Validation' and
+                            // add it
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                                    contains(ENABLE_SCHEMA_VALIDATION)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                         }

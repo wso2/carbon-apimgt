@@ -77,6 +77,7 @@ public class APIMgtGatewayConstants {
      * Constants for handling threat protection exceptions.
      */
     public static final String HTTP_SC_CODE = "400";
+    public static final String HTTP_SC = "HTTP_SC";
     public static final String HTTP_HEADER_THREAT_MSG = "Threat detected in HTTP Headers";
     public static final String QPARAM_THREAT_MSG = "Threat detected in Query Parameters";
     public static final String PAYLOAD_THREAT_MSG = "Threat detected in Payload";
@@ -136,5 +137,32 @@ public class APIMgtGatewayConstants {
     public static final String CORS_REQUEST_HANDLER_ERROR = "Error in CORS_Request Handler";
     public static final String API_KEY_VALIDATOR_ERROR = "Error while accessing backend services for API key validation";
     public static final String GOOGLE_ANALYTICS_ERROR = "Error in Google Analytics Handler";
+
+    /**
+     * Constants for swagger schema validator
+     */
+    public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
+    public static final String LOCAL_ENTRY = "localentry";
+    public static final String ELECTED_REQUEST_METHOD = "api.ut.HTTP_METHOD";
+    public static final String SWAGGER_PATH = "paths";
+    public static final String RESPONSE = "responses";
+    public static final String SUCCESS_RESPONSE = "200";
+    public static final String SCHEMA = "schema";
+    public static final String DEFINITION = "definition";
+    public static final String SCHEMA_REFERENCE = "$ref";
+    public static final char LAST_INDEX = '/';
+    public static final String DEFINITIONS = "definitions";
+    public static final String KEY_WORD_ALLOF = "allOf";
+    public static final String KEY_WORD_ONEOF = "oneOf";
+    public static final String KEY_WORD_ANYOF = "anyOf";
+    public static final String REST_URL = "REST_URL_POSTFIX";
+    public static final String PARAMETERS = "parameters";
+    public static final String REQUEST_BODY = "requestBody";
+    public static final String UTF = "UTF-8";
+    public static final String SCHEMA_HANDLER = "_json_schema_validator_handler_";
+    public static final String API_SWAGGER_SCHEMA = "swaggerSchemaCache";
+    public static final String COMPONENTS = "components";
+    public static final String SCHEMAS = "schemas";
+    public static final String CONTENT = "content";
 }
 
