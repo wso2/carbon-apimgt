@@ -338,29 +338,14 @@ public class APIGatewayManager {
                     if (debugEnabled) {
                         startTime = System.currentTimeMillis();
                     }
-                    // If the Gateway type is 'production' and the production url
-                    // has been removed
-                    // Or if the Gateway type is 'sandbox' and the sandbox url has
-                    // been removed.
-                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) &&
-                            !APIUtil.isProductionEndpointsExists(apiProduct.getEndpointConfig())) ||
-                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) &&
-                                    !APIUtil.isSandboxEndpointsExists(apiProduct.getEndpointConfig()))) {
-                        if (debugEnabled) {
-                            log.debug("Removing API " + apiProduct.getName() +
-                                    " from Environment " + environment.getName() +
-                                    " since its relevant URL has been removed.");
-                        }
-                        client.deleteApi(tenantDomain, id);
-                    } else {
-                        if (debugEnabled) {
-                            log.debug("API exists, updating existing API " + id.getApiName() +
-                                    " in environment " + environment.getName());
-                        }
 
-                        //Update the API
-                        client.updateApi(builder, tenantDomain, id);
+                    if (debugEnabled) {
+                        log.debug("API exists, updating existing API " + id.getApiName() +
+                                " in environment " + environment.getName());
                     }
+
+                    //Update the API
+                    client.updateApi(builder, tenantDomain, id);
 
                     if (debugEnabled) {
                         long endTime = System.currentTimeMillis();
@@ -375,24 +360,14 @@ public class APIGatewayManager {
                     if (debugEnabled) {
                         startTime = System.currentTimeMillis();
                     }
-                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) &&
-                            !APIUtil.isProductionEndpointsExists(apiProduct.getEndpointConfig())) ||
-                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) &&
-                                    !APIUtil.isSandboxEndpointsExists(apiProduct.getEndpointConfig()))) {
 
-                        if (debugEnabled) {
-                            log.debug("Not adding API to environment " + environment.getName() +
-                                    " since its endpoint URL " + "cannot be found");
-                        }
-                    } else {
-                        if (debugEnabled) {
-                            log.debug("API does not exist, adding new API " + id.getApiName() +
-                                    " in environment " + environment.getName());
-                        }
-
-                        //Add the API
-                        client.addApi(builder, tenantDomain, id);
+                    if (debugEnabled) {
+                        log.debug("API does not exist, adding new API " + id.getApiName() +
+                                " in environment " + environment.getName());
                     }
+
+                    //Add the API
+                    client.addApi(builder, tenantDomain, id);
 
                     if (debugEnabled) {
                         long endTime = System.currentTimeMillis();
