@@ -101,7 +101,8 @@ const styles = theme => ({
         padding: '5px 12px',
         width: 350,
         transition: theme.transitions.create(['border-color', 'box-shadow']),
-        fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
+        fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial',
+            'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
         '&:focus': {
             borderColor: '#80bdff',
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
@@ -184,34 +185,11 @@ class InfoBar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            api: null,
-            applications: null,
-            policies: null,
-            dropDownApplications: null,
-            dropDownPolicies: null,
             notFound: false,
-            tabValue: 'Social Sites',
-            comment: '',
-            commentList: null,
-            prodUrlCopied: false,
-            sandboxUrlCopied: false,
             showOverview: true,
         };
-        this.applicationId = this.props.applicationId;
+        this.toggleOverview = this.toggleOverview.bind(this);
     }
-
-    /**
-     *
-     *
-     * @memberof InfoBar
-     */
-    toggleOverview = (todo) => {
-        if (typeof todo === 'boolean') {
-            this.setState({ showOverview: todo });
-        } else {
-            this.setState({ showOverview: !this.state.showOverview });
-        }
-    };
 
     /**
      *
@@ -220,12 +198,14 @@ class InfoBar extends React.Component {
      */
     componentDidMount() {
         const client = new API();
+        const { applicationId } = this.props;
         // Get application
-        const promised_application = client.getApplication(this.applicationId);
-        promised_application
+        const promisedApplication = client.getApplication(applicationId);
+
+        promisedApplication
             .then((response) => {
-                const promised_tier = client.getTierByName(response.obj.throttlingTier, 'application');
-                return Promise.all([response, promised_tier]);
+                const promisedPolicy = client.getTierByName(response.obj.throttlingPolicy, 'application');
+                return Promise.all([response, promisedPolicy]);
             })
             .then((response) => {
                 const [application, tier] = response.map(data => data.obj);
@@ -233,13 +213,26 @@ class InfoBar extends React.Component {
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    console.error(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
             });
+    }
+
+    /**
+     *
+     * Toggles the showOverview state
+     * @memberof InfoBar
+     */
+    toggleOverview(todo) {
+        if (typeof todo === 'boolean') {
+            this.setState({ showOverview: todo });
+        } else {
+            this.setState({ showOverview: !this.state.showOverview });
+        }
     }
 
     /**
@@ -249,14 +242,19 @@ class InfoBar extends React.Component {
      * @memberof InfoBar
      */
     render() {
-        const { classes, theme } = this.props;
-        const application = this.state.application;
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
+        const { classes, theme, resourceNotFountMessage } = this.props;
+        const {
+            application, tierDescription, showOverview, notFound,
+        } = this.state;
+
+        if (notFound) {
+            return <ResourceNotFound message={resourceNotFountMessage} />;
         }
+
         if (!application) {
             return <Loading />;
         }
+
         return (
             <div className={classes.infoBarMain}>
                 <div className={classes.root}>
@@ -273,25 +271,25 @@ class InfoBar extends React.Component {
                     <div style={{ marginLeft: theme.spacing.unit }}>
                         <Typography variant='display1'>{application.name}</Typography>
                         <Typography variant='caption' gutterBottom align='left'>
-                            N Subscriptions
+                            { application.subscriptionCount } Subscriptions
                         </Typography>
                     </div>
                 </div>
 
-                {this.state.showOverview && (
-                    <Collapse in={this.state.showOverview} timeout='auto' unmountOnExit>
+                {showOverview && (
+                    <Collapse in={showOverview} timeout='auto' unmountOnExit>
                         <div className={classes.infoContent}>
                             <div className={classes.contentWrapper}>
                                 <div className={classes.topBar}>
                                     <div className={classes.infoItem}>
                                         <Typography variant='subheading' gutterBottom>
-                                            {application.throttlingTier}
+                                            {application.throttlingPolicy}
                                             {' '}
                                             <Typography variant='caption'>
-(
-                                                {this.state.tierDescription}
+                                                (
+                                                {tierDescription}
                                                 {' '}
-)
+                                                )
                                             </Typography>
                                         </Typography>
                                         <Typography variant='caption' gutterBottom align='left'>
@@ -299,28 +297,30 @@ class InfoBar extends React.Component {
                                         </Typography>
                                     </div>
                                     <div className={classes.infoItem}>
-                                        {application.lifeCycleStatus === 'APPROVED' ? (
+                                        {application.status === 'APPROVED' ? (
                                             <CheckCircle />
                                         ) : (
                                             <Typography variant='subheading' gutterBottom>
-                                                {this.state.lifeCycleStatus}
+                                                {application.status}
                                             </Typography>
                                         )}
                                         <Typography variant='caption' gutterBottom align='left'>
-                                            lifeCycleStatus
+                                            Lifecycle Status
                                         </Typography>
                                     </div>
                                 </div>
-                                <Typography>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.</Typography>
+                                <Typography>{application.description}</Typography>
                             </div>
                         </div>
                     </Collapse>
                 )}
                 <div className={classes.infoContentBottom}>
-                    <div className={classes.contentWrapper} onClick={this.toggleOverview}>
+                    <div className={classes.contentWrapper} onClick={() => this.toggleOverview()}>
                         <div className={classes.buttonView}>
-                            {this.state.showOverview ? <Typography className={classes.buttonOverviewText}>LESS</Typography> : <Typography className={classes.buttonOverviewText}>MORE</Typography>}
-                            {this.state.showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
+                            {showOverview ?
+                                <Typography className={classes.buttonOverviewText}>LESS</Typography> :
+                                <Typography className={classes.buttonOverviewText}>MORE</Typography>}
+                            {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
                         </div>
                     </div>
                 </div>
