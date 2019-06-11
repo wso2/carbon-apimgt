@@ -1323,14 +1323,13 @@ public class APIMappingUtil {
             productAPI.setApiId(apiProductResource.getApiId());
             productAPI.setName(apiProductResource.getApiName());
             List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
-            List<URITemplate> templates = apiProductResource.getResources();
+            URITemplate template = apiProductResource.getUriTemplate();
 
-            for (URITemplate template : templates) {
-                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-                operation.setHttpVerb(template.getHTTPVerb());
-                operation.setUritemplate(template.getResourceURI());
-                operations.add(operation);
-            }
+            ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
+            operation.setHttpVerb(template.getHTTPVerb());
+            operation.setUritemplate(template.getResourceURI());
+            operations.add(operation);
+
             productAPI.setOperations(operations);
             apis.add(productAPI);  
         }
@@ -1473,7 +1472,7 @@ public class APIMappingUtil {
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getHttpVerb());
                 template.setResourceURI(resourceItem.getUritemplate());
-                resource.setResource(template);
+                resource.setUriTemplate(template);
             }
             productResources.add(resource);
         }

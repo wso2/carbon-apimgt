@@ -29,6 +29,7 @@ public class APIProduct {
     private APIProductIdentifier id;
     private String uuid;
     private int productId;
+    private String context;
     private String description;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
     private String visibility;
@@ -42,8 +43,11 @@ public class APIProduct {
     private String tenantDomain;
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
-    private Set<String> environments;
     private JSONObject additionalProperties = new JSONObject();
+    private Set<String> environments;
+    private String transports;
+    private String responseCache;
+    private int cacheTimeout;
 
     public APIProduct(){}
 
@@ -149,12 +153,12 @@ public class APIProduct {
         this.definition = definition;
     }
 
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments;
-    }
-
     public Set<String> getEnvironments() {
         return environments;
+    }
+
+    public void setEnvironments(Set<String> environments) {
+        this.environments = environments;
     }
 
     /**
@@ -194,7 +198,50 @@ public class APIProduct {
     public String getProperty(String key) {
         return additionalProperties.get(key).toString();
     }
-    
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    public String getTransports() {
+        return transports;
+    }
+
+    public String getResponseCache() {
+        return responseCache;
+    }
+
+    public void setResponseCache(String responseCache) {
+        this.responseCache = responseCache;
+    }
+
+    public int getCacheTimeout() {
+        return cacheTimeout;
+    }
+
+    public void setCacheTimeout(int cacheTimeout) {
+        this.cacheTimeout = cacheTimeout;
+    }
+
+    public String getProductionMaxTps() {
+        return productionMaxTps;
+    }
+
+    public void setProductionMaxTps(String productionMaxTps) {
+        this.productionMaxTps = productionMaxTps;
+    }
+
+    public String getSandboxMaxTps() {
+        return sandboxMaxTps;
+    }
+
+    public void setSandboxMaxTps(String sandboxMaxTps) {
+        this.sandboxMaxTps = sandboxMaxTps;
+    }
 
     @Override
     public String toString() {

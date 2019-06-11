@@ -18,15 +18,12 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class APIProductResource {
 
     private String apiName;
     private String apiId;
     private APIIdentifier apiIdentifier;
-    private List<URITemplate> resources = new ArrayList<>();
+    private URITemplate uriTemplate;
 
     public String getApiName() {
         return apiName;
@@ -44,18 +41,6 @@ public class APIProductResource {
         this.apiId = apiId;
     }
 
-    public List<URITemplate> getResources() {
-        return resources;
-    }
-
-    public void setResources(List<URITemplate> resources) {
-        this.resources = resources;
-    }
-
-    public void setResource(URITemplate resource) {
-        this.resources.add(resource);
-    }
-
     public void setApiIdentifier(APIIdentifier apiIdentifier) {
         this.apiIdentifier = apiIdentifier;
     }
@@ -66,12 +51,16 @@ public class APIProductResource {
 
     @Override
     public String toString() {
-        String resources = "";
-        for (URITemplate uriTemplate : this.resources) {
-            resources += uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI() + " " ;   
-        }
+        String resources = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI() + " " ;
         return "APIProductResource [apiName=" + apiName + ", apiId=" + apiId + ", apiIdentifier=" + apiIdentifier
                 + ", resources=" + resources + "]";
     }
-    
+
+    public URITemplate getUriTemplate() {
+        return uriTemplate;
+    }
+
+    public void setUriTemplate(URITemplate uriTemplate) {
+        this.uriTemplate = uriTemplate;
+    }
 }
