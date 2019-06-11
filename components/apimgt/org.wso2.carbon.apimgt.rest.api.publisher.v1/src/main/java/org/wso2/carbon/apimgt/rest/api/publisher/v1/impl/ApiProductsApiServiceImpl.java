@@ -140,13 +140,14 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch,
+    @Override
+    public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch,
             MessageContext messageContext) {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIProduct retrievedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            APIProduct retrievedProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
@@ -183,11 +184,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
             //We do not allow to modify provider,name,version  and uuid. Set the origial value
-            product.setID(retrievedProduct.getId());
+            APIProductIdentifier productIdentifier = retrievedProduct.getId();
+            product.setID(productIdentifier);
             product.setUuid(apiProductId);
 
             apiProvider.updateAPIProduct(product, username);
-            APIProduct updatedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
             return Response.ok().entity(updatedProductDTO).build();
         } catch (APIManagementException e) {

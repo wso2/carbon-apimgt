@@ -1595,10 +1595,10 @@ public final class APIUtil {
      * @return APIProduct path
      */
     public static String getAPIProductPath(APIProductIdentifier identifier) {
-        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                + RegistryConstants.PATH_SEPARATOR + APIConstants.API_PRODUCT_RESOURCE_COLLECTION
-                + RegistryConstants.PATH_SEPARATOR + identifier.getName() + RegistryConstants.PATH_SEPARATOR
-                + identifier.getVersion() + APIConstants.API_PRODUCT_RESOURCE_NAME;
+        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
+                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + APIConstants.API_PRODUCT_RESOURCE_NAME;
     }
 
     /**
@@ -1640,7 +1640,8 @@ public final class APIUtil {
      * @return API Product provider path
      */
     public static String getAPIProductProviderPath(APIProductIdentifier identifier) {
-        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
+        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
     }
 
     /**
@@ -8717,6 +8718,8 @@ public final class APIUtil {
             apiProduct.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
             apiProduct.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            apiProduct.setEnvironments(extractEnvironmentsForAPI(environments));
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
