@@ -462,9 +462,6 @@
 										</div>
 										<% } %>
 										</div>
-										 <div class="message message-info" id="openAPISpec3Warning" style="display: none">
-                                            <p><%=i18n.localize("Client side SDK generation feature is currently not available for APIs in OpenAPI 3.0 specification")%></p>
-		                                </div>
 										<hr/>
 										<%if(api!=null){%>
 											<input type = "hidden" name = "bizOwner" value = "<%=encode.forHtmlAttribute(api.bizOwner)%>" />

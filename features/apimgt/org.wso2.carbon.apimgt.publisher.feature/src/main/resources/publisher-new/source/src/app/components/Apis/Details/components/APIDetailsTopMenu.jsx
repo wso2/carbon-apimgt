@@ -9,6 +9,7 @@ import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import DeleteApiButton from './DeleteApiButton';
+import CreateNewVersionButton from './CreateNewVersionButton';
 
 const styles = theme => ({
     root: {
@@ -91,6 +92,7 @@ const DetailsTopMenu = ({ classes, theme }) => {
                         <div className={classes.linkText}>View In store</div>
                     </a>
                     <VerticalDivider height={70} />
+                    <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />
                     <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} />
                 </div>
             )}

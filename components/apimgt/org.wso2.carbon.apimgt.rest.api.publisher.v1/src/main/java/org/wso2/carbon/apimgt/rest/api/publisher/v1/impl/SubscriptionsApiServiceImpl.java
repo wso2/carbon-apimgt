@@ -57,8 +57,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
-            Map<String, String> billingEngineUsageData = monetizationImplementation.getCurrentUsage(subscriptionId,
-                    apiProvider);
+            Map<String, String> billingEngineUsageData = monetizationImplementation.
+                    getCurrentUsageForSubscription(subscriptionId, apiProvider);
             if (MapUtils.isEmpty(billingEngineUsageData)) {
                 String errorMessage = "Billing engine usage data was not found for subscription ID : " + subscriptionId;
                 RestApiUtil.handleBadRequest(errorMessage, log);
