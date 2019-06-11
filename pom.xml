@@ -380,6 +380,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
+                <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+                <version>${carbon.identity-inbound-auth-oauth.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.core.common</artifactId>
                 <version>${carbon.kernel.version}</version>
