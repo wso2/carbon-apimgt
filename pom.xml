@@ -1476,6 +1476,17 @@
                 <artifactId>org.wso2.carbon.apimgt.localentry.stub</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.json.wso2</groupId>
+                <artifactId>json</artifactId>
+                <version>${json.orbit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.everit.json</groupId>
+                <artifactId>org.everit.json.schema</artifactId>
+                <version>${everit.version}</version>
+                <scope>compile</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1679,6 +1690,8 @@
         <span.reporter.version>0.1.0</span.reporter.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
         <aspectj.version>1.9.3</aspectj.version>
+        <everit.version>1.5.0.wso2.v1</everit.version>
+        <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
     </properties>
 </project>
 
