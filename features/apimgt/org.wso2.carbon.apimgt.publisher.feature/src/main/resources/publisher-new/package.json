@@ -36,6 +36,7 @@
         "rc-notification": "^3.0.1",
         "react": "^16.8.6",
         "react-autosuggest": "^9.3.4",
+        "react-color": "^2.17.3",
         "react-dom": "^16.8.6",
         "react-dropzone": "^3.13.4",
         "react-intl": "^2.4.0",
