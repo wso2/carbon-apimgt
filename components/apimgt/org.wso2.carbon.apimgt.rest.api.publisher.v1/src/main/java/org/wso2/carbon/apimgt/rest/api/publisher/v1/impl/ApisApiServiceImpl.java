@@ -1086,7 +1086,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         " should be in published state to get total revenue.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            Map<String, String> revenueUsageData = monetizationImplementation.getTotalRevenue(api);
+            Map<String, String> revenueUsageData = monetizationImplementation.getTotalRevenue(api, apiProvider);
             APIRevenueDTO apiRevenueDTO = new APIRevenueDTO();
             apiRevenueDTO.setProperties(revenueUsageData);
             return Response.ok().entity(apiRevenueDTO).build();

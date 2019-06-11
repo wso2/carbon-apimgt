@@ -102,9 +102,10 @@ public interface Monetization {
      * Get total revenue for a given API from all subscriptions
      *
      * @param api API
+     * @param apiProvider API provider
      * @return total revenue data for a given API from all subscriptions
      * @throws MonetizationException if failed to get total revenue data for a given API
      */
-    Map<String, String> getTotalRevenue(API api) throws MonetizationException;
+    Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException;
 
 }

@@ -66,7 +66,7 @@ public class DefaultMonetizationImpl implements Monetization {
     }
 
     @Override
-    public Map<String, String> getTotalRevenue(API api) throws MonetizationException {
+    public Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException {
         return new HashMap<String, String>();
     }
 }
