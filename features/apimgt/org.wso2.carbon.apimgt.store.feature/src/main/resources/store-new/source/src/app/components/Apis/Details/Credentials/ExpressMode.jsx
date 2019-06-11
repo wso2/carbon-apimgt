@@ -22,14 +22,6 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import ArrowForward from '@material-ui/icons/ArrowForward';
-import InputBase from '@material-ui/core/InputBase';
-import Select from '@material-ui/core/Select';
-import Input from '@material-ui/core/Input';
-import MenuItem from '@material-ui/core/MenuItem';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Radio from '@material-ui/core/Radio';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import Alert from '../../../Shared/Alert';
 
@@ -39,8 +31,6 @@ import Application from '../../../../data/Application';
 import ApplicationCreate from '../../../Shared/AppsAndKeys/ApplicationCreate';
 import SubscribeToApi from '../../../Shared/AppsAndKeys/SubscribeToApi';
 import Keys from '../../../Shared/AppsAndKeys/KeyConfiguration';
-import Tokens from '../../../Shared/AppsAndKeys/Tokens';
-import ViewToken from '../../../Shared/AppsAndKeys/ViewToken';
 import { ApiContext } from '../ApiContext';
 
 const styles = theme => ({
@@ -83,8 +73,6 @@ class ExpressMode extends Component {
         super(props);
         this.state = {
             newApp: null,
-
-
             tiers: null,
             quota: 'Unlimited',
             appName: null,
@@ -93,7 +81,6 @@ class ExpressMode extends Component {
             tokenType: 'OAUTH',
             callBackURL: 'http://localhost',
             supportedGrantTypes: ['client_credentials'],
-            restApplication: null,
         };
     }
 
@@ -133,15 +120,6 @@ class ExpressMode extends Component {
     }
 
     /**
-     *
-     *
-     * @memberof ApplicationCreate
-     */
-    handleInputChange = name => (event) => {
-        this.setState({ [name]: event.target.value });
-    };
-
-    /**
      * Create new application and generate keys
      * enerate credentials
      * @memberof ApplicationCreate
@@ -175,7 +153,8 @@ class ExpressMode extends Component {
                 Alert.error('Application already exists.');
                 console.log('Error while creating the application');
             });
-    }
+    };
+
     render() {
         const { classes, api } = this.props;
         const {
