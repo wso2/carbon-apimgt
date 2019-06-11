@@ -6,6 +6,6 @@
     <to eventAdapterType="rdbms">
         <property name="datasource.name">WSO2AM_DB</property>
         <property name="execution.mode">insert</property>
-        <property name="table.name">HoneyPotAPIData</property>
+        <property name="table.name">AM_BOT_DATA</property>
     </to>
 </eventPublisher>

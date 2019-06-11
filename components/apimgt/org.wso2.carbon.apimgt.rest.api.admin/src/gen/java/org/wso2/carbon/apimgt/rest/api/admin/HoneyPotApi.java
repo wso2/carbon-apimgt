@@ -8,7 +8,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.factories.HoneyPotApiServiceFactory
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.EmailListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.EmailDTO;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -28,6 +28,21 @@ public class HoneyPotApi  {
 
    private final HoneyPotApiService delegate = HoneyPotApiServiceFactory.getHoneyPotApi();
 
+    @POST
+    @Path("/addEmail")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Add an Email", notes = "Here we can use this to configure email\n", response = EmailDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nEmail List updated.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n") })
+
+    public Response honeyPotAddEmailPost(@ApiParam(value = "A email\n" ,required=true ) EmailDTO body) throws APIManagementException, SQLException {
+    return delegate.honeyPotAddEmailPost(body);
+    }
     @DELETE
     @Path("/deleteAlertData")
     @Consumes({ "application/json" })
@@ -42,6 +57,21 @@ public class HoneyPotApi  {
 
     public Response honeyPotDeleteAlertDataDelete(@ApiParam(value = "Pass the messageID to remove the record\n",required=true) @QueryParam("messageID")  String messageID) throws APIManagementException, SQLException {
     return delegate.honeyPotDeleteAlertDataDelete(messageID);
+    }
+    @DELETE
+    @Path("/email")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Delete an configured email.", notes = "Delete an configured email from DB by pasing uuid.\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nEmail successfully deleted.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nResource to be deleted does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
+
+    public Response honeyPotEmailDelete(@ApiParam(value = "Pass the uuid to remove the email\n",required=true) @QueryParam("uuid")  String uuid) throws APIManagementException, SQLException {
+    return delegate.honeyPotEmailDelete(uuid);
     }
     @GET
     @Path("/getAlertData")
@@ -76,22 +106,6 @@ public class HoneyPotApi  {
 
     public Response honeyPotGetEmailListGet(@ApiParam(value = "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n") @QueryParam("tenantDomain")  String tenantDomain) throws APIManagementException {
     return delegate.honeyPotGetEmailListGet(tenantDomain);
-    }
-    @PUT
-    @Path("/updateEmailList")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update Email list", notes = "Here we can configure email as first time, as well as update the existing email list my adding more or removing\n", response = EmailListDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nEmail List updated.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n") })
-
-    public Response honeyPotUpdateEmailListPut(@ApiParam(value = "Email list\n" ,required=true ) EmailListDTO body,
-    @ApiParam(value = "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n") @QueryParam("tenantDomain")  String tenantDomain) throws APIManagementException, SQLException {
-    return delegate.honeyPotUpdateEmailListPut(body,tenantDomain);
     }
 }
 

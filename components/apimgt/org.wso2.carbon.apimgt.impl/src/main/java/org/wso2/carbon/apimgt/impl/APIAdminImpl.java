@@ -133,24 +133,24 @@ public class APIAdminImpl implements APIAdmin {
      * configure email list which need to send alert
      * update email list as adding more or remove
      */
-    public void addHoneyPotAPiEmailAlertConfiguration(String emailList, String tenantDomain) throws APIManagementException, SQLException {
-        apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(emailList, tenantDomain);
+    public void addHoneyPotAPiEmailAlertConfiguration(String email) throws APIManagementException, SQLException {
+        apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(email);
     }
 
     /**
      * retrieve email lit which configured above
      */
-    public static List<String> retrieveSavedHoneyPotAPIAlertEmailList(String tenantDomain) throws APIManagementException {
+    public static List<HoneyPotAPIAlertData> retrieveSavedHoneyPotAPIAlertEmailList() throws APIManagementException {
 
-        List<String> list;
-        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(tenantDomain);
+        List<HoneyPotAPIAlertData> list;
+        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList();
         return list;
     }
 
     /**
      * remove all configured email list
      */
-    public void deleteHoneyPotAPIAlertEmailList(String tenantDomain) throws APIManagementException, SQLException {
-        apiMgtDAO.deleteHoneyPotAPIAlertEmailList(tenantDomain);
+    public void deleteHoneyPotAPIAlertEmailList(String uuid) throws APIManagementException, SQLException {
+        apiMgtDAO.deleteHoneyPotAPIAlertEmailList(uuid);
     }
 }
