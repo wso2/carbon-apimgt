@@ -24,7 +24,6 @@ import AuthManager from 'AppData/AuthManager';
 import qs from 'qs';
 import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
-import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import Progress from 'AppComponents/Shared/Progress';
 import SelectLogin from 'AppComponents/Login/SelectLogin';
 // Localization
@@ -165,7 +164,8 @@ class Publisher extends React.Component {
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
-                {/* <AppErrorBoundary appName='Publisher Application'> */}
+                {/* <AppErrorBoundary appName='Publisher Application'>
+            TODO: need to create error boundary without using MUI styles */}
                 <Router basename='/publisher-new'>
                     <Switch>
                         <Route path='/login' exact component={SelectLogin} />
