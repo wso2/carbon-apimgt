@@ -17,7 +17,6 @@
  */
 
 import React, { Component } from 'react';
-import Log from 'log4javascript';
 import PropTypes from 'prop-types';
 
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
@@ -34,7 +33,6 @@ import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
 import { Redirect, Route, Switch, Link } from 'react-router-dom';
 import Utils from 'AppData/Utils';
-import ConfigManager from 'AppData/ConfigManager';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
@@ -128,23 +126,6 @@ class Details extends Component {
      * @memberof Details
      */
     componentDidMount() {
-        ConfigManager.getConfigs()
-            .environments.then(() => {
-                // const multiEnvironments = response.data.environments.length > 1;
-                // const more = multiEnvironments && (
-                //     <Link to='/apis'>
-                //         <Button variant='raised' color='secondary'>
-                //             Go Home
-                //         </Button>
-                //     </Link>
-                // );
-                // this.setState({
-                //     resourceNotFountMessage: { more, multiEnvironments },
-                // });
-            })
-            .catch((error) => {
-                Log.error('Error while receiving environment configurations : ', error);
-            });
         this.setAPI();
     }
 

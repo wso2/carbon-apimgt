@@ -21,7 +21,6 @@ import { Input, Icon, Button, Row, Col } from 'antd';
 import 'react-tagsinput/react-tagsinput.css';
 import TagsInput from 'react-tagsinput';
 import PropTypes from 'prop-types';
-import Log from 'log4javascript';
 import Alert from 'AppComponents/Shared/Alert';
 
 import Api from 'AppData/api';
@@ -63,7 +62,7 @@ class Scope extends React.Component {
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    Log.log(error);
+                    console.log(error);
                 }
                 const { status } = error;
                 if (status === 404) {
@@ -84,7 +83,7 @@ class Scope extends React.Component {
         const promisedScopeDelete = api.deleteScope(this.props.api_uuid, scopeName);
         promisedScopeDelete.then((response) => {
             if (response.status !== 200) {
-                Log.log(response);
+                console.log(response);
                 Alert.error('Something went wrong while deleting the ' + scopeName + ' Scope!');
                 return;
             }

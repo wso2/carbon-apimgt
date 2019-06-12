@@ -101,23 +101,25 @@ class Publisher extends React.Component {
             // This could happen when OAuth code authentication took place and could send
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
-            userPromise.then((loggedUser) => {
-                if (loggedUser != null) {
-                    const hasViewScope = loggedUser.scopes.includes('apim:api_view');
-                    if (hasViewScope) {
-                        this.setState({ user: loggedUser, userResolved: true });
+            userPromise
+                .then((loggedUser) => {
+                    if (loggedUser != null) {
+                        const hasViewScope = loggedUser.scopes.includes('apim:api_view');
+                        if (hasViewScope) {
+                            this.setState({ user: loggedUser, userResolved: true });
+                        } else {
+                            console.log('No relevant scopes found, redirecting to login page');
+                            this.setState({ userResolved: true });
+                        }
                     } else {
-                        console.log('No relevant scopes found, redirecting to login page');
+                        console.log('User returned with null, redirect to login page');
                         this.setState({ userResolved: true });
                     }
-                } else {
-                    console.log('User returned with null, redirect to login page');
+                })
+                .catch((error) => {
+                    console.log('Error: ' + error + ',redirecting to login page');
                     this.setState({ userResolved: true });
-                }
-            }).catch((error) => {
-                console.log('Error: ' + error + ',redirecting to login page');
-                this.setState({ userResolved: true });
-            });
+                });
         }
     }
 
@@ -163,24 +165,24 @@ class Publisher extends React.Component {
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
-                <AppErrorBoundary appName='Publisher Application'>
-                    <Router basename='/publisher-new'>
-                        <Switch>
-                            <Route path='/login' exact component={SelectLogin} />
-                            <Route
-                                path='/login/basic'
-                                render={props => <Login {...props} updateUser={this.updateUser} />}
-                            />
-                            <Route path='/logout' component={Logout} />
-                            {!user && <Redirect to={{ pathname: '/login', search: params }} />}
-                            <Route
-                                render={() => {
-                                    return <LoadableProtectedApp user={user} />;
-                                }}
-                            />
-                        </Switch>
-                    </Router>
-                </AppErrorBoundary>
+                {/* <AppErrorBoundary appName='Publisher Application'> */}
+                <Router basename='/publisher-new'>
+                    <Switch>
+                        <Route path='/login' exact component={SelectLogin} />
+                        <Route
+                            path='/login/basic'
+                            render={props => <Login {...props} updateUser={this.updateUser} />}
+                        />
+                        <Route path='/logout' component={Logout} />
+                        {!user && <Redirect to={{ pathname: '/login', search: params }} />}
+                        <Route
+                            render={() => {
+                                return <LoadableProtectedApp user={user} />;
+                            }}
+                        />
+                    </Switch>
+                </Router>
+                {/* </AppErrorBoundary> */}
             </IntlProvider>
         );
     }

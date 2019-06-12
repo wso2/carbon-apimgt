@@ -25,6 +25,7 @@ module.exports = {
             '<rootDir>/source/test/__mocks__/fileMock.js',
         '\\.(css|less)$': '<rootDir>/source/test/__mocks__/styleMock.js',
         Config: '<rootDir>/site/public/theme/defaultTheme.js',
+        MaterialIcons: '<rootDir>/site/public/fonts/iconfont/MaterialIcons.js',
     },
     transform: {
         '^.+\\.jsx$': 'babel-jest',

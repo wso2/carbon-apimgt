@@ -21,7 +21,6 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import Api from 'AppData/api';
-import ConfigManager from 'AppData/ConfigManager';
 import { Progress } from 'AppComponents/Shared';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -93,10 +92,6 @@ class LifeCycle extends Component {
         // const promised_tiers = Api.policies('api');
         const promised_lcState = this.api.getLcState(api.id);
         let privateJetModeEnabled = false;
-
-        ConfigManager.getConfigs().features.then(response => {
-            privateJetModeEnabled = response.data.privateJetMode.isEnabled;
-        });
 
         const promised_lcHistory = this.api.getLcHistory(api.id);
         // const promised_labels = this.api.labels();

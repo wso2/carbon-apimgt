@@ -150,5 +150,6 @@ const Configurations = {
         },
     },
 };
-
-module.exports = Configurations; // Added for tests
+if (typeof module !== 'undefined') {
+    module.exports = Configurations; // Added for tests
+}
