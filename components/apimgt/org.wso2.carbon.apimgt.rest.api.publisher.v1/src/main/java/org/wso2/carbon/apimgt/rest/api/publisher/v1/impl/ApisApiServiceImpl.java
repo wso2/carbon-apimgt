@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.google.gson.Gson;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -48,8 +50,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -62,6 +66,7 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApisApiServiceImpl implements ApisApiService {
@@ -929,6 +934,114 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
+    /**
+     * Get API monetization status and monetized tier to billing plan mapping
+     *
+     * @param apiId API ID
+     * @param messageContext message context
+     * @return API monetization status and monetized tier to billing plan mapping
+     */
+    @Override
+    public Response apisApiIdMonetizationGet(String apiId, MessageContext messageContext) {
+
+        try {
+            if (StringUtils.isBlank(apiId)) {
+                String errorMessage = "API ID cannot be empty or null when retrieving monetized plans.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPI(apiIdentifier);
+            Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+            Map<String, String> monetizedPoliciesToPlanMapping = monetizationImplementation.
+                    getMonetizedPoliciesToPlanMapping(api);
+            APIMonetizationInfoDTO monetizationInfoDTO = APIMappingUtil.getMonetizedTiersDTO
+                    (apiIdentifier, monetizedPoliciesToPlanMapping);
+            return Response.ok().entity(monetizationInfoDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Failed to retrieve monetized plans for API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        } catch (MonetizationException e) {
+            String errorMessage = "Failed to fetch monetized plans of API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        }
+        return Response.serverError().build();
+    }
+
+    /**
+     * Monetize (enable or disable) for a given API
+     *
+     * @param apiId API ID
+     * @param body request body
+     * @param messageContext message context
+     * @return monetizationDTO
+     */
+    @Override
+    public Response apisApiIdMonetizePost(String apiId, APIMonetizationInfoDTO body, MessageContext messageContext) {
+        try {
+            if (StringUtils.isBlank(apiId)) {
+                String errorMessage = "API ID cannot be empty or null when configuring monetization.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPI(apiIdentifier);
+            if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
+                String errorMessage = "API " + apiIdentifier.getApiName() +
+                        " should be in published state to configure monetization.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            //set the monetization status
+            boolean monetizationEnabled = body.isEnabled();
+            api.setMonetizationStatus(monetizationEnabled);
+            //clear the existing properties related to monetization
+            api.getMonetizationProperties().clear();
+            Map<String, String> monetizationProperties = body.getProperties();
+            if (MapUtils.isNotEmpty(monetizationProperties)) {
+                String errorMessage = RestApiPublisherUtils.validateMonetizationProperties(monetizationProperties);
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                for (Map.Entry<String, String> currentEntry : monetizationProperties.entrySet()) {
+                    api.addMonetizationProperty(currentEntry.getKey(), currentEntry.getValue());
+                }
+            }
+            apiProvider.configureMonetizationInAPIArtifact(api);
+            Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+            HashMap monetizationDataMap = new Gson().fromJson(api.getMonetizationProperties().toString(), HashMap.class);
+            boolean isMonetizationStateChangeSuccessful = false;
+            if (MapUtils.isEmpty(monetizationDataMap)) {
+                String errorMessage = "Monetization data map is empty for API ID " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
+            try {
+                if (monetizationEnabled) {
+                    isMonetizationStateChangeSuccessful = monetizationImplementation.enableMonetization
+                            (tenantDomain, api, monetizationDataMap);
+                } else {
+                    isMonetizationStateChangeSuccessful = monetizationImplementation.disableMonetization
+                            (tenantDomain, api, monetizationDataMap);
+                }
+            } catch (MonetizationException e) {
+                String errorMessage = "Error while changing monetization status for API ID : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+            if (isMonetizationStateChangeSuccessful) {
+                APIMonetizationInfoDTO monetizationInfoDTO = APIMappingUtil.getMonetizationInfoDTO(apiIdentifier);
+                return Response.ok().entity(monetizationInfoDTO).build();
+            } else {
+                String errorMessage = "Unable to change monetization status for API : " + apiId;
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while configuring monetization for API ID : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return Response.serverError().build();
+    }
+
     @Override
     public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath,
             String verb, String ifNoneMatch, MessageContext messageContext) {
@@ -948,6 +1061,45 @@ public class ApisApiServiceImpl implements ApisApiService {
             ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
+    }
+
+    /**
+     * Get total revenue for a given API from all its' subscriptions
+     *
+     * @param apiId API ID
+     * @param messageContext message context
+     * @return revenue data for a given API
+     */
+    @Override
+    public Response apisApiIdRevenueGet(String apiId, MessageContext messageContext) {
+
+        if (StringUtils.isBlank(apiId)) {
+            String errorMessage = "API ID cannot be empty or null when getting revenue details.";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPI(apiIdentifier);
+            if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
+                String errorMessage = "API " + apiIdentifier.getApiName() +
+                        " should be in published state to get total revenue.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            Map<String, String> revenueUsageData = monetizationImplementation.getTotalRevenue(api, apiProvider);
+            APIRevenueDTO apiRevenueDTO = new APIRevenueDTO();
+            apiRevenueDTO.setProperties(revenueUsageData);
+            return Response.ok().entity(apiRevenueDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Failed to retrieve revenue data for API ID : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        } catch (MonetizationException e) {
+            String errorMessage = "Failed to get current revenue data for API ID : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        }
+        return null;
     }
 
     @Override
@@ -1074,18 +1226,110 @@ public class ApisApiServiceImpl implements ApisApiService {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
-
+    /**
+     * Retrieves the thumbnail image of an API specified by API identifier
+     *
+     * @param apiId           API Id
+     * @param ifNoneMatch     If-None-Match header value
+     * @param messageContext If-Modified-Since header value
+     * @return Thumbnail image of the API
+     */
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            ResourceFile thumbnailResource = apiProvider.getIcon(apiIdentifier);
+
+            if (thumbnailResource != null) {
+                return Response
+                        .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
+                        .build();
+            } else {
+                return Response.noContent().build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving thumbnail of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String fileName = fileDetail.getDataHandler().getName();
+            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+                fileContentType = fileDetail.getContentType().toString();
+            }
+            //this will fail if user does not have access to the API or the API does not exist
+            API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
+            ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
+            String thumbPath = APIUtil.getIconPath(api.getId());
+            String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
+            api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+            APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+
+            //Creating URI templates due to available uri templates in returned api object only kept single template
+            //for multiple http methods
+            String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
+            if (!org.apache.commons.lang3.StringUtils.isEmpty(apiSwaggerDefinition)) {
+                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, apiSwaggerDefinition);
+                api.setUriTemplates(uriTemplates);
+
+                // scopes
+                Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
+                api.setScopes(scopes);
+            }
+
+            apiProvider.updateAPI(api);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
+                    .replace(RestApiConstants.APIID_PARAM, apiId);
+            URI uri = new URI(uriString);
+            FileInfoDTO infoDTO = new FileInfoDTO();
+            infoDTO.setRelativePath(uriString);
+            infoDTO.setMediaType(apiImage.getContentType());
+            return Response.created(uri).entity(infoDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while adding thumbnail for API : " + apiId,
+                                e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving thumbnail location of API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (FaultGatewaysException e) {
+            //This is logged and process is continued because icon is optional for an API
+            log.error("Failed to update API after adding icon. ", e);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+        }
+        return null;
     }
 
     @Override
@@ -1154,9 +1398,47 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisCopyApiPost(String newVersion, String apiId, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion,
+                                    MessageContext messageContext) {
+        URI newVersionedApiUri;
+        APIDTO newVersionedApi;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = api.getId();
+            if (defaultVersion) {
+                api.setAsDefaultVersion(true);
+            }
+            //creates the new version
+            apiProvider.createNewAPIVersion(api, newVersion);
+
+            //get newly created API to return as response
+            APIIdentifier apiNewVersionedIdentifier =
+                    new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
+            newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
+            //This URI used to set the location header of the POST response
+            newVersionedApiUri =
+                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+            return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
+        } catch (APIManagementException | DuplicateAPIException e) {
+            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
+                String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
+                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while copying API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location of " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override

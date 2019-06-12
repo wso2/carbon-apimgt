@@ -24,7 +24,7 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
 import Grid from '@material-ui/core/Grid';
-import ApiThumb from 'AppComponents/Apis/Listing/components/ApiThumb';
+import ApiThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/ApiThumb';
 import API from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import AuthManager from 'AppData/AuthManager';

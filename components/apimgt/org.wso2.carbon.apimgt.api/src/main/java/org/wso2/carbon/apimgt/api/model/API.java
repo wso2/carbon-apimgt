@@ -130,6 +130,16 @@ public class API implements Serializable {
      */
     private JSONObject additionalProperties;
 
+    /**
+     * Properties relevant to monetization of the particular API.
+     */
+    private JSONObject monetizationProperties = new JSONObject();
+
+    /**
+     * Property to indicate the monetization status of the particular API.
+     */
+    private boolean isMonetizationEnabled = false;
+
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
 
@@ -165,6 +175,52 @@ public class API implements Serializable {
      */
     public void setAdditionalProperties(JSONObject properties) {
         this.additionalProperties = properties;
+    }
+
+    /**
+     * This method is used to get the properties related to monetization
+     *
+     * @return properties related to monetization
+     */
+    public JSONObject getMonetizationProperties() {
+        return monetizationProperties;
+    }
+
+    /**
+     * This method is used to get the monetization status (true or false)
+     *
+     * @return flag to indicate the monetization status (true or false)
+     */
+    public boolean getMonetizationStatus() {
+        return isMonetizationEnabled;
+    }
+
+    /**
+     * This method is used to set the monetization status (true or false)
+     *
+     * @param monetizationStatus flag to indicate the monetization status (true or false)
+     */
+    public void setMonetizationStatus(boolean monetizationStatus) {
+        this.isMonetizationEnabled = monetizationStatus;
+    }
+
+    /**
+     * This method is used to set the monetization properties
+     *
+     * @param monetizationProperties properties related to monetization
+     */
+    public void setMonetizationProperties(JSONObject monetizationProperties) {
+        this.monetizationProperties = monetizationProperties;
+    }
+
+    /**
+     * This method is used to add monetization property
+     *
+     * @param key   key of the monetization property
+     * @param value applicable value of the monetization property
+     */
+    public void addMonetizationProperty(String key, String value) {
+        monetizationProperties.put(key, value);
     }
 
     /**

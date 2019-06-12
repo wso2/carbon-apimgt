@@ -32,7 +32,7 @@ public class ImportApi  {
     @Path("/applications")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Import an Application", notes = "This operation can be used to import an existing Application.\n", response = ApplicationInfoDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Import an Application", notes = "This operation can be used to import an Application.\n", response = ApplicationInfoDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with the updated object information as entity in the body.\n"),
         
@@ -49,11 +49,6 @@ public class ImportApi  {
     @ApiParam(value = "Expected Owner of the Application in the Import Environment\n") @QueryParam("appOwner")  String appOwner)
     {
     return delegate.importApplicationsPost(fileInputStream,fileDetail,preserveOwner,skipSubscriptions,appOwner);
-    }
-
-    public String importApplicationsPostGetLastUpdatedTime(InputStream fileInputStream,Attachment fileDetail,Boolean preserveOwner,Boolean skipSubscriptions,String appOwner)
-    {
-        return delegate.importApplicationsPostGetLastUpdatedTime(fileInputStream,fileDetail,preserveOwner,skipSubscriptions,appOwner);
     }
 }
 
