@@ -304,6 +304,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSdksLanguageGet(String apiId, String language, MessageContext messageContext) {
 
+        if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
+            String message = "Error generating the SDK. API id or language should not be empty";
+            RestApiUtil.handleBadRequest(message, log);
+        }
         String tenant = RestApiUtil.getLoggedInUserTenantDomain();
         APIDTO api = getAPIByAPIId(apiId, tenant);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
@@ -319,9 +323,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"" ).build();
             } catch (APIClientGenerationException e) {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
-                RestApiUtil.handleInternalServerError(message, log);
+                RestApiUtil.handleInternalServerError(message, e, log);
             }
-        }
+        } 
+        String message = "Could not find an API for ID " + apiId;
+        RestApiUtil.handleResourceNotFoundError(message, log);
         return null;
     }
 
