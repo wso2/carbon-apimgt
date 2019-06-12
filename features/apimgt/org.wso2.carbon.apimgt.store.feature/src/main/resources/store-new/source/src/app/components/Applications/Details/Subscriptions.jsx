@@ -34,6 +34,9 @@ import Alert from '../../Shared/Alert';
 import SubscriptionTableData from './SubscriptionTableData';
 import APIList from '../../Apis/Listing/APIList';
 import Subscription from '../../../data/Subscription';
+import Api from '../../../data/api';
+import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+
 /**
  *
  *
@@ -68,30 +71,15 @@ class Subscriptions extends React.Component {
         super(props);
         this.state = {
             subscriptions: null,
+            unsubscribedAPIList: [],
+            apisNotFound: false,
+            subscriptionsNotFound: false,
+            isAuthorize: true,
         };
         this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
         this.updateSubscriptions = this.updateSubscriptions.bind(this);
-    }
-
-    /**
-     *
-     *
-     * @param {*} applicationId
-     * @memberof Subscriptions
-     */
-    updateSubscriptions(applicationId) {
-        const client = new Subscription();
-        const promisedSubscriptions = client.getSubscriptions(null, applicationId);
-        promisedSubscriptions
-            .then((response) => {
-                this.setState({ subscriptions: response.body.list });
-            })
-            .catch((error) => {
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
+        this.updateUnsubscribedAPIsList = this.updateUnsubscribedAPIsList.bind(this);
+        this.handleSubscribe = this.handleSubscribe.bind(this);
     }
 
     /**
@@ -102,32 +90,135 @@ class Subscriptions extends React.Component {
     componentDidMount() {
         const { applicationId } = this.props.match.params;
         this.updateSubscriptions(applicationId);
+        this.updateUnsubscribedAPIsList();
     }
 
     /**
      *
+     * Update subscriptions list of Application
+     * @param {*} applicationId
+     * @memberof Subscriptions
+     */
+    updateSubscriptions(applicationId) {
+        const client = new Subscription();
+        const promisedSubscriptions = client.getSubscriptions(null, applicationId);
+        promisedSubscriptions
+            .then((response) => {
+                this.setState({ subscriptions: response.body.list }, this.updateUnsubscribedAPIsList);
+            })
+            .catch((error) => {
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ subscriptionsNotFound: true });
+                } else if (status === 401) {
+                    this.setState({ isAuthorize: false });
+                }
+            });
+    }
+
+    /**
      *
+     * Handle subscription deletion of application
      * @param {*} subscriptionId
      * @memberof Subscriptions
      */
     handleSubscriptionDelete(subscriptionId) {
         const client = new Subscription();
         const promisedDelete = client.deleteSubscription(subscriptionId);
-        promisedDelete.then((response) => {
-            if (response.status !== 200) {
-                console.log(response);
-                Alert.info('Something went wrong while deleting the Subscription!');
-                return;
-            }
-            Alert.info('Subscription deleted successfully!');
-            const { subscriptions } = this.state;
-            for (const endpointIndex in subscriptions) {
-                if (Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex) && subscriptions[endpointIndex].subscriptionId === subscriptionId) {
-                    subscriptions.splice(endpointIndex, 1);
-                    break;
+
+        promisedDelete
+            .then((response) => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    Alert.info('Something went wrong while deleting the Subscription!');
+                    return;
                 }
-            }
-        });
+                Alert.info('Subscription deleted successfully!');
+                const { subscriptions } = this.state;
+                for (const endpointIndex in subscriptions) {
+                    if (Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex)
+                    && subscriptions[endpointIndex].subscriptionId === subscriptionId) {
+                        subscriptions.splice(endpointIndex, 1);
+                        break;
+                    }
+                }
+                this.setState({ subscriptions }, this.updateUnsubscribedAPIsList);
+            })
+            .catch((error) => {
+                const { status } = error;
+                if (status === 401) {
+                    this.setState({ isAuthorize: false });
+                }
+                Alert.error('Error occurred when deleting subscription');
+            });
+    }
+
+    /**
+     *
+     * Update list of unsubscribed APIs
+     * @memberof Subscriptions
+     */
+    updateUnsubscribedAPIsList() {
+        const apiClient = new Api();
+        const promisedGetApis = apiClient.getAllAPIs();
+        const { subscriptions } = this.state;
+
+
+        promisedGetApis
+            .then((response) => {
+                const { list } = response.obj;
+                const subscribedAPIIds = subscriptions.map(sub => sub.apiId);
+                const unsubscribedAPIList = list
+                    .filter(api => !subscribedAPIIds.includes(api.id))
+                    .map((filteredApi) => {
+                        return {
+                            Id: filteredApi.id,
+                            Policy: filteredApi.throttlingPolicies,
+                            Name: filteredApi.name,
+                        };
+                    });
+                this.setState({ unsubscribedAPIList });
+            })
+            .catch((error) => {
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ apisNotFound: true });
+                } else if (status === 401) {
+                    this.setState({ isAuthorize: false });
+                }
+            });
+    }
+
+    /**
+     *
+     * Handle onClick of subscribing to an API
+     * @memberof Subscriptions
+     */
+    handleSubscribe(applicationId, apiId, policy) {
+        const api = new Api();
+
+        if (!policy) {
+            Alert.error('Select a subscription policy');
+            return;
+        }
+
+        const promisedSubscribe = api.subscribe(apiId, applicationId, policy);
+        promisedSubscribe
+            .then((response) => {
+                if (response.status !== 201) {
+                    Alert.error('Error occurred  during subscription');
+                } else {
+                    Alert.info('Subscription successful');
+                    this.updateSubscriptions(applicationId);
+                }
+            })
+            .catch((error) => {
+                const { status } = error;
+                if (status === 401) {
+                    this.setState({ isAuthorize: false });
+                }
+                Alert.error('Error occurred  during subscription');
+            });
     }
 
     /**
@@ -137,9 +228,18 @@ class Subscriptions extends React.Component {
      * @memberof Subscriptions
      */
     render() {
-        const { subscriptions } = this.state;
+        const { isAuthorize } = this.state;
+
+        if (!isAuthorize) {
+            window.location = '/store-new/services/configs';
+        }
+
+        const {
+            subscriptions, unsubscribedAPIList, apisNotFound, subscriptionsNotFound,
+        } = this.state;
         const { applicationId } = this.props.match.params;
         const { classes } = this.props;
+
         if (subscriptions) {
             return (
                 <div className={classes.root}>
@@ -157,27 +257,44 @@ class Subscriptions extends React.Component {
                                 </CardActions>
                                 <Divider />
                                 <CardContent className={classes.cardContent}>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell className={classes.firstCell}>API Name</TableCell>
-                                                <TableCell>Subscription Tier</TableCell>
-                                                <TableCell>Status</TableCell>
-                                                <TableCell>Action</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {subscriptions
-                                                && subscriptions.map((subscription) => {
-                                                    return <SubscriptionTableData subscription={subscription} key={subscription.subscriptionId} handleSubscriptionDelete={this.handleSubscriptionDelete} />;
-                                                })}
-                                        </TableBody>
-                                    </Table>
+                                    {
+                                        subscriptionsNotFound ?
+                                            (<ResourceNotFound />) :
+                                            (
+                                                <Table>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell className={classes.firstCell}>
+                                                                API Name
+                                                            </TableCell>
+                                                            <TableCell>Subscription Tier</TableCell>
+                                                            <TableCell>Status</TableCell>
+                                                            <TableCell>Action</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {subscriptions
+                                                    && subscriptions.map((subscription) => {
+                                                        return (
+                                                            <SubscriptionTableData
+                                                                subscription={subscription}
+                                                                handleSubscriptionDelete={this.handleSubscriptionDelete}
+                                                            />
+                                                        );
+                                                    })}
+                                                    </TableBody>
+                                                </Table>)
+                                    }
                                 </CardContent>
                             </Card>
                         </Grid>
                         <Grid item xs={6} className={classes.cardGrid}>
-                            <APIList subscriptions={subscriptions} applicationId={applicationId} updateSubscriptions={this.updateSubscriptions} />
+                            <APIList
+                                apisNotFound={apisNotFound}
+                                unsubscribedAPIList={unsubscribedAPIList}
+                                applicationId={applicationId}
+                                handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
+                            />
                         </Grid>
                     </Grid>
                 </div>

@@ -43,6 +43,7 @@ class SubscriptionTableData extends React.Component {
         };
         this.handleRequestClose = this.handleRequestClose.bind(this);
         this.handleRequestOpen = this.handleRequestOpen.bind(this);
+        this.handleRequestDelete = this.handleRequestDelete.bind(this);
     }
 /**
  *
@@ -62,21 +63,33 @@ handleRequestOpen() {
     }
 /**
  *
+ * Handle onclick for subscription delete
+ * @memberof SubscriptionTableData
+ */
+handleRequestDelete(subscriptionId) {
+    const { handleSubscriptionDelete } = this.props;
+        this.setState({ openMenu: false });
+        if (handleSubscriptionDelete) {
+            handleSubscriptionDelete(subscriptionId);
+        }
+    }
+/**
+ *
  *
  * @returns
  * @memberof SubscriptionTableData
  */
 render() {
         const {
-            apiName, lifeCycleStatus, policy, subscriptionId, apiIdentifier
+            apiInfo, status, throttlingPolicy, subscriptionId, apiId
         } = this.props.subscription;
         return (
             <TableRow hover>
                 <TableCell style={{paddingLeft: 0}}>
-                    <Link to={'/apis/' + apiIdentifier}>{apiName}</Link>
+                    <Link to={'/apis/' + apiId}>{apiInfo.name}</Link>
                 </TableCell>
-                <TableCell>{policy}</TableCell>
-                <TableCell>{lifeCycleStatus}</TableCell>
+                <TableCell>{throttlingPolicy}</TableCell>
+                <TableCell>{status}</TableCell>
 
                 <TableCell>
                     <div>
@@ -94,8 +107,7 @@ render() {
                                 <Button dense color='primary' onClick={this.handleRequestClose}>
                                     Cancel
                                 </Button>
-                                <Button dense color='primary' onClick={() =>
-                                    this.props.handleSubscriptionDelete(subscriptionId)}>
+                                <Button dense color='primary' onClick={() => this.handleRequestDelete(subscriptionId)}>
                                     Delete
                                 </Button>
                             </DialogActions>

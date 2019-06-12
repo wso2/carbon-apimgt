@@ -28,13 +28,8 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { FormattedMessage } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Loading from '../../Base/Loading/Loading';
 import Application from '../../../data/Application';
-/**
- *
- *
- * @param {*} theme
- */
+
 const styles = theme => ({
     FormControl: {
         padding: theme.spacing.unit * 2,
@@ -65,14 +60,19 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class KeyConfiguration extends React.Component {
+    /**
+     *
+     * @param {*} props props
+     */
     constructor(props) {
         super(props);
         this.state = {
             application: null,
             tokenType: 'OAUTH',
         };
-        if (this.props.selectedApp) {
-            this.appId = this.props.selectedApp.appId || this.props.selectedApp.value;
+        const { selectedApp } = this.props;
+        if (selectedApp) {
+            this.appId = selectedApp.appId || selectedApp.value;
             this.application = Application.get(this.appId);
         }
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
@@ -83,17 +83,49 @@ class KeyConfiguration extends React.Component {
     /**
      *
      *
+     * @memberof KeyConfiguration
+     */
+    componentDidMount() {
+        if (this.appId) {
+            this.application.then(application => application.getKeys())
+                .then((keys) => {
+                    this.setState({ keys });
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.error(error);
+                    }
+                    if (error.status === 404) {
+                        this.setState({ notFound: true });
+                    }
+                });
+        }
+    }
+
+    /**
+     *
+     *
+     * @returns {boolean}
+     * @memberof KeyConfiguration
+     */
+    getKeyStatus() {
+        return this.hasKeys;
+    }
+
+    /**
+     *
+     *
      * @param {*} event onchange ecvent
      * @memberof KeyConfiguration
      */
     handleTextChange(event) {
-        const { application } = this.state;
+        const { application, tokenType } = this.state;
         const { currentTarget } = event;
         const { keyType } = this.props;
         const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
             keyType,
-            tokenType: this.state.tokenType,
+            tokenType,
         };
         keys.callbackUrl = currentTarget.value;
         application.keys.set(keyType, keys);
@@ -107,13 +139,13 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     handleCheckboxChange(event) {
-        const { application } = this.state;
+        const { application, tokenType } = this.state;
         const { keyType } = this.props;
         const { currentTarget } = event;
         const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
             keyType,
-            tokenType: this.state.tokenType,
+            tokenType,
         };
         let index;
 
@@ -135,27 +167,17 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     handleTokenTypeChange(event) {
-        const { application } = this.state;
+        const { application, tokenType } = this.state;
         const { keyType } = this.props;
         const keys = application.keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
             keyType,
-            tokenType: this.state.tokenType,
+            tokenType,
         };
         keys.tokenType = event.target.value;
         application.keys.set(keyType, keys);
         // update the state with the new array of options
         this.setState({ application, tokenType: event.target.value });
-    }
-
-    /**
-     *
-     *
-     * @returns {boolean}
-     * @memberof KeyConfiguration
-     */
-    getKeyStatus() {
-        return this.hasKeys;
     }
 
     /**
@@ -208,46 +230,21 @@ class KeyConfiguration extends React.Component {
     /**
      *
      *
-     * @memberof KeyConfiguration
-     */
-    componentDidMount() {
-        if (this.appId) {
-            this.application.then(application => application.getKeys())
-                .then((resp) => {
-                    this.setState({ application });
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.error(error);
-                    }
-                    if (error.status === 404) {
-                        this.setState({ notFound: true });
-                    }
-                });
-        }
-    }
-
-    /**
-     *
-     *
      * @returns {Component}
      * @memberof KeyConfiguration
      */
     render() {
-        const { notFound, application } = this.state;
+        const { notFound, keys, tokenType } = this.state;
         const { keyType, classes } = this.props;
         if (notFound) {
             return <ResourceNotFound />;
         }
-        // if (!this.state.application) {
-        //     return <Loading />;
-        // }
-        let csCkKeys,
-            consumerKey,
-            supportedGrantTypes,
-            callbackUrl;
-        if (application) {
-            csCkKeys = this.state.application.keys.get(keyType);
+        let csCkKeys;
+        let consumerKey;
+        let supportedGrantTypes;
+        let callbackUrl;
+        if (keys) {
+            csCkKeys = keys.get(keyType);
             consumerKey = csCkKeys && csCkKeys.consumerKey;
             supportedGrantTypes = csCkKeys && csCkKeys.supportedGrantTypes;
             callbackUrl = csCkKeys && csCkKeys.callbackUrl;
@@ -265,7 +262,7 @@ class KeyConfiguration extends React.Component {
                     <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
                         <FormattedMessage id='token.type' defaultMessage='Token Type' />
                     </InputLabel>
-                    <RadioGroup aria-label='Token Type' name='tokenType' className={classes.group} value={this.state.tokenType} onChange={this.handleTokenTypeChange}>
+                    <RadioGroup aria-label='Token Type' name='tokenType' className={classes.group} value={tokenType} onChange={this.handleTokenTypeChange}>
                         <FormControlLabel value='OAUTH' control={<Radio />} label='OAUTH' />
                         <FormControlLabel value='JWT' control={<Radio />} label='JWT' />
                     </RadioGroup>
