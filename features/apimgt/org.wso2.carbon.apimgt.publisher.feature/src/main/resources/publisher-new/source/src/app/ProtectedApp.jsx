@@ -22,8 +22,6 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import qs from 'qs';
-import Log from 'log4javascript';
-import ConfigManager from 'AppData/ConfigManager';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import { PageNotFound } from 'AppComponents/Base/Errors';
 import Apis from 'AppComponents/Apis/Apis';
@@ -36,7 +34,6 @@ import Configurations from 'Config';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 
 const themes = [];
-console.log(Configurations);
 themes.push(createMuiTheme(Configurations.themes.light));
 themes.push(createMuiTheme(Configurations.themes.dark));
 
@@ -67,14 +64,6 @@ export default class Protected extends Component {
         if (storedThemeIndex) {
             this.setState({ themeIndex: parseInt(storedThemeIndex, 10) });
         }
-        ConfigManager.getConfigs()
-            .environments.then((response) => {
-                this.environments = response.data.environments;
-                // this.handleEnvironmentQueryParam(); todo: do we really need to handle environment query params here ?
-            })
-            .catch((error) => {
-                Log.error('Error while receiving environment configurations : ', error);
-            });
         const user = AuthManager.getUser();
         if (user) {
             this.setState({ user });

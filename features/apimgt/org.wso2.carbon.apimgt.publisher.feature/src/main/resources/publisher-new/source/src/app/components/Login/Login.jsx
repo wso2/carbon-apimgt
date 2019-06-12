@@ -33,7 +33,6 @@ import PropTypes from 'prop-types';
 import AuthManager from 'AppData/AuthManager';
 import Footer from 'AppComponents/Base/Footer/Footer';
 import User from 'AppData/User';
-import ConfigManager from 'AppData/ConfigManager';
 import Utils from 'AppData/Utils';
 import { Redirecting, Progress } from 'AppComponents/Shared';
 import { FormattedMessage } from 'react-intl';
@@ -68,38 +67,6 @@ class Login extends Component {
         };
         this.fetch_DCRAppInfo = this.fetchDCRAppInfo.bind(this);
         this.handleRedirectionFromIDP = this.handleRedirectionFromIDP.bind(this);
-    }
-
-    /**
-     * @inheritDoc
-     * @memberof Login
-     */
-    componentDidMount() {
-        let idToken = this.handleRedirectionFromIDP();
-        // Get Environments and SSO data
-        ConfigManager.getConfigs()
-            .environments.then((response) => {
-                const { environments } = response.data;
-                let environmentId = Utils.getEnvironmentID(environments);
-                if (environmentId === -1) {
-                    environmentId = 0;
-                }
-                this.setState({ environments, environmentId });
-
-                // Update environment to discard default environment configuration
-                const environment = environments[environmentId];
-                Utils.setEnvironment(environment);
-
-                // Set authentication status of environments
-                this.setLoginStatusOfEnvironments(environments);
-
-                // Fetch DCR App data and handle SSO login if redirected from IDP
-                this.fetchDCRAppInfo(environments, idToken);
-                idToken = null; // Discard ID Token
-            })
-            .catch((error) => {
-                console.error('Error while receiving environment configurations : ', error);
-            });
     }
 
     setLoginStatusOfEnvironments(environments) {
