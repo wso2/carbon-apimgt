@@ -1110,7 +1110,7 @@ public interface APIProvider extends APIManager {
      * @return UUID of the api product
      * @throws APIManagementException exception
      */
-    String addAPIProduct(APIProduct product) throws APIManagementException;
+    String addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
     
     /**
      * Return the API product based on the UUID and tenant domain

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -303,7 +304,9 @@ public class APIGatewayManager {
         long startTimePublishToGateway = 0;
         long apiGetStartTime = 0;
 
-        APIIdentifier id = new APIIdentifier(PRODUCT_PREFIX, apiProduct.getName(), PRODUCT_VERSION);
+        APIProductIdentifier apiProductId = apiProduct.getId();
+
+        APIIdentifier id = new APIIdentifier(PRODUCT_PREFIX, apiProductId.getName(), PRODUCT_VERSION);
 
         if (debugEnabled) {
             log.debug("API to be published: " + id);

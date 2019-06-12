@@ -12983,6 +12983,7 @@ public class ApiMgtDAO {
         if(log.isDebugEnabled()) {
             log.debug("addAPIProduct() : " + apiproduct.toString() + " for tenant " + tenantDomain);
         }
+        APIProductIdentifier identifier = apiproduct.getId();
         ResultSet rs = null;
         int productId = 0;
         int scopeId = 0;
@@ -12991,8 +12992,8 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             String queryAddAPIProduct = SQLConstants.ADD_API_PRODUCT;
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_product_id"});
-            prepStmtAddAPIProduct.setString(1, apiproduct.getProvider());
-            prepStmtAddAPIProduct.setString(2, apiproduct.getName());
+            prepStmtAddAPIProduct.setString(1, identifier.getProviderName());
+            prepStmtAddAPIProduct.setString(2, identifier.getName());
             prepStmtAddAPIProduct.setString(3, apiproduct.getDescription());
             List<String> tierList = new ArrayList<String>();
             Set<Tier> tiers = apiproduct.getAvailableTiers();
@@ -13000,7 +13001,7 @@ public class ApiMgtDAO {
                 tierList.add(tier.getName());
             }
             prepStmtAddAPIProduct.setString(4, StringUtils.join(tierList,","));
-            prepStmtAddAPIProduct.setString(5, apiproduct.getProvider());
+            prepStmtAddAPIProduct.setString(5, identifier.getProviderName());
             prepStmtAddAPIProduct.setString(6, apiproduct.getVisibility());
             prepStmtAddAPIProduct.setString(7, apiproduct.getSubscriptionAvailability());
             prepStmtAddAPIProduct.setString(8, apiproduct.getUuid());
@@ -13034,8 +13035,8 @@ public class ApiMgtDAO {
             addAPIProductResourceMappings(apiproduct, productId, connection);
             connection.commit();
         } catch (SQLException e) {
-            handleException("Error while adding API product " + apiproduct.getName() + " of provider "
-                    + apiproduct.getProvider(), e);
+            handleException("Error while adding API product " + identifier.getName() + " of provider "
+                    + identifier.getProviderName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddAPIProduct, null, null);
             APIMgtDBUtil.closeAllConnections(prepStmtAddScopeEntry, connection, null);
@@ -13064,19 +13065,17 @@ public class ApiMgtDAO {
             //add the resources in each API in the API product.
             List<APIProductResource> productApis = apiProduct.getProductResources();
             for (APIProductResource apiProductResource : productApis) {
-                List<URITemplate> uriTemplates = apiProductResource.getResources();
-                for (URITemplate uriTemplate : uriTemplates) {
-                    prepStmtAddResourceMapping.setInt(1, productId);
-                    prepStmtAddResourceMapping.setInt(2, uriTemplate.getId());
-                    prepStmtAddResourceMapping.addBatch();
-                }
+                URITemplate uriTemplate = apiProductResource.getUriTemplate();
+                prepStmtAddResourceMapping.setInt(1, productId);
+                prepStmtAddResourceMapping.setInt(2, uriTemplate.getId());
+                prepStmtAddResourceMapping.addBatch();
             }
 
             prepStmtAddResourceMapping.executeBatch();
             prepStmtAddResourceMapping.clearBatch();
         } catch (SQLException e) {
-            handleException("Error while adding API product " + apiProduct.getName() + " of provider " + apiProduct
-                    .getProvider(), e);
+            handleException("Error while adding API product " + apiProduct.getId().getName() + " of provider " + apiProduct
+                    .getId().getProviderName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, null, null);
         }
@@ -13133,10 +13132,13 @@ public class ApiMgtDAO {
             rs = prepStmtGetAPIProduct.executeQuery();
             if (rs.next()) {
                 product = new APIProduct();
+                String productName = rs.getString("API_PRODUCT_NAME");
+                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
+                String productVersion = rs.getString("API_PRODUCT_VERSION");
+                APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
+                product.setID(id);
                 product.setUuid(rs.getString("UUID"));
                 product.setDescription(rs.getString("DESCRIPTION"));
-                product.setProvider(rs.getString("API_PRODUCT_PROVIDER"));
-                product.setName(rs.getString("API_PRODUCT_NAME"));
                 String productTiers = rs.getString("API_PRODUCT_TIER");
                 if (!StringUtils.isEmpty(productTiers)) {
                     String[] tierArray = productTiers.split(",");
@@ -13199,7 +13201,7 @@ public class ApiMgtDAO {
                 template.setHTTPVerb(rs2.getString("HTTP_METHOD"));
                 template.setResourceURI(rs2.getString("URL_PATTERN"));
                 template.setId(rs2.getInt("URL_MAPPING_ID"));
-                resource.setResource(template);
+                resource.setUriTemplate(template);
                 resourceMap.put(apiId, resource);
             }
             product.setProductResources(new ArrayList<APIProductResource>(resourceMap.values()));
@@ -13305,7 +13307,7 @@ public class ApiMgtDAO {
                         if (log.isDebugEnabled()) {
                             log.debug(
                                     "Removing url mappings from API : " + api.getId().toString() + " on API product : "
-                                            + apiProduct.getName());
+                                            + apiProduct.getId().toString());
                         }
 
                         preparedStatement.setInt(1, uriTemplate.getId());
@@ -13367,7 +13369,7 @@ public class ApiMgtDAO {
                         } else {
                             log.info("Resource " + key + " was deleted from API " + api.getId().toString()
                                     + " while updating the API. So it is no longer available with API product "
-                                    + apiProduct.getName());
+                                    + apiProduct.getId().toString());
 
                         }
                     }

@@ -49,6 +49,10 @@ public class APIProduct {
     private String responseCache;
     private int cacheTimeout;
 
+    // Used for keeping Production & Sandbox Throttling limits.
+    private String productionMaxTps;
+    private String sandboxMaxTps;
+
     public APIProduct(){}
 
     public APIProduct(APIProductIdentifier id) {

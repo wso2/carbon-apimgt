@@ -298,14 +298,14 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
-   * List of gateway environments the API Product is available
+   * List of gateway environments the API Product is available 
    **/
   public APIProductDTO gatewayEnvironments(List<String> gatewayEnvironments) {
     this.gatewayEnvironments = gatewayEnvironments;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "[\"Production and Sandbox\"]", value = "List of gateway environments the API Product is available ")
   @JsonProperty("gatewayEnvironments")
   public List<String> getGatewayEnvironments() {

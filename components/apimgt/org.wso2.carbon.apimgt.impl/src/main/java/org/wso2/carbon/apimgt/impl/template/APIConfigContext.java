@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.template;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
@@ -90,8 +91,9 @@ public class APIConfigContext extends ConfigContext {
     }
 
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
+        APIProductIdentifier id = apiProduct.getId();
         //set the api name version and context
-        context.put("apiName", apiProduct.getProvider() + "--" + apiProduct.getName());
+        context.put("apiName", id.getProviderName() + "--" + id.getName());
         context.put("apiVersion", "1.0.0");
 
         // We set the context pattern now to support plugable version strategy
