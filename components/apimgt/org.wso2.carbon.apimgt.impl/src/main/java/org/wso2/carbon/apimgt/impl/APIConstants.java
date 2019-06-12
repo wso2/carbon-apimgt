@@ -373,6 +373,17 @@ public final class APIConstants {
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
     public static final String FEDERATED_USER = "FEDERATED";
 
+    //Monetization related constants
+    public static final String MONETIZATION_IMPL = "Monetization." + "MonetizationImpl";
+    public static final String TYPE = "type";
+    public static final String CURRENCY = "currencyType";
+    public static final String BILLING_CYCLE = "billingCycle";
+    public static final String FIXED_RATE = "fixedRate";
+    public static final String FIXED_PRICE = "fixedPrice";
+    public static final String PRICE_PER_REQUEST = "pricePerRequest";
+    public static final String API_MONETIZATION_STATUS = "isMonetizationEnabled";
+    public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";
+
     //documentation rxt
 
     public static final String DOC_NAME = "overview_name";
@@ -1373,7 +1384,10 @@ public final class APIConstants {
         public static final String ATTRIBUTES = "Attributes";
         public static final String ATTRIBUTE = "Attribute";
         public static final String REQUIRED = "Required";
+        public static final String HIDDEN = "Hidden";
         public static final String DESCRIPTION = "Description";
+        public static final String DEFAULT = "Default";
+        public static final String NAME = "Name";
     }
 
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";

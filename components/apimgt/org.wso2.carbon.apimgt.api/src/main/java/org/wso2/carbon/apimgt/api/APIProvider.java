@@ -686,6 +686,22 @@ public interface APIProvider extends APIManager {
     void validateResourceThrottlingTiers(API api, String tenantDomain) throws APIManagementException;
 
     /**
+     * This method is used to configure monetization for a given API
+     *
+     * @param api API to be updated with monetization
+     * @throws APIManagementException if it failed to update the monetization status and data
+     */
+    void configureMonetizationInAPIArtifact(API api) throws APIManagementException;
+
+    /**
+     * This method is used to get the implementation class for monetization
+     *
+     * @return implementation class for monetization
+     * @throws APIManagementException if failed to get implementation class for monetization
+     */
+    Monetization getMonetizationImplClass() throws APIManagementException;
+
+    /**
      * This method is used to initiate the web service calls and cluster messages related to stats publishing status
      *
      * @param receiverUrl   event receiver url

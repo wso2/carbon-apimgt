@@ -15,7 +15,5 @@ import javax.ws.rs.core.Response;
 
 public abstract class ExportApiService {
     public abstract Response exportApplicationsGet(String appName,String appOwner);
-
-    public abstract String exportApplicationsGetGetLastUpdatedTime(String appName,String appOwner);
 }
 

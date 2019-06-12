@@ -38,7 +38,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import ChipInput from 'material-ui-chip-input';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
+import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import ApiContext from '../components/ApiContext';
 
 const styles = theme => ({
@@ -332,7 +332,7 @@ class Configuration extends React.Component {
                                     <div className={classes.imageContainer}>
                                         <div className={classes.imageWrapper}>
                                             {/* Thumbnail */}
-                                            <ThumbnailView api={api} width={200} height={200} />
+                                            <ThumbnailView api={api} width={200} height={200} isEditable />
                                         </div>
                                         <div className={classes.rightDataColum}>
                                             <Typography component='p' variant='subtitle2' className={classes.subtitle}>

@@ -1174,6 +1174,11 @@ paths:
           type: string
           in: query
           required: true
+        - name: defaultVersion
+          description: Specifies whether new API should be added as default version.
+          type: boolean
+          default: false
+          in: query
         - $ref: '#/parameters/apiId-Q'
       tags:
         - API (Individual)
@@ -1631,6 +1636,147 @@ paths:
           description: |
             Not Found.
             Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+#########################################################
+# The "Configure Monetization" Processing Function resource API
+#########################################################
+  /apis/{apiId}/monetize:
+#---------------------------------------
+# Configure monetization for a given API
+#---------------------------------------
+    post:
+      x-scope: apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"properties\":{\r\n      \"vendor\":\"test\",\r\n      \"type\":\"postpaid\"\r\n   }\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"properties\":{\r\n      \"vendor\":\"test\",\r\n      \"type\":\"postpaid\"\r\n   }\r\n}"
+      summary: Configure monetization for a given API
+      description: |
+        This operation can be used to configure monetization for a given API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Monetization data object
+          required: true
+          schema:
+            $ref: '#/definitions/APIMonetizationInfo'
+      tags:
+        - API (Individual)
+      responses:
+        201:
+          description: |
+            OK.
+            Monetization status changed successfully.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#########################################################
+# The get monetizied policies processing function resource API
+#########################################################
+  /apis/{apiId}/monetization:
+#---------------------------------------
+# Get monetized policies for a given API
+#---------------------------------------
+    get:
+      x-scope: apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization\""
+      x-wso2-request: "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"monetizedTiers\":{\r\n      \"tier1\":\"enabled\",\r\n      \"tier2\":\"disabled\"\r\n   }\r\n}"
+      summary: Get monetization status for each tier in a given API
+      description: |
+        This operation can be used to get monetization status for each tier in a given API
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Monetization status for each tier returned successfully.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Get Total Revenue" Processing Function resource API
+######################################################
+  /apis/{apiId}/revenue:
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/revenue"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/revenue
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"object\": \"invoice\",\n   \"account_country\": \"US\",\n   \"account_name\": \"test.com\",\n   \"amount_due\": \"0\",\n   \"amount_paid\": \"0\"\n  \"amount_remaining\": \"0\"\n}"
+      security:
+        - OAuth2Security:
+          - apim:api_publish
+      summary: Get total revenue details of a given monetized API with meterd billing.
+      description: |
+        This operation can be used to get details of total revenue details of a given monetized API with meterd billing.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Details of a total revenue returned.
+          schema:
+            $ref: '#/definitions/APIRevenue'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+            Last-Modified:
+              description: 'Date and time the resource has been modified the last time. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+        '304':
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        '404':
+          description: |
+            Not Found.
+            Requested Subscription does not exist.
           schema:
             $ref: '#/definitions/Error'
 
@@ -2948,6 +3094,54 @@ paths:
               type: string
             Last-Modified:
               description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+        '304':
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        '404':
+          description: |
+            Not Found.
+            Requested Subscription does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The get usage billing resource APIs
+######################################################
+  '/subscriptions/{subscriptionId}/usage':
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"object\": \"invoice\",\n   \"account_country\": \"US\",\n   \"account_name\": \"test.com\",\n   \"amount_due\": \"0\",\n   \"amount_paid\": \"0\"\n  \"amount_remaining\": \"0\"\n}"
+      security:
+        - OAuth2Security:
+          - apim:subscription_view
+      summary: Get details of a pending invoice for a monetized subscription with meterd billing.
+      description: |
+        This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing.
+      parameters:
+        - $ref: '#/parameters/subscriptionId'
+      tags:
+        - Subscription (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Details of a pending invoice returned.
+          schema:
+            $ref: '#/definitions/APIMonetizationUsage'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+            Last-Modified:
+              description: 'Date and time the resource has been modified the last time. Used by caches, or in conditional requests (Will be supported in future).'
               type: string
         '304':
           description: |
@@ -4882,6 +5076,8 @@ definitions:
         additionalProperties:
           type: string
         description : Map of custom properties of API
+      monetization:
+        $ref: '#/definitions/APIMonetizationInfo'
       accessControl:
         type: string
         description: |
@@ -5300,6 +5496,29 @@ definitions:
             type: string
             example: 01234567-0123-0123-0123-012345678901
 
+  #-----------------------------------------------------
+  # The API monetization usage resource
+  #-----------------------------------------------------
+  APIMonetizationUsage:
+    title: API monetization usage object
+    properties:
+      properties:
+        type: object
+        description: Map of custom properties related to monetization usage
+        additionalProperties:
+          type: string
+
+  #-----------------------------------------------------
+  # The API revenue resource
+  #-----------------------------------------------------
+  APIRevenue:
+    title: API revenue data object
+    properties:
+      properties:
+        type: object
+        description: Map of custom properties related to API revenue
+        additionalProperties:
+          type: string
 
 #-----------------------------------------------------
 # The Mediation Policy resource
@@ -6056,6 +6275,24 @@ definitions:
           thumbnailUri:
             type: string
             example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+
+  #-----------------------------------------------------
+  # The API monetization resource
+  #-----------------------------------------------------
+  APIMonetizationInfo:
+    title: API monetization object
+    required:
+      - enabled
+    properties:
+      enabled:
+        type: boolean
+        description: Flag to indicate the monetization status
+        example: true
+      properties:
+        type: object
+        description: Map of custom properties related to monetization
+        additionalProperties:
+          type: string
 
   DocumentSearchResult:
     title: Document Result

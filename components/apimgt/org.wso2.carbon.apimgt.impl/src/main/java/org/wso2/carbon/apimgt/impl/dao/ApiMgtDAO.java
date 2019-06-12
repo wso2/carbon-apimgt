@@ -1422,6 +1422,48 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
+    public Set<Scope> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
+            throws APIManagementException {
+        HashMap<String, Scope> scopeHashMap = new HashMap<>();
+        int tenantId = APIUtil.getTenantId(subscriber.getName());
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            String sqlQueryforGetSubscribedApis = SQLConstants.GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL;
+            String sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_API_PREFIX + sqlQueryforGetSubscribedApis +
+                    SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+
+            if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL + sqlQueryforGetSubscribedApis +
+                        SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+            }
+            try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
+                statement.setInt(1, tenantId);
+                statement.setInt(2, applicationId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        Scope scope;
+                        String scopeKey = resultSet.getString(1);
+                        if (scopeHashMap.containsKey(scopeKey)) {
+                            // scope already exists append roles.
+                            scope = scopeHashMap.get(scopeKey);
+                            scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                        } else {
+                            scope = new Scope();
+                            scope.setKey(scopeKey);
+                            scope.setName(resultSet.getString(2));
+                            scope.setDescription(resultSet.getString(3));
+                            scope.setRoles(resultSet.getString(4).trim());
+                        }
+                        scopeHashMap.put(scopeKey, scope);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve scopes ", e);
+        }
+        return populateScopeSet(scopeHashMap);
+    }
+
     private Set<APIKey> getAPIKeysBySubscription(int subscriptionId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement ps = null;
@@ -4447,8 +4489,6 @@ public class ApiMgtDAO {
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
                 application.setOwner(rs.getString("CREATED_BY"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
-                applicationAttributes = getApplicationAttributes(connection, applicationId);
-                application.setApplicationAttributes(applicationAttributes);
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
@@ -8366,9 +8406,9 @@ public class ApiMgtDAO {
                 if (scopeHashMap.containsKey(scopeKey)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeKey);
-                    String roles = scope.getRoles();
+                    String roles = resultSet.getString(4);
                     if (StringUtils.isNotEmpty(roles)) {
-                        scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                        scope.setRoles(scope.getRoles().concat("," + roles.trim()));
                     }
                 } else {
                     scope = new Scope();
@@ -8409,14 +8449,20 @@ public class ApiMgtDAO {
                 if (scopeHashMap.containsKey(scopeId)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeId);
-                    scope.setRoles(scope.getRoles().concat("," + resultSet.getString(5)).trim());
+                    String roles = resultSet.getString(5);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(scope.getRoles().concat("," + roles.trim()));
+                    }
                 } else {
                     scope = new Scope();
                     scope.setId(scopeId);
                     scope.setKey(resultSet.getString(2));
                     scope.setName(resultSet.getString(3));
                     scope.setDescription(resultSet.getString(4));
-                    scope.setRoles(resultSet.getString(5).trim());
+                    String roles = resultSet.getString(5);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(roles.trim());
+                    }
                 }
                 scopeHashMap.put(scopeId, scope);
             }
@@ -8463,14 +8509,20 @@ public class ApiMgtDAO {
                 if (scopeHashMap.containsKey(scopeId)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeId);
-                    scope.setRoles(scope.getRoles().concat("," + resultSet.getString(6)).trim());
+                    String roles = resultSet.getString(6);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(scope.getRoles().concat("," + roles.trim()));
+                    }
                 } else {
                     scope = new Scope();
                     scope.setId(scopeId);
                     scope.setKey(resultSet.getString(2));
                     scope.setName(resultSet.getString(3));
                     scope.setDescription(resultSet.getString(4));
-                    scope.setRoles(resultSet.getString(6).trim());
+                    String roles = resultSet.getString(6);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(roles.trim());
+                    }
                 }
                 scopeHashMap.put(scopeId, scope);
             }
@@ -9478,6 +9530,18 @@ public class ApiMgtDAO {
             policyStatement.setString(15, policy.getBillingPlan());
             if (hasCustomAttrib) {
                 policyStatement.setBytes(16, policy.getCustomAttributes());
+                policyStatement.setString(17, policy.getMonetizationPlan());
+                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+            } else {
+                policyStatement.setString(16, policy.getMonetizationPlan());
+                policyStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+
             }
             policyStatement.executeUpdate();
 
@@ -10049,6 +10113,17 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                monetizationPlanProperties.put(APIConstants.FIXED_PRICE,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
+                monetizationPlanProperties.put(APIConstants.BILLING_CYCLE,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
+                monetizationPlanProperties.put(APIConstants.PRICE_PER_REQUEST,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
+                monetizationPlanProperties.put(APIConstants.CURRENCY,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
+                subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -10934,17 +11009,38 @@ public class ApiMgtDAO {
                 updateStatement.setBinaryStream(12, new ByteArrayInputStream(policy.getCustomAttributes()),
                         lengthOfStream);
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(13, policy.getPolicyName());
-                    updateStatement.setInt(14, policy.getTenantId());
+                    updateStatement.setString(13, policy.getMonetizationPlan());
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(18, policy.getPolicyName());
+                    updateStatement.setInt(19, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(13, policy.getUUID());
+                    updateStatement.setString(13, policy.getMonetizationPlan());
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(18, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(12, policy.getPolicyName());
-                    updateStatement.setInt(13, policy.getTenantId());
+                    updateStatement.setString(12, policy.getMonetizationPlan());
+                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(17, policy.getPolicyName());
+                    updateStatement.setInt(18, policy.getTenantId());
+
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(12, policy.getUUID());
+                    updateStatement.setString(12, policy.getMonetizationPlan());
+                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(17, policy.getUUID());
                 }
             }
             updateStatement.executeUpdate();
@@ -12771,7 +12867,7 @@ public class ApiMgtDAO {
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 if (multiGroupAppSharingEnabled) {
-                    if (application.getGroupId().isEmpty()) {
+                    if (StringUtils.isEmpty(application.getGroupId())) {
                         application.setGroupId(getGroupId(application.getId()));
                     }
                 }

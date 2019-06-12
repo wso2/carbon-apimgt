@@ -22,15 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import ArrowForward from '@material-ui/icons/ArrowForward';
-import InputBase from '@material-ui/core/InputBase';
-import Select from '@material-ui/core/Select';
-import Input from '@material-ui/core/Input';
-import MenuItem from '@material-ui/core/MenuItem';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import Radio from '@material-ui/core/Radio';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Button from  '@material-ui/core/Button';
+import Button from '@material-ui/core/Button';
 import Alert from '../../../Shared/Alert';
 
 // import ApiContext from '../../ApiContext'
@@ -39,8 +31,6 @@ import Application from '../../../../data/Application';
 import ApplicationCreate from '../../../Shared/AppsAndKeys/ApplicationCreate';
 import SubscribeToApi from '../../../Shared/AppsAndKeys/SubscribeToApi';
 import Keys from '../../../Shared/AppsAndKeys/KeyConfiguration';
-import Tokens from '../../../Shared/AppsAndKeys/Tokens';
-import ViewToken from '../../../Shared/AppsAndKeys/ViewToken';
 import { ApiContext } from '../ApiContext';
 
 const styles = theme => ({
@@ -76,6 +66,7 @@ const styles = theme => ({
         flexDirection: 'row',
     },
 });
+const restApi = new API();
 
 class ExpressMode extends Component {
     constructor(props) {
@@ -90,9 +81,7 @@ class ExpressMode extends Component {
             tokenType: 'OAUTH',
             callBackURL: 'http://localhost',
             supportedGrantTypes: ['client_credentials'],
-            restApplication: null,
         };
-        this.restApi = new API();
     }
 
     /**
@@ -102,8 +91,8 @@ class ExpressMode extends Component {
      */
     componentDidMount() {
         // Get all the tires to populate the drop down.
-        const promised_tiers = this.restApi.getAllTiers('application');
-        promised_tiers
+        const promiseTiers = restApi.getAllTiers('application');
+        promiseTiers
             .then((response) => {
                 const tierResponseObj = response.body;
                 const tiers = [];
@@ -118,7 +107,7 @@ class ExpressMode extends Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -131,47 +120,47 @@ class ExpressMode extends Component {
     }
 
     /**
-     *
-     *
+     * Create new application and generate keys
+     * enerate credentials
      * @memberof ApplicationCreate
      */
-    handleInputChange = name => (event) => {
-        this.setState({ [name]: event.target.value });
-    };
     generateCredentials = () => {
-        let { api } = this.props;
-        let { name, quota, description, supportedGrantTypes, callbackUrl, tokenType } = this.state;
-        const application_data = {
-            name: name,
+        const { api } = this.props;
+        const {
+            name, quota, description, supportedGrantTypes, callbackUrl, tokenType,
+        } = this.state;
+        const applicationData = {
+            name,
             throttlingTier: quota,
-            description: description,
+            description,
         };
-        this.restApi.createApplication(application_data).then((response) => {
-            const appCreated = JSON.parse(response.data);
-            // Once application loading fixed this need to pass application ID and load app
-            console.log('Application created successfully.', appCreated, api);
-            const restApplication = Application.get(appCreated.applicationId);
+        restApi.createApplication(applicationData)
+            .then((response) => {
+                const appCreated = JSON.parse(response.data);
+                // Once application loading fixed this need to pass application ID and load app
+                console.log('Application created successfully.', appCreated, api);
+                const restApplication = Application.get(appCreated.applicationId);
 
-            
-            const promiseKey = restApplication.generateKeys("SANDBOX", supportedGrantTypes, callbackUrl, tokenType);
-            promiseKey.then( (x) => {
-                console.info(x);
-            }).catch( (error) => {
-                console.info(error);
-            } );
 
-    
-        })
-        .catch((error_response) => {
-            Alert.error('Application already exists.');
-            console.log('Error while creating the application');
-        });
-    }
+                const promiseKey = restApplication.generateKeys('SANDBOX', supportedGrantTypes, callbackUrl, tokenType);
+                promiseKey.then((x) => {
+                    console.info(x);
+                }).catch((error) => {
+                    console.info(error);
+                });
+            })
+            .catch(() => {
+                Alert.error('Application already exists.');
+                console.log('Error while creating the application');
+            });
+    };
+
     render() {
         const { classes, api } = this.props;
-        let {
-            newApp, tiers, appName, appDescription, quota, apiPolicyName, tokenType, callBackURL, 
+        const {
+            newApp, tiers, appName, appDescription, quota, tokenType, callBackURL,
         } = this.state;
+        let { apiPolicyName } = this.state;
         const apiTiersList = [];
         if (api && api.policies) {
             for (let i = 0; i < api.policies.length; i++) {
@@ -182,54 +171,64 @@ class ExpressMode extends Component {
                 apiPolicyName = apiTiersList[0].value;
             }
         }
-        let supportedGrantTypes=  ['client_credentials'];
+        const supportedGrantTypes = ['client_credentials'];
         return (
             <ApiContext.Consumer>
                 {({ api, applicationsAvailable }) => (
-                <Grid container spacing={24} className={classes.root}>
-                    <Grid item xs={12}>
-                        <Typography variant='body1'>
+                    <Grid container spacing={24} className={classes.root}>
+                        <Grid item xs={12}>
+                            <Typography variant='body1'>
                             Express mode take you through application creation, key generation, and subscription process
                             with following settings in one go. Click the values to change them to new values.
-                        </Typography>
-                        <Button variant="contained" color="primary" className={classes.button} onClick={this.generateCredentials}>
-                            Generate Credentials for 
-                        </Button>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <div className={classes.arrowTextContainer}>
-                            <Typography variant='body1'>New Application</Typography>
-                            <ArrowForward />
-                        </div>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <div className={classes.arrowTextContainer}>
-                            <Typography variant='body1'>
-                                Subscribe <strong>{api.name}</strong> to Application <strong>{appName}</strong>
                             </Typography>
-                            <ArrowForward />
-                        </div>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                className={classes.button}
+                                onClick={this.generateCredentials}
+                            >
+                            Generate Credentials for
+                            </Button>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <div className={classes.arrowTextContainer}>
+                                <Typography variant='body1'>New Application</Typography>
+                                <ArrowForward />
+                            </div>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <div className={classes.arrowTextContainer}>
+                                <Typography variant='body1'>
+                                Subscribe <strong>{api.name}</strong> to Application <strong>{appName}</strong>
+                                </Typography>
+                                <ArrowForward />
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div className={classes.arrowTextContainer}>
+                                <Typography variant='body1'>Generate Keys</Typography>
+                            </div>
+                        </Grid>
+                        <Grid item xs={3}>
+                            <ApplicationCreate innerRef={(node) => { this.applicationCreate = node; }} />
+                        </Grid>
+                        <Grid item xs={3}>
+
+                            <SubscribeToApi
+                                innerRef={(node) => { this.subscribeToApi = node; }}
+                                newApp={newApp}
+                                api={api}
+                                applicationsAvailable={applicationsAvailable}
+                            />;
+
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Keys innerRef={(node) => { this.keys = node; }} selectedApp={newApp} keyType='SANDBOX' />
+
+                        </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                        <div className={classes.arrowTextContainer}>
-                            <Typography variant='body1'>Generate Keys</Typography>
-                        </div>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <ApplicationCreate innerRef={node => (this.applicationCreate = node)} />
-                    </Grid>
-                    <Grid item xs={3}>
-                        
-                        <SubscribeToApi innerRef={node => (this.subscribeToApi = node)} newApp={newApp} api={api} applicationsAvailable={applicationsAvailable} />;
-                        
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Keys innerRef={node => (this.keys = node)} selectedApp={newApp} keyType='SANDBOX' />
-                        
-                    </Grid>
-                </Grid>
                 )}
-                </ApiContext.Consumer>
+            </ApiContext.Consumer>
         );
     }
 }

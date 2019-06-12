@@ -45,10 +45,5 @@ public class ExportApi  {
     {
     return delegate.exportApplicationsGet(appName,appOwner);
     }
-
-    public String exportApplicationsGetGetLastUpdatedTime(String appName,String appOwner)
-    {
-        return delegate.exportApplicationsGetGetLastUpdatedTime(appName,appOwner);
-    }
 }
 
