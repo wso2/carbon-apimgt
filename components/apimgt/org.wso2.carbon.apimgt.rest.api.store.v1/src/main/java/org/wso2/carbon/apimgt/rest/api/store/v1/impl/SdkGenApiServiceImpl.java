@@ -18,15 +18,39 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApiService;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 public class SdkGenApiServiceImpl implements SdkGenApiService {
+
+    private static final Log log = LogFactory.getLog(SdkGenApiServiceImpl.class);
+
+    /**
+     * Rest API implementation to get the supported sdk languages
+    */
     @Override
     public Response sdkGenLanguagesGet(MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+
+        APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
+        String supportedLanguages = apiClientGenerationManager.getSupportedSDKLanguages();
+
+        if (StringUtils.isNotEmpty(supportedLanguages)) {
+            // Split the string with ',' and add them to a list.
+            List<String> lanuagesList = Arrays.stream(supportedLanguages.split(",")).collect(Collectors.toList());
+            return Response.ok().entity(lanuagesList).build();
+        }
+        String message = "Could not find the supported sdk languages";
+        RestApiUtil.handleInternalServerError(message, log);
+        return null;
     }
 }
