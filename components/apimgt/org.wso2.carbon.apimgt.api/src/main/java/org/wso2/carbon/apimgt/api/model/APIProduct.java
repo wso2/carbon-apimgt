@@ -165,6 +165,10 @@ public class APIProduct {
         this.environments = environments;
     }
 
+    public Set<String> getEnvironments() {
+        return environments;
+    }
+
     /**
      * To get the additional properties
      *
