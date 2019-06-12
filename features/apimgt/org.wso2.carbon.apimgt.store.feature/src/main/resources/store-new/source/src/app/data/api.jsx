@@ -446,10 +446,14 @@ export default class API extends Resource {
      * @returns {Promise} List of languages that supports SDK generation by swagger-codegen
      */
     getSdkLanguages() {
-        const promiseLanguages = this.client.then((client) => {
-            return client.apis['SDK Languages'].get_sdk_gen_languages({}, this._requestMetaData());
-        });
-        return promiseLanguages;
+        const promise_languages = this.client.then(
+            (client) => {
+                return client.apis.SDKs.get_sdk_gen_languages(
+                    {}, this._requestMetaData(),
+                );
+            },
+        );
+        return promise_languages;
     }
 
     /**
@@ -458,10 +462,15 @@ export default class API extends Resource {
      */
     getSdk(apiId, language) {
         const payload = { apiId, language };
-        const promiseSdk = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__sdks__language_(payload, this._requestMetaData());
-        });
-        return promiseSdk;
+
+        const promise_sdk = this.client.then(
+            (client) => {
+                return client.apis.SDKs.get_apis__apiId__sdks__language_(
+                    payload, this._requestMetaData(),
+                );
+            },
+        );
+        return promise_sdk;
     }
 
     /**

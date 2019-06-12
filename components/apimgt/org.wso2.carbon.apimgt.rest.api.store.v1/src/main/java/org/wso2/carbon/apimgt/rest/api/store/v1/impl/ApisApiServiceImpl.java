@@ -29,12 +29,15 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
+import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -49,6 +52,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApisApiServiceImpl implements ApisApiService {
@@ -289,10 +293,42 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
+    /**
+     * Rest api implementation to downloading the client sdk for given api in given sdk language.
+     *
+     * @param apiId : The id of the api.
+     * @param language : Preferred sdk language.
+     * @param messageContext : messageContext
+     * @return : The sdk as a zip archive.
+     */
     @Override
     public Response apisApiIdSdksLanguageGet(String apiId, String language, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+
+        if (StringUtils.isEmpty(apiId) || StringUtils.isEmpty(language)) {
+            String message = "Error generating the SDK. API id or language should not be empty";
+            RestApiUtil.handleBadRequest(message, log);
+        }
+        String tenant = RestApiUtil.getLoggedInUserTenantDomain();
+        APIDTO api = getAPIByAPIId(apiId, tenant);
+        APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
+        Map<String, String> sdkArtifacts;
+        if (api != null) {
+            String apiProvider = api.getProvider();
+            try {
+                sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(),
+                        api.getVersion(), apiProvider);
+                //Create the sdk response.
+                File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
+                return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
+                        "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"" ).build();
+            } catch (APIClientGenerationException e) {
+                String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
+                RestApiUtil.handleInternalServerError(message, e, log);
+            }
+        } 
+        String message = "Could not find an API for ID " + apiId;
+        RestApiUtil.handleResourceNotFoundError(message, log);
+        return null;
     }
 
     /**

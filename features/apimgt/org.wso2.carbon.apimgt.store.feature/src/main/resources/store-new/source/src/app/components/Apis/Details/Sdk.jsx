@@ -180,15 +180,14 @@ class Sdk extends React.Component {
                                     <Card>
                                         <div>{language.toString().toUpperCase()}</div>
                                         <Divider />
-                                        <CardMedia title={language.toString().toUpperCase()} src={'/store-new/site/public/app/images/sdks/' + new String(language) + '.svg'}>
-                                            <img alt={language} src={'/store-new/site/public/app/images/sdks/' + new String(language) + '.svg'} style={{ width: '100px', height: '100px', margin: '15px' }} />
+                                        <CardMedia title={language.toString().toUpperCase()} src={'/store-new/site/public/images/sdks/' + new String(language) + '.svg'}>
+                                            <img alt={language} src={'/store-new/site/public/images/sdks/' + new String(language) + '.svg'} style={{ width: '100px', height: '100px', margin: '15px' }} />
                                         </CardMedia>
                                         <CardActions>
                                             <Grid container justify='center'>
                                                 <Button color='secondary' onClick={event => this.handleClick(event, language)}>
                                                     <FileDownload />
-                                                    {' '}
-Download
+                                                    {'Download'}
                                                 </Button>
                                             </Grid>
                                         </CardActions>
