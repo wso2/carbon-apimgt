@@ -28,7 +28,7 @@ import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import API from '../../../data/api';
-import Alert from '../Alert';
+
 /**
  *
  *
@@ -60,10 +60,8 @@ class ApplicationCreate extends Component {
         this.state = {
             quota: 'Unlimited',
             tiers: [],
-            throttlingTier: null,
             description: null,
             name: null,
-            callbackUrl: null,
         };
         this.handleChange = this.handleChange.bind(this);
     }
@@ -76,8 +74,8 @@ class ApplicationCreate extends Component {
     componentDidMount() {
         // Get all the tires to populate the drop down.
         const api = new API();
-        const promised_tiers = api.getAllTiers('application');
-        promised_tiers
+        const promiseTiers = api.getAllTiers('application');
+        promiseTiers
             .then((response) => {
                 const tierResponseObj = response.body;
                 const tiers = [];
@@ -92,7 +90,7 @@ class ApplicationCreate extends Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -107,24 +105,6 @@ class ApplicationCreate extends Component {
     handleChange = name => (event) => {
         this.setState({ [name]: event.target.value });
     };
-
-    /**
-     *
-     *
-     * @memberof ApplicationCreate
-     */
-    handlePolicyChange = name => (event) => {
-        this.setState({ [name]: event.target.value });
-    };
-
-    /**
-     *
-     *
-     * @memberof ApplicationCreate
-     */
-    getAlert() {
-        alert('getAlert from Child');
-    }
 
     /**
      *
@@ -167,8 +147,8 @@ class ApplicationCreate extends Component {
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
-                                helperText='Enter a name to identify the Application. You will be able to pick this application
-                                            when subscribing to APIs '
+                                helperText='Enter a name to identify the Application. You will be able to pick this
+                                application when subscribing to APIs '
                                 fullWidth
                                 name='name'
                                 onChange={this.handleChange('name')}
@@ -183,14 +163,21 @@ class ApplicationCreate extends Component {
                                 <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
                                     Per Token Quota
                                 </InputLabel>
-                                <Select value={this.state.quota} onChange={this.handlePolicyChange('quota')} input={<Input name='quota' id='quota-helper' />}>
+                                <Select
+                                    value={this.state.quota}
+                                    onChange={this.handleChange('quota')}
+                                    input={<Input name='quota' id='quota-helper' />}
+                                >
                                     {this.state.tiers.map(tier => (
                                         <MenuItem key={tier} value={tier}>
                                             {tier}
                                         </MenuItem>
                                     ))}
                                 </Select>
-                                <Typography variant='caption'>Assign API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.</Typography>
+                                <Typography variant='caption'>
+                                    Assign API request quota per access token. Allocated quota will be shared among all
+                                    the subscribed APIs of the application.
+                                </Typography>
                             </FormControl>
                         )}
                         <FormControl margin='normal' className={classes.FormControl}>
