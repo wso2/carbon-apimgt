@@ -17,14 +17,10 @@
  */
 import React from 'react';
 import { unwrap } from '@material-ui/core/test-utils';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
-import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import PublisherRootErrorBoundary from './PublisherRootErrorBoundary';
 
-import Configurations from 'Config';
-import AppErrorBoundary from './AppErrorBoundary';
-
-const UnwrappedAppErrorBoundary = unwrap(AppErrorBoundary);
-describe('AppErrorBoundary test', () => {
+const UnwrappedAppErrorBoundary = unwrap(PublisherRootErrorBoundary);
+describe('PublisherRootErrorBoundary test', () => {
     test('Should return the child element when no exception is thrown', () => {
         const Child = <div>Testing child</div>;
         const Test = <UnwrappedAppErrorBoundary classes={{}}>{Child}</UnwrappedAppErrorBoundary>;
@@ -32,27 +28,25 @@ describe('AppErrorBoundary test', () => {
         expect(shallowRendered.contains(Child)).toBeTruthy();
     });
 
-    test('should return error boundary HTML', () => {
+    test('should return error boundary HTML without any Material UI stylings', () => {
         const message = 'Error boundary test error';
-        const { light } = Configurations.themes;
         const TestError = () => {
             throw new Error(message);
         };
         const TestComponent = (
-            <MuiThemeProvider theme={createMuiTheme(light)}>
-                <AppErrorBoundary>
-                    <TestError />
-                </AppErrorBoundary>
-            </MuiThemeProvider>
+            <PublisherRootErrorBoundary>
+                <TestError />
+            </PublisherRootErrorBoundary>
         );
 
         const wrapper = mount(TestComponent);
-        const renderedAppErrorBoundary = wrapper.find(AppErrorBoundary);
-        expect(renderedAppErrorBoundary.children().state().hasError).toBeTruthy();
-        expect(renderedAppErrorBoundary.children().state().error).not.toBeNull();
-        expect(renderedAppErrorBoundary.children().state().error.message).not.toBeNull();
-        expect(renderedAppErrorBoundary.children().state().error.message).toEqual(message);
+
+        const renderedAppErrorBoundary = wrapper.find(PublisherRootErrorBoundary);
+        expect(renderedAppErrorBoundary.state().hasError).toBeTruthy();
+        expect(renderedAppErrorBoundary.state().error).not.toBeNull();
+        expect(renderedAppErrorBoundary.state().error.message).not.toBeNull();
         // Check the error message string
-        expect(renderedAppErrorBoundary.children().contains('Something went wrong')).toBeTruthy();
+        expect(renderedAppErrorBoundary.state().error.message).toEqual(message);
+        expect(renderedAppErrorBoundary.contains('You may refresh the page now or try again later')).toBeTruthy();
     });
 });

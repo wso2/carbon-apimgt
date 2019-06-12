@@ -19,13 +19,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
-import Login from 'AppComponents/Login/Login';
 import AuthManager from 'AppData/AuthManager';
 import qs from 'qs';
 import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
 import Progress from 'AppComponents/Shared/Progress';
-import SelectLogin from 'AppComponents/Login/SelectLogin';
+import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
+import InitLogin from 'AppComponents/Login/InitLogin';
 // Localization
 import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
 
@@ -164,25 +164,20 @@ class Publisher extends React.Component {
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
-                {/* <AppErrorBoundary appName='Publisher Application'>
-            TODO: need to create error boundary without using MUI styles */}
-                <Router basename='/publisher-new'>
-                    <Switch>
-                        <Route path='/login' exact component={SelectLogin} />
-                        <Route
-                            path='/login/basic'
-                            render={props => <Login {...props} updateUser={this.updateUser} />}
-                        />
-                        <Route path='/logout' component={Logout} />
-                        {!user && <Redirect to={{ pathname: '/login', search: params }} />}
-                        <Route
-                            render={() => {
-                                return <LoadableProtectedApp user={user} />;
-                            }}
-                        />
-                    </Switch>
-                </Router>
-                {/* </AppErrorBoundary> */}
+                <PublisherRootErrorBoundary appName='Publisher Application'>
+                    <Router basename='/publisher-new'>
+                        <Switch>
+                            <Route path='/login' exact component={InitLogin} />
+                            <Route path='/logout' component={Logout} />
+                            {!user && <Redirect to={{ pathname: '/login', search: params }} />}
+                            <Route
+                                render={() => {
+                                    return <LoadableProtectedApp user={user} />;
+                                }}
+                            />
+                        </Switch>
+                    </Router>
+                </PublisherRootErrorBoundary>
             </IntlProvider>
         );
     }

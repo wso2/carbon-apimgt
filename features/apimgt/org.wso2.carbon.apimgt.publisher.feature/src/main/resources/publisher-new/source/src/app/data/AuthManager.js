@@ -173,6 +173,7 @@ class AuthManager {
     }
 
     /**
+     * @deprecated Was used when Basic login facility provided from SPA app
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
      * @param {String} username - Username of the user
@@ -309,39 +310,7 @@ class AuthManager {
     }
 
     /**
-     * Login to environments specified using the JWT token
-     * @param {string} idToken - JWT token
-     * @param {array} environments - Array of environments
-     * @param {array} configs - Array of configurations of each environments to validate the feature is enabled
-     * @returns {Array} Array of Promise objects of each request
-     */
-    handleAutoLoginEnvironments(idToken, environments, configs) {
-        const promiseArray = [];
-
-        const headers = {
-            Accept: 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-        };
-        const data = {
-            assertion: idToken,
-            validity_period: -1,
-            scopes: AuthManager.CONST.USER_SCOPES,
-        };
-        const currentEnvName = Utils.getCurrentEnvironment().label;
-
-        environments.forEach((environment, environmentID) => {
-            const isAutoLoginEnabled = configs[environmentID].is_multi_environment_overview_enabled;
-            const isAlreadyLoggedIn = AuthManager.getUser(environment.label); // Already logged in by any user
-            const isCurrentEnvironment = environment.label === currentEnvName;
-
-            if (isAutoLoginEnabled && !isAlreadyLoggedIn && !isCurrentEnvironment) {
-                promiseArray.push(this.postAuthenticationRequest(headers, data, environment));
-            }
-        });
-        return promiseArray;
-    }
-
-    /**
+     * @deprecated Was used when Basic login facility provided from SPA app
      * Send the POST request to the using Axios
      * @param {Object} headers - Header object
      * @param {Object} data - Data object with credentials
