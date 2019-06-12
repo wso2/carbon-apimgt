@@ -68,11 +68,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (log.isDebugEnabled()) {
                 log.debug("Delete API Product request: Id " +apiProductId + " by " + username);
             }
-            APIProduct apiProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             if (apiProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            apiProvider.deleteAPIProduct(apiProduct, tenantDomain);
+            apiProvider.deleteAPIProduct(apiProduct.getId());
             return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting API Product : " + apiProductId;
