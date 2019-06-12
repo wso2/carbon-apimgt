@@ -93,7 +93,7 @@ render() {
 
                 <TableCell>
                     <div>
-                        {/* Scope validation should be implemente here */}
+                        {/* todo : Scope validation should be implemente here */}
                         <IconButton aria-label='Delete' onClick={this.handleRequestOpen}>
                             <Delete />
                         </IconButton>
