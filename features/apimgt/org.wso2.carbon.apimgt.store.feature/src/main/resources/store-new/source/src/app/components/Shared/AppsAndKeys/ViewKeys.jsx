@@ -34,7 +34,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import withMobileDialog from '@material-ui/core/withMobileDialog';
 import Typography from '@material-ui/core/Typography';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
@@ -83,6 +82,103 @@ class ViewKeys extends React.Component {
         showToken: false,
         showCurl: false,
     };
+    /**
+     * Fetch Application object by ID coming from URL path params and fetch related keys to display
+     */
+    componentDidMount() {
+        this.updateUI();
+    }
+
+    onCopy = name => (event) => {
+        this.setState({
+            [name]: true,
+        });
+        const that = this;
+        const elementName = name;
+        const caller = function () {
+            that.setState({
+                [elementName]: false,
+            });
+        };
+        setTimeout(caller, 4000);
+    };
+
+    handleShowCS = () => {
+        this.setState({ showCS: !this.state.showCS });
+    };
+
+    handleShowCS = () => {
+        this.setState({ showCS: !this.state.showCS });
+    };
+
+    /**
+     * Avoid conflict with `onClick`
+     * @param event
+     */
+    handleMouseDownGeneric = (event) => {
+        event.preventDefault();
+    };
+
+    updateUI = () => {
+        const promiseApp = Application.get(this.props.selectedApp.appId);
+        promiseApp
+            .then((application) => {
+                application.getKeys().then(() => {
+                    this.setState({ application });
+                });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    };
+
+    handleClickOpen = () => {
+        this.setState({ open: true });
+        this.setState({
+            showToken: false,
+        });
+    };
+
+    handleClickOpenCurl = () => {
+        this.setState({ open: true });
+        this.setState({
+            showCurl: true,
+        });
+    };
+
+    handleClose = () => {
+        this.setState({ open: false, showCurl: false });
+    };
+
+    generateAccessToken = () => {
+        const that = this;
+        const promisseTokens = this.tokens.generateToken();
+        promisseTokens
+            .then((response) => {
+                console.log('token generated successfully : ', response);
+                that.token = response;
+                that.setState({
+                    showToken: true,
+                });
+            },
+            // () => application.generateToken(this.key_type).then(() => this.setState({ application: application }))
+            )
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    };
 
     handleClickToken() {
         const { application } = this.state;
@@ -99,24 +195,28 @@ class ViewKeys extends React.Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
             });
     }
 
+
     handleUpdateToken() {
         const { application } = this.state;
         const keys = application.keys.get(this.key_type);
         application
-            .updateKeys(keys.tokenType, this.key_type, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey, keys.consumerSecret)
+            .updateKeys(
+                keys.tokenType, this.key_type, keys.supportedGrantTypes,
+                keys.callbackUrl, keys.consumerKey, keys.consumerSecret,
+            )
             .then(() => this.setState({ application }))
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -126,15 +226,14 @@ class ViewKeys extends React.Component {
     /**
      * Because application access tokens are not coming with /keys or /application API calls,
      * Fetch access token value upon user request
-     * @returns {boolean} If no application object found in state object
      */
     handleShowToken() {
         if (!this.state.application) {
             console.warn('No Application found!');
             return false;
         }
-        const promised_tokens = this.state.application.generateToken(this.props.key_type);
-        promised_tokens.then(token => this.setState({ showAT: true }));
+        const promiseTokens = this.state.application.generateToken(this.props.key_type);
+        promiseTokens.then(token => this.setState({ showAT: true }));
     }
 
     handleTextChange(event) {
@@ -169,103 +268,6 @@ class ViewKeys extends React.Component {
         this.setState({ application });
     }
 
-    handleShowCS = () => {
-        this.setState({ showCS: !this.state.showCS });
-    };
-
-    /**
-     * Avoid conflict with `onClick`
-     * @param event
-     */
-    handleMouseDownGeneric = (event) => {
-        event.preventDefault();
-    };
-    updateUI = () => {
-        const promised_app = Application.get(this.props.selectedApp.appId);
-        promised_app
-            .then((application) => {
-                application.getKeys().then(() => {
-                    this.setState({ application });
-                });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-    /**
-     * Fetch Application object by ID coming from URL path params and fetch related keys to display
-     */
-    componentDidMount() {
-        this.updateUI();    
-    }
-
-    handleShowCS = () => {
-        this.setState({ showCS: !this.state.showCS });
-    };
-
-    onCopy = name => (event) => {
-        this.setState({
-            [name]: true,
-        });
-        const that = this;
-        const elementName = name;
-        const caller = function () {
-            that.setState({
-                [elementName]: false,
-            });
-        };
-        setTimeout(caller, 4000);
-    };
-
-    handleClickOpen = () => {
-        this.setState({ open: true });
-        this.setState({
-            showToken: false,
-        });
-    };
-
-    handleClickOpenCurl = () => {
-        this.setState({ open: true });
-        this.setState({
-            showCurl: true,
-        });
-    };
-
-    handleClose = () => {
-        this.setState({ open: false, showCurl: false });
-    };
-
-    generateAccessToken = () => {
-        const that = this;
-        const promisseTokens = this.tokens.generateToken();
-        promisseTokens
-            .then(
-                (response) => {
-                    console.log('token generated successfully : ', response);
-                    that.token = response;
-                    that.setState({
-                        showToken: true,
-                    });
-                },
-                // () => application.generateToken(this.key_type).then(() => this.setState({ application: application }))
-            )
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    };
-
     render() {
         const {
             notFound, showCS, showToken, showCurl,
@@ -279,9 +281,9 @@ class ViewKeys extends React.Component {
         if (!this.state.application) {
             return <Loading />;
         }
-        const cs_ck_keys = this.state.application.keys.get(keyType);
-        const consumerKey = cs_ck_keys && cs_ck_keys.consumerKey;
-        const consumerSecret = cs_ck_keys && cs_ck_keys.consumerSecret;
+        const csCkKeys = this.state.application.keys.get(keyType);
+        const consumerKey = csCkKeys && csCkKeys.consumerKey;
+        const consumerSecret = csCkKeys && csCkKeys.consumerSecret;
         return consumerKey ? (
             <React.Fragment>
                 <div className={classes.inputWrapper}>
@@ -289,9 +291,23 @@ class ViewKeys extends React.Component {
                         <Grid item xs={6}>
                             <InputLabel htmlFor='adornment-amount'>Consumer Key</InputLabel>
                             <div className={classes.copyWrapper}>
-                                <Input inputProps={{ readonly: true }} id='consumerKey' value={consumerKey || 'Keys are not generated yet. Click the Generate token button to generate the keys.'} helperText='Consumer Key of the application' margin='normal' fullWidth />
-                                <Tooltip title={this.state.keyCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
-                                    <CopyToClipboard text={consumerKey || 'Keys are not generated yet.'} onCopy={this.onCopy('keyCopied')}>
+                                <Input
+                                    inputProps={{ readonly: true }}
+                                    id='consumerKey'
+                                    value={consumerKey ||
+                                    'Keys are not generated yet. Click the Generate token button to generate the keys.'}
+                                    helperText='Consumer Key of the application'
+                                    margin='normal'
+                                    fullWidth
+                                />
+                                <Tooltip
+                                    title={this.state.keyCopied ? 'Copied' : 'Copy to clipboard'}
+                                    placement='right'
+                                >
+                                    <CopyToClipboard
+                                        text={consumerKey || 'Keys are not generated yet.'}
+                                        onCopy={this.onCopy('keyCopied')}
+                                    >
                                         <FileCopy color='secondary' />
                                     </CopyToClipboard>
                                 </Tooltip>
@@ -305,30 +321,54 @@ class ViewKeys extends React.Component {
                                     id='consumerSecret'
                                     label='Consumer Secret'
                                     type={showCS || !consumerSecret ? 'text' : 'password'}
-                                    value={consumerSecret || 'Keys are not generated yet. Click the Generate token button to generate the keys.'}
+                                    value={consumerSecret ||
+                                    'Keys are not generated yet. Click the Generate token button to generate the keys.'}
                                     fullWidth
                                     endAdornment={(
                                         <InputAdornment position='end'>
-                                            <IconButton classes='' onClick={this.handleShowCS} onMouseDown={this.handleMouseDownGeneric}>
+                                            <IconButton
+                                                classes=''
+                                                onClick={this.handleShowCS}
+                                                onMouseDown={this.handleMouseDownGeneric}
+                                            >
                                                 {showCS ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
                                     )}
                                 />
-                                <Tooltip title={this.state.secretCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
-                                    <CopyToClipboard text={consumerSecret || 'Keys are not generated yet.'} onCopy={this.onCopy('secretCopied')}>
+                                <Tooltip
+                                    title={this.state.secretCopied ? 'Copied' : 'Copy to clipboard'}
+                                    placement='right'
+                                >
+                                    <CopyToClipboard
+                                        text={consumerSecret || 'Keys are not generated yet.'}
+                                        onCopy={this.onCopy('secretCopied')}
+                                    >
                                         <FileCopy color='secondary' />
                                     </CopyToClipboard>
                                 </Tooltip>
                             </div>
                         </Grid>
                         <Grid item xs={12}>
-                            <Dialog fullScreen={fullScreen} open={this.state.open} onClose={this.handleClose} aria-labelledby='responsive-dialog-title'>
-                                <DialogTitle id='responsive-dialog-title'>{showCurl ? 'Get CURL to Generate Access Token' : 'Generate Access Token'}</DialogTitle>
+                            <Dialog
+                                fullScreen={fullScreen}
+                                open={this.state.open}
+                                onClose={this.handleClose}
+                                aria-labelledby='responsive-dialog-title'
+                            >
+                                <DialogTitle
+                                    id='responsive-dialog-title'
+                                >{showCurl ? 'Get CURL to Generate Access Token' : 'Generate Access Token'}
+                                </DialogTitle>
                                 <DialogContent>
                                     {!showCurl && (
                                         <DialogContentText>
-                                            {!showToken && <Tokens innerRef={node => (this.tokens = node)} selectedApp={selectedApp} keyType={keyType} />}
+                                            {!showToken
+                                            && <Tokens
+                                                innerRef={(node) => { this.tokens = node; }}
+                                                selectedApp={selectedApp}
+                                                keyType={keyType}
+                                            />}
                                             {showToken && <ViewToken token={this.token} />}
                                         </DialogContentText>
                                     )}
@@ -350,10 +390,22 @@ class ViewKeys extends React.Component {
                                 </DialogActions>
                             </Dialog>
                             <div className={classes.tokenSection}>
-                                <Button variant='outlined' size='small' color='primary' className={classes.margin} onClick={this.handleClickOpen}>
+                                <Button
+                                    variant='outlined'
+                                    size='small'
+                                    color='primary'
+                                    className={classes.margin}
+                                    onClick={this.handleClickOpen}
+                                >
                                     Generate Access Token
                                 </Button>
-                                <Button variant='outlined' size='small' color='primary' className={classes.margin} onClick={this.handleClickOpenCurl}>
+                                <Button
+                                    variant='outlined'
+                                    size='small'
+                                    color='primary'
+                                    className={classes.margin}
+                                    onClick={this.handleClickOpenCurl}
+                                >
                                     CURL to Generate Access Token
                                 </Button>
                             </div>
