@@ -215,6 +215,10 @@ public class APIProduct {
         return transports;
     }
 
+    public void setTransports(String transports) {
+        this.transports = transports;
+    }
+
     public String getResponseCache() {
         return responseCache;
     }

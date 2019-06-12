@@ -16,6 +16,7 @@ public class APIProductInfoDTO   {
   
     private String id = null;
     private String name = null;
+    private String context = null;
     private String description = null;
     private String provider = null;
     private String thumbnailUri = null;
@@ -88,6 +89,23 @@ public enum StateEnum {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public APIProductInfoDTO context(String context) {
+    this.context = context;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorAPI", value = "")
+  @JsonProperty("context")
+  public String getContext() {
+    return context;
+  }
+  public void setContext(String context) {
+    this.context = context;
   }
 
   /**
@@ -173,6 +191,7 @@ public enum StateEnum {
     APIProductInfoDTO apIProductInfo = (APIProductInfoDTO) o;
     return Objects.equals(id, apIProductInfo.id) &&
         Objects.equals(name, apIProductInfo.name) &&
+        Objects.equals(context, apIProductInfo.context) &&
         Objects.equals(description, apIProductInfo.description) &&
         Objects.equals(provider, apIProductInfo.provider) &&
         Objects.equals(thumbnailUri, apIProductInfo.thumbnailUri) &&
@@ -181,7 +200,7 @@ public enum StateEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, provider, thumbnailUri, state);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state);
   }
 
   @Override
@@ -191,6 +210,7 @@ public enum StateEnum {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");

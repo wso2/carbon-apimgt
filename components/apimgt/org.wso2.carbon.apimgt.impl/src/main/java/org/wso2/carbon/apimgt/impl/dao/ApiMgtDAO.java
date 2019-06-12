@@ -13009,7 +13009,7 @@ public class ApiMgtDAO {
                     StringUtils.isEmpty(tenantDomain) ? MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
             prepStmtAddAPIProduct.setString(10,
                     apiproduct.getState() == null ? APIConstants.CREATED : apiproduct.getState());
-            prepStmtAddAPIProduct.setString(11, ""); //version is not supported atm
+            prepStmtAddAPIProduct.setString(11, "1.0.0"); //version is not supported atm
             String subscriptionAvailableTenants = "";
             if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(apiproduct.getSubscriptionAvailability())) {
                 subscriptionAvailableTenants = apiproduct.getSubscriptionAvailableTenants();

@@ -22,6 +22,7 @@ public class APIProductDTO   {
   
     private String id = null;
     private String name = null;
+    private String context = null;
     private String description = null;
     private String provider = null;
     private String thumbnailUri = null;
@@ -96,6 +97,7 @@ public enum VisibilityEnum {
     private List<String> visibleRoles = new ArrayList<>();
     private List<String> visibleTenants = new ArrayList<>();
     private List<String> gatewayEnvironments = new ArrayList<>();
+    private List<String> transport = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
 
 @XmlType(name="SubscriptionAvailabilityEnum")
@@ -171,6 +173,23 @@ public enum SubscriptionAvailabilityEnum {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public APIProductDTO context(String context) {
+    this.context = context;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "CalculatorAPI", value = "")
+  @JsonProperty("context")
+  public String getContext() {
+    return context;
+  }
+  public void setContext(String context) {
+    this.context = context;
   }
 
   /**
@@ -316,6 +335,24 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   * Supported transports for the API (http and/or https). 
+   **/
+  public APIProductDTO transport(List<String> transport) {
+    this.transport = transport;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the API (http and/or https). ")
+  @JsonProperty("transport")
+  public List<String> getTransport() {
+    return transport;
+  }
+  public void setTransport(List<String> transport) {
+    this.transport = transport;
+  }
+
+  /**
    **/
   public APIProductDTO policies(List<String> policies) {
     this.policies = policies;
@@ -432,6 +469,7 @@ public enum SubscriptionAvailabilityEnum {
     APIProductDTO apIProduct = (APIProductDTO) o;
     return Objects.equals(id, apIProduct.id) &&
         Objects.equals(name, apIProduct.name) &&
+        Objects.equals(context, apIProduct.context) &&
         Objects.equals(description, apIProduct.description) &&
         Objects.equals(provider, apIProduct.provider) &&
         Objects.equals(thumbnailUri, apIProduct.thumbnailUri) &&
@@ -440,6 +478,7 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(visibleRoles, apIProduct.visibleRoles) &&
         Objects.equals(visibleTenants, apIProduct.visibleTenants) &&
         Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
+        Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(policies, apIProduct.policies) &&
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, apIProduct.subscriptionAvailableTenants) &&
@@ -450,7 +489,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, gatewayEnvironments, policies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, gatewayEnvironments, transport, policies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
   }
 
   @Override
@@ -460,6 +499,7 @@ public enum SubscriptionAvailabilityEnum {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
@@ -468,6 +508,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
+    sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
