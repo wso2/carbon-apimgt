@@ -13984,38 +13984,18 @@ public class ApiMgtDAO {
         connection = APIMgtDBUtil.getConnection();
         connection.setAutoCommit(false);
         try {
-//            String getEmailListIdByTenantDomain = SQLConstants.HoneyPotAPIDataConstants.GET_SAVED_ALERT_EMAIL_LISTID;
-//            ps = connection.prepareStatement(getEmailListIdByTenantDomain);
-//            ps.setString(1, tenantDomain);
-//            rs = ps.executeQuery();
-//            int emailListId = 0;
-//            while (rs.next()) {
-//                emailListId = rs.getInt(1);
-//            }
-//            if (emailListId != 0) {
-//                connection.setAutoCommit(false);
-//                String deleteEmailListIdByTenantDomain = SQLConstants.HoneyPotAPIDataConstants.DELETE_EMAIL_LIST_BY_TENANT_ID;
-//                ps = connection.prepareStatement(deleteEmailListIdByTenantDomain);
-//                ps.setString(1, tenantDomain);
-//                ps.execute();
-//                String emailListSaveQuery = SQLConstants.HoneyPotAPIDataConstants.ADD_ALERT_EMAIL_LIST;
-//                ps = connection.prepareStatement(emailListSaveQuery);
-//                ps.setString(1, tenantDomain);
-//                ps.setString(2, emailList);
-//                ps.execute();
-//
-//            } else {
                 String emailListSaveQuery = SQLConstants.HoneyPotAPIDataConstants.ADD_NOTIFICATION;
                 ps = connection.prepareStatement(emailListSaveQuery);
                 UUID uuid = UUID.randomUUID();
                 String randomUUIDString = uuid.toString();
+                String category = "Bot-Detection";
                 String notificationType = "email";
                 //HoneyPotAPIAlertData honeyPotAPIAlertData = new HoneyPotAPIAlertData();
                 ps.setString(1,randomUUIDString);
-                ps.setString(2, notificationType);
-                ps.setString(3, email);
+                ps.setString(2,category);
+                ps.setString(3, notificationType);
+                ps.setString(4, email);
                 ps.execute();
-            //}
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while save email list.", e);
@@ -14046,7 +14026,7 @@ public class ApiMgtDAO {
             while (resultSet.next()) {
                 HoneyPotAPIAlertData honeyPotAPIAlertData = new HoneyPotAPIAlertData();
                 honeyPotAPIAlertData.setUuid(resultSet.getString("UUID"));
-                honeyPotAPIAlertData.setEmail(resultSet.getString("VALUE"));
+                honeyPotAPIAlertData.setEmail(resultSet.getString("SUBSCRIBER_ADDRESS"));
                 list.add(honeyPotAPIAlertData);
             }
         } catch (SQLException e) {

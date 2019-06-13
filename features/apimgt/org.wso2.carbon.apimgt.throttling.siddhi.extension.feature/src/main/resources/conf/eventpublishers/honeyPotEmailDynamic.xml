@@ -10,11 +10,11 @@
             Identified an Anonymous Attack and that details are,
 
 
-            1. Message-Id = {{messageID}},
-            2. Invoked method = {{apiMethod}},
-            3. Passed header set in request = {{headerSet}},
-            4. Passed message body(if any) = {{messageBody}},
-            5. Clinet IP = {{clientIp}}
+            1. Message-Id = {{MESSAGE_ID}},
+            2. Invoked method = {{HTTP_METHOD}},
+            3. Passed header set in request = {{HEADERS}},
+            4. Passed message body(if any) = {{MESSAGE_BODY}},
+            5. Clinet IP = {{CLIENT_IP}}
 
             Thanks,
             Super Admin
@@ -23,7 +23,7 @@
     </mapping>
     <to eventAdapterType="email">
         <property name="email.subject">Annonymous Attack</property>
-        <property name="email.address">{{emails}}</property>
+        <property name="email.address">{{EMAILS}}</property>
         <property name="email.type">text/plain</property>
     </to>
 </eventPublisher>

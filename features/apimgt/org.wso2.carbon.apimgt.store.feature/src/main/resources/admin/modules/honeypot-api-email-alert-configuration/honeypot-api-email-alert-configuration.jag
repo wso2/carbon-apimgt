@@ -1,33 +1,18 @@
 <%
 var agent = "admin-dashboard";
 
+var log = new Log();
 
-var saveEmailList  = function (emailList, tenantDomain) {
+var saveEmailList  = function () {
 
-
-    var log = new Log();
-    //new Log('emailList').info(stringify(emailList));
-    //new Log('tenantDomain').info(stringify(tenantDomain));
-   // var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-    //var tenantDomain = MultitenantUtils.getTenantDomain(tenantDomain);
-
+    var emailList=request.getParameter("emailList");
     try {
         var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
-        //new Log('APIAdminImpl').info(stringify(APIAdminImpl));
-
         var addEmailList = new APIAdminImpl();
-        //new Log('addEmailList').info(stringify(emailList));
-
-        var addEmailListDB = addEmailList.addHoneyPotAPiEmailAlertConfiguration(emailList, tenantDomain);
-        //new Log('addEmailListDB').info(stringify(addEmailListDB));
-
-        //apiDatapublisherInstance.saveAndPublishAlertTypesEvent(emailList, tenantDomain);
-
+        var addEmailListDB = addEmailList.addHoneyPotAPiEmailAlertConfiguration(emailList);
         return {
-            error: false
+            error: false,
         }
-
-
     } catch (e) {
 
         log.error(e.code);
@@ -40,45 +25,46 @@ var saveEmailList  = function (emailList, tenantDomain) {
 
 };
 
-var deleteEmails = function (username){
+var deleteEmails = function (uuid){
+    try {
+        var uuid=request.getParameter("uuid");
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+        apiAdmin.deleteHoneyPotAPIAlertEmailList(uuid);
+        log.debug("Deletion Success");
+        return {
+            error: false
+        };
+    } catch (ex) {
+        return {
+            error: true,
+            message: ex.message.split(":")[1]
+        };
+    }
 
 };
 
 var retrieveSavedEmailList = function () {
 
     var gson = com.google.gson.Gson();
-    var log = new Log();
 
     try {
-
-        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
-
-        var userName = jagg.getUser().username;
-        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-        var tenantDomain = MultitenantUtils.getTenantDomain(userName);
-
-        if ("carbon.super" == tenantDomain) {
-           userName = userName + "@carbon.super";
-        }
-
-
-        var allSavedEmailList = APIAdminImpl.retrieveSavedHoneyPotAPIAlertEmailList(tenantDomain);
-
-        var allSavedEmailListJson = JSON.parse(gson.toJson(allSavedEmailList));
-
+       var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+       var allSavedEmailList = APIAdminImpl.retrieveSavedHoneyPotAPIAlertEmailList();
+       var allSavedEmailListJson = JSON.parse(gson.toJson(allSavedEmailList));
         return {
-            "error": false,
-            "allSavedEmailListJson": allSavedEmailListJson
+           "error": false,
+           "allSavedEmailListJson": allSavedEmailListJson
         };
-
-
     } catch (e) {
 
         log.error(e.code);
         return {
-            error: true,
-            message: e.message.split(":")[1]
+           error: true,
+           message: e.message.split(":")[1]
     };
-}
+  }
 };
 %>

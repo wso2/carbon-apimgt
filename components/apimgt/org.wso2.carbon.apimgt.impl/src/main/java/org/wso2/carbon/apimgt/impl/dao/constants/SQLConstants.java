@@ -3485,11 +3485,12 @@ public class SQLConstants {
 //        public static final String ADD_ALERT_EMAIL_LIST =
 //                " INSERT INTO HONEYPOT_EMAIL_LIST  (TENANT_DOMAIN, EMAIL_LIST) " +
 //                        " VALUES(?, ?)";
-        public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION_BOT (UUID, NOTIFICATION_TYPE, VALUE)" +
-                            " VALUES(?,?,?)";
+        public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION_SUBSCRIBER (UUID, CATEGORY," +
+        "NOTIFICATION_METHOD, SUBSCRIBER_ADDRESS)" +
+                            " VALUES(?,?,?,?)";
 
         public static final String GET_SAVED_ALERT_EMAILS =
-                " SELECT UUID, VALUE FROM AM_NOTIFICATION_BOT";
+                " SELECT UUID, SUBSCRIBER_ADDRESS FROM AM_NOTIFICATION_SUBSCRIBER";
         public static final String GET_SAVED_ALERT_EMAIL_LISTID =
                 " SELECT " +
                         "  EMAIL_LIST_ID " +
@@ -3501,7 +3502,7 @@ public class SQLConstants {
                 "UPDATE HONEYPOT_EMAIL_LIST SET EMAIL_LIST =?" + " WHERE TENANT_DOMAIN= ? ";
 
         public static final String DELETE_EMAIL_BY_UUID =
-                "DELETE FROM AM_NOTIFICATION_BOT WHERE UUID= ?";
+                "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
 
     }
 }
