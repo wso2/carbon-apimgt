@@ -160,7 +160,7 @@ export default class Application extends Resource {
                 tokenType,
             };
             const payload = { applicationId: this.id, keyType, body: requestContent };
-            return client.apis.Applications.put_applications__applicationId__keys__keyType_(payload);
+            return client.apis['Application Keys'].put_applications__applicationId__keys__keyType_(payload);
         });
         return promisedPut.then((keysResponse) => {
             this.keys.set(keyType, keysResponse.obj);

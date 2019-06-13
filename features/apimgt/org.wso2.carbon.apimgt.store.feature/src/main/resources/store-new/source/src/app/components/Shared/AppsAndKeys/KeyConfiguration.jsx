@@ -67,7 +67,7 @@ class KeyConfiguration extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            application: null,
+            keys: null,
             tokenType: 'OAUTH',
         };
         const { selectedApp } = this.props;
@@ -119,17 +119,17 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     handleTextChange(event) {
-        const { application, tokenType } = this.state;
+        const { keys, tokenType } = this.state;
         const { currentTarget } = event;
         const { keyType } = this.props;
-        const keys = application.keys.get(keyType) || {
+        const applicationKey = keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
             keyType,
             tokenType,
         };
-        keys.callbackUrl = currentTarget.value;
-        application.keys.set(keyType, keys);
-        this.setState({ application });
+        applicationKey.callbackUrl = currentTarget.value;
+        keys.set(keyType, applicationKey);
+        this.setState({ keys });
     }
 
     /**
@@ -139,10 +139,10 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     handleCheckboxChange(event) {
-        const { application, tokenType } = this.state;
+        const { keys, tokenType } = this.state;
         const { keyType } = this.props;
         const { currentTarget } = event;
-        const keys = application.keys.get(keyType) || {
+        const applicationKey = keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
             keyType,
             tokenType,
@@ -150,14 +150,14 @@ class KeyConfiguration extends React.Component {
         let index;
 
         if (currentTarget.checked) {
-            keys.supportedGrantTypes.push(currentTarget.id);
+            applicationKey.supportedGrantTypes.push(currentTarget.id);
         } else {
-            index = keys.supportedGrantTypes.indexOf(currentTarget.id);
-            keys.supportedGrantTypes.splice(index, 1);
+            index = applicationKey.supportedGrantTypes.indexOf(currentTarget.id);
+            applicationKey.supportedGrantTypes.splice(index, 1);
         }
-        application.keys.set(keyType, keys);
+        keys.set(keyType, applicationKey);
         // update the state with the new array of options
-        this.setState({ application });
+        this.setState({ keys });
     }
 
     /**
@@ -167,17 +167,17 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     handleTokenTypeChange(event) {
-        const { application, tokenType } = this.state;
+        const { keys, tokenType } = this.state;
         const { keyType } = this.props;
-        const keys = application.keys.get(keyType) || {
+        const applicationKey = keys.get(keyType) || {
             supportedGrantTypes: ['client_credentials'],
             keyType,
             tokenType,
         };
-        keys.tokenType = event.target.value;
-        application.keys.set(keyType, keys);
+        applicationKey.tokenType = event.target.value;
+        keys.set(keyType, applicationKey);
         // update the state with the new array of options
-        this.setState({ application, tokenType: event.target.value });
+        this.setState({ keys, tokenType: event.target.value });
     }
 
     /**
@@ -220,11 +220,13 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     updateKeys() {
-        const { application } = this.state;
+        const { keys } = this.state;
         const { keyType } = this.props;
-        const keys = application.keys.get(keyType);
-        return application.updateKeys(keys.tokenType, keyType, keys.supportedGrantTypes,
-            keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
+        const applicationKey = keys.get(keyType);
+        return this.application.then((application) => {
+            return application.updateKeys(applicationKey.tokenType, keyType, applicationKey.supportedGrantTypes,
+                applicationKey.callbackUrl, applicationKey.consumerKey, applicationKey.consumerSecret);
+        });
     }
 
     /**
