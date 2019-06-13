@@ -12,4 +12,3 @@ jagg.initializer("honeypot-api-email-alert-configuration", {
     }
 });
 %>
-

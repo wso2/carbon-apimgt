@@ -16,14 +16,11 @@ include("/jagg/jagg.jag");
         });
     } else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
         print({
-           // new Log('testUserone').info(stringify(request.getMethod();));
             error:true,
             message: msg.error.csrfError
         });
     } else {
         if (action === "saveEmailList" && request.getMethod() == 'POST') {
-            //new Log('Hello').info('Hello');
-
             var userName = jagg.getUser().username;
             var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
             var tenantDomain = MultitenantUtils.getTenantDomain(userName);
@@ -33,11 +30,8 @@ include("/jagg/jagg.jag");
             }
 
             mod = jagg.module("honeypot-api-email-alert-configuration");
-            var emailList = request.getParameter("emailList");
-            //new Log('emailList').info(stringify(emailList));
-
-            var results = mod.saveEmailList(emailList, tenantDomain);
-            //new Log('results').info(stringify(results));
+            var email = request.getParameter("email");
+            var results = mod.saveEmailList(email);
 
             if (results.error) {
                 obj = {
@@ -50,20 +44,11 @@ include("/jagg/jagg.jag");
                 }
             }
             print(obj);
-	   }else if(action === "deleteEmails"){
-
-                var userName = jagg.getUser().username;
-
-                var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-                var tenantDomain = MultitenantUtils.getTenantDomain(userName);
-
-                if ("carbon.super" == tenantDomain) {
-                    userName = userName + "@carbon.super";
-                }
+	   }else if(action === "deleteEmails" && request.getMethod() == 'POST'){
 
                 mod = jagg.module("honeypot-api-email-alert-configuration");
-
-                var results = mod.deleteEmails(userName);
+                var uuid = request.getParameter("uuid");
+                var results = mod.deleteEmails(uuid);
 
                 if (results.error) {
                     obj = {

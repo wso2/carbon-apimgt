@@ -5,31 +5,31 @@
   "description": "",
   "payloadData": [
     {
-      "name":"currentTime",
+      "name":"REQUEST_TIME",
       "type":"LONG"
     },
     {
-      "name": "messageID",
+      "name": "MESSAGE_ID",
       "type": "STRING"
     },
     {
-      "name": "apiMethod",
+      "name": "HTTP_METHOD",
       "type": "STRING"
     },
     {
-      "name":"headerSet",
+      "name":"HEADERS",
       "type": "STRING"
     },
     {
-      "name":"messageBody",
+      "name":"MESSAGE_BODY",
       "type":"STRING"
     },
     {
-      "name":"clientIp",
+      "name":"CLIENT_IP",
       "type":"STRING"
     },
     {
-      "name":"emails",
+      "name":"EMAILS",
       "type":"STRING"
     }
   ]

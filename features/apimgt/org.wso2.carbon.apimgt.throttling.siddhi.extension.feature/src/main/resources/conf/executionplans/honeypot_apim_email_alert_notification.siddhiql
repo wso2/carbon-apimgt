@@ -6,16 +6,16 @@
 
 /* define streams/tables and write queries here ... */
 @Import('org.wso2.honeypotAPI.request.stream:1.0.0')
-define stream HoneypotDataStream (currentTime long,messageID string, apiMethod string, headerSet string, messageBody string, clientIp string);
+define stream HoneypotDataStream (REQUEST_TIME long,MESSAGE_ID string, HTTP_METHOD string, HEADERS string, MESSAGE_BODY string, CLIENT_IP string);
 
 @Export('org.wso2.apim.honeypotapi.emailAlertStream:1.0.0')
-define stream emailAlertStream (currentTime long,messageID string, apiMethod string, headerSet string,messageBody string, clientIp string, emails string);
+define stream emailAlertStream (REQUEST_TIME long,MESSAGE_ID string, HTTP_METHOD string, HEADERS string,MESSAGE_BODY string, CLIENT_IP string, EMAILS string);
 
 
-@from(eventtable='rdbms', datasource.name = 'WSO2AM_DB', table.name = 'HONEYPOT_EMAIL_LIST')
-define table emailListable (TENANT_DOMAIN string, EMAIL_LIST string);
+@from(eventtable='rdbms', datasource.name = 'WSO2AM_DB', table.name = 'AM_NOTIFICATION_SUBSCRIBER')
+define table emailListable (UUID string, SUBSCRIBER_ADDRESS string);
 
 @info(name = 'query1')
 from HoneypotDataStream#window.length(1) join emailListable
-select currentTime, messageID , apiMethod, headerSet,messageBody,clientIp,emailListable.EMAIL_LIST as emails
+select REQUEST_TIME, MESSAGE_ID , HTTP_METHOD, HEADERS,MESSAGE_BODY,CLIENT_IP,emailListable.SUBSCRIBER_ADDRESS as EMAILS
 insert into emailAlertStream;
