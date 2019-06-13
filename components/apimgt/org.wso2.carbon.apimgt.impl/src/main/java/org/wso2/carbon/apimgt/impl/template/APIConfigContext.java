@@ -18,6 +18,8 @@ package org.wso2.carbon.apimgt.impl.template;
 
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
@@ -27,9 +29,14 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 public class APIConfigContext extends ConfigContext {
 
     private API api;
+    private APIProduct apiProduct;
 
     public APIConfigContext(API api) {
         this.api = api;
+    }
+
+    public APIConfigContext(APIProduct apiProduct) {
+        this.apiProduct = apiProduct;
     }
 
     @Override
@@ -47,6 +54,17 @@ public class APIConfigContext extends ConfigContext {
     @Override
     public VelocityContext getContext() {
         VelocityContext context = new VelocityContext();
+
+        if (api != null) {
+            setApiVelocityContext(api, context);
+        } else if (apiProduct != null) { // API Product scenario
+            setApiProductVelocityContext(apiProduct, context);
+        }
+
+        return context;
+    }
+
+    private void setApiVelocityContext(API api, VelocityContext context) {
         //set the api name version and context
         context.put("apiName", this.getAPIName(api));
         context.put("apiVersion", api.getId().getVersion());
@@ -70,7 +88,23 @@ public class APIConfigContext extends ConfigContext {
         } else {
             context.put("apiIsOauthProtected", Boolean.FALSE);
         }
-        return context;
+    }
+
+    private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
+        APIProductIdentifier id = apiProduct.getId();
+        //set the api name version and context
+        context.put("apiName", id.getProviderName() + "--" + id.getName());
+        context.put("apiVersion", "1.0.0");
+
+        // We set the context pattern now to support plugable version strategy
+        // context.put("apiContext", api.getContext());
+        context.put("apiContext", apiProduct.getContext());
+
+        //the api object will be passed on to the template so it properties can be used to
+        // customise how the synapse config is generated.
+        context.put("apiObj", apiProduct);
+
+        context.put("apiIsBlocked", Boolean.FALSE);
     }
 
     public String getAPIName(API api) {

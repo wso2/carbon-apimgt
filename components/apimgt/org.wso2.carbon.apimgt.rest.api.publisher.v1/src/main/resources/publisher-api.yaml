@@ -5996,6 +5996,9 @@ definitions:
         type: string
         description: Name of the API Product
         example: CalculatorAPIProduct
+      context:
+        type: string
+        example: CalculatorAPI
       description:
         type: string
         description: A brief description about the API
@@ -6033,6 +6036,9 @@ definitions:
         type: string
         description: Name of the API Product
         example: CalculatorAPIProduct
+      context:
+        type: string
+        example: CalculatorAPI
       description:
         type: string
         description: A brief description about the API
@@ -6077,6 +6083,13 @@ definitions:
         items:
           type: string
         example: ["Production and Sandbox"]
+      transport:
+        description: |
+          Supported transports for the API (http and/or https).
+        type: array
+        items:
+          type: string
+        example: ["http","https"]
       policies:
         type: array
         items:

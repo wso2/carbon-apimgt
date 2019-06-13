@@ -47,7 +47,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     private Environment environment;
     private static Log log = LogFactory.getLog(APIGatewayAdminClient.class);
 
-    public APIGatewayAdminClient(APIIdentifier apiId, Environment environment) throws AxisFault {
+    public APIGatewayAdminClient(Environment environment) throws AxisFault {
         //String qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
         //String qualifiedDefaultApiName = apiId.getProviderName() + "--" + apiId.getApiName();
         //String providerDomain = apiId.getProviderName();
@@ -388,9 +388,11 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      */
     public ArrayList<String> getEndpointType(API api) throws ParseException {
         ArrayList<String> arrayList = new ArrayList<>();
-        if (APIUtil.isProductionEndpointsExists(api) && !APIUtil.isSandboxEndpointsExists(api)) {
+        if (APIUtil.isProductionEndpointsExists(api.getEndpointConfig()) &&
+                !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig())) {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
-        } else if (APIUtil.isSandboxEndpointsExists(api) && !APIUtil.isProductionEndpointsExists(api)) {
+        } else if (APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()) &&
+                !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) {
             arrayList.add(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
         } else {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);

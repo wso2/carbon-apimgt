@@ -114,7 +114,7 @@ public class ThrottlePolicyDeploymentManager {
                 if (log.isDebugEnabled()) {
                     log.debug("deploy policy to gateway : " + environment.getValue().getName());
                 }
-                APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment.getValue());
+                APIGatewayAdminClient client = new APIGatewayAdminClient(environment.getValue());
                 client.deployPolicy(policy, fileName);
             }
 

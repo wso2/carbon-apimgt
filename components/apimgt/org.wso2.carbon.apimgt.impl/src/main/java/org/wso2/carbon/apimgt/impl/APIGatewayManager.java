@@ -27,6 +27,9 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -62,6 +65,9 @@ public class APIGatewayManager {
     private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
 
     private final String ENDPOINT_SANDBOX = "_SANDBOX_";
+
+    private static final String PRODUCT_PREFIX = "prod";
+    private static final String PRODUCT_VERSION = "1.0.0";
 
 	private APIGatewayManager() {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
@@ -107,7 +113,7 @@ public class APIGatewayManager {
             }
             APIGatewayAdminClient client;
             try {
-                client = new APIGatewayAdminClient(api.getId(), environment);
+                client = new APIGatewayAdminClient(environment);
                 String operation;
                 long apiGetStartTime = System.currentTimeMillis();
                 APIData apiData = client.getApi(tenantDomain, api.getId());
@@ -122,8 +128,10 @@ public class APIGatewayManager {
                     // has been removed
                     // Or if the Gateway type is 'sandbox' and the sandbox url has
                     // been removed.
-                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil.isProductionEndpointsExists(api)) ||
-                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil.isSandboxEndpointsExists(api))) {
+                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) &&
+                            !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) ||
+                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) &&
+                                    !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()))) {
                         if (debugEnabled) {
                             log.debug("Removing API " + api.getId().getApiName() +
                                     " from Environment " + environment.getName() +
@@ -186,8 +194,10 @@ public class APIGatewayManager {
                     // Or if the Gateway type is 'sandbox' and a sandbox url has not
                     // been specified
                     startTime = System.currentTimeMillis();
-                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil.isProductionEndpointsExists(api)) ||
-                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil.isSandboxEndpointsExists(api))) {
+                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) &&
+                            !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) ||
+                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) &&
+                                    !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()))) {
 
                         if (debugEnabled) {
                             log.debug("Not adding API to environment " + environment.getName() +
@@ -274,6 +284,121 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
+    /**
+     * Publishes an API Product to all configured Gateways.
+     *
+     * @param apiProduct
+     *            - The API Product to be published
+     * @param builder
+     *            - The template builder
+     * @param tenantDomain
+     *            - Tenant Domain of the publisher
+     */
+    public Map<String, String> publishToGateway(APIProduct apiProduct, APITemplateBuilder builder, String tenantDomain) {
+        Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+
+        if (apiProduct.getEnvironments() == null) {
+            return failedEnvironmentsMap;
+        }
+        long startTime = 0;
+        long startTimePublishToGateway = 0;
+        long apiGetStartTime = 0;
+
+        APIProductIdentifier apiProductId = apiProduct.getId();
+
+        APIIdentifier id = new APIIdentifier(PRODUCT_PREFIX, apiProductId.getName(), PRODUCT_VERSION);
+
+        if (debugEnabled) {
+            log.debug("API to be published: " + id);
+            log.debug("Number of environments to be published to: " + apiProduct.getEnvironments().size());
+        }
+
+        for (String environmentName : apiProduct.getEnvironments()) {
+            if (debugEnabled) {
+                startTimePublishToGateway = System.currentTimeMillis();
+            }
+            Environment environment = environments.get(environmentName);
+            //If the environment is removed from the configuration, continue without publishing
+            if (environment == null) {
+                continue;
+            }
+            APIGatewayAdminClient client;
+            try {
+                client = new APIGatewayAdminClient(environment);
+                if (debugEnabled) {
+                    apiGetStartTime = System.currentTimeMillis();
+                }
+
+                APIData apiData = client.getApi(tenantDomain, id);
+
+                if (debugEnabled) {
+                    long endTime = System.currentTimeMillis();
+                    log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
+                }
+
+                // If the API exists in the Gateway
+                if (apiData != null) {
+                    if (debugEnabled) {
+                        startTime = System.currentTimeMillis();
+                    }
+
+                    if (debugEnabled) {
+                        log.debug("API exists, updating existing API " + id.getApiName() +
+                                " in environment " + environment.getName());
+                    }
+
+                    //Update the API
+                    client.updateApi(builder, tenantDomain, id);
+
+                    if (debugEnabled) {
+                        long endTime = System.currentTimeMillis();
+                        log.debug("Publishing API (if the API exists in the Gateway) took " +
+                                (endTime - startTime) / 1000 + "  seconds");
+                    }
+                } else {
+                    // If the Gateway type is 'production' and a production url has
+                    // not been specified
+                    // Or if the Gateway type is 'sandbox' and a sandbox url has not
+                    // been specified
+                    if (debugEnabled) {
+                        startTime = System.currentTimeMillis();
+                    }
+
+                    if (debugEnabled) {
+                        log.debug("API does not exist, adding new API " + id.getApiName() +
+                                " in environment " + environment.getName());
+                    }
+
+                    //Add the API
+                    client.addApi(builder, tenantDomain, id);
+
+                    if (debugEnabled) {
+                        long endTime = System.currentTimeMillis();
+                        log.debug("Publishing API (if the API does not exist in the Gateway) took " +
+                                (endTime - startTime) / 1000 + "  seconds");
+                    }
+                }
+            } catch (AxisFault axisFault) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+                failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
+                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
+            }
+
+            if (debugEnabled) {
+                long endTimePublishToGateway = System.currentTimeMillis();
+                log.debug("Publishing to gateway : " + environmentName + " total time taken : " +
+                        (endTimePublishToGateway - startTimePublishToGateway) / 1000 + "  seconds");
+            }
+        }
+
+        return failedEnvironmentsMap;
+    }
+
+
 	/**
 	 * Removed an API from the configured Gateways
 	 * 
@@ -293,10 +418,11 @@ public class APIGatewayManager {
                         continue;
                     }
 
-                    APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
                     unDeployClientCertificates(client, api, tenantDomain);
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
-                        if (client.getApi(tenantDomain, api.getId()) != null) {
+                        APIIdentifier id = api.getId();
+                        if (client.getApi(tenantDomain, id) != null) {
                             if (debugEnabled) {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
@@ -324,7 +450,8 @@ public class APIGatewayManager {
                     }
 
                     if (api.isPublishedDefaultVersion()) {
-                        if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                        APIIdentifier id = api.getId();
+                        if (client.getDefaultApi(tenantDomain, id) != null) {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
@@ -418,7 +545,7 @@ public class APIGatewayManager {
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             for (String environmentName : environments) {
                 Environment environment = this.environments.get(environmentName);
-                client = new APIGatewayAdminClient(api.getId(), environment);
+                client = new APIGatewayAdminClient(environment);
                 try {
                     gatewayManager.deployWebsocketAPI(api, client);
                 } catch (JSONException ex) {
@@ -497,8 +624,9 @@ public class APIGatewayManager {
             for (String environmentName : api.getEnvironments()) {
                 try {
                     Environment environment = environments.get(environmentName);
-                    APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-                    if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                    APIIdentifier id = api.getId();
+                    if (client.getDefaultApi(tenantDomain, id) != null) {
                         if (debugEnabled) {
                             log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
                                       environment.getName());
@@ -532,10 +660,11 @@ public class APIGatewayManager {
     public boolean isAPIPublished(API api, String tenantDomain)throws APIManagementException {
         for (Environment environment : environments.values()) {
             try {
-                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
                 // If the API exists in at least one environment, consider as
                 // published and return true.
-                if (client.getApi(tenantDomain, api.getId()) != null) {
+                APIIdentifier id = api.getId();
+                if (client.getApi(tenantDomain, id) != null) {
                     return true;
                 }
             } catch (AxisFault axisFault) {
@@ -561,9 +690,10 @@ public class APIGatewayManager {
     public String getAPIEndpointSecurityType(API api, String tenantDomain) throws APIManagementException {
         for (Environment environment : environments.values()) {
             try {
-                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-                if (client.getApi(tenantDomain, api.getId()) != null) {
-                    APIData apiData = client.getApi(tenantDomain, api.getId());
+                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                APIIdentifier id = api.getId();
+                APIData apiData = client.getApi(tenantDomain, id);
+                if (apiData != null) {
                     ResourceData[] resourceData = apiData.getResources();
                     for (ResourceData resource : resourceData) {
                         if (resource != null && resource.getInSeqXml() != null 
@@ -947,7 +1077,6 @@ public class APIGatewayManager {
      * @param api
      * @param tenantDomain
      * @param environment
-     * @param operation -add,delete,update operations for an API
      * @throws APIManagementException
      */
 	private void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain, Environment

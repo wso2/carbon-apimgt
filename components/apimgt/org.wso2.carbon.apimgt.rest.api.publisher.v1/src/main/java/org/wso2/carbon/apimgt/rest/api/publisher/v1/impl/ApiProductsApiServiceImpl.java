@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -192,7 +193,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
             return Response.ok().entity(updatedProductDTO).build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | FaultGatewaysException e) {
             String errorMessage = "Error while updating API Product : " + apiProductId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
@@ -356,7 +357,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     RestApiConstants.RESOURCE_PATH_API_PRODUCTS + "/" + createdApiProductDTO.getId());
             return Response.created(createdApiProductUri).entity(createdApiProductDTO).build();
 
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | FaultGatewaysException e) {
             String errorMessage = "Error while adding new API Product : " + provider + "-" + body.getName()
                     + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);

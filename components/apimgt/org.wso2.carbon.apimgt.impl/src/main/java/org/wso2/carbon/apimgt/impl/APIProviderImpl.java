@@ -1805,6 +1805,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedEnvironment;
     }
 
+    private Map<String, String> publishToGateway(APIProduct apiProduct) throws APIManagementException {
+        Map<String, String> failedEnvironment;
+        String tenantDomain = null;
+        APITemplateBuilder builder = null;
+        APIProductIdentifier apiProductId = apiProduct.getId();
+
+        String provider = apiProductId.getProviderName();
+        if (provider.contains("AT")) {
+            provider = provider.replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        }
+
+        try {
+            builder = getAPITemplateBuilder(apiProduct);
+        } catch (Exception e) {
+            handleException("Error while publishing to Gateway ", e);
+        }
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain);
+        if (log.isDebugEnabled()) {
+            String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
+                    + " published to gateway";
+            log.debug(logMessage);
+        }
+        return failedEnvironment;
+    }
+
     /**
      * This method returns a list of previous versions of a given API
      *
@@ -2121,6 +2149,62 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         }
+
+        return vtb;
+    }
+
+
+    private APITemplateBuilder getAPITemplateBuilder(APIProduct apiProduct) throws APIManagementException {
+        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct);
+        vtb.addHandler(
+                "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler", Collections
+                        .<String, String>emptyMap());
+
+        Map<String, String> authProperties = new HashMap<String, String>();
+
+        //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
+        String removeHeaderFromOutMessage = APIUtil
+                .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+        if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
+            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
+        } else {
+            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
+                    APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
+        }
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
+                authProperties);
+        Map<String, String> properties = new HashMap<String, String>();
+
+        boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
+        if (apiProduct.getProductionMaxTps() != null) {
+            properties.put("productionMaxCount", apiProduct.getProductionMaxTps());
+        }
+
+        if (apiProduct.getSandboxMaxTps() != null) {
+            properties.put("sandboxMaxCount", apiProduct.getSandboxMaxTps());
+        }
+
+        if (isGlobalThrottlingEnabled) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
+                    , properties);
+        } else {
+            properties.put("id", "A");
+            properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
+            properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
+            properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler"
+                    , properties);
+        }
+
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
+                , Collections.<String, String>emptyMap());
+
+        properties = new HashMap<String, String>();
+        properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
+        vtb.addHandler(
+                "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
+                , properties);
 
         return vtb;
     }
@@ -6095,7 +6179,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addAPIProduct(APIProduct product) throws APIManagementException {
+    public String addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
@@ -6112,46 +6196,49 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
 
             apiProductResource.setApiIdentifier(api.getId());
-            List<URITemplate> apiResources = apiProductResource.getResources();
+            URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
             Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
-            if (apiResources == null) {
+            if (uriTemplate == null) {
                 // TODO handle if no resource is defined. either throw an error or add all the resources of that API
                 // to the product
             } else {
-                for (URITemplate resourceTemplate : apiResources) {
-                    String key = resourceTemplate.getHTTPVerb() + ":" + resourceTemplate.getResourceURI();
-                    if (templateMap.containsKey(key)) {
-                        
-                        //Since the template ID is not set from the request, we manually set it.
-                        resourceTemplate.setId(templateMap.get(key).getId());
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+                if (templateMap.containsKey(key)) {
 
-                    } else {
-                        throw new APIManagementException("API with id " + apiProductResource.getApiId()
-                                + " does not have a resource " + resourceTemplate.getResourceURI()
-                                + " with http method " + resourceTemplate.getHTTPVerb());
-                    }
+                    //Since the template ID is not set from the request, we manually set it.
+                    uriTemplate.setId(templateMap.get(key).getId());
+
+                } else {
+                    throw new APIManagementException("API with id " + apiProductResource.getApiId()
+                            + " does not have a resource " + uriTemplate.getResourceURI()
+                            + " with http method " + uriTemplate.getHTTPVerb());
                 }
             }
         }
            
         //now we have validated APIs and it's resources inside the API product. Add it to database
+
         String uuid = UUID.randomUUID().toString();
         product.setUuid(uuid);
+
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+
+        Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+        if (!failedToPublishEnvironments.isEmpty()) {
+            Set<String> publishedEnvironments =
+                    new HashSet<String>(product.getEnvironments());
+            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+            product.setEnvironments(publishedEnvironments);
+            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+            failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+        }
+
         apiMgtDAO.addAPIProduct(product, tenantDomain);
 
-        JSONObject apiLogObject = new JSONObject();
-        apiLogObject.put(APIConstants.AuditLogConstants.NAME, product.getId().getName());
-        //apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, product.getContext());
-        apiLogObject.put(APIConstants.AuditLogConstants.VERSION, product.getId().getVersion());
-        apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, product.getId().getProviderName());
-
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
-                APIConstants.AuditLogConstants.CREATED, this.username);
-
-        if (log.isDebugEnabled()) {
-            log.debug("API details successfully added to the API Manager Database. API Name: " + product.getId()
-                    .getName() + ", API Version : " + product.getId().getVersion() + ", API context : " + "change"); //todo : log context
+        if (!failedGateways.isEmpty() &&
+                (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
         }
 
         return uuid;
@@ -6268,39 +6355,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateAPIProduct(APIProduct product, String user) throws APIManagementException {
+    public void updateAPIProduct(APIProduct product, String user) throws APIManagementException, FaultGatewaysException {
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
             API api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
-            List<URITemplate> apiResources = apiProductResource.getResources();
+            URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
             Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
-            if (apiResources == null) {
+            if (uriTemplate == null) {
                 // TODO handle if no resource is defined. either throw an error or add all the resources of that API
                 // to the product
             } else {
-                for (URITemplate resourceTemplate : apiResources) {
-                    String key = resourceTemplate.getHTTPVerb() + ":" + resourceTemplate.getResourceURI();
-                    if (templateMap.containsKey(key)) {
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+                if (templateMap.containsKey(key)) {
 
-                        //Since the template ID is not set from the request, we manually set it.
-                        resourceTemplate.setId(templateMap.get(key).getId());
+                    //Since the template ID is not set from the request, we manually set it.
+                    uriTemplate.setId(templateMap.get(key).getId());
 
-                    } else {
-                        throw new APIManagementException("API with id " + apiProductResource.getApiId()
-                                + " does not have a resource " + resourceTemplate.getResourceURI()
-                                + " with http method " + resourceTemplate.getHTTPVerb());
-                    }
+                } else {
+                    throw new APIManagementException("API with id " + apiProductResource.getApiId()
+                            + " does not have a resource " + uriTemplate.getResourceURI()
+                            + " with http method " + uriTemplate.getHTTPVerb());
                 }
             }
         }
 
-        //todo : check whether permissions need to be updated and pass it along
-        updateApiProductArtifact(product, true, true);
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+
+        Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+        if (!failedToPublishEnvironments.isEmpty()) {
+            Set<String> publishedEnvironments =
+                    new HashSet<String>(product.getEnvironments());
+            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+            product.setEnvironments(publishedEnvironments);
+            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+            failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+        }
+
         apiMgtDAO.updateAPIProduct(product, user);
+
+        if (!failedGateways.isEmpty() &&
+                (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
+        }
+
     }
 
     @Override

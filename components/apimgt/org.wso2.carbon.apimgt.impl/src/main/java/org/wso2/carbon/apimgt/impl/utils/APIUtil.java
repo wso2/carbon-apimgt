@@ -1278,6 +1278,7 @@ public final class APIUtil {
             }
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(apiProduct));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TRANSPORTS, apiProduct.getTransports());
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -5423,11 +5424,11 @@ public final class APIUtil {
     }
 
 
-    public static boolean isSandboxEndpointsExists(API api) {
+    public static boolean isSandboxEndpointsExists(String endpointConfig) {
         JSONParser parser = new JSONParser();
         JSONObject config = null;
         try {
-            config = (JSONObject) parser.parse(api.getEndpointConfig());
+            config = (JSONObject) parser.parse(endpointConfig);
 
             if (config.containsKey("sandbox_endpoints")) {
                 return true;
@@ -5440,11 +5441,11 @@ public final class APIUtil {
         return false;
     }
 
-    public static boolean isProductionEndpointsExists(API api) {
+    public static boolean isProductionEndpointsExists(String endpointConfig) {
         JSONParser parser = new JSONParser();
         JSONObject config = null;
         try {
-            config = (JSONObject) parser.parse(api.getEndpointConfig());
+            config = (JSONObject) parser.parse(endpointConfig);
 
             if (config.containsKey("production_endpoints")) {
                 return true;
@@ -8720,6 +8721,7 @@ public final class APIUtil {
             apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             apiProduct.setEnvironments(extractEnvironmentsForAPI(environments));
+            apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()

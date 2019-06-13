@@ -1306,6 +1306,7 @@ public class APIMappingUtil {
         productDto.setName(product.getId().getName());
         productDto.setProvider(product.getId().getProviderName());
         productDto.setId(product.getUuid());
+        productDto.setContext(product.getContext());
         productDto.setDescription(product.getDescription());
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
         businessInformation.setBusinessOwner(product.getBusinessOwner());
@@ -1323,14 +1324,13 @@ public class APIMappingUtil {
             productAPI.setApiId(apiProductResource.getApiId());
             productAPI.setName(apiProductResource.getApiName());
             List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
-            List<URITemplate> templates = apiProductResource.getResources();
+            URITemplate template = apiProductResource.getUriTemplate();
 
-            for (URITemplate template : templates) {
-                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-                operation.setHttpVerb(template.getHTTPVerb());
-                operation.setUritemplate(template.getResourceURI());
-                operations.add(operation);
-            }
+            ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
+            operation.setHttpVerb(template.getHTTPVerb());
+            operation.setUritemplate(template.getResourceURI());
+            operations.add(operation);
+
             productAPI.setOperations(operations);
             apis.add(productAPI);  
         }
@@ -1363,6 +1363,16 @@ public class APIMappingUtil {
         if (product.getVisibleTenants() != null) {
             productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
         }
+
+        if (StringUtils.isEmpty(product.getTransports())) {
+            List<String> transports = new ArrayList<>();
+            transports.add(APIConstants.HTTPS_PROTOCOL);
+
+            productDto.setTransport(transports);
+        } else {
+            productDto.setTransport(Arrays.asList(product.getTransports().split(",")));
+        }
+
         List<String> environmentsList = new ArrayList<String>();
         environmentsList.addAll(product.getEnvironments());
         productDto.setGatewayEnvironments(environmentsList);
@@ -1414,6 +1424,22 @@ public class APIMappingUtil {
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
+
+        String context = dto.getContext();
+
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+
+        context = context.startsWith("/") ? context : ("/" + context);
+        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+            //Create tenant aware context for API
+            context = "/t/" + providerDomain + context;
+        }
+
+        product.setContext(context);
+
         if(dto.getBusinessInformation() != null) {
             product.setBusinessOwner(dto.getBusinessInformation().getBusinessOwner());
             product.setBusinessOwnerEmail(dto.getBusinessInformation().getBusinessOwnerEmail());
@@ -1454,6 +1480,9 @@ public class APIMappingUtil {
             product.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
 
+        String transports = StringUtils.join(dto.getTransport(), ',');
+        product.setTransports(transports);
+
         if (dto.getGatewayEnvironments().size() > 0) {
             List<String> gatewaysList = dto.getGatewayEnvironments();
             product.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
@@ -1473,7 +1502,7 @@ public class APIMappingUtil {
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getHttpVerb());
                 template.setResourceURI(resourceItem.getUritemplate());
-                resource.setResource(template);
+                resource.setUriTemplate(template);
             }
             productResources.add(resource);
         }
