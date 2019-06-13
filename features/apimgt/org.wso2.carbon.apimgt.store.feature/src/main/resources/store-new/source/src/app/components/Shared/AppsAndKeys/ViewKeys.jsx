@@ -23,6 +23,8 @@ import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Grid from '@material-ui/core/Grid';
@@ -63,6 +65,9 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
     },
+    gridWrapper: {
+        paddingTop: theme.spacing.unit * 2,
+    },
     tokenSection: {
         marginTop: theme.spacing.unit * 2,
         marginBottom: theme.spacing.unit * 2,
@@ -82,6 +87,7 @@ class ViewKeys extends React.Component {
         showToken: false,
         showCurl: false,
     };
+
     /**
      * Fetch Application object by ID coming from URL path params and fetch related keys to display
      */
@@ -89,7 +95,10 @@ class ViewKeys extends React.Component {
         this.updateUI();
     }
 
-    onCopy = name => (event) => {
+    /**
+     * Handle onClick of the copy icon
+     * */
+    onCopy = (name) => {
         this.setState({
             [name]: true,
         });
@@ -103,12 +112,12 @@ class ViewKeys extends React.Component {
         setTimeout(caller, 4000);
     };
 
-    handleShowCS = () => {
-        this.setState({ showCS: !this.state.showCS });
-    };
-
-    handleShowCS = () => {
-        this.setState({ showCS: !this.state.showCS });
+    /**
+     * Handle onClick of the show consumer secret icon
+     * @param data
+     * */
+    handleShowHidden = (data) => {
+        this.setState({ [data]: !this.state[data] });
     };
 
     /**
@@ -119,12 +128,18 @@ class ViewKeys extends React.Component {
         event.preventDefault();
     };
 
+    /**
+     * Update the application keys
+     * @param data
+     * */
     updateUI = () => {
-        const promiseApp = Application.get(this.props.selectedApp.appId);
+        const { selectedApp } = this.props;
+        const promiseApp = Application.get(selectedApp.appId);
+
         promiseApp
             .then((application) => {
-                application.getKeys().then(() => {
-                    this.setState({ application });
+                application.getKeys().then((keys) => {
+                    this.setState({ keys });
                 });
             })
             .catch((error) => {
@@ -138,37 +153,44 @@ class ViewKeys extends React.Component {
             });
     };
 
+    /**
+     * Handle onCLick of generate access token
+     * */
     handleClickOpen = () => {
-        this.setState({ open: true });
-        this.setState({
-            showToken: false,
-        });
+        this.setState({ open: true, showToken: false });
     };
 
+    /**
+     * Handle onClick of get curl
+     * */
     handleClickOpenCurl = () => {
-        this.setState({ open: true });
-        this.setState({
-            showCurl: true,
-        });
+        this.setState({ open: true, showCurl: true });
     };
 
+    /**
+     * Handle on close of dialog for generating access token and get curl
+     * */
     handleClose = () => {
         this.setState({ open: false, showCurl: false });
     };
 
+    /**
+     * Generate access token
+     * */
     generateAccessToken = () => {
         const that = this;
-        const promisseTokens = this.tokens.generateToken();
-        promisseTokens
+        const promiseTokens = this.tokens.generateToken();
+        promiseTokens
             .then((response) => {
                 console.log('token generated successfully : ', response);
                 that.token = response;
                 that.setState({
                     showToken: true,
+                    token: response.accessToken,
+                    tokenScopes: response.tokenScopes,
+                    tokenValidityTime: response.validityTime,
                 });
-            },
-            // () => application.generateToken(this.key_type).then(() => this.setState({ application: application }))
-            )
+            })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
@@ -180,155 +202,86 @@ class ViewKeys extends React.Component {
             });
     };
 
-    handleClickToken() {
-        const { application } = this.state;
-        const keys = application.keys.get(this.key_type) || {
-            supportedGrantTypes: ['client_credentials'],
-        };
-        if (!keys.callbackUrl) {
-            keys.callbackUrl = 'https://wso2.am.com';
-        }
-        application
-            .generateKeys(this.key_type, keys.supportedGrantTypes, keys.callbackUrl)
-            .then(() => application.generateToken(this.key_type).then(() => this.setState({ application })))
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
-
-    handleUpdateToken() {
-        const { application } = this.state;
-        const keys = application.keys.get(this.key_type);
-        application
-            .updateKeys(
-                keys.tokenType, this.key_type, keys.supportedGrantTypes,
-                keys.callbackUrl, keys.consumerKey, keys.consumerSecret,
-            )
-            .then(() => this.setState({ application }))
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
-    /**
-     * Because application access tokens are not coming with /keys or /application API calls,
-     * Fetch access token value upon user request
-     */
-    handleShowToken() {
-        if (!this.state.application) {
-            console.warn('No Application found!');
-            return false;
-        }
-        const promiseTokens = this.state.application.generateToken(this.props.key_type);
-        promiseTokens.then(token => this.setState({ showAT: true }));
-    }
-
-    handleTextChange(event) {
-        const { application, key } = this.state;
-        const { currentTarget } = event;
-        const keys = application.keys.get(this.props.key_type) || {
-            supportedGrantTypes: ['client_credentials'],
-            keyType: this.props.key_type,
-        };
-        keys.callbackUrl = currentTarget.value;
-        application.keys.set(this.key_type, keys);
-        this.setState({ application });
-    }
-
-    handleCheckboxChange(event) {
-        const { application } = this.state;
-        const { currentTarget } = event;
-        const keys = application.keys.get(this.props.key_type) || {
-            supportedGrantTypes: ['client_credentials'],
-            keyType: this.key_type,
-        };
-        let index;
-
-        if (currentTarget.checked) {
-            keys.supportedGrantTypes.push(currentTarget.id);
-        } else {
-            index = keys.supportedGrantTypes.indexOf(currentTarget.id);
-            keys.supportedGrantTypes.splice(index, 1);
-        }
-        application.keys.set(this.key_type, keys);
-        // update the state with the new array of options
-        this.setState({ application });
-    }
-
     render() {
         const {
-            notFound, showCS, showToken, showCurl,
+            notFound, showCS, showToken, showCurl, keys, secretCopied, tokenCopied, keyCopied, open,
+            token, tokenScopes, tokenValidityTime,
         } = this.state;
         const {
             keyType, classes, fullScreen, selectedApp,
         } = this.props;
+
         if (notFound) {
             return <ResourceNotFound />;
         }
-        if (!this.state.application) {
+        if (!keys) {
             return <Loading />;
         }
-        const csCkKeys = this.state.application.keys.get(keyType);
+
+        const csCkKeys = keys.get(keyType);
         const consumerKey = csCkKeys && csCkKeys.consumerKey;
         const consumerSecret = csCkKeys && csCkKeys.consumerSecret;
+        let accessToken;
+        let accessTokenScopes;
+        let validityPeriod;
+
+        if (token) {
+            accessToken = token;
+            accessTokenScopes = tokenScopes;
+            validityPeriod = tokenValidityTime;
+        } else if (keys.get(keyType) && keys.get(keyType).token) {
+            accessToken = keys.get(keyType).token.accessToken;
+            accessTokenScopes = keys.get(keyType).token.tokenScopes;
+            validityPeriod = keys.get(keyType).token.validityTime;
+        }
+
         return consumerKey ? (
             <React.Fragment>
                 <div className={classes.inputWrapper}>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={24} className={classes.gridWrapper}>
                         <Grid item xs={6}>
                             <InputLabel htmlFor='adornment-amount'>Consumer Key</InputLabel>
                             <div className={classes.copyWrapper}>
                                 <Input
-                                    inputProps={{ readonly: true }}
-                                    id='consumerKey'
-                                    value={consumerKey ||
-                                    'Keys are not generated yet. Click the Generate token button to generate the keys.'}
-                                    helperText='Consumer Key of the application'
+                                    inputProps={{ readOnly: true }}
+                                    id='consumer-key'
+                                    value={consumerKey}
                                     margin='normal'
                                     fullWidth
                                 />
                                 <Tooltip
-                                    title={this.state.keyCopied ? 'Copied' : 'Copy to clipboard'}
+                                    title={keyCopied ? 'Copied' : 'Copy to clipboard'}
                                     placement='right'
                                 >
                                     <CopyToClipboard
-                                        text={consumerKey || 'Keys are not generated yet.'}
-                                        onCopy={this.onCopy('keyCopied')}
+                                        text={consumerKey}
+                                        onCopy={() => this.onCopy('keyCopied')}
                                     >
                                         <FileCopy color='secondary' />
                                     </CopyToClipboard>
                                 </Tooltip>
                             </div>
+                            <FormControl>
+                                <FormHelperText id='consumer-key-helper-text'>
+                                    Consumer Key of the application
+                                </FormHelperText>
+                            </FormControl>
                         </Grid>
                         <Grid item xs={6}>
                             <InputLabel htmlFor='adornment-amount'>Consumer Secret</InputLabel>
                             <div className={classes.copyWrapper}>
                                 <Input
-                                    inputProps={{ readonly: true }}
-                                    id='consumerSecret'
+                                    inputProps={{ readOnly: true }}
+                                    id='consumer-secret'
                                     label='Consumer Secret'
                                     type={showCS || !consumerSecret ? 'text' : 'password'}
-                                    value={consumerSecret ||
-                                    'Keys are not generated yet. Click the Generate token button to generate the keys.'}
+                                    value={consumerSecret}
                                     fullWidth
                                     endAdornment={(
                                         <InputAdornment position='end'>
                                             <IconButton
                                                 classes=''
-                                                onClick={this.handleShowCS}
+                                                onClick={() => this.handleShowHidden('showCS')}
                                                 onMouseDown={this.handleMouseDownGeneric}
                                             >
                                                 {showCS ? <VisibilityOff /> : <Visibility />}
@@ -337,22 +290,61 @@ class ViewKeys extends React.Component {
                                     )}
                                 />
                                 <Tooltip
-                                    title={this.state.secretCopied ? 'Copied' : 'Copy to clipboard'}
+                                    title={secretCopied ? 'Copied' : 'Copy to clipboard'}
                                     placement='right'
                                 >
                                     <CopyToClipboard
-                                        text={consumerSecret || 'Keys are not generated yet.'}
-                                        onCopy={this.onCopy('secretCopied')}
+                                        text={consumerSecret}
+                                        onCopy={() => this.onCopy('secretCopied')}
                                     >
                                         <FileCopy color='secondary' />
                                     </CopyToClipboard>
                                 </Tooltip>
                             </div>
+                            <FormControl>
+                                <FormHelperText id='consumer-secret-helper-text'>
+                                    Consumer Secret of the application
+                                </FormHelperText>
+                            </FormControl>
                         </Grid>
+                        {
+                            accessToken &&
+                                (
+                                    <Grid item xs={6}>
+
+                                        <InputLabel htmlFor='adornment-amount'>Access Token</InputLabel>
+                                        <div className={classes.copyWrapper}>
+                                            <Input
+                                                inputProps={{ readOnly: true }}
+                                                id='access-token'
+                                                value={accessToken}
+                                                margin='normal'
+                                                fullWidth
+                                            />
+                                            <Tooltip
+                                                title={tokenCopied ? 'Copied' : 'Copy to clipboard'}
+                                                placement='right'
+                                            >
+                                                <CopyToClipboard
+                                                    text={accessToken}
+                                                    onCopy={() => this.onCopy('tokenCopied')}
+                                                >
+                                                    <FileCopy color='secondary' />
+                                                </CopyToClipboard>
+                                            </Tooltip>
+                                        </div>
+                                        <FormControl>
+                                            <FormHelperText id='access-token-helper-text'>
+                                                Above token has a validity period of {validityPeriod} seconds.
+                                                And the token has ( {accessTokenScopes.join(', ')} ) scopes.
+                                            </FormHelperText>
+                                        </FormControl>
+                                    </Grid>)
+                        }
                         <Grid item xs={12}>
                             <Dialog
                                 fullScreen={fullScreen}
-                                open={this.state.open}
+                                open={open}
                                 onClose={this.handleClose}
                                 aria-labelledby='responsive-dialog-title'
                             >
@@ -418,7 +410,7 @@ class ViewKeys extends React.Component {
                 <Typography variant='caption' gutterBottom className={classes.noKeyMessageBox}>
                     {keyType}
                     {' '}
-Key and Secret is not generated for this application
+                    Key and Secret is not generated for this application
                 </Typography>
             </React.Fragment>
         );
