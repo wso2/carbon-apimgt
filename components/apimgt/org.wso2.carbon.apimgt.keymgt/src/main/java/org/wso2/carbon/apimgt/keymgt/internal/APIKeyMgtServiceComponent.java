@@ -291,9 +291,6 @@ public class APIKeyMgtServiceComponent {
         }
     }
 
-    @Component(
-         name = "api.keymgt.component", 
-         immediate = true)
     private static class ServerRunnable implements Runnable {
 
         TServer server;
