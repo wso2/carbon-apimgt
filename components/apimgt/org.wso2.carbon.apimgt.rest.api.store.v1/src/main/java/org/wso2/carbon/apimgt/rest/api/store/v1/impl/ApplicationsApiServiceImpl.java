@@ -342,10 +342,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "is already registered")) {
-                RestApiUtil
-                        .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
-                                e,
-                                log);
+                RestApiUtil.handleResourceAlreadyExistsError("Keys already generated for the application " +
+                        applicationId, e, log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while generating keys for application " + applicationId, e,
                         log);

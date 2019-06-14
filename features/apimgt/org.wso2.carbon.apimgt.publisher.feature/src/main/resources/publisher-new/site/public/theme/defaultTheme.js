@@ -150,7 +150,6 @@ const Configurations = {
         },
     },
 };
-
-// if (process && process.env.NODE_ENV) {
-//     export default Configurations;
-// }
+if (typeof module !== 'undefined') {
+    module.exports = Configurations; // Added for tests
+}

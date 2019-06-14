@@ -1060,6 +1060,45 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
+    /**
+     * Get total revenue for a given API from all its' subscriptions
+     *
+     * @param apiId API ID
+     * @param messageContext message context
+     * @return revenue data for a given API
+     */
+    @Override
+    public Response apisApiIdRevenueGet(String apiId, MessageContext messageContext) {
+
+        if (StringUtils.isBlank(apiId)) {
+            String errorMessage = "API ID cannot be empty or null when getting revenue details.";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPI(apiIdentifier);
+            if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
+                String errorMessage = "API " + apiIdentifier.getApiName() +
+                        " should be in published state to get total revenue.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            Map<String, String> revenueUsageData = monetizationImplementation.getTotalRevenue(api, apiProvider);
+            APIRevenueDTO apiRevenueDTO = new APIRevenueDTO();
+            apiRevenueDTO.setProperties(revenueUsageData);
+            return Response.ok().entity(apiRevenueDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Failed to retrieve revenue data for API ID : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        } catch (MonetizationException e) {
+            String errorMessage = "Failed to get current revenue data for API ID : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, log);
+        }
+        return null;
+    }
+
     @Override
     public Response apisApiIdScopesGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
@@ -1356,9 +1395,47 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisCopyApiPost(String newVersion, String apiId, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion,
+                                    MessageContext messageContext) {
+        URI newVersionedApiUri;
+        APIDTO newVersionedApi;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = api.getId();
+            if (defaultVersion) {
+                api.setAsDefaultVersion(true);
+            }
+            //creates the new version
+            apiProvider.createNewAPIVersion(api, newVersion);
+
+            //get newly created API to return as response
+            APIIdentifier apiNewVersionedIdentifier =
+                    new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
+            newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
+            //This URI used to set the location header of the POST response
+            newVersionedApiUri =
+                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+            return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
+        } catch (APIManagementException | DuplicateAPIException e) {
+            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
+                String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
+                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while copying API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location of " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override

@@ -252,16 +252,17 @@ class API extends Resource {
 
     /**
      * Create a new version of a given API
-     * @param id {string} UUID of the API.
      * @param version {string} new API version.
+     * @param isDefaultVersion specifies whether new API version is set as default version
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    createNewAPIVersion(id, version, callback = null) {
+    createNewAPIVersion(version, isDefaultVersion, callback = null) {
         const promise_copy_api = this.client.then((client) => {
             return client.apis['API (Individual)'].post_apis_copy_api({
-                    apiId: id,
-                    newVersion: version
+                    apiId: this.id,
+                    newVersion: version,
+                    defaultVersion: isDefaultVersion,
                 },
                 this._requestMetaData(),
             );

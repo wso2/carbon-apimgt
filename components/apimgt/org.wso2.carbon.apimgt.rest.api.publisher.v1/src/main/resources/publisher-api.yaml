@@ -71,8 +71,9 @@ securityDefinitions:
   OAuth2Security:
     type: oauth2
     flow: password
-    tokenUrl: https://localhost:9443/token
+
     scopes:
+      openid: Authorize access to user details
       apim:api_view: View API
       apim:api_create: Create API
       apim:api_update: Update API
@@ -1173,6 +1174,11 @@ paths:
           type: string
           in: query
           required: true
+        - name: defaultVersion
+          description: Specifies whether new API should be added as default version.
+          type: boolean
+          default: false
+          in: query
         - $ref: '#/parameters/apiId-Q'
       tags:
         - API (Individual)
@@ -1723,6 +1729,54 @@ paths:
           description: |
             Not Acceptable.
             The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Get Total Revenue" Processing Function resource API
+######################################################
+  /apis/{apiId}/revenue:
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/revenue"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/revenue
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"object\": \"invoice\",\n   \"account_country\": \"US\",\n   \"account_name\": \"test.com\",\n   \"amount_due\": \"0\",\n   \"amount_paid\": \"0\"\n  \"amount_remaining\": \"0\"\n}"
+      security:
+        - OAuth2Security:
+          - apim:api_publish
+      summary: Get total revenue details of a given monetized API with meterd billing.
+      description: |
+        This operation can be used to get details of total revenue details of a given monetized API with meterd billing.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Details of a total revenue returned.
+          schema:
+            $ref: '#/definitions/APIRevenue'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+            Last-Modified:
+              description: 'Date and time the resource has been modified the last time. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+        '304':
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        '404':
+          description: |
+            Not Found.
+            Requested Subscription does not exist.
           schema:
             $ref: '#/definitions/Error'
 
@@ -5454,6 +5508,18 @@ definitions:
         additionalProperties:
           type: string
 
+  #-----------------------------------------------------
+  # The API revenue resource
+  #-----------------------------------------------------
+  APIRevenue:
+    title: API revenue data object
+    properties:
+      properties:
+        type: object
+        description: Map of custom properties related to API revenue
+        additionalProperties:
+          type: string
+
 #-----------------------------------------------------
 # The Mediation Policy resource
 #-----------------------------------------------------
@@ -6322,10 +6388,8 @@ definitions:
   # The settings resource
   #-----------------------------------------------------
   Settings:
-    title: Settings
+    title: SettingsDTO
     properties:
-      tokenUrl:
-        type: string
       environment:
         type: array
         items:

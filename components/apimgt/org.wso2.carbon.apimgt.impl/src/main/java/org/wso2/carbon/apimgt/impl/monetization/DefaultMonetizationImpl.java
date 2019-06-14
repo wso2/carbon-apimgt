@@ -60,8 +60,13 @@ public class DefaultMonetizationImpl implements Monetization {
     }
 
     @Override
-    public Map<String, String> getCurrentUsage(String subscriptionUUID, APIProvider apiProvider)
+    public Map<String, String> getCurrentUsageForSubscription(String subscriptionUUID, APIProvider apiProvider)
             throws MonetizationException {
-        return new HashMap<>();
+        return new HashMap<String, String>();
+    }
+
+    @Override
+    public Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException {
+        return new HashMap<String, String>();
     }
 }

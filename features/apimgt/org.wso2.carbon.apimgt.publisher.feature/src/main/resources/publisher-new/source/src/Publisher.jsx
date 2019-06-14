@@ -19,14 +19,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
-import Login from 'AppComponents/Login/Login';
 import AuthManager from 'AppData/AuthManager';
 import qs from 'qs';
 import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
-import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import Progress from 'AppComponents/Shared/Progress';
-import SelectLogin from 'AppComponents/Login/SelectLogin';
+import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
+import InitLogin from 'AppComponents/Login/InitLogin';
 // Localization
 import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
 
@@ -101,23 +100,25 @@ class Publisher extends React.Component {
             // This could happen when OAuth code authentication took place and could send
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
-            userPromise.then((loggedUser) => {
-                if (loggedUser != null) {
-                    const hasViewScope = loggedUser.scopes.includes('apim:api_view');
-                    if (hasViewScope) {
-                        this.setState({ user: loggedUser, userResolved: true });
+            userPromise
+                .then((loggedUser) => {
+                    if (loggedUser != null) {
+                        const hasViewScope = loggedUser.scopes.includes('apim:api_view');
+                        if (hasViewScope) {
+                            this.setState({ user: loggedUser, userResolved: true });
+                        } else {
+                            console.log('No relevant scopes found, redirecting to login page');
+                            this.setState({ userResolved: true });
+                        }
                     } else {
-                        console.log('No relevant scopes found, redirecting to login page');
+                        console.log('User returned with null, redirect to login page');
                         this.setState({ userResolved: true });
                     }
-                } else {
-                    console.log('User returned with null, redirect to login page');
+                })
+                .catch((error) => {
+                    console.log('Error: ' + error + ',redirecting to login page');
                     this.setState({ userResolved: true });
-                }
-            }).catch((error) => {
-                console.log('Error: ' + error + ',redirecting to login page');
-                this.setState({ userResolved: true });
-            });
+                });
         }
     }
 
@@ -163,14 +164,10 @@ class Publisher extends React.Component {
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
-                <AppErrorBoundary appName='Publisher Application'>
+                <PublisherRootErrorBoundary appName='Publisher Application'>
                     <Router basename='/publisher-new'>
                         <Switch>
-                            <Route path='/login' exact component={SelectLogin} />
-                            <Route
-                                path='/login/basic'
-                                render={props => <Login {...props} updateUser={this.updateUser} />}
-                            />
+                            <Route path='/login' exact component={InitLogin} />
                             <Route path='/logout' component={Logout} />
                             {!user && <Redirect to={{ pathname: '/login', search: params }} />}
                             <Route
@@ -180,7 +177,7 @@ class Publisher extends React.Component {
                             />
                         </Switch>
                     </Router>
-                </AppErrorBoundary>
+                </PublisherRootErrorBoundary>
             </IntlProvider>
         );
     }

@@ -17,10 +17,10 @@
  */
 
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
+import Progress from './Progress';
 
 import './redirecting.css';
 
@@ -33,7 +33,7 @@ const Redirecting = (props) => {
                 <Grid item lg={6} md={8} xs={10}>
                     <Grid container alignItems='center'>
                         <Grid item sm={2} xs={12}>
-                            <CircularProgress className='redirect-loadingbar' />
+                            <Progress className='redirect-loadingbar' />
                         </Grid>
                         <Grid item sm={10} xs={12}>
                             <div className='redirect-main-content'>
