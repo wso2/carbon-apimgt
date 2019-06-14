@@ -44,7 +44,7 @@ const styles = theme => ({
     buttonWrapper: {
         paddingTop: 20,
     },
-    root: {
+    paperRoot: {
         padding: 20,
         marginTop: 20,
     },
@@ -114,7 +114,7 @@ class BusinessInformation extends React.Component {
                     {({ api, updateAPI }) => (
                         <Grid container spacing={24}>
                             <Grid item xs={12}>
-                                <Paper className={classes.root} elevation={1}>
+                                <Paper className={classes.paperRoot} elevation={1}>
                                     <FormControl margin='normal' className={classes.FormControlOdd}>
                                         <TextField
                                             fullWidth
