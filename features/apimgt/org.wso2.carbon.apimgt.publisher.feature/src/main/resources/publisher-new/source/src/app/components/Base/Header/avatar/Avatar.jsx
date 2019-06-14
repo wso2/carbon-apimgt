@@ -7,12 +7,12 @@ import {
     MenuItem,
     MenuList,
     Fade,
-    ListItemIcon,
-    ListItemText,
-    Divider,
+    // ListItemIcon,
+    // ListItemText,
+    // Divider,
 } from '@material-ui/core';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import NightMode from '@material-ui/icons/Brightness2';
+// import NightMode from '@material-ui/icons/Brightness2';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 // import qs from 'qs';
@@ -74,7 +74,7 @@ class Avatar extends Component {
     doOIDCLogout = (e) => {
         e.preventDefault();
         window.location = '/publisher-new/services/logout';
-    }
+    };
 
     /**
      *
@@ -106,19 +106,20 @@ class Avatar extends Component {
                             <Paper>
                                 <ClickAwayListener onClickAway={this.toggleMenu}>
                                     <MenuList>
-                                        <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>
-                                        <MenuItem onClick={this.toggleMenu}>My account</MenuItem>
+                                        {/* TODO: uncomment when component run without errors */}
+                                        {/* <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>
+                                         <MenuItem onClick={this.toggleMenu}>My account</MenuItem> */}
                                         <Link to={{ pathname: '/services/logout' }}>
                                             <MenuItem onClick={this.doOIDCLogout}>Logout</MenuItem>
                                         </Link>
-
-                                        <Divider />
-                                        <MenuItem className={classes.menuItem} onClick={this.props.toggleTheme}>
-                                            <ListItemText primary='Night Mode' />
-                                            <ListItemIcon className={classes.icon}>
-                                                <NightMode />
-                                            </ListItemIcon>
-                                        </MenuItem>
+                                        {/* TODO: uncomment when component run without errors */}
+                                        {/* <Divider />
+                                         <MenuItem className={classes.menuItem} onClick={this.props.toggleTheme}>
+                                         <ListItemText primary='Night Mode' />
+                                         <ListItemIcon className={classes.icon}>
+                                         <NightMode />
+                                         </ListItemIcon>
+                                         </MenuItem> */}
                                     </MenuList>
                                 </ClickAwayListener>
                             </Paper>

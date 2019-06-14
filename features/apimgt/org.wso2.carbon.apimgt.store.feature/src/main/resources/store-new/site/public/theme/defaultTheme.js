@@ -30,7 +30,7 @@ const Configurations = {
             custom: {
                 starColor: '#f2c73a',
                 disableColor: '#D3D3D3',
-                leftMenuWidth: 220,
+                leftMenuWidth: 200,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
                 logo: '/store-new/site/public/images/logo.png',
@@ -39,7 +39,7 @@ const Configurations = {
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
                 leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-                leftMenuIconSize: 32,
+                leftMenuIconSize: 24,
                 leftMenuIconMainSize: 52,
                 leftMenuTextStyle: 'uppercase',
                 adminRole: 'admin',
@@ -47,8 +47,8 @@ const Configurations = {
                 maxCommentLength: 1300,
                 resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
                 imageThumbnail: {
-                    width: 240, 
-                    contentPictureOverlap: false, 
+                    width: 240,
+                    contentPictureOverlap: false,
                     contentBackgroundColor: 'rgba(239, 239, 239, 0.5)',
                     defaultApiImage: false, //put false to render the system generated and user provided image.
                     //And put a string to render a custom image
@@ -65,7 +65,7 @@ const Configurations = {
                 },
                 secondary: {
                     light: '#0066ff',
-                    main: '#a2ecf5',
+                    main: '#99c573',
                     // dark: will be calculated from palette.secondary.main,
                     contrastText: '#ffcc00',
                 },
@@ -85,7 +85,7 @@ const Configurations = {
             custom: {
                 starColor: '#f2c73a',
                 disableColor: '#D3D3D3',
-                leftMenuWidth: 120,
+                leftMenuWidth: 200,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
                 logo: '/store-new/site/public/images/logo.png',
@@ -94,12 +94,20 @@ const Configurations = {
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
                 leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-                leftMenuIconSize: 32,
+                leftMenuIconSize: 24,
                 leftMenuIconMainSize: 52,
                 leftMenuTextStyle: 'uppercase',
                 adminRole: 'admin',
                 commentsLimit: 5,
                 maxCommentLength: 1300,
+                resourceChipColors: {get: '#02a8f4', post: '#8ac149', put: '#ff9700', delete: '#fd5621', option: '#5f7c8a', patch: '#785446', head: '#785446'},
+                imageThumbnail: {
+                    width: 240,
+                    contentPictureOverlap: false,
+                    contentBackgroundColor: 'rgba(239, 239, 239, 0.5)',
+                    defaultApiImage: false, //put false to render the system generated and user provided image.
+                    //And put a string to render a custom image
+                }
             },
         },
     },

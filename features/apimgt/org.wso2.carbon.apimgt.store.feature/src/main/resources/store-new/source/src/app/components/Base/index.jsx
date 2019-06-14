@@ -58,9 +58,9 @@ const styles = theme => ({
         minHeight: '100%',
         marginBottom: -50,
         background:
-            theme.palette.background.default + ' url(' +
-            theme.custom.backgroundImage +
-            ') repeat left top'
+        theme.palette.background.default + ' url(' +
+        theme.custom.backgroundImage +
+        ') repeat left top'
     },
     contentWrapper: {
         display: 'flex',
@@ -314,11 +314,12 @@ class Layout extends React.Component {
                                 </React.Fragment>
                             ) : (
                                 <React.Fragment>
-                                    <Link to={'/sign-up'}>
-                                        <Button className={classes.userLink}>
-                                            <HowToReg /> sign-up
-                                        </Button>
-                                    </Link>
+                                    {/* TODO: uncomment when the feature is working */}
+                                    {/* <Link to={'/sign-up'}>
+                                     <Button className={classes.userLink}>
+                                     <HowToReg /> sign-up
+                                     </Button>
+                                     </Link> */}
                                     <a href='/store-new/services/configs'>
                                         <Button className={classes.userLink}>
                                             <Person /> Sign-in
