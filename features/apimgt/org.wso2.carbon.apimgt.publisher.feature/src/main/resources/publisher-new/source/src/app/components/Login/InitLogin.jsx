@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,14 +16,15 @@
  * under the License.
  */
 
-import Base from './Base/index';
-import Apis from './Apis/Apis';
-import Logout from './Logout';
-import Endpoints from './Endpoints';
+/**
+ * This component is created to unify the login process from react UI.
+ * If we need to change the login process in the future, Changing here will reflect
+ * all the login redirection done in other places of the code
+ * @class InitLogin
+ */
 
-export {
-    Base,
-    Apis,
-    Logout,
-    Endpoints,
+const InitLogin = () => {
+    window.location = '/publisher-new/services/auth/login';
+    return null;
 };
+export default InitLogin;
