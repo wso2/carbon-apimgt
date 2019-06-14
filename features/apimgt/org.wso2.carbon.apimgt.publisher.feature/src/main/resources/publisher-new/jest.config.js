@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// Refer https://jestjs.io/docs/en/configuration for more information about jest configs
+
+/**
+ * Refer https://jestjs.io/docs/en/configuration for more information about jest configs
+ * Added monaco-editor mapping because of this issue
+ *      https://github.com/react-monaco-editor/react-monaco-editor/issues/133#issuecomment-403960502
+ */
 module.exports = {
     setupFiles: ['<rootDir>/source/test/setupTests.js'],
     moduleNameMapper: {
@@ -26,6 +31,7 @@ module.exports = {
         '\\.(css|less)$': '<rootDir>/source/test/__mocks__/styleMock.js',
         Config: '<rootDir>/site/public/theme/defaultTheme.js',
         MaterialIcons: '<rootDir>/site/public/fonts/iconfont/MaterialIcons.js',
+        'monaco-editor': '<rootDir>/node_modules/react-monaco-editor',
     },
     transform: {
         '^.+\\.jsx$': 'babel-jest',
