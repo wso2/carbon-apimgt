@@ -22,12 +22,12 @@ import PropTypes from 'prop-types';
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
-import ScopesIcon from '@material-ui/icons/VpnKey';
-import SecurityIcon from '@material-ui/icons/Security';
+// import ScopesIcon from '@material-ui/icons/VpnKey';
+// import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
-import CommentsIcon from '@material-ui/icons/CommentRounded';
+// import CommentsIcon from '@material-ui/icons/CommentRounded';
 import BusinessIcon from '@material-ui/icons/Business';
-import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
+// import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
@@ -190,7 +190,9 @@ class Details extends Component {
             });
     }
     handleMenuSelect(menuLink) {
-        this.props.history.push({ pathname: '/apis/' + this.props.match.params.apiUUID + '/' + menuLink });
+        this.props.history.push({
+            pathname: '/apis/' + this.props.match.params.apiUUID + '/' + menuLink,
+        });
         this.setState({ active: menuLink });
     }
     /**
@@ -252,36 +254,38 @@ class Details extends Component {
                             active={active}
                             Icon={<ResourcesIcon />}
                         />
-                        <LeftMenuItem
-                            text='scopes'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<ScopesIcon />}
-                        />
+                        {/* TODO: uncomment when component run without errors */}
+                        {/* <LeftMenuItem
+                         text='scopes'
+                         handleMenuSelect={this.handleMenuSelect}
+                         active={active}
+                         Icon={<ScopesIcon />}
+                         /> */}
                         <LeftMenuItem
                             text='documents'
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<DocumentsIcon />}
                         />
-                        <LeftMenuItem
-                            text='subscriptions'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<SubscriptionsIcon />}
-                        />
-                        <LeftMenuItem
-                            text='security'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<SecurityIcon />}
-                        />
-                        <LeftMenuItem
-                            text='comments'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<CommentsIcon />}
-                        />
+                        {/* TODO: uncomment when component run without errors */}
+                        {/* <LeftMenuItem
+                         text='subscriptions'
+                         handleMenuSelect={this.handleMenuSelect}
+                         active={active}
+                         Icon={<SubscriptionsIcon />}
+                         />
+                         <LeftMenuItem
+                         text='security'
+                         handleMenuSelect={this.handleMenuSelect}
+                         active={active}
+                         Icon={<SecurityIcon />}
+                         />
+                         <LeftMenuItem
+                         text='comments'
+                         handleMenuSelect={this.handleMenuSelect}
+                         active={active}
+                         Icon={<CommentsIcon />}
+                         /> */}
                         <LeftMenuItem
                             text='business info'
                             handleMenuSelect={this.handleMenuSelect}
