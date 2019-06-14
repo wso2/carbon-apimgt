@@ -30,6 +30,7 @@ public class APIConfigContext extends ConfigContext {
 
     private API api;
     private APIProduct apiProduct;
+    private static final String PRODUCT_PREFIX = "prod";
 
     public APIConfigContext(API api) {
         this.api = api;
@@ -93,7 +94,7 @@ public class APIConfigContext extends ConfigContext {
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
         APIProductIdentifier id = apiProduct.getId();
         //set the api name version and context
-        context.put("apiName", id.getProviderName() + "--" + id.getName());
+        context.put("apiName", PRODUCT_PREFIX + "--" + id.getName());
         context.put("apiVersion", "1.0.0");
 
         // We set the context pattern now to support plugable version strategy

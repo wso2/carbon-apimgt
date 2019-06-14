@@ -1502,6 +1502,7 @@ public class APIMappingUtil {
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getHttpVerb());
                 template.setResourceURI(resourceItem.getUritemplate());
+                template.setUriTemplate(resourceItem.getUritemplate());
                 resource.setUriTemplate(template);
             }
             productResources.add(resource);

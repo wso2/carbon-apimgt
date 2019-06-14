@@ -92,11 +92,31 @@ public class ResourceConfigContext extends ConfigContextDecorator {
             context.put("apiStatus", api.getStatus());
             context.put("faultSequence", faultSeqExt != null ? faultSeqExt : api.getFaultSequence());
         } else if (apiProduct != null) {
+            //Here we aggregate duplicate resourceURIs of an API and populate httpVerbs set in the uri template
             List<APIProductResource> productResources = apiProduct.getProductResources();
+            List<APIProductResource> aggregateResources = new ArrayList<APIProductResource>();
+            List<String> uriTemplateNames = new ArrayList<String>();
+
+            for (APIProductResource productResource : productResources) {
+                URITemplate uriTemplate = productResource.getUriTemplate();
+                String productResourceKey = productResource.getApiIdentifier() + ":" + uriTemplate.getUriTemplate();
+                if (uriTemplateNames.contains(productResourceKey)) {
+                    for (APIProductResource resource : aggregateResources) {
+                        String resourceKey = resource.getApiIdentifier() + ":" + resource.getUriTemplate().getUriTemplate();
+                        if (resourceKey.equals(productResourceKey)) {
+                            resource.getUriTemplate().setHttpVerbs(uriTemplate.getHTTPVerb());
+                        }
+                    }
+                } else {
+                    uriTemplate.setHttpVerbs(uriTemplate.getHTTPVerb());
+                    aggregateResources.add(productResource);
+                    uriTemplateNames.add(productResourceKey);
+                }
+            }
 
             List<URITemplate> uriTemplates = new ArrayList<>();
-            for (APIProductResource productResource : productResources) {
-                uriTemplates.add(productResource.getUriTemplate());
+            for (APIProductResource resource : aggregateResources) {
+                uriTemplates.add(resource.getUriTemplate());
             }
 
             context.put("resources", uriTemplates);
