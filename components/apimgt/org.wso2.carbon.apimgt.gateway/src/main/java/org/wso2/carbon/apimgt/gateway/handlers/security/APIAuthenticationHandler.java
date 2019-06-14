@@ -79,7 +79,7 @@ import java.util.regex.Pattern;
 public class APIAuthenticationHandler extends AbstractHandler implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
-    private volatile ArrayList<Authenticator> authenticators = null;
+    private ArrayList<Authenticator> authenticators = new ArrayList<>();
     private SynapseEnvironment synapseEnvironment;
 
     private String authorizationHeader;
@@ -193,7 +193,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     public void destroy() {
-        if (authenticators != null) {
+        if (!authenticators.isEmpty()) {
             for (Authenticator authenticator : authenticators) {
                 authenticator.destroy();
             }
@@ -303,7 +303,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 long currentTime = System.currentTimeMillis();
                 messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
             }
-            if (authenticators == null) {
+            if (authenticators.isEmpty()) {
                 initializeAuthenticators();
             }
             if (isAuthenticate(messageContext)) {

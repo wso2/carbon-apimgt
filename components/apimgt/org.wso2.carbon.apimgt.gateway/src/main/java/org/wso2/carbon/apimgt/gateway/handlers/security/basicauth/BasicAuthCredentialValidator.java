@@ -70,18 +70,11 @@ public class BasicAuthCredentialValidator {
     private String host;
 
     /**
-     * Initialize the validator.
-     */
-    BasicAuthCredentialValidator() {
-    }
-
-    /**
      * Initialize the validator with the synapse environment.
      *
-     * @param env the synapse environment
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    BasicAuthCredentialValidator(SynapseEnvironment env) throws APISecurityException {
+    BasicAuthCredentialValidator() throws APISecurityException {
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
         this.getGatewayUsernameCache();
 
@@ -97,14 +90,14 @@ public class BasicAuthCredentialValidator {
             authAdminStub = new AuthenticationAdminStub(configurationContext, url +
                     "AuthenticationAdmin");
         } catch (AxisFault axisFault) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage());
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
         }
 
         try {
             remoteUserStoreManagerServiceStub = new RemoteUserStoreManagerServiceStub(configurationContext, url +
                     "RemoteUserStoreManagerService");
         } catch (AxisFault axisFault) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage());
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
         }
         ServiceClient svcClient = remoteUserStoreManagerServiceStub._getServiceClient();
         CarbonUtils.setBasicAccessSecurityHeaders(config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME),
@@ -113,7 +106,7 @@ public class BasicAuthCredentialValidator {
         try {
             host = new URL(url).getHost();
         } catch (MalformedURLException e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
     }
 
@@ -168,7 +161,7 @@ public class BasicAuthCredentialValidator {
             authenticated = authAdminStub.login(username, password, host);
         } catch (RemoteException | LoginAuthenticationExceptionException e) {
             log.debug("Basic Authentication: Username and Password authentication failure");
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
 
         if (gatewayKeyCacheEnabled) {
@@ -471,7 +464,7 @@ public class BasicAuthCredentialValidator {
             return Boolean.parseBoolean(cacheEnabled);
         } catch (Exception e) {
             log.error("Did not found valid API Validation Information cache configuration." +
-                    " Use default configuration" + e);
+                    " Use default configuration " + e, e);
         }
         return true;
     }

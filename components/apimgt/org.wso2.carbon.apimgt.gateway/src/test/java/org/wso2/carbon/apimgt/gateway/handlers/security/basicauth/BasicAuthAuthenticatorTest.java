@@ -23,6 +23,8 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -38,33 +40,40 @@ public class BasicAuthAuthenticatorTest {
     private final String CUSTOM_AUTH_HEADER = "AUTH-HEADER";
 
     @Before
-    public void setup() {
+    public void setup() throws APISecurityException {
         messageContext = Mockito.mock(Axis2MessageContext.class);
         axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
         basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true, null);
-        basicAuthAuthenticator.setBasicAuthCredentialValidator(new BasicAuthCredentialValidator() {
-            @Override
-            public boolean validate(String username, String password) {
-                if ((username.equals("test_username@carbon.super") ||
-                        username.equals("test_username_blocked@carbon.super")) && password.equals("test_password")) {
-                    return true;
-                }
-                return false;
-            }
+        BasicAuthCredentialValidator basicAuthCredentialValidator = Mockito.mock(BasicAuthCredentialValidator.class);
 
-            @Override
-            public boolean validateScopes(String username, Swagger swagger, MessageContext synCtx) throws APISecurityException {
-                if (username.equals("test_username@carbon.super")) {
-                    return true;
-                } else if (username.equals("test_username_blocked@carbon.super")) {
-                    throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
-                }
-                return false;
-            }
-        });
+        Mockito.when(basicAuthCredentialValidator.validate(Mockito.anyString(), Mockito.anyString()))
+                .thenAnswer(invocationOnMock -> {
+                    Object argument1 = invocationOnMock.getArguments()[0];
+                    Object argument2 = invocationOnMock.getArguments()[1];
+
+                    if ((argument1.equals("test_username@carbon.super") ||
+                            argument1.equals("test_username_blocked@carbon.super")) &&
+                            argument2.equals("test_password")) {
+                        return true;
+                    }
+                    return false;
+                });
+
+        Mockito.when(basicAuthCredentialValidator.validateScopes(Mockito.anyString(), Mockito.any(Swagger.class),
+                Mockito.any(MessageContext.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Object argument = invocationOnMock.getArguments()[0];
+                    if (argument.equals("test_username@carbon.super")) {
+                        return true;
+                    } else if (argument.equals("test_username_blocked@carbon.super")) {
+                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+                    }
+                    return false;
+                });
+        basicAuthAuthenticator.setBasicAuthCredentialValidator(basicAuthCredentialValidator);
     }
 
     @Test
