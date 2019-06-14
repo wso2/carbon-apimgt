@@ -753,12 +753,13 @@ class API extends Resource {
     /*
      Add inline content to a INLINE type document
      */
-    addInlineContentToDocument(api_id, doc_id, inline_content) {
+    addInlineContentToDocument(apiId, documentId, sourceType, inlineContent) {
         const promised_addInlineContentToDocument = this.client.then((client) => {
             const payload = {
-                apiId: api_id,
-                documentId: doc_id,
-                inlineContent: inline_content,
+                apiId,
+                documentId,
+                sourceType,
+                inlineContent,
                 'Content-Type': 'application/json',
             };
             return client.apis['Document (Individual)'].post_apis__apiId__documents__documentId__content(

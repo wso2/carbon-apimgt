@@ -546,16 +546,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail);
             } else if (inlineContent != null) {
-                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
-                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE", log);
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) &&
+                        !documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE " +
+                            "or MARKDOWN", log);
                 }
                 apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
-            } else if (inlineContent != null) {
-                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
-                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not MARKDOWN", log);
-                }
-                apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
-            } else {
+            }  else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
 
