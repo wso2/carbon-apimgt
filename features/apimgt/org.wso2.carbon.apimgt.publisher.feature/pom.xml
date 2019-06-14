@@ -208,7 +208,7 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--<execution>
                         <id>node test</id>
                         <goals>
                             <goal>exec</goal>
@@ -223,7 +223,7 @@
                                 <argument>test</argument>
                             </arguments>
                         </configuration>
-                    </execution>
+                    </execution>-->
                 </executions>
                 <configuration>
                     <workingDirectory>${npm.working.dir}</workingDirectory>
