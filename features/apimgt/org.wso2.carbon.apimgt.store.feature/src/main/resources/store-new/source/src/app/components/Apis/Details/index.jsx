@@ -319,7 +319,7 @@ class Details extends React.Component {
                     <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>
-                    <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
+                    <InfoBar apiId={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
                     <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}

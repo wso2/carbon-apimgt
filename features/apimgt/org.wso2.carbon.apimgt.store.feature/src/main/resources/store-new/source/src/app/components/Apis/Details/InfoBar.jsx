@@ -462,7 +462,6 @@ class InfoBar extends React.Component {
             showOverview: false,
             checked: false,
         };
-        this.api_uuid = this.props.api_uuid;
     }
 
     /**
@@ -471,8 +470,9 @@ class InfoBar extends React.Component {
      * @memberof InfoBar
      */
     componentDidMount() {
+        const { apiId } = this.props;
         const api = new Api();
-        api.getAPIById(this.api_uuid)
+        api.getAPIById(apiId)
             .then((response) => {
                 this.setState({ api: response.obj });
                 // this.props.setDetailsAPI(response.obj);
@@ -500,7 +500,7 @@ class InfoBar extends React.Component {
                 }
             });
 
-        api.getSubscriptions(this.api_uuid, null)
+        api.getSubscriptions(apiId, null)
             .then(() => {})
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -551,20 +551,8 @@ class InfoBar extends React.Component {
      * @returns {string}
      */
     getHttpsEP = (api) => {
-        const epUrls = api.endpointURLs.filter((v) => {
-            if (v.environmentType === 'hybrid') {
-                return v;
-            } else {
-                return null;
-            }
-        });
-
-        const selectedEnvUrls = epUrls[0].environmentURLs;
-        if (selectedEnvUrls.https) {
-            return selectedEnvUrls.https;
-        } else {
-            return selectedEnvUrls.http;
-        }
+        const epHybridUrl = api.endpointURLs.find(url => url.environmentType === 'hybrid');
+        return epHybridUrl.environmentURLs.https || epHybridUrl.environmentURLs.http;
     };
 
     /**
