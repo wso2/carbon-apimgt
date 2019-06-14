@@ -26,10 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -45,10 +42,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -712,6 +706,39 @@ public class APIGatewayManager {
             }
         }
         return APIConstants.APIEndpointSecurityConstants.BASIC_AUTH;
+    }
+
+    public void setProductResourceSequences(APIProviderImpl apiProvider, APIProduct apiProduct, String tenantDomain)
+            throws APIManagementException {
+        for (APIProductResource resource : apiProduct.getProductResources()) {
+            APIIdentifier apiIdentifier = resource.getApiIdentifier();
+            API api = apiProvider.getAPI(apiIdentifier);
+
+            for (String environmentName : api.getEnvironments()) {
+                Environment environment = environments.get(environmentName);
+                try {
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+
+                    String inSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                    if (client.isExistingSequence(inSequenceKey, tenantDomain)) {
+                        resource.setInSequenceName(inSequenceKey);
+                    }
+
+                    String outSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+                    if (client.isExistingSequence(outSequenceKey, tenantDomain)) {
+                        resource.setOutSequenceName(outSequenceKey);
+                    }
+
+                    String faultSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                    if (client.isExistingSequence(faultSequenceKey, tenantDomain)) {
+                        resource.setFaultSequenceName(faultSequenceKey);
+                    }
+                } catch (AxisFault axisFault) {
+                    throw new APIManagementException("Error occurred while checking if product resources " +
+                            "have custom sequences", axisFault);
+                }
+            }
+        }
     }
 
     /**
