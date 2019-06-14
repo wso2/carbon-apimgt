@@ -15,7 +15,8 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -208,14 +209,14 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <!--<execution>
+                    <execution>
                         <id>node test</id>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <phase>test</phase>
                         <configuration>
-                            <skip>${skipTests}</skip>
+                            <skip>${maven.test.skip}</skip>
                             <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -223,7 +224,7 @@
                                 <argument>test</argument>
                             </arguments>
                         </configuration>
-                    </execution>-->
+                    </execution>
                 </executions>
                 <configuration>
                     <workingDirectory>${npm.working.dir}</workingDirectory>

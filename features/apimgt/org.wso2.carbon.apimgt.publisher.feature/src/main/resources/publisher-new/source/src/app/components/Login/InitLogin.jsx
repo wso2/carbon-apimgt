@@ -16,6 +16,8 @@
  * under the License.
  */
 
+import React from 'react';
+
 /**
  * This component is created to unify the login process from react UI.
  * If we need to change the login process in the future, Changing here will reflect
@@ -23,8 +25,14 @@
  * @class InitLogin
  */
 
-const InitLogin = () => {
-    window.location = '/publisher-new/services/auth/login';
-    return null;
-};
+const page = '/publisher-new/services/auth/login';
+class InitLogin extends React.Component {
+    componentDidMount() {
+        window.location = page;
+    }
+
+    render() {
+        return `You will be redirect to ${page}`;
+    }
+}
 export default InitLogin;
