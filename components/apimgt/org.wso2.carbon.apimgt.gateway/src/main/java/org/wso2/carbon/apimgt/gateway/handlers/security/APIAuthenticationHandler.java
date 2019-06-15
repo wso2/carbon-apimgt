@@ -372,6 +372,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      */
     protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
         int apiSecurityErrorCode = 0;
+        ArrayList<Integer> errorCodes = new ArrayList<>();
         String errorMessage = "";
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
@@ -385,7 +386,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (!authenticationResponse.isAuthenticated()) {
                 // Update error message if authentication failed
                 errorMessage = updateErrorMessage(errorMessage, authenticationResponse.getErrorMessage());
-                apiSecurityErrorCode = updateErrorCode(apiSecurityErrorCode, authenticationResponse.getErrorCode());
+                apiSecurityErrorCode = updateErrorCode(authenticationResponse.getErrorCode(),
+                        errorCodes);
             }
             if (!authenticationResponse.isContinueToNextAuthenticator()) {
                 break;
@@ -405,13 +407,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return errorMessage;
     }
 
-    private int updateErrorCode(int errorCode, int newErrorCode) {
-        if (errorCode == 0) {
-            errorCode = newErrorCode;
-        } else {
-            errorCode = APISecurityConstants.MULTI_AUTHENTICATION_FAILURE;
+    private int updateErrorCode(int newErrorCode, ArrayList<Integer> errorCodes) {
+        errorCodes.add(newErrorCode);
+        if (errorCodes.size() > 1) {
+            if (errorCodes.contains(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) &&
+                    errorCodes.contains(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS)) {
+                return APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS;
+            } else if (errorCodes.contains(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS)) {
+                return APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS;
+            } else if (errorCodes.contains(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS)) {
+                return APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS;
+            }
+            return APISecurityConstants.MULTI_AUTHENTICATION_FAILURE;
         }
-        return errorCode;
+        return newErrorCode;
     }
 
     private String getAuthenticatorsChallengeString() {
@@ -512,15 +521,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         errorDetail.setText(APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
 
         // if custom auth header is configured, the error message should specify its name instead of default value
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS ||
+                e.getErrorCode() == APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS) {
             String errorDescription =
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
                             + authorizationHeader + " : Bearer ACCESS_TOKEN" + "'";
             errorDetail.setText(errorDescription);
-        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS) {
+        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS ||
+                e.getErrorCode() == APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS) {
             String errorDescription =
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
                             + authorizationHeader + " : Basic ACCESS_TOKEN" + "'";
+            errorDetail.setText(errorDescription);
+        } else if (e.getErrorCode() ==
+                APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS) {
+            String errorDescription =
+                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
+                            + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader +
+                            " : Basic ACCESS_TOKEN'";
             errorDetail.setText(errorDescription);
         }
 

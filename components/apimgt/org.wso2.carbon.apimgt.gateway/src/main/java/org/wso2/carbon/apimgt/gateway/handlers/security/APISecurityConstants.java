@@ -74,6 +74,11 @@ public class APISecurityConstants {
     public static final int API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS = 900914;
     public static final String API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE = "Invalid Basic Auth Credentials";
 
+    public static final int MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS = 900915;
+    public static final int MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS = 900916;
+    public static final int MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS = 900917;
+
+
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages
     public static final String DESCRIPTION_SEPARATOR = ". ";
@@ -131,6 +136,15 @@ public class APISecurityConstants {
             case MULTI_AUTHENTICATION_FAILURE:
                 errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
                 break;
+            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS:
+                errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
+                break;
+            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS:
+                errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
+                break;
+            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS:
+                errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
+                break;
             default:
                 errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
                 break;
@@ -158,6 +172,15 @@ public class APISecurityConstants {
                 errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
                 break;
             case API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS:
+                errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
+                break;
+            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS:
+                errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
+                break;
+            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS:
+                errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
+                break;
+            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS:
                 errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
                 break;
             case API_AUTH_ACCESS_TOKEN_EXPIRED:
