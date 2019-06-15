@@ -17,7 +17,7 @@
  */
 import { unwrap } from '@material-ui/core/test-utils';
 import { TextField, Button, Typography, Select, MenuItem } from '@material-ui/core';
-import CommentAdd from '../../src/app/components/Apis/Details/Comments/CommentAdd';
+import CommentAdd from '../../../src/app/components/Apis/Details/Comments/CommentAdd';
 
 const CommentAddUnwrapped = unwrap(CommentAdd);
 
@@ -42,7 +42,7 @@ const category = 'Another category';
 const props = createTestProps();
 
 beforeEach(() => {
-    wrapper = shallow(<CommentAddUnwrapped {...props} /> );
+    wrapper = shallow(<CommentAddUnwrapped {...props} />);
 });
 
 describe('<CommentAdd /> rendering', () => {
@@ -71,7 +71,7 @@ describe('<CommentAdd /> rendering', () => {
     });
 
     it('should render only one <Button /> to display only the save option, if cancelButton property is false ', () => {
-        wrapper = shallow(<CommentAddUnwrapped {...props} cancelButton={false} /> );
+        wrapper = shallow(<CommentAddUnwrapped {...props} cancelButton={false} />);
         expect(wrapper.find(Button)).toHaveLength(1);
     });
 });
@@ -92,16 +92,18 @@ describe('<CommentAdd /> interactions', () => {
     });
 
     it('should change the state commentText and currentlength when the onChange function of the TextField is invoked', () => {
-        wrapper.find(TextField).simulate('change',
-            { target: { value: commentText } }
+        wrapper.find(TextField).simulate(
+'change',
+            { target: { value: commentText } },
         );
         expect(wrapper.state('commentText')).toEqual(commentText);
         expect(wrapper.state('currentLength')).toEqual(commentText.length);
     });
 
     it('should change the state commentText and currentlength when the onChange function of the Select is invoked', () => {
-        wrapper.find(Select).simulate('change',
-            { target: { value: category } }
+        wrapper.find(Select).simulate(
+'change',
+            { target: { value: category } },
         );
         expect(wrapper.state('category')).toEqual(category);
     });

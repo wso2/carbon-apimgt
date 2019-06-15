@@ -17,7 +17,7 @@
  */
 import { unwrap } from '@material-ui/core/test-utils';
 import { TextField, Button, Typography, Select, MenuItem } from '@material-ui/core';
-import CommentEdit from '../../src/app/components/Apis/Details/Comments/CommentEdit';
+import CommentEdit from '../../../src/app/components/Apis/Details/Comments/CommentEdit';
 
 const CommentEditUnwrapped = unwrap(CommentEdit);
 
@@ -32,7 +32,7 @@ function createTestProps(props) {
         cancelButton: true,
         allComments: [],
         theme: { custom: { maxCommentLength: 1300 } },
-        comment:  {
+        comment: {
             commentId: 'ebf03093-74a3-4cd3-b5d0-a30d32a90f4b',
             category: 'General',
             parentCommentId: null,
@@ -100,16 +100,18 @@ describe('<CommentEdit /> interactions', () => {
     });
 
     it('should change the state commentText and currentlength when the onChange function of the TextField is invoked', () => {
-        wrapper.find(TextField).simulate('change',
-            { target: { value: commentText } }
+        wrapper.find(TextField).simulate(
+'change',
+            { target: { value: commentText } },
         );
         expect(wrapper.state('commentText')).toEqual(commentText);
         expect(wrapper.state('currentLength')).toEqual(commentText.length);
     });
 
     it('should change the state commentText and currentlength when the onChange function of the Select is invoked', () => {
-        wrapper.find(Select).simulate('change',
-            { target: { value: category } }
+        wrapper.find(Select).simulate(
+'change',
+            { target: { value: category } },
         );
         expect(wrapper.state('category')).toEqual(category);
     });

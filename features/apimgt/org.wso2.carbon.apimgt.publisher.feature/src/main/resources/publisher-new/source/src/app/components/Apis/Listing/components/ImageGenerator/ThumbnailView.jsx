@@ -20,7 +20,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
-import React, { Component, useContext } from 'react';
+import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Dialog from '@material-ui/core/Dialog';

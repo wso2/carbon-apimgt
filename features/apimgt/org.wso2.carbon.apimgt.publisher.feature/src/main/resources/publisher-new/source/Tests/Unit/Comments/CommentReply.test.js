@@ -17,34 +17,21 @@
  */
 import { unwrap } from '@material-ui/core/test-utils';
 import { Typography } from '@material-ui/core';
-import Comment from '../../src/app/components/Apis/Details/Comments/Comment';
-import CommentEdit from '../../src/app/components/Apis/Details/Comments/CommentEdit';
-import CommentOptions from '../../src/app/components/Apis/Details/Comments/CommentOptions';
-import CommentReply from '../../src/app/components/Apis/Details/Comments/CommentReply';
-import ConfirmDialog from '../../src/app/components/Shared/ConfirmDialog';
+import CommentEdit from '../../../src/app/components/Apis/Details/Comments/CommentEdit';
+import CommentOptions from '../../../src/app/components/Apis/Details/Comments/CommentOptions';
+import CommentReply from '../../../src/app/components/Apis/Details/Comments/CommentReply';
+import ConfirmDialog from '../../../src/app/components/Shared/ConfirmDialog';
 
-const CommentUnwrapped = unwrap(Comment);
+const CommentReplyUnwrapped = unwrap(CommentReply);
 
-let comment, reply;
+let comment,
+    reply;
 
 /**
  * Initialize common properties to be passed
  * @param {*} props properies to be override
  */
 function createTestProps(props) {
-    comment = {
-        commentId: 'ebf03093-74a3-4cd3-b5d0-a30d32a90f4b',
-        category: 'General',
-        parentCommentId: null,
-        username: 'admin',
-        commentText: 'My new comment',
-        createdTime: '2018-09-27T10:16:44.444Z',
-        createdBy: 'admin',
-        lastUpdatedTime: '2018-09-27T10:37:03.570Z',
-        lastUpdatedBy: 'admin',
-        replies: [],
-    };
-
     reply = {
         commentId: 'adf03093-74a3-4cd3-b5d0-a30d32a90f4b',
         category: 'General',
@@ -58,16 +45,26 @@ function createTestProps(props) {
         replies: [],
     };
 
+    comment = {
+        commentId: 'ebf03093-74a3-4cd3-b5d0-a30d32a90f4b',
+        category: 'General',
+        parentCommentId: null,
+        username: 'admin',
+        commentText: 'My new comment',
+        createdTime: '2018-09-27T10:16:44.444Z',
+        createdBy: 'admin',
+        lastUpdatedTime: '2018-09-27T10:37:03.570Z',
+        lastUpdatedBy: 'admin',
+        replies: [reply],
+    };
+
     return {
+        // common props
         classes: {},
-        apiId: '1234',
-        allComments: [
-            comment
-        ],
+        apiId: '6e770272-212b-404e-ab9c-333fdba02f2f',
+        allComments: [comment],
         theme: { custom: { maxCommentLength: 1300 } },
-        comments:  [
-            comment,
-        ],
+        comments: [reply],
         commentsUpdate: jest.fn(),
         ...props,
     };
@@ -77,14 +74,10 @@ let wrapper;
 const props = createTestProps();
 
 beforeEach(() => {
-    wrapper = shallow(<CommentUnwrapped {...props} /> );
+    wrapper = shallow(<CommentReplyUnwrapped {...props} />);
 });
 
-describe('<Comment /> rendering', () => {
-    it('renders correctly', () => {
-        expect(wrapper).toMatchSnapshot();
-    });
-
+describe('<CommentReply /> rendering', () => {
     it('should render 2 <Typography /> s to display the username and the comment text', () => {
         expect(wrapper.find(Typography)).toHaveLength(2);
     });
@@ -97,17 +90,11 @@ describe('<Comment /> rendering', () => {
         expect(wrapper.find(CommentOptions)).toHaveLength(1);
     });
 
-    it('should render a <ConfirmDialog /> component', () => {
-        expect(wrapper.find(ConfirmDialog)).toHaveLength(1);
-    });
-
-    it('should not render a <CommentReply /> component when there are no replies', () => {
+    it('should not render a <CommentReply /> component because replies cannot have replies', () => {
         expect(wrapper.find(CommentReply)).toHaveLength(0);
     });
 
-    it('should render a <CommentReply /> component', () => {
-        comment.replies.push(reply);
-        wrapper = shallow(<CommentUnwrapped {...props} comments={[comment]} allComments={[comment]} /> );
-        expect(wrapper.find(CommentReply)).toHaveLength(1);
+    it('should render a <ConfirmDialog /> component', () => {
+        expect(wrapper.find(ConfirmDialog)).toHaveLength(1);
     });
 });
