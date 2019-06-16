@@ -696,24 +696,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.apisApiIdThumbnailGet(apiId, ifNoneMatch, securityContext);
     }
 
-    @POST
-    @Path("/{apiId}/thumbnail")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Upload a thumbnail image", notes = "This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`. ", response = FileInfoDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API")
-        })
-    }, tags={ "API (Individual)",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Image updated ", response = FileInfoDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apisApiIdThumbnailPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
-        return delegate.apisApiIdThumbnailPost(apiId, fileInputStream, fileDetail, ifMatch, securityContext);
-    }
-
     @GET
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
@@ -865,12 +847,30 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
-    }, tags={ "API (Collection)" })
+    }, tags={ "API (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API definition validation information is returned ", response = APIDefinitionValidationResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = ErrorDTO.class) })
     public Response apisValidateDefinitionPost(@Multipart(value = "type")  String type, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) {
         return delegate.apisValidateDefinitionPost(type, url, fileInputStream, fileDetail, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/thumbnail")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Upload a thumbnail image", notes = "This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`. ", response = FileInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_update", description = "Update API")
+        })
+    }, tags={ "API (Individual)" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Image updated ", response = FileInfoDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
+    public Response updateAPIThumbnail(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+        return delegate.updateAPIThumbnail(apiId, fileInputStream, fileDetail, ifMatch, securityContext);
     }
 }

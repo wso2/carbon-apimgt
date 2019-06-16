@@ -927,7 +927,7 @@ paths:
 #----------------------------------------------------------------------------
 # Upload a thumbnail image to a certain API
 #----------------------------------------------------------------------------
-    post:
+    put:
       consumes:
         - multipart/form-data
       security:
@@ -949,6 +949,7 @@ paths:
         --------------------------5e542e0e5b50e1e4--
       x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\r\nContent-Type: application/json\r\n\r\n{\r\n   \"relativePath\": \"/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\",\r\n   \"mediaType\": \"image/jpeg\"\r\n}"
       summary: Upload a thumbnail image
+      operationId: updateAPIThumbnail
       description: |
         This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`.
       parameters:
