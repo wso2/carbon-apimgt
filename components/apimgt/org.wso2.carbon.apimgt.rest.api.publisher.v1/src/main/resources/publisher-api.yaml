@@ -5430,8 +5430,13 @@ definitions:
           even if the request count exceeded within a unit time
         type: boolean
         example: true
-
-
+      monetizationProperties:
+        description:
+          Properties of a tier plan which are related to monetization
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
 #-----------------------------------------------------
 # The Subscription List resource
 #-----------------------------------------------------
@@ -6396,6 +6401,10 @@ definitions:
         items:
           $ref: '#/definitions/Environment'
       scopes:
+        type: array
+        items:
+          type: string
+      MonetizationProperties:
         type: array
         items:
           type: string
