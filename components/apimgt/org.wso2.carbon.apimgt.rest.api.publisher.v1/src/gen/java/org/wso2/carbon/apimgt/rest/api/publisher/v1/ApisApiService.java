@@ -73,7 +73,6 @@ public interface ApisApiService {
       public Response apisApiIdThreatProtectionPoliciesGet(String apiId, MessageContext messageContext);
       public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId, MessageContext messageContext);
       public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext);
-      public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);
       public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);
       public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext);
@@ -83,4 +82,5 @@ public interface ApisApiService {
       public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, String ifMatch, MessageContext messageContext);
       public Response apisPost(APIDTO body, MessageContext messageContext);
       public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext);
+      public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);
 }

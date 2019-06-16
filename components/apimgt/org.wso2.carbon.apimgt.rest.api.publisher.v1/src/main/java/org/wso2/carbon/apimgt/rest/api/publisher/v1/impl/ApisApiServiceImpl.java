@@ -1264,7 +1264,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, Attachment fileDetail,
+    public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -1275,7 +1275,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 fileContentType = fileDetail.getContentType().toString();
             }
             //this will fail if user does not have access to the API or the API does not exist
-            API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
             String thumbPath = APIUtil.getIconPath(api.getId());
             String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
