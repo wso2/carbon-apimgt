@@ -105,13 +105,31 @@ export default class API extends Resource {
 
     /**
      * Get the swagger of an API
-     * @param id {String} UUID of the API in which the swagger is needed
+     * @param apiId {String} UUID of the API in which the swagger is needed
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSwaggerByAPIId(id, callback = null) {
+    getSwaggerByAPIId(apiId, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis.APIs.get_apis__apiId__swagger({ apiId: id }, this._requestMetaData());
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param environmentName {String} API environment name
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -446,14 +464,10 @@ export default class API extends Resource {
      * @returns {Promise} List of languages that supports SDK generation by swagger-codegen
      */
     getSdkLanguages() {
-        const promise_languages = this.client.then(
-            (client) => {
-                return client.apis.SDKs.get_sdk_gen_languages(
-                    {}, this._requestMetaData(),
-                );
-            },
-        );
-        return promise_languages;
+        const promiseLanguages = this.client.then((client) => {
+            return client.apis.SDKs.get_sdk_gen_languages({}, this._requestMetaData());
+        });
+        return promiseLanguages;
     }
 
     /**
@@ -463,14 +477,10 @@ export default class API extends Resource {
     getSdk(apiId, language) {
         const payload = { apiId, language };
 
-        const promise_sdk = this.client.then(
-            (client) => {
-                return client.apis.SDKs.get_apis__apiId__sdks__language_(
-                    payload, this._requestMetaData(),
-                );
-            },
-        );
-        return promise_sdk;
+        const promiseSdk = this.client.then((client) => {
+            return client.apis.SDKs.get_apis__apiId__sdks__language_(payload, this._requestMetaData());
+        });
+        return promiseSdk;
     }
 
     /**

@@ -138,9 +138,10 @@ class ViewKeys extends React.Component {
 
         promiseApp
             .then((application) => {
-                application.getKeys().then((keys) => {
-                    this.setState({ keys });
-                });
+                return application.getKeys();
+            })
+            .then((keys) => {
+                this.setState({ keys });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
