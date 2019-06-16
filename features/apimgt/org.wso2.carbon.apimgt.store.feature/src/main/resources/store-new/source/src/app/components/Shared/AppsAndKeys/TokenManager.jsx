@@ -59,13 +59,12 @@ const styles = theme => ({
 
 class TokenManager extends React.Component {
   generateKeys = () => {
-      const that = this;
       const promiseGenerate = this.keys.keygenWrapper();
       promiseGenerate
           .then((response) => {
               console.log('Keys generated successfully with ID : ' + response);
-              if (that.props.updateSubscriptionData) { that.props.updateSubscriptionData(); }
-              that.viewKeys.updateUI();
+              if (this.props.updateSubscriptionData) { this.props.updateSubscriptionData(); }
+              this.viewKeys.updateUI();
           })
           .catch((error) => {
               if (process.env.NODE_ENV !== 'production') {
@@ -118,7 +117,7 @@ class TokenManager extends React.Component {
                       className={classes.button}
                       onClick={this.generateKeys}
                   >
-            Generate Keys
+            Generate Keys2
                   </Button>
               </div>
           </div>

@@ -258,6 +258,11 @@ class KeyConfiguration extends React.Component {
             }
         }
 
+        let isRefreshChecked = false;
+        if (supportedGrantTypes) {
+            isRefreshChecked = supportedGrantTypes.includes('refresh_token');
+        }
+
         return (
             <React.Fragment>
                 <FormControl className={classes.FormControl} component='fieldset'>
@@ -275,7 +280,7 @@ class KeyConfiguration extends React.Component {
                     </InputLabel>
                     <div className={classes.checkboxWrapper}>
                         <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel control={<Checkbox id='refresh_token' checked={supportedGrantTypes && supportedGrantTypes.includes('refresh_token')} onChange={this.handleCheckboxChange} value='refresh_token' />} label='Refresh Token' />
+                            <FormControlLabel control={<Checkbox id='refresh_token' checked={isRefreshChecked} onChange={this.handleCheckboxChange} value='refresh_token' />} label='Refresh Token' />
                             <FormControlLabel control={<Checkbox id='password' checked={supportedGrantTypes && supportedGrantTypes.includes('password')} value='password' onChange={this.handleCheckboxChange} />} label='Password' />
                             <FormControlLabel control={<Checkbox id='implicit' checked={supportedGrantTypes && supportedGrantTypes.includes('implicit')} value='implicit' onChange={this.handleCheckboxChange} />} label='Implicit' />
                         </div>
@@ -288,7 +293,6 @@ class KeyConfiguration extends React.Component {
                 </FormControl>
 
                 {
-                    // (supportedGrantTypes && (supportedGrantTypes.includes("implicit") || supportedGrantTypes.includes("code")))  &&
                     <FormControl className={classes.FormControlOdd}>
                         <TextField id='callbackURL' fullWidth onChange={this.handleTextChange} label='Callback URL' placeholder='http://url-to-webapp' className={classes.textField} margin='normal' value={callbackUrl} />
                         <FormHelperText>Callback URL is a redirection URI in the client application which is used by the authorization server to send the client's user-agent (usually web browser) back after granting access.</FormHelperText>
