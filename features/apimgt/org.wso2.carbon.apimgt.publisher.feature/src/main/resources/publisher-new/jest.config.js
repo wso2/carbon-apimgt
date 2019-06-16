@@ -26,6 +26,7 @@ module.exports = {
     moduleNameMapper: {
         'AppComponents(.*)$': '<rootDir>/source/src/app/components/$1',
         'AppData(.*)$': '<rootDir>/source/src/app/data/$1',
+        'AppTests(.*)$': '<rootDir>/source/Tests/$1',
         '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
             '<rootDir>/source/Tests/Unit/__mocks__/fileMock.js',
         '\\.(css|less)$': '<rootDir>/source/Tests/Unit/__mocks__/styleMock.js',
