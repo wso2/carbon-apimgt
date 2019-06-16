@@ -97,14 +97,14 @@ class Listing extends React.Component {
      * @memberof Listing
      */
     updateApi(apiUUID) {
-        const api = this.state.apis;
-        for (const apiIndex in api.list) {
-            if (api.list.apiIndex && api.list[apiIndex].id === apiUUID) {
-                api.list.splice(apiIndex, 1);
+        const { apis } = this.state;
+        for (const apiIndex in apis.list) {
+            if (apis.list.apiIndex && apis.list[apiIndex].id === apiUUID) {
+                apis.list.splice(apiIndex, 1);
                 break;
             }
         }
-        this.setState({ apis: api });
+        this.setState({ apis });
     }
     /**
      *

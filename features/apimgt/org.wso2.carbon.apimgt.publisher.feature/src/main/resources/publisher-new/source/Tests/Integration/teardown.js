@@ -16,23 +16,17 @@
  * under the License.
  */
 
-import React from 'react';
+/* eslint-disable no-underscore-dangle */
 
-/**
- * This component is created to unify the login process from react UI.
- * If we need to change the login process in the future, Changing here will reflect
- * all the login redirection done in other places of the code
- * @class InitLogin
- */
+const chalk = require('chalk');
+const rimraf = require('rimraf');
+const os = require('os');
+const path = require('path');
 
-const page = '/publisher-new/services/auth/login';
-class InitLogin extends React.Component {
-    componentDidMount() {
-        window.location = page;
-    }
+const DIR = path.join(os.tmpdir(), 'jest_puppeteer_global_setup');
 
-    render() {
-        return `You will be redirected to ${page}`;
-    }
-}
-export default InitLogin;
+module.exports = async function () {
+    console.log(chalk.green('Teardown Puppeteer'));
+    await global.__BROWSER_GLOBAL__.close();
+    rimraf.sync(DIR);
+};

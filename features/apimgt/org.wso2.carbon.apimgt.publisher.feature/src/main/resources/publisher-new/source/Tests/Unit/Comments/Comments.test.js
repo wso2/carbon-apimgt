@@ -19,28 +19,28 @@ import { unwrap } from '@material-ui/core/test-utils';
 import { Typography } from '@material-ui/core';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleOutlined';
-import Comments from '../../src/app/components/Apis/Details/Comments/Comments';
-import Comment from '../../src/app/components/Apis/Details/Comments/Comment';
-import CommentAdd from '../../src/app/components/Apis/Details/Comments/CommentAdd';
+import Comments from '../../../src/app/components/Apis/Details/Comments/Comments';
+import Comment from '../../../src/app/components/Apis/Details/Comments/Comment';
+import CommentAdd from '../../../src/app/components/Apis/Details/Comments/CommentAdd';
 
 const CommentsUnwrapped = unwrap(Comments);
 
 let wrapper;
 const theme = {
     custom: {
-        commentsLimit: 5
-    }
+        commentsLimit: 5,
+    },
 };
 const api = {
     id: '6e770272-212b-404e-ab9c-333fdba02f2f',
     isDefaultVersion: true,
     lastUpdatedTime: '2018-11-27T03:08:22.569Z',
     lifeCycleStatus: 'Published',
-    name: 'Swagger Petstore'
+    name: 'Swagger Petstore',
 };
 
 beforeEach(() => {
-    wrapper = shallow(<CommentsUnwrapped api={api} classes={{}} theme={theme} /> );
+    wrapper = shallow(<CommentsUnwrapped api={api} classes={{}} theme={theme} />);
 });
 
 beforeAll(() => {
@@ -115,5 +115,4 @@ describe('<Comments /> interactions', () => {
         wrapper.find(ArrowDropDown).first().simulate('click');
         expect(wrapper.state('startCommentsToDisplay')).toEqual(stateBefore + 1);
     });
-
 });
