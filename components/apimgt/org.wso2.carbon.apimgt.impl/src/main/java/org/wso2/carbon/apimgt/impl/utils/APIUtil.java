@@ -7160,6 +7160,9 @@ public final class APIUtil {
                 if (policy instanceof SubscriptionPolicy) {
                     SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
                     setBillingPlanAndCustomAttributesToTier(subscriptionPolicy, tier);
+                    if(StringUtils.equals(subscriptionPolicy.getBillingPlan(),APIConstants.COMMERCIAL_TIER_PLAN)){
+                        tier.setMonetizationAttributes(subscriptionPolicy.getMonetizationPlanProperties());
+                    }
                 }
 
                 if (limit instanceof RequestCountLimit) {
