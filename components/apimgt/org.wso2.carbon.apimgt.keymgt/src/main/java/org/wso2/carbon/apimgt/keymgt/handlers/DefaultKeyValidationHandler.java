@@ -52,6 +52,7 @@ import java.util.Set;
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     private static final Log log = LogFactory.getLog(DefaultKeyValidationHandler.class);
+    private static final String DEFAULT_SCOPE_VALIDATOR_NAME = "Role based scope validator";
 
     public DefaultKeyValidationHandler(){
         log.info(this.getClass().getName() + " Initialised");
@@ -189,30 +190,29 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             OAuthAppDAO oAuthAppDAO = new OAuthAppDAO();
             appInfo = oAuthAppDAO.getAppInformation(clientId);
             scopeValidators = appInfo.getScopeValidators();     //get scope validators from the DB
+            boolean isValid = true;
             List<String> appScopeValidators=  new ArrayList<>(Arrays.asList(scopeValidators));
-
-            if (ArrayUtils.isEmpty(scopeValidators)) {
-                log.debug(String.format("There is no scope validator registered for %s@%s", appInfo.getApplicationName(),
-                            OAuth2Util.getTenantDomainOfOauthApp(appInfo)));
-                return true;
-            }
 
             for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
                 try {
-                    if (validator != null && appScopeValidators.contains(validator.getValidatorName())) {
-                        //take the intersection of defined scope validators and scope
-                        //validators registered for the application
+                    if (validator != null && ArrayUtils.isEmpty(scopeValidators) &&
+                            validator.getValidatorName().contains(DEFAULT_SCOPE_VALIDATOR_NAME)) {
+                        // validate scopes for old created applications
+                        isValid = validator.validateScope(accessTokenDO, resource);
+                    } else if (validator != null && scopeValidators != null &&
+                            appScopeValidators.contains(validator.getValidatorName())) {
+                        //take the intersection of defined scope validators and scope validators registered for the apps
                         log.debug(String.format("Validating scope of token %s using %s", accessTokenDO.getTokenId(),
                                 validator.getValidatorName()));
 
-                        boolean isValid = validator.validateScope(accessTokenDO, resource);
-                        if (!isValid) {
-                            log.debug(String.format("Scope validation failed for %s", validator.getValidatorName()));
-                            apiKeyValidationInfoDTO.setAuthorized(false);
-                            apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
-                            return false;
-                        }
+                        isValid = validator.validateScope(accessTokenDO, resource);
                         appScopeValidators.remove(validator.getValidatorName());
+                    }
+                    if (!isValid) {
+                        log.debug(String.format("Scope validation failed for %s", validator.getValidatorName()));
+                        apiKeyValidationInfoDTO.setAuthorized(false);
+                        apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+                        return false;
                     }
                 } catch (IdentityOAuth2Exception e) {
                     log.error("ERROR while validating token scope " + e.getMessage(), e);
@@ -221,8 +221,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                     return false;
                 }
             }
-
-            if (!appScopeValidators.isEmpty()) {   //if scope validators are not defined in identity.xml but there are scope validators assigned to an application, throws exception.
+            if (!appScopeValidators.isEmpty()) {   //if scope validators are not defined in identity.xml but there are
+                // scope validators assigned to an application, throws exception.
                 throw new IdentityOAuth2Exception(String.format("The scope validator(s) %s registered for application %s@%s" +
                                 " is/are not found in the server configuration ", StringUtils.join(appScopeValidators, ", "),
                         appInfo.getApplicationName(), OAuth2Util.getTenantDomainOfOauthApp(appInfo)));
@@ -239,7 +239,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
             return false;
         }
-
         return true;
     }
 }
