@@ -50,18 +50,18 @@ const styles = theme => ({
         width: '100%',
     },
     inputText: {
-        marginLeft: '40px',
-        minWidth: '400px',
+        marginLeft: theme.spacing.unit * 5,
+        minWidth: theme.spacing.unit * 50,
     },
     grid: {
         spacing: 20,
-        marginTop: '30px',
-        marginBottom: '30px',
-        paddingLeft: theme.spacing.unit * 5,
+        marginTop: theme.spacing.unit * 4,
+        marginBottom: theme.spacing.unit * 4,
+        paddingLeft: theme.spacing.unit * 11,
         paddingRight: theme.spacing.unit * 2,
     },
     userNotificationPaper: {
-        padding: '20px',
+        padding: theme.spacing.unit * 2,
     },
     formControl: {
         display: 'flex',
