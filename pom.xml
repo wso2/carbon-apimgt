@@ -1567,7 +1567,7 @@
         <axis2.osgi.version.range>[1.6.1, 1.7.0)</axis2.osgi.version.range>
 
         <!-- Apache Axiom -->
-        <orbit.version.axiom>1.2.11.wso2v10</orbit.version.axiom>
+        <orbit.version.axiom>1.2.11-wso4v12</orbit.version.axiom>
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
         <exp.pkg.version.axiom>1.2.11.wso2v10</exp.pkg.version.axiom>
         <imp.pkg.version.axiom>[1.2.11.wso2v10, 1.3.0)</imp.pkg.version.axiom>
