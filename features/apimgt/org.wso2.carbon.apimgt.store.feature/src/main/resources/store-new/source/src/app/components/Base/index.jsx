@@ -41,9 +41,6 @@ import HowToReg from '@material-ui/icons/HowToReg';
 import VerticalDivider from '../Shared/VerticalDivider';
 
 const styles = theme => ({
-    // New styles ..........
-    // /////////////////////////////////
-    // /////////////////////////////////
     appBar: {
         position: 'relative',
         background: theme.palette.background.appBar,
