@@ -14002,7 +14002,6 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
         }
-
     }
 
     /**
