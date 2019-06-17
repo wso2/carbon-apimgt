@@ -783,7 +783,8 @@ public class ApiMgtDAO {
      *
      * @throws APIManagementException
      */
-    public void updateUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo) throws APIManagementException {
+    public void updateUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+                throws APIManagementException {
 
         Connection conn = null;
         ResultSet rs = null;
@@ -10197,8 +10198,6 @@ public class ApiMgtDAO {
         return policies.toArray(new ApplicationPolicy[policies.size()]);
     }
 
-
-
     /**
      * Get all subscription level policeis belongs to specific tenant
      *
@@ -10256,7 +10255,6 @@ public class ApiMgtDAO {
         }
         return policies.toArray(new SubscriptionPolicy[policies.size()]);
     }
-
 
     /**
      * Get all Global level policeis belongs to specific tenant
@@ -10514,7 +10512,6 @@ public class ApiMgtDAO {
         }
         return policy;
     }
-
 
     /**
      * Retrieves {@link ApplicationPolicy} with name <code>uuid</code>
