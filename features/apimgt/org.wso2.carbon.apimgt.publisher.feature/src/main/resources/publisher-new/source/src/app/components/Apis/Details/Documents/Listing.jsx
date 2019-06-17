@@ -29,6 +29,7 @@ import AddCircle from '@material-ui/icons/AddCircle';
 import Alert from 'AppComponents/Shared/Alert';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
+import TextEditor from './TextEditor';
 
 const styles = theme => ({
     root: {
@@ -151,6 +152,8 @@ class Listing extends React.Component {
                             const sourceType = tableMeta.rowData[2];
                             if (sourceType === 'MARKDOWN') {
                                 return <MarkdownEditor docName={docName} docId={docId} apiId={this.apiId} />;
+                            } else if (sourceType === 'INLINE') {
+                                return <TextEditor docName={docName} docId={docId} apiId={this.apiId} />;
                             } else {
                                 return <span />;
                             }
