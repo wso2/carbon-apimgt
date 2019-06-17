@@ -174,7 +174,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     && body.getApiProductId() != null) {
 
                 String uuid = body.getApiProductId();
-                APIProduct product = apiConsumer.getAPIProduct(uuid, tenantDomain); 
+                APIProduct product = apiConsumer.getAPIProductbyUUID(uuid, tenantDomain);
                 if(product == null) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
                     return null;

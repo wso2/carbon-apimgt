@@ -6568,36 +6568,9 @@ public class ApiMgtDAO {
             }
             connection.commit();
 
-            //check whether there are any associated api products before updating url temaplates and scopes
-            //TODO move to constants
-            String queryGetAssociatedAPIProducts = "SELECT DISTINCT AM_API_PRODUCT.UUID, AM_API_PRODUCT.TENANT_DOMAIN "
-                    + "FROM AM_API_PRODUCT_MAPPING, AM_API_URL_MAPPING, AM_API_PRODUCT " + "WHERE "
-                    + "AM_API_PRODUCT_MAPPING.URL_MAPPING_ID = AM_API_URL_MAPPING.URL_MAPPING_ID "
-                    + "AND AM_API_PRODUCT.API_PRODUCT_ID  = AM_API_PRODUCT_MAPPING.API_PRODUCT_ID " + "AND API_ID = ?";
-            int apiId = getAPIID(api.getId(), connection);
-            PreparedStatement prepStmtGetAssociatedAPIProducts = connection
-                    .prepareStatement(queryGetAssociatedAPIProducts);
-            prepStmtGetAssociatedAPIProducts.setInt(1, apiId);
-            ResultSet rs = null;
-            rs = prepStmtGetAssociatedAPIProducts.executeQuery();
-
-            List<APIProduct> apiProducts = new ArrayList<APIProduct>();
-
-            while (rs.next()) {
-                String productUUID = rs.getString("UUID");
-                String tenantDomain = rs.getString("TENANT_DOMAIN");
-                apiProducts.add(getAPIProduct(productUUID, tenantDomain));
-            }
-
             synchronized (scopeMutex) {
-                //remove api product mappings before updating api url templates
-                deleteProductMappingsForAPI(api, apiProducts);
                 updateScopes(api, tenantId);
                 updateURLTemplates(api);
-                /* update scopes above will delete all scopes and scope mappings associated with API (including product scopes).
-                after update url templates template ids will change. So we have to add product scopes and mappings again after
-                updating api templates */
-                addProductMappingsForAPI(api, apiProducts);
             }
         } catch (SQLException e) {
             handleException("Error while updating the API: " + api.getId() + " in the database", e);
@@ -12994,32 +12967,17 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_product_id"});
             prepStmtAddAPIProduct.setString(1, identifier.getProviderName());
             prepStmtAddAPIProduct.setString(2, identifier.getName());
-            prepStmtAddAPIProduct.setString(3, apiproduct.getDescription());
+            prepStmtAddAPIProduct.setString(3, identifier.getVersion());
+            prepStmtAddAPIProduct.setString(4, apiproduct.getContext());
             List<String> tierList = new ArrayList<String>();
             Set<Tier> tiers = apiproduct.getAvailableTiers();
             for (Tier tier : tiers) {
                 tierList.add(tier.getName());
             }
-            prepStmtAddAPIProduct.setString(4, StringUtils.join(tierList,","));
-            prepStmtAddAPIProduct.setString(5, identifier.getProviderName());
-            prepStmtAddAPIProduct.setString(6, apiproduct.getVisibility());
-            prepStmtAddAPIProduct.setString(7, apiproduct.getSubscriptionAvailability());
-            prepStmtAddAPIProduct.setString(8, apiproduct.getUuid());
-            prepStmtAddAPIProduct.setString(9,
-                    StringUtils.isEmpty(tenantDomain) ? MultitenantConstants.SUPER_TENANT_DOMAIN_NAME : tenantDomain);
-            prepStmtAddAPIProduct.setString(10,
-                    apiproduct.getState() == null ? APIConstants.CREATED : apiproduct.getState());
-            prepStmtAddAPIProduct.setString(11, "1.0.0"); //version is not supported atm
-            String subscriptionAvailableTenants = "";
-            if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(apiproduct.getSubscriptionAvailability())) {
-                subscriptionAvailableTenants = apiproduct.getSubscriptionAvailableTenants();
-            }
-            prepStmtAddAPIProduct.setString(12, subscriptionAvailableTenants);
-            prepStmtAddAPIProduct.setString(13, apiproduct.getVisibleRoles());
-            prepStmtAddAPIProduct.setString(14, apiproduct.getBusinessOwner());
-            prepStmtAddAPIProduct.setString(15, apiproduct.getBusinessOwnerEmail());
-            String additionalProperties = apiproduct.getAdditionalProperties().toJSONString();
-            prepStmtAddAPIProduct.setBlob(16, new ByteArrayInputStream(additionalProperties.getBytes()));
+            prepStmtAddAPIProduct.setString(5, StringUtils.join(tierList,","));
+            prepStmtAddAPIProduct.setString(6, identifier.getProviderName());
+            prepStmtAddAPIProduct.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
@@ -13032,7 +12990,7 @@ public class ApiMgtDAO {
                 throw new APIManagementException("Error while adding API product " + apiproduct.getUuid());
             }
 
-            addAPIProductResourceMappings(apiproduct, productId, connection);
+            addAPIProductResourceMappings(apiproduct.getProductResources(), connection);
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding API product " + identifier.getName() + " of provider "
@@ -13045,14 +13003,11 @@ public class ApiMgtDAO {
 
     /**
      * Add api product url mappings to DB
-     *    - product scope to api mapping AM_API_SCOPES
      *    - url templeates to product mappings (resource bundling) - AM_API_PRODUCT_MAPPING
-     *    - product scope to url template mappings - IDN_OAUTH2_RESOURCE_SCOPES
-     * @param apiProduct
-     * @param productId
+     * @param productResources
      * @throws APIManagementException
      */
-    public void addAPIProductResourceMappings(APIProduct apiProduct, int productId, Connection connection)
+    public void addAPIProductResourceMappings(List<APIProductResource> productResources, Connection connection)
             throws APIManagementException {
         //add product-api resource mappings
         PreparedStatement prepStmtAddResourceMapping = null;
@@ -13060,11 +13015,16 @@ public class ApiMgtDAO {
         String addProductResourceMappingSql = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
 
         try {
+            if (connection == null) {
+                connection = APIMgtDBUtil.getConnection();
+            }
+
             prepStmtAddResourceMapping = connection.prepareStatement(addProductResourceMappingSql);
 
             //add the resources in each API in the API product.
-            List<APIProductResource> productApis = apiProduct.getProductResources();
-            for (APIProductResource apiProductResource : productApis) {
+            for (APIProductResource apiProductResource : productResources) {
+                APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
+                int productId = getAPIProductID(productIdentifier, connection);
                 URITemplate uriTemplate = apiProductResource.getUriTemplate();
                 prepStmtAddResourceMapping.setInt(1, productId);
                 prepStmtAddResourceMapping.setInt(2, uriTemplate.getId());
@@ -13074,8 +13034,7 @@ public class ApiMgtDAO {
             prepStmtAddResourceMapping.executeBatch();
             prepStmtAddResourceMapping.clearBatch();
         } catch (SQLException e) {
-            handleException("Error while adding API product " + apiProduct.getId().getName() + " of provider " + apiProduct
-                    .getId().getProviderName(), e);
+            handleException("Error while adding API product Resources" , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, null, null);
         }
@@ -13098,169 +13057,12 @@ public class ApiMgtDAO {
             prepStmtRemoveResourceToProductMappings.setInt(1, productId);
             prepStmtRemoveResourceToProductMappings.execute();
 
-            addAPIProductResourceMappings(apiProduct, productId, connection);
+            addAPIProductResourceMappings(apiProduct.getProductResources(), connection);
         } catch (SQLException e) {
             handleException("Error while updating API-Product Resources.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtRemoveResourceToProductMappings, null, null);
         }
-    }
-    
-    /**
-     * Get API Product.
-     * @param uuid uuid of the product
-     * @param tenantDomain tenant domain 
-     * @return product
-     * @throws APIManagementException exception
-     */
-    public APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
-        APIProduct product = null;
-        Connection connection = null;
-        PreparedStatement prepStmtGetAPIProduct = null;
-        PreparedStatement prepStmtGetAPIProductResource = null;
-        ResultSet rs = null;
-        ResultSet rs2 = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();   
-            String queryGetAPIProduct = SQLConstants.GET_API_PRODUCT_SQL;
-            int productId = 0;
-            
-            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
-            prepStmtGetAPIProduct.setString(1, uuid);
-            prepStmtGetAPIProduct.setString(2, tenantDomain);
-            rs = prepStmtGetAPIProduct.executeQuery();
-            if (rs.next()) {
-                product = new APIProduct();
-                String productName = rs.getString("API_PRODUCT_NAME");
-                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                String productVersion = rs.getString("API_PRODUCT_VERSION");
-                APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
-                product.setID(id);
-                product.setUuid(rs.getString("UUID"));
-                product.setDescription(rs.getString("DESCRIPTION"));
-                String productTiers = rs.getString("API_PRODUCT_TIER");
-                if (!StringUtils.isEmpty(productTiers)) {
-                    String[] tierArray = productTiers.split(",");
-                    Set<Tier> availableTiers = new HashSet<Tier>();
-                    for (String tier : tierArray) {
-                        availableTiers.add(new Tier(tier));
-                    }           
-                    product.setAvailableTiers(availableTiers );
-                }
-
-                InputStream inputStream = rs.getBinaryStream("DEFINITION");
-                if (inputStream != null) {
-                    String content = APIMgtDBUtil.getStringFromInputStream(inputStream);
-                    product.setDefinition(content);                
-                }
-                
-                InputStream properties = rs.getBinaryStream("PROPERTIES");
-                if (properties != null) {
-                    String propertyString = APIMgtDBUtil.getStringFromInputStream(properties);
-                    JSONParser parser = new JSONParser();
-                    product.setAdditionalProperties((JSONObject) parser.parse(propertyString));
-                }
-                product.setVisibility(rs.getString("VISIBILITY"));
-                product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
-                product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
-                product.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
-                product.setSubscriptionAvailableTenants(rs.getString("SUBSCRIPTION_AVAILABILE_TENANTS"));
-                product.setState(rs.getString("STATE"));
-                product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));
-                product.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                productId = rs.getInt("API_PRODUCT_ID");
-                product.setProductId(productId);
-            } else {
-                return null;
-            }
-            
-            //get api resources related to api product
-            String queryListProductResourceMapping = SQLConstants.LIST_PRODUCT_RESOURCE_MAPPING;      
-            prepStmtGetAPIProductResource = connection.prepareStatement(queryListProductResourceMapping);
-            prepStmtGetAPIProductResource.setInt(1, productId);
-
-            //keep a temporary map for each resources for each api in the product
-            Map<String, APIProductResource> resourceMap = new HashMap<String, APIProductResource>();
-            String apiId = "";
-            rs2 = prepStmtGetAPIProductResource.executeQuery();
-            while (rs2.next()) {
-                apiId = rs2.getString("API_ID");
-                APIProductResource resource;
-                if (resourceMap.containsKey(apiId)) {
-                    resource = resourceMap.get(apiId);
-                } else {
-                    resource = new APIProductResource();
-                    resource.setApiName(rs2.getString("API_NAME"));
-                    APIIdentifier identifier = new APIIdentifier(rs2.getString("API_PROVIDER"),
-                            rs2.getString("API_NAME"), rs2.getString("API_VERSION"));
-                    resource.setApiId(identifier.toString()); // TODO set API UUID
-                    resource.setApiIdentifier(identifier);
-                }
-                URITemplate template = new URITemplate();
-                template.setHTTPVerb(rs2.getString("HTTP_METHOD"));
-                template.setResourceURI(rs2.getString("URL_PATTERN"));
-                template.setId(rs2.getInt("URL_MAPPING_ID"));
-                resource.setUriTemplate(template);
-                resourceMap.put(apiId, resource);
-            }
-            product.setProductResources(new ArrayList<APIProductResource>(resourceMap.values()));
-        } catch (SQLException e) {
-            handleException("Error while retrieving api product for UUID " + uuid , e);
-        } catch (ParseException e) {
-            handleException("Error while parsing api product properties for UUID " + uuid , e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, null, rs);
-            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProductResource, connection, rs2);
-        }
-        if(log.isDebugEnabled()) {
-            log.debug("getAPIProduct() for uuid " + uuid + " : " + product.toString());
-        }
-        return product;
-    }
-    
-    /**
-     * Retrieve all the api products in the given tenant
-     * @param tenantDomain tenant domain
-     * @return list of products
-     * @throws APIManagementException
-     */
-    public List<APIProduct> getAPIProductsForTenantDomain(String tenantDomain) throws APIManagementException {
-        List<APIProduct> productList = new ArrayList<APIProduct>();
-        Connection connection = null;
-        PreparedStatement prepStmtGetAPIProduct = null;
-        
-        ResultSet rs = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();   
-            String queryGetAPIProduct = SQLConstants.GET_ALL_API_PRODUCTS;
-            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
-            prepStmtGetAPIProduct.setString(1, tenantDomain);
-            rs = prepStmtGetAPIProduct.executeQuery();
-
-            while (rs.next()) {
-                APIProduct product = new APIProduct();
-                String productName = rs.getString("API_PRODUCT_NAME");
-                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                String productVersion = rs.getString("API_PRODUCT_VERSION");
-                APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
-                product.setID(id); //todo : replace with proper constructor
-                product.setUuid(rs.getString("UUID"));
-                product.setState(rs.getString("STATE"));
-                product.setProductId(rs.getInt("API_PRODUCT_ID"));
-                product.setDescription(rs.getString("DESCRIPTION"));
-                productList.add(product);  
-            }
-
-        } catch (SQLException e) {
-            handleException("Error while retrieving api product for tenant " + tenantDomain , e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
-        }
-        
-        return productList;
-        
     }
 
     /**
@@ -13289,106 +13091,42 @@ public class ApiMgtDAO {
         }
     }
 
-    private void deleteProductMappingsForAPI(API api, List<APIProduct> apiProducts) throws APIManagementException {
+    public List<APIProductResource> getProductMappingsForAPI(API api) throws APIManagementException {
         Connection connection = null;
-        PreparedStatement preparedStatement = null;
 
-        String querydeleteProductMappingsForAPI = SQLConstants.DELETE_PRODUCT_RESOURCE_MAPPING;
+        String query = SQLConstants.GET_PRODUCT_RESOURCE_MAPPINGS_FOR_API;
+        List<APIProductResource> productMappings = new ArrayList<APIProductResource>();
+        APIIdentifier apiIdentifier = api.getId();
+        int apiId = getAPIID(apiIdentifier, connection);
 
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            preparedStatement = connection.prepareStatement(querydeleteProductMappingsForAPI);
-            for (APIProduct apiProduct : apiProducts) {
-                List<APIProductResource> productResources = apiProduct.getProductResources();
-                for (APIProductResource productResource : productResources) {
-                    if (productResource.getApiIdentifier().equals(api.getId())) { //TODO: check and modify to use UUID
-                        URITemplate uriTemplate = productResource.getUriTemplate();
-                        if (log.isDebugEnabled()) {
-                            log.debug(
-                                    "Removing url mappings from API : " + api.getId().toString() + " on API product : "
-                                            + apiProduct.getId().toString());
-                        }
-
-                        preparedStatement.setInt(1, uriTemplate.getId());
-                        preparedStatement.addBatch();
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(query)){
+                ps.setInt(1, apiId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        APIProductResource productMapping = new APIProductResource();
+                        productMapping.setApiIdentifier(apiIdentifier);
+                        APIProductIdentifier productIdentifier = new APIProductIdentifier(
+                                rs.getString("API_PRODUCT_PROVIDER"), rs.getString("API_PRODUCT_NAME"),
+                                rs.getString("API_PRODUCT_VERSION"));
+                        productMapping.setProductIdentifier(productIdentifier);
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                        uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
+                        productMapping.setUriTemplate(uriTemplate);
+                        productMappings.add(productMapping);
                     }
                 }
             }
-            preparedStatement.executeBatch();
-            preparedStatement.clearBatch();
-            connection.commit();
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    handleException("Error occurred while Rolling back changes done on API product mapping updating",
-                            e1);
-                }
-            }
-            handleException("Error occured while removing url template mappings from API " + api.getId().toString()
-                    + " on API Products.", e);
-
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
-        }
-    }
-
-    private void addProductMappingsForAPI(API api, List<APIProduct> apiProducts) throws APIManagementException {
-        Connection connection = null;
-
-        String queryAddProductResourceMappings = SQLConstants.ADD_PRODUCT_RESOURCE_MAPPING_SQL;
-
-        PreparedStatement prepStmtAddProductResourceMappings = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-            prepStmtAddProductResourceMappings = connection.prepareStatement(queryAddProductResourceMappings);
-
-            //get previously added resources and re-add them to product with new URL_MAPPING_ID
-            Map<String, URITemplate> templateMap = getURITemplatesForAPI(api);
-            int productId;
-            for (APIProduct apiProduct : apiProducts) {
-                productId = getAPIProductId(apiProduct.getId().getName(), apiProduct.getId().getProviderName(), apiProduct.getId().getVersion());
-                List<APIProductResource> productResources = apiProduct.getProductResources();
-                for (APIProductResource productResource : productResources) {
-                    if (api.getId().equals(productResource.getApiIdentifier())) {
-                        URITemplate uriTemplate = productResource.getUriTemplate();
-
-                        String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
-                        if (templateMap.containsKey(key)) {
-                            //update api template mapping id
-                            uriTemplate.setId(templateMap.get(key).getId());
-
-                            //add record to database back with new ID
-                            prepStmtAddProductResourceMappings.setInt(1, productId);
-                            prepStmtAddProductResourceMappings.setInt(2, uriTemplate.getId());
-                            prepStmtAddProductResourceMappings.addBatch();
-                        } else {
-                            log.info("Resource " + key + " was deleted from API " + api.getId().toString()
-                                    + " while updating the API. So it is no longer available with API product "
-                                    + apiProduct.getId().toString());
-
-                        }
-                    }
-                }
-            }
-            prepStmtAddProductResourceMappings.executeBatch();
-            prepStmtAddProductResourceMappings.clearBatch();
-
-            connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding product mappings fro api " + api.getId(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtAddProductResourceMappings, connection, null);
         }
+        return productMappings;
     }
 
-    private int getAPIProductId(String productName, String provider, String version) throws APIManagementException {
+    private int getAPIProductId(APIProductIdentifier identifier) throws APIManagementException {
         Connection conn = null;
-        String queryGetProductId = SQLConstants.GET_PRODUCT_BY_ID;
+        String queryGetProductId = SQLConstants.GET_PRODUCT_ID;
         PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         int productId = -1;
@@ -13396,8 +13134,9 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             preparedStatement = conn.prepareStatement(queryGetProductId);
-            preparedStatement.setString(1, productName);
-            preparedStatement.setString(2, provider);
+            preparedStatement.setString(1, identifier.getName());
+            preparedStatement.setString(2, identifier.getProviderName());
+            preparedStatement.setString(3, APIConstants.API_PRODUCT_VERSION); //versioning is not supported atm
 
             rs = preparedStatement.executeQuery();
 
@@ -13411,93 +13150,12 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving api product id for product " + productName + " by " + provider, e);
+            handleException("Error while retrieving api product id for product " + identifier.getName() + " by " +
+                    identifier.getProviderName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, conn, rs);
         }
         return productId;
-    }
-
-    public Map<String, String> getProductScopeRolesOfApplication(String consumerKey) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        Map<String, String> scopes = new HashMap<String, String>();
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            String sql = SQLConstants.GET_PRODUCT_SCOPES_ROLES_OF_APPLICATION;
-
-            prepStmt = connection.prepareStatement(sql);
-            prepStmt.setString(1, consumerKey);
-            rs = prepStmt.executeQuery();
-
-            while (rs.next()) {
-                String scope = rs.getString("SCOPE");
-                scopes.put(scope, ""); //product scopes are not meant to be bound to any role, so the role list will be empty
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving product scope and role mappings for consumer key " + consumerKey, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-        }
-        return scopes;
-    }
-    
-    /**
-     * Get api products that can be access by specific set of roles and tenant domain
-     *
-     * @param tenantDomain Tenant domain
-     * @return list of products
-     * @throws APIManagementException 
-     */
-    public List<APIProduct> getStoreVisibleAPIProducts(String user, String tenantDomain) throws APIManagementException {
-        List<APIProduct> productList = new ArrayList<APIProduct>();
-        Connection connection = null;
-        PreparedStatement prepStmtGetAPIProduct = null;
-        ResultSet rs = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            String queryGetAPIProduct = SQLConstants.GET_PUBLISHED_PRODUCT_SQL;
-            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
-            prepStmtGetAPIProduct.setString(1, APIStatus.PUBLISHED.toString());
-            prepStmtGetAPIProduct.setString(2, tenantDomain);
-
-            rs = prepStmtGetAPIProduct.executeQuery();
-
-            while (rs.next()) {
-                String visibleRoles = rs.getString("VISIBILE_ROLES");
-                String visibility = rs.getString("VISIBILITY");
-                String productTenant = rs.getString("TENANT_DOMAIN");
-                // add if the product is 1)public 2) restrict to current domain for non-anonymous users
-                //    3)restrict to a role within tenant
-                if (APIConstants.API_GLOBAL_VISIBILITY.equals(visibility)
-                        || (APIConstants.API_PRIVATE_VISIBILITY.equals(visibility)
-                                && tenantDomain.equals(productTenant) && !APIConstants.WSO2_ANONYMOUS_USER.equals(user))
-                        || (APIConstants.API_RESTRICTED_VISIBILITY.equals(visibility)
-                                && APIUtil.isRoleExistForUser(user, visibleRoles)
-                                && tenantDomain.equals(productTenant))) {
-
-                    APIProduct product = new APIProduct();
-                    String productName = rs.getString("API_PRODUCT_NAME");
-                    String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                    String productVersion = rs.getString("API_PRODUCT_VERSION");
-                    APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
-                    product.setID(id); //todo : replace with proper constructor
-                    product.setUuid(rs.getString("UUID"));
-                    product.setProductId(rs.getInt("API_PRODUCT_ID"));
-                    product.setDescription(rs.getString("DESCRIPTION"));
-                    productList.add(product);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving api product for tenant " + tenantDomain, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, connection, rs);
-        }
-        return productList;
     }
     
     public void updateAPIProduct(APIProduct product, String username) throws APIManagementException {
@@ -13531,8 +13189,11 @@ public class ApiMgtDAO {
             ps.setString(11, product.getSubscriptionAvailableTenants());
             String additionalProperties = product.getAdditionalProperties().toJSONString();
             ps.setBlob(12, new ByteArrayInputStream(additionalProperties.getBytes()));
-            ps.setString(13, product.getId().getName());
-            ps.setString(14, product.getUuid());
+            APIProductIdentifier identifier = product.getId();
+            ps.setString(13, identifier.getName());
+            ps.setString(14, identifier.getName());
+            ps.setString(15, identifier.getProviderName());
+            ps.setString(16, identifier.getVersion());
             ps.executeUpdate();
 
             int productId = getAPIProductID(product.getId(), conn);
@@ -13550,117 +13211,6 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
-    }
-
-    public int getScopeIdByScopeName(String scopeName, Connection connection) throws APIManagementException {
-
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
-        String sql = SQLConstants.GET_SCOPE_ID_BY_NAME;
-        int scopeId = -1;
-        try {
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, scopeName);
-            rs = preparedStatement.executeQuery();
-
-            if (rs.next()) {
-                scopeId = rs.getInt("SCOPE_ID");
-            }
-        } catch (SQLException e) {
-            handleException("Error while getting scope id by scope name : " + scopeName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(preparedStatement, null, rs);
-        }
-        return scopeId;
-    }
-
-    /**
-     * Get the product using uuid. This could be used for cross tenant scenarios.
-     * @param uuid uuid of the product
-     * @return product
-     * @throws APIManagementException
-     */
-    public APIProduct getAPIProductByUUID(String uuid) throws APIManagementException {
-        APIProduct product = new APIProduct();
-        Connection connection = null;
-        PreparedStatement prepStmtGetAPIProduct = null;
-        PreparedStatement prepStmtGetAPIProductResource = null;
-        ResultSet rs = null;
-        ResultSet rs2 = null;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();   
-            String queryGetAPIProduct = SQLConstants.GET_API_PRODUCT_UUID_SQL;
-            int productId = 0;
-            
-            prepStmtGetAPIProduct = connection.prepareStatement(queryGetAPIProduct);
-            prepStmtGetAPIProduct.setString(1, uuid);
-            rs = prepStmtGetAPIProduct.executeQuery();
-            if (rs.next()) {
-                String productName = rs.getString("API_PRODUCT_NAME");
-                String productProvider = rs.getString("API_PRODUCT_PROVIDER");
-                String productVersion = rs.getString("API_PRODUCT_VERSION");
-                APIProductIdentifier id = new APIProductIdentifier(productProvider, productName, productVersion);
-                product.setID(id); //todo : replace with proper constructor
-                product.setUuid(rs.getString("UUID"));
-                product.setDescription(rs.getString("DESCRIPTION"));
-                String productTiers = rs.getString("API_PRODUCT_TIER");
-                if (!StringUtils.isEmpty(productTiers)) {
-                    String[] tierArray = productTiers.split(",");
-                    Set<Tier> availableTiers = new HashSet<Tier>();
-                    for (String tier : tierArray) {
-                        availableTiers.add(new Tier(tier));
-                    }           
-                    product.setAvailableTiers(availableTiers );
-                }
-                InputStream inputStream = rs.getBinaryStream("DEFINITION");
-                if (inputStream != null) {
-                    String content = APIMgtDBUtil.getStringFromInputStream(inputStream);
-                    product.setDefinition(content);                
-                }
-                product.setVisibility(rs.getString("VISIBILITY"));
-                product.setBusinessOwner(rs.getString("BUSINESS_OWNER"));
-                product.setBusinessOwnerEmail(rs.getString("BUSINESS_OWNER_EMAIL"));
-                product.setSubscriptionAvailability(rs.getString("SUBSCRIPTION_AVAILABILITY"));
-                product.setSubscriptionAvailableTenants(rs.getString("SUBSCRIPTION_AVAILABILE_TENANTS"));
-                product.setState(rs.getString("STATE"));
-                product.setVisibleRoles(rs.getString("VISIBILE_ROLES"));
-                product.setTenantDomain(rs.getString("TENANT_DOMAIN"));
-                productId = rs.getInt("API_PRODUCT_ID");
-                product.setProductId(productId);
-            }
-            //get api resources related to api product
-            String queryListProductResourceMapping = SQLConstants.LIST_PRODUCT_RESOURCE_MAPPING;      
-            prepStmtGetAPIProductResource = connection.prepareStatement(queryListProductResourceMapping);
-            prepStmtGetAPIProductResource.setInt(1, productId);
-
-            List<APIProductResource> apiProductResources = new ArrayList<>();
-            rs2 = prepStmtGetAPIProductResource.executeQuery();
-            while (rs2.next()) {
-                APIProductResource resource = new APIProductResource();
-                resource.setApiName(rs2.getString("API_NAME"));
-                APIIdentifier identifier = new APIIdentifier(rs2.getString("API_PROVIDER"),
-                        rs2.getString("API_NAME"), rs2.getString("API_VERSION"));
-                resource.setApiIdentifier(identifier);
-
-                URITemplate template = new URITemplate();
-                template.setHTTPVerb(rs2.getString("HTTP_METHOD"));
-                template.setResourceURI(rs2.getString("URL_PATTERN"));
-                template.setId(rs2.getInt("URL_MAPPING_ID"));
-                resource.setUriTemplate(template);
-                apiProductResources.add(resource);
-            }
-            product.setProductResources(apiProductResources);
-        } catch (SQLException e) {
-            handleException("Error while retrieving api product for UUID " + uuid , e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProduct, null, rs);
-            APIMgtDBUtil.closeAllConnections(prepStmtGetAPIProductResource, connection, rs2);
-        }
-        if(log.isDebugEnabled()) {
-            log.debug("getAPIProductByUUID() for uuid " + uuid + " : " + product.toString());
-        }
-        return product;
     }
 
     /**

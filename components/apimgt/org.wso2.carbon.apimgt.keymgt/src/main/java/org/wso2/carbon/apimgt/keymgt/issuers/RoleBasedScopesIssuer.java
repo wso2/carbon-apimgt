@@ -40,7 +40,6 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import javax.cache.Caching;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,16 +74,10 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
         Map<String, String> restAPIScopesOfCurrentTenant;
 
         try {
-            Map<String, String> appScopes = new HashMap<>();
-            Map<String, String> apiScopes;
-            Map<String, String> productScopes;
+            Map<String, String> appScopes;
             ApiMgtDAO apiMgtDAO = getApiMgtDAOInstance();
             //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
-            apiScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
-            //Get all scopes associated with api products subscribed by the application
-            productScopes = apiMgtDAO.getProductScopeRolesOfApplication(consumerKey);
-            appScopes.putAll(apiScopes);
-            appScopes.putAll(productScopes);
+            appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
             //in memory and add it to each and every request coming.
             String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();

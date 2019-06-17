@@ -206,7 +206,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIProduct retrievedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            APIProduct retrievedProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
@@ -231,7 +231,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIProduct retrievedProduct = apiProvider.getAPIProduct(apiProductId, tenantDomain);
+            APIProduct retrievedProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
@@ -328,10 +328,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 provider = username;
             }
 
-            if (apiProvider.isProductExist(body.getName(), provider, tenantDomain)) {
+            /*if (apiProvider.isProductExist(body.getName(), provider, tenantDomain)) {
                 RestApiUtil.handleBadRequest(
                         "Product with name " + body.getName() + " for provider " + provider + " already exists", log);
-            }
+            }*/
             List<String> tiersFromDTO = body.getPolicies();
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
@@ -348,7 +348,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
-            String uuid = apiProvider.addAPIProduct(productToBeAdded);
+            apiProvider.addAPIProduct(productToBeAdded);
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
 

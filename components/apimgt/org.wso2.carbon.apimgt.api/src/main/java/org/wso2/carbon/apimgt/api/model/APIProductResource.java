@@ -23,6 +23,7 @@ public class APIProductResource {
     private String apiName;
     private String apiId;
     private APIIdentifier apiIdentifier;
+    private APIProductIdentifier productIdentifier;
     private URITemplate uriTemplate;
 
     public String getApiName() {
@@ -47,6 +48,14 @@ public class APIProductResource {
 
     public APIIdentifier getApiIdentifier() {
         return apiIdentifier;
+    }
+
+    public void setProductIdentifier(APIProductIdentifier productIdentifier) {
+        this.productIdentifier = productIdentifier;
+    }
+
+    public APIProductIdentifier getProductIdentifier() {
+        return productIdentifier;
     }
 
     @Override

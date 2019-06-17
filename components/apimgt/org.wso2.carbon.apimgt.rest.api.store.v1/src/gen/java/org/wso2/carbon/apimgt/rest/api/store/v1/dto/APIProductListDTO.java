@@ -19,8 +19,6 @@ import javax.xml.bind.annotation.*;
 public class APIProductListDTO   {
   
     private Integer count = null;
-    private String next = null;
-    private String previous = null;
     private List<APIProductInfoDTO> list = new ArrayList<>();
     private PaginationDTO pagination = null;
 
@@ -40,42 +38,6 @@ public class APIProductListDTO   {
   }
   public void setCount(Integer count) {
     this.count = count;
-  }
-
-  /**
-   * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
-   **/
-  public APIProductListDTO next(String next) {
-    this.next = next;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "/api-products?limit=1&offset=2&query=", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
-  @JsonProperty("next")
-  public String getNext() {
-    return next;
-  }
-  public void setNext(String next) {
-    this.next = next;
-  }
-
-  /**
-   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
-   **/
-  public APIProductListDTO previous(String previous) {
-    this.previous = previous;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "/api-products?limit=1&offset=0&query=", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
-  @JsonProperty("previous")
-  public String getPrevious() {
-    return previous;
-  }
-  public void setPrevious(String previous) {
-    this.previous = previous;
   }
 
   /**
@@ -123,15 +85,13 @@ public class APIProductListDTO   {
     }
     APIProductListDTO apIProductList = (APIProductListDTO) o;
     return Objects.equals(count, apIProductList.count) &&
-        Objects.equals(next, apIProductList.next) &&
-        Objects.equals(previous, apIProductList.previous) &&
         Objects.equals(list, apIProductList.list) &&
         Objects.equals(pagination, apIProductList.pagination);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, next, previous, list, pagination);
+    return Objects.hash(count, list, pagination);
   }
 
   @Override
@@ -140,8 +100,6 @@ public class APIProductListDTO   {
     sb.append("class APIProductListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
-    sb.append("    next: ").append(toIndentedString(next)).append("\n");
-    sb.append("    previous: ").append(toIndentedString(previous)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");
