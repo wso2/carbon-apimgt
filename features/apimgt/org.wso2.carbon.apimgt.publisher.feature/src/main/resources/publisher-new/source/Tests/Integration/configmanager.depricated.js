@@ -15,17 +15,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
 
-import {describe, it, before} from 'mocha'
-import {assert} from 'chai'
+'use strict';
 
-import TestUtils from './utils'
-import ConfigManager from '../src/app/data/ConfigManager'
+import { describe, it, before } from 'mocha';
+import { assert } from 'chai';
+
+import TestUtils from './utils';
+import ConfigManager from '../../src/app/data/ConfigManager';
 
 TestUtils.setupMockEnvironment();
 
-describe("ConfigManager", function () {
+describe('ConfigManager', () => {
     before(function () {
         TestUtils.setupMockEnvironment();
     });

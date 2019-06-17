@@ -32,7 +32,7 @@ class InitLogin extends React.Component {
     }
 
     render() {
-        return `You will be redirect to ${page}`;
+        return `You will be redirected to ${page}`;
     }
 }
 export default InitLogin;

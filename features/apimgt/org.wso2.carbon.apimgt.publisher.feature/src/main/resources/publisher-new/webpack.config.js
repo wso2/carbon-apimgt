@@ -36,6 +36,7 @@ const config = {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
+            AppTests: path.resolve(__dirname, 'source/Tests/'),
         },
         extensions: ['.js', '.jsx'],
     },

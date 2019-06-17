@@ -1,10 +1,10 @@
-import {before, it, describe} from 'mocha'
-import {assert} from 'chai'
+import { before, it, describe } from 'mocha';
+import { assert } from 'chai';
 
-import APIClient from '../src/app/data/APIClient'
+import APIClient from '../../src/app/data/APIClient';
 
 
-describe("APIClient", function () {
+describe('APIClient', () => {
     describe("#Constructor", function () {
         it("Should return same instance at all time: ", function () {
             let instance_one = new APIClient();
@@ -12,4 +12,4 @@ describe("APIClient", function () {
             assert.notEqual(instance_one,instance_two, "Two instances are equal!");
         })
     })
-})
+});

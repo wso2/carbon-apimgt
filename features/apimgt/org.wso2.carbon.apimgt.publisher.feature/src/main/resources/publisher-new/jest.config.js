@@ -22,13 +22,14 @@
  *      https://github.com/react-monaco-editor/react-monaco-editor/issues/133#issuecomment-403960502
  */
 module.exports = {
-    setupFiles: ['<rootDir>/source/test/setupTests.js'],
+    setupFiles: ['<rootDir>/source/Tests/setupTests.js'],
     moduleNameMapper: {
         'AppComponents(.*)$': '<rootDir>/source/src/app/components/$1',
         'AppData(.*)$': '<rootDir>/source/src/app/data/$1',
+        'AppTests(.*)$': '<rootDir>/source/Tests/$1',
         '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-            '<rootDir>/source/test/__mocks__/fileMock.js',
-        '\\.(css|less)$': '<rootDir>/source/test/__mocks__/styleMock.js',
+            '<rootDir>/source/Tests/Unit/__mocks__/fileMock.js',
+        '\\.(css|less)$': '<rootDir>/source/Tests/Unit/__mocks__/styleMock.js',
         Config: '<rootDir>/site/public/theme/defaultTheme.js',
         MaterialIcons: '<rootDir>/site/public/fonts/iconfont/MaterialIcons.js',
         'monaco-editor': '<rootDir>/node_modules/react-monaco-editor',
@@ -37,7 +38,7 @@ module.exports = {
         '^.+\\.jsx$': 'babel-jest',
         '^.+\\.js$': 'babel-jest',
     },
-
+    testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/source/Tests/Integration/'],
     transformIgnorePatterns: ['<rootDir>/node_modules/'],
 
     // Automatically clear mock calls and instances between every test

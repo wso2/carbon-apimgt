@@ -1033,7 +1033,7 @@ class API extends Resource {
                 file: imageFile,
                 'Content-Type': imageFile.type,
             };
-            return client.apis['API (Individual)'].post_apis__apiId__thumbnail(
+            return client.apis['API (Individual)'].updateAPIThumbnail(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'

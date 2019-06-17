@@ -16,7 +16,7 @@
  * under the License.
  */
 import { withStyles } from '@material-ui/core/styles';
-import intl, { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import green from '@material-ui/core/colors/green';
 import red from '@material-ui/core/colors/red';
@@ -257,7 +257,7 @@ class ThumbnailView extends Component {
     /**
      * @param {SyntheticEvent} e React event object
      */
-    handleClick = action => () => {
+    handleClick = (action, intl) => () => {
         if (action === 'btnEditAPIThumb') {
             this.setState({ open: true });
         } else if (action === 'btnUploadAPIThumb') {
@@ -288,7 +288,7 @@ class ThumbnailView extends Component {
                 fileObj = new File([blob], 'FileName.json', { type: 'application/json' });
             }
 
-            this.uploadThumbnail(api.id, fileObj);
+            this.uploadThumbnail(api.id, fileObj, intl);
         }
     };
 
@@ -298,7 +298,7 @@ class ThumbnailView extends Component {
      * @param {String} apiId ID of the API to be updated
      * @param {File} file new thumbnail image file
      */
-    uploadThumbnail(apiId, file) {
+    uploadThumbnail(apiId, file, intl) {
         const api = new Api();
 
         const thumbnailPromise = api.addAPIThumbnail(apiId, file);
@@ -354,7 +354,7 @@ class ThumbnailView extends Component {
      */
     render() {
         const {
-            api, classes, width, height, isEditable, theme,
+            api, classes, width, height, isEditable, theme, intl,
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
         const {
@@ -387,7 +387,11 @@ class ThumbnailView extends Component {
         return (
             <React.Fragment>
                 {isEditable ? (
-                    <ButtonBase focusRipple className={classes.thumb} onClick={this.handleClick('btnEditAPIThumb')}>
+                    <ButtonBase
+                        focusRipple
+                        className={classes.thumb}
+                        onClick={this.handleClick('btnEditAPIThumb', intl)}
+                    >
                         {view}
                         <span className={classes.thumbBackdrop} />
                         <span className={classes.thumbButton}>

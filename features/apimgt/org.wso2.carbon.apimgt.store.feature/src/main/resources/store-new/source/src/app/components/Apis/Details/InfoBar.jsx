@@ -462,7 +462,6 @@ class InfoBar extends React.Component {
             showOverview: false,
             checked: false,
         };
-        this.api_uuid = this.props.api_uuid;
     }
 
     /**
@@ -471,9 +470,9 @@ class InfoBar extends React.Component {
      * @memberof InfoBar
      */
     componentDidMount() {
+        const { apiId } = this.props;
         const api = new Api();
-        const promised_api = api.getAPIById(this.api_uuid);
-        promised_api
+        api.getAPIById(apiId)
             .then((response) => {
                 this.setState({ api: response.obj });
                 // this.props.setDetailsAPI(response.obj);
@@ -488,8 +487,7 @@ class InfoBar extends React.Component {
                 }
             });
 
-        const promised_applications = api.getAllApplications();
-        promised_applications
+        api.getAllApplications()
             .then((response) => {
                 this.setState({ applications: response.obj.list });
             })
@@ -497,21 +495,18 @@ class InfoBar extends React.Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
-                if (status === 404) {
+                if (error.status === 404) {
                     this.setState({ notFound: true });
                 }
             });
 
-        const promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
-        promised_subscriptions
-            .then((response) => {})
+        api.getSubscriptions(apiId, null)
+            .then(() => {})
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
-                if (status === 404) {
+                if (error.status === 404) {
                     this.setState({ notFound: true });
                 }
             });
@@ -522,7 +517,7 @@ class InfoBar extends React.Component {
      *
      * @memberof InfoBar
      */
-    onCopy = name => (event) => {
+    onCopy = name => () => {
         this.setState({
             [name]: true,
         });
@@ -543,10 +538,21 @@ class InfoBar extends React.Component {
      */
     toggleOverview = (todo) => {
         if (typeof todo === 'boolean') {
-            this.setState(state => ({ showOverview: todo }));
+            this.setState({ showOverview: todo });
         } else {
             this.setState(state => ({ showOverview: !state.showOverview }));
         }
+    };
+
+    /**
+     * [Temporary function] to get the first hybrid https or http endpoint of an API
+     *
+     * @param {Api} api API object
+     * @returns {string}
+     */
+    getHttpsEP = (api) => {
+        const epHybridUrl = api.endpointURLs.find(url => url.environmentType === 'hybrid');
+        return epHybridUrl.environmentURLs.https || epHybridUrl.environmentURLs.http;
     };
 
     /**
@@ -557,13 +563,18 @@ class InfoBar extends React.Component {
      */
     render() {
         const { classes, theme } = this.props;
-        const api = this.state.api;
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
+        const {
+            api, notFound, showOverview, prodUrlCopied, sandboxUrlCopied,
+        } = this.state;
+        const { resourceNotFountMessage } = this.props;
+        if (notFound) {
+            return <ResourceNotFound message={resourceNotFountMessage} />;
         }
         if (!api) {
             return <Loading />;
         }
+        const epUrl = this.getHttpsEP(api);
+
         return (
             <div className={classes.infoBarMain}>
                 <div className={classes.root}>
@@ -590,11 +601,11 @@ class InfoBar extends React.Component {
                     <StarRatingBar apiIdProp={api.id} />
                 </div>
 
-                {this.state.showOverview && (
-                    <Collapse in={this.state.showOverview}>
+                {showOverview && (
+                    <Collapse in={showOverview}>
                         <div className={classes.infoContent}>
                             <div className={classes.contentWrapper}>
-                                <Typography>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut dolor dui, fermentum in ipsum a, pharetra feugiat orci. Suspendisse at sem nunc. Integer in eros eget orci sollicitudin ultricies. Mauris vehicula mollis vulputate. Morbi sed velit vulputate nisl ullamcorper blandit. Quisque diam orci, ultrices at risus vel, auctor vulputate odio. Etiam vel iaculis massa, vel sollicitudin velit. Aenean facilisis vitae elit vitae iaculis. Nam vel tincidunt arcu.</Typography>
+                                <Typography>{api.description}</Typography>
                                 <Table className={classes.table}>
                                     <TableBody>
                                         <TableRow>
@@ -642,7 +653,7 @@ class InfoBar extends React.Component {
                                             </TableCell>
                                             <TableCell>
                                                 <TextField
-                                                    defaultValue='http://192.168.1.2:8282/SwaggerPetstore/1.0.0'
+                                                    defaultValue={epUrl}
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
@@ -656,12 +667,20 @@ class InfoBar extends React.Component {
                                                         className: classes.bootstrapFormLabel,
                                                     }}
                                                 />
-                                                <Tooltip title={this.state.prodUrlCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
-                                                    <CopyToClipboard text='http://192.168.1.2:8282/SwaggerPetstore/1.0.0' onCopy={this.onCopy('prodUrlCopied')}>
+                                                <Tooltip
+                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                    placement='right'
+                                                >
+                                                    <CopyToClipboard text={epUrl} onCopy={this.onCopy('prodUrlCopied')}>
                                                         <FileCopy color='secondary' />
                                                     </CopyToClipboard>
                                                 </Tooltip>
-                                                <Button variant='contained' size='small' color='primary' className={classes.margin}>
+                                                <Button
+                                                    variant='contained'
+                                                    size='small'
+                                                    color='primary'
+                                                    className={classes.margin}
+                                                >
                                                     Test Endpoint
                                                 </Button>
                                             </TableCell>
@@ -676,7 +695,7 @@ class InfoBar extends React.Component {
                                             <TableCell>
                                                 <div className={classes.iconAligner}>
                                                     <TextField
-                                                        defaultValue='http://192.168.1.2:8282/SwaggerPetstore/1.0.0'
+                                                        defaultValue={epUrl}
                                                         id='bootstrap-input'
                                                         InputProps={{
                                                             disableUnderline: true,
@@ -690,12 +709,23 @@ class InfoBar extends React.Component {
                                                             className: classes.bootstrapFormLabel,
                                                         }}
                                                     />
-                                                    <Tooltip title={this.state.sandboxUrlCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
-                                                        <CopyToClipboard text='http://192.168.1.2:8282/SwaggerPetstore/1.0.0' onCopy={this.onCopy('sandboxUrlCopied')}>
+                                                    <Tooltip
+                                                        title={sandboxUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                        placement='right'
+                                                    >
+                                                        <CopyToClipboard
+                                                            text={epUrl}
+                                                            onCopy={this.onCopy('sandboxUrlCopied')}
+                                                        >
                                                             <FileCopy color='secondary' />
                                                         </CopyToClipboard>
                                                     </Tooltip>
-                                                    <Button variant='contained' size='small' color='primary' className={classes.margin}>
+                                                    <Button
+                                                        variant='contained'
+                                                        size='small'
+                                                        color='primary'
+                                                        className={classes.margin}
+                                                    >
                                                         Test Endpoint
                                                     </Button>
                                                 </div>
@@ -710,8 +740,9 @@ class InfoBar extends React.Component {
                 <div className={classes.infoContentBottom}>
                     <div className={classes.contentWrapper} onClick={this.toggleOverview}>
                         <div className={classes.buttonView}>
-                            {this.state.showOverview ? <Typography className={classes.buttonOverviewText}>LESS</Typography> : <Typography className={classes.buttonOverviewText}>MORE</Typography>}
-                            {this.state.showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
+                            {showOverview ? <Typography className={classes.buttonOverviewText}>LESS</Typography>
+                                : <Typography className={classes.buttonOverviewText}>MORE</Typography>}
+                            {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
                         </div>
                     </div>
                 </div>
