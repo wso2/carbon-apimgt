@@ -231,7 +231,7 @@ class ViewKeys extends React.Component {
             accessTokenScopes = tokenScopes;
             validityPeriod = tokenValidityTime;
         } else if (keys.get(keyType) && keys.get(keyType).token) {
-            accessToken = keys.get(keyType).token.accessToken;
+            ({ accessToken } = keys.get(keyType).token);
             accessTokenScopes = keys.get(keyType).token.tokenScopes;
             validityPeriod = keys.get(keyType).token.validityTime;
         }
@@ -308,40 +308,37 @@ class ViewKeys extends React.Component {
                                 </FormHelperText>
                             </FormControl>
                         </Grid>
-                        {
-                            accessToken &&
-                                (
-                                    <Grid item xs={6}>
-
-                                        <InputLabel htmlFor='adornment-amount'>Access Token</InputLabel>
-                                        <div className={classes.copyWrapper}>
-                                            <Input
-                                                inputProps={{ readOnly: true }}
-                                                id='access-token'
-                                                value={accessToken}
-                                                margin='normal'
-                                                fullWidth
-                                            />
-                                            <Tooltip
-                                                title={tokenCopied ? 'Copied' : 'Copy to clipboard'}
-                                                placement='right'
-                                            >
-                                                <CopyToClipboard
-                                                    text={accessToken}
-                                                    onCopy={() => this.onCopy('tokenCopied')}
-                                                >
-                                                    <FileCopy color='secondary' />
-                                                </CopyToClipboard>
-                                            </Tooltip>
-                                        </div>
-                                        <FormControl>
-                                            <FormHelperText id='access-token-helper-text'>
+                        {accessToken && (
+                            <Grid item xs={6}>
+                                <InputLabel htmlFor='adornment-amount'>Access Token</InputLabel>
+                                <div className={classes.copyWrapper}>
+                                    <Input
+                                        inputProps={{ readOnly: true }}
+                                        id='access-token'
+                                        value={accessToken}
+                                        margin='normal'
+                                        fullWidth
+                                    />
+                                    <Tooltip
+                                        title={tokenCopied ? 'Copied' : 'Copy to clipboard'}
+                                        placement='right'
+                                    >
+                                        <CopyToClipboard
+                                            text={accessToken}
+                                            onCopy={() => this.onCopy('tokenCopied')}
+                                        >
+                                            <FileCopy color='secondary' />
+                                        </CopyToClipboard>
+                                    </Tooltip>
+                                </div>
+                                <FormControl>
+                                    <FormHelperText id='access-token-helper-text'>
                                                 Above token has a validity period of {validityPeriod} seconds.
                                                 And the token has ( {accessTokenScopes.join(', ')} ) scopes.
-                                            </FormHelperText>
-                                        </FormControl>
-                                    </Grid>)
-                        }
+                                    </FormHelperText>
+                                </FormControl>
+                            </Grid>
+                        )}
                         <Grid item xs={12}>
                             <Dialog
                                 fullScreen={fullScreen}
