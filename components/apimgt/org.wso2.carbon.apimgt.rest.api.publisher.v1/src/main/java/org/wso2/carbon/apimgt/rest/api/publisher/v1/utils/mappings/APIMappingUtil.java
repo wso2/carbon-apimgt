@@ -1301,6 +1301,7 @@ public class APIMappingUtil {
         listDto.setCount(list.size());
         return listDto;
     }
+
     public static APIProductDTO fromAPIProducttoDTO(APIProduct product) {
         APIProductDTO productDto = new APIProductDTO();
         productDto.setName(product.getId().getName());

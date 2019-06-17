@@ -37,9 +37,12 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java.io.InputStream;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -76,7 +79,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
-            APIProduct product = apiConsumer.getAPIProduct(apiProductId, requestedTenantDomain);
+            APIProduct product = apiConsumer.getAPIProductbyUUID(apiProductId, requestedTenantDomain);
             if (product == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
@@ -105,7 +108,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
-            APIProduct product = apiConsumer.getAPIProduct(apiProductId, requestedTenantDomain);
+            APIProduct product = apiConsumer.getAPIProductbyUUID(apiProductId, requestedTenantDomain);
             if (product == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
@@ -136,29 +139,42 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String ifNoneMatch, MessageContext messageContext) {
         //TODO implement pagination
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        List<APIProduct> allMatchedProducts = new ArrayList<>();
         APIProductListDTO apiProductListDTO = new APIProductListDTO();
+
         try {
+            //for now one criterea is supported
+            String searchQuery = StringUtils.replace(query, ":", "=");
+
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
-            List<APIProduct> product = apiConsumer.getStoreVisibleAPIProductsForUser(username, requestedTenantDomain);
-            APIProductListDTO list = APIMappingUtil.fromAPIProductListToDTO(product);
-            //add pagination
-            return Response.ok().entity(list).build();
+            Map<String, Object> result = apiConsumer.searchPaginatedAPIProducts(searchQuery, requestedTenantDomain, offset, limit);
+            Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");
+            allMatchedProducts.addAll(apiProducts);
+            apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(allMatchedProducts);
 
+            //Add pagination section in the response
+            Object totalLength = result.get("length");
+            Integer length = 0;
+            if (totalLength != null) {
+                length = (Integer) totalLength;
+            }
+            APIMappingUtil.setPaginationParams(apiProductListDTO, query, offset, limit, length);
+
+            return Response.ok().entity(apiProductListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
                 // this is not an error of the user as he does not know the total number of apis available. Thus sends
                 // an empty response
                 apiProductListDTO.setCount(0);
-                apiProductListDTO.setNext("");
-                apiProductListDTO.setPrevious("");
+                apiProductListDTO.setPagination(new PaginationDTO());
                 return Response.ok().entity(apiProductListDTO).build();
             } else {
-                String errorMessage = "Error while retrieving APIs";
+                String errorMessage = "Error while retrieving API Products";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (UserStoreException e) {

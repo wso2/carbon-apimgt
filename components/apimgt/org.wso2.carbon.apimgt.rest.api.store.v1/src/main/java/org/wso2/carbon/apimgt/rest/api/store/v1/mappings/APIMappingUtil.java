@@ -398,19 +398,26 @@ public class APIMappingUtil {
     /**
      * Converts a List object of API Products into a DTO
      *
-     * @param apiProdList List of APIs
+     * @param productList List of APIs
      * @return APIListDTO object containing APIDTOs
      */
-    public static APIProductListDTO fromAPIProductListToDTO(List<APIProduct> apiProdList) {
-        APIProductListDTO apiProdListDTO = new APIProductListDTO();
-        List<APIProductInfoDTO> apiProdInfoDTOs = apiProdListDTO.getList();
-        if (apiProdList != null) {
-            for (APIProduct api : apiProdList) {
-                apiProdInfoDTOs.add(fromAPIProductToInfoDTO(api));
-            }
+    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList) {
+        APIProductListDTO listDto = new APIProductListDTO();
+        List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
+        for (APIProduct apiProduct : productList) {
+            APIProductInfoDTO productDto = new APIProductInfoDTO();
+            productDto.setName(apiProduct.getId().getName());
+            productDto.setProvider(apiProduct.getId().getProviderName());
+            productDto.setDescription(apiProduct.getDescription());
+            productDto.setId(apiProduct.getUuid());
+            productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                    .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+            list.add(productDto);
         }
-        apiProdListDTO.setCount(apiProdInfoDTOs.size());
-        return apiProdListDTO;
+
+        listDto.setList(list);
+        listDto.setCount(list.size());
+        return listDto;
     }
     
     public static APIProductDTO fromAPIProductToDTO(APIProduct product) throws APIManagementException {
@@ -453,5 +460,38 @@ public class APIMappingUtil {
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
 
         return apiProductInfoDTO;
+    }
+
+    /**
+     * Sets pagination urls for a APIProductListDTO object given pagination parameters and url parameters
+     *
+     * @param apiProductListDTO a APIProductListDTO object
+     * @param query      search condition
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
+     */
+    public static void setPaginationParams(APIProductListDTO apiProductListDTO, String query, int offset, int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        apiProductListDTO.setPagination(paginationDTO);
     }
 }

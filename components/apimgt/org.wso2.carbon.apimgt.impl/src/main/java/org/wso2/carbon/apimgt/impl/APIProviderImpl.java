@@ -84,6 +84,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -1071,7 +1072,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
             }
             validateResourceThrottlingTiers(api, tenantDomain);
+
+            //get product resource mappings on API before updating the API. Update uri templates on api will remove all
+            //product mappings as well.
+            List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
             apiMgtDAO.updateAPI(api, tenantId, userNameWithoutChange);
+            updateProductResourceMappings(api, productResources);
+
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated the API: " + api.getId() + " in the database");
             }
@@ -6179,7 +6186,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+    public void addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
@@ -6196,6 +6203,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
 
             apiProductResource.setApiIdentifier(api.getId());
+            apiProductResource.setProductIdentifier(product.getId());
             URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
             Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
@@ -6219,9 +6227,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
            
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
-        String uuid = UUID.randomUUID().toString();
-        product.setUuid(uuid);
-
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
         Map<String, String> failedToPublishEnvironments = publishToGateway(product);
@@ -6240,21 +6245,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
             throw new FaultGatewaysException(failedGateways);
         }
-
-        return uuid;
-    }
-
-    @Override
-    public APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
-        APIProduct product = apiMgtDAO.getAPIProduct(uuid, tenantDomain);
-        return product;
-    }
-
-    @Override
-    public List<APIProduct> getAPIProducts(String tenantDomain, String apiProvider) throws APIManagementException {
-        List<APIProduct> products = apiMgtDAO.getAPIProductsForTenantDomain(tenantDomain);
-        return products;
-
     }
 
     @Override
@@ -6362,6 +6352,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             API api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
+            apiProductResource.setProductIdentifier(product.getId());
             URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
             Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
@@ -6395,6 +6386,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
         }
 
+        //todo : check whether permissions need to be updated and pass it along
+        updateApiProductArtifact(product, true, true);
         apiMgtDAO.updateAPIProduct(product, user);
 
         if (!failedGateways.isEmpty() &&
@@ -6563,4 +6556,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
+
+    public void updateProductResourceMappings(API api, List<APIProductResource> productResources) throws APIManagementException {
+        //get uri templates of API again
+        Map<String, URITemplate> apiResources = apiMgtDAO.getURITemplatesForAPI(api);
+
+        for (APIProductResource productResource : productResources) {
+            URITemplate uriTemplate = productResource.getUriTemplate();
+            String productResourceKey = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+
+            //set new uri template ID to the product resource
+            int updatedURITemplateId = apiResources.get(productResourceKey).getId();
+            uriTemplate.setId(updatedURITemplateId);
+        }
+
+        apiMgtDAO.addAPIProductResourceMappings(productResources, null);
+    }
+
 }

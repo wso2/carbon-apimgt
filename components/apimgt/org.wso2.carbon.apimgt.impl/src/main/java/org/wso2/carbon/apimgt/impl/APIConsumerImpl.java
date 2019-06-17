@@ -2698,7 +2698,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } 
         if (identifier instanceof APIProductIdentifier) {
             apiProdIdentifier = (APIProductIdentifier) identifier;
-            product = apiMgtDAO.getAPIProduct(apiProdIdentifier.getUUID(), tenantDomain);
+            product = getAPIProductbyUUID(apiProdIdentifier.getUUID(), tenantDomain);
             state = product.getState();
         }
         WorkflowResponse workflowResponse = null;
@@ -5158,26 +5158,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return docMap;
-    }
-    
-    @Override
-    public APIProduct getAPIProduct(String uuid, String tenantDomain) throws APIManagementException {
-        return apiMgtDAO.getAPIProduct(uuid, tenantDomain);
-    }
-    
-    @Override
-    public List<APIProduct> getStoreVisibleAPIProductsForUser(String user, String tenantDomain)
-            throws APIManagementException {
-        if(StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        return apiMgtDAO.getStoreVisibleAPIProducts(user, tenantDomain);
-
-    }
-
-    @Override
-    public APIProduct getAPIProductByUUID(String uuid) throws APIManagementException {   
-        return apiMgtDAO.getAPIProductByUUID(uuid);
     }
         
 }

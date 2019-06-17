@@ -153,7 +153,7 @@ public class RestAPIStoreUtils {
         
         if (productIdentifier != null && application != null) {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            APIProduct product = apiConsumer.getAPIProductByUUID(productIdentifier.getUUID());
+            APIProduct product = apiConsumer.getAPIProduct(productIdentifier);
             if(!isUserAllowedForSubscription(product, username) || !isUserAccessAllowedForAPIProduct(product)) {
                 return false;
             }
@@ -263,7 +263,7 @@ public class RestAPIStoreUtils {
             subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
         } 
         if (identifier instanceof APIProductIdentifier) {
-            APIProduct product = apiConsumer.getAPIProductByUUID(((APIProductIdentifier) identifier).getUUID());
+            APIProduct product = apiConsumer.getAPIProduct((APIProductIdentifier) identifier);
             tiers = product.getAvailableTiers();
             subscriptionAvailability = product.getSubscriptionAvailability();
             subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();    
