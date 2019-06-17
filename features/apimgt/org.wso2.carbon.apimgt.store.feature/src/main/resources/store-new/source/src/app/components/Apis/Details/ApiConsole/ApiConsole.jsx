@@ -179,7 +179,7 @@ class ApiConsole extends React.Component {
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                    console.error(error);
                 }
                 const { status } = error;
                 if (status === 404) {
