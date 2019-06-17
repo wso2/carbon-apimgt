@@ -156,7 +156,6 @@ public class APIAdminImpl implements APIAdmin {
      * @throws APIManagementException
      */
     public MonetizationUsagePublishInfo getMonetizationUsagePublishInfo() throws APIManagementException {
-
         return apiMgtDAO.getMonetizationUsagePublishInfo();
     }
 
@@ -167,7 +166,6 @@ public class APIAdminImpl implements APIAdmin {
      */
     public void updateMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws APIManagementException {
-
         apiMgtDAO.updateUsagePublishInfo(monetizationUsagePublishInfo);
     }
 
@@ -178,7 +176,6 @@ public class APIAdminImpl implements APIAdmin {
      */
     public void addMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws APIManagementException {
-
         apiMgtDAO.addMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
     }
 
