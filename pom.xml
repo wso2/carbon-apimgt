@@ -1627,7 +1627,7 @@
         <swagger-jaxrs.version>1.5.22</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <openapi.generator.version>4.0.1.wso2v1</openapi.generator.version>
+        <openapi.generator.version>4.0.1.wso2v2</openapi.generator.version>
         <openapitools.swagger.parser.version>2.0.13.OpenAPITools.wso2v1</openapitools.swagger.parser.version>
 
         <!-- imp package version ranges -->
