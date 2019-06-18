@@ -41,7 +41,6 @@ import java.util.Map;
 @PrepareForTest(ServiceReferenceHolder.class)
 public class APISecurityUtilsTestCase {
 
-    @Test(expected = IllegalStateException.class)
     public void testSetAuthenticationContext() {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -66,12 +65,19 @@ public class APISecurityUtilsTestCase {
 
         APISecurityUtils.setAuthenticationContext(messageContext, authenticationContext, "abc");
 
+        Assert.assertEquals(APISecurityUtils.getAuthenticationContext(messageContext).getCallerToken(),
+                "callertoken");
+
         Assert.assertEquals("keyType", messageContext.getProperty(APIConstants.API_KEY_TYPE));
 
         //test for IllegalStateException
         String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
+        Mockito.when(authenticationContext.getCallerToken()).thenReturn("newCallerToken");
         Mockito.when(messageContext.getProperty(API_AUTH_CONTEXT)).thenReturn("abc");
         APISecurityUtils.setAuthenticationContext(messageContext, authenticationContext, "abc");
+
+        Assert.assertEquals(APISecurityUtils.getAuthenticationContext(messageContext).getCallerToken(),
+                "newCallerToken");
     }
 
 }
