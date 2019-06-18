@@ -3060,19 +3060,9 @@ public class SQLConstants {
     public static final String UPDATE_PRODUCT_SQL =
             " UPDATE AM_API_PRODUCT " +
             " SET" +
-            "   STATE=?," +
-            "   DESCRIPTION=?," +
             "   API_PRODUCT_TIER=?," +
             "   UPDATED_BY=?," +
-            "   UPDATED_TIME=?," +
-            "   VISIBILITY=?," +
-            "   VISIBILE_ROLES=?, " +
-            "   BUSINESS_OWNER=?, " +
-            "   BUSINESS_OWNER_EMAIL=?, " +
-            "   SUBSCRIPTION_AVAILABILITY=?, " +
-            "   SUBSCRIPTION_AVAILABILE_TENANTS=?, " +
-            "   PROPERTIES=?, " +
-            "   API_PRODUCT_NAME=? " +
+            "   UPDATED_TIME=?" +
             " WHERE" +
             "   API_PRODUCT_NAME=? AND API_PRODUCT_PROVIDER=? AND API_PRODUCT_VERSION=?";
 

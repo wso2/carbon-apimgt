@@ -13171,29 +13171,18 @@ public class ApiMgtDAO {
             String query = SQLConstants.UPDATE_PRODUCT_SQL;
 
             ps = conn.prepareStatement(query);
-            ps.setString(1, product.getState());
-            ps.setString(2, product.getDescription());
             Set<Tier> tiers = product.getAvailableTiers();
             List<String> tierList = new ArrayList<String>();
             for (Tier tier : tiers) {
                 tierList.add(tier.getName());
             }
-            ps.setString(3, StringUtils.join(tierList,","));
-            ps.setString(4, username);
-            ps.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-            ps.setString(6, product.getVisibility());
-            ps.setString(7, product.getVisibleRoles());
-            ps.setString(8, product.getBusinessOwner());
-            ps.setString(9, product.getBusinessOwnerEmail());
-            ps.setString(10, product.getSubscriptionAvailability());
-            ps.setString(11, product.getSubscriptionAvailableTenants());
-            String additionalProperties = product.getAdditionalProperties().toJSONString();
-            ps.setBlob(12, new ByteArrayInputStream(additionalProperties.getBytes()));
+            ps.setString(1, StringUtils.join(tierList,","));
+            ps.setString(2, username);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             APIProductIdentifier identifier = product.getId();
-            ps.setString(13, identifier.getName());
-            ps.setString(14, identifier.getName());
-            ps.setString(15, identifier.getProviderName());
-            ps.setString(16, identifier.getVersion());
+            ps.setString(4, identifier.getName());
+            ps.setString(5, identifier.getProviderName());
+            ps.setString(6, identifier.getVersion());
             ps.executeUpdate();
 
             int productId = getAPIProductID(product.getId(), conn);
