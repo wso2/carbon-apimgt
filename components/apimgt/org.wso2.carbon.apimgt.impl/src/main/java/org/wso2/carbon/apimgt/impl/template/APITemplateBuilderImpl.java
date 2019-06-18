@@ -113,7 +113,13 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
 
-            Template t = velocityengine.getTemplate(this.getTemplatePath());
+            Template t = null;
+
+            if (api != null) {
+                t = velocityengine.getTemplate(getTemplatePath());
+            } else {
+                t = velocityengine.getTemplate(getApiProductTemplatePath());
+            }
 
             t.merge(context, writer);
 

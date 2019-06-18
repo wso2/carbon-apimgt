@@ -26,6 +26,10 @@ public class APIProductResource {
     private APIProductIdentifier productIdentifier;
     private URITemplate uriTemplate;
 
+    private String inSequenceName = "";
+    private String outSequenceName = "";
+    private String faultSequenceName = "";
+
     public String getApiName() {
         return apiName;
     }
@@ -71,5 +75,29 @@ public class APIProductResource {
 
     public void setUriTemplate(URITemplate uriTemplate) {
         this.uriTemplate = uriTemplate;
+    }
+
+    public String getInSequenceName() {
+        return inSequenceName;
+    }
+
+    public void setInSequenceName(String inSequenceName) {
+        this.inSequenceName = inSequenceName;
+    }
+
+    public String getFaultSequenceName() {
+        return faultSequenceName;
+    }
+
+    public void setFaultSequenceName(String faultSequenceName) {
+        this.faultSequenceName = faultSequenceName;
+    }
+
+    public String getOutSequenceName() {
+        return outSequenceName;
+    }
+
+    public void setOutSequenceName(String outSequenceName) {
+        this.outSequenceName = outSequenceName;
     }
 }

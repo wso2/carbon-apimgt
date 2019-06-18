@@ -1824,13 +1824,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
         }
 
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        gatewayManager.setProductResourceSequences(this, apiProduct, tenantDomain);
+
         try {
             builder = getAPITemplateBuilder(apiProduct);
         } catch (Exception e) {
             handleException("Error while publishing to Gateway ", e);
         }
 
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
