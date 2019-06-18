@@ -1181,3 +1181,6 @@ const MaterialIcons = {
         },
     ],
 };
+if (typeof module !== 'undefined') {
+    module.exports = MaterialIcons; // Added for tests
+}
