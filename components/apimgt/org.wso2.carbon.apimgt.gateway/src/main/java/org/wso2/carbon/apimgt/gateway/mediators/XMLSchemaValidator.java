@@ -127,7 +127,7 @@ public class XMLSchemaValidator extends AbstractMediator {
             AnalyzerHolder.returnObject(apimThreatAnalyzer);
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("XML Schema Validator : " + APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
+                log.debug("XML Schema Validator: " + APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
             }
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
