@@ -114,12 +114,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
                 }
             }
 
-            List<URITemplate> uriTemplates = new ArrayList<>();
-            for (APIProductResource resource : aggregateResources) {
-                uriTemplates.add(resource.getUriTemplate());
-            }
-
-            context.put("resources", uriTemplates);
+            context.put("aggregates", aggregateResources);
         }
 
         return context;  //To change body of implemented methods use File | Settings | File Templates.
