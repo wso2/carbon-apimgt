@@ -1123,10 +1123,9 @@ public interface APIProvider extends APIManager {
     /**
      * Update API Product
      * @param product
-     * @param user updating user
      * @throws APIManagementException
      */
-    void updateAPIProduct(APIProduct product, String user) throws APIManagementException, FaultGatewaysException;
+    void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
     
     /**
      * Check whether api product exists for the given name and the provider

@@ -13319,6 +13319,43 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(addStatement, conn, null);
         }
+    }
 
+    /**
+     * get resource mapping of the api product
+     *
+     * @param productIdentifier api product identifier
+     * @throws APIManagementException
+     */
+    public List<APIProductResource> getAPIProductResourceMappings(APIProductIdentifier productIdentifier)
+            throws APIManagementException {
+        List<APIProductResource> productResourceList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            String sql = SQLConstants.GET_RESOURCES_OF_PRODUCT;
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, productIdentifier.getProviderName());
+                ps.setString(2, productIdentifier.getName());
+                ps.setString(3, productIdentifier.getVersion());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        APIProductResource resource = new APIProductResource();
+                        APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
+                                rs.getString("API_VERSION"));
+                        resource.setProductIdentifier(productIdentifier);
+                        resource.setApiIdentifier(apiId);
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                        uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
+                        uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                        uriTemplate.setId(rs.getInt("URL_MAPPING_ID"));
+                        resource.setUriTemplate(uriTemplate);
+                        productResourceList.add(resource);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get product resources of api product : " + productIdentifier, e);
+        }
+        return productResourceList;
     }
 }

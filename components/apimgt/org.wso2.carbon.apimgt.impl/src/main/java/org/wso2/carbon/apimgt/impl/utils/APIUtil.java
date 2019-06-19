@@ -1266,6 +1266,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, apiProduct.getBusinessOwnerEmail());
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, apiProduct.getSubscriptionAvailability());
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, apiProduct.getSubscriptionAvailableTenants());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : apiProduct.getAvailableTiers()) {
@@ -1603,6 +1604,21 @@ public final class APIUtil {
                 + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
                 .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
                 + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + APIConstants.API_PRODUCT_RESOURCE_NAME;
+    }
+
+    /**
+     * Utility method for creating storage path for an api product icon.
+     *
+     * @param identifier APIProductIdentifier
+     * @return Icon storage path.
+     */
+    public static String getProductIconPath(APIProductIdentifier identifier) {
+        String artifactPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
+                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_ICON_IMAGE;
+        return artifactPath;
     }
 
     /**

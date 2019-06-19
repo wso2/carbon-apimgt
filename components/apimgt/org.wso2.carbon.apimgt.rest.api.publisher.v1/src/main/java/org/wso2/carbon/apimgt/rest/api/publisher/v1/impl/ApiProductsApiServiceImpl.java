@@ -24,11 +24,13 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 
@@ -40,6 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApiProductsApiServiceImpl implements ApiProductsApiService {
@@ -189,7 +193,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             product.setID(productIdentifier);
             product.setUuid(apiProductId);
 
-            apiProvider.updateAPIProduct(product, username);
+            apiProvider.updateAPIProduct(product);
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
             return Response.ok().entity(updatedProductDTO).build();
@@ -251,13 +255,79 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept,
+    @Override
+    public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept,
             String ifNoneMatch, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIProductIdentifier productIdentifier = APIMappingUtil
+                    .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            ResourceFile thumbnailResource = apiProvider.getProductIcon(productIdentifier);
+
+            if (thumbnailResource != null) {
+                return Response
+                        .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
+                        .build();
+            } else {
+                return Response.noContent().build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing API Products. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving thumbnail of API Product : " + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving thumbnail of API Product : " + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdThumbnailPost(String apiProductId, InputStream fileInputStream,
+    @Override
+    public Response apiProductsApiProductIdThumbnailPut(String apiProductId, InputStream fileInputStream,
             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String fileName = fileDetail.getDataHandler().getName();
+            String fileContentType = URLConnection.guessContentTypeFromName(fileName);
+            if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
+                fileContentType = fileDetail.getContentType().toString();
+            }
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
+            ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
+            String thumbPath = APIUtil.getProductIconPath(apiProduct.getId());
+            String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
+            apiProduct.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, apiProduct.getId().getProviderName()));
+            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), null, null, thumbPath);
+
+            //need to set product resource mappings before updating product, otherwise existing mappings will be lost
+            List<APIProductResource> resources = apiProvider.getResourcesOfAPIProduct(apiProduct.getId());
+            apiProduct.setProductResources(resources);
+            apiProvider.updateAPIProduct(apiProduct);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
+                    .replace(RestApiConstants.APIID_PARAM, apiProductId);
+            URI uri = new URI(uriString);
+            FileInfoDTO infoDTO = new FileInfoDTO();
+            infoDTO.setRelativePath(uriString);
+            infoDTO.setMediaType(apiImage.getContentType());
+            return Response.created(uri).entity(infoDTO).build();
+        } catch (APIManagementException | FaultGatewaysException e) {
+            String errorMessage = "Error while updating API Product : " + apiProductId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving thumbnail location of API Product : " + apiProductId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 
@@ -367,5 +437,16 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * To check whether a particular exception is due to access control restriction.
+     *
+     * @param e Exception object.
+     * @return true if the the exception is caused due to authorization failure.
+     */
+    private boolean isAuthorizationFailure(Exception e) {
+        String errorMessage = e.getMessage();
+        return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }

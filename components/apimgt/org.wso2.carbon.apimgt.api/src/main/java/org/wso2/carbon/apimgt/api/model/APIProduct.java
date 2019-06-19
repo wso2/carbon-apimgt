@@ -48,6 +48,7 @@ public class APIProduct {
     private String transports;
     private String responseCache;
     private int cacheTimeout;
+    private String thumbnailUrl;
 
     // Used for keeping Production & Sandbox Throttling limits.
     private String productionMaxTps;
@@ -249,6 +250,14 @@ public class APIProduct {
 
     public void setSandboxMaxTps(String sandboxMaxTps) {
         this.sandboxMaxTps = sandboxMaxTps;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
     }
 
     @Override
