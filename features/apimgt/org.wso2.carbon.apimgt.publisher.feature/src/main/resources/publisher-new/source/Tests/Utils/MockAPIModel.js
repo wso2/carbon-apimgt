@@ -34,8 +34,6 @@ const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
  * @returns {*} Mocked API model
  */
 export default async function getMockedModel(modelName) {
-    const swaggerFile = fs.readFileSync(swaggerFilePath, 'utf8');
-    const { YAML } = SwaggerParser;
-    const swagger = await SwaggerParser.dereference(YAML.parse(swaggerFile));
+    const swagger = await SwaggerParser.dereference(swaggerFilePath);
     return generateStatic(swagger.definitions[modelName]);
 }
