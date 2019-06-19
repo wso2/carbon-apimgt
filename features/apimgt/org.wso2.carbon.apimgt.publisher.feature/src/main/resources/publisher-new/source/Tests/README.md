@@ -1,10 +1,19 @@
 # Testing Implementation
 
-We run two types of testing
-mainly
+We run mainly two types of tests
 
 -   Unit tests
 -   Integration test
+
+
+
+# Unit tests
+
+We use [Jest framework](https://jestjs.io/en/) for managing the unit tests.it also been used as the assertion library as well. For DOM testing, out of the available libraries such as `react-testing-library`, `Enzyme`, and `React's TestUtils`, etc. . . we have mainly used `Enzyme`.
+
+Test files naming convention is to add test of a component in the same name as the component's file name in the same location. For example if you write a new component name `MySampleComponent.jsx` then use `MySampleComponent.test.jsx` as the test file name for that component.
+Jest will pickup the files for test which are ending with `.test.jsx` or `.test.js`
+
 
 # Troubleshooting
 
