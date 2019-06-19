@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
@@ -8,6 +26,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
 import { Link } from 'react-router-dom';
 import APIsIcon from '@material-ui/icons/SettingsApplicationsOutlined';
+import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 
 import API from 'AppData/api';
 /* Utility methods defined here are described in
@@ -43,19 +62,22 @@ function renderInput(inputProps) {
 /**
  *
  * Use your imagination to define how suggestions are rendered.
- * @param {Object} suggestion This is an API object coming from APIS GET search API call
+ * @param {Object} suggestion This is either API object or document coming from search API call
  * @param {Object} { query, isHighlighted } query : User entered value
  * @returns {React.Component} @inheritdoc
  */
 function renderSuggestion(suggestion, { query, isHighlighted }) {
     const matches = match(suggestion.name, query);
     const parts = parse(suggestion.name, matches);
-    const path = `/apis/${suggestion.id}/overview`;
+    const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview` :
+        `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+    // TODO: Style the version ( and apiName if docs) apearing in the menu item
+    const suffix = suggestion.type === 'API' ? suggestion.version : (suggestion.apiName + ' ' + suggestion.apiVersion);
     return (
         <React.Fragment>
             <Link to={path}>
                 <MenuItem selected={isHighlighted} component='div'>
-                    <APIsIcon />
+                    { suggestion.type === 'API' ? <APIsIcon /> : <DocumentsIcon /> }
 
                     {parts.map((part, index) => {
                         return part.highlight ? (
@@ -68,6 +90,8 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
                             </strong>
                         );
                     })}
+                    <pre /><pre />
+                    {suffix}
                 </MenuItem>
             </Link>
             <Divider />
@@ -95,7 +119,7 @@ function getSuggestionValue(suggestion) {
 function getSuggestions(value) {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
-    const promisedAPIs = API.all({ query: { name: inputValue }, limit: 8 });
+    const promisedAPIs = API.search({ query: inputValue, limit: 8 });
     return inputLength === 0 ? new Promise(resolve => resolve([])) : promisedAPIs;
 }
 
