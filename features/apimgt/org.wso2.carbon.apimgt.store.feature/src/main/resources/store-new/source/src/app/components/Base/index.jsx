@@ -14,6 +14,14 @@ import { Menu as MenuIcon } from '@material-ui/icons';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import {
+    MenuItem,
+    MenuList,
+    ListItemIcon,
+    ListItemText,
+    Divider,
+} from '@material-ui/core';
+import NightMode from '@material-ui/icons/Brightness2';
 
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -33,26 +41,23 @@ import HowToReg from '@material-ui/icons/HowToReg';
 import VerticalDivider from '../Shared/VerticalDivider';
 
 const styles = theme => ({
-    // New styles ..........
-    ///////////////////////////////////
-    ///////////////////////////////////
     appBar: {
         position: 'relative',
-        background: theme.palette.background.appBar
+        background: theme.palette.background.appBar,
     },
     icon: {
-        marginRight: theme.spacing.unit * 2
+        marginRight: theme.spacing.unit * 2,
     },
     menuIcon: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
-        fontSize: 35
+        fontSize: 35,
     },
     userLink: {
-        color: theme.palette.getContrastText(theme.palette.background.appBar)
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
     },
     // Page layout styles
     drawer: {
-        top: 64
+        top: 64,
     },
     wrapper: {
         minHeight: '100%',
@@ -60,34 +65,34 @@ const styles = theme => ({
         background:
         theme.palette.background.default + ' url(' +
         theme.custom.backgroundImage +
-        ') repeat left top'
+        ') repeat left top',
     },
     contentWrapper: {
         display: 'flex',
         flexDirection: 'row',
         overflow: 'auto',
         position: 'relative',
-        minHeight: 'calc(100vh - 114px)'
+        minHeight: 'calc(100vh - 114px)',
     },
     push: {
-        height: 50
+        height: 50,
     },
     footer: {
-        backgroundColor: theme.palette.grey['A100'],
+        backgroundColor: theme.palette.grey.A100,
         paddingLeft: theme.spacing.unit * 3,
         height: 50,
         alignItems: 'center',
-        display: 'flex'
+        display: 'flex',
     },
     toolbar: {
         minHeight: 56,
         [`${theme.breakpoints.up('xs')} and (orientation: landscape)`]: {
-            minHeight: 48
+            minHeight: 48,
         },
         [theme.breakpoints.up('sm')]: {
-            minHeight: 64
-        }
-    }
+            minHeight: 64,
+        },
+    },
 });
 
 class Layout extends React.Component {
@@ -102,32 +107,32 @@ class Layout extends React.Component {
         themeIndex: 0,
         left: false,
         openNavBar: false,
-        openUserMenu: false
+        openUserMenu: false,
     };
 
     componentDidMount() {
-        //Get Environments
-        let promised_environments = ConfigManager.getConfigs()
-            .environments.then(response => {
+        // Get Environments
+        const promised_environments = ConfigManager.getConfigs()
+            .environments.then((response) => {
                 this.setState({
-                    environments: response.data.environments
+                    environments: response.data.environments,
                 });
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error(
                     'Error while receiving environment configurations : ',
-                    error
+                    error,
                 );
             });
 
-        let storedThemeIndex = localStorage.getItem('themeIndex');
+        const storedThemeIndex = localStorage.getItem('themeIndex');
         if (storedThemeIndex) {
             this.setState({ themeIndex: parseInt(storedThemeIndex) });
             let nightMode = false;
             if (parseInt(storedThemeIndex) === 1) {
                 nightMode = true;
             }
-            this.setState({ nightMode: nightMode });
+            this.setState({ nightMode });
         }
     }
 
@@ -135,26 +140,35 @@ class Layout extends React.Component {
         this.setState({ openUserMenu: false });
     };
 
-    handleEnvironmentChange = event => {
+    handleEnvironmentChange = (event) => {
         this.setState({ openEnvironmentMenu: false });
-        //TODO: [rnk] Optimize Rendering.
-        let environmentId = parseInt(event.target.id);
+        // TODO: [rnk] Optimize Rendering.
+        const environmentId = parseInt(event.target.id);
         Utils.setEnvironment(this.state.environments[environmentId]);
         this.setState({ environmentId });
     };
 
-    handleClickButton = key => {
+    /**
+     * Do OIDC logout redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
+     */
+    doOIDCLogout = (e) => {
+        e.preventDefault();
+        window.location = '/store-new/services/logout';
+    }
+
+    handleClickButton = (key) => {
         this.setState({
             [key]: true,
-            anchorEl: findDOMNode(this.button)
+            anchorEl: findDOMNode(this.button),
         });
     };
-    handleRequestClose = key => {
+    handleRequestClose = (key) => {
         this.setState({
-            [key]: false
+            [key]: false,
         });
     };
-    handleSwitch = name => event => {
+    handleSwitch = name => (event) => {
         this.setState({ [name]: event.target.checked });
         this.props.setTheme();
     };
@@ -164,7 +178,7 @@ class Layout extends React.Component {
     handleToggleUserMenu = () => {
         this.setState(state => ({ openUserMenu: !state.openUserMenu }));
     };
-    handleCloseUserMenu = event => {
+    handleCloseUserMenu = (event) => {
         if (this.anchorEl.contains(event.target)) {
             return;
         }
@@ -183,20 +197,20 @@ class Layout extends React.Component {
     }
     render() {
         const { classes, theme } = this.props;
-        let user = AuthManager.getUser();
+        const user = AuthManager.getUser();
 
         return (
             <React.Fragment>
                 <div className={classes.wrapper}>
-                    <AppBar position="fixed" className={classes.appBar}>
+                    <AppBar position='fixed' className={classes.appBar}>
                         <Toolbar className={classes.toolbar}>
                             <IconButton
                                 onClick={this.toggleGlobalNavBar}
-                                color="inherit"
+                                color='inherit'
                             >
                                 <MenuIcon className={classes.menuIcon} />
                             </IconButton>
-                            <Link to="/">
+                            <Link to='/'>
                                 <img src={theme.custom.logo} />
                             </Link>
                             <VerticalDivider height={32} />
@@ -213,13 +227,13 @@ class Layout extends React.Component {
                             {user ? (
                                 <React.Fragment>
                                     <Button
-                                        buttonRef={node => {
+                                        buttonRef={(node) => {
                                             this.anchorEl = node;
                                         }}
                                         aria-owns={
                                             open ? 'menu-list-grow' : null
                                         }
-                                        aria-haspopup="true"
+                                        aria-haspopup='true'
                                         onClick={this.handleToggleUserMenu}
                                         className={classes.userLink}
                                     >
@@ -232,22 +246,22 @@ class Layout extends React.Component {
                                         disablePortal
                                         anchorOrigin={{
                                             vertical: 'bottom',
-                                            horizontal: 'center'
+                                            horizontal: 'center',
                                         }}
                                         transformOrigin={{
                                             vertical: 'top',
-                                            horizontal: 'center'
+                                            horizontal: 'center',
                                         }}
                                     >
                                         {({ TransitionProps, placement }) => (
                                             <Grow
                                                 {...TransitionProps}
-                                                id="menu-list-grow"
+                                                id='menu-list-grow'
                                                 style={{
                                                     transformOrigin:
                                                         placement === 'bottom'
                                                             ? 'center top'
-                                                            : 'center bottom'
+                                                            : 'center bottom',
                                                 }}
                                             >
                                                 <Paper>
@@ -257,55 +271,19 @@ class Layout extends React.Component {
                                                                 .handleCloseUserMenu
                                                         }
                                                     >
-                                                        <Card>
-                                                            <CardContent>
-                                                                <ListItem
-                                                                    button
-                                                                    className={
-                                                                        classes.listItem
-                                                                    }
-                                                                >
-                                                                    <FormControlLabel
-                                                                        control={
-                                                                            <Switch
-                                                                                checked={
-                                                                                    this
-                                                                                        .state
-                                                                                        .nightMode
-                                                                                }
-                                                                                onChange={this.handleSwitch(
-                                                                                    'nightMode'
-                                                                                )}
-                                                                                value="checkedB"
-                                                                                color="primary"
-                                                                            />
-                                                                        }
-                                                                        label="Night Mode"
-                                                                    />
-                                                                </ListItem>
-                                                                <Link
-                                                                    to={'/user'}
-                                                                >
-                                                                    Change
-                                                                    Password
-                                                                </Link>
-                                                                <Link
-                                                                    to={
-                                                                        '/profile'
-                                                                    }
-                                                                    className={
-                                                                        classes.textDisplayLink
-                                                                    }
-                                                                >
-                                                                    Profile
-                                                                </Link>
-                                                            </CardContent>
-                                                            <CardActions>
-                                                                <Link to="/logout">
-                                                                    Logout
-                                                                </Link>
-                                                            </CardActions>
-                                                        </Card>
+                                                        <MenuList>
+                                                            <MenuItem onClick={this.handleCloseUserMenu}>Profile</MenuItem>
+                                                            <MenuItem onClick={this.handleCloseUserMenu}>My account</MenuItem>
+                                                            <MenuItem onClick={this.doOIDCLogout}>Logout</MenuItem>
+                                                            <Divider />
+                                                            <MenuItem className={classes.menuItem} onClick={this.handleCloseUserMenu}>
+                                                                <ListItemText primary='Night Mode' />
+                                                                <ListItemIcon className={classes.icon}>
+                                                                    <NightMode />
+                                                                </ListItemIcon>
+                                                            </MenuItem>
+
+                                                        </MenuList>
                                                     </ClickAwayListener>
                                                 </Paper>
                                             </Grow>
@@ -351,7 +329,7 @@ class Layout extends React.Component {
 
 Layout.propTypes = {
     classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired
+    theme: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Layout);
