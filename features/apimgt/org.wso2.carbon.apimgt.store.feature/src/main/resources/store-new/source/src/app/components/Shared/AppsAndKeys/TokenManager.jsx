@@ -24,7 +24,8 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-
+import Application from '../../../data/Application';
+import Loading from '../../Base/Loading/Loading';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
 
@@ -33,7 +34,7 @@ const styles = theme => ({
         padding: theme.spacing.unit * 3,
     },
     button: {
-        marginLeft: theme.spacing.unit * 2,
+        marginLeft: 0,
     },
     tokenSection: {
         marginTop: theme.spacing.unit * 2,
@@ -50,80 +51,185 @@ const styles = theme => ({
         marginBottom: 0,
     },
     generateWrapper: {
-        padding: 10,
-        borderLeft: 'solid 1px #fff',
-        borderRight: 'solid 1px #fff',
-        borderBottom: 'solid 1px #fff',
+        padding: '10px 0px',
     },
 });
 
+/**
+ *  @param {event} event event
+ *  @param {String} value description
+ */
 class TokenManager extends React.Component {
-  generateKeys = () => {
-      const that = this;
-      const promiseGenerate = this.keys.keygenWrapper();
-      promiseGenerate
-          .then((response) => {
-              console.log('Keys generated successfully with ID : ' + response);
-              if (that.props.updateSubscriptionData) { that.props.updateSubscriptionData(); }
-              that.viewKeys.updateUI();
-          })
-          .catch((error) => {
-              if (process.env.NODE_ENV !== 'production') {
-                  console.error(error);
-              }
-              const { status } = error;
-              if (status === 404) {
-                  this.setState({ notFound: true });
-              }
-          });
-  };
+    /**
+     *
+     * @param {*} props props
+     */
+    constructor(props) {
+        super(props);
+        const { selectedApp, keyType } = this.props;
+        this.state = {
+            keys: null,
+            keyRequest: {
+                keyType,
+                supportedGrantTypes: ['client_credentials'],
+                callbackUrl: 'https://wso2.am.com',
+            },
+        };
+        if (selectedApp) {
+            this.appId = selectedApp.appId || selectedApp.value;
+            this.application = Application.get(this.appId);
+        }
+        this.updateKeyRequest = this.updateKeyRequest.bind(this);
+        this.generateKeys = this.generateKeys.bind(this);
+        this.updateKeys = this.updateKeys.bind(this);
+    }
 
-  handleChange = (event, value) => {
-      this.setState({ value });
-  };
+    /**
+     *
+     *
+     * @memberof TokenManager
+     */
+    componentDidMount() {
+        if (this.appId) {
+            this.application.then(application => application.getKeys())
+                .then((keys) => {
+                    const { keyType } = this.props;
+                    const { keyRequest } = this.state;
+                    if (keys.size > 0) {
+                        const { callbackUrl, supportedGrantTypes } = keys.get(keyType);
+                        const newRequest = { ...keyRequest, callbackUrl, supportedGrantTypes };
+                        this.setState({ keys, keyRequest: newRequest });
+                    } else {
+                        this.setState({ keys });
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.error(error);
+                    }
+                    if (error.status === 404) {
+                        this.setState({ notFound: true });
+                    }
+                });
+        }
+    }
 
-  render() {
-      const { classes, selectedApp, keyType } = this.props;
-      return (
-          <div className={classes.root}>
-              <Typography variant='headline' className={classes.keyTitle}>
-                  {keyType}
-                  {' '}
-          Key and Secret
-              </Typography>
-              <ViewKeys
-                  selectedApp={selectedApp}
-                  keyType={keyType}
-                  innerRef={node => (this.viewKeys = node)}
-              />
+    /**
+     * Update keyRequest state
+     * @param {Object} keyRequest parameters requried for key generation request
+     */
+    updateKeyRequest(keyRequest) {
+        this.setState({ keyRequest });
+    }
 
-              <ExpansionPanel>
-                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography className={classes.heading} variant='subtitle1'>
-              Key Configuration
-                      </Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails className={classes.keyConfigWrapper}>
-                      <KeyConfiguration
-                          innerRef={node => (this.keys = node)}
-                          selectedApp={selectedApp}
-                          keyType={keyType}
-                      />
-                  </ExpansionPanelDetails>
-              </ExpansionPanel>
-              <div className={classes.generateWrapper}>
-                  <Button
-                      variant='contained'
-                      color='primary'
-                      className={classes.button}
-                      onClick={this.generateKeys}
-                  >
-            Generate Keys
-                  </Button>
-              </div>
-          </div>
-      );
-  }
+    /**
+     * Generate keys for application,
+     *
+     * @memberof KeyConfiguration
+     */
+    generateKeys() {
+        const { keyRequest, keys } = this.state;
+        const { keyType, updateSubscriptionData } = this.props;
+        this.application.then((application) => {
+            return application.generateKeys(keyRequest.keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
+        }).then((response) => {
+            console.log('Keys generated successfully with ID : ' + response);
+            if (updateSubscriptionData) {
+                updateSubscriptionData();
+            }
+            this.viewKeys.updateUI();
+            const newKeys = new Map([...keys]);
+            newKeys.set(keyType, response);
+            this.setState({ keys: newKeys });
+        }).catch((error) => {
+            if (process.env.NODE_ENV !== 'production') {
+                console.error(error);
+            }
+            const { status } = error;
+            if (status === 404) {
+                this.setState({ notFound: true });
+            }
+        });
+    }
+
+    /**
+   *
+   * @memberof KeyConfiguration
+   */
+    updateKeys() {
+        const { keys, keyRequest } = this.state;
+        const { keyType } = this.props;
+        const applicationKey = keys.get(keyType);
+        this.application.then((application) => {
+            return application.updateKeys(applicationKey.tokenType, keyType, keyRequest.supportedGrantTypes,
+                keyRequest.callbackUrl, applicationKey.consumerKey, applicationKey.consumerSecret);
+        }).then((response) => {
+            console.log('Keys updated successfully : ' + response);
+        }).catch((error) => {
+            if (process.env.NODE_ENV !== 'production') {
+                console.error(error);
+            }
+            const { status } = error;
+            if (status === 404) {
+                this.setState({ notFound: true });
+            }
+        });
+    }
+
+    /**
+     *  @returns {Component}
+     * @memberof Tokenemanager
+     */
+    render() {
+        const { classes, selectedApp, keyType } = this.props;
+        const { keys, keyRequest, notFound } = this.state;
+
+        if (!keys) {
+            return <Loading />;
+        }
+        return (
+            <div className={classes.root}>
+                <Typography variant='headline' className={classes.keyTitle}>
+                    {keyType}
+                    {' '}
+                    Key and Secret
+                </Typography>
+                <ViewKeys
+                    selectedApp={selectedApp}
+                    keyType={keyType}
+                    innerRef={node => (this.viewKeys = node)}
+                />
+
+                <ExpansionPanel>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography className={classes.heading} variant='subtitle1'>
+                            Key Configuration
+                        </Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails className={classes.keyConfigWrapper}>
+                        <KeyConfiguration
+                            keys={keys}
+                            selectedApp={selectedApp}
+                            keyType={keyType}
+                            updateKeyRequest={this.updateKeyRequest}
+                            keyRequest={keyRequest}
+                        />
+                    </ExpansionPanelDetails>
+                </ExpansionPanel>
+                <div className={classes.generateWrapper}>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        className={classes.button}
+                        onClick={keys.size > 0 ? this.updateKeys : this.generateKeys}
+                        noFound={notFound}
+                    >
+                        {keys.size > 0 ? 'Update keys' : 'Generate Keys'}
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 }
 
 TokenManager.propTypes = {

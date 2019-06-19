@@ -239,6 +239,7 @@ class Credentials extends React.Component {
             if (updateSubscriptionData) updateSubscriptionData();
         });
     }
+    
     /**
      *
      *

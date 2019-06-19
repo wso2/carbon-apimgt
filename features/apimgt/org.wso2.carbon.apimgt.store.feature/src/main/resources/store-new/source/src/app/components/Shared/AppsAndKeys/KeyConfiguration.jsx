@@ -24,11 +24,8 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
 import { FormattedMessage } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Application from '../../../data/Application';
 
 const styles = theme => ({
     FormControl: {
@@ -38,6 +35,9 @@ const styles = theme => ({
     FormControlOdd: {
         padding: theme.spacing.unit * 2,
         width: '100%',
+    },
+    button: {
+        marginLeft: theme.spacing.unit * 1,
     },
     quotaHelp: {
         position: 'relative',
@@ -61,170 +61,34 @@ const styles = theme => ({
  */
 class KeyConfiguration extends React.Component {
     /**
-     *
-     * @param {*} props props
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            application: null,
-            tokenType: 'OAUTH',
-        };
-        const { selectedApp } = this.props;
-        if (selectedApp) {
-            this.appId = selectedApp.appId || selectedApp.value;
-            this.application = Application.get(this.appId);
+    * This method is used to handle the updating of key generation
+    * request object.
+    * @param {*} field field that should be updated in key request
+    * @param {*} event event fired
+    */
+    handleChange(field, event) {
+        const { keyRequest, updateKeyRequest } = this.props;
+        const newRequest = { ...keyRequest };
+        const { target: currentTarget } = event;
+        let newGrantTypes = [...newRequest.supportedGrantTypes];
+
+        switch (field) {
+            case 'callbackUrl':
+                newRequest.callbackUrl = currentTarget.value;
+                break;
+            case 'grantType':
+                if (currentTarget.checked) {
+                    newGrantTypes = [...newGrantTypes, currentTarget.id];
+                } else {
+                    newGrantTypes = newRequest.supportedGrantTypes
+                        .filter(item => item !== currentTarget.id);
+                }
+                newRequest.supportedGrantTypes = newGrantTypes;
+                break;
+            default:
+                break;
         }
-        this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
-        this.handleTextChange = this.handleTextChange.bind(this);
-        this.handleTokenTypeChange = this.handleTokenTypeChange.bind(this);
-    }
-
-    /**
-     *
-     *
-     * @memberof KeyConfiguration
-     */
-    componentDidMount() {
-        if (this.appId) {
-            this.application.then(application => application.getKeys())
-                .then((keys) => {
-                    this.setState({ keys });
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.error(error);
-                    }
-                    if (error.status === 404) {
-                        this.setState({ notFound: true });
-                    }
-                });
-        }
-    }
-
-    /**
-     *
-     *
-     * @returns {boolean}
-     * @memberof KeyConfiguration
-     */
-    getKeyStatus() {
-        return this.hasKeys;
-    }
-
-    /**
-     *
-     *
-     * @param {*} event onchange ecvent
-     * @memberof KeyConfiguration
-     */
-    handleTextChange(event) {
-        const { application, tokenType } = this.state;
-        const { currentTarget } = event;
-        const { keyType } = this.props;
-        const keys = application.keys.get(keyType) || {
-            supportedGrantTypes: ['client_credentials'],
-            keyType,
-            tokenType,
-        };
-        keys.callbackUrl = currentTarget.value;
-        application.keys.set(keyType, keys);
-        this.setState({ application });
-    }
-
-    /**
-     *
-     *
-     * @param {object} event onchange event
-     * @memberof KeyConfiguration
-     */
-    handleCheckboxChange(event) {
-        const { application, tokenType } = this.state;
-        const { keyType } = this.props;
-        const { currentTarget } = event;
-        const keys = application.keys.get(keyType) || {
-            supportedGrantTypes: ['client_credentials'],
-            keyType,
-            tokenType,
-        };
-        let index;
-
-        if (currentTarget.checked) {
-            keys.supportedGrantTypes.push(currentTarget.id);
-        } else {
-            index = keys.supportedGrantTypes.indexOf(currentTarget.id);
-            keys.supportedGrantTypes.splice(index, 1);
-        }
-        application.keys.set(keyType, keys);
-        // update the state with the new array of options
-        this.setState({ application });
-    }
-
-    /**
-     *
-     *
-     * @param {object} event onchange event
-     * @memberof KeyConfiguration
-     */
-    handleTokenTypeChange(event) {
-        const { application, tokenType } = this.state;
-        const { keyType } = this.props;
-        const keys = application.keys.get(keyType) || {
-            supportedGrantTypes: ['client_credentials'],
-            keyType,
-            tokenType,
-        };
-        keys.tokenType = event.target.value;
-        application.keys.set(keyType, keys);
-        // update the state with the new array of options
-        this.setState({ application, tokenType: event.target.value });
-    }
-
-    /**
-     * We have to wrap the two update and generate methods in a single mehtod.
-     *
-     * @returns {promise}
-     * @memberof KeyConfiguration
-     */
-    keygenWrapper() {
-        if (this.hasKeys) {
-            return this.updateKeys();
-        } else {
-            return this.generateKeys();
-        }
-    }
-
-    /**
-     * Fetch Application object by ID coming from URL path params and fetch related keys to display
-     *
-     * @returns {promise}
-     * @memberof KeyConfiguration
-     */
-    generateKeys() {
-        const { keyType } = this.props;
-        return this.application.then((application) => {
-            const keys = application.keys.get(keyType) || {
-                supportedGrantTypes: ['client_credentials'],
-            };
-            if (!keys.callbackUrl) {
-                keys.callbackUrl = 'https://wso2.am.com';
-            }
-            return application.generateKeys(keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.tokenType);
-        });
-    }
-
-    /**
-     *
-     *
-     * @returns {promise}
-     * @memberof KeyConfiguration
-     */
-    updateKeys() {
-        const { application } = this.state;
-        const { keyType } = this.props;
-        const keys = application.keys.get(keyType);
-        return application.updateKeys(keys.tokenType, keyType, keys.supportedGrantTypes,
-            keys.callbackUrl, keys.consumerKey, keys.consumerSecret);
+        updateKeyRequest(newRequest);
     }
 
     /**
@@ -234,51 +98,37 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     render() {
-        const { notFound, keys, tokenType } = this.state;
-        const { keyType, classes } = this.props;
+        const { classes, keyRequest, notFound } = this.props;
+        const { supportedGrantTypes, callbackUrl } = keyRequest;
         if (notFound) {
             return <ResourceNotFound />;
         }
-        let csCkKeys;
-        let consumerKey;
-        let supportedGrantTypes;
-        let callbackUrl;
-        if (keys) {
-            csCkKeys = keys.get(keyType);
-            consumerKey = csCkKeys && csCkKeys.consumerKey;
-            supportedGrantTypes = csCkKeys && csCkKeys.supportedGrantTypes;
-            callbackUrl = csCkKeys && csCkKeys.callbackUrl;
-            supportedGrantTypes = supportedGrantTypes || false;
-            if (consumerKey) {
-                this.hasKeys = true;
-            } else {
-                this.hasKeys = false;
-            }
+
+        let isRefreshChecked = false;
+        let isPasswordChecked = false;
+        let isImplicitChecked = false;
+        let isCodeChecked = false;
+        if (supportedGrantTypes) {
+            isRefreshChecked = supportedGrantTypes.includes('refresh_token');
+            isPasswordChecked = supportedGrantTypes.includes('password');
+            isImplicitChecked = supportedGrantTypes.includes('implicit');
+            isCodeChecked = supportedGrantTypes.includes('authorization_code');
         }
 
         return (
             <React.Fragment>
                 <FormControl className={classes.FormControl} component='fieldset'>
                     <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
-                        <FormattedMessage id='token.type' defaultMessage='Token Type' />
-                    </InputLabel>
-                    <RadioGroup aria-label='Token Type' name='tokenType' className={classes.group} value={tokenType} onChange={this.handleTokenTypeChange}>
-                        <FormControlLabel value='OAUTH' control={<Radio />} label='OAUTH' />
-                        <FormControlLabel value='JWT' control={<Radio />} label='JWT' />
-                    </RadioGroup>
-                </FormControl>
-                <FormControl className={classes.FormControl} component='fieldset'>
-                    <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
                         <FormattedMessage id='grant.types' defaultMessage='Grant Types' />
                     </InputLabel>
                     <div className={classes.checkboxWrapper}>
                         <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel control={<Checkbox id='refresh_token' checked={supportedGrantTypes && supportedGrantTypes.includes('refresh_token')} onChange={this.handleCheckboxChange} value='refresh_token' />} label='Refresh Token' />
-                            <FormControlLabel control={<Checkbox id='password' checked={supportedGrantTypes && supportedGrantTypes.includes('password')} value='password' onChange={this.handleCheckboxChange} />} label='Password' />
-                            <FormControlLabel control={<Checkbox id='implicit' checked={supportedGrantTypes && supportedGrantTypes.includes('implicit')} value='implicit' onChange={this.handleCheckboxChange} />} label='Implicit' />
+                            <FormControlLabel control={<Checkbox id='refresh_token' checked={isRefreshChecked} onChange={e => this.handleChange('grantType', e)} value='refresh_token' />} label='Refresh Token' />
+                            <FormControlLabel control={<Checkbox id='password' checked={isPasswordChecked} value='password' onChange={e => this.handleChange('grantType', e)} />} label='Password' />
+                            <FormControlLabel control={<Checkbox id='implicit' checked={isImplicitChecked} value='implicit' onChange={e => this.handleChange('grantType', e)} />} label='Implicit' />
                         </div>
                         <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel control={<Checkbox id='code' checked={supportedGrantTypes && supportedGrantTypes.includes('code')} value='code' onChange={this.handleCheckboxChange} />} label='Code' />
+                            <FormControlLabel control={<Checkbox id='authorization_code' checked={isCodeChecked} value='authorization_code' onChange={e => this.handleChange('grantType', e)} />} label='Code' />
                             <FormControlLabel control={<Checkbox id='client_credentials' checked disabled value='client_credentials' />} label='Client Credential' />
                         </div>
                     </div>
@@ -286,9 +136,8 @@ class KeyConfiguration extends React.Component {
                 </FormControl>
 
                 {
-                    // (supportedGrantTypes && (supportedGrantTypes.includes("implicit") || supportedGrantTypes.includes("code")))  &&
                     <FormControl className={classes.FormControlOdd}>
-                        <TextField id='callbackURL' fullWidth onChange={this.handleTextChange} label='Callback URL' placeholder='http://url-to-webapp' className={classes.textField} margin='normal' value={callbackUrl} />
+                        <TextField id='callbackURL' fullWidth onChange={e => this.handleChange('callbackUrl', e)} label='Callback URL' placeholder='http://url-to-webapp' className={classes.textField} margin='normal' value={callbackUrl} />
                         <FormHelperText>Callback URL is a redirection URI in the client application which is used by the authorization server to send the client's user-agent (usually web browser) back after granting access.</FormHelperText>
                     </FormControl>
                 }
