@@ -1255,8 +1255,8 @@ public final class APIUtil {
             //todo : review and add missing fields
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, apiProduct.getId().getName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, apiProduct.getId().getVersion());
-
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, apiProduct.getId().getProviderName());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, apiProduct.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, apiProduct.getDescription());
             artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiProduct.getState());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, apiProduct.getVisibility());
@@ -8715,7 +8715,7 @@ public final class APIUtil {
             apiProduct = new APIProduct(apiProductIdentifier);
             //set uuid
             apiProduct.setUuid(artifact.getId());
-            //set description
+            apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
             apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));

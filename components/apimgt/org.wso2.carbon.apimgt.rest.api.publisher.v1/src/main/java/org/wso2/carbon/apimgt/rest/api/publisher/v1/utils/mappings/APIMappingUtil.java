@@ -1288,6 +1288,7 @@ public class APIMappingUtil {
             APIProductInfoDTO productDto = new APIProductInfoDTO();
             productDto.setName(apiProduct.getId().getName());
             productDto.setProvider(apiProduct.getId().getProviderName());
+            productDto.setContext(apiProduct.getContext());
             productDto.setDescription(apiProduct.getDescription());
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
