@@ -78,7 +78,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a new subscription ", notes = "This operation can be used to add a new subscription providing the id of the API and the application. ", response = SubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
         })
     }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
@@ -96,7 +96,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Remove a subscription ", notes = "This operation can be used to remove a subscription. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
         })
     }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
