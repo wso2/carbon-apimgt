@@ -21,6 +21,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
+import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
 
 /**
  *
@@ -77,17 +78,22 @@ class SubscriptionPolicySelect extends React.Component {
         return (
             policies &&
             <div className={classes.root}>
-                <Button
-                    variant='contained'
-                    size='small'
-                    color='primary'
-                    className={classes.buttonGap}
-                    onClick={() => {
-                        handleSubscribe(applicationId, apiId, selectedPolicy);
-                    }}
+                <ScopeValidation
+                    resourcePath={resourcePaths.SUBSCRIPTIONS}
+                    resourceMethod={resourceMethods.POST}
                 >
+                    <Button
+                        variant='contained'
+                        size='small'
+                        color='primary'
+                        className={classes.buttonGap}
+                        onClick={() => {
+                            handleSubscribe(applicationId, apiId, selectedPolicy);
+                        }}
+                    >
                     Subscribe
-                </Button>
+                    </Button>
+                </ScopeValidation>
                 <Select
                     value={selectedPolicy}
                     onChange={(e) => {
