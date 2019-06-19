@@ -24,12 +24,8 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
 import { FormattedMessage } from 'react-intl';
-import Button from '@material-ui/core/Button';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Application from '../../../data/Application';
 
 const styles = theme => ({
     FormControl: {
@@ -64,8 +60,35 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class KeyConfiguration extends React.Component {
-    state = {
+    /**
+    * This method is used to handle the updating of key generation
+    * request object.
+    * @param {*} field field that should be updated in key request
+    * @param {*} event event fired
+    */
+    handleChange(field, event) {
+        const { keyRequest, updateKeyRequest } = this.props;
+        const newRequest = { ...keyRequest };
+        const { target: currentTarget } = event;
+        let newGrantTypes = [...newRequest.supportedGrantTypes];
 
+        switch (field) {
+            case 'callbackUrl':
+                newRequest.callbackUrl = currentTarget.value;
+                break;
+            case 'grantType':
+                if (currentTarget.checked) {
+                    newGrantTypes = [...newGrantTypes, currentTarget.id];
+                } else {
+                    newGrantTypes = newRequest.supportedGrantTypes
+                        .filter(item => item !== currentTarget.id);
+                }
+                newRequest.supportedGrantTypes = newGrantTypes;
+                break;
+            default:
+                break;
+        }
+        updateKeyRequest(newRequest);
     }
 
     /**
@@ -75,9 +98,7 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     render() {
-        const {
-            classes, updateKeyRequest, keyRequest, notFound,
-        } = this.props;
+        const { classes, keyRequest, notFound } = this.props;
         const { supportedGrantTypes, callbackUrl } = keyRequest;
         if (notFound) {
             return <ResourceNotFound />;
@@ -102,12 +123,12 @@ class KeyConfiguration extends React.Component {
                     </InputLabel>
                     <div className={classes.checkboxWrapper}>
                         <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel control={<Checkbox id='refresh_token' checked={isRefreshChecked} onChange={e => updateKeyRequest('grantType', e)} value='refresh_token' />} label='Refresh Token' />
-                            <FormControlLabel control={<Checkbox id='password' checked={isPasswordChecked} value='password' onChange={e => updateKeyRequest('grantType', e)} />} label='Password' />
-                            <FormControlLabel control={<Checkbox id='implicit' checked={isImplicitChecked} value='implicit' onChange={e => updateKeyRequest('grantType', e)} />} label='Implicit' />
+                            <FormControlLabel control={<Checkbox id='refresh_token' checked={isRefreshChecked} onChange={e => this.handleChange('grantType', e)} value='refresh_token' />} label='Refresh Token' />
+                            <FormControlLabel control={<Checkbox id='password' checked={isPasswordChecked} value='password' onChange={e => this.handleChange('grantType', e)} />} label='Password' />
+                            <FormControlLabel control={<Checkbox id='implicit' checked={isImplicitChecked} value='implicit' onChange={e => this.handleChange('grantType', e)} />} label='Implicit' />
                         </div>
                         <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel control={<Checkbox id='authorization_code' checked={isCodeChecked} value='authorization_code' onChange={e => updateKeyRequest('grantType', e)} />} label='Code' />
+                            <FormControlLabel control={<Checkbox id='authorization_code' checked={isCodeChecked} value='authorization_code' onChange={e => this.handleChange('grantType', e)} />} label='Code' />
                             <FormControlLabel control={<Checkbox id='client_credentials' checked disabled value='client_credentials' />} label='Client Credential' />
                         </div>
                     </div>
@@ -116,7 +137,7 @@ class KeyConfiguration extends React.Component {
 
                 {
                     <FormControl className={classes.FormControlOdd}>
-                        <TextField id='callbackURL' fullWidth onChange={e => updateKeyRequest('callbackUrl', e)} label='Callback URL' placeholder='http://url-to-webapp' className={classes.textField} margin='normal' value={callbackUrl} />
+                        <TextField id='callbackURL' fullWidth onChange={e => this.handleChange('callbackUrl', e)} label='Callback URL' placeholder='http://url-to-webapp' className={classes.textField} margin='normal' value={callbackUrl} />
                         <FormHelperText>Callback URL is a redirection URI in the client application which is used by the authorization server to send the client's user-agent (usually web browser) back after granting access.</FormHelperText>
                     </FormControl>
                 }

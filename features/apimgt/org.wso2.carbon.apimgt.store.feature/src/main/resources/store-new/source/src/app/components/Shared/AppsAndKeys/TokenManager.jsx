@@ -115,34 +115,11 @@ class TokenManager extends React.Component {
     }
 
     /**
-     * This method is used to handle the updating of key generation
-     * request object.
-     * @param {*} field field that should be updated in key request
-     * @param {*} event event fired
+     * Update keyRequest state
+     * @param {Object} keyRequest parameters requried for key generation request
      */
-    updateKeyRequest(field, event) {
-        const { keyRequest } = this.state;
-        const newRequest = { ...keyRequest };
-        const { target: currentTarget } = event;
-        let newGrantTypes = [...newRequest.supportedGrantTypes];
-
-        switch (field) {
-            case 'callbackUrl':
-                newRequest.callbackUrl = currentTarget.value;
-                break;
-            case 'grantType':
-                if (currentTarget.checked) {
-                    newGrantTypes = [...newGrantTypes, currentTarget.id];
-                } else {
-                    newGrantTypes = newRequest.supportedGrantTypes
-                        .filter(item => item !== currentTarget.id);
-                }
-                newRequest.supportedGrantTypes = newGrantTypes;
-                break;
-            default:
-                break;
-        }
-        this.setState({ keyRequest: newRequest });
+    updateKeyRequest(keyRequest) {
+        this.setState({ keyRequest });
     }
 
     /**
@@ -176,7 +153,7 @@ class TokenManager extends React.Component {
     }
 
     /**
-   * @returns {promise}
+   *
    * @memberof KeyConfiguration
    */
     updateKeys() {

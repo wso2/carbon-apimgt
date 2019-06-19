@@ -33,7 +33,7 @@ import SubscribeToApi from '../../../Shared/AppsAndKeys/SubscribeToApi';
 import Keys from '../../../Shared/AppsAndKeys/KeyConfiguration';
 import Tokens from '../../../Shared/AppsAndKeys/Tokens';
 import ViewToken from '../../../Shared/AppsAndKeys/ViewToken';
-
+import Application from '../../../../data/Application';
 import { ApiContext } from '../ApiContext';
 
 /**
@@ -80,11 +80,16 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class Wizard extends React.Component {
+    /**
+     *
+     * @param {*} props props
+     */
     constructor(props) {
         super(props);
         this.getStepContent = this.getStepContent.bind(this);
         this.handleNext = this.handleNext.bind(this);
         this.handleRedirectTest = this.handleRedirectTest.bind(this);
+        this.updateKeyRequest = this.updateKeyRequest.bind(this);
     }
 
     state = {
@@ -93,6 +98,11 @@ class Wizard extends React.Component {
         appId: null,
         tab: 0,
         redirect: false,
+        keyRequest: {
+            keyType: 'PRODUCTION',
+            supportedGrantTypes: ['client_credentials'],
+            callbackUrl: 'https://wso2.am.com',
+        },
     };
 
     /**
@@ -103,6 +113,14 @@ class Wizard extends React.Component {
     handleTabChange = (event, tab) => {
         this.setState({ tab });
     };
+
+    /**
+     * Update keyRequest state
+     * @param {Object} keyRequest parameters requried for key generation request
+     */
+    updateKeyRequest(keyRequest) {
+        this.setState({ keyRequest });
+    }
 
     /**
      *
@@ -128,12 +146,12 @@ class Wizard extends React.Component {
                         </Tabs>
                         {this.state.tab === 0 && (
                             <div>
-                                <Keys innerRef={node => (this.keys = node)} selectedApp={this.newApp} keyType='PRODUCTION' />
+                                <Keys innerRef={node => (this.keys = node)} updateKeyRequest={this.updateKeyRequest} keyRequest={this.state.keyRequest} selectedApp={this.newApp} keyType='PRODUCTION' />
                             </div>
                         )}
                         {this.state.tab === 1 && (
                             <div>
-                                <Keys innerRef={node => (this.keys = node)} selectedApp={this.newApp} keyType='SANDBOX' />
+                                <Keys innerRef={node => (this.keys = node)} updateKeyRequest={this.updateKeyRequest} keyRequest={this.state.keyRequest} selectedApp={this.newApp} keyType='SANDBOX' />
                             </div>
                         )}
                     </React.Fragment>
@@ -224,30 +242,26 @@ class Wizard extends React.Component {
                         console.error(error);
                     });
             }
-
-            //
         } else if (activeStep === 2) {
             // Generate keys
-            const promiseGenerate = this.keys.keygenWrapper();
-            promiseGenerate
-                .then(
-                    (response) => {
-                        console.log('Keys generated successfully with ID : ' + response);
-                        that.setState({
-                            activeStep: activeStep + 1,
-                        });
-                    },
-                    // () => application.generateToken(this.key_type).then(() => this.setState({ application: application }))
-                )
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const status = error.status;
-                    if (status === 404) {
-                        this.setState({ notFound: true });
-                    }
+            const { keyRequest } = this.state;
+            Application.get(this.newApp.value).then((application) => {
+                return application.generateKeys(keyRequest.keyType, keyRequest.supportedGrantTypes,
+                    keyRequest.callbackUrl);
+            }).then((response) => {
+                console.log('Keys generated successfully with ID : ' + response);
+                that.setState({
+                    activeStep: activeStep + 1,
                 });
+            }).catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
         } else if (activeStep === 3) {
             // Generate tokens
             const promisseTokens = this.tokens.generateToken();
@@ -360,21 +374,21 @@ class Wizard extends React.Component {
                                         </Button>
                                     </div>
                                 ) : (
-                                    <div className={classes.wizardContent}>
-                                        {this.getStepContent(activeStep, api, applicationsAvailable)}
-                                        <div className={classes.wizardButtons}>
-                                            <Button disabled={activeStep === 0} onClick={this.handleBack} className={classes.button} variant='outlined'>
-                                                Back
+                                        <div className={classes.wizardContent}>
+                                            {this.getStepContent(activeStep, api, applicationsAvailable)}
+                                            <div className={classes.wizardButtons}>
+                                                <Button disabled={activeStep === 0} onClick={this.handleBack} className={classes.button} variant='outlined'>
+                                                    Back
                                             </Button>
-                                            <Button disabled={activeStep < steps.length - 1} onClick={this.handleRedirectTest} className={classes.button} variant='outlined'>
-                                                Test
+                                                <Button disabled={activeStep < steps.length - 1} onClick={this.handleRedirectTest} className={classes.button} variant='outlined'>
+                                                    Test
                                             </Button>
-                                            <Button variant='contained' color='primary' onClick={() => this.handleNext()} className={classes.button}>
-                                                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                                            </Button>
+                                                <Button variant='contained' color='primary' onClick={() => this.handleNext()} className={classes.button}>
+                                                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                                </Button>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
                             </div>
                         </div>
                     </div>
