@@ -275,7 +275,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         return delegate.apiProductsApiProductIdThumbnailGet(apiProductId, accept, ifNoneMatch, securityContext);
     }
 
-    @POST
+    @PUT
     @Path("/{apiProductId}/thumbnail")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
@@ -289,8 +289,8 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdThumbnailPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
-        return delegate.apiProductsApiProductIdThumbnailPost(apiProductId, fileInputStream, fileDetail, ifMatch, securityContext);
+    public Response apiProductsApiProductIdThumbnailPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+        return delegate.apiProductsApiProductIdThumbnailPut(apiProductId, fileInputStream, fileDetail, ifMatch, securityContext);
     }
 
     @GET

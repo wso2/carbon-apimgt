@@ -4689,7 +4689,7 @@ paths:
     #----------------------------------------------------------------------------
     # Upload a thumbnail image to a certain API Product
     #----------------------------------------------------------------------------
-    post:
+    put:
       consumes:
         - multipart/form-data
       security:

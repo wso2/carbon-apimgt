@@ -6348,11 +6348,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateAPIProduct(APIProduct product, String user) throws APIManagementException, FaultGatewaysException {
+    public void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
-            API api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
+            API api;
+            if (apiProductResource.getApiIdentifier() != null) {
+                api = super.getLightweightAPI(apiProductResource.getApiIdentifier());
+            } else {
+                api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
+            }
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
             apiProductResource.setProductIdentifier(product.getId());
@@ -6391,7 +6396,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //todo : check whether permissions need to be updated and pass it along
         updateApiProductArtifact(product, true, true);
-        apiMgtDAO.updateAPIProduct(product, user);
+        apiMgtDAO.updateAPIProduct(product, userNameWithoutChange);
 
         if (!failedGateways.isEmpty() &&
                 (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {

@@ -37,7 +37,7 @@ public interface ApiProductsApiService {
       public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext);
       public Response apiProductsApiProductIdSwaggerPut(String apiProductId, String apiDefinition, String ifMatch, MessageContext messageContext);
       public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext);
-      public Response apiProductsApiProductIdThumbnailPost(String apiProductId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);
+      public Response apiProductsApiProductIdThumbnailPut(String apiProductId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);
       public Response apiProductsGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext);
       public Response apiProductsPost(APIProductDTO body, MessageContext messageContext);
 }

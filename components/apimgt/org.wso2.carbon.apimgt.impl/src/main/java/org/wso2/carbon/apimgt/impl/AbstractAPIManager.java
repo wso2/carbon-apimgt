@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -3201,5 +3202,56 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected APIProduct getApiProduct(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
         return APIUtil.getAPIProduct(apiArtifact, registry);
+    }
+
+    public List<APIProductResource> getResourcesOfAPIProduct(APIProductIdentifier productIdentifier)
+            throws APIManagementException {
+        return apiMgtDAO.getAPIProductResourceMappings(productIdentifier);
+    }
+
+    public ResourceFile getProductIcon(APIProductIdentifier identifier) throws APIManagementException {
+        String thumbPath = APIUtil.getProductIconPath(identifier);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        Registry registry;
+        boolean isTenantFlowStarted = false;
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                startTenantFlow(tenantDomain);
+                isTenantFlowStarted = true;
+            }
+
+	        /* If the API provider is a tenant, load tenant registry*/
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                int id = getTenantManager().getTenantId(tenantDomain);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
+                    registry = getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    registry = this.registry;
+                }
+            }
+
+            if (registry.resourceExists(thumbPath)) {
+                Resource res = registry.get(thumbPath);
+                return new ResourceFile(res.getContentStream(), res.getMediaType());
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while loading API Product icon of API Product " +  identifier.getName()
+                    + ":" + identifier.getVersion() + " from the registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Error while loading API Product icon of API Product " + identifier.getName()
+                    + ":" + identifier.getVersion();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
+        return null;
     }
 }

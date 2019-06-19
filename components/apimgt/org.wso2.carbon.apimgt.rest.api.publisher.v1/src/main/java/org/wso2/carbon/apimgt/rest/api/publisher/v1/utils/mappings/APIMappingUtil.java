@@ -101,6 +101,7 @@ import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isEndpointURLNonEmpty;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.retrieveSavedEmailList;
 
 public class APIMappingUtil {
 
@@ -1288,6 +1289,7 @@ public class APIMappingUtil {
             APIProductInfoDTO productDto = new APIProductInfoDTO();
             productDto.setName(apiProduct.getId().getName());
             productDto.setProvider(apiProduct.getId().getProviderName());
+            productDto.setContext(apiProduct.getContext());
             productDto.setDescription(apiProduct.getDescription());
             productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
                     .valueOf(apiProduct.getState()));
@@ -1635,6 +1637,22 @@ public class APIMappingUtil {
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
         apiProductListDTO.setPagination(paginationDTO);
+    }
+
+    /**
+     * Returns the APIProductIdentifier given the uuid
+     *
+     * @param productId                 API Product uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return APIProductIdentifier which represents the given id
+     * @throws APIManagementException
+     */
+    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String productId, String requestedTenantDomain)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProduct product = apiProvider.getAPIProductbyUUID(productId, requestedTenantDomain);
+        return product.getId();
     }
 
 }

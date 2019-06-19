@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -714,4 +715,23 @@ public interface APIManager {
      */
     Map<String,Object> searchPaginatedAPIProducts(String searchQuery, String tenantDomain,int start,int end) throws
             APIManagementException;
+
+    /**
+     * Returns resource list of the api product
+     *
+     * @param productIdentifier
+     * @return
+     * @throws APIManagementException
+     */
+    List<APIProductResource> getResourcesOfAPIProduct(APIProductIdentifier productIdentifier)
+            throws APIManagementException;
+
+    /**
+     * Retrieves the icon image associated with a particular API Product as a stream.
+     *
+     * @param identifier ID representing the API Product
+     * @return an Icon containing image content and content type information
+     * @throws APIManagementException if an error occurs while retrieving the image
+     */
+    ResourceFile getProductIcon(APIProductIdentifier identifier) throws APIManagementException;
 }
