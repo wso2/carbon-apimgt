@@ -1669,7 +1669,7 @@
         <reflection.version>0.9.11</reflection.version>
         <jacoco.version>0.7.9</jacoco.version>
         <xml-apis.version>1.4.01</xml-apis.version>
-        <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <wiremock.version>2.5.0</wiremock.version>
         <mockito.version>2.10.0</mockito.version>
         <powermock.version>1.7.4</powermock.version>
