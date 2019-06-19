@@ -1977,7 +1977,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private APITemplateBuilder getAPITemplateBuilder(API api) throws APIManagementException {
+
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
+
+
+        if( api.isEndpointKerberosEnable() && api.getEndpointTargetSPN() !=null) {
+            Map<String, String> kuberosProperties = new HashMap<String, String>();
+            kuberosProperties.put("targetSPN", api.getEndpointTargetSPN());
+            vtb.addHandler("org.wso2.apim.kerberos.handler.CustomKerberosDelegationHandler", Collections.EMPTY_MAP);
+        }
+
         vtb.addHandler(
                 "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler", Collections
                 .<String, String>emptyMap());

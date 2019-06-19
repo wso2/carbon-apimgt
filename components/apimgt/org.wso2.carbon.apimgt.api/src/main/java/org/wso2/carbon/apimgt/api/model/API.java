@@ -90,6 +90,9 @@ public class API implements Serializable {
     private String endpointUTUsername;
     private String endpointUTPassword;
 
+    private boolean endpointKerberosEnable= false;
+    private String  endpointTargetSPN;
+
     private String transports;
     private String inSequence;
     private String outSequence;
@@ -608,6 +611,16 @@ public class API implements Serializable {
     public void setApiResourcePatternsChanged(boolean apiResourcePatternsChanged) {
         this.apiResourcePatternsChanged = apiResourcePatternsChanged;
     }
+    /**
+     * @return the endpointTargetSPN
+     */
+    public String getEndpointTargetSPN() {
+        return endpointTargetSPN;
+    }
+    /**
+     * @param endpointTargetSPN the endpointTargetSPN to set
+     */
+    public void setEndpointTargetSPN(String endpointTargetSPN) { this.endpointTargetSPN = endpointTargetSPN; }
 
     /**
      * @return the endpointUTUsername
@@ -664,6 +677,16 @@ public class API implements Serializable {
     public void setEndpointAuthDigest(boolean endpointAuthDigest) {
         this.endpointAuthDigest = endpointAuthDigest;
     }
+
+    /**
+     * @return the endpointKerberosEnable
+     */
+    public boolean isEndpointKerberosEnable() { return endpointKerberosEnable; }
+
+    /**
+     * @param endpointKerberosEnable the endpointKerberosEnable to set
+     */
+    public void setEndpointKerberosEnable(boolean endpointKerberosEnable) { this.endpointKerberosEnable = endpointKerberosEnable; }
 
     public String getInSequence() {
         return inSequence;

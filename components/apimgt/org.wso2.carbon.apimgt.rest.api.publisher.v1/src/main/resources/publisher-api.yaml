@@ -5693,6 +5693,10 @@ definitions:
         enum:
           - basic
           - digest
+          - kerberos
+      targetSPN:
+        type: string
+        example: HTTP/idp.example.com@EXAMPLE.COM
       username:
         type: string
         example: admin

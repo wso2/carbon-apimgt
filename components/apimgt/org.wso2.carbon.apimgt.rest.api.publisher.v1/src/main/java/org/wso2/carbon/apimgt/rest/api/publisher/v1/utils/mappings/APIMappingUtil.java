@@ -487,6 +487,11 @@ public class APIMappingUtil {
         APIEndpointSecurityDTO securityDTO = dto.getEndpointSecurity();
         if (dto.getEndpointSecurity() != null && securityDTO.getType() != null) {
             api.setEndpointSecured(true);
+            if(APIEndpointSecurityDTO.TypeEnum.KERBEROS.equals(securityDTO.getType())){
+                api.setEndpointKerberosEnable(true);
+                api.setEndpointTargetSPN(securityDTO.getTargetSPN());
+
+            }
             api.setEndpointUTUsername(securityDTO.getUsername());
             api.setEndpointUTPassword(securityDTO.getPassword());
             if (APIEndpointSecurityDTO.TypeEnum.DIGEST.equals(securityDTO.getType())) {
@@ -749,6 +754,9 @@ public class APIMappingUtil {
             }
             if (api.isEndpointAuthDigest()) {
                 securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.DIGEST);
+            }
+            if (api.isEndpointKerberosEnable()){
+                securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.KERBEROS);
             }
             dto.setEndpointSecurity(securityDTO);
         }
