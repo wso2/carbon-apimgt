@@ -19,6 +19,8 @@ import javax.xml.bind.annotation.*;
 public class APIListDTO   {
   
     private Integer count = null;
+    private String next = null;
+    private String previous = null;
     private List<APIInfoDTO> list = new ArrayList<>();
     private PaginationDTO pagination = null;
 
@@ -38,6 +40,42 @@ public class APIListDTO   {
   }
   public void setCount(Integer count) {
     this.count = count;
+  }
+
+  /**
+   * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
+   **/
+  public APIListDTO next(String next) {
+    this.next = next;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "/apis?limit=1&offset=2&query=", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
+  @JsonProperty("next")
+  public String getNext() {
+    return next;
+  }
+  public void setNext(String next) {
+    this.next = next;
+  }
+
+  /**
+   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
+   **/
+  public APIListDTO previous(String previous) {
+    this.previous = previous;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "/apis?limit=1&offset=0&query=", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
+  @JsonProperty("previous")
+  public String getPrevious() {
+    return previous;
+  }
+  public void setPrevious(String previous) {
+    this.previous = previous;
   }
 
   /**
@@ -85,13 +123,15 @@ public class APIListDTO   {
     }
     APIListDTO apIList = (APIListDTO) o;
     return Objects.equals(count, apIList.count) &&
+        Objects.equals(next, apIList.next) &&
+        Objects.equals(previous, apIList.previous) &&
         Objects.equals(list, apIList.list) &&
         Objects.equals(pagination, apIList.pagination);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, list, pagination);
+    return Objects.hash(count, next, previous, list, pagination);
   }
 
   @Override
@@ -100,6 +140,8 @@ public class APIListDTO   {
     sb.append("class APIListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
+    sb.append("    next: ").append(toIndentedString(next)).append("\n");
+    sb.append("    previous: ").append(toIndentedString(previous)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");
