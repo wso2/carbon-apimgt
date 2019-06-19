@@ -1908,18 +1908,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean isMutualSSLMandatory = false;
             boolean isOauthBasicAuthMandatory = false;
 
+            boolean securitySchemeFound = false;
+
             for (String apiSecurityLevel : apiSecurityLevels) {
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
                     isOauth2 = true;
                     securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+                    securitySchemeFound = true;
                 }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                     isMutualSSL = true;
                     securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
+                    securitySchemeFound = true;
                 }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
                     isBasicAuth = true;
                     securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
+                    securitySchemeFound = true;
                 }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
                     isMutualSSLMandatory = true;
@@ -1931,11 +1936,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
+            // If no security schema found, set OAuth2 as default
+            if (!securitySchemeFound) {
+                isOauth2 = true;
+                securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+            }
+            // If Only OAuth2/Basic-Auth specified, set it as mandatory
             if (!isMutualSSL && !isOauthBasicAuthMandatory) {
                 securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
             }
+            // If Only Mutual SSL specified, set it as mandatory
             if (!isBasicAuth && !isOauth2 && !isMutualSSLMandatory) {
                 securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+            }
+            // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
+            // set OAuth2/Basic-Auth as mandatory
+            if ((isOauth2 || isBasicAuth) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
             }
 
             apiSecurity = String.join(",", securityLevels);
