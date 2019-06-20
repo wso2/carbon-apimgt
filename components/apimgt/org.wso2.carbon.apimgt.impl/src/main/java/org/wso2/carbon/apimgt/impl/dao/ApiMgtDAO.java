@@ -6654,12 +6654,12 @@ public class ApiMgtDAO {
             }
             if (id == -1) {
                 String msg = "Unable to find the API Product : " + identifier.getName() + "-" +
-                        identifier.getProviderName() + "-" + identifier.getVersion() + " in the database";
+                        APIUtil.replaceEmailDomainBack(identifier.getProviderName()) + "-" + identifier.getVersion() + " in the database";
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
-            handleException("Error while locating API Product: " + identifier.getName() + "-" + identifier.getProviderName()
+            handleException("Error while locating API Product: " + identifier.getName() + "-" + APIUtil.replaceEmailDomainBack(identifier.getProviderName())
                     + "-" + identifier.getVersion() + " from the database", e);
         } finally {
             if (created) {
@@ -12965,7 +12965,7 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             String queryAddAPIProduct = SQLConstants.ADD_API_PRODUCT;
             prepStmtAddAPIProduct = connection.prepareStatement(queryAddAPIProduct, new String[]{"api_product_id"});
-            prepStmtAddAPIProduct.setString(1, identifier.getProviderName());
+            prepStmtAddAPIProduct.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmtAddAPIProduct.setString(2, identifier.getName());
             prepStmtAddAPIProduct.setString(3, identifier.getVersion());
             prepStmtAddAPIProduct.setString(4, apiproduct.getContext());
@@ -12975,7 +12975,7 @@ public class ApiMgtDAO {
                 tierList.add(tier.getName());
             }
             prepStmtAddAPIProduct.setString(5, StringUtils.join(tierList,","));
-            prepStmtAddAPIProduct.setString(6, identifier.getProviderName());
+            prepStmtAddAPIProduct.setString(6, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmtAddAPIProduct.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
 
             prepStmtAddAPIProduct.execute();
@@ -12994,7 +12994,7 @@ public class ApiMgtDAO {
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while adding API product " + identifier.getName() + " of provider "
-                    + identifier.getProviderName(), e);
+                    + APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddAPIProduct, null, null);
             APIMgtDBUtil.closeAllConnections(prepStmtAddScopeEntry, connection, null);
@@ -13078,7 +13078,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             ps = connection.prepareStatement(deleteQuery);
-            ps.setString(1, productIdentifier.getProviderName());
+            ps.setString(1, APIUtil.replaceEmailDomainBack(productIdentifier.getProviderName()));
             ps.setString(2, productIdentifier.getName());
             ps.setString(3, productIdentifier.getVersion());
             ps.executeUpdate();
@@ -13135,7 +13135,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             preparedStatement = conn.prepareStatement(queryGetProductId);
             preparedStatement.setString(1, identifier.getName());
-            preparedStatement.setString(2, identifier.getProviderName());
+            preparedStatement.setString(2, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             preparedStatement.setString(3, APIConstants.API_PRODUCT_VERSION); //versioning is not supported atm
 
             rs = preparedStatement.executeQuery();
@@ -13151,7 +13151,7 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error while retrieving api product id for product " + identifier.getName() + " by " +
-                    identifier.getProviderName(), e);
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, conn, rs);
         }
@@ -13181,7 +13181,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             APIProductIdentifier identifier = product.getId();
             ps.setString(4, identifier.getName());
-            ps.setString(5, identifier.getProviderName());
+            ps.setString(5, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             ps.setString(6, identifier.getVersion());
             ps.executeUpdate();
 
@@ -13333,7 +13333,7 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             String sql = SQLConstants.GET_RESOURCES_OF_PRODUCT;
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setString(1, productIdentifier.getProviderName());
+                ps.setString(1, APIUtil.replaceEmailDomainBack(productIdentifier.getProviderName()));
                 ps.setString(2, productIdentifier.getName());
                 ps.setString(3, productIdentifier.getVersion());
                 try (ResultSet rs = ps.executeQuery()) {

@@ -1423,7 +1423,7 @@ public class APIMappingUtil {
     public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider)
             throws APIManagementException {
         APIProduct product = new APIProduct();
-        APIProductIdentifier id = new APIProductIdentifier(provider, dto.getName(), ""); //todo: replace this with dto.getVersion
+        APIProductIdentifier id = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), dto.getName(), APIConstants.API_PRODUCT_VERSION); //todo: replace this with dto.getVersion
         product.setID(id);
         product.setUuid(dto.getId());
         product.setDescription(dto.getDescription());
