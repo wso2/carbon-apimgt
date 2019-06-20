@@ -95,7 +95,7 @@ class TokenManager extends React.Component {
                 .then((keys) => {
                     const { keyType } = this.props;
                     const { keyRequest } = this.state;
-                    if (keys.size > 0) {
+                    if (keys.size > 0 && keys.get(keyType)) {
                         const { callbackUrl, supportedGrantTypes } = keys.get(keyType);
                         const newRequest = { ...keyRequest, callbackUrl, supportedGrantTypes };
                         this.setState({ keys, keyRequest: newRequest });
@@ -131,7 +131,7 @@ class TokenManager extends React.Component {
         const { keyRequest, keys } = this.state;
         const { keyType, updateSubscriptionData } = this.props;
         this.application.then((application) => {
-            return application.generateKeys(keyRequest.keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
+            return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
         }).then((response) => {
             console.log('Keys generated successfully with ID : ' + response);
             if (updateSubscriptionData) {
@@ -221,10 +221,10 @@ class TokenManager extends React.Component {
                         variant='contained'
                         color='primary'
                         className={classes.button}
-                        onClick={keys.size > 0 ? this.updateKeys : this.generateKeys}
+                        onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
                         noFound={notFound}
                     >
-                        {keys.size > 0 ? 'Update keys' : 'Generate Keys'}
+                        {keys.size > 0 && keys.get(keyType) ? 'Update keys' : 'Generate Keys'}
                     </Button>
                 </div>
             </div>

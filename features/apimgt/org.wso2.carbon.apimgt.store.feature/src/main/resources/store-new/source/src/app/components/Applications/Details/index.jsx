@@ -139,7 +139,7 @@ class Details extends Component {
     render() {
         const redirect_url = '/applications/' + this.props.match.params.application_uuid + '/productionkeys';
 
-        const { classes, theme } = this.props;
+        const { classes, theme, match } = this.props;
         const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
 
         if (this.state.notFound) {
@@ -164,8 +164,8 @@ class Details extends Component {
                     <div className={classes.contentDown}>
                         <Switch>
                             <Redirect exact from='/applications/:applicationId' to={redirect_url} />
-                            <Route path='/applications/:applicationId/productionkeys' render={() => <TokenManager keyType='PRODUCTION' selectedApp={{ appId: this.state.application.applicationId, label: this.state.application.name }} />} />
-                            <Route path='/applications/:applicationId/sandBoxkeys' render={() => <TokenManager keyType='SANDBOX' selectedApp={{ appId: this.state.application.applicationId, label: this.state.application.name }} />} />
+                            <Route path='/applications/:applicationId/productionkeys' component={() => <TokenManager keyType='PRODUCTION' selectedApp={{ appId: this.state.application.applicationId, label: this.state.application.name }} />} />
+                            <Route path='/applications/:applicationId/sandBoxkeys' component={() => <TokenManager keyType='SANDBOX' selectedApp={{ appId: this.state.application.applicationId, label: this.state.application.name }} />} />
                             <Route path='/applications/:applicationId/subscriptions' component={Subscriptions} />
                             <Route component={PageNotFound} />
                         </Switch>
