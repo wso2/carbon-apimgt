@@ -66,26 +66,27 @@ const allScopes = [
 class Tokens extends React.Component {
     constructor(props) {
         super(props);
-        this.keyType = props.type;
         this.state = {
             application: null,
-            showCS: false, // Show Consumer Secret flag
             scopesSelected: [],
-            timeout: 3600, // Timeout for token in miliseconds
+            timeout: 3600, // Timeout for token in milliseconds
         };
-        this.appId = this.props.selectedApp.appId || this.props.selectedApp.value;
-        this.keyType = this.props.keyType;
-        this.handleShowToken = this.handleShowToken.bind(this);
-        this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
-        this.handleTextChange = this.handleTextChange.bind(this);
-        this.handleUpdateToken = this.handleUpdateToken.bind(this);
+        this.handleOnChange = this.handleOnChange.bind(this);
     }
 
     /**
      * Fetch Application object by ID coming from URL path params and fetch related keys to display
      */
     componentDidMount() {
-        const promiseApp = Application.get(this.appId);
+        const { selectedApp } = this.props;
+        let appId;
+
+        if (selectedApp) {
+            appId = selectedApp.appId || selectedApp.value;
+        }
+
+        const promiseApp = Application.get(appId);
+
         promiseApp.then((application) => {
             application.getKeys().then(() => this.setState({ application }));
         }).catch((error) => {
@@ -99,13 +100,14 @@ class Tokens extends React.Component {
         });
     }
 
-    handleChangeScopes = (event) => {
-        this.setState({ scopesSelected: event.target.value });
-    };
-
-    handleChangeInput = name => (event) => {
-        this.setState({ [name]: event.target.value });
-    };
+    /**
+     * Handle onChange of validity time and scopes
+     * @memberof Tokens
+     */
+    handleOnChange(event) {
+        const { target } = event;
+        this.setState({ [target.name]: target.value });
+    }
 
     /**
      * Generate an access token for the application instance
@@ -114,109 +116,25 @@ class Tokens extends React.Component {
      * @memberof Tokens
      */
     generateToken() {
+        const { keyType } = this.props;
         const { application, timeout, scopesSelected } = this.state;
-        if (!application) {
-            console.warn('No Application found!');
-            return false;
-        }
-        const promiseTokens = application.generateToken(
-            this.keyType, timeout,
-            scopesSelected,
-        );
-        return promiseTokens;
-    }
-
-    handleUpdateToken() {
-        const { application } = this.state;
-        const keys = application.keys.get(this.keyType);
-
-        application.updateKeys(
-            keys.tokenType, this.keyType, keys.supportedGrantTypes, keys.callbackUrl, keys.consumerKey,
-            keys.consumerSecret,
-        )
-            .then(() => this.setState({ application })).catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
-    /**
-     * Because application access tokens are not coming with /keys or /application API calls,
-     * Fetch access token value upon user request
-     * @returns {promise} If no application object found in state object
-     */
-    handleShowToken() {
-        const { application } = this.state;
 
         if (!application) {
             console.warn('No Application found!');
             return false;
         }
-        return application.generateToken(this.keyType);
-        // promised_tokens.then((token) => this.setState({ showAT: true }))
+        return application.generateToken(keyType, timeout, scopesSelected);
     }
-
-    handleTextChange(event) {
-        const { application } = this.state;
-        const { currentTarget } = event;
-        const keys = application.keys.get(this.keyType) ||
-            {
-                supportedGrantTypes:
-                    ['client_credentials'],
-                keyType: this.keyType,
-            };
-
-        keys.callbackUrl = currentTarget.value;
-        application.keys.set(this.keyType, keys);
-        this.setState({ application });
-    }
-
-    handleCheckboxChange(event) {
-        const { application } = this.state;
-        const { currentTarget } = event;
-        const keys = application.keys.get(this.keyType) ||
-            {
-                supportedGrantTypes:
-                    ['client_credentials'],
-                keyType: this.keyType,
-            };
-        let index;
-
-        if (currentTarget.checked) {
-            keys.supportedGrantTypes.push(currentTarget.id);
-        } else {
-            index = keys.supportedGrantTypes.indexOf(currentTarget.id);
-            keys.supportedGrantTypes.splice(index, 1);
-        }
-        application.keys.set(this.keyType, keys);
-        // update the state with the new array of options
-        this.setState({ application });
-    }
-
-    handleShowCS = () => {
-        this.setState({ showCS: !this.state.showCS });
-    };
-
-    /**
-     * Avoid conflict with `onClick`
-     * @param event
-     */
-    handleMouseDownGeneric = (event) => {
-        event.preventDefault();
-    };
 
     render() {
-        const { notFound } = this.state;
+        const {
+            notFound, application, timeout, scopesSelected,
+        } = this.state;
 
         if (notFound) {
             return <ResourceNotFound />;
         }
-        if (!this.state.application) {
+        if (!application) {
             return <Loading />;
         }
 
@@ -235,9 +153,9 @@ class Tokens extends React.Component {
                             'after generation. Set this to a negative value to ensure that the token never expires. '}
                         fullWidth
                         name='timeout'
-                        onChange={this.handleChangeInput('timeout')}
+                        onChange={e => this.handleOnChange(e)}
                         placeholder='Enter time in milliseconds'
-                        value={this.state.timeout}
+                        value={timeout}
                         autoFocus
                         className={classes.inputText}
                     />
@@ -245,9 +163,10 @@ class Tokens extends React.Component {
                 <FormControl margin='normal' className={classes.FormControlOdd}>
                     <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>Scopes</InputLabel>
                     <Select
+                        name='scopesSelected'
                         multiple
-                        value={this.state.scopesSelected}
-                        onChange={this.handleChangeScopes}
+                        value={scopesSelected}
+                        onChange={e => this.handleOnChange(e)}
                         input={<Input id='select-multiple-chip' />}
                         renderValue={selected => (
                             <div className={classes.chips}>
