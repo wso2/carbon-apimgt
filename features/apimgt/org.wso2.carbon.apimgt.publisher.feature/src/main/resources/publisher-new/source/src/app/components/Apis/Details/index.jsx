@@ -27,6 +27,7 @@ import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 // import CommentsIcon from '@material-ui/icons/CommentRounded';
 import BusinessIcon from '@material-ui/icons/Business';
+import CodeIcon from '@material-ui/icons/Code';
 // import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
@@ -51,6 +52,10 @@ import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';
 import Security from './Security';
+import APIDefinition from './APIDefinition/APIDefinition';
+import CustomIcon from '../../Shared/CustomIcon';
+import LeftMenuItem from '../../Shared/LeftMenuItem';
+import { PageNotFound } from '../../Base/Errors/index';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
@@ -298,22 +303,28 @@ class Details extends Component {
                             Icon={<ConfigurationIcon />}
                         />
                         <LeftMenuItem
-                            text='lifecycle'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<LifeCycleIcon />}
-                        />
-                        <LeftMenuItem
                             text='endpoints'
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<EndpointIcon />}
                         />
                         <LeftMenuItem
+                            text='api definition'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<CodeIcon />}
+                        />
+                        <LeftMenuItem
                             text='resources'
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<ResourcesIcon />}
+                        />
+                        <LeftMenuItem
+                            text='lifecycle'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<LifeCycleIcon />}
                         />
                         {/* TODO: uncomment when component run without errors */}
                         {/* <LeftMenuItem
@@ -366,6 +377,10 @@ class Details extends Component {
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route path={Details.subPaths.OVERVIEW} component={() => <Overview />} />
+                                <Route
+                                    path='/apis/:api_uuid/api definition'
+                                    component={() => <APIDefinition api={api} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}

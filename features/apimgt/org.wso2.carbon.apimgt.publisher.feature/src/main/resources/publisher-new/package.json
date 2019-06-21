@@ -57,7 +57,9 @@
         "react-toastify": "^1.7.0",
         "swagger-client": "3.4.8",
         "typeface-roboto": "0.0.35",
-        "url-loader": "^0.5.9"
+        "url-loader": "^0.5.9",
+        "js-yaml": "^3.13.1",
+        "swagger-editor": "^3.6.30"
     },
     "devDependencies": {
         "@babel/core": "^7.4.4",
