@@ -27,32 +27,19 @@ import org.wso2.carbon.apimgt.micro.gateway.common.OnPremiseGatewayInitListener;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-/**
- * @scr.component name="onpremise.api.gateway.common.component" immediate="true"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- * @scr.reference name="user.realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- * @scr.reference name="onPremiseInitObserver"
- * interface="org.wso2.carbon.apimgt.micro.gateway.common.OnPremiseGatewayInitListener"
- * cardinality="0..n" policy="dynamic"  bind="addGatewayInitListener" unbind="removeGatewayInitListener"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
- * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService
- */
+@Component(
+         name = "onpremise.api.gateway.common.component", 
+         immediate = true)
 public class GatewayCommonComponent {
 
     private static final Log log = LogFactory.getLog(GatewayCommonComponent.class);
 
+    @Activate
     @Activate
     protected void activate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
@@ -60,6 +47,7 @@ public class GatewayCommonComponent {
         }
     }
 
+    @Deactivate
     @Deactivate
     protected void deactivate(ComponentContext ctx) {
     }
@@ -69,6 +57,12 @@ public class GatewayCommonComponent {
      *
      * @param service API Manager Configuration Service
      */
+    @Reference(
+             name = "api.manager.config.service", 
+             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
         if (log.isDebugEnabled()) {
             log.debug("API manager configuration service bound to Gateway Common component");
@@ -93,6 +87,12 @@ public class GatewayCommonComponent {
      *
      * @param  realmService Realm Service
      */
+    @Reference(
+             name = "user.realm.service", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (realmService != null && log.isDebugEnabled()) {
             log.debug("Realm service initialized");
@@ -114,6 +114,12 @@ public class GatewayCommonComponent {
      *
      * @param configCtx configuration context service
      */
+    @Reference(
+             name = "config.context.service", 
+             service = org.wso2.carbon.utils.ConfigurationContextService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService configCtx) {
         ServiceReferenceHolder.getInstance().setConfigContextService(configCtx);
     }
@@ -132,6 +138,12 @@ public class GatewayCommonComponent {
      *
      * @param listener micro gateway initialization listener
      */
+    @Reference(
+             name = "onPremiseInitObserver", 
+             service = org.wso2.carbon.apimgt.micro.gateway.common.OnPremiseGatewayInitListener.class, 
+             cardinality = ReferenceCardinality.MULTIPLE, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "removeGatewayInitListener")
     protected void addGatewayInitListener(OnPremiseGatewayInitListener listener) {
         synchronized (GatewayCommonComponent.class) {
             ServiceReferenceHolder.getInstance().getListeners().add(listener);
@@ -160,6 +172,12 @@ public class GatewayCommonComponent {
      *
      * @param registryService service to get tenant data.
      */
+    @Reference(
+             name = "registry.service", 
+             service = org.wso2.carbon.registry.core.service.RegistryService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "null")
     protected void setRegistryService(RegistryService registryService) {
         ServiceReferenceHolder.getInstance().setRegistryService(registryService);
     }
@@ -173,3 +191,4 @@ public class GatewayCommonComponent {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
     }
 }
+
