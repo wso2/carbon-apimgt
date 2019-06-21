@@ -4873,6 +4873,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
+                //Check if there's a policy exists before adding the new policy
+                Policy policyIfExists = getAPIPolicy(username, apiPolicy.getPolicyName());
+                if (policyIfExists != null) {
+                    handleException("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists");
+                }
                 apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
                 apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
@@ -4883,6 +4888,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+                //Check if there's a policy exists before adding the new policy
+                Policy policyIfExists = getApplicationPolicy(username, appPolicy.getPolicyName());
+                if (policyIfExists != null) {
+                    handleException("Application Policy with name " + appPolicy.getPolicyName() + " already exists");
+                }
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
                 String policyFile = appPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + appPolicy.getPolicyName();
                 executionFlows.put(policyFile, policyString);
@@ -4890,6 +4900,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policyLevel = PolicyConstants.POLICY_LEVEL_APP;
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
+                //Check if there's a policy exists before adding the new policy
+                Policy policyIfExists = getSubscriptionPolicy(username, subPolicy.getPolicyName());
+                if (policyIfExists != null) {
+                    handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
+                }
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
                 String policyFile = subPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + subPolicy.getPolicyName();
                 executionFlows.put(policyFile, policyString);
