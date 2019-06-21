@@ -233,7 +233,7 @@ class TokenManager extends React.Component {
 }
 
 TokenManager.propTypes = {
-    classes: PropTypes.object,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(TokenManager);
