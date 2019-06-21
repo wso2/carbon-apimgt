@@ -140,9 +140,8 @@ public enum StatusEnum {
   }
 
   
-  @ApiModelProperty(required = true, value = "The unique identifier of the API.")
+  @ApiModelProperty(value = "The unique identifier of the API.")
   @JsonProperty("apiId")
-  @NotNull
   public String getApiId() {
     return apiId;
   }

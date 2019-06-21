@@ -988,7 +988,6 @@ public class ApiMgtDAO {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PRODUCT_PROVIDER")),
                             resultSet.getString("API_PRODUCT_NAME"), resultSet.getString("API_PRODUCT_VERSION"));
-                    apiProductIdentifier.setUUID(resultSet.getString("PRODUCT_UUID"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_PRODUCT_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 }
@@ -1041,7 +1040,6 @@ public class ApiMgtDAO {
                     APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PRODUCT_PROVIDER")),
                             resultSet.getString("API_PRODUCT_NAME"), resultSet.getString("API_PRODUCT_VERSION"));
-                    apiProductIdentifier.setUUID(resultSet.getString("PRODUCT_UUID"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_PRODUCT_ID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 }
