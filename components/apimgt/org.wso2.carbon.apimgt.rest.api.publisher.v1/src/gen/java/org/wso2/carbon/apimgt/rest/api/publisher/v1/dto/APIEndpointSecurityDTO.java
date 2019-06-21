@@ -48,7 +48,7 @@ public enum TypeEnum {
 }
 
     private TypeEnum type = null;
-    private String targetSPN = null;
+    private String targetSpn = null;
     private String username = null;
     private String password = null;
 
@@ -72,19 +72,19 @@ public enum TypeEnum {
 
   /**
    **/
-  public APIEndpointSecurityDTO targetSPN(String targetSPN) {
-    this.targetSPN = targetSPN;
+  public APIEndpointSecurityDTO targetSpn(String targetSpn) {
+    this.targetSpn = targetSpn;
     return this;
   }
 
   
   @ApiModelProperty(example = "HTTP/idp.example.com@EXAMPLE.COM", value = "")
-  @JsonProperty("targetSPN")
-  public String getTargetSPN() {
-    return targetSPN;
+  @JsonProperty("targetSpn")
+  public String getTargetSpn() {
+    return targetSpn;
   }
-  public void setTargetSPN(String targetSPN) {
-    this.targetSPN = targetSPN;
+  public void setTargetSpn(String targetSpn) {
+    this.targetSpn = targetSpn;
   }
 
   /**
@@ -132,14 +132,14 @@ public enum TypeEnum {
     }
     APIEndpointSecurityDTO apIEndpointSecurity = (APIEndpointSecurityDTO) o;
     return Objects.equals(type, apIEndpointSecurity.type) &&
-        Objects.equals(targetSPN, apIEndpointSecurity.targetSPN) &&
+        Objects.equals(targetSpn, apIEndpointSecurity.targetSpn) &&
         Objects.equals(username, apIEndpointSecurity.username) &&
         Objects.equals(password, apIEndpointSecurity.password);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, targetSPN, username, password);
+    return Objects.hash(type, targetSpn, username, password);
   }
 
   @Override
@@ -148,7 +148,7 @@ public enum TypeEnum {
     sb.append("class APIEndpointSecurityDTO {\n");
     
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    targetSPN: ").append(toIndentedString(targetSPN)).append("\n");
+    sb.append("    targetSpn: ").append(toIndentedString(targetSpn)).append("\n");
     sb.append("    username: ").append(toIndentedString(username)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("}");

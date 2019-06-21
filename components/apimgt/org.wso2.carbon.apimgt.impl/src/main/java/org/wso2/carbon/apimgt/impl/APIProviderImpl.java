@@ -1981,9 +1981,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
 
 
-        if( api.isEndpointKerberosEnable() && api.getEndpointTargetSPN() !=null) {
+        if( api.isEndpointKerberosEnable() && api.getEndpointTargetSpn() !=null) {
             Map<String, String> kuberosProperties = new HashMap<String, String>();
-            kuberosProperties.put("targetSPN", api.getEndpointTargetSPN());
+            kuberosProperties.put("targetSpn", api.getEndpointTargetSpn());
             vtb.addHandler("org.wso2.apim.kerberos.handler.CustomKerberosDelegationHandler", Collections.EMPTY_MAP);
         }
 

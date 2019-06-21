@@ -5694,7 +5694,7 @@ definitions:
           - basic
           - digest
           - kerberos
-      targetSPN:
+      targetSpn:
         type: string
         example: HTTP/idp.example.com@EXAMPLE.COM
       username:

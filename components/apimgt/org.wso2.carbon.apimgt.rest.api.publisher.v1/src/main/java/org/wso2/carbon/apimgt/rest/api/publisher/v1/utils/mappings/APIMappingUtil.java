@@ -489,7 +489,7 @@ public class APIMappingUtil {
             api.setEndpointSecured(true);
             if(APIEndpointSecurityDTO.TypeEnum.KERBEROS.equals(securityDTO.getType())){
                 api.setEndpointKerberosEnable(true);
-                api.setEndpointTargetSPN(securityDTO.getTargetSPN());
+                api.setEndpointTargetSpn(securityDTO.getTargetSpn());
 
             }
             api.setEndpointUTUsername(securityDTO.getUsername());

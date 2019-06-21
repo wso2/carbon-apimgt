@@ -91,7 +91,7 @@ public class API implements Serializable {
     private String endpointUTPassword;
 
     private boolean endpointKerberosEnable= false;
-    private String  endpointTargetSPN;
+    private String  endpointTargetSpn;
 
     private String transports;
     private String inSequence;
@@ -612,15 +612,15 @@ public class API implements Serializable {
         this.apiResourcePatternsChanged = apiResourcePatternsChanged;
     }
     /**
-     * @return the endpointTargetSPN
+     * @return the endpointTargetSpn
      */
-    public String getEndpointTargetSPN() {
-        return endpointTargetSPN;
+    public String getEndpointTargetSpn() {
+        return endpointTargetSpn;
     }
     /**
-     * @param endpointTargetSPN the endpointTargetSPN to set
+     * @param endpointTargetSpn the endpointTargetSpn to set
      */
-    public void setEndpointTargetSPN(String endpointTargetSPN) { this.endpointTargetSPN = endpointTargetSPN; }
+    public void setEndpointTargetSpn(String endpointTargetSpn) { this.endpointTargetSpn = endpointTargetSpn; }
 
     /**
      * @return the endpointUTUsername
