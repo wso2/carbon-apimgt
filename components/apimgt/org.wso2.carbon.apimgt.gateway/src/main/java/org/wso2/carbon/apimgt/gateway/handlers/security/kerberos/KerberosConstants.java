@@ -19,7 +19,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.security.kerberosHandler;
+package org.wso2.carbon.apimgt.gateway.handlers.security.kerberos;
 
 /**
  * Constants for IWA federated authenticator application

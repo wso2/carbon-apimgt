@@ -19,7 +19,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.security.kerberosHandler.utils;
+package org.wso2.carbon.apimgt.gateway.handlers.security.kerberos.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

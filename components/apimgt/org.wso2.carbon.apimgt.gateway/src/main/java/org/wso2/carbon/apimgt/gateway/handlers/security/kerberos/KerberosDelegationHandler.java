@@ -19,7 +19,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.security.kerberosHandler;
+package org.wso2.carbon.apimgt.gateway.handlers.security.kerberos;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,8 +28,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.AbstractHandler;
-import org.wso2.carbon.apimgt.gateway.handlers.security.kerberosHandler.utils.KerberosDelegator;
-import org.wso2.carbon.apimgt.gateway.handlers.security.kerberosHandler.utils.User;
+import org.wso2.carbon.apimgt.gateway.handlers.security.kerberos.utils.KerberosDelegator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.kerberos.utils.User;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.nio.file.Paths;
@@ -41,14 +41,14 @@ public class KerberosDelegationHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(KerberosDelegationHandler.class);
     private static final boolean IS_DEBUG_ENABLED = Boolean.parseBoolean(System.getProperty("debug", "false"));
 
-    private String targetSPN;
+    private String targetSpn;
 
-    public String getTargetSPN() {
-        return targetSPN;
+    public String getTargetSpn() {
+        return targetSpn;
     }
 
-    public void setTargetSPN(String targetSPN) {
-        this.targetSPN = targetSPN;
+    public void setTargetSpn(String targetSpn) {
+        this.targetSpn = targetSpn;
     }
 
     public boolean handleRequest(MessageContext messageContext) {
@@ -111,10 +111,10 @@ public class KerberosDelegationHandler extends AbstractHandler {
         String clientKerberosTicket = getKerberosHeader(headers);
         if (log.isDebugEnabled()) {
             log.info("Acquired Client's Kerberos ticket: " + clientKerberosTicket);
-            log.info("Initiating constrained delegation for SPN: " + targetSPN);
+            log.info("Initiating constrained delegation for SPN: " + targetSpn);
         }
         byte[] delegatedTicket = kerberosDelegator
-                .delegate(Base64.getDecoder().decode(clientKerberosTicket.split(" ")[1]), targetSPN);
+                .delegate(Base64.getDecoder().decode(clientKerberosTicket.split(" ")[1]), targetSpn);
         String delegatedKerberosTicket = Base64.getEncoder().encodeToString(delegatedTicket);
         if (log.isDebugEnabled()) {
             log.info("Acquired delegated Kerberos ticket: " + delegatedKerberosTicket);
