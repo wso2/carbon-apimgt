@@ -25,6 +25,8 @@ import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint';
 import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 import APICreateTopMenu from './Components/APICreateTopMenu';
+import { PageNotFound } from 'AppComponents/Base/Errors/index';
+
 
 const styles = {
     content: {
@@ -38,9 +40,10 @@ function ApiCreate(props) {
         <main className={classes.content}>
             <APICreateTopMenu />
             <Switch>
-                <Route path='/apis/create/rest' component={ApiCreateEndpoint} />
-                <Route path='/apis/create/swagger' component={ApiCreateSwagger} />
-                <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
+                <Route path="/apis/create/rest" component={ApiCreateEndpoint} />
+                <Route path="/apis/create/swagger" component={ApiCreateSwagger} />
+                <Route path="/apis/create/wsdl" component={ApiCreateWSDL} />
+                <Route component={PageNotFound} />
             </Switch>
         </main>
     );
