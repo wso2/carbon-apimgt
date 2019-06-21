@@ -1,0 +1,7 @@
+<%
+jagg.initializer("item-manage-security", {
+
+   preInitialize:function () {
+    }
+});
+%>

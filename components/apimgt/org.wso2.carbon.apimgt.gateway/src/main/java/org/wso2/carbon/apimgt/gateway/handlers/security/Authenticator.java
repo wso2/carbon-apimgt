@@ -50,10 +50,9 @@ public interface Authenticator {
      * can access user information easily.
      *
      * @param synCtx The message to be authenticated
-     * @return true if the authentication is successful (never returns false)
-     * @throws APISecurityException If an authentication failure or some other error occurs
+     * @return an AuthenticationResponse object which contains the authentication status
      */
-    boolean authenticate(MessageContext synCtx) throws APISecurityException;
+    AuthenticationResponse authenticate(MessageContext synCtx);
 
     /**
      * Returns a string representation of the authentication challenge imposed by this
@@ -65,5 +64,6 @@ public interface Authenticator {
     String getChallengeString();
     
     String getRequestOrigin();
-    
+
+    int getPriority();
 }

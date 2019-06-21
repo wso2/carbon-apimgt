@@ -494,7 +494,7 @@
     "Subscription Tier": "Nivel de suscripción",
     "Subscription Tiers": "Niveles de suscripción",
     "Subscription is pending approval": "La suscripción está pendiente de aprobación.",
-    "Subscription tiers are not applicable for this API, as it is only protected with mutual SSL." : "Los niveles de suscripción no son aplicables para esta API, ya que solo está protegida con SSL mutuo.",
+    "Subscription tiers are not applicable for this API, as it is not protected with OAuth2." : "Los niveles de suscripción no son aplicables para esta API, ya que no está protegido con OAuth2.",
     "Subscriptions Created Over Time": "Suscripciones creadas en el tiempo",
     "Subscriptions": "Suscripciones",
     "Success!": "¡Éxito!",

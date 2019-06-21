@@ -1900,23 +1900,62 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         if (api.getApiSecurity() != null) {
             apiSecurity = api.getApiSecurity();
+            ArrayList<String> securityLevels = new ArrayList<>();
             String[] apiSecurityLevels = apiSecurity.split(",");
             boolean isOauth2 = false;
             boolean isMutualSSL = false;
+            boolean isBasicAuth = false;
+            boolean isMutualSSLMandatory = false;
+            boolean isOauthBasicAuthMandatory = false;
+
+            boolean securitySchemeFound = false;
+
             for (String apiSecurityLevel : apiSecurityLevels) {
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
                     isOauth2 = true;
+                    securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+                    securitySchemeFound = true;
                 }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                     isMutualSSL = true;
+                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
+                    securitySchemeFound = true;
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
+                    isBasicAuth = true;
+                    securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
+                    securitySchemeFound = true;
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
+                    isMutualSSLMandatory = true;
+                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
+                    isOauthBasicAuthMandatory = true;
+                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
                 }
             }
-            apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
-            if (isOauth2 && isMutualSSL) {
-                apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2 + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (isMutualSSL) {
-                apiSecurity = APIConstants.API_SECURITY_MUTUAL_SSL;
+
+            // If no security schema found, set OAuth2 as default
+            if (!securitySchemeFound) {
+                isOauth2 = true;
+                securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
             }
+            // If Only OAuth2/Basic-Auth specified, set it as mandatory
+            if (!isMutualSSL && !isOauthBasicAuthMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+            }
+            // If Only Mutual SSL specified, set it as mandatory
+            if (!isBasicAuth && !isOauth2 && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+            }
+            // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
+            // set OAuth2/Basic-Auth as mandatory
+            if ((isOauth2 || isBasicAuth) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+            }
+
+            apiSecurity = String.join(",", securityLevels);
         }
         if (log.isDebugEnabled()) {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
@@ -2076,6 +2115,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
                         APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
             }
+            authProperties.put(APIConstants.API_UUID, api.getUUID());
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
             Map<String, String> properties = new HashMap<String, String>();

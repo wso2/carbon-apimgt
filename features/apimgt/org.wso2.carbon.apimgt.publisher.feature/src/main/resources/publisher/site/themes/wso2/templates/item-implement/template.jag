@@ -45,9 +45,10 @@
     var manage_w_link = jagg.url('/manage?'+apiUrlId);
 
     var manage_wlabel = "";
-    // When only mutual ssl is selected tiers need not be selected.
-    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") || api.availableTiers != "" || api
-        .availableSubscriptionPolicy != "")) {
+    // When only mutual ssl or basic auth is selected tiers need not be selected.
+    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") ||
+        (api.apisecurity_oauth2 == "" && api.apisecurity_basic_auth != "") || api.availableTiers != ""
+        || api.availableSubscriptionPolicy != "")) {
         manage_wlabel = "completed";
     } else {
         var manage_w_link = '#';

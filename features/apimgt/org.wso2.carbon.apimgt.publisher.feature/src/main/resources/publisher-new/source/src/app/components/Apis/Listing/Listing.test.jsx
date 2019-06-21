@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -28,34 +29,67 @@ import CardView from './CardView/CardView';
 import TableView from './TableView/TableView';
 import TopMenu from './components/TopMenu';
 import Listing from './Listing';
-import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { mountWithIntl, shallowWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import getMockedModel from 'AppTests/Utils/MockAPIModel.js';
 import { unwrap } from '@material-ui/core/test-utils';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-
 import Configurations from 'Config';
+import { MemoryRouter } from 'react-router-dom';
+import AuthManager from 'AppData/AuthManager';
 
-jest.mock('AppData/api.js');
+
+jest.mock('AppData/api.js', () => {
+    return function () {
+        return {
+            getAPIThumbnail: () => {
+                return Promise.resolve({});
+            },
+        };
+    };
+});
+
+jest.mock('AppData/AuthManager');
+const hasScopes = jest.fn();
 const mockedAll = jest.fn();
+
+function flushPromises() {
+    return new Promise(resolve => setImmediate(resolve));
+}
 
 describe('APIs <Listing/> component tests', () => {
     beforeAll(() => {
         API.all = mockedAll.bind(API);
+        AuthManager.hasScopes = hasScopes.bind(AuthManager);
     });
 
     afterEach(() => {
-        mockedAll.mockReset();
+        // mockedAll.mockReset();
     });
 
-    test('should shallow render the listing page', () => {
+    test('should shallow render the listing page', async () => {
         const { light } = Configurations.themes;
         const ThemedListing = (
             <MuiThemeProvider theme={createMuiTheme(light)}>
-                <Listing />
+                <MemoryRouter>
+                    <Listing />
+                </MemoryRouter>
             </MuiThemeProvider>
         );
-        mockedAll.mockReturnValue(Promise.resolve({ obj: { list: [] } }));
-        const wrapper = mountWithIntl(ThemedListing);
+        const mockedModel = await getMockedModel('APIList');
+        mockedAll.mockReturnValue(Promise.resolve({ obj: mockedModel }));
+        hasScopes.mockReturnValue(Promise.resolve(true));
+
+        let wrapper = await mountWithIntl(ThemedListing);
+        wrapper = await wrapper.update();
+        await flushPromises();
+        // Calling children() because Listing component has exported with withstyle wrapper
+        expect(wrapper.find(Listing).children().state().apis).toEqual(mockedModel);
+
+        expect(wrapper.contains(mockedModel.list[0].name)).toBeTruthy();
+        expect(wrapper.contains(mockedModel.list[0].version)).toBeTruthy();
+        expect(wrapper.contains(mockedModel.list[0].context)).toBeTruthy();
+
         expect(wrapper.contains('Create an API')).toBeTruthy();
     });
 

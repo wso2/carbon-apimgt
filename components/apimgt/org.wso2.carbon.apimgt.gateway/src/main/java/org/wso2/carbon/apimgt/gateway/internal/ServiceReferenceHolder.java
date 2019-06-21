@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 
@@ -38,6 +39,7 @@ public class ServiceReferenceHolder {
     private ConfigurationContext axis2ConfigurationContext;
     private TracingService tracingService;
     private ServerConfigurationService serverConfigurationService;
+    private RealmService realmService;
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
@@ -120,4 +122,11 @@ public class ServiceReferenceHolder {
         this.serverConfigurationService = serverConfigurationService;
     }
 
+    public RealmService getRealmService() {
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
+    }
 }
