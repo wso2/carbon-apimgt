@@ -5,7 +5,21 @@ We run mainly two types of tests
 -   Unit tests
 -   Integration test
 
+# How to run
 
+Before running either unit tests or integration test, Go to the application root directory where `package.json` file is located (i:e `<carbon-apimgt-root>/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher-new/`) and run `npm install` command to download all the dependencies.
+
+## Unit tests
+
+To run the unit tests, simply execute the `npm test` command in the application root directory (where the package.json file located). `npm test` is an alias to `jest` command defined in `package.json`.
+
+## Integration tests
+
+Before running the integration tests, Make sure you have started relevent WSO2 API-Manager server in it's default ports(managment port`9443`) locally.Then, to run integration tests, Execute the command `npm run test:integration` in the application root directory.
+
+## Code coverage
+
+Run the command `npm run test:coverage` to generate the code coverage for unit tests.Once generated, The coverage reports will be available in `<APP_ROOT>/coverage/` directory.
 
 # Unit tests
 
