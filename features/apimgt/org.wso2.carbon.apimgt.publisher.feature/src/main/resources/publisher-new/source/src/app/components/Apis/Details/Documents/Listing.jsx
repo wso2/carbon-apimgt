@@ -26,10 +26,14 @@ import API from 'AppData/api.js';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import AddCircle from '@material-ui/icons/AddCircle';
+import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
 import TextEditor from './TextEditor';
+import Edit from './Edit';
+import Delete from './Delete';
+import Download from './Download';
 
 const styles = theme => ({
     root: {
@@ -68,6 +72,14 @@ const styles = theme => ({
     },
     mainTitle: {
         paddingRight: 10,
+    },
+    actionTable: {
+        '& td': {
+            width: 50,
+        },
+        '& td:first-child': {
+            width: 130,
+        },
     },
 });
 function LinkGenerator(props) {
@@ -142,6 +154,7 @@ class Listing extends React.Component {
                 },
             },
             'sourceType',
+            'type',
             {
                 name: 'action',
                 options: {
@@ -151,9 +164,71 @@ class Listing extends React.Component {
                             const docId = tableMeta.rowData[0];
                             const sourceType = tableMeta.rowData[2];
                             if (sourceType === 'MARKDOWN') {
-                                return <MarkdownEditor docName={docName} docId={docId} apiId={this.apiId} />;
+                                return (
+                                    <table className={classes.actionTable}>
+                                        <tr>
+                                            <td>
+                                                <MarkdownEditor docName={docName} docId={docId} apiId={this.apiId} />
+                                            </td>
+                                            <td>
+                                                <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                            </td>
+                                            <td>
+                                                <Delete docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                );
                             } else if (sourceType === 'INLINE') {
-                                return <TextEditor docName={docName} docId={docId} apiId={this.apiId} />;
+                                return (
+                                    <table className={classes.actionTable}>
+                                        <tr>
+                                            <td>
+                                                <TextEditor docName={docName} docId={docId} apiId={this.apiId} />
+                                            </td>
+                                            <td>
+                                                <Edit docName={docName}  docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                            </td>
+                                            <td>
+                                                <Delete docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                );
+                            } else if (sourceType === 'URL') {
+                                return (
+                                    <table className={classes.actionTable}>
+                                        <tr>
+                                            <td>
+                                                <Button>
+                                                    <Icon>open_in_new</Icon> <FormattedMessage id='documents.listing.open' defaultMessage='Open' />
+                                                </Button>   
+                                            </td>
+                                            <td>
+                                                <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                            </td>
+                                            <td>
+                                                <Delete docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                );
+                            } else if (sourceType === 'FILE') {
+                                return (
+                                    <table className={classes.actionTable}>
+                                        <tr>
+                                            <td>
+                                                <Download docId={docId} apiId={this.apiId} />
+                                            </td>
+                                            <td>
+                                                <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                            </td>
+                                            <td>
+                                                <Delete docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                );
                             } else {
                                 return <span />;
                             }

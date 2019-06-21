@@ -108,7 +108,6 @@ function TextEditor(props) {
                 const state = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks, blocksFromHTML.entityMap);
 
                 setEditorState(EditorState.createWithContent(state));
-                // setCode(doc.text);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -125,7 +124,7 @@ function TextEditor(props) {
     return (
         <div>
             <Button onClick={toggleOpen}>
-                <Icon>description</Icon> <FormattedMessage id='documents.text.editor.editor' defaultMessage='Editor' />
+                <Icon>description</Icon> <FormattedMessage id='documents.text.editor.editor' defaultMessage='Edit Content' />
             </Button>
             <Dialog fullScreen open={open} onClose={toggleOpen} TransitionComponent={Transition}>
                 <Paper square className={classes.popupHeader}>
