@@ -16,6 +16,8 @@
  * under the License.
  */
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
+import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Input from '@material-ui/core/Input';
@@ -147,16 +149,26 @@ class Tokens extends React.Component {
                 <FormControl margin='normal' className={classes.FormControl}>
                     <TextField
                         required
-                        label='Access token validity period'
+                        label={<FormattedMessage
+                            id='access.token.validity.period'
+                            defaultMessage='Access token validity period'
+                        />}
                         InputLabelProps={{
                             shrink: true,
                         }}
-                        helperText={'You can set an expiration period to determine the validity period of the token' +
-                        'after generation. Set this to a negative value to ensure that the token never expires. '}
+                        helperText={<FormattedMessage
+                            id='subscription.scopes.description'
+                            defaultMessage={'You can set an expiration period to determine the validity period of ' +
+                            'the token after generation. Set this to a negative value to ensure that the token never' +
+                            ' expires.'}
+                        />}
                         fullWidth
                         name='timeout'
                         onChange={e => this.handleOnChange(e)}
-                        placeholder='Enter time in milliseconds'
+                        placeholder={this.context.intl.formatMessage({
+                            id: 'access.token.validity.period.placeholder',
+                            defaultMessage: 'Enter time in milliseconds',
+                        })}
                         value={timeout}
                         autoFocus
                         className={classes.inputText}
@@ -193,16 +205,23 @@ class Tokens extends React.Component {
                         ))}
                     </Select>
                     <Typography variant='caption'>
-                        When you generate access tokens to APIs protected by scope/s, you can select the scope/s and
-                        then generate the token for it. Scopes enable fine-grained access control to API resources
-                        based on user roles. You define scopes to an API's resources. When a user invokes the API,
-                        his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated
-                        scopes.
+                        <FormattedMessage
+                            id='subscription.scopes.description'
+                            defaultMessage={'When you generate access tokens to APIs protected by scope/s,' +
+                            ' you can select the scope/s and then generate the token for it. Scopes enable ' +
+                            'fine-grained access control to API resources based on user roles. You define scopes to ' +
+                            'an API resource. When a user invokes the API, his/her OAuth 2 bearer token cannot grant ' +
+                            'access to any API resource beyond its associated scopes.'}
+                        />
+
+
                     </Typography>
                 </FormControl>
             </React.Fragment>
         );
     }
 }
-
+Tokens.contextTypes = {
+    intl: PropTypes.object.isRequired,
+};
 export default withStyles(styles)(Tokens);
