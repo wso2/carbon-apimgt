@@ -51,6 +51,7 @@ const styles = theme => ({
         margin: theme.spacing.unit / 4,
     },
 });
+
 const MenuProps = {
     PaperProps: {
         style: {
@@ -59,10 +60,7 @@ const MenuProps = {
         },
     },
 };
-const allScopes = [
-    'device_ipad',
-    'device_mac',
-];
+
 class Tokens extends React.Component {
     constructor(props) {
         super(props);
@@ -70,6 +68,7 @@ class Tokens extends React.Component {
             application: null,
             scopesSelected: [],
             timeout: 3600, // Timeout for token in milliseconds
+            subscriptionScopes: [],
         };
         this.handleOnChange = this.handleOnChange.bind(this);
     }
@@ -88,7 +87,10 @@ class Tokens extends React.Component {
         const promiseApp = Application.get(appId);
 
         promiseApp.then((application) => {
-            application.getKeys().then(() => this.setState({ application }));
+            application.getKeys().then(() => {
+                const subscriptionScopes = application.subscriptionScopes.map((scope) => { return scope.scopeKey; });
+                this.setState({ application, subscriptionScopes });
+            });
         }).catch((error) => {
             if (process.env.NODE_ENV !== 'production') {
                 console.error(error);
@@ -128,7 +130,7 @@ class Tokens extends React.Component {
 
     render() {
         const {
-            notFound, application, timeout, scopesSelected,
+            notFound, application, timeout, scopesSelected, subscriptionScopes,
         } = this.state;
 
         if (notFound) {
@@ -150,7 +152,7 @@ class Tokens extends React.Component {
                             shrink: true,
                         }}
                         helperText={'You can set an expiration period to determine the validity period of the token' +
-                            'after generation. Set this to a negative value to ensure that the token never expires. '}
+                        'after generation. Set this to a negative value to ensure that the token never expires. '}
                         fullWidth
                         name='timeout'
                         onChange={e => this.handleOnChange(e)}
@@ -160,7 +162,11 @@ class Tokens extends React.Component {
                         className={classes.inputText}
                     />
                 </FormControl>
-                <FormControl margin='normal' className={classes.FormControlOdd}>
+                <FormControl
+                    margin='normal'
+                    className={classes.FormControlOdd}
+                    disabled={subscriptionScopes.length === 0}
+                >
                     <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>Scopes</InputLabel>
                     <Select
                         name='scopesSelected'
@@ -177,7 +183,7 @@ class Tokens extends React.Component {
                         )}
                         MenuProps={MenuProps}
                     >
-                        {allScopes.map(scope => (
+                        {subscriptionScopes.map(scope => (
                             <MenuItem
                                 key={scope}
                                 value={scope}
