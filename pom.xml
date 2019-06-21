@@ -4,7 +4,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.4.224-SNAPSHOT</version>
+    <version>6.4.228-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>http://wso2.org</url>
 
@@ -1503,7 +1503,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>6.4.224-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>6.4.228-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <analytics.shared.version>1.0.4</analytics.shared.version>
@@ -1648,7 +1648,7 @@
         <!-- apache pdfbox version -->
         <pdfbox.version>1.8.16</pdfbox.version>
 
-        <event.processor.stub.version>2.1.29</event.processor.stub.version>
+        <event.processor.stub.version>2.1.30</event.processor.stub.version>
         <swagger.codegen.version>2.3.1.wso2v1</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>
@@ -1677,7 +1677,7 @@
         <reflection.version>0.9.11</reflection.version>
         <woodstox-core.version>5.2.1</woodstox-core.version>
         <apache.commons.version>2.6.2</apache.commons.version>
-        <apache.commons.lang3.version>3.8.1</apache.commons.lang3.version>
+        <apache.commons.lang3.version>3.9</apache.commons.lang3.version>
         <io.swagger.codegen.version>2.4.5</io.swagger.codegen.version>
 
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
