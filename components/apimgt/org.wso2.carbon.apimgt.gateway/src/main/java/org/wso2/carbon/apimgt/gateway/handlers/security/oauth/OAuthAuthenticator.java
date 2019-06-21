@@ -27,6 +27,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -57,6 +58,7 @@ public class OAuthAuthenticator implements Authenticator {
     private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
 
     protected APIKeyValidator keyValidator;
+    protected JWTValidator jwtValidator;
 
     private String securityHeader = HttpHeaders.AUTHORIZATION;
     private String defaultAPIHeader="WSO2_AM_API_DEFAULT_VERSION";
@@ -82,6 +84,7 @@ public class OAuthAuthenticator implements Authenticator {
 
     public void init(SynapseEnvironment env) {
         this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
+        this.jwtValidator = new JWTValidator();
         initOAuthParams();
     }
 
@@ -242,6 +245,23 @@ public class OAuthAuthenticator implements Authenticator {
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
         } else {
+            //Start JWT token validation
+            if (StringUtils.countMatches(apiKey, ".") == 2) { // JWT token contains two dots
+                try {
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey);
+                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("User is authorized using JWT token to access the resource.");
+                    }
+                    return new AuthenticationResponse(true, isMandatory, false,
+                            0, null);
+                } catch (APISecurityException ex) {
+                    return new AuthenticationResponse(false, isMandatory, true,
+                            ex.getErrorCode(), ex.getMessage());
+                }
+            }
+
             String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
             if(log.isDebugEnabled()){
                 log.debug("Matching resource is: ".concat(matchingResource));
