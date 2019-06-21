@@ -28,14 +28,14 @@ import Icon from "@material-ui/core/Icon";
 import Paper from "@material-ui/core/Paper";
 import {FormattedMessage, injectIntl} from "react-intl";
 import ResourceNotFound from "../../../Base/Errors/ResourceNotFound";
-import Api from "AppData/api";
 import {Progress} from "AppComponents/Shared";
 import Typography from "@material-ui/core/Typography";
 import Slide from "@material-ui/core/Slide";
 import MonacoEditor from "react-monaco-editor";
 import SwaggerEditorDrawer from "./SwaggerEditorDrawer";
 import yaml from "js-yaml";
-import Alert from 'AppComponents/Shared/Alert';
+import Alert from "AppComponents/Shared/Alert";
+import Dropzone from "react-dropzone";
 
 const styles = theme => ({
     titleWrapper: {
@@ -49,6 +49,13 @@ const styles = theme => ({
     },
     buttonIcon: {
         marginRight: 10,
+    },
+    dropzone: {
+        border: 'none',
+        cursor: 'pointer',
+        padding: `${theme.spacing.unit * 2}px 0px`,
+        position: 'relative',
+        textAlign: 'center',
     },
 });
 class APIDefinition extends React.Component {
@@ -66,6 +73,7 @@ class APIDefinition extends React.Component {
         this.updateSwaggerContent = this.updateSwaggerContent.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
         this.hasJsonStructure = this.hasJsonStructure.bind(this);
+        this.onDrop = this.onDrop.bind(this);
     }
 
     componentDidMount() {
@@ -87,12 +95,6 @@ class APIDefinition extends React.Component {
             });
     }
 
-    updateSwaggerContent() {
-        const updatedContent = window.localStorage.getItem('swagger-editor-content');
-        this.closeEditor();
-        this.setState({swagger: updatedContent});
-    }
-
     openEditor() {
         window.localStorage.setItem('swagger-editor-content', this.state.swagger);
         this.setState({openEditor: true});
@@ -106,6 +108,7 @@ class APIDefinition extends React.Component {
     Transition(props) {
         return <Slide direction='up' {...props} />;
     }
+
     updateSwaggerContent() {
         const updatedContent = window.localStorage.getItem('swagger-editor-content');
         this.setState({swagger: updatedContent}, () => this.updateSwaggerDefinition());
@@ -127,7 +130,7 @@ class APIDefinition extends React.Component {
         const promise = this.api.updateSwagger(parsedContent);
         promise.then(
             (response) => {
-                Alert.success('API Deninition Updated Successfully');
+                Alert.success('API Definition Updated Successfully');
                 this.closeEditor();
             }
         ).catch((err) => {
@@ -148,8 +151,22 @@ class APIDefinition extends React.Component {
         }
     }
 
-    render() {
+    onDrop(file) {
+        if (file[0]) {
+            let reader = new FileReader();
+            reader.onload = (e) => {
+                let content = e.target.result;
+                this.setState({swagger: content}, () => {
+                    this.updateSwaggerDefinition()
+                });
+            }
+            reader.readAsText(file[0]);
+        } else {
+            Alert.error('Unsupported file type.')
+        }
+    }
 
+    render() {
         const {swagger} = this.state;
         const {classes} = this.props;
 
@@ -180,10 +197,18 @@ class APIDefinition extends React.Component {
                         <EditRounded className={classes.buttonIcon}/>
                         Edit
                     </Button>
-                    <Button size='small' className={classes.button}>
-                        <CloudUploadRounded className={classes.buttonIcon}/>
-                        Import API Definition
-                    </Button>
+                    <Dropzone
+                        multiple={false}
+                        className={classes.dropzone}
+                        accept={['application/json', 'application/x-yaml']}
+                        onDrop={(dropFile) => {
+                            this.onDrop(dropFile);
+                        }}>
+                        <Button size='small' className={classes.button}>
+                            <CloudUploadRounded className={classes.buttonIcon}/>
+                            Import API Definition
+                        </Button>
+                    </Dropzone>
                 </div>
                 <div>
                     <MonacoEditor
@@ -200,6 +225,7 @@ class APIDefinition extends React.Component {
                         <IconButton color='inherit' onClick={this.closeEditor} aria-label='Close'>
                             <Icon>close</Icon>
                         </IconButton>
+
                         <Button className={classes.button} variant='contained' color='primary'
                                 onClick={this.updateSwaggerContent}>
                             <FormattedMessage
@@ -211,7 +237,8 @@ class APIDefinition extends React.Component {
                     <SwaggerEditorDrawer />
                 </Dialog>
             </div>
-        );
+        )
+            ;
     }
 }
 APIDefinition.propTypes = {
