@@ -378,7 +378,7 @@ class Details extends Component {
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route path={Details.subPaths.OVERVIEW} component={() => <Overview />} />
                                 <Route
-                                    path='/apis/:api_uuid/api definition'
+                                    path={Details.subPaths.API_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
@@ -417,6 +417,7 @@ class Details extends Component {
 Details.subPaths = {
     BASE: '/apis/:api_uuid',
     OVERVIEW: '/apis/:api_uuid/overview',
+    API_DEFINITION: '/apis/:api_uuid/api definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
