@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
@@ -33,14 +33,17 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.util.Map;
 
 public class SearchResultMappingUtil {
+
     private static final Log log = LogFactory.getLog(SearchResultMappingUtil.class);
 
     /**
      * Get API result representation for content search
+     *
      * @param api API
      * @return APISearchResultDTO
      */
     public static APISearchResultDTO fromAPIToAPIResultDTO(API api) {
+
         APISearchResultDTO apiResultDTO = new APISearchResultDTO();
         apiResultDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
@@ -61,10 +64,12 @@ public class SearchResultMappingUtil {
 
     /**
      * Get Document result representation for content search
+     *
      * @param document Api Document
      * @return DocumentSearchResultDTO
      */
     public static DocumentSearchResultDTO fromDocumentationToDocumentResultDTO(Documentation document, API api) {
+
         DocumentSearchResultDTO docResultDTO = new DocumentSearchResultDTO();
         docResultDTO.setId(document.getId());
         docResultDTO.setName(document.getName());
@@ -86,10 +91,10 @@ public class SearchResultMappingUtil {
      * Sets pagination urls for a SearchResultListDTO object given pagination parameters and url parameters
      *
      * @param resultListDTO a SearchResultListDTO object
-     * @param query      search condition
-     * @param limit      max number of objects returned
-     * @param offset     starting index
-     * @param size       max offset
+     * @param query         search condition
+     * @param limit         max number of objects returned
+     * @param offset        starting index
+     * @param size          max offset
      */
     public static void setPaginationParams(SearchResultListDTO resultListDTO, String query, int offset, int limit, int size) {
 

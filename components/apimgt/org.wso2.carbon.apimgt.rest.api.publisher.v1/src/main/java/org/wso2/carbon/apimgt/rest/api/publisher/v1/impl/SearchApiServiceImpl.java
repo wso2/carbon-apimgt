@@ -43,11 +43,12 @@ import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
-
 public class SearchApiServiceImpl implements SearchApiService {
+
     private static final Log log = LogFactory.getLog(SearchApiServiceImpl.class);
+
     public Response searchGet(Integer limit, Integer offset, String query, String ifNoneMatch,
-            MessageContext messageContext) {
+                              MessageContext messageContext) {
 
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
@@ -57,7 +58,7 @@ public class SearchApiServiceImpl implements SearchApiService {
         query = query == null ? "*" : query;
 
         try {
-            if (!query.contains(":")){
+            if (!query.contains(":")) {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
@@ -67,12 +68,17 @@ public class SearchApiServiceImpl implements SearchApiService {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             Map<String, Object> result = apiProvider
                     .searchPaginatedAPIs(newSearchQuery, tenantDomain, offset, limit, false);
-            ArrayList<Object> apis ;
-            if ( result.get("apis") instanceof ArrayList<?>){
-                apis = (ArrayList<Object>) result.get("apis");
+            ArrayList<Object> apis;
+            /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method and searchPaginatedAPIs
+            method in AbstractApiManager. And those methods respectively returns ArrayList and a TreeSet.
+            Hence the below logic.
+            */
+            Object apiSearchResults = result.get("apis");
+            if (apiSearchResults instanceof List<?>) {
+                apis = (ArrayList<Object>) apiSearchResults;
             } else {
                 apis = new ArrayList<Object>();
-                apis.addAll((Collection<?>) result.get("apis"));
+                apis.addAll((Collection<?>) apiSearchResults);
             }
 
             for (Object searchResult : apis) {
@@ -82,7 +88,8 @@ public class SearchApiServiceImpl implements SearchApiService {
                     allmatchedResults.add(apiResult);
                 } else if (searchResult instanceof Map.Entry) {
                     Map.Entry pair = (Map.Entry) searchResult;
-                    SearchResultDTO docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO((Documentation) pair.getKey(), (API) pair.getValue());
+                    SearchResultDTO docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO(
+                            (Documentation) pair.getKey(), (API) pair.getValue());
                     allmatchedResults.add(docResult);
                 }
             }
