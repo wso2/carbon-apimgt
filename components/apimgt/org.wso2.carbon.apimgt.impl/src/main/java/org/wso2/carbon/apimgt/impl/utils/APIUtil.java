@@ -8729,6 +8729,7 @@ public final class APIUtil {
             }
 
             apiProduct = new APIProduct(apiProductIdentifier);
+            apiProduct.setProductId(apiId);
             //set uuid
             apiProduct.setUuid(artifact.getId());
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));

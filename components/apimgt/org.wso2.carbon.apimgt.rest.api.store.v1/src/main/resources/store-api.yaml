@@ -4063,7 +4063,6 @@ definitions:
     title: Subscription
     required:
       - applicationId
-      - apiId
       - throttlingPolicy
       - apiName
       - apiVersion
