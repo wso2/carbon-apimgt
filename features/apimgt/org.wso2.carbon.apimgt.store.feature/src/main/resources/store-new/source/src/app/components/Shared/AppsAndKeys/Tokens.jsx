@@ -121,11 +121,15 @@ class Tokens extends React.Component {
      */
     generateToken() {
         const { keyType } = this.props;
-        const { application, timeout, scopesSelected } = this.state;
+        const { application, scopesSelected } = this.state;
+        let { timeout } = this.state;
 
         if (!application) {
             console.warn('No Application found!');
             return false;
+        }
+        if (timeout || timeout.length === 0) {
+            timeout = 3600;
         }
         return application.generateToken(keyType, timeout, scopesSelected);
     }
