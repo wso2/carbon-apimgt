@@ -123,22 +123,89 @@ class KeyConfiguration extends React.Component {
                     </InputLabel>
                     <div className={classes.checkboxWrapper}>
                         <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel control={<Checkbox id='refresh_token' checked={isRefreshChecked} onChange={e => this.handleChange('grantType', e)} value='refresh_token' />} label='Refresh Token' />
-                            <FormControlLabel control={<Checkbox id='password' checked={isPasswordChecked} value='password' onChange={e => this.handleChange('grantType', e)} />} label='Password' />
-                            <FormControlLabel control={<Checkbox id='implicit' checked={isImplicitChecked} value='implicit' onChange={e => this.handleChange('grantType', e)} />} label='Implicit' />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        id='refresh_token'
+                                        checked={isRefreshChecked}
+                                        onChange={e => this.handleChange('grantType', e)}
+                                        value='refresh_token'
+                                    />
+                                )}
+                                label='Refresh Token'
+                            />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        id='password'
+                                        checked={isPasswordChecked}
+                                        value='password'
+                                        onChange={e => this.handleChange('grantType', e)}
+                                    />
+                                )}
+                                label='Password'
+                            />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        id='implicit'
+                                        checked={isImplicitChecked}
+                                        value='implicit'
+                                        onChange={e => this.handleChange('grantType', e)}
+                                    />
+                                )}
+                                label='Implicit'
+                            />
                         </div>
                         <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel control={<Checkbox id='authorization_code' checked={isCodeChecked} value='authorization_code' onChange={e => this.handleChange('grantType', e)} />} label='Code' />
-                            <FormControlLabel control={<Checkbox id='client_credentials' checked disabled value='client_credentials' />} label='Client Credential' />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        id='authorization_code'
+                                        checked={isCodeChecked}
+                                        value='authorization_code'
+                                        onChange={e => this.handleChange('grantType', e)}
+                                    />
+                                )}
+                                label='Code'
+                            />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        id='client_credentials'
+                                        checked
+                                        disabled
+                                        value='client_credentials'
+                                    />
+                                )}
+                                label='Client Credential'
+                            />
                         </div>
                     </div>
-                    <FormHelperText>The application can use the following grant types to generate Access Tokens. Based on the application requirement, you can enable or disable grant types for this application.</FormHelperText>
+                    <FormHelperText>
+                        The application can use the following grant types to generate
+                        Access Tokens. Based on the application requirement,
+                        you can enable or disable grant types for this application.
+                    </FormHelperText>
                 </FormControl>
 
                 {
                     <FormControl className={classes.FormControlOdd}>
-                        <TextField id='callbackURL' fullWidth onChange={e => this.handleChange('callbackUrl', e)} label='Callback URL' placeholder='http://url-to-webapp' className={classes.textField} margin='normal' value={callbackUrl} />
-                        <FormHelperText>Callback URL is a redirection URI in the client application which is used by the authorization server to send the client's user-agent (usually web browser) back after granting access.</FormHelperText>
+                        <TextField
+                            id='callbackURL'
+                            fullWidth
+                            onChange={e => this.handleChange('callbackUrl', e)}
+                            label='Callback URL'
+                            placeholder='http://url-to-webapp'
+                            className={classes.textField}
+                            margin='normal'
+                            value={callbackUrl}
+                        />
+                        <FormHelperText>
+                            {`Callback URL is a redirection URI in the client
+                            application which is used by the authorization server to send the
+                            client's user-agent (usually web browser) back after granting access.`}
+                        </FormHelperText>
                     </FormControl>
                 }
             </React.Fragment>
