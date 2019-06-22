@@ -15,11 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from "react";
-import PropTypes from "prop-types";
-import {Progress} from "AppComponents/Shared";
-import SwaggerEditor, {plugins, presets} from "swagger-editor";
-import "swagger-editor/dist/swagger-editor.css";
+import React from 'react';
+import SwaggerEditor, { plugins } from 'swagger-editor';
+import 'swagger-editor/dist/swagger-editor.css';
 
 /**
  * This component hosts the Swagger Editor component.
@@ -31,10 +29,10 @@ class SwaggerEditorDrawer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
-
     }
+
     componentDidMount() {
-        const editor = SwaggerEditor({
+        window.editor = SwaggerEditor({
             dom_id: '#swagger-editor',
             layout: 'EditorLayout',
             plugins: Object.values(plugins),
@@ -42,25 +40,17 @@ class SwaggerEditorDrawer extends React.Component {
             debounce: 10,
             components: {},
             showExtensions: false,
-            swagger2GeneratorUrl: "https://generator.swagger.io/api/swagger.json",
-            oas3GeneratorUrl: "https://generator3.swagger.io/openapi.json",
-            swagger2ConverterUrl: "https://converter.swagger.io/api/convert",
+            swagger2GeneratorUrl: 'https://generator.swagger.io/api/swagger.json',
+            oas3GeneratorUrl: 'https://generator3.swagger.io/openapi.json',
+            swagger2ConverterUrl: 'https://converter.swagger.io/api/convert',
         });
     }
 
     render() {
-        if (!this.props.swagger) {
-            <Progress />
-        }
-
         return (
-            <div id="swagger-editor">
-            </div>
-        )
+            <div id='swagger-editor' />
+        );
     }
 }
-SwaggerEditorDrawer.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    state: PropTypes.shape({}).isRequired,
-};
+
 export default SwaggerEditorDrawer;
