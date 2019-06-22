@@ -20,12 +20,16 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.rest.RESTConstants;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
@@ -48,7 +52,7 @@ public class JWTValidator {
     public JWTValidator() {
     }
 
-    public AuthenticationContext authenticate(String jwtToken) throws APISecurityException {
+    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx) throws APISecurityException {
         String[] splitToken = jwtToken.split("\\.");
         if (splitToken.length != 3) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
@@ -57,27 +61,41 @@ public class JWTValidator {
         boolean isVerified = verifySignature(jwtToken);
 
         if (isVerified) {
-            //TODO: fill auth context with payload details
-            AuthenticationContext authContext = new AuthenticationContext();
-            authContext.setAuthenticated(true);
-            authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
-            authContext.setApiKey(jwtToken);
-            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-            authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
-            authContext.setCallerToken(null);
-            authContext.setApplicationId(null);
-            authContext.setApplicationName(null);
-            authContext.setApplicationTier(APIConstants.UNLIMITED_TIER);
-            authContext.setSubscriber(null);
-            authContext.setConsumerKey(null);
-            authContext.setApiTier(APIConstants.UNLIMITED_TIER);
-            authContext.setThrottlingDataList(null);
-            authContext.setSubscriberTenantDomain(null);
-//        authContext.setSpikeArrestLimit();
-            authContext.setSpikeArrestUnit(null);
-            authContext.setStopOnQuotaReach(true);
-            authContext.setIsContentAware(true);
-            return authContext;
+            JSONObject payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
+            JSONObject applicationObj = (JSONObject) payload.get("application");
+            JSONArray subscribedAPIs = (JSONArray) payload.get("subscribedAPIs");
+
+            String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+            String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+
+            JSONObject api = null;
+            for (int i = 0; i < subscribedAPIs.length(); i++) {
+                JSONObject subscribedAPIsJSONObject = subscribedAPIs.getJSONObject(i);
+                if (subscribedAPIsJSONObject.getString("context").equals(apiContext) &&
+                        subscribedAPIsJSONObject.getString("version").equals(apiVersion)) {
+                    api = subscribedAPIsJSONObject;
+                    break;
+                }
+            }
+
+            if (api != null) {
+                AuthenticationContext authContext = new AuthenticationContext();
+                authContext.setAuthenticated(true);
+                authContext.setTier(api.getString("subscriptionTier"));
+                authContext.setApiKey(payload.getString("jti"));
+                authContext.setKeyType(payload.getString("keytype"));
+                authContext.setUsername(payload.getString("sub"));
+                authContext.setApplicationId(String.valueOf(applicationObj.getInt("id")));
+                authContext.setApplicationName(applicationObj.getString("name"));
+                authContext.setApplicationTier(applicationObj.getString("tier"));
+                authContext.setSubscriber(payload.getString("sub"));
+                authContext.setConsumerKey(payload.getString("consumerKey"));
+                authContext.setSubscriberTenantDomain(api.getString("subscriberTenantDomain"));
+                return authContext;
+            } else {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        "User is not subscribed to the API : " + apiContext + ", version: " + apiVersion);
+            }
         }
         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
     }

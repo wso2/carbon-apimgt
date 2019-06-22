@@ -248,7 +248,7 @@ public class OAuthAuthenticator implements Authenticator {
             //Start JWT token validation
             if (StringUtils.countMatches(apiKey, ".") == 2) { // JWT token contains two dots
                 try {
-                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey);
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
 
                     if (log.isDebugEnabled()) {
