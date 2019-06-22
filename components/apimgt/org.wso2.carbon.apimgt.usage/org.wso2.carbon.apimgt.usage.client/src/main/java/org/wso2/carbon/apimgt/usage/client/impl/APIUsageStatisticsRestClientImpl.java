@@ -604,6 +604,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         "from " + tableName + " on " + idListQuery.toString() + " within " + getTimestamp(startDate)
                                 + "L, " + getTimestamp(endDate) + "L per '" + granularity + "' select "
                                 + APIUsageStatisticsClientConstants.API_NAME + ", "
+                                + APIUsageStatisticsClientConstants.API_VERSION + ", "
                                 + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                                 + APIUsageStatisticsClientConstants.API_METHOD + ", "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
@@ -611,6 +612,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                                 + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + " group by "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                                 + APIUsageStatisticsClientConstants.API_NAME + ", "
+                                + APIUsageStatisticsClientConstants.API_VERSION + ", "
                                 + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                                 + APIUsageStatisticsClientConstants.API_METHOD + ", "
                                 + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
@@ -618,6 +620,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                                 query);
                 String apiName;
+                String apiVersion;
                 String apiCreator;
                 String callType;
                 String applicationId;
@@ -627,23 +630,24 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
                     for (Object record : jArray) {
                         JSONArray recordArray = (JSONArray) record;
-                        if (recordArray.size() == 6) {
+                        if (recordArray.size() == 7) {
                             apiName = (String) recordArray.get(0);
-                            apiCreator = (String) recordArray.get(1);
+                            apiVersion = (String) recordArray.get(1);
+                            apiCreator = (String) recordArray.get(2);
                             apiName = apiName + " (" + apiCreator + ")";
-                            callType = (String) recordArray.get(2);
-                            applicationId = (String) recordArray.get(3);
-                            apiResourceTemplate = (String) recordArray.get(4);
+                            callType = (String) recordArray.get(3);
+                            applicationId = (String) recordArray.get(4);
+                            apiResourceTemplate = (String) recordArray.get(5);
                             List<String> callTypeList = new ArrayList<String>();
                             callTypeList.add(apiResourceTemplate + " (" + callType + ")");
                             List<Integer> hitCountList = new ArrayList<Integer>();
-                            long hitCount = (Long) recordArray.get(5);
+                            long hitCount = (Long) recordArray.get(6);
                             hitCountList.add((int) hitCount);
                             String appName = subscriberAppsMap.get(applicationId);
                             boolean found = false;
                             for (AppCallTypeDTO dto : appApiCallTypeList) {
                                 if (dto.getAppName().equals(appName)) {
-                                    dto.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
+                                    dto.addToApiCallTypeArray(apiName, apiVersion, callTypeList, hitCountList);
                                     found = true;
                                     break;
                                 }
@@ -651,7 +655,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             if (!found) {
                                 appCallTypeDTO = new AppCallTypeDTO();
                                 appCallTypeDTO.setAppName(appName);
-                                appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
+                                appCallTypeDTO.addToApiCallTypeArray(apiName, apiVersion, callTypeList, hitCountList);
                                 appApiCallTypeList.add(appCallTypeDTO);
                             }
                         }
@@ -1514,10 +1518,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                             + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
                             + APIUsageStatisticsClientConstants.API_METHOD + ", "
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ", "
+                            + "sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                            + ") as total_request_count, "
                             + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ", "
-                            + APIUsageStatisticsClientConstants.TIME_STAMP + ";";
-
+                            + APIUsageStatisticsClientConstants.TIME_STAMP + " group by "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
