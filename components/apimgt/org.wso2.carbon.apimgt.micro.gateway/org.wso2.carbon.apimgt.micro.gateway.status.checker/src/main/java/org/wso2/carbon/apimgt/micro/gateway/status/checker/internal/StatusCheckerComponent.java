@@ -22,16 +22,13 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.core.ServerStartupHandler;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
-@Component(
-         name = "org.wso2.carbon.apimgt.micro.gateway.status.checker", 
-         immediate = true)
+/**
+ * @scr.component name="org.wso2.carbon.apimgt.micro.gateway.status.checker" immediate="true"
+ * @scr.reference name="api.manager.config.service"
+ * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ */
 public class StatusCheckerComponent {
 
     private static final Log log = LogFactory.getLog(StatusCheckerComponent.class);
@@ -41,11 +38,11 @@ public class StatusCheckerComponent {
      *
      * @param context OSGi component context.
      */
-    @Activate
     protected void activate(ComponentContext context) {
         try {
-            // Register the server start up handler which hold the execution of its invoke method until the server starts
-            context.getBundleContext().registerService(ServerStartupHandler.class.getName(), new StatusCheckerServerStartListener(), null);
+            //Register the server start up handler which hold the execution of its invoke method until the server starts
+            context.getBundleContext()
+                   .registerService(ServerStartupHandler.class.getName(), new StatusCheckerServerStartListener(), null);
             if (log.isDebugEnabled()) {
                 log.debug("StatusCheckerComponent bundle activated successfully.");
             }
@@ -59,7 +56,6 @@ public class StatusCheckerComponent {
      *
      * @param context OSGi component context.
      */
-    @Deactivate
     protected void deactivate(ComponentContext context) {
         if (log.isDebugEnabled()) {
             log.debug("StatusCheckerComponent bundle is deactivated.");
@@ -71,12 +67,6 @@ public class StatusCheckerComponent {
      *
      * @param service APIManager Configuration service
      */
-    @Reference(
-             name = "api.manager.config.service", 
-             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
         log.debug("API manager configuration service bound to the On-Prem Gw Status Checker");
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(service);
@@ -91,5 +81,5 @@ public class StatusCheckerComponent {
         log.debug("API manager configuration service unbound from the On-Prem Gw Status Checker");
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
-}
 
+}

@@ -144,11 +144,6 @@
             <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
         </dependency>
-    <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

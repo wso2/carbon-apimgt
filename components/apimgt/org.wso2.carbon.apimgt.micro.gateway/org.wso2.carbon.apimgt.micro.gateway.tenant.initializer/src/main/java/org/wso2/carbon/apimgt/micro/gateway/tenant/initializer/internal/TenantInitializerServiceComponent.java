@@ -14,6 +14,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.internal;
 
 import org.apache.commons.logging.Log;
@@ -27,29 +28,34 @@ import org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.listener.ServerSt
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
-@Component(
-         name = "org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.internal.TenantInitializerServiceComponent", 
-         immediate = true)
+/**
+ * @scr.component name=
+ * "org.wso2.carbon.apimgt.micro.gateway.tenant.initializer.internal.TenantInitializerServiceComponent"
+ * immediate="true"
+ * @scr.reference name="config.context.service"
+ * interface="org.wso2.carbon.utils.ConfigurationContextService" cardinality="1..1"
+ * policy="dynamic" bind="setConfigurationContextService" unbind="unsetConfigurationContextService"
+ * @scr.reference name="api.manager.config.service"
+ * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ * @scr.reference name="user.realm.service"
+ * interface="org.wso2.carbon.user.core.service.RealmService" cardinality="1..1"
+ * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
+ */
 public class TenantInitializerServiceComponent {
-
     private static final Log log = LogFactory.getLog(TenantInitializerServiceComponent.class);
 
-    @Activate
     @Activate
     protected void activate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("Activating tenant initialization component.");
         }
         BundleContext bundleContext = ctx.getBundleContext();
-        bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
+        bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(),
+                null);
     }
 
-    @Deactivate
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
@@ -71,12 +77,6 @@ public class TenantInitializerServiceComponent {
      *
      * @param ccService configuration context service
      */
-    @Reference(
-             name = "config.context.service", 
-             service = org.wso2.carbon.utils.ConfigurationContextService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService ccService) {
         ServiceDataHolder.getInstance().setConfigurationContextService(ccService);
     }
@@ -86,12 +86,6 @@ public class TenantInitializerServiceComponent {
      *
      * @param service API Manager Configuration Service
      */
-    @Reference(
-             name = "api.manager.config.service", 
-             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
         log.debug("API manager configuration service bound to Tenant Initializer.");
         ServiceDataHolder.getInstance().setAPIManagerConfigurationService(service);
@@ -112,12 +106,6 @@ public class TenantInitializerServiceComponent {
      *
      * @param realmService realm service
      */
-    @Reference(
-             name = "user.realm.service", 
-             service = org.wso2.carbon.user.core.service.RealmService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         ServiceDataHolder.getInstance().setRealmService(realmService);
     }
@@ -131,4 +119,3 @@ public class TenantInitializerServiceComponent {
         ServiceDataHolder.getInstance().setRealmService(null);
     }
 }
-

@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.wso2.carbon.apimgt.usage.client.internal;
 
 import org.apache.commons.logging.Log;
@@ -24,16 +25,13 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.UsageClient;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
-@Component(
-         name = "org.wso2.apimgt.usage.client", 
-         immediate = true)
+/**
+ * @scr.component name="org.wso2.apimgt.usage.client" immediate="true"
+ * @scr.reference name="api.manager.config.service"
+ * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ */
 public class APIUsageClientServiceComponent {
 
     private static final Log log = LogFactory.getLog(APIUsageClientServiceComponent.class);
@@ -42,27 +40,20 @@ public class APIUsageClientServiceComponent {
 
     private static APIManagerAnalyticsConfiguration analyticsConfiguration = null;
 
-    @Activate
-    protected void activate(ComponentContext componentContext) throws APIMgtUsageQueryServiceClientException {
+    protected void activate(ComponentContext componentContext)
+            throws APIMgtUsageQueryServiceClientException {
         if (log.isDebugEnabled()) {
             log.debug("API usage client component activated");
         }
-        if (APIUtil.isAnalyticsEnabled()) {
+        if (APIUtil.isAnalyticsEnabled()){
             UsageClient.initializeDataSource();
         }
     }
 
-    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         log.debug("API usage client component deactivated");
     }
 
-    @Reference(
-             name = "api.manager.config.service", 
-             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         log.debug("API manager configuration service bound to the API usage client component");
         configuration = amcService.getAPIManagerConfiguration();
@@ -81,4 +72,3 @@ public class APIUsageClientServiceComponent {
         return analyticsConfiguration;
     }
 }
-

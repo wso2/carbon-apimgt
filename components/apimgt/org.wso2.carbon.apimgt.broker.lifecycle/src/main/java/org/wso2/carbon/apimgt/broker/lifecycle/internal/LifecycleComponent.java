@@ -17,6 +17,7 @@
  *  under the License.
  * /
  */
+
 package org.wso2.carbon.apimgt.broker.lifecycle.internal;
 
 import org.apache.commons.logging.Log;
@@ -25,73 +26,70 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.andes.listeners.BrokerLifecycleListener;
 import org.wso2.carbon.andes.service.QpidService;
 import org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
-@Component(
-         name = "org.wso2.apimgt.broker.lifecycle", 
-         immediate = true)
+
+/**
+ * This components registers a Broker Lifecycle Listener. This component will only get activated when andes bundle is
+ * present.
+ */
+
+/**
+ * @scr.component name="org.wso2.apimgt.broker.lifecycle" immediate="true"
+ * @scr.reference name="shutdown.listener"
+ * interface="org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService" cardinality="1..1"
+ * policy="dynamic" bind="setShutDownService" unbind="unsetShutDownService"
+ * @scr.reference name="QpidService"
+ * interface="org.wso2.carbon.andes.service.QpidService" cardinality="1..1"
+ * policy="dynamic" bind="setQpidService" unbind="unsetQpidService"
+ */
+
 public class LifecycleComponent {
 
     private static final Log log = LogFactory.getLog(LifecycleComponent.class);
 
-    @Activate
     protected void activate(ComponentContext context) {
         log.debug("Activating component...");
+
         return;
     }
 
-    @Reference(
-             name = "QpidService", 
-             service = org.wso2.carbon.andes.service.QpidService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetQpidService")
-    public void setQpidService(QpidService qpidService) {
+    public void setQpidService(QpidService qpidService){
         log.debug("Setting QpidService...");
         ServiceReferenceHolder.getInstance().setQpidService(qpidService);
-        if (qpidService != null) {
+        if(qpidService != null){
             qpidService.registerBrokerLifecycleListener(new BrokerLifecycleListener() {
-
                 @Override
                 public void onShuttingdown() {
-                    if (ServiceReferenceHolder.getInstance().getListenerShutdownService() == null) {
+                    if(ServiceReferenceHolder.getInstance().getListenerShutdownService() == null){
                         return;
                     }
+
                     log.debug("Triggering a Shutdown of the Listener...");
                     ServiceReferenceHolder.getInstance().getListenerShutdownService().shutDownListener();
+
                 }
 
                 @Override
                 public void onShutdown() {
+
                 }
             });
         }
     }
 
-    public void unsetQpidService(QpidService qpidService) {
+    public void unsetQpidService(QpidService qpidService){
         log.debug("Un Setting QpidService...");
         ServiceReferenceHolder.getInstance().setQpidService(null);
     }
 
-    @Reference(
-             name = "shutdown.listener", 
-             service = org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetShutDownService")
-    public void setShutDownService(JMSListenerShutDownService shutDownService) {
+    public void setShutDownService(JMSListenerShutDownService shutDownService){
         log.debug("Setting JMS Listener Shutdown Service");
         ServiceReferenceHolder.getInstance().setListenerShutdownService(shutDownService);
     }
 
-    public void unsetShutDownService(JMSListenerShutDownService shutDownService) {
+    public void unsetShutDownService(JMSListenerShutDownService shutDownService){
         log.debug("Setting JMS Listener Shutdown Service");
         ServiceReferenceHolder.getInstance().setListenerShutdownService(null);
     }
-}
 
+}

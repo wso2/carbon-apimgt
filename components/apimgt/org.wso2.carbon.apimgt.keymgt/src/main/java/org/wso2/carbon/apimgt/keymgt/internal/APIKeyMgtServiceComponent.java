@@ -15,6 +15,7 @@
 *specific language governing permissions and limitations
 *under the License.
 */
+
 package org.wso2.carbon.apimgt.keymgt.internal;
 
 import org.apache.commons.logging.Log;
@@ -44,41 +45,52 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
-@Component(
-         name = "api.keymgt.component", 
-         immediate = true)
+/**
+ * @scr.component name="api.keymgt.component" immediate="true"
+ * @scr.reference name="registry.service"
+ * interface="org.wso2.carbon.registry.core.service.RegistryService"
+ * cardinality="1..1" policy="dynamic" bind="setRegistryService"
+ * unbind="unsetRegistryService"
+ * @scr.reference name="user.realmservice.default"
+ * interface="org.wso2.carbon.user.core.service.RealmService" cardinality="1..1"
+ * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
+ * @scr.reference name="api.manager.config.service"
+ * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
+ * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ * @scr.reference name="org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent"
+ * interface="org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService"
+ * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
+ * @scr.reference name="scope.issuer.service"
+ * interface="org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer"
+ * cardinality="0..n"
+ * policy="dynamic"
+ * bind="addScopeIssuer"
+ * unbind="removeScopeIssuers"
+ */
 public class APIKeyMgtServiceComponent {
 
     private static Log log = LogFactory.getLog(APIKeyMgtServiceComponent.class);
-
     private ThriftAuthenticatorService thriftAuthenticationService;
-
     private ExecutorService executor = Executors.newFixedThreadPool(1);
-
     private boolean isThriftServerEnabled;
 
     private static KeyManagerUserOperationListener listener = null;
-
     private ServiceRegistration serviceRegistration = null;
 
-    @Activate
     protected void activate(ComponentContext ctxt) {
         try {
+
             APIKeyMgtDataHolder.initData();
-            // Based on configuration we have to decide thrift server run or not
+
+            //Based on configuration we have to decide thrift server run or not
             if (APIKeyMgtDataHolder.getThriftServerEnabled()) {
                 APIKeyValidationServiceImpl.init(thriftAuthenticationService);
                 startThriftService();
@@ -87,41 +99,52 @@ public class APIKeyMgtServiceComponent {
                     log.debug("API key validation thrift server is disabled");
                 }
             }
+
             listener = new KeyManagerUserOperationListener();
-            serviceRegistration = ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(), listener, null);
+            serviceRegistration = ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(),
+                    listener, null);
             log.debug("Key Manager User Operation Listener is enabled.");
+
             // loading white listed scopes
             List<String> whitelist = null;
-            APIManagerConfigurationService configurationService = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-            if (configurationService != null) {
+
+            APIManagerConfigurationService configurationService = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+                                                            .getInstance().getAPIManagerConfigurationService();
+
+            if(configurationService != null) {
                 // Read scope whitelist from Configuration.
                 whitelist = configurationService.getAPIManagerConfiguration().getProperty(APIConstants.WHITELISTED_SCOPES);
+
                 // If whitelist is null, default scopes will be put.
                 if (whitelist == null) {
                     whitelist = new ArrayList<String>();
                     whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
                     whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
                 }
-            } else {
+            }else {
                 log.debug("API Manager Configuration couldn't be read successfully. Scopes might not work correctly.");
             }
+
             PermissionBasedScopeIssuer permissionBasedScopeIssuer = new PermissionBasedScopeIssuer();
             RoleBasedScopesIssuer roleBasedScopesIssuer = new RoleBasedScopesIssuer();
             APIKeyMgtDataHolder.addScopesIssuer(permissionBasedScopeIssuer.getPrefix(), permissionBasedScopeIssuer);
             APIKeyMgtDataHolder.addScopesIssuer(roleBasedScopesIssuer.getPrefix(), roleBasedScopesIssuer);
+
             if (log.isDebugEnabled()) {
                 log.debug("Permission based scope Issuer and Role based scope issuers are loaded.");
             }
+
             ScopesIssuer.loadInstance(whitelist);
+
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
             }
+
         } catch (Exception e) {
             log.error("Failed to initialize key management service.", e);
         }
     }
 
-    @Deactivate
     protected void deactivate(ComponentContext context) {
         if (serviceRegistration != null) {
             serviceRegistration.unregister();
@@ -131,12 +154,6 @@ public class APIKeyMgtServiceComponent {
         }
     }
 
-    @Reference(
-             name = "registry.service", 
-             service = org.wso2.carbon.registry.core.service.RegistryService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         APIKeyMgtDataHolder.setRegistryService(registryService);
         if (log.isDebugEnabled()) {
@@ -151,12 +168,6 @@ public class APIKeyMgtServiceComponent {
         }
     }
 
-    @Reference(
-             name = "user.realmservice.default", 
-             service = org.wso2.carbon.user.core.service.RealmService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         APIKeyMgtDataHolder.setRealmService(realmService);
         if (log.isDebugEnabled()) {
@@ -171,12 +182,6 @@ public class APIKeyMgtServiceComponent {
         }
     }
 
-    @Reference(
-             name = "api.manager.config.service", 
-             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         if (log.isDebugEnabled()) {
             log.debug("API manager configuration service bound to the API handlers");
@@ -198,13 +203,8 @@ public class APIKeyMgtServiceComponent {
      *
      * @param authenticationService <code>ThriftAuthenticatorService</code>
      */
-    @Reference(
-             name = "org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent", 
-             service = org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService.class, 
-             cardinality = ReferenceCardinality.MANDATORY, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "unsetThriftAuthenticationService")
-    protected void setThriftAuthenticationService(ThriftAuthenticatorService authenticationService) {
+    protected void setThriftAuthenticationService(
+            ThriftAuthenticatorService authenticationService) {
         if (log.isDebugEnabled()) {
             log.debug("ThriftAuthenticatorService set in Entitlement bundle");
         }
@@ -216,7 +216,8 @@ public class APIKeyMgtServiceComponent {
      *
      * @param //authenticationService <code>ThriftAuthenticatorService</code>
      */
-    protected void unsetThriftAuthenticationService(ThriftAuthenticatorService authenticationService) {
+    protected void unsetThriftAuthenticationService(
+            ThriftAuthenticatorService authenticationService) {
         if (log.isDebugEnabled()) {
             log.debug("ThriftAuthenticatorService unset in Entitlement bundle");
         }
@@ -227,12 +228,6 @@ public class APIKeyMgtServiceComponent {
      * Add scope issuer to the map.
      * @param scopesIssuer scope issuer.
      */
-    @Reference(
-             name = "scope.issuer.service", 
-             service = org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer.class, 
-             cardinality = ReferenceCardinality.MULTIPLE, 
-             policy = ReferencePolicy.DYNAMIC, 
-             unbind = "removeScopeIssuers")
     protected void addScopeIssuer(AbstractScopesIssuer scopesIssuer) {
         APIKeyMgtDataHolder.addScopesIssuer(scopesIssuer.getPrefix(), scopesIssuer);
     }
@@ -247,38 +242,64 @@ public class APIKeyMgtServiceComponent {
 
     private void startThriftService() throws Exception {
         try {
-            TSSLTransportFactory.TSSLTransportParameters transportParam = new TSSLTransportFactory.TSSLTransportParameters();
-            // read the keystore and password used for ssl communication from config
+            TSSLTransportFactory.TSSLTransportParameters transportParam =
+                    new TSSLTransportFactory.TSSLTransportParameters();
+
+            //read the keystore and password used for ssl communication from config
             String keyStorePath = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Location");
             String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
-            String thriftPortString = APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_PORT);
+
+            String thriftPortString = APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_PORT);
+
             int thriftReceivePort;
+
             if (thriftPortString == null) {
                 thriftReceivePort = APIConstants.DEFAULT_THRIFT_PORT + APIUtil.getPortOffset();
             } else {
                 thriftReceivePort = Integer.parseInt(thriftPortString);
             }
-            String thriftHostString = APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_HOST);
+
+            String thriftHostString =
+                    APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
+                            APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_HOST);
+
             if (thriftHostString == null) {
                 thriftHostString = NetworkUtils.getLocalHostname();
                 log.info("Setting default carbon host for thrift key management service: " + thriftHostString);
             }
-            String thriftClientTimeOut = APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
+
+            String thriftClientTimeOut =
+                    APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
+                            APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
             if (thriftClientTimeOut == null) {
                 throw new APIKeyMgtException("Port and Connection timeout not provided to start thrift key mgt service.");
             }
+
             int clientTimeOut = Integer.parseInt(thriftClientTimeOut);
-            // set it in parameters
+            //set it in parameters
             transportParam.setKeyStore(keyStorePath, keyStorePassword);
-            TServerSocket serverTransport = TSSLTransportFactory.getServerSocket(thriftReceivePort, clientTimeOut, getHostAddress(thriftHostString), transportParam);
-            APIKeyValidationService.Processor processor = new APIKeyValidationService.Processor(new APIKeyValidationServiceImpl());
-            // TODO: have to decide on the protocol.
-            TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
-            // TServer server = new TThreadPoolServer(new TThreadPoolServer.Args())
+
+            TServerSocket serverTransport =
+                    TSSLTransportFactory.getServerSocket(thriftReceivePort,
+                            clientTimeOut,
+                            getHostAddress(thriftHostString),
+                            transportParam);
+
+
+            APIKeyValidationService.Processor processor = new APIKeyValidationService.Processor(
+                    new APIKeyValidationServiceImpl());
+
+            //TODO: have to decide on the protocol.
+            TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).
+                    processor(processor));
+            //TServer server = new TThreadPoolServer(new TThreadPoolServer.Args())
+
             /*TServer server = new TThreadPoolServer(processor, serverTransport,
             new TCompactProtocol.Factory());*/
             Runnable serverThread = new ServerRunnable(server);
             executor.submit(serverThread);
+
             log.info("Started thrift key mgt service at port:" + thriftReceivePort);
         } catch (TTransportException e) {
             String transportErrorMsg = "Error in initializing thrift transport";
@@ -291,8 +312,10 @@ public class APIKeyMgtServiceComponent {
         }
     }
 
+    /**
+     * Thread that starts thrift server
+     */
     private static class ServerRunnable implements Runnable {
-
         TServer server;
 
         public ServerRunnable(TServer server) {
@@ -311,12 +334,14 @@ public class APIKeyMgtServiceComponent {
      * @return InetAddress
      * @throws java.net.UnknownHostException
      */
+
     private InetAddress getHostAddress(String host) throws UnknownHostException {
         String[] splittedString = host.split("\\.");
         boolean value = checkIfIP(splittedString);
         if (!value) {
             return InetAddress.getByName(host);
         }
+
         byte[] byteAddress = new byte[4];
         for (int i = 0; i < splittedString.length; i++) {
             if (Integer.parseInt(splittedString[i]) > 127) {
@@ -334,7 +359,7 @@ public class APIKeyMgtServiceComponent {
      * @param ip IP
      * @return true/false
      */
-    private boolean checkIfIP(String[] ip) {
+    private boolean checkIfIP(String ip[]) {
         for (int i = 0; i < ip.length; i++) {
             try {
                 Integer.parseInt(ip[i]);
@@ -345,4 +370,3 @@ public class APIKeyMgtServiceComponent {
         return true;
     }
 }
-
