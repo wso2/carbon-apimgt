@@ -58,6 +58,12 @@ const styles = theme => ({
         textAlign: 'center',
     },
 });
+/**
+ * This component holds the functionality of viewing the api definition content of an api. The initial view is a
+ * read-only representation of the api definition file.
+ * Users can either edit the content by clicking the 'Edit' button or upload a new api definition file by clicking
+ * 'Import API Definition'.
+ * */
 class APIDefinition extends React.Component {
     constructor(props) {
         super(props);
@@ -95,25 +101,42 @@ class APIDefinition extends React.Component {
             });
     }
 
+    /**
+     * Method to set the state for opening the swagger editor drawer.
+     * Swagger editor loads the definition content from the local storage. Hence we set the swagger content to the
+     * local storage.
+     * */
     openEditor() {
         window.localStorage.setItem('swagger-editor-content', this.state.swagger);
         this.setState({openEditor: true});
     }
 
+    /**
+     * Sets the state to close the swagger-editor drawer.
+     * */
     closeEditor() {
         window.localStorage.setItem('swagger-editor-content', '');
         this.setState({openEditor: false});
     }
 
+    /**
+     * Handles the transition of the drawer.
+     * */
     Transition(props) {
         return <Slide direction='up' {...props} />;
     }
 
+    /**
+     * Updates swagger content in the local storage.
+     * */
     updateSwaggerContent() {
         const updatedContent = window.localStorage.getItem('swagger-editor-content');
         this.setState({swagger: updatedContent}, () => this.updateSwaggerDefinition());
     }
 
+    /**
+     * Updates swagger definition of the api.
+     * */
     updateSwaggerDefinition() {
         let parsedContent = {};
         if (this.hasJsonStructure()) {
@@ -139,6 +162,9 @@ class APIDefinition extends React.Component {
         });
     }
 
+    /**
+     * Checks whether the swagger content is json type.
+     * */
     hasJsonStructure() {
         const swagger = this.state.swagger;
         if (typeof swagger !== 'string') return false;
@@ -151,6 +177,9 @@ class APIDefinition extends React.Component {
         }
     }
 
+    /**
+     * Handles the file upload.
+     * */
     onDrop(file) {
         if (file[0]) {
             let reader = new FileReader();
@@ -237,8 +266,7 @@ class APIDefinition extends React.Component {
                     <SwaggerEditorDrawer />
                 </Dialog>
             </div>
-        )
-            ;
+        );
     }
 }
 APIDefinition.propTypes = {

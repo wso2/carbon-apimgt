@@ -21,6 +21,12 @@ import {Progress} from "AppComponents/Shared";
 import SwaggerEditor, {plugins, presets} from "swagger-editor";
 import "swagger-editor/dist/swagger-editor.css";
 
+/**
+ * This component hosts the Swagger Editor component.
+ * Known Issue: The cursor jumps back to the start of the first line when updating the swagger-ui based on the
+ * modification done via the editor.
+ * https://github.com/wso2/product-apim/issues/5071
+ * */
 class SwaggerEditorDrawer extends React.Component {
     constructor(props) {
         super(props);
