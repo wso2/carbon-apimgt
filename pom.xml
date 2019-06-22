@@ -1548,7 +1548,7 @@
         <siddhi.version>3.2.4</siddhi.version>
 
         <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
-        <carbon.commons.imp.pkg.version>[4.5.0, 4.6.0)</carbon.commons.imp.pkg.version>
+        <carbon.commons.imp.pkg.version>[4.7.1, 4.8.0)</carbon.commons.imp.pkg.version>
         <commons.logging.imp.pkg.version>[1.2.0, 1.3.0)</commons.logging.imp.pkg.version>
 
         <!-- Carbon Identity import version ranges -->
@@ -1577,14 +1577,14 @@
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 
         <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v28</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v37</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1, 1.7.0)</axis2.osgi.version.range>
 
         <!-- Apache Axiom -->
-        <orbit.version.axiom>1.2.11.wso2v10</orbit.version.axiom>
-        <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
-        <exp.pkg.version.axiom>1.2.11.wso2v10</exp.pkg.version.axiom>
-        <imp.pkg.version.axiom>[1.2.11.wso2v10, 1.3.0)</imp.pkg.version.axiom>
+        <orbit.version.axiom>1.2.11-wso2v16</orbit.version.axiom>
+        <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
+        <exp.pkg.version.axiom>1.2.11-wso2v16</exp.pkg.version.axiom>
+        <imp.pkg.version.axiom>[1.2.11-wso2v16, 1.3.0)</imp.pkg.version.axiom>
         <axiom.osgi.version.range>[1.2.11, 1.3.0)</axiom.osgi.version.range>
 
         <!-- Servlet API -->
