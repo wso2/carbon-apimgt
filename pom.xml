@@ -1526,7 +1526,7 @@
         <carbon.kernel.version>4.5.0-m1</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.6.66</carbon.commons.version>
+        <carbon.commons.version>4.7.1</carbon.commons.version>
         <carbon.registry.version>4.6.46</carbon.registry.version>
         <carbon.mediation.version>4.6.151</carbon.mediation.version>
 
@@ -1559,7 +1559,7 @@
         <carbon.mediation.imp.pkg.version>[4.0.0, 5.0.0)</carbon.mediation.imp.pkg.version>
         <carbon.governance.imp.pkg.version>[4.6.0, 4.7.1)</carbon.governance.imp.pkg.version>
         <carbon.registry.package.import.version.range>[4.5.4, 5.0.0)</carbon.registry.package.import.version.range>
-        <carbon.commons.imp.pkg.version>[4.5.0, 5.0.0)</carbon.commons.imp.pkg.version>
+        <carbon.commons.imp.pkg.version>[4.7.0, 5.0.0)</carbon.commons.imp.pkg.version>
 
         <!-- Carbon platform version comes here-->
         <carbon.platform.package.import.version.range>[4.4.0, 4.6.0)</carbon.platform.package.import.version.range>
