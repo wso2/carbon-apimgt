@@ -30,6 +30,10 @@ import { FormattedMessage } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
 import Typography from '@material-ui/core/Typography';
 import Slide from '@material-ui/core/Slide';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import MonacoEditor from 'react-monaco-editor';
 import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
@@ -80,6 +84,8 @@ class APIDefinition extends React.Component {
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
         this.hasJsonStructure = this.hasJsonStructure.bind(this);
         this.onDrop = this.onDrop.bind(this);
+        this.handleNo = this.handleNo.bind(this);
+        this.handleOk = this.handleOk.bind(this);
     }
 
     componentDidMount() {
@@ -136,6 +142,21 @@ class APIDefinition extends React.Component {
     }
 
     /**
+     * Handles the yes button action of the save api definition confirmation dialog box.
+    */
+    handleOk() {
+        const updatedContent = window.localStorage.getItem('swagger-editor-content');
+        this.setState({ swagger: updatedContent, openDialog: false }, () => this.updateSwaggerDefinition());
+    }
+
+    /**
+     * Handles the No button action of the save api definition confirmation dialog box.
+    */
+    handleNo() {
+        this.setState({ openDialog: false });
+    }
+
+    /**
      * Method to set the state for opening the swagger editor drawer.
      * Swagger editor loads the definition content from the local storage. Hence we set the swagger content to the
      * local storage.
@@ -164,8 +185,7 @@ class APIDefinition extends React.Component {
      * Updates swagger content in the local storage.
      * */
     updateSwaggerContent() {
-        const updatedContent = window.localStorage.getItem('swagger-editor-content');
-        this.setState({ swagger: updatedContent }, () => this.updateSwaggerDefinition());
+        this.setState({ openDialog: true });
     }
 
     /**
@@ -186,7 +206,6 @@ class APIDefinition extends React.Component {
         const promise = this.api.updateSwagger(parsedContent);
         promise.then((response) => {
             if (response) Alert.success('API Definition Updated Successfully');
-            this.closeEditor();
         }).catch((err) => {
             console.debug(err);
             Alert.error('Error while updating the API Definition');
@@ -194,7 +213,7 @@ class APIDefinition extends React.Component {
     }
 
     render() {
-        const { swagger, openEditor } = this.state;
+        const { swagger, openEditor, openDialog } = this.state;
         const { classes } = this.props;
 
         const editorOptions = {
@@ -250,12 +269,7 @@ class APIDefinition extends React.Component {
                     TransitionComponent={this.transition}
                 >
                     <Paper square className={classes.popupHeader}>
-                        <IconButton
-                            className={classes.button}
-                            color='inherit'
-                            onClick={this.closeEditor}
-                            aria-label='Close'
-                        >
+                        <IconButton className={classes.button} color='inherit' onClick={this.closeEditor} aria-label='Close'>
                             <Icon>close</Icon>
                         </IconButton>
 
@@ -272,6 +286,32 @@ class APIDefinition extends React.Component {
                         </Button>
                     </Paper>
                     <SwaggerEditorDrawer />
+                </Dialog>
+                <Dialog
+                    open={openDialog}
+                    onClose={this.handleNo}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        <Typography align='left'>
+                            Save API Definition
+                        </Typography>
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            Do you want to save the API Definition?
+                            This will affect the existing resources.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleNo} color="secondary">
+                            No
+                        </Button>
+                        <Button onClick={this.handleOk} color="primary" autoFocus>
+                            Yes
+                        </Button>
+                    </DialogActions>
                 </Dialog>
             </div>
         );
