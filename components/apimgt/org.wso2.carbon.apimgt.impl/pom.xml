@@ -413,6 +413,14 @@
                             <name>IdentityConfigurationPath</name>
                             <value>${basedir}/src/test/resources/identity.xml</value>
                         </property>
+                        <property>
+                            <name>axis2.repo</name>
+                            <value>${basedir}/src/test/resources</value>
+                        </property>
+                        <property>
+                            <name>axis2.xml</name>
+                            <value>${basedir}/src/test/resources/axis2_client.xml</value>
+                        </property>
                     </systemProperties>
                 </configuration>
                 <dependencies>
@@ -469,7 +477,6 @@
                             version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${pdfbox.version}",
                             org.apache.poi.*,
-                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*,
                             org.apache.velocity.*,
                             org.apache.solr.common,
