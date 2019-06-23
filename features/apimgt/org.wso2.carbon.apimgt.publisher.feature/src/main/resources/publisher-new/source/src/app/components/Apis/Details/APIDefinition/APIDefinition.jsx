@@ -269,7 +269,12 @@ class APIDefinition extends React.Component {
                     TransitionComponent={this.transition}
                 >
                     <Paper square className={classes.popupHeader}>
-                        <IconButton className={classes.button} color='inherit' onClick={this.closeEditor} aria-label='Close'>
+                        <IconButton
+                            className={classes.button}
+                            color='inherit'
+                            onClick={this.closeEditor}
+                            aria-label='Close'
+                        >
                             <Icon>close</Icon>
                         </IconButton>
 
@@ -290,25 +295,25 @@ class APIDefinition extends React.Component {
                 <Dialog
                     open={openDialog}
                     onClose={this.handleNo}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
+                    aria-labelledby='alert-dialog-title'
+                    aria-describedby='alert-dialog-description'
                 >
-                    <DialogTitle id="alert-dialog-title">
+                    <DialogTitle id='alert-dialog-title'>
                         <Typography align='left'>
                             Save API Definition
                         </Typography>
                     </DialogTitle>
                     <DialogContent>
-                        <DialogContentText id="alert-dialog-description">
+                        <DialogContentText id='alert-dialog-description'>
                             Do you want to save the API Definition?
                             This will affect the existing resources.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleNo} color="secondary">
+                        <Button onClick={this.handleNo} color='secondary'>
                             No
                         </Button>
-                        <Button onClick={this.handleOk} color="primary" autoFocus>
+                        <Button onClick={this.handleOk} color='primary' autoFocus>
                             Yes
                         </Button>
                     </DialogActions>
