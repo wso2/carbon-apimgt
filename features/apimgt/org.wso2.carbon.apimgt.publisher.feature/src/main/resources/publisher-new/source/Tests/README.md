@@ -5,6 +5,10 @@ We run mainly two types of tests
 -   Unit tests
 -   Integration test
 
+# Prerequisites
+
+Require NodeJs 8.0 or higher, and npm 5.0 or higher.You may use [`nvm`](https://github.com/nvm-sh/nvm) for installing/managing Node and NPM tools.
+
 # How to run
 
 Before running either unit tests or integration test, Go to the application root directory where `package.json` file is located (i:e `<carbon-apimgt-root>/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher-new/`) and run `npm install` command to download all the dependencies.
