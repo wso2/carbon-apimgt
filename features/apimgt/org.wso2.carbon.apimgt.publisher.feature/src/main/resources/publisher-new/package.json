@@ -86,6 +86,7 @@
         "less": "^2.7.2",
         "less-loader": "^4.0.4",
         "mock-local-storage": "^1.0.2",
+        "puppeteer": "^1.17.0",
         "style-loader": "^0.18.1",
         "swagger-parser": "^7.0.0",
         "webpack": "v4.28.4",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,21 +16,9 @@
  * under the License.
  */
 
-import React from 'react';
-import { Route, Switch } from 'react-router-dom';
-
-import Listing from './Listing/Listing';
-import Details from './Details/index';
-import ApiCreate from './Create/ApiCreate';
-
-const Apis = () => {
-    return (
-        <Switch>
-            <Route exact path='/apis' component={Listing} />
-            <Route path='/apis/create' component={ApiCreate} />
-            <Route path='/apis/:apiUUID/' component={Details} />
-        </Switch>
-    );
-};
-
-export default Apis;
+ describe('Unit test for ApiCreate component', () => {
+     test.todo('should render ApiCreateEndpoint when navigating to /apis/create/rest url');
+     test.todo('should render ApiCreateSwagger when navigating to /apis/create/swagger url');
+     test.todo('should render ApiCreateWSDL when navigating to /apis/create/wsdl url');
+     test.todo('should render page not found when navigating to /apis/create/chuck/norris url');
+ });

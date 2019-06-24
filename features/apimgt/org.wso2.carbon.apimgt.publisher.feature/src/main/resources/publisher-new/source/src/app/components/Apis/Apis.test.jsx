@@ -17,10 +17,73 @@
  */
 
 import React from 'react';
+import { MemoryRouter, Route } from 'react-router-dom';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import Configurations from 'Config';
 import APIs from './Apis';
+import ApiCreate from './Create/ApiCreate';
+
+
+import { PageNotFound } from '../Base/Errors';
+
+jest.mock('./Listing/Listing', () => () => {
+    return <div>Testing Listing page</div>;
+});
+
+// jest.mock('./Listing/Listing', () => {
+//     const Listing = () => (<div>Testing listing page</div>);
+//     return Listing;
+// });
+
+const { light } = Configurations.themes;
 
 describe('Test APIs main routing component', () => {
     test('Should render the APIs routing component in smoke test', () => {
         shallow(<APIs />);
+    });
+
+    test('should return API Listing component when request path match with /apis', () => {
+        const exactPath = '/apis';
+        const exactApisPath = (
+            <MemoryRouter initialEntries={[exactPath]}>
+                <APIs />
+            </MemoryRouter>
+        );
+        const wrapper = mount(exactApisPath);
+        expect(wrapper.find(Route).prop('path')).toEqual(exactPath);
+        expect(wrapper.contains('Testing Listing page')).toBeTruthy();
+    });
+    test('should return ApiCreate component when request path match with /apis/create', () => {
+        const apiCreatePath = '/apis/create';
+        const createAPI = (
+            <MemoryRouter initialEntries={[apiCreatePath]}>
+                <APIs />
+            </MemoryRouter>
+        );
+
+        const wrapper = mount(createAPI);
+        expect(wrapper.find(ApiCreate)).toHaveLength(1);
+
+        // Page not found is expected here, Because we are navigating to exact /apis/create path
+        const pageNotFoundWrapper = wrapper.find(PageNotFound);
+        expect(pageNotFoundWrapper).toHaveLength(1);
+    });
+
+    test.todo('should return API Details component when request path match with /apis/:apiUUID/');
+    test('should return PageNotFound component if there is no matching path', () => {
+        const url = '/apis/chuck/norris';
+        const noneExistingPath = (
+            <MemoryRouter initialEntries={[url]}>
+                <MuiThemeProvider theme={createMuiTheme(light)}>
+                    <APIs />
+                </MuiThemeProvider>
+            </MemoryRouter>
+        );
+        const wrapper = mount(noneExistingPath);
+        const pageNotFoundWrapper = wrapper.find(PageNotFound);
+        expect(pageNotFoundWrapper).toHaveLength(1);
+        expect(pageNotFoundWrapper.contains('404 Page Not Found!')).toBeTruthy();
+        expect(pageNotFoundWrapper.contains(url)).toBeTruthy();
     });
 });
