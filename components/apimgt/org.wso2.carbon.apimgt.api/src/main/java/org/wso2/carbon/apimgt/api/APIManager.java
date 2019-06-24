@@ -734,4 +734,14 @@ public interface APIManager {
      * @throws APIManagementException if an error occurs while retrieving the image
      */
     ResourceFile getProductIcon(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Associates the given product resource with the specified path.
+     *
+     * @param resourcePath a String representing the relative path of a resource.
+     * @param resourceFile to be saved
+     * @return a String URL pointing to the image that was added
+     * @throws APIManagementException if an error occurs while adding the icon image
+     */
+    String addProductResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException;
 }

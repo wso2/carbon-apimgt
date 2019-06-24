@@ -3254,4 +3254,10 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return null;
     }
+
+    @Override
+    public String addProductResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {
+        //todo : implement access control checks here and move to userawareAPIProvider
+        return addResourceFile(resourcePath, resourceFile);
+    }
 }
