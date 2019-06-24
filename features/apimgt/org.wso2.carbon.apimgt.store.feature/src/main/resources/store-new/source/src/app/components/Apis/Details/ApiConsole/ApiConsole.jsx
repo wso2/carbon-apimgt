@@ -33,6 +33,7 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 
 import Progress from '../../../Shared/Progress';
@@ -106,6 +107,7 @@ class ApiConsole extends React.Component {
         const apiID = match.params.api_uuid;
         let api;
         let environments;
+        let labels;
         let selectedEnvironment;
         let swagger;
         let subscriptions;
@@ -118,11 +120,18 @@ class ApiConsole extends React.Component {
         promiseAPI
             .then((apiResponse) => {
                 api = apiResponse.obj;
-                environments = api.endpointURLs;
-
+                if (api.endpointURLs) {
+                    environments = api.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
+                }
+                if (api.labels) {
+                    labels = api.labels.map((label) => { return label.name; });
+                }
                 if (environments && environments.length > 0) {
-                    selectedEnvironment = environments[0].environmentName;
+                    [selectedEnvironment] = environments;
                     return this.apiClient.getSwaggerByAPIIdAndEnvironment(apiID, selectedEnvironment);
+                } else if (labels && labels.length > 0) {
+                    [selectedEnvironment] = labels;
+                    return this.apiClient.getSwaggerByAPIIdAndLabel(apiID, selectedEnvironment);
                 } else {
                     return this.apiClient.getSwaggerByAPIId(apiID);
                 }
@@ -143,11 +152,11 @@ class ApiConsole extends React.Component {
                             return application.getKeys();
                         })
                         .then((appKeys) => {
-                            if (appKeys.get('PRODUCTION')) {
-                                selectedKeyType = 'PRODUCTION';
-                                ({ accessToken } = appKeys.get('PRODUCTION').token);
-                            } else if (appKeys.get('SANDBOX')) {
+                            if (appKeys.get('SANDBOX')) {
                                 selectedKeyType = 'SANDBOX';
+                                ({ accessToken } = appKeys.get('PRODUCTION').token);
+                            } else {
+                                selectedKeyType = 'PRODUCTION';
                                 ({ accessToken } = appKeys.get('PRODUCTION').token);
                             }
 
@@ -156,6 +165,7 @@ class ApiConsole extends React.Component {
                                 swagger,
                                 subscriptions,
                                 environments,
+                                labels,
                                 selectedEnvironment,
                                 selectedApplication,
                                 keys: appKeys,
@@ -169,6 +179,7 @@ class ApiConsole extends React.Component {
                         swagger,
                         subscriptions,
                         environments,
+                        labels,
                         selectedEnvironment,
                         selectedApplication,
                         keys,
@@ -238,15 +249,21 @@ class ApiConsole extends React.Component {
      * @memberof ApiConsole
      */
     updateSwagger() {
-        const { selectedEnvironment, api } = this.state;
-        let promisSwagger;
+        const {
+            selectedEnvironment, api, environments,
+        } = this.state;
+        let promiseSwagger;
 
         if (selectedEnvironment) {
-            promisSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, selectedEnvironment);
+            if (environments.includes(selectedEnvironment)) {
+                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, selectedEnvironment);
+            } else {
+                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(api.id, selectedEnvironment);
+            }
         } else {
-            promisSwagger = this.apiClient.getSwaggerByAPIId(api.id);
+            promiseSwagger = this.apiClient.getSwaggerByAPIId(api.id);
         }
-        promisSwagger.then((swaggerResponse) => {
+        promiseSwagger.then((swaggerResponse) => {
             this.setState({ swagger: swaggerResponse.obj });
         });
     }
@@ -298,7 +315,7 @@ class ApiConsole extends React.Component {
         const { classes } = this.props;
         const {
             api, notFound, swagger, accessToken, showToken, subscriptions, selectedApplication, selectedKeyType,
-            selectedEnvironment, environments,
+            selectedEnvironment, environments, labels,
         } = this.state;
         const user = AuthManager.getUser();
 
@@ -328,10 +345,10 @@ class ApiConsole extends React.Component {
                             </Paper>
                         </Grid>
                     )}
-                    {subscriptions && subscriptions.length > 0 && (
+                    {subscriptions && (
                         <Grid container>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
-                                <FormControl className={classes.formControl}>
+                                <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
                                     <InputLabel htmlFor='application-selection'>Applications</InputLabel>
                                     <Select
                                         name='selectedApplication'
@@ -347,9 +364,14 @@ class ApiConsole extends React.Component {
                                         ))}
                                     </Select>
                                 </FormControl>
+                                { subscriptions.length === 0 &&
+                                <FormHelperText>
+                                    Please subscribe to an application
+                                </FormHelperText>
+                                }
                             </Grid>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
-                                <FormControl className={classes.formControl}>
+                                <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
                                     <InputLabel htmlFor='key-type-selection'>Key</InputLabel>
                                     <Select
                                         name='selectedKeyType'
@@ -369,7 +391,7 @@ class ApiConsole extends React.Component {
                             </Grid>
                         </Grid>
                     )}
-                    {environments && environments.length > 0 && (
+                    {((environments && environments.length > 0) || (labels && labels.length > 0)) && (
                         <Grid item md={8} xs={8} className={classes.gridWrapper}>
                             <FormControl className={classes.formControl}>
                                 <InputLabel htmlFor='environment-selection'>Environment</InputLabel>
@@ -380,14 +402,29 @@ class ApiConsole extends React.Component {
                                     input={<Input name='environment' id='environment-selection' />}
                                     fullWidth
                                 >
-                                    {environments.map(env => (
-                                        <MenuItem value={env.environmentName}>
-                                            {env.environmentName}
+                                    {environments && environments.length > 0 && (
+                                        <MenuItem value='' disabled>
+                                            <em>API Gateways</em>
                                         </MenuItem>
-                                    ))}
-                                    <MenuItem value='a'>
-                                            a
-                                    </MenuItem>
+                                    )}
+                                    {environments && (
+                                        environments.map(env => (
+                                            <MenuItem value={env}>
+                                                {env}
+                                            </MenuItem>
+                                        )))}
+                                    {labels && labels.length > 0 && (
+                                        <MenuItem value='' disabled>
+                                            <em>Micro Gateways</em>
+                                        </MenuItem>
+                                    )}
+                                    {labels && (
+                                        labels.map(label => (
+                                            <MenuItem value={label}>
+                                                {label}
+                                            </MenuItem>
+                                        ))
+                                    )}
                                 </Select>
                             </FormControl>
                         </Grid>
