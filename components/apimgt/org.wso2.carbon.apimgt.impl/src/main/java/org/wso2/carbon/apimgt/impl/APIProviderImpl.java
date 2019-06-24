@@ -6489,6 +6489,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //provider ------provides----> APIProduct
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
 
+            String visibleRolesList = apiProduct.getVisibleRoles();
+            String[] visibleRoles = new String[0];
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+
+            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
+                    artifactPath, registry);
+
             registry.commitTransaction();
             transactionCommitted = true;
 

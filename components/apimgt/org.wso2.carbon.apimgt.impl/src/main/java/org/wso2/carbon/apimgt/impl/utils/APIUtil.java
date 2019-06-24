@@ -3615,9 +3615,9 @@ public final class APIUtil {
     /**
      * This function is to set resource permissions based on its visibility
      *
-     * @param visibility   API visibility
+     * @param visibility   API/Product visibility
      * @param roles        Authorized roles
-     * @param artifactPath API resource path
+     * @param artifactPath API/Product resource path
      * @param registry     Registry
      * @throws APIManagementException Throwing exception
      */
