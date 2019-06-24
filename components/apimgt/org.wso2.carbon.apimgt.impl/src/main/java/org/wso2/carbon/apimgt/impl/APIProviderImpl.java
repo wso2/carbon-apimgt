@@ -181,6 +181,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.replaceEmailDomain;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -6353,8 +6354,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
             API api;
-            if (apiProductResource.getApiIdentifier() != null) {
-                api = super.getLightweightAPI(apiProductResource.getApiIdentifier());
+            APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
+            if (productIdentifier != null) {
+                APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
+                String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
+                APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
+                        productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
+                api = super.getLightweightAPI(emailReplacedAPIIdentifier);
             } else {
                 api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
             }
