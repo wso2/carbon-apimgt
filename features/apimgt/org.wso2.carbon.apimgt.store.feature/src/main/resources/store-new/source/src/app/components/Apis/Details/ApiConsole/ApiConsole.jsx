@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -335,12 +336,15 @@ class ApiConsole extends React.Component {
                                 <Typography variant='h5' component='h3'>
                                     <WarningIcon />
                                     {' '}
-                                    Notice
+                                    <FormattedMessage id='notice' defaultMessage='Notice' />
                                 </Typography>
                                 <Typography component='p'>
-                                    You require an access token to try the API. Please log in and subscribe to the API
-                                    to generate an access token. If you already have an access token, please provide it
-                                    below.
+                                    <FormattedMessage
+                                        id='api.console.require.access.token'
+                                        defaultMessage={'You require an access token to try the API. Please log ' +
+                                        'in and subscribe to the API to generate an access token. If you already ' +
+                                        'have an access token, please provide it below.'}
+                                    />
                                 </Typography>
                             </Paper>
                         </Grid>
@@ -349,7 +353,9 @@ class ApiConsole extends React.Component {
                         <Grid container>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
                                 <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
-                                    <InputLabel htmlFor='application-selection'>Applications</InputLabel>
+                                    <InputLabel htmlFor='application-selection'>
+                                        <FormattedMessage id='applications' defaultMessage='Applications' />
+                                    </InputLabel>
                                     <Select
                                         name='selectedApplication'
                                         value={selectedApplication}
@@ -366,13 +372,18 @@ class ApiConsole extends React.Component {
                                 </FormControl>
                                 { subscriptions.length === 0 &&
                                 <FormHelperText>
-                                    Please subscribe to an application
+                                    <FormattedMessage
+                                        id='require.application.subscribe'
+                                        defaultMessage='Please subscribe to an application'
+                                    />
                                 </FormHelperText>
                                 }
                             </Grid>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
                                 <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
-                                    <InputLabel htmlFor='key-type-selection'>Key</InputLabel>
+                                    <InputLabel htmlFor='key-type-selection'>
+                                        <FormattedMessage id='key' defaultMessage='Key' />
+                                    </InputLabel>
                                     <Select
                                         name='selectedKeyType'
                                         value={selectedKeyType}
@@ -394,7 +405,9 @@ class ApiConsole extends React.Component {
                     {((environments && environments.length > 0) || (labels && labels.length > 0)) && (
                         <Grid item md={8} xs={8} className={classes.gridWrapper}>
                             <FormControl className={classes.formControl}>
-                                <InputLabel htmlFor='environment-selection'>Environment</InputLabel>
+                                <InputLabel htmlFor='environment-selection'>
+                                    <FormattedMessage id='environment' defaultMessage='Environment' />
+                                </InputLabel>
                                 <Select
                                     name='selectedEnvironment'
                                     value={selectedEnvironment}
@@ -404,7 +417,9 @@ class ApiConsole extends React.Component {
                                 >
                                     {environments && environments.length > 0 && (
                                         <MenuItem value='' disabled>
-                                            <em>API Gateways</em>
+                                            <em>
+                                                <FormattedMessage id='api.gateways' defaultMessage='API Gateways' />
+                                            </em>
                                         </MenuItem>
                                     )}
                                     {environments && (
@@ -415,7 +430,9 @@ class ApiConsole extends React.Component {
                                         )))}
                                     {labels && labels.length > 0 && (
                                         <MenuItem value='' disabled>
-                                            <em>Micro Gateways</em>
+                                            <em>
+                                                <FormattedMessage id='micro.gateways' defaultMessage='Micro Gateways' />
+                                            </em>
                                         </MenuItem>
                                     )}
                                     {labels && (
@@ -435,12 +452,13 @@ class ApiConsole extends React.Component {
                                 margin='normal'
                                 variant='outlined'
                                 className={classes.inputText}
-                                label='Access Token'
+                                label={<FormattedMessage id='access.token' defaultMessage='Access Token' />}
                                 name='accessToken'
                                 onChange={this.handleChanges}
                                 type={showToken ? 'text' : 'password'}
                                 value={accessToken || ''}
-                                helperText='Enter access token'
+                                helperText={
+                                    <FormattedMessage id='enter.access.token' defaultMessage='Enter access Token' />}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position='end'>
