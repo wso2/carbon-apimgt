@@ -96,6 +96,41 @@ public enum VisibilityEnum {
     private VisibilityEnum visibility = null;
     private List<String> visibleRoles = new ArrayList<>();
     private List<String> visibleTenants = new ArrayList<>();
+
+@XmlType(name="AccessControlEnum")
+@XmlEnum(String.class)
+public enum AccessControlEnum {
+
+    @XmlEnumValue("NONE") NONE(String.valueOf("NONE")), @XmlEnumValue("RESTRICTED") RESTRICTED(String.valueOf("RESTRICTED"));
+
+
+    private String value;
+
+    AccessControlEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static AccessControlEnum fromValue(String v) {
+        for (AccessControlEnum b : AccessControlEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private AccessControlEnum accessControl = null;
+    private List<String> accessControlRoles = new ArrayList<>();
     private List<String> gatewayEnvironments = new ArrayList<>();
     private List<String> transport = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
@@ -317,6 +352,42 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   * Defines whether the API Product is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API Product can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators, based on the restriction. 
+   **/
+  public APIProductDTO accessControl(AccessControlEnum accessControl) {
+    this.accessControl = accessControl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Defines whether the API Product is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API Product can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators, based on the restriction. ")
+  @JsonProperty("accessControl")
+  public AccessControlEnum getAccessControl() {
+    return accessControl;
+  }
+  public void setAccessControl(AccessControlEnum accessControl) {
+    this.accessControl = accessControl;
+  }
+
+  /**
+   * The user roles that are able to view/modify as API Product publisher or creator.
+   **/
+  public APIProductDTO accessControlRoles(List<String> accessControlRoles) {
+    this.accessControlRoles = accessControlRoles;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"admin\"]", value = "The user roles that are able to view/modify as API Product publisher or creator.")
+  @JsonProperty("accessControlRoles")
+  public List<String> getAccessControlRoles() {
+    return accessControlRoles;
+  }
+  public void setAccessControlRoles(List<String> accessControlRoles) {
+    this.accessControlRoles = accessControlRoles;
+  }
+
+  /**
    * List of gateway environments the API Product is available 
    **/
   public APIProductDTO gatewayEnvironments(List<String> gatewayEnvironments) {
@@ -477,6 +548,8 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(visibility, apIProduct.visibility) &&
         Objects.equals(visibleRoles, apIProduct.visibleRoles) &&
         Objects.equals(visibleTenants, apIProduct.visibleTenants) &&
+        Objects.equals(accessControl, apIProduct.accessControl) &&
+        Objects.equals(accessControlRoles, apIProduct.accessControlRoles) &&
         Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
         Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(policies, apIProduct.policies) &&
@@ -489,7 +562,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, gatewayEnvironments, transport, policies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
   }
 
   @Override
@@ -507,6 +580,8 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
+    sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
+    sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");

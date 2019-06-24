@@ -1464,6 +1464,16 @@ public class APIMappingUtil {
             String visibleTenants = StringUtils.join(dto.getVisibleTenants(), ',');
             product.setVisibleTenants(visibleTenants);
         }
+
+        List<String> accessControlRoles = dto.getAccessControlRoles();
+        if (accessControlRoles == null || accessControlRoles.isEmpty()) {
+            product.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
+            product.setAccessControlRoles("null");
+        } else {
+            product.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
+            product.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
+        }
+
         for (String tier : tiersFromDTO) {
             apiTiers.add(new Tier(tier));
         }

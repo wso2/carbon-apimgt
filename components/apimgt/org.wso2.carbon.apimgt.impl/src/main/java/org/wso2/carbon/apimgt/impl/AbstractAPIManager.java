@@ -3093,7 +3093,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
-            result = searchPaginatedAPIProducts(userRegistry, searchQuery, start, end);
+            result = searchPaginatedAPIProducts(userRegistry, getSearchQuery(searchQuery), start, end);
 
         } catch (Exception e) {
             String msg = "Failed to Search APIs";

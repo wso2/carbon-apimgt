@@ -54,6 +54,14 @@ public class APIProduct {
     private String productionMaxTps;
     private String sandboxMaxTps;
 
+    /**
+     * Publisher access control related parameters.
+     * AccessControl -> Specifies whether that particular API Product is restricted to certain set of publishers and creators.
+     * AccessControlRoles -> Specifies the roles that the particular API Product is visible to.
+     */
+    private String accessControl;
+    private String accessControlRoles;
+
     public APIProduct(){}
 
     public APIProduct(APIProductIdentifier id) {
@@ -260,6 +268,22 @@ public class APIProduct {
         return thumbnailUrl;
     }
 
+    public void setAccessControl(String accessControl) {
+        this.accessControl = accessControl;
+    }
+
+    public String getAccessControl() {
+        return accessControl;
+    }
+
+    public void setAccessControlRoles(String accessControlRoles) {
+        this.accessControlRoles = accessControlRoles;
+    }
+
+    public String getAccessControlRoles() {
+        return accessControlRoles;
+    }
+
     @Override
     public String toString() {
         String tiers = "";
@@ -275,8 +299,9 @@ public class APIProduct {
                 + ", availableTiers=" + tiers + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
                 + ", visibleTenants=" + visibleTenants + ", environments=" + env + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableTenants=" + subscriptionAvailableTenants
-                + ", state=" + state + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail
-                + ", tenantDomain=" + tenantDomain + ", productResources=" + productResources + "]";
+                + ", accessControl=" + accessControl + ", accessControlRoles=" + accessControlRoles + ", state=" + state
+                + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain="
+                + tenantDomain + ", productResources=" + productResources + "]";
     }
 
 }

@@ -6076,6 +6076,22 @@ definitions:
         type: array
         items:
           type: string
+      accessControl:
+        type: string
+        description: |
+          Defines whether the API Product is restricted to certain set of publishers or creators or is it visible to all the
+          publishers and creators. If the accessControl restriction is none, this API Product can be modified by all the
+          publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
+          based on the restriction.
+        enum:
+          - NONE
+          - RESTRICTED
+      accessControlRoles:
+        type: array
+        description: The user roles that are able to view/modify as API Product publisher or creator.
+        items:
+          type: string
+        example: [admin]
       gatewayEnvironments:
         description: |
           List of gateway environments the API Product is available
