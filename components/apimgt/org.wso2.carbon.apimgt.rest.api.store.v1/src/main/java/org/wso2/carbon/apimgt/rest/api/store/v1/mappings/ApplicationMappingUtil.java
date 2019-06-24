@@ -155,6 +155,8 @@ public class ApplicationMappingUtil {
         if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationInfoDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
         }
+        Map<String,String> applicationAttributes = application.getApplicationAttributes();
+        applicationInfoDTO.setAttributes(applicationAttributes);
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
         return applicationInfoDTO;

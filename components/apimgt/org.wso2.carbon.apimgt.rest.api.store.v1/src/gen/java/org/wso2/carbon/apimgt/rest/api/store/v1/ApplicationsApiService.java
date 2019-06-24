@@ -40,6 +40,7 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body, MessageContext messageContext);
       public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext);
       public Response applicationsApplicationIdScopesGet(String applicationId, Boolean filterByUserRoles, String ifNoneMatch, MessageContext messageContext);
+      public Response applicationsAttributesGet(String ifNoneMatch, MessageContext messageContext);
       public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext);
       public Response applicationsPost(ApplicationDTO body, MessageContext messageContext);
 }

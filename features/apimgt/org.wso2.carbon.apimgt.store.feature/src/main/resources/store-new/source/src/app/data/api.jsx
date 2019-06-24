@@ -231,6 +231,12 @@ export default class API extends Resource {
         }
     }
 
+    getAllApplicationAttributes() {
+        return this.client.then((client) => {
+            return client.apis['Application Attributes'].get_applications_attributes(this._requestMetaData());
+        });
+    }
+
     /**
      * Create application
      * @param {object} application content of the application
