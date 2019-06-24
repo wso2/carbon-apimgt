@@ -31,11 +31,6 @@ jest.mock('./Listing/Listing', () => () => {
     return <div>Testing Listing page</div>;
 });
 
-// jest.mock('./Listing/Listing', () => {
-//     const Listing = () => (<div>Testing listing page</div>);
-//     return Listing;
-// });
-
 const { light } = Configurations.themes;
 
 describe('Test APIs main routing component', () => {
