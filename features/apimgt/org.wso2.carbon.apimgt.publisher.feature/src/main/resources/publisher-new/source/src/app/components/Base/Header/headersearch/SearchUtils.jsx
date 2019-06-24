@@ -119,8 +119,12 @@ function getSuggestionValue(suggestion) {
 function getSuggestions(value) {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
-    const promisedAPIs = API.search({ query: inputValue, limit: 8 });
-    return inputLength === 0 ? new Promise(resolve => resolve([])) : promisedAPIs;
+    if (inputLength === 0 || (inputValue.includes(':') &&
+        (inputValue.trim().split(':').filter(x => x)).length === 1)) {
+        return new Promise(resolve => resolve({ obj: { list: [] } }));
+    } else {
+        return API.search({ query: inputValue, limit: 8 });
+    }
 }
 
 export { renderInput, renderSuggestion, getSuggestions, getSuggestionValue };
