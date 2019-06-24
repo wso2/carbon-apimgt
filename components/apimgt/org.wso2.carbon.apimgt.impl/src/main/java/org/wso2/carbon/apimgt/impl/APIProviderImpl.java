@@ -5772,12 +5772,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * To add API roles restrictions and add additional properties.
+     * To add API/Product roles restrictions and add additional properties.
      *
-     * @param artifactPath                Path of the API artifact.
+     * @param artifactPath                Path of the API/Product artifact.
      * @param publisherAccessControlRoles Role specified for the publisher access control.
      * @param publisherAccessControl      Publisher Access Control restriction.
-     * @param additionalProperties        Additional properties that is related with an API.
+     * @param additionalProperties        Additional properties that is related with an API/Product.
      * @throws RegistryException Registry Exception.
      */
     private void updateRegistryResources(String artifactPath, String publisherAccessControlRoles,
@@ -6495,6 +6495,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 visibleRoles = visibleRolesList.split(",");
             }
 
+            String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
+                    apiProduct.getAdditionalProperties());
             APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
                     artifactPath, registry);
 
