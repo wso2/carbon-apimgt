@@ -609,7 +609,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                                 + APIUsageStatisticsClientConstants.API_METHOD + ", "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                                 + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ", "
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + " group by "
+                                + "sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                                + ") as total_request_count group by "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                                 + APIUsageStatisticsClientConstants.API_NAME + ", "
                                 + APIUsageStatisticsClientConstants.API_VERSION + ", "
