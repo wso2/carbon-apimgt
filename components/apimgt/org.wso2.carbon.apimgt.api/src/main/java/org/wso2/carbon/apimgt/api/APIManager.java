@@ -174,13 +174,13 @@ public interface APIManager {
     boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException;
 
     /**
-     * Returns a list of documentation attached to a particular API
+     * Returns a list of documentation attached to a particular API/API Product
      *
-     * @param apiId APIIdentifier
+     * @param id Identifier
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException;
+    List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException;
 
     /**
      * Returns a list of documentation attached to a particular API

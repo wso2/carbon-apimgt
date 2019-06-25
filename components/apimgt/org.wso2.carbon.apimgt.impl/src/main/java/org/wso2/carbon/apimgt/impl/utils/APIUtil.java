@@ -8544,4 +8544,29 @@ public final class APIUtil {
         return null;
     }
 
+    /**
+     * Utility method to get product documentation content file path
+     *
+     * @param productId             APIProductIdentifier
+     * @param documentationName String
+     * @return Doc content path
+     */
+    public static String getProductDocContentPath(APIProductIdentifier productId, String documentationName) {
+        return getProductDocPath(productId) + documentationName;
+    }
+
+    /**
+     * Utility method to get product documentation path
+     *
+     * @param productId APIProductIdentifier
+     * @return Doc path
+     */
+    public static String getProductDocPath(APIProductIdentifier productId) {
+        return APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                productId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                productId.getName() + RegistryConstants.PATH_SEPARATOR +
+                productId.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+
 }

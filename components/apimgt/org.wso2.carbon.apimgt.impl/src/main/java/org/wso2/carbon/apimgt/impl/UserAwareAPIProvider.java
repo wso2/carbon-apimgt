@@ -389,9 +389,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getAllDocumentation(apiId);
+    public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
+        checkAccessControlPermission(id);
+        return super.getAllDocumentation(id);
     }
 
     @Override

@@ -992,6 +992,20 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for product documentations
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getProductDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
+        String paginatedURL = RestApiConstants.PRODUCT_DOCUMENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        return paginatedURL;
+    }
+
     /**
      * Checks whether the list of tiers are valid given the all valid tiers
      * 

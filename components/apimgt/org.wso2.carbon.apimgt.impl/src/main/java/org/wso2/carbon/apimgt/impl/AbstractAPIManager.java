@@ -1144,11 +1144,20 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
-        String apiResourcePath = APIUtil.getAPIPath(apiId);
+        String resourcePath = StringUtils.EMPTY;
+        String docArtifactKeyType = StringUtils.EMPTY;
+        if (id instanceof APIIdentifier) {
+            resourcePath = APIUtil.getAPIPath((APIIdentifier) id);
+            docArtifactKeyType = APIConstants.DOCUMENTATION_KEY;
+        } else if (id instanceof APIProductIdentifier) {
+            resourcePath = APIUtil.getAPIProductPath((APIProductIdentifier) id);
+            docArtifactKeyType = APIConstants.PRODUCT_DOCUMENTATION_KEY;
+        }
+
         try {
-            Association[] docAssociations = registry.getAssociations(apiResourcePath,
+            Association[] docAssociations = registry.getAssociations(resourcePath,
                     APIConstants.DOCUMENTATION_ASSOCIATION);
             if (docAssociations == null) {
                 return documentationList;
@@ -1158,13 +1167,19 @@ public abstract class AbstractAPIManager implements APIManager {
 
                 Resource docResource = registry.get(docPath);
                 GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
-                        APIConstants.DOCUMENTATION_KEY);
+                        docArtifactKeyType);
                 GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
                 Documentation doc = APIUtil.getDocumentation(docArtifact);
                 Date contentLastModifiedDate;
                 Date docLastModifiedDate = docResource.getLastModified();
                 if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType()) || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
-                    String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                    String contentPath = StringUtils.EMPTY;
+                    if (id instanceof APIIdentifier) {
+                        contentPath = APIUtil.getAPIDocContentPath((APIIdentifier) id, doc.getName());
+                    } else if (id instanceof APIProductIdentifier) {
+                        contentPath = APIUtil.getProductDocContentPath((APIProductIdentifier) id, doc.getName());
+                    }
+
                     contentLastModifiedDate = registry.get(contentPath).getLastModified();
                     doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
                             contentLastModifiedDate : docLastModifiedDate));
@@ -1175,7 +1190,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
         } catch (RegistryException e) {
-            String msg = "Failed to get documentations for api " + apiId.getApiName();
+            String msg = "Failed to get documentations for api/product " + id.getName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
