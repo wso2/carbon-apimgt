@@ -127,7 +127,7 @@ function MarkdownEditor(props) {
     return (
         <div>
             <Button onClick={toggleOpen}>
-                <Icon>code</Icon> <FormattedMessage id='documents.markdown.editor.editor' defaultMessage='Editor' />
+                <Icon>code</Icon> <FormattedMessage id='documents.markdown.editor.editor' defaultMessage='Edit Content' />
             </Button>
             <Dialog fullScreen open={open} onClose={toggleOpen} TransitionComponent={Transition}>
                 <Paper square className={classes.popupHeader}>
@@ -156,7 +156,7 @@ function MarkdownEditor(props) {
                         <Grid item xs={6}>
                             <MonacoEditor
                                 width='100%'
-                                height='calc(100vh - 55px)'
+                                height='100vh'
                                 language='markdown'
                                 theme='vs-dark'
                                 value={code}

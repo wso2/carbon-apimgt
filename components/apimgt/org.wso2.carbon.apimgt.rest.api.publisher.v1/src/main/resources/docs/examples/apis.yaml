@@ -1,0 +1,489 @@
+get:
+  - rawRequest: |
+      GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis HTTP/1.1
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    curl: |
+      curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://127.0.0.1:9443/api/am/publisher/v1.0/apis
+    response:
+      head: |
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+      body:
+        {
+          "count": 1,
+          "list": [
+          {
+            "id": "ae4eae22-3f65-387b-2323-d37eaa366fa8",
+            "name": "CalculatorAPI",
+            "description": "A calculator API that supports basic operations",
+            "context": "CalculatorAPI",
+            "version": "1.0.0",
+            "provider": "admin",
+            "lifeCycleStatus": "CREATED",
+            "workflowStatus": "APPROVED",
+            "hasThumbnail": true,
+            "securityScheme": [
+              "oauth2"
+            ]
+          }
+          ],
+          "pagination": {
+            "offset": 0,
+            "limit": 1,
+            "total": 1,
+            "next": "",
+            "previous": ""
+          }
+        }
+  - rawRequest: |
+      GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis HTTP/1.1
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    rawResponse: |
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+
+      {
+        "count":2,
+        "list":[
+        {
+          "id":"43537569-b701-4f3f-a989-e1b6f42ebcf0",
+          "name":"PizzaShackAPI",
+          "description":"This is a simple API for Pizza Shack online pizza delivery store.",
+          "context":"/pizzashack",
+          "version":"1.0.0",
+          "provider":"admin",
+          "lifeCycleStatus":"PUBLISHED",
+          "workflowStatus":null,
+          "hasThumbnail":true,
+          "securityScheme":[
+
+          ]
+        },
+        {
+          "id":"740aeb01-2d3f-4721-afac-4324988a2e0b",
+          "name":"PizzaShackAPI",
+          "description":"This is a simple API for Pizza Shack online pizza delivery store.",
+          "context":"/pizzashack",
+          "version":"2.0.0",
+          "provider":"admin",
+          "lifeCycleStatus":"CREATED",
+          "workflowStatus":null,
+          "hasThumbnail":true,
+          "securityScheme":[
+
+          ]
+        }
+        ],
+        "pagination":{
+          "offset":0,
+          "limit":25,
+          "total":2,
+          "next":"",
+          "previous":""
+        }
+      }
+
+post:
+  - rawRequest: |
+      POST https://localhost:9443/api/am/publisher/v1.0/apis HTTP/1.1
+      Content-Type: application/json
+      Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+
+      {
+        "id":"e4edb5f4-0ea8-4a16-ac63-84b7e8c6e4b9",
+        "name":"PizzaShackAPI2",
+        "description":"This is a simple API for Pizza Shack online pizza delivery store.",
+        "context":"/pizzashack2",
+        "version":"1.0.0",
+        "provider":"admin",
+        "lifeCycleStatus":"PUBLISHED",
+        "wsdlUri":null,
+        "responseCaching":"Disabled",
+        "cacheTimeout":300,
+        "destinationStatsEnabled":null,
+        "isDefaultVersion":false,
+        "type":"HTTP",
+        "transport":[
+          "http",
+          "https"
+        ],
+        "tags":[
+          "pizza"
+        ],
+        "policies":[
+          "Unlimited"
+        ],
+        "apiPolicy":null,
+        "authorizationHeader":null,
+        "securityScheme":[
+          "oauth2"
+        ],
+        "maxTps":null,
+        "visibility":"PUBLIC",
+        "visibleRoles":[
+
+        ],
+        "visibleTenants":[
+
+        ],
+        "endpointSecurity":null,
+        "gatewayEnvironments":[
+          "Production and Sandbox"
+        ],
+        "labels":[
+
+        ],
+        "mediationPolicies":[
+
+        ],
+        "subscriptionAvailability":null,
+        "subscriptionAvailableTenants":[
+
+        ],
+        "additionalProperties":{
+
+        },
+        "accessControl":"NONE",
+        "accessControlRoles":[
+
+        ],
+        "businessInformation":{
+          "businessOwner":"Jane Roe",
+          "businessOwnerEmail":"marketing@pizzashack.com",
+          "technicalOwner":"John Doe",
+          "technicalOwnerEmail":"architecture@pizzashack.com"
+        },
+        "corsConfiguration":{
+          "corsConfigurationEnabled":false,
+          "accessControlAllowOrigins":[
+            "*"
+          ],
+          "accessControlAllowCredentials":false,
+          "accessControlAllowHeaders":[
+            "authorization",
+            "Access-Control-Allow-Origin",
+            "Content-Type",
+            "SOAPAction"
+          ],
+          "accessControlAllowMethods":[
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE",
+            "PATCH",
+            "OPTIONS"
+          ]
+        },
+        "workflowStatus":null,
+        "createdTime":null,
+        "lastUpdatedTime":null,
+        "endpoint":[
+        {
+          "inline":{
+            "id":"id",
+            "name":"name",
+            "endpointConfig":{
+              "endpointType":"SINGLE",
+              "list":[
+              {
+                "url":"https://localhost:9443/am/sample/pizzashack/v1/api/",
+                "timeout":"1000"
+              }
+              ]
+            },
+            "endpointSecurity":{
+              "enabled":false,
+              "type":"basic",
+              "username":"basic",
+              "password":"basic"
+            },
+            "maxTps":1000,
+            "type":"http"
+          },
+          "type":"production_endpoints",
+          "key":"01234567-0123-0123-0123-012345678903"
+        },
+        {
+          "inline":{
+            "id":"id",
+            "name":"name",
+            "endPointConfig":{
+              "endpointType":"SINGLE",
+              "list":[
+              {
+                "url":"https://localhost:9443/am/sample/pizzashack/v1/api/",
+                "timeout":"1000"
+              }
+              ]
+            },
+            "endpointSecurity":{
+              "enabled":false,
+              "type":"basic",
+              "username":"basic",
+              "password":"basic"
+            },
+            "maxTps":1000,
+            "type":"http"
+          },
+          "type":"sandbox_endpoints",
+          "key":"01234567-0123-0123-0123-012345678904"
+        }
+        ],
+        "scopes":[
+
+        ],
+        "operations":[
+        {
+          "uritemplate":"/order/{orderId}",
+          "httpVerb":"GET",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        },
+        {
+          "uritemplate":"/order/{orderId}",
+          "httpVerb":"DELETE",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        },
+        {
+          "uritemplate":"/order/{orderId}",
+          "httpVerb":"PUT",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        },
+        {
+          "uritemplate":"/menu",
+          "httpVerb":"GET",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        },
+        {
+          "uritemplate":"/order",
+          "httpVerb":"POST",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        }
+        ],
+        "threatProtectionPolicies":null
+      }
+    rawResponse: |
+      HTTP/1.1 201 Created
+      Content-Type: application/json
+
+      {
+        "id":"e4edb5f4-0ea8-4a16-ac63-84b7e8c6e4b9",
+        "name":"PizzaShackAPI2",
+        "description":"This is a simple API for Pizza Shack online pizza delivery store.",
+        "context":"/pizzashack2",
+        "version":"1.0.0",
+        "provider":"admin",
+        "lifeCycleStatus":"PUBLISHED",
+        "wsdlUri":null,
+        "responseCaching":"Disabled",
+        "cacheTimeout":300,
+        "destinationStatsEnabled":null,
+        "isDefaultVersion":false,
+        "type":"HTTP",
+        "transport":[
+          "http",
+          "https"
+        ],
+        "tags":[
+          "pizza"
+        ],
+        "policies":[
+          "Unlimited"
+        ],
+        "apiPolicy":null,
+        "authorizationHeader":null,
+        "securityScheme":[
+          "oauth2"
+        ],
+        "maxTps":null,
+        "visibility":"PUBLIC",
+        "visibleRoles":[
+
+        ],
+        "visibleTenants":[
+
+        ],
+        "endpointSecurity":null,
+        "gatewayEnvironments":[
+          "Production and Sandbox"
+        ],
+        "labels":[
+
+        ],
+        "mediationPolicies":[
+
+        ],
+        "subscriptionAvailability":null,
+        "subscriptionAvailableTenants":[
+
+        ],
+        "additionalProperties":{
+
+        },
+        "accessControl":"NONE",
+        "accessControlRoles":[
+
+        ],
+        "businessInformation":{
+          "businessOwner":"Jane Roe",
+          "businessOwnerEmail":"marketing@pizzashack.com",
+          "technicalOwner":"John Doe",
+          "technicalOwnerEmail":"architecture@pizzashack.com"
+        },
+        "corsConfiguration":{
+          "corsConfigurationEnabled":false,
+          "accessControlAllowOrigins":[
+            "*"
+          ],
+          "accessControlAllowCredentials":false,
+          "accessControlAllowHeaders":[
+            "authorization",
+            "Access-Control-Allow-Origin",
+            "Content-Type",
+            "SOAPAction"
+          ],
+          "accessControlAllowMethods":[
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE",
+            "PATCH",
+            "OPTIONS"
+          ]
+        },
+        "workflowStatus":null,
+        "createdTime":null,
+        "lastUpdatedTime":null,
+        "endpoint":[
+        {
+          "inline":{
+            "id":"id",
+            "name":"name",
+            "endpointConfig":{
+              "endpointType":"SINGLE",
+              "list":[
+              {
+                "url":"https://localhost:9443/am/sample/pizzashack/v1/api/",
+                "timeout":"1000"
+              }
+              ]
+            },
+            "endpointSecurity":{
+              "enabled":false,
+              "type":"basic",
+              "username":"basic",
+              "password":"basic"
+            },
+            "maxTps":1000,
+            "type":"http"
+          },
+          "type":"production_endpoints",
+          "key":"01234567-0123-0123-0123-012345678903"
+        },
+        {
+          "inline":{
+            "id":"id",
+            "name":"name",
+            "endPointConfig":{
+              "endpointType":"SINGLE",
+              "list":[
+              {
+                "url":"https://localhost:9443/am/sample/pizzashack/v1/api/",
+                "timeout":"1000"
+              }
+              ]
+            },
+            "endpointSecurity":{
+              "enabled":false,
+              "type":"basic",
+              "username":"basic",
+              "password":"basic"
+            },
+            "maxTps":1000,
+            "type":"http"
+          },
+          "type":"sandbox_endpoints",
+          "key":"01234567-0123-0123-0123-012345678904"
+        }
+        ],
+        "scopes":[
+
+        ],
+        "operations":[
+        {
+          "uritemplate":"/order/{orderId}",
+          "httpVerb":"GET",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        },
+        {
+          "uritemplate":"/order/{orderId}",
+          "httpVerb":"DELETE",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        },
+        {
+          "uritemplate":"/order/{orderId}",
+          "httpVerb":"PUT",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        },
+        {
+          "uritemplate":"/menu",
+          "httpVerb":"GET",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        },
+        {
+          "uritemplate":"/order",
+          "httpVerb":"POST",
+          "id":"",
+          "scopes":[
+
+          ],
+          "authType":"Any",
+          "throttlingPolicy":"Unlimited"
+        }
+        ],
+        "threatProtectionPolicies":null
+      }
