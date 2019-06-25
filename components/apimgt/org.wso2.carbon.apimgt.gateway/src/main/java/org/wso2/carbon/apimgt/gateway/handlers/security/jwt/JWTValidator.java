@@ -32,9 +32,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -58,10 +58,10 @@ public class JWTValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
         }
 
-        boolean isVerified = verifySignature(jwtToken);
+        JSONObject payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
+        boolean isVerified = verifyToken(jwtToken, payload.getString("sub"));
 
         if (isVerified) {
-            JSONObject payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
             JSONObject applicationObj = (JSONObject) payload.get("application");
             JSONArray subscribedAPIs = (JSONArray) payload.get("subscribedAPIs");
 
@@ -100,11 +100,12 @@ public class JWTValidator {
         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
     }
 
-    private boolean verifySignature(String jwtToken) throws APISecurityException {
+
+    private boolean verifyToken(String jwtToken, String username) throws APISecurityException {
         Certificate publicCert;
 
-        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        int tenantId = APIUtil.getTenantId(username);
 
         //get tenant's key store manager
         try {
