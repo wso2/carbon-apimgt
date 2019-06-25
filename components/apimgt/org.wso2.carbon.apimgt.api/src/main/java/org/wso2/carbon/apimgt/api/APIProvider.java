@@ -363,13 +363,13 @@ public interface APIProvider extends APIManager {
      */
     public void removeDocumentation(APIIdentifier apiId, String docId)throws APIManagementException;
     /**
-     * Adds Documentation to an API
+     * Adds Documentation to an API/Product
      *
-     * @param apiId         APIIdentifier
+     * @param id         API/Product Identifier
      * @param documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException;
+    void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException;
 
     /**
      * Add a file to a document of source type FILE 

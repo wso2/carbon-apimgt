@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
@@ -2742,15 +2743,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     /**
-     * Adds Documentation to an API
+     * Adds Documentation to an API/Product
      *
-     * @param apiId         APIIdentifier
+     * @param id         API/Product Identifier
      * @param documentation Documentation
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add documentation
      */
-    public void addDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException {
-        API api = getAPI(apiId);
-        createDocumentation(api, documentation);
+    public void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException {
+        if (id instanceof APIIdentifier) {
+            API api = getAPI((APIIdentifier) id);
+            createDocumentation(api, documentation);
+        } else if (id instanceof APIProductIdentifier) {
+            APIProduct product = getAPIProduct((APIProductIdentifier) id);
+            createDocumentation(product, documentation);
+        }
+
     }
 
     /**
@@ -6312,7 +6319,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param identifier API identifier
      * @throws APIManagementException APIManagementException
      */
-    protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
+    protected void checkAccessControlPermission(Identifier identifier) throws APIManagementException {
         if (identifier == null || !isAccessControlRestrictionEnabled) {
             if (!isAccessControlRestrictionEnabled && log.isDebugEnabled()) {
                 log.debug("Publisher access control restriction is not enabled. Hence the API " + identifier
@@ -6320,38 +6327,47 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             return;
         }
-        String apiPath = APIUtil.getAPIPath(identifier);
+        String resourcePath = StringUtils.EMPTY;
+        String identifierType = StringUtils.EMPTY;
+        if (identifier instanceof APIIdentifier) {
+            resourcePath = APIUtil.getAPIPath((APIIdentifier) identifier);
+            identifierType = APIConstants.API_IDENTIFIER_TYPE;
+        } else if (identifier instanceof APIProductIdentifier) {
+            resourcePath = APIUtil.getAPIProductPath((APIProductIdentifier) identifier);
+            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
+        }
+
         try {
             // Need user name with tenant domain to get correct domain name from
             // MultitenantUtils.getTenantDomain(username)
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            if (!registry.resourceExists(apiPath)) {
+            if (!registry.resourceExists(resourcePath)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Resource does not exist in the path : " + apiPath + " this can happen if this in the "
-                            + "middle of the new API creation, hence not checking the access control");
+                    log.debug("Resource does not exist in the path : " + resourcePath + " this can happen if this is in the "
+                            + "middle of the new " + identifierType + " creation, hence not checking the access control");
                 }
                 return;
             }
-            Resource apiResource = registry.get(apiPath);
-            if (apiResource == null) {
+            Resource resource = registry.get(resourcePath);
+            if (resource == null) {
                 return;
             }
-            String accessControlProperty = apiResource.getProperty(APIConstants.ACCESS_CONTROL);
+            String accessControlProperty = resource.getProperty(APIConstants.ACCESS_CONTROL);
             if (accessControlProperty == null || accessControlProperty.trim().isEmpty() || accessControlProperty
                     .equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("API in the path  " + apiPath + " does not have any access control restriction");
+                    log.debug(identifierType + " in the path  " + resourcePath + " does not have any access control restriction");
                 }
                 return;
             }
             if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
                 return;
             }
-            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+            String publisherAccessControlRoles = resource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
             if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
                 String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
                 if (log.isDebugEnabled()) {
-                    log.debug("API has restricted access to creators and publishers with the roles : " + Arrays
+                    log.debug(identifierType + " has restricted access to creators and publishers with the roles : " + Arrays
                             .toString(accessControlRoleList));
                 }
                 String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
@@ -6365,16 +6381,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug("API " + identifier + " cannot be accessed by user '" + username + "'. It "
+                    log.debug(identifierType + " " + identifier + " cannot be accessed by user '" + username + "'. It "
                             + "has a publisher access control restriction");
                 }
                 throw new APIManagementException(
-                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the API " + identifier);
+                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the " + identifierType + " " + identifier);
             }
         } catch (RegistryException e) {
             throw new APIManagementException(
-                    "Registry Exception while trying to check the access control restriction of API " + identifier
-                            .getApiName(), e);
+                    "Registry Exception while trying to check the access control restriction of " + identifierType + " " + identifier
+                            .getName(), e);
         }
     }
 
@@ -6787,5 +6803,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         apiMgtDAO.addAPIProductResourceMappings(productResources, null);
     }
+
+    /**
+     * Create a product documentation
+     *
+     * @param product           APIProduct
+     * @param documentation Documentation
+     * @throws APIManagementException if failed to add documentation
+     */
+    private void createDocumentation(APIProduct product, Documentation documentation) throws APIManagementException {
+        try {
+            APIProductIdentifier productId = product.getId();
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry, APIConstants.PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifact artifact = artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
+            artifactManager.addGenericArtifact(APIUtil.createDocArtifactContent(artifact, productId, documentation));
+            String productPath = APIUtil.getAPIProductPath(productId);
+
+            //Adding association from api to documentation . (API -----> doc)
+            registry.addAssociation(productPath, artifact.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
+            String docVisibility = documentation.getVisibility().name();
+            String[] authorizedRoles = getAuthorizedRoles(productPath);
+            String visibility = product.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
+            }
+            APIUtil.setResourcePermissions(product.getId().getProviderName(),visibility, authorizedRoles, artifact
+                    .getPath(), registry);
+            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+            if (docFilePath != null && !StringUtils.EMPTY.equals(docFilePath)) {
+                //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
+                //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
+                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                APIUtil.setResourcePermissions(product.getId().getProviderName(),visibility, authorizedRoles, filePath, registry);
+                registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
+            }
+            documentation.setId(artifact.getId());
+        } catch (RegistryException e) {
+            handleException("Failed to add documentation", e);
+        } catch (UserStoreException e) {
+            handleException("Failed to add documentation", e);
+        }
+    }
+
 
 }

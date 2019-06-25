@@ -87,6 +87,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
@@ -1712,12 +1713,12 @@ public final class APIUtil {
      * This utility method used to create documentation artifact content
      *
      * @param artifact      GovernanceArtifact
-     * @param apiId         APIIdentifier
+     * @param id            Identifier
      * @param documentation Documentation
      * @return GenericArtifact
      * @throws APIManagementException if failed to get GovernanceArtifact from Documentation
      */
-    public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, APIIdentifier apiId,
+    public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, Identifier id,
                                                            Documentation documentation) throws APIManagementException {
         try {
             artifact.setAttribute(APIConstants.DOC_NAME, documentation.getName());
@@ -1753,9 +1754,14 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.DOC_SOURCE_URL, documentation.getSourceUrl());
             artifact.setAttribute(APIConstants.DOC_FILE_PATH, documentation.getFilePath());
             artifact.setAttribute(APIConstants.DOC_OTHER_TYPE_NAME, documentation.getOtherTypeName());
-            String basePath = apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                    apiId.getApiName() + RegistryConstants.PATH_SEPARATOR + apiId.getVersion();
-            artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
+            String basePath = id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                    id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion();
+            if (id instanceof APIIdentifier) {
+                artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
+            } else if (id instanceof APIProductIdentifier) {
+                artifact.setAttribute(APIConstants.DOC_PRODUCT_BASE_PATH, basePath);
+            }
+
         } catch (GovernanceException e) {
             String msg = "Failed to create doc artifact content from :" + documentation.getName();
             log.error(msg, e);
@@ -8522,4 +8528,20 @@ public final class APIUtil {
                 credentials.getBytes(Charset.forName( "UTF-8")));
         return new String(encodedCredentials, Charset.forName("UTF-8"));
     }
+
+     /* Utility method to get api identifier from api path.
+     *
+     * @param productPath Path of the API Product in registry
+     * @return relevant API Product Identifier
+     */
+    public static APIProductIdentifier getProductIdentifier(String productPath) {
+        int length = (APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
+        String relativePath = productPath.substring(length);
+        String[] values = relativePath.split(RegistryConstants.PATH_SEPARATOR);
+        if (values.length > 3) {
+            return new APIProductIdentifier(values[0], values[1], values[2]);
+        }
+        return null;
+    }
+
 }

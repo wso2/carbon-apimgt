@@ -202,11 +202,14 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void addDocumentation(APIIdentifier apiId,
+    public void addDocumentation(Identifier id,
                                  Documentation documentation) throws APIManagementException {
         checkCreatePermission();
-        checkAccessControlPermission(apiId);
-        super.addDocumentation(apiId, documentation);
+        //todo : implement access control check for api products too
+        if (id instanceof APIIdentifier) {
+            checkAccessControlPermission((APIIdentifier) id);
+        }
+        super.addDocumentation(id, documentation);
     }
 
     @Override

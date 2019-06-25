@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -163,14 +164,14 @@ public interface APIManager {
     String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException;
 
     /**
-     * Checks whether the given document already exists for the given api
+     * Checks whether the given document already exists for the given api/product
      *
-     * @param identifier API Identifier
+     * @param identifier API/Product Identifier
      * @param docName    Name of the document
-     * @return true if document already exists for the given api
+     * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    boolean isDocumentationExist(APIIdentifier identifier, String docName) throws APIManagementException;
+    boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException;
 
     /**
      * Returns a list of documentation attached to a particular API
@@ -744,4 +745,14 @@ public interface APIManager {
      * @throws APIManagementException if an error occurs while adding the icon image
      */
     String addProductResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException;
+
+    /**
+     * Get an api product documentation by artifact Id
+     *
+     * @param docId   DocumentID
+     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @return Documentation
+     * @throws APIManagementException if failed to get Documentation
+     */
+    Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
 }
