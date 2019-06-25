@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 
 import java.util.ArrayList;
@@ -35,8 +34,8 @@ public class APIMTokenIssuerUtil {
     public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, OAuthTokenReqMessageContext tokReqMsgCtx)
             throws APIManagementException {
 
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String userName = tokReqMsgCtx.getAuthorizedUser().getUserName();
+        String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
+        String userName = tokReqMsgCtx.getAuthorizedUser().toFullQualifiedUsername();
         String applicationName = application.getName();
 
         String appOwner = application.getOwner();
