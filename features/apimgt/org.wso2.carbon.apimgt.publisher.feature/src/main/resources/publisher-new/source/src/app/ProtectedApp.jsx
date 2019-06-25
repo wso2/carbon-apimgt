@@ -25,7 +25,6 @@ import qs from 'qs';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import { PageNotFound } from 'AppComponents/Base/Errors';
 import Apis from 'AppComponents/Apis/Apis';
-import Endpoints from 'AppComponents/Endpoints';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
@@ -111,7 +110,6 @@ export default class Protected extends Component {
                         <Switch>
                             <Redirect exact from='/' to='/apis' />
                             <Route path='/apis' component={Apis} />
-                            <Route path='/endpoints' component={Endpoints} />
                             <Route component={PageNotFound} />
                         </Switch>
                     </Base>

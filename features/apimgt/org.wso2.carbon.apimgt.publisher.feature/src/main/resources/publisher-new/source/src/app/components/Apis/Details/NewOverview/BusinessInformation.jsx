@@ -97,7 +97,7 @@ function BusinessInformation(props) {
 }
 
 BusinessInformation.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default BusinessInformation;
