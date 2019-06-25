@@ -20,16 +20,21 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
 import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
@@ -41,6 +46,7 @@ import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
+import java.util.Map;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -52,7 +58,8 @@ public class JWTValidator {
     public JWTValidator() {
     }
 
-    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx) throws APISecurityException {
+    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, Swagger swagger)
+            throws APISecurityException {
         String[] splitToken = jwtToken.split("\\.");
         if (splitToken.length != 3) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
@@ -79,6 +86,28 @@ public class JWTValidator {
             }
 
             if (api != null) {
+                // Scope validation
+                String resourceScope = null;
+                Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+
+                if (vendorExtensions != null) {
+                    resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
+                }
+
+                if (StringUtils.isNotBlank(resourceScope) && payload.getString("scope") != null) {
+                    String[] tokenScopes = payload.getString("scope").split(" ");
+                    boolean scopeFound = false;
+                    for (String scope : tokenScopes) {
+                        if (scope.trim().equals(resourceScope)) {
+                            scopeFound = true;
+                            break;
+                        }
+                    }
+                    if (!scopeFound) {
+                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+                    }
+                }
+
                 AuthenticationContext authContext = new AuthenticationContext();
                 authContext.setAuthenticated(true);
                 authContext.setTier(api.getString("subscriptionTier"));
@@ -166,6 +195,35 @@ public class JWTValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                     "Invalid JWT token", e);
         }
+    }
+
+    private Map<String, Object> getVendorExtensions(MessageContext synCtx, Swagger swagger) {
+        if (swagger != null) {
+            String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
+            Path path = swagger.getPath(apiElectedResource);
+            if (path != null) {
+                switch (httpMethod) {
+                    case APIConstants.HTTP_GET:
+                        return path.getGet().getVendorExtensions();
+                    case APIConstants.HTTP_POST:
+                        return path.getPost().getVendorExtensions();
+                    case APIConstants.HTTP_PUT:
+                        return path.getPut().getVendorExtensions();
+                    case APIConstants.HTTP_DELETE:
+                        return path.getDelete().getVendorExtensions();
+                    case APIConstants.HTTP_HEAD:
+                        return path.getHead().getVendorExtensions();
+                    case APIConstants.HTTP_OPTIONS:
+                        return path.getOptions().getVendorExtensions();
+                    case APIConstants.HTTP_PATCH:
+                        return path.getPatch().getVendorExtensions();
+                }
+            }
+        }
+        return null;
     }
 
 }
