@@ -133,7 +133,11 @@
     var state = request.getParameter("state");
     if (state !== null) {
         state = decodeURIComponent(state);
-        response.sendRedirect(site.context + state);
+        if ( state !== '/') {
+            response.sendRedirect(site.context + state);
+        } else {
+            response.sendRedirect(site.context + "/apis");
+        }
     } else {
         response.sendRedirect(site.context + "/apis");
     }
