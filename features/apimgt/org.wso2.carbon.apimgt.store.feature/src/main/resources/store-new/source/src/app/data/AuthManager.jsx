@@ -21,6 +21,7 @@ import axios from 'axios';
 import qs from 'qs';
 import Utils from './Utils';
 import User from './User';
+import APIClient from './APIClient';
 import APIClientFactory from './APIClientFactory';
 
 
@@ -171,6 +172,24 @@ class AuthManager {
             localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`, JSON.stringify(user.toJson()));
         }
     }
+
+    /**
+     *
+     * Get scope for resources
+     * @static
+     * @param {String} resourcePath
+     * @param {String} resourceMethod
+     * @returns Boolean
+     * @memberof AuthManager
+     */
+    static hasScopes(resourcePath, resourceMethod) {
+        const userScopes = AuthManager.getUser().scopes;
+        const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
+        return validScope.then((scope) => {
+            return userScopes.includes(scope);
+        });
+    }
+
 
     /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,

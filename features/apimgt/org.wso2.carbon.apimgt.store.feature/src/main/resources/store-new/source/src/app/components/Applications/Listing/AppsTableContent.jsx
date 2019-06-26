@@ -30,6 +30,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Subscription from '../../../data/Subscription';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
 /**
  *
  *
@@ -43,10 +44,10 @@ function getSorting(order, orderBy) {
 /**
  *
  *
- * @class AppsTableBody
+ * @class AppsTableContent
  * @extends {Component}
  */
-class AppsTableBody extends Component {
+class AppsTableContent extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -58,7 +59,7 @@ class AppsTableBody extends Component {
     /**
      *
      *
-     * @memberof AppsTableBody
+     * @memberof AppsTableContent
      */
     componentDidMount() {
         const client = new Subscription();
@@ -88,7 +89,7 @@ class AppsTableBody extends Component {
      *
      *
      * @returns
-     * @memberof AppsTableBody
+     * @memberof AppsTableContent
      */
     render() {
         const {
@@ -122,18 +123,34 @@ class AppsTableBody extends Component {
                                 <TableCell>{app.lifeCycleStatus}</TableCell>
                                 <TableCell>{app.subscriptions}</TableCell>
                                 <TableCell>
-                                    <Tooltip title='Edit'>
-                                        <Link to={'application/edit/' + app.applicationId}>
-                                            <IconButton>
-                                                <EditIcon aria-label='Edit' />
+                                    <ScopeValidation
+                                        resourcePath={resourcePaths.SINGLE_APPLICATION}
+                                        resourceMethod={resourceMethods.PUT}
+                                    >
+                                        <Tooltip title='Edit'>
+                                            <Link to={'application/edit/' + app.applicationId}>
+                                                <IconButton>
+                                                    <EditIcon aria-label='Edit' />
+                                                </IconButton>
+                                            </Link>
+                                        </Tooltip>
+                                    </ScopeValidation>
+                                    <ScopeValidation
+                                        resourcePath={resourcePaths.SINGLE_APPLICATION}
+                                        resourceMethod={resourceMethods.DELETE}
+                                    >
+                                        <Tooltip title='Delete'>
+                                            <IconButton
+                                                disabled={app.deleting}
+                                                data-appId={app.applicationId}
+                                                onClick={handleAppDelete}
+                                                color='default'
+                                                aria-label='Delete'
+                                            >
+                                                <DeleteIcon />
                                             </IconButton>
-                                        </Link>
-                                    </Tooltip>
-                                    <Tooltip title='Delete'>
-                                        <IconButton disabled={app.deleting} data-appId={app.applicationId} onClick={handleAppDelete} color='default' aria-label='Delete'>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Tooltip>
+                                        </Tooltip>
+                                    </ScopeValidation>
                                     {app.deleting && <CircularProgress size={24} />}
                                 </TableCell>
                             </TableRow>
@@ -148,4 +165,4 @@ class AppsTableBody extends Component {
         );
     }
 }
-export default AppsTableBody;
+export default AppsTableContent;

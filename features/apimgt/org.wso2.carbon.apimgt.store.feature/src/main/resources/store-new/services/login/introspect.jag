@@ -38,7 +38,7 @@
     log.debug("Intropspection result json: " + introspectResult);
     response.contentType = "application/json";
 
-    var scopes = "apim:subscribe apim:self-signup apim:dedicated_gateway openid"; // TODO: fetch from introspect request
+    var scopes = "apim:app_manage apim:sub_manage apim:app_update apim:subscribe apim:self-signup apim:dedicated_gateway openid"; // TODO: fetch from introspect request
 
     if (introspectResult.data.active) {
         print(introspectResult.data);
