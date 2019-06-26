@@ -30,7 +30,7 @@
     var Base64 = org.apache.axiom.om.util.Base64;
     var String = Packages.java.lang.String;
     var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = MGT_TRANSPORT + HOST + ":" +  application.get("serverPort") + TOKEN_URL_SUFFIX;
+    var tokenRevokeEndpoint = MGT_TRANSPORT + HOST + ":" +  application.get("serverPort") + REVOKE_URL_SUFFIX;
     var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default").value;
     var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value;
     var token = tokenP1 + tokenP2;
