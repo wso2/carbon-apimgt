@@ -37,32 +37,38 @@ const LoadableSwitch = Loadable.Map({
         ApiConsole: () => import(// eslint-disable-line function-paren-newline
         /* webpackChunkName: "ApiConsole" */
         /* webpackPrefetch: true */
-            './ApiConsole/ApiConsole',
+            // eslint-disable-next-line comma-dangle
+            './ApiConsole/ApiConsole'
         ),
         Overview: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Overview" */
             /* webpackPrefetch: true */
-            './Overview',
+            // eslint-disable-next-line comma-dangle
+            './Overview'
         ),
         Documentation: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Documentation" */
             /* webpackPrefetch: true */
-            './Documents/Documentation',
+            // eslint-disable-next-line comma-dangle
+            './Documents/Documentation'
         ),
         Credentials: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Credentials" */
             /* webpackPrefetch: true */
-            './Credentials/Credentials',
+            // eslint-disable-next-line comma-dangle
+            './Credentials/Credentials'
         ),
         Comments: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Comments" */
             /* webpackPrefetch: true */
-            './Comments/Comments',
+            // eslint-disable-next-line comma-dangle
+            './Comments/Comments'
         ),
         Sdk: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Sdk" */
             /* webpackPrefetch: true */
-            './Sdk',
+            // eslint-disable-next-line comma-dangle
+            './Sdk'
         ),
     },
     render(loaded, props) {

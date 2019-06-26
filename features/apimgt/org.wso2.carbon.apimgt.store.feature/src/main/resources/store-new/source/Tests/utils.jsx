@@ -16,24 +16,24 @@
  * under the License.
  */
 
-import AuthManager from "../src/app/data/AuthManager.jsx
-import Os from 'os'
-import Utils from '../src/app/data/Utils'
-import User from '../src/app/data/User'
+import Os from 'os';
+import AuthManager from '../src/app/data/AuthManager.jsx';
+import Utils from '../src/app/data/Utils';
+import User from '../src/app/data/User';
 
 class TestUtils {
     static setupMockEnvironment() {
-        const hostname = Os.hostname(); //for IP address Object.entries(os.networkInterfaces())[0][1][0].address
+        const hostname = Os.hostname(); // for IP address Object.entries(os.networkInterfaces())[0][1][0].address
         global.window = {
             location: {
-                hash: "",
-                host: hostname + ":9292",
-                hostname: hostname,
-                origin: "https://" + hostname + ":9292",
-                pathname: "/",
-                port: "9292",
-                protocol: "https:"
-            }
+                hash: '',
+                host: hostname + ':9292',
+                hostname,
+                origin: 'https://' + hostname + ':9292',
+                pathname: '/',
+                port: '9292',
+                protocol: 'https:',
+            },
         };
         global.document = {
             value_: '',
@@ -47,8 +47,8 @@ class TestUtils {
             },
 
             clearCookies() {
-                this.value_ = ''
-            }
+                this.value_ = '';
+            },
         };
     }
 
@@ -61,25 +61,25 @@ class TestUtils {
      * @returns {AxiosPromise}
      */
     static userLogin(username = 'admin', password = 'admin') {
-        let authenticator = new AuthManager();
-        let promisedAuth = authenticator.authenticateUser(username, password);
+        const authenticator = new AuthManager();
+        const promisedAuth = authenticator.authenticateUser(username, password);
         promisedAuth.then(
-            response => {
+            (response) => {
                 let WSO2_AM_TOKEN_MSF4J;
-                for (let cookie of response.headers["set-cookie"]) {
+                for (const cookie of response.headers['set-cookie']) {
                     const parts = cookie.split('=');
                     if (parts[0] === User.CONST.WSO2_AM_TOKEN_MSF4J) {
                         WSO2_AM_TOKEN_MSF4J = parts[1].split(';')[0];
                         break;
                     }
                 }
-                const {partialToken, validityPeriod} = response.data;
+                const { partialToken, validityPeriod } = response.data;
                 document.clearCookies();
-                Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, partialToken + WSO2_AM_TOKEN_MSF4J, validityPeriod, "/store-new");
-            }
+                Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, partialToken + WSO2_AM_TOKEN_MSF4J, validityPeriod, '/store-new');
+            },
         );
         return promisedAuth;
     }
 }
 
-export default TestUtils
+export default TestUtils;
