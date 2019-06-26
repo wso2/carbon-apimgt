@@ -15,7 +15,7 @@ const styles = theme => ({
     },
     iconItem: {
         paddingRight: theme.spacing.unit * 2,
-        fontSize: 60,
+        fontSize: 40,
     },
     button: {
         marginTop: theme.spacing.unit,

@@ -105,8 +105,9 @@ public class JsonSchemaValidator extends AbstractMediator {
                 AnalyzerHolder.returnObject(apimThreatAnalyzer);
             }
         } else {
-            GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
-                    APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
+            if (log.isDebugEnabled()) {
+                log.debug("JSON Schema Validator: " + APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
+            }
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
         if (validRequest) {

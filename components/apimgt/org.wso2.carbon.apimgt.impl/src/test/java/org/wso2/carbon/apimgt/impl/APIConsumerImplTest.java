@@ -875,6 +875,7 @@ public class APIConsumerImplTest {
         Application application = Mockito.mock(Application.class);
         Mockito.when(application.getName()).thenReturn("app");
         PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
+        PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
                 thenReturn(false);
         Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
@@ -940,6 +941,7 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Subscriber subscriber = new Subscriber("subscriber");
         Application application = new Application("testApp", subscriber);
+        PowerMockito.when(MultitenantUtils.getTenantDomain("testId")).thenReturn("carbon.super");
         Mockito.when(apiMgtDAO.getApplicationWithOAuthApps("testApp", "testId", "testGroup")).
                 thenReturn(application);
         Mockito.when(apiMgtDAO.getApplicationKeys(Mockito.anyInt())).thenReturn(new HashSet<>());
@@ -951,7 +953,10 @@ public class APIConsumerImplTest {
     public void testGetApplicationById() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.apiMgtDAO = apiMgtDAO;
-        Application application = new Application("testID");
+        Application application = Mockito.mock(Application.class);
+        PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("testId"));
+        PowerMockito.when(MultitenantUtils.getTenantDomain("testId")).thenReturn("carbon.super");
+        application.setUUID("testID");
         Mockito.when(apiMgtDAO.getApplicationById(1111)).
                 thenReturn(application);
         assertEquals(application, apiConsumer.getApplicationById(1111));

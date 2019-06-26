@@ -23,33 +23,6 @@ public class APIInfoListDTO  {
   
   private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
 
-  private String lastUpdatedTime = null;
-
-  private String createdTime = null;
-
-  /**
-  * gets and sets the lastUpdatedTime for APIInfoListDTO
-  **/
-  @JsonIgnore
-  public String getLastUpdatedTime(){
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime){
-    this.lastUpdatedTime=lastUpdatedTime;
-  }
-
-  /**
-  * gets and sets the createdTime for a APIInfoListDTO
-  **/
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
   
   /**
    * Number of API Info objects returned.\n

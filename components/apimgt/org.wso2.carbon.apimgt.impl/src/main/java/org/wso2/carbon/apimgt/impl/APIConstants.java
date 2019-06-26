@@ -272,6 +272,9 @@ public final class APIConstants {
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
     public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
+    public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
+    public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
+    public static final String API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY = "oauth_basic_auth_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
@@ -372,6 +375,17 @@ public final class APIConstants {
     public static final String OVERVIEW_ELEMENT = "overview";
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
     public static final String FEDERATED_USER = "FEDERATED";
+
+    //Monetization related constants
+    public static final String MONETIZATION_IMPL = "Monetization." + "MonetizationImpl";
+    public static final String TYPE = "type";
+    public static final String CURRENCY = "currencyType";
+    public static final String BILLING_CYCLE = "billingCycle";
+    public static final String FIXED_RATE = "fixedRate";
+    public static final String FIXED_PRICE = "fixedPrice";
+    public static final String PRICE_PER_REQUEST = "pricePerRequest";
+    public static final String API_MONETIZATION_STATUS = "isMonetizationEnabled";
+    public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";
 
     //documentation rxt
 
@@ -666,6 +680,7 @@ public final class APIConstants {
     public static final String BILLING_AND_USAGE_CONFIGURATION = "EnableBillingAndUsage";
 
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
+    public static final String BASIC_AUTH_APPLICATION_NAME = "BasicAuthApplication";
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
             "Policy");
@@ -824,6 +839,9 @@ public final class APIConstants {
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
     public static final String POLICY_CACHE_CONTEXT = "POLICY:";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
+    public static final String GATEWAY_USERNAME_CACHE_NAME = "gatewayUsernameCache";
+    public static final String GATEWAY_INVALID_USERNAME_CACHE_NAME = "gatewayInvalidUsernameCache";
+    public static final String GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME = "gatewayBasicAuthResourceCache";
     public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
@@ -1082,6 +1100,7 @@ public final class APIConstants {
     public static final String CUSTOM_ERROR_MESSAGE = "ERROR_MESSAGE";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
+    public static final String SWAGGER_X_ROLES = "x-roles";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
@@ -1089,6 +1108,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
     public static final String SWAGGER_SCOPE_KEY = "key";
     public static final String SWAGGER_NAME = "name";
+    public static final String SWAGGER_SCHEMES = "schemes";
     public static final String SWAGGER_DESCRIPTION = "description";
     public static final String SWAGGER_SERVERS = "servers";
     public static final String SWAGGER_SUMMARY = "summary";
@@ -1096,14 +1116,24 @@ public final class APIConstants {
     public static final String SWAGGER_TITLE = "title";
     public static final String SWAGGER_EMAIL = "email";
     public static final String SWAGGER_CONTACT = "contact";
+    public static final String SWAGGER_SECURITY_TYPE = "type";
+    public static final String SWAGGER_SECURITY_OAUTH2 = "oauth2";
+    public static final String SWAGGER_SECURITY_OAUTH2_IMPLICIT = "implicit";
+    public static final String SWAGGER_SECURITY_OAUTH2_PASSWORD = "password";
+    public static final String SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL = "authorizationUrl";
+    public static final String SWAGGER_SECURITY_OAUTH2_TOKEN_URL = "tokenUrl";
+    public static final String SWAGGER_SECURITY_OAUTH2_FLOW = "flow";
     public static final String SWAGGER_VER = "version";
     public static final String SWAGGER_OBJECT_NAME_APIM = "apim";
     public static final String SWAGGER_PATHS = "paths";
     public static final String SWAGGER_RESPONSES = "responses";
     public static final String SWAGGER = "swagger";
+    public static final String SWAGGER_HOST = "host";
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+    public static final String SWAGGER_SECURITY_DEFINITIONS = "securityDefinitions";
+    public static final String SWAGGER_APIM_DEFAULT_SECURITY = "default";
     public static final String OPEN_API_V3 = "3.0.0";
     public static final String OPEN_API = "openapi";
 
@@ -1113,6 +1143,7 @@ public final class APIConstants {
     public static final String SWAGGER_BASEPATH = "basePath";
     public static final String SWAGGER_OPERATIONS = "operations";
     public static final String SWAGGER_SCOPE = "scope";
+    public static final String SWAGGER_SCOPES = "scopes";
     public static final String SWAGGER_AUTH_TYPE = "auth_type";
     public static final String API_THROTTLING_TIER = "throttling_tier";
     public static final String API_MEDIATION_SCRIPT = "mediation_script";
@@ -1150,6 +1181,7 @@ public final class APIConstants {
     public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String API_DATA_URL = "url";
+    public static final String API_UUID = "apiUUID";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
@@ -1162,7 +1194,9 @@ public final class APIConstants {
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
 
     public static final String HTTPS_PROTOCOL = "https";
+    public static final String HTTPS_PROTOCOL_URL_PREFIX = "https://";
     public static final String HTTP_PROTOCOL = "http";
+    public static final String HTTP_PROTOCOL_URL_PREFIX = "http://";
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;
 
@@ -1366,7 +1400,10 @@ public final class APIConstants {
         public static final String ATTRIBUTES = "Attributes";
         public static final String ATTRIBUTE = "Attribute";
         public static final String REQUIRED = "Required";
+        public static final String HIDDEN = "Hidden";
         public static final String DESCRIPTION = "Description";
+        public static final String DEFAULT = "Default";
+        public static final String NAME = "Name";
     }
 
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
@@ -1529,4 +1566,12 @@ public final class APIConstants {
         public static final String APPLICATION = "Application";
         public static final String NONE = "None";
     }
+    // HTTP methods
+    public static final String HTTP_GET = "GET";
+    public static final String HTTP_POST = "POST";
+    public static final String HTTP_PUT = "PUT";
+    public static final String HTTP_DELETE = "DELETE";
+    public static final String HTTP_HEAD = "HEAD";
+    public static final String HTTP_OPTIONS = "OPTIONS";
+    public static final String HTTP_PATCH = "PATCH";
 }

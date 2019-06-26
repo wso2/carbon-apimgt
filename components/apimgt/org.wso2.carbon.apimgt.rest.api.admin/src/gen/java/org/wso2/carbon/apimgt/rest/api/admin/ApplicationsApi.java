@@ -40,8 +40,8 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response applicationsApplicationIdChangeOwnerPost(@ApiParam(value = "",required=true) @QueryParam("owner") String owner,
-    @ApiParam(value = "Application UUID\n",required=true ) @PathParam("applicationId") String applicationId)
+    public Response applicationsApplicationIdChangeOwnerPost(@ApiParam(value = "",required=true) @QueryParam("owner")  String owner,
+    @ApiParam(value = "Application UUID\n",required=true ) @PathParam("applicationId")  String applicationId)
     {
     return delegate.applicationsApplicationIdChangeOwnerPost(owner,applicationId);
     }
@@ -59,12 +59,12 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response applicationsGet(@ApiParam(value = "username of the application creator\n") @QueryParam("user") String user,
-    @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
+    public Response applicationsGet(@ApiParam(value = "username of the application creator\n") @QueryParam("user")  String user,
+    @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
+    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Whether to get the applications of all the users of all tenants\n") @QueryParam("tenantDomain")  String tenantDomain)
+    @ApiParam(value = "Tenant domain of the applications to get. This has to be specified only if require to get applications of\nanother tenant other than the requester's tenant. So, if not specified, the default will be set as the\nrequester's tenant domain. This cross tenant Application access is allowed only for super tenant admin\nusers only at a migration process.\n") @QueryParam("tenantDomain")  String tenantDomain)
     {
     return delegate.applicationsGet(user,limit,offset,accept,ifNoneMatch,tenantDomain);
     }

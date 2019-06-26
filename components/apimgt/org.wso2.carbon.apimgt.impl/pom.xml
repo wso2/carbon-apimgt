@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.4.198-SNAPSHOT</version>
+        <version>6.4.229-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -279,6 +279,14 @@
             <artifactId>swagger-parser</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.org.openapitools</groupId>
+            <artifactId>openapi-generator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.openapitools.swagger.parser</groupId>
+            <artifactId>swagger-parser</artifactId>
+        </dependency>
+        <dependency>
             <groupId>xerces.wso2</groupId>
             <artifactId>xercesImpl</artifactId>
         </dependency>
@@ -319,11 +327,6 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>${commons.collections4.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>

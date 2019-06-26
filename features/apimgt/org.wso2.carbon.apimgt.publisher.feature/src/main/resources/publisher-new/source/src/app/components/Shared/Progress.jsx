@@ -19,12 +19,8 @@
 import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-const Progress = () => {
-    return (
-        <div>
-            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
-        </div>
-    );
+const Progress = (props) => {
+    return <CircularProgress {...props} style={{ margin: 'auto', display: 'block' }} />;
 };
 
 export default Progress;

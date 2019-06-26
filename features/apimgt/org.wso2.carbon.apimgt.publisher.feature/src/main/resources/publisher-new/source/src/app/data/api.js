@@ -34,6 +34,7 @@ class API extends Resource {
             this.version = version;
             this.context = context;
             this.isDefaultVersion = false;
+            this.gatewayEnvironments = ["Production and Sandbox"]; //todo: load the environments from settings API
             this.transport = [
                 "http",
                 "https"
@@ -251,16 +252,17 @@ class API extends Resource {
 
     /**
      * Create a new version of a given API
-     * @param id {string} UUID of the API.
      * @param version {string} new API version.
+     * @param isDefaultVersion specifies whether new API version is set as default version
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    createNewAPIVersion(id, version, callback = null) {
+    createNewAPIVersion(version, isDefaultVersion, callback = null) {
         const promise_copy_api = this.client.then((client) => {
             return client.apis['API (Individual)'].post_apis_copy_api({
-                    apiId: id,
-                    newVersion: version
+                    apiId: this.id,
+                    newVersion: version,
+                    defaultVersion: isDefaultVersion,
                 },
                 this._requestMetaData(),
             );
@@ -379,6 +381,7 @@ class API extends Resource {
     /**
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated
+     * @deprecated
      */
     updateSwagger(id, swagger) {
         const promised_update = this.client.then((client) => {
@@ -395,6 +398,30 @@ class API extends Resource {
             );
         });
         return promised_update;
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     *
+     */
+    updateSwagger(swagger) {
+        const promised_update = this.client.then((client) => {
+            const payload = {
+                apiId: this.id,
+                apiDefinition: JSON.stringify(swagger),
+                'Content-Type': 'multipart/form-data',
+            };
+            return client.apis['API (Individual)'].put_apis__apiId__swagger(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        return promised_update.then(response => {
+            return this;
+        });
     }
 
     /**
@@ -726,12 +753,13 @@ class API extends Resource {
     /*
      Add inline content to a INLINE type document
      */
-    addInlineContentToDocument(api_id, doc_id, inline_content) {
+    addInlineContentToDocument(apiId, documentId, sourceType, inlineContent) {
         const promised_addInlineContentToDocument = this.client.then((client) => {
             const payload = {
-                apiId: api_id,
-                documentId: doc_id,
-                inlineContent: inline_content,
+                apiId,
+                documentId,
+                sourceType,
+                inlineContent,
                 'Content-Type': 'application/json',
             };
             return client.apis['Document (Individual)'].post_apis__apiId__documents__documentId__content(
@@ -1005,7 +1033,7 @@ class API extends Resource {
                 file: imageFile,
                 'Content-Type': imageFile.type,
             };
-            return client.apis['API (Individual)'].post_apis__apiId__thumbnail(
+            return client.apis['API (Individual)'].updateAPIThumbnail(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'

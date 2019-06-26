@@ -16,8 +16,6 @@
  * under the License.
  */
 
-import axios from 'axios';
-
 /**
  * Fetch the UI related configurations via the APIs, These configuration can be modified from the configuration files
  * reside in the API Manager server instance
@@ -49,7 +47,7 @@ class ConfigManager {
         const { origin } = window.location;
         const requestUrl = origin + configPath;
 
-        promisedConfig = axios.get(requestUrl);
+        promisedConfig = fetch(requestUrl);
         ConfigManager._promisedConfigMap.set(configPath, promisedConfig);
         return promisedConfig;
     }
@@ -60,8 +58,7 @@ class ConfigManager {
      */
     static getConfigs() {
         return {
-            environments: ConfigManager._getPromisedConfigs(ConfigManager.ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH),
-            features: ConfigManager._getPromisedConfigs(ConfigManager.ConfigRequestPaths.FEATURE_LIST_PATH),
+            configName: ConfigManager._getPromisedConfigs(ConfigManager.ConfigRequestPaths.CONFIG_KEY),
         };
     }
 }
@@ -71,13 +68,12 @@ class ConfigManager {
  * @type {Object}
  */
 ConfigManager.ConfigRequestPaths = {
-    ENVIRONMENT_CONFIG_PATH: '/publisher-new/site/public/theme/temporary_environments_config.json',
-    FEATURE_LIST_PATH: '/publisher-new/site/public/theme/temporary_features_config.json',
-    IDP_CONFIGS: '/publisher-new/site/public/theme/temporary_features_config.json',
+    CONFIG_KEY: 'PATH_TO_YOUR_CONFIG.JSON',
 };
 
 /**
- * The map of single instance promised configs objects
+ * The map of single instance promised configs objects, This act as a configuration cache per page page load.
+ * Assumption is , configs would not change between page refreshes.
  * {key}: ConfigRequestPaths
  * {value}: promised config
  * @type {Map}

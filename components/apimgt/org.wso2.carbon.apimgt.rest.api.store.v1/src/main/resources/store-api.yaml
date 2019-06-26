@@ -73,6 +73,7 @@ securityDefinitions:
     flow: password
     tokenUrl: https://localhost:9443/token
     scopes:
+      openid: Authorize access to user details
       apim:subscribe: Subscribe API
       apim:self-signup: Self Sign-up
       apim:dedicated_gateway: Updating dedicated Gateway
@@ -238,6 +239,8 @@ paths:
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName'
+        - $ref: '#/parameters/environmentName'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/requestedTenant'
       tags:
@@ -1080,7 +1083,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Throttling Policies
+        - APIs
       responses:
         200:
           description: |
@@ -3381,6 +3384,24 @@ parameters:
       - application
       - subscription
     required: true
+    
+# Label Name
+# Specified as part of the query string
+  labelName:
+    name: labelName
+    in: query
+    description: |
+      Name of the API microgateway label.
+    type: string
+
+# API Gateway Environment Name
+# Specified as part of the query string
+  environmentName:
+    name: environmentName
+    in: query
+    description: |
+      Name of the API gateway environment.
+    type: string
 
 # Used for pagination:
 # The maximum number of resoures to be returned by a GET
@@ -3515,6 +3536,12 @@ definitions:
       thumbnailUri:
         type: string
         example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+      throttlingPolicies:
+        type: array
+        description: List of throttling policies of the API
+        items:
+          type: string
+        example: ["Unlimited", "Bronze"]
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -3583,10 +3610,13 @@ definitions:
         description: |
           Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
           in tenant or system level will be used.
-      apiSecurity :
-         type: string
-         description: |
-           Supported API security for the API ( mutualssl and/or oauth2)
+      securityScheme:
+        type: array
+        description: |
+          Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If
+          it is not set OAuth2 will be set as the security for the current API.
+        items:
+          type: string
       tags:
         type: array
         description: Search keywords related to the API
@@ -3599,9 +3629,10 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
-      thumbnailUrl:
-        type: string
-        example: ""
+      hasThumbnail:
+        type: boolean
+        example: true
+        default: false
       additionalProperties:
         description: |
           Custom(user defined) properties of API
@@ -3770,6 +3801,8 @@ definitions:
       name:
         type: string
         example: "Public"
+      description:
+        type: string
       accessUrls:
         type: array
         items:
@@ -4437,6 +4470,7 @@ definitions:
     required:
       - consumerKey
       - consumerSecret
+      - keyType
     properties:
       consumerKey:
         type: string
@@ -4721,8 +4755,6 @@ definitions:
   Settings:
     title: Settings
     properties:
-      tokenUrl:
-        type: string
       grantTypes:
         type: array
         items:

@@ -18,14 +18,12 @@
 
 import Base from './Base/index';
 import Apis from './Apis/Apis';
-import Login from './Login/Login';
 import Logout from './Logout';
 import Endpoints from './Endpoints';
 
 export {
     Base,
     Apis,
-    Login,
     Logout,
     Endpoints,
 };

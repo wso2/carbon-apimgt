@@ -31,7 +31,7 @@ const config = {
         publicPath: 'site/public/dist/',
     },
     watch: false,
-    devtool: 'source-map',
+    devtool: 'inline-source-map',
     resolve: {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
@@ -40,12 +40,20 @@ const config = {
         extensions: ['.js', '.jsx'],
     },
     module: {
-        rules: [{
+        rules: [
+            {
+                test: /\.js$/,
+                use: ['source-map-loader'],
+                enforce: 'pre',
+            },
+            {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
-                use: [{
-                    loader: 'babel-loader',
-                }, ],
+                use: [
+                    {
+                        loader: 'babel-loader',
+                    },
+                ],
             },
             {
                 test: /\.css$/,
@@ -53,7 +61,8 @@ const config = {
             },
             {
                 test: /\.less$/,
-                use: [{
+                use: [
+                    {
                         loader: 'style-loader', // creates style nodes from JS strings
                     },
                     {
@@ -78,6 +87,7 @@ const config = {
 
 if (process.env.NODE_ENV === 'development') {
     config.watch = true;
+    config.mode = 'development';
 } else if (process.env.NODE_ENV === 'production') {
     /* ESLint will only un in production build to increase the continues build(watch) time in the development mode */
     /*const esLintLoader = {
@@ -92,7 +102,7 @@ if (process.env.NODE_ENV === 'development') {
     config.module.rules.push(esLintLoader);*/
 }
 
-module.exports = function (env) {
+module.exports = function(env) {
     if (env && env.analysis) {
         var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
         config.plugins.push(new BundleAnalyzerPlugin());

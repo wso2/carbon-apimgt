@@ -5,7 +5,7 @@
 
 |  Branch | Build Status(Jenkins) | Build Status(TravisCI) |
 | :------------ |:------------- |:-------------
-| 6.x      | [![Build Status](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt_6.x/badge/icon)](https://wso2.org/jenkins/view/platform/job/platform-builds/job/carbon-apimgt_6.x/) | [![Build Status](https://travis-ci.org/wso2/carbon-apimgt.svg?branch=6.x)](https://travis-ci.org/wso2/carbon-apimgt) |
+| master      | [![Build Status](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt/badge/icon)](https://wso2.org/jenkins/view/platform/job/platform-builds/job/carbon-apimgt/) | [![Build Status](https://api.travis-ci.org/wso2/carbon-apimgt.svg?branch=master)](https://travis-ci.org/wso2/carbon-apimgt) |
 
 ## Building from the source
 

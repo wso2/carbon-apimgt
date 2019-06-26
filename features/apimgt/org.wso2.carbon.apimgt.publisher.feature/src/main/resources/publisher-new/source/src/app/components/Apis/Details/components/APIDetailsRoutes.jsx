@@ -1,10 +1,7 @@
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import Utils from 'AppData/Utils';
-
-import { PageNotFound } from '../../../Base/Errors/';
-import EnvironmentOverview from '../EnvironmentOverview/EnvironmentOverview';
+import { PageNotFound } from 'AppComponents/Base/Errors/';
 // import PermissionFormWrapper from '../Permissions/Permission';
 
 /**
@@ -18,19 +15,10 @@ import EnvironmentOverview from '../EnvironmentOverview/EnvironmentOverview';
  * @returns {React.Component} Entire routing switch condition for API details page.
  */
 const APIDetailsRoutes = ({ api, apiDetailPages }) => {
-    const environmentOverview = Utils.isMultiEnvironmentOverviewEnabled() || null;
     const redirectUrl = `/apis/${api.id}/overview`;
     return (
         <Switch>
             <Redirect exact from='/apis/:api_uuid' to={redirectUrl} />
-            {environmentOverview && (
-                <Route
-                    path='/apis/:api_uuid/environment view'
-                    render={routeProps => (
-                        <EnvironmentOverview resourceNotFountMessage='' {...routeProps} />
-                    )}
-                />
-            )}
             {apiDetailPages.map(({ pathName, PageComponent }) => (
                 <Route
                     key={pathName}

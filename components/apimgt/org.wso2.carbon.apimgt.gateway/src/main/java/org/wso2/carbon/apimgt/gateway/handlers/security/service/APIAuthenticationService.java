@@ -130,6 +130,57 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
     }
 
     /**
+     * This method is to invalidate a username which is already in gateway cache.
+     *
+     * @param username The username to be remove from the cache
+     */
+    public void invalidateCachedUsername(String username) {
+        if (username == null) {
+            log.debug("No username received to invalidate Gateway Username Cache.");
+            return;
+        }
+        Cache gatewayUsernameCache = getCacheManager().
+                getCache(APIConstants.GATEWAY_USERNAME_CACHE_NAME);
+        Cache gatewayInvalidUsernameCache = getCacheManager().
+                getCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME);
+
+        if (gatewayUsernameCache != null) {
+            gatewayUsernameCache.remove(username);
+        }
+        if (gatewayInvalidUsernameCache != null) {
+            gatewayInvalidUsernameCache.remove(username);
+        }
+    }
+
+    /**
+     * This method is to invalidate usernames which are already in gateway cache.
+     *
+     * @param username_list The usernames to be remove from the cache
+     */
+    public void invalidateCachedUsernames(String[] username_list) {
+        if (username_list == null || username_list.length == 0) {
+            log.debug("No username received to invalidate Gateway Username Cache.");
+            return;
+        }
+        Cache gatewayUsernameCache = getCacheManager().
+                getCache(APIConstants.GATEWAY_USERNAME_CACHE_NAME);
+        Cache gatewayInvalidUsernameCache = getCacheManager().
+                getCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME);
+
+        if (gatewayUsernameCache != null) {
+            for (String username : username_list) {
+                gatewayUsernameCache.remove(username);
+            }
+        }
+        if (gatewayInvalidUsernameCache != null) {
+            for (String username : username_list) {
+                gatewayInvalidUsernameCache.remove(username);
+            }
+        }
+    }
+
+
+    /**
      * Invalidate the cached access tokens from the API Gateway. This method is supposed to be used when you have to
      * remove a bulk of access tokens from the cache. For example, a removal of a subscription would require the
      * application's active access tokens to be removed from the cache. These access tokens can reside in different

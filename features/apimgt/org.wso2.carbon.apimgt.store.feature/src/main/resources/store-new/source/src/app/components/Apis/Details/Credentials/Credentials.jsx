@@ -185,14 +185,14 @@ class Credentials extends React.Component {
      * @memberof Credentials
      */
     handleSubscribe = (updateSubscriptionData) => {
-        const promised_subscribe = this.subscribeToApi.createSubscription();
-        if (promised_subscribe) {
-            promised_subscribe
+        const promiseSubscribe = this.subscribeToApi.createSubscription();
+        if (promiseSubscribe) {
+            promiseSubscribe
                 .then((response) => {
                     console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
                     Alert.info('Subscribed successfully');
                     if (updateSubscriptionData) updateSubscriptionData();
-                    this.setState({ 'openAvailable' : false });
+                    this.setState({ openAvailable: false });
                 })
                 .catch((error) => {
                     console.log('Error while creating the subscription.');
@@ -236,9 +236,10 @@ class Credentials extends React.Component {
                 return;
             }
             Alert.info('Subscription deleted successfully!');
-            if( updateSubscriptionData ) updateSubscriptionData();
+            if (updateSubscriptionData) updateSubscriptionData();
         });
     }
+    
     /**
      *
      *
@@ -250,13 +251,17 @@ class Credentials extends React.Component {
         const { selectedKeyType, selectedAppId } = this.state;
         return (
             <ApiContext.Consumer>
-                {({ api, applicationsAvailable, subscribedApplications, updateSubscriptionData }) => (
+                {({
+                    api, applicationsAvailable, subscribedApplications, updateSubscriptionData,
+                }) => (
                     <div className={classes.contentWrapper}>
                         <Typography onClick={this.handleExpandClick} variant='display1' className={classes.titleSub}>
                             API Credentials
                         </Typography>
                         <Typography variant='body1' gutterBottom>
-                            API Credentials are grouped in to applications. An application is primarily used to decouple the consumer from the APIs. It allows you to Generate and use a single key for multiple APIs and subscribe multiple times to a single API with different SLA levels.
+                            API Credentials are grouped in to applications. An application is primarily used to decouple
+                            the consumer from the APIs. It allows you to Generate and use a single key for multiple APIs
+                            and subscribe multiple times to a single API with different SLA levels.
                         </Typography>
                         {applicationsAvailable.length === 0 && subscribedApplications.length === 0 ? (
                             !this.state.wizardOn && (
@@ -264,8 +269,15 @@ class Credentials extends React.Component {
                                     <Typography variant='headline' component='h3'>
                                         Generate Credentials
                                     </Typography>
-                                    <Typography component='p'>You need to generate credentials to access this API</Typography>
-                                    <Button variant='contained' color='primary' className={classes.button} onClick={this.startStopWizard}>
+                                    <Typography component='p'>
+                                        You need to generate credentials to access this API
+                                    </Typography>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        className={classes.button}
+                                        onClick={this.startStopWizard}
+                                    >
                                         GENERATE
                                     </Button>
                                 </InlineMessage>
@@ -287,20 +299,42 @@ class Credentials extends React.Component {
                                     </div>
                                     {applicationsAvailable.length > 0 && (
                                         <div>
-                                            <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={()=>this.handleClickToggle('openAvailable')}>
+                                            <Button
+                                                variant='outlined'
+                                                size='small'
+                                                color='primary'
+                                                className={classes.buttonElm}
+                                                onClick={() => this.handleClickToggle('openAvailable')}
+                                            >
                                                 Subscribe to Available App
                                             </Button>
-                                            <Typography variant='caption' component='p' className={classes.buttonElmText}>
+                                            <Typography
+                                                variant='caption'
+                                                component='p'
+                                                className={classes.buttonElmText}
+                                            >
                                                 {applicationsAvailable.length}
                                                 {' '}
-Available
+                                                Available
                                             </Typography>
                                         </div>
                                     )}
-                                    <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={()=>this.handleClickToggle('openNew')}>
+                                    <Button
+                                        variant='outlined'
+                                        size='small'
+                                        color='primary'
+                                        className={classes.buttonElm}
+                                        onClick={() => this.handleClickToggle('openNew')}
+                                    >
                                         Subscribe to New App
                                     </Button>
-                                    <Button variant='outlined' size='small' color='primary' className={classes.buttonElm} onClick={()=>this.handleClickToggle('openExpress')}>
+                                    <Button
+                                        variant='outlined'
+                                        size='small'
+                                        color='primary'
+                                        className={classes.buttonElm}
+                                        onClick={() => this.handleClickToggle('openExpress')}
+                                    >
                                         Express Mode
                                     </Button>
                                 </div>
@@ -322,41 +356,78 @@ Available
                                                 <td className={classes.td}>{app.policy}</td>
                                                 <td className={classes.td}>
                                                     <div className={classes.actionColumn}>
-                                                        <Link className={classes.button} to={"/applications/" + app.value}>
+                                                        <Link
+                                                            className={classes.button}
+                                                            to={'/applications/' + app.value}
+                                                        >
                                                             <span>MANAGE APP</span>
-                                                            <CustomIcon width={16} height={16} strokeColor={theme.palette.primary.main} icon='applications' />
+                                                            <CustomIcon
+                                                                width={16}
+                                                                height={16}
+                                                                strokeColor={theme.palette.primary.main}
+                                                                icon='applications'
+                                                            />
                                                         </Link>
-                                                        <a className={classes.button}
-                                                            onClick={() => this.handleSubscriptionDelete(app.subscriptionId, updateSubscriptionData)}>
+                                                        <a
+                                                            className={classes.button}
+                                                            onClick={() => this.handleSubscriptionDelete(
+                                                                app.subscriptionId,
+                                                                updateSubscriptionData,
+                                                            )}
+                                                        >
                                                             <span>UNSUBSCRIBE</span>
-                                                            <CustomIcon width={16} height={16} strokeColor={theme.palette.primary.main} icon='subscriptions' />
+                                                            <CustomIcon
+                                                                width={16}
+                                                                height={16}
+                                                                strokeColor={theme.palette.primary.main}
+                                                                icon='subscriptions'
+                                                            />
                                                         </a>
                                                         <a
                                                             className={classNames(classes.button, {
-                                                                [classes.activeLink]: selectedAppId && selectedKeyType === 'PRODUCTION' && app.value === selectedAppId,
+                                                                [classes.activeLink]: selectedAppId
+                                                                && selectedKeyType === 'PRODUCTION'
+                                                                && app.value === selectedAppId,
                                                             })}
                                                             onClick={() => this.loadInfo('PRODUCTION', app.value)}
                                                         >
                                                             <span>PROD KEYS</span>
-                                                            <CustomIcon width={16} height={16} strokeColor={theme.palette.primary.main} icon='productionkeys' />
+                                                            <CustomIcon
+                                                                width={16}
+                                                                height={16}
+                                                                strokeColor={theme.palette.primary.main}
+                                                                icon='productionkeys'
+                                                            />
                                                         </a>
                                                         <a
                                                             className={classNames(classes.button, {
-                                                                [classes.activeLink]: selectedAppId && selectedKeyType === 'SANDBOX' && app.value === selectedAppId,
+                                                                [classes.activeLink]: selectedAppId
+                                                                && selectedKeyType === 'SANDBOX'
+                                                                && app.value === selectedAppId,
                                                             })}
                                                             onClick={() => this.loadInfo('SANDBOX', app.value)}
                                                         >
                                                             <span>SANDBOX KEYS</span>
-                                                            <CustomIcon width={16} height={16} strokeColor={theme.palette.primary.main} icon='productionkeys' />
+                                                            <CustomIcon
+                                                                width={16}
+                                                                height={16}
+                                                                strokeColor={theme.palette.primary.main}
+                                                                icon='productionkeys'
+                                                            />
                                                         </a>
                                                     </div>
                                                 </td>
                                             </tr>
-                                            {app.value === selectedAppId && (selectedKeyType === 'PRODUCTION' || selectedKeyType === 'SANDBOX') && (
+                                            {app.value === selectedAppId
+                                            && (selectedKeyType === 'PRODUCTION' || selectedKeyType === 'SANDBOX') && (
                                                 <tr>
                                                     <td colSpan='3'>
                                                         <div className={classes.selectedWrapper}>
-                                                            <TokenManager keyType={selectedKeyType} selectedApp={{ appId: app.value, label: app.label }} updateSubscriptionData={updateSubscriptionData} />
+                                                            <TokenManager
+                                                                keyType={selectedKeyType}
+                                                                selectedApp={{ appId: app.value, label: app.label }}
+                                                                updateSubscriptionData={updateSubscriptionData}
+                                                            />
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -370,13 +441,28 @@ Available
                                 ***************************
                                 */}
                                 {applicationsAvailable.length > 0 && (
-                                    <Dialog fullScreen open={this.state.openAvailable} onClose={()=>this.handleClickToggle('openAvailable',updateSubscriptionData)} TransitionComponent={Transition}>
+                                    <Dialog
+                                        fullScreen
+                                        open={this.state.openAvailable}
+                                        onClose={() => this.handleClickToggle(
+                                            'openAvailable',
+                                            updateSubscriptionData,
+                                        )}
+                                        TransitionComponent={Transition}
+                                    >
                                         {' '}
                                         <AppBar className={classes.appBar}>
                                             <Grid container spacing={0}>
                                                 <Grid item xs={6}>
                                                     <Toolbar className={classes.toolbar}>
-                                                        <IconButton color='inherit' onClick={()=>this.handleClickToggle('openAvailable',updateSubscriptionData)} aria-label='Close'>
+                                                        <IconButton
+                                                            color='inherit'
+                                                            onClick={() => this.handleClickToggle(
+                                                                'openAvailable',
+                                                                updateSubscriptionData,
+                                                            )}
+                                                            aria-label='Close'
+                                                        >
                                                             <CloseIcon />
                                                         </IconButton>
                                                         <div className={classes.subscribeTitle}>
@@ -385,19 +471,23 @@ Available
                                                                 {' '}
                                                                 {api.name}
                                                                 {' '}
-to
+                                                                to
                                                                 {' '}
-                                                                {applicationsAvailable.length === 1 ? 'an available application' : 'available applications'}
-.
+                                                                {applicationsAvailable.length === 1 ?
+                                                                    'an available application' :
+                                                                    'available applications'}.
                                                             </Typography>
                                                             <Typography variant='caption'>
-(
-                                                                {applicationsAvailable.length}
-                                                                {' '}
-Applications )
+                                                                ({applicationsAvailable.length}
+                                                                {' '}Applications )
                                                             </Typography>
                                                         </div>
-                                                        <Button variant='contained' color='primary' className={classes.button} onClick={() => this.handleSubscribe(updateSubscriptionData)}>
+                                                        <Button
+                                                            variant='contained'
+                                                            color='primary'
+                                                            className={classes.button}
+                                                            onClick={() => this.handleSubscribe(updateSubscriptionData)}
+                                                        >
                                                             Subscribe
                                                         </Button>
                                                     </Toolbar>
@@ -405,7 +495,12 @@ Applications )
                                             </Grid>
                                         </AppBar>
                                         <div className={classes.plainContent}>
-                                            <SubscribeToApi innerRef={node => (this.subscribeToApi = node)} api={api} applicationsAvailable={applicationsAvailable} rootClass={classes.subscribeRoot} />
+                                            <SubscribeToApi
+                                                innerRef={(node) => { this.subscribeToApi = node; }}
+                                                api={api}
+                                                applicationsAvailable={applicationsAvailable}
+                                                rootClass={classes.subscribeRoot}
+                                            />
                                         </div>
                                     </Dialog>
                                 )}
@@ -414,24 +509,42 @@ Applications )
                                 Subscribe with new Mode
                                 ***************************************
                                 */}
-                                <Dialog fullScreen open={this.state.openNew} onClose={()=>this.handleClickToggle('openNew',updateSubscriptionData)} TransitionComponent={Transition}>
+                                <Dialog
+                                    fullScreen
+                                    open={this.state.openNew}
+                                    onClose={() => this.handleClickToggle('openNew', updateSubscriptionData)}
+                                    TransitionComponent={Transition}
+                                >
                                     {' '}
                                     <AppBar className={classes.appBar}>
                                         <Grid container spacing={0}>
                                             <Grid item xs={6}>
                                                 <Toolbar className={classes.toolbar}>
-                                                    <IconButton color='inherit' onClick={()=>this.handleClickToggle('openNew',updateSubscriptionData)} aria-label='Close'>
+                                                    <IconButton
+                                                        color='inherit'
+                                                        onClick={() => this.handleClickToggle(
+                                                            'openNew',
+                                                            updateSubscriptionData,
+                                                        )}
+                                                        aria-label='Close'
+                                                    >
                                                         <CloseIcon />
                                                     </IconButton>
                                                     <div className={classes.subscribeTitle}>
-                                                        <Typography variant='h6'>Subscribe to new Application</Typography>
+                                                        <Typography variant='h6'>
+                                                            Subscribe to new Application
+                                                        </Typography>
                                                     </div>
                                                 </Toolbar>
                                             </Grid>
                                         </Grid>
                                     </AppBar>
                                     <div className={classes.plainContent}>
-                                        <Wizard onClickFunction={(a,b)=>this.handleClickToggle(a,b)} updateSubscriptionData={updateSubscriptionData}/>
+                                        <Wizard
+                                            apiId={api.id}
+                                            onClickFunction={(a, b) => this.handleClickToggle(a, b)}
+                                            updateSubscriptionData={updateSubscriptionData}
+                                        />
                                     </div>
                                 </Dialog>
 
@@ -440,12 +553,24 @@ Applications )
                                 Subscribe with express Mode
                                 ***************************************
                                 */}
-                                <Dialog fullScreen open={this.state.openExpress} onClose={()=>this.handleClickToggle('openExpress',updateSubscriptionData)}  TransitionComponent={Transition}>
+                                <Dialog
+                                    fullScreen
+                                    open={this.state.openExpress}
+                                    onClose={() => this.handleClickToggle('openExpress', updateSubscriptionData)}
+                                    TransitionComponent={Transition}
+                                >
                                     <AppBar className={classes.appBar}>
                                         <Grid container spacing={0}>
                                             <Grid item xs={6}>
                                                 <Toolbar className={classes.toolbar}>
-                                                    <IconButton color='inherit' onClick={()=>this.handleClickToggle('openExpress',updateSubscriptionData)}  aria-label='Close'>
+                                                    <IconButton
+                                                        color='inherit'
+                                                        onClick={() => this.handleClickToggle(
+                                                            'openExpress',
+                                                            updateSubscriptionData,
+                                                        )}
+                                                        aria-label='Close'
+                                                    >
                                                         <CloseIcon />
                                                     </IconButton>
                                                     <div className={classes.subscribeTitle}>
