@@ -2700,20 +2700,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * @param apiId APIIdentifier
+     * @param id Identifier
      * @param docId UUID of the doc
      * @throws APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docId)
+    public void removeDocumentation(Identifier id, String docId)
             throws APIManagementException {
         String docPath;
+        String identifierType = StringUtils.EMPTY;
+        String artifactKey = StringUtils.EMPTY;
+
+        if (id instanceof APIIdentifier) {
+            identifierType = APIConstants.API_IDENTIFIER_TYPE;
+            artifactKey = APIConstants.DOCUMENTATION_KEY;
+        } else if (id instanceof APIProductIdentifier) {
+            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
+            artifactKey = APIConstants.PRODUCT_DOCUMENTATION_KEY;
+        }
 
         try {
             GenericArtifactManager artifactManager = APIUtil
-                    .getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
+                    .getArtifactManager(registry, artifactKey);
             if (artifactManager == null) {
-                String errorMessage = "Failed to retrieve artifact manager when removing documentation of API " + apiId
-                        + " Document ID " + docId;
+                String errorMessage =
+                        "Failed to retrieve artifact manager when removing documentation of " + identifierType + " "
+                                + id + " Document ID " + docId;
                 log.error(errorMessage);
                 throw new APIManagementException(errorMessage);
             }
@@ -2724,14 +2735,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (docFilePath != null) {
                 File tempFile = new File(docFilePath);
                 String fileName = tempFile.getName();
-                docFilePath = APIUtil.getDocumentationFilePath(apiId, fileName);
+                docFilePath = APIUtil.getDocumentationFilePath(id, fileName);
                 if (registry.resourceExists(docFilePath)) {
                     registry.delete(docFilePath);
                 }
             }
 
             Association[] associations = registry.getAssociations(docPath,
-                    APIConstants.DOCUMENTATION_KEY);
+                    APIConstants.DOCUMENTATION_ASSOCIATION);
 
             for (Association association : associations) {
                 registry.delete(association.getDestinationPath());

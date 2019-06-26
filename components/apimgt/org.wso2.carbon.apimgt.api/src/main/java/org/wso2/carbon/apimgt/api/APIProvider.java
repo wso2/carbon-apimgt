@@ -357,11 +357,11 @@ public interface APIProvider extends APIManager {
     /**
      * Removes a given documentation
      *
-     * @param apiId   APIIdentifier
+     * @param id   Identifier
      * @param docId UUID of the doc
      * @throws APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docId)throws APIManagementException;
+    public void removeDocumentation(Identifier id, String docId)throws APIManagementException;
     /**
      * Adds Documentation to an API/Product
      *

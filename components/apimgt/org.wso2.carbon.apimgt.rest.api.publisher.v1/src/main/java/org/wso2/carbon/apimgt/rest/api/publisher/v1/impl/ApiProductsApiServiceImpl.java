@@ -96,13 +96,68 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdDocumentsDocumentIdDelete(String apiProductId, String documentId,
+    @Override
+    public Response apiProductsApiProductIdDocumentsDocumentIdDelete(String apiProductId, String documentId,
             String ifMatch, MessageContext messageContext) {
+        Documentation documentation;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API Product or the API Product does not exist
+            APIProductIdentifier productIdentifier = APIMappingUtil
+                    .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            documentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                RestApiUtil
+                        .handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
+            }
+            apiProvider.removeDocumentation(productIdentifier, documentId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing API Products. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while deleting : " + documentId + " of API Product " + apiProductId, e,
+                        log);
+            } else {
+                String errorMessage = "Error while retrieving API Product : " + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId, String documentId,
+    @Override
+    public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId, String documentId,
             String accept, String ifNoneMatch, MessageContext messageContext) {
+        Documentation documentation;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            documentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            if (documentation == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
+            }
+
+            DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+            return Response.ok().entity(documentDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing API Products. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving document : " + documentId + " of API Product "
+                                + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving document : " + documentId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
         return null;
     }
 
@@ -179,9 +234,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             URI uri = new URI(uriString);
             return Response.created(uri).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            //Auth failure occurs when cross tenant accessing API Products. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiProductId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
                         .handleAuthorizationFailure("Authorization failure while adding documents of API : " + apiProductId, e,

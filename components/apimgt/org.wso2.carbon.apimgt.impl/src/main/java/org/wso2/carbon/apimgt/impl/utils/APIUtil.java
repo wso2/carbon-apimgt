@@ -1586,9 +1586,14 @@ public final class APIUtil {
      * @return Generated path.
      * @fileName File name.
      */
-    public static String getDocumentationFilePath(APIIdentifier identifier, String fileName) {
-        return APIUtil.getAPIDocPath(identifier) + APIConstants.DOCUMENT_FILE_DIR +
-                RegistryConstants.PATH_SEPARATOR + fileName;
+    public static String getDocumentationFilePath(Identifier identifier, String fileName) {
+        if (identifier instanceof APIIdentifier) {
+            return APIUtil.getAPIDocPath((APIIdentifier) identifier) + APIConstants.DOCUMENT_FILE_DIR +
+                    RegistryConstants.PATH_SEPARATOR + fileName;
+        } else {
+            return APIUtil.getProductDocPath((APIProductIdentifier) identifier) + APIConstants.DOCUMENT_FILE_DIR +
+                    RegistryConstants.PATH_SEPARATOR + fileName;
+        }
     }
 
     public static String getOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
