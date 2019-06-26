@@ -92,7 +92,7 @@ class Documents extends React.Component {
 
 Documents.propTypes = {
     parentClasses: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({ id: PropTypes.string }).isRequired,
 };
 
 export default Documents;

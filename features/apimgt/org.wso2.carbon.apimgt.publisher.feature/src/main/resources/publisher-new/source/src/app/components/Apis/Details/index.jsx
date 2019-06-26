@@ -396,7 +396,7 @@ class Details extends Component {
     }
 }
 
-// Add your path here and refer to it in above <Route/> component,
+// Add your path here and refer it in above <Route/> component,
 // Paths that are not defined here will be returned with Not Found error
 // key name doesn't matter here, Use an appropriate name as the key
 Details.subPaths = {
