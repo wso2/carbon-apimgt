@@ -15,17 +15,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import Enzyme, { shallow, render, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import TestRenderer from 'react-test-renderer';
 
-// React 16 Enzyme adapter
-Enzyme.configure({ adapter: new Adapter() });
+/* eslint-disable no-underscore-dangle */
 
-// Make Enzyme functions available in all test files without importing
-global.React = React;
-global.shallow = shallow;
-global.render = render;
-global.mount = mount;
-global.testRenderer = TestRenderer;
+const chalk = require('chalk');
+const rimraf = require('rimraf');
+const os = require('os');
+const path = require('path');
+
+const DIR = path.join(os.tmpdir(), 'jest_puppeteer_global_setup');
+
+module.exports = async function () {
+    console.log(chalk.green('Teardown Puppeteer'));
+    await global.__BROWSER_GLOBAL__.close();
+    rimraf.sync(DIR);
+};
