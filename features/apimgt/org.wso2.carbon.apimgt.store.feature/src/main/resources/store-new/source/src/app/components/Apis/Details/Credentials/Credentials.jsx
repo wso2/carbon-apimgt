@@ -29,6 +29,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Grid from '@material-ui/core/Grid';
 import classNames from 'classnames';
+import Subscription from 'AppData/Subscription';
 import CustomIcon from '../../../Shared/CustomIcon';
 import TokenManager from '../../../Shared/AppsAndKeys/TokenManager';
 import SubscribeToApi from '../../../Shared/AppsAndKeys/SubscribeToApi';
@@ -36,7 +37,6 @@ import { ApiContext } from '../ApiContext';
 import Wizard from './Wizard';
 import InlineMessage from '../../../Shared/InlineMessage';
 import ExpressMode from './ExpressMode';
-import Subscription from '../../../../data/Subscription';
 import Alert from '../../../Shared/Alert';
 import { ScopeValidation, resourceMethods, resourcePaths } from '../../../Shared/ScopeValidation';
 
