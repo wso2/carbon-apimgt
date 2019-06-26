@@ -6830,7 +6830,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             artifactManager.addGenericArtifact(APIUtil.createDocArtifactContent(artifact, productId, documentation));
             String productPath = APIUtil.getAPIProductPath(productId);
 
-            //Adding association from api to documentation . (API -----> doc)
+            //Adding association from api to documentation . (API Product -----> doc)
             registry.addAssociation(productPath, artifact.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
             String docVisibility = documentation.getVisibility().name();
             String[] authorizedRoles = getAuthorizedRoles(productPath);
