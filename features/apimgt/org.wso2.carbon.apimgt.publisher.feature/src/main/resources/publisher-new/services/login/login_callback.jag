@@ -115,7 +115,7 @@
     cookie = {
         'name': 'AM_ID_TOKEN_DEFAULT_P2',
         'value': idTokenPart2,
-        'path': site.context + "services/logout",
+        'path': site.context + "/services/logout",
         "secure": true,
         "maxAge": Integer(tokenResponse.expires_in)
     };
@@ -132,7 +132,7 @@
 
     var state = request.getParameter("state");
     if (state !== null) {
-        state = decodeURI(state);
+        state = decodeURIComponent(state);
         response.sendRedirect(site.context + state);
     } else {
         response.sendRedirect(site.context + "/apis");

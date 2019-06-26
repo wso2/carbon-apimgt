@@ -41,7 +41,7 @@
     // get the pathname excluding the 'publisher' segment
     // todo: remove (-new) section when publisher-new is replaced with store
     if (referer !== null) {
-        state = encodeURI(referer.replace(/(https?:\/\/.*):(\d*)\/?(publisher)(-new)?/g, ''));
+        state = referer.replace(/(https?:\/\/.*):(\d*)\/?(publisher)(-new)?(\/login\?referrer=)/g, '');
     }
 
     var authorizationHeader = "Basic " + utils.getBase64EncodedAdminCredentials();
