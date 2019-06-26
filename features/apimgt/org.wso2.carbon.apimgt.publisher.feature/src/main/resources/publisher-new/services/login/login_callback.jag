@@ -17,7 +17,6 @@
  * under the License.
  */
 
-    var log = new Log("Token Request Function");
     include("/services/constants.jag");
     var site = require("/site/conf/site.json");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -41,7 +40,6 @@
     var tokenEndpoint = MGT_TRANSPORT + HOST + ":" +  application.get("serverPort") + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
-    log.debug("Token response: " + result.data);
     response.contentType = "application/json";
     var tokenResponse = JSON.parse(result.data);
 
@@ -61,14 +59,6 @@
     tokenLength = tokenResponse.refresh_token.length;
     var refreshTokenPart1 = refreshToken.substring(0, tokenLength / 2);
     var refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
-
-    var response_data = {
-        AM_ACC_TOKEN_DEFAULT_P1: String(accessTokenPart1),
-        AM_REF_TOKEN_DEFAULT_P1: String(refreshTokenPart1),
-        id_token: String(tokenResponse.id_token),
-        scope: String(tokenResponse.scope),
-        expires_in: String(tokenResponse.expires_in)
-    } // TODO: not in use ~tmkb
 
     // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/publisher
     // because partial HTTP only cookie is required for get the user information from access token,

@@ -39,7 +39,6 @@
         "token": token
     };
     var result = post(tokenRevokeEndpoint, tokenRevokeRequestData, {"Authorization": "Basic " + base64encoded});
-    log.debug("revoke token response:" + response);
 
     var cookie = {
         'name': 'AM_ACC_TOKEN_DEFAULT_P2',

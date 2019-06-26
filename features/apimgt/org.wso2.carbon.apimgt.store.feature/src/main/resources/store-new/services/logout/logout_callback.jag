@@ -39,7 +39,6 @@
      };
 
     var result = post(tokenRevokeEndpoint, tokenRevokeRequestData,{"Authorization": "Basic " + base64encoded});
-    log.debug("revoke token response:"+response);
 
     var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': "/store-new/", "HttpOnly": true, "secure": true, "maxAge": 2};
     response.addCookie(cookie);
@@ -53,8 +52,8 @@
     response.addCookie(cookie);
     cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':'', 'path': "/store-new/services/logout", "secure": true, "maxAge": 2};
     response.addCookie(cookie);
-    log.debug("redirecting to anonymous view");
 
+    log.debug("redirecting to anonymous view");
     response.sendRedirect("/store-new/apis");
 
 %>
