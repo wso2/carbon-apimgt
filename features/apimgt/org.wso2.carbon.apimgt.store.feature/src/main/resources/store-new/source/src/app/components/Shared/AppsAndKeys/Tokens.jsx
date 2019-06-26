@@ -27,7 +27,7 @@ import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import Application from '../../../data/Application';
+import Application from 'AppData/Application';
 import Loading from '../../Base/Loading/Loading';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
@@ -226,6 +226,6 @@ class Tokens extends React.Component {
     }
 }
 Tokens.contextTypes = {
-    intl: PropTypes.object.isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 export default withStyles(styles)(Tokens);
