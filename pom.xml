@@ -1593,7 +1593,7 @@
         <lmax.disruptor.version.range>[2.10.0,3.4)</lmax.disruptor.version.range>
 
         <!-- xml api version-->
-        <xml.apis.version>1.4.01</xml.apis.version>
+        <xml.apis.version>2.0.2</xml.apis.version>
 
         <!-- databridge agent version range-->
         <databridge.agent.range>[5.1,6)</databridge.agent.range>
@@ -1668,7 +1668,7 @@
         <slf4j.test.version>1.7.26</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
         <jacoco.version>0.7.9</jacoco.version>
-        <xml-apis.version>1.4.01</xml-apis.version>
+        <xml-apis.version>2.0.2</xml-apis.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
         <wiremock.version>2.5.0</wiremock.version>
         <mockito.version>2.10.0</mockito.version>
