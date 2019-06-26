@@ -204,6 +204,14 @@
                         <version>${maven.surefire.plugin.version}</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>org.opensaml.httpclient.https.disableHostnameVerification</name>
+                            <value>true</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>

@@ -1578,7 +1578,7 @@
         <orbit.version.axiom>1.2.11-wso2v16</orbit.version.axiom>
         <axiom.wso2.version>1.2.11-wso2v16</axiom.wso2.version>
         <exp.pkg.version.axiom>1.2.11-wso2v16</exp.pkg.version.axiom>
-        <imp.pkg.version.axiom>[1.2.11-wso2v16, 1.3.0)</imp.pkg.version.axiom>
+        <imp.pkg.version.axiom>[1.2.11, 1.3.0)</imp.pkg.version.axiom>
         <axiom.osgi.version.range>[1.2.11, 1.3.0)</axiom.osgi.version.range>
 
         <!-- Servlet API -->
