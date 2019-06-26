@@ -69,6 +69,14 @@ public class JWTValidator {
         boolean isVerified = verifyToken(jwtToken, payload.getString("sub"));
 
         if (isVerified) {
+            // Check whether the token is expired or not
+            long currentTime = System.currentTimeMillis() / 1000;
+            long expiredTime = payload.getLong("exp");
+            if (currentTime > expiredTime) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
+                        "JWT token is expired");
+            }
+
             JSONObject applicationObj = (JSONObject) payload.get("application");
             JSONArray subscribedAPIs = (JSONArray) payload.get("subscribedAPIs");
 
