@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -46,6 +47,9 @@ import java.io.File;
 
 /**
  * @scr.component name="org.wso2.carbon.apimgt.handlers" immediate="true"
+ * @scr.reference name="user.realm.service"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
  * @scr.reference name="configuration.context.service"
  * interface="org.wso2.carbon.utils.ConfigurationContextService" cardinality="1..1"
  * policy="dynamic" bind="setConfigurationContextService" unbind="unsetConfigurationContextService"
@@ -216,5 +220,16 @@ public class APIHandlerServiceComponent {
     }
     protected void unsetTracingService(TracingService tracingService) {
         ServiceReferenceHolder.getInstance().setTracingService(null);
+    }
+
+    protected void setRealmService(RealmService realmService) {
+        if (realmService != null && log.isDebugEnabled()) {
+            log.debug("Realm service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 }

@@ -16,28 +16,9 @@ import javax.xml.bind.annotation.*;
 
 public class LabelDTO   {
   
-    private String labelId = null;
     private String name = null;
-    private String type = null;
+    private String description = null;
     private List<String> accessUrls = new ArrayList<>();
-
-  /**
-   **/
-  public LabelDTO labelId(String labelId) {
-    this.labelId = labelId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("labelId")
-  @NotNull
-  public String getLabelId() {
-    return labelId;
-  }
-  public void setLabelId(String labelId) {
-    this.labelId = labelId;
-  }
 
   /**
    **/
@@ -59,20 +40,19 @@ public class LabelDTO   {
 
   /**
    **/
-  public LabelDTO type(String type) {
-    this.type = type;
+  public LabelDTO description(String description) {
+    this.description = description;
     return this;
   }
 
   
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("type")
-  @NotNull
-  public String getType() {
-    return type;
+  @ApiModelProperty(value = "")
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
   }
-  public void setType(String type) {
-    this.type = type;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   /**
@@ -83,9 +63,8 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("access_urls")
-  @NotNull
   public List<String> getAccessUrls() {
     return accessUrls;
   }
@@ -103,15 +82,14 @@ public class LabelDTO   {
       return false;
     }
     LabelDTO label = (LabelDTO) o;
-    return Objects.equals(labelId, label.labelId) &&
-        Objects.equals(name, label.name) &&
-        Objects.equals(type, label.type) &&
+    return Objects.equals(name, label.name) &&
+        Objects.equals(description, label.description) &&
         Objects.equals(accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(labelId, name, type, accessUrls);
+    return Objects.hash(name, description, accessUrls);
   }
 
   @Override
@@ -119,9 +97,8 @@ public class LabelDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LabelDTO {\n");
     
-    sb.append("    labelId: ").append(toIndentedString(labelId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();

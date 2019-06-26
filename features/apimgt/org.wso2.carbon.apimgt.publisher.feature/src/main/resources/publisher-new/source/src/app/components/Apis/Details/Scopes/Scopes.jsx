@@ -17,11 +17,10 @@
  */
 
 import 'react-tagsinput/react-tagsinput.css';
-import { message } from 'antd/lib/index';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Api from 'AppData/api';
-import { Progress } from 'AppComponents/Shared';
+import { Progress, Alert } from 'AppComponents/Shared';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
@@ -108,7 +107,6 @@ class Scopes extends React.Component {
      * @memberof Scopes
      */
     addScope() {
-        const hideMessage = message.loading('Adding the Scope ...', 0);
         const api = new Api();
         const scope = this.state.apiScope;
         scope.bindings = {
@@ -119,11 +117,10 @@ class Scopes extends React.Component {
         promisedScopeAdd.then((response) => {
             if (response.status !== 201) {
                 console.log(response);
-                message.error('Something went wrong while updating the ' + scope.name + ' Scope!');
-                hideMessage();
+                Alert.error('Something went wrong while updating the ' + scope.name + ' Scope!');
                 return;
             }
-            message.success(scope.name + ' Scope added successfully!');
+            Alert.success(scope.name + ' Scope added successfully!');
             const { apiScopes } = this.state;
             apiScopes[apiScopes.length] = this.state.apiScope;
             this.setState({
@@ -131,7 +128,6 @@ class Scopes extends React.Component {
                 apiScope: {},
                 roles: [],
             });
-            hideMessage();
         });
     }
     /**

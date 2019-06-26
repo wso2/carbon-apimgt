@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid } from '@material-ui/core/';
 
-import ApiThumb from '../components/ApiThumb';
+import ApiThumb from '../components/ImageGenerator/ApiThumb';
 
 const CardView = ({ apis, updateAPIsList }) => {
     return (

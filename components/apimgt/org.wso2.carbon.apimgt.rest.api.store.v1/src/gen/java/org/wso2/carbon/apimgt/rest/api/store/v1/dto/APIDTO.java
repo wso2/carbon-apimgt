@@ -34,10 +34,10 @@ public class APIDTO   {
     private Boolean isDefaultVersion = null;
     private List<String> transport = new ArrayList<>();
     private String authorizationHeader = null;
-    private String apiSecurity = null;
+    private List<String> securityScheme = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
     private List<String> tiers = new ArrayList<>();
-    private String thumbnailUrl = null;
+    private Boolean hasThumbnail = false;
     private Map<String, String> additionalProperties = new HashMap<>();
     private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<>();
     private APIBusinessInformationDTO businessInformation = null;
@@ -265,21 +265,21 @@ public class APIDTO   {
   }
 
   /**
-   * Supported API security for the API ( mutualssl and/or oauth2) 
+   * Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. 
    **/
-  public APIDTO apiSecurity(String apiSecurity) {
-    this.apiSecurity = apiSecurity;
+  public APIDTO securityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Supported API security for the API ( mutualssl and/or oauth2) ")
-  @JsonProperty("apiSecurity")
-  public String getApiSecurity() {
-    return apiSecurity;
+  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @JsonProperty("securityScheme")
+  public List<String> getSecurityScheme() {
+    return securityScheme;
   }
-  public void setApiSecurity(String apiSecurity) {
-    this.apiSecurity = apiSecurity;
+  public void setSecurityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
   }
 
   /**
@@ -320,19 +320,19 @@ public class APIDTO   {
 
   /**
    **/
-  public APIDTO thumbnailUrl(String thumbnailUrl) {
-    this.thumbnailUrl = thumbnailUrl;
+  public APIDTO hasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
     return this;
   }
 
   
-  @ApiModelProperty(example = "", value = "")
-  @JsonProperty("thumbnailUrl")
-  public String getThumbnailUrl() {
-    return thumbnailUrl;
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("hasThumbnail")
+  public Boolean isHasThumbnail() {
+    return hasThumbnail;
   }
-  public void setThumbnailUrl(String thumbnailUrl) {
-    this.thumbnailUrl = thumbnailUrl;
+  public void setHasThumbnail(Boolean hasThumbnail) {
+    this.hasThumbnail = hasThumbnail;
   }
 
   /**
@@ -462,10 +462,10 @@ public class APIDTO   {
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(authorizationHeader, API.authorizationHeader) &&
-        Objects.equals(apiSecurity, API.apiSecurity) &&
+        Objects.equals(securityScheme, API.securityScheme) &&
         Objects.equals(tags, API.tags) &&
         Objects.equals(tiers, API.tiers) &&
-        Objects.equals(thumbnailUrl, API.thumbnailUrl) &&
+        Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
         Objects.equals(endpointURLs, API.endpointURLs) &&
         Objects.equals(businessInformation, API.businessInformation) &&
@@ -476,7 +476,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, transport, authorizationHeader, apiSecurity, tags, tiers, thumbnailUrl, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, transport, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes);
   }
 
   @Override
@@ -496,10 +496,10 @@ public class APIDTO   {
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
-    sb.append("    apiSecurity: ").append(toIndentedString(apiSecurity)).append("\n");
+    sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    tiers: ").append(toIndentedString(tiers)).append("\n");
-    sb.append("    thumbnailUrl: ").append(toIndentedString(thumbnailUrl)).append("\n");
+    sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    endpointURLs: ").append(toIndentedString(endpointURLs)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");

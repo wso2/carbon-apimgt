@@ -22,7 +22,9 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -49,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -60,8 +63,10 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -121,6 +126,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -2573,6 +2579,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
+    public JSONArray getScopesForApplicationSubscription(String username, int applicationId)
+            throws APIManagementException {
+        Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+        JSONObject scopeList = new JSONObject();
+        JSONArray scopeArray = new JSONArray();
+
+        Subscriber subscriber = new Subscriber(username);
+        scopeSet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
+
+        for (Scope scope : scopeSet) {
+            JSONObject scopeObj = new JSONObject();
+            scopeObj.put("scopeKey", scope.getKey());
+            scopeObj.put("scopeName", scope.getName());
+            scopeArray.add(scopeObj);
+        }
+        return scopeArray;
+    }
+
     /*
      *@see super.getSubscribedAPIsByApplicationId
      *
@@ -3041,6 +3065,77 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleApplicationNameContainSpacesException("Application name " +
                                                             "cannot contain leading or trailing white spaces");
         }
+
+        JSONArray applicationAttributesFromConfig =
+                getAppAttributesFromConfig(MultitenantUtils.getTenantDomain(userId));
+        Map<String, String> applicationAttributes = application.getApplicationAttributes();
+        if (applicationAttributes == null) {
+            /*
+             * This empty Hashmap is set to avoid throwing a null pointer exception, in case no application attributes
+             * are set when creating an application
+             */
+            applicationAttributes = new HashMap<String, String>();
+        }
+        Set<String> configAttributes = new HashSet<>();
+
+        if (applicationAttributesFromConfig != null) {
+
+            for (Object object : applicationAttributesFromConfig) {
+                JSONObject attribute = (JSONObject) object;
+                Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
+                Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
+                String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+                String defaultValue = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
+                if (BooleanUtils.isTrue(hidden) && BooleanUtils.isTrue(required) && StringUtils.isEmpty(defaultValue)) {
+                    /*
+                     * In case a default value is not provided for a required hidden attribute, an exception is thrown,
+                     * we don't do this validation in server startup to support multi tenancy scenarios
+                     */
+                    handleException("Default value not provided for hidden required attribute. Please check the " +
+                            "configuration");
+                }
+                configAttributes.add(attributeName);
+                if (BooleanUtils.isTrue(required)) {
+                    if (BooleanUtils.isTrue(hidden)) {
+                        /*
+                         * If a required hidden attribute is attempted to be populated, we replace it with
+                         * the default value.
+                         */
+                        String oldValue = applicationAttributes.put(attributeName, defaultValue);
+                        if (StringUtils.isNotEmpty(oldValue)) {
+                            log.info("Replaced provided value: " + oldValue + " with default the value" +
+                                    " for the hidden application attribute: " + attributeName);
+                        }
+                    } else if (!applicationAttributes.keySet().contains(attributeName)) {
+                        if (StringUtils.isNotEmpty(defaultValue)) {
+                            /*
+                             * If a required attribute is not provided and a default value is given, we replace it with
+                             * the default value.
+                             */
+                            applicationAttributes.put(attributeName, defaultValue);
+                            log.info("Added default value: " + defaultValue +
+                                    " as required attribute: " + attributeName + "is not provided");
+                        } else {
+                            /*
+                             * If a required attribute is not provided but a default value not given, we throw a bad
+                             * request exception.
+                             */
+                            handleException("Bad Request. Required application attribute not provided");
+                        }
+                    }
+                } else if (BooleanUtils.isTrue(hidden)) {
+                    /*
+                     * If an optional hidden attribute is provided, we remove it and leave it blank, and leave it for
+                     * an extension to populate it.
+                     */
+                    applicationAttributes.remove(attributeName);
+                }
+            }
+            application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, configAttributes));
+        } else {
+            application.setApplicationAttributes(null);
+        }
+
         String regex = "^[a-zA-Z0-9 ._-]*$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(application.getName());
@@ -3163,6 +3258,73 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Matcher matcher = pattern.matcher(application.getName());
         if (!matcher.find()) {
             handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
+        }
+
+        Subscriber subscriber = application.getSubscriber();
+        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+
+        JSONArray applicationAttributesFromConfig = getAppAttributesFromConfig(tenantDomain);
+        Map<String, String> applicationAttributes = application.getApplicationAttributes();
+        Map<String, String> existingApplicationAttributes = existingApp.getApplicationAttributes();
+        if (applicationAttributes == null) {
+            /*
+             * This empty Hashmap is set to avoid throwing a null pointer exception, in case no application attributes
+             * are set when updating an application
+             */
+            applicationAttributes = new HashMap<String, String>();
+        }
+        Set<String> configAttributes = new HashSet<>();
+
+        if (applicationAttributesFromConfig != null) {
+
+            for (Object object : applicationAttributesFromConfig) {
+                boolean isExistingValue = false;
+                JSONObject attribute = (JSONObject) object;
+                Boolean hidden = (Boolean) attribute.get(APIConstants.ApplicationAttributes.HIDDEN);
+                Boolean required = (Boolean) attribute.get(APIConstants.ApplicationAttributes.REQUIRED);
+                String attributeName = (String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+                String defaultValue = (String) attribute.get(APIConstants.ApplicationAttributes.DEFAULT);
+                if (BooleanUtils.isTrue(hidden) && BooleanUtils.isTrue(required) && StringUtils.isEmpty(defaultValue)) {
+                    /*
+                     * In case a default value is not provided for a required hidden attribute, an exception is thrown,
+                     * we don't do this validation in server startup to support multi tenancy scenarios
+                     */
+                    handleException("Default value not provided for hidden required attribute. Please check the " +
+                            "configuration");
+                }
+                configAttributes.add(attributeName);
+                if (existingApplicationAttributes.containsKey(attributeName)) {
+                    /*
+                     * If a there is an existing attribute value, that is used as the default value.
+                     */
+                    isExistingValue = true;
+                    defaultValue = existingApplicationAttributes.get(attributeName);
+                }
+                if (BooleanUtils.isTrue(required)) {
+                    if (BooleanUtils.isTrue(hidden)) {
+                        String oldValue = applicationAttributes.put(attributeName, defaultValue);
+                        if (StringUtils.isNotEmpty(oldValue)) {
+                            log.info("Replaced provided value: " + oldValue + " with the default/existing value for" +
+                                    " the hidden application attribute: " + attributeName);
+                        }
+                    } else if (!applicationAttributes.keySet().contains(attributeName)) {
+                        if (StringUtils.isNotEmpty(defaultValue)) {
+                            applicationAttributes.put(attributeName, defaultValue);
+                        } else {
+                            handleException("Bad Request. Required application attribute not provided");
+                        }
+                    }
+                } else if (BooleanUtils.isTrue(hidden)) {
+                    if (isExistingValue) {
+                        applicationAttributes.put(attributeName, defaultValue);
+                    } else {
+                        applicationAttributes.remove(attributeName);
+                    }
+                }
+            }
+            application.setApplicationAttributes(validateApplicationAttributes(applicationAttributes, configAttributes));
+        } else {
+            application.setApplicationAttributes(null);
         }
 
         apiMgtDAO.updateApplication(application);
@@ -5040,6 +5202,106 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
 
+    @Override
+    public String getOpenAPIDefinitionForEnvironment(APIIdentifier apiId, String environmentName)
+            throws APIManagementException {
+        API api = getLightweightAPI(apiId);
+        String apiTenantDomain = MultitenantUtils.getTenantDomain(api.getId().getProviderName());
+
+        JSONObject swaggerObj = getModifiedOpenAPIDefinition(api);
+        assert swaggerObj != null;
+
+        String basePath = api.getContext();
+        Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+
+        String host;
+        String hostWithScheme = null;
+        if (!domains.isEmpty()) {
+            basePath = basePath.replace("/t/" + apiTenantDomain, "");
+            hostWithScheme = domains.get(APIConstants.CUSTOM_URL);
+        } else {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            Map<String, Environment> allEnvironments = config.getApiGatewayEnvironments();
+            Environment environment = allEnvironments.get(environmentName);
+
+            if (environment == null) {
+                handleException(
+                        "Could not find provided environment '" + environmentName + "' attached to the api '" + api
+                                .getId().toString() + "'");
+            }
+
+            assert environment != null;
+            String[] hostsWithScheme = environment.getApiGatewayEndpoint().split(",");
+            for (String url : hostsWithScheme) {
+                if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
+                    hostWithScheme = url;
+                    break;
+                }
+            }
+
+            if (hostWithScheme == null) {
+                hostWithScheme = hostsWithScheme[0];
+            }
+        }
+
+        host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
+                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+
+        JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
+        JSONObject defaultImplicitSecurity = (JSONObject) securityDefinitions
+                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
+        defaultImplicitSecurity
+                .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, hostWithScheme + "/authorize");
+
+        swaggerObj.put(APIConstants.SWAGGER_HOST, host);
+        swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
+        return swaggerObj.toJSONString();
+    }
+
+    @Override
+    public String getOpenAPIDefinitionForLabel(APIIdentifier apiId, String labelName)
+            throws APIManagementException {
+        API api = getLightweightAPI(apiId);
+
+        JSONObject swaggerObj = getModifiedOpenAPIDefinition(api);
+        List<Label> gatewayLabels = api.getGatewayLabels();
+        Label labelObj = null;
+
+        for (Label label : gatewayLabels) {
+            if (label.getName().equals(labelName)) {
+                labelObj = label;
+                break;
+            }
+        }
+
+        if (labelObj == null) {
+            handleException(
+                    "Could not find provided label '" + labelName + "' attached to the api '" + api.getId().toString()
+                            + "'");
+            return null;
+        }
+
+        String hostWithScheme = null;
+        List<String> accessUrls = labelObj.getAccessUrls();
+        for (String url : accessUrls) {
+            if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
+                hostWithScheme = url;
+                break;
+            }
+        }
+
+        if (hostWithScheme == null) {
+            hostWithScheme = accessUrls.get(0);
+        }
+
+        String host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
+                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+
+        swaggerObj.put(APIConstants.SWAGGER_HOST, host);
+        return swaggerObj.toJSONString();
+    }
+
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
         ArrayList<Object> apiSet = (ArrayList<Object>) searchResults.get("apis");
 
@@ -5111,6 +5373,54 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return searchResults;
     }
 
+    /**
+     * Retrieves the modified swagger definition of an API which is required for the try-out
+     *
+     * @param api API
+     * @return modified swagger definition of an API
+     * @throws APIManagementException when error occurs while performing operation
+     */
+    private JSONObject getModifiedOpenAPIDefinition(API api) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(api.getId());
+        definition = APIUtil.removeXMediationScriptsFromSwagger(definition);
+
+        try {
+            JSONObject swaggerObj = (JSONObject) new JSONParser().parse(definition);
+            String basePath = api.getContext();
+            JSONArray schemes = new JSONArray();
+            String[] apiTransports = api.getTransports().split(",");
+            if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
+                schemes.add(APIConstants.HTTPS_PROTOCOL);
+            }
+            if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
+                schemes.add(APIConstants.HTTP_PROTOCOL);
+            }
+
+            JSONObject defaultImplicitSecurity = new JSONObject();
+            defaultImplicitSecurity.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
+            defaultImplicitSecurity
+                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, "https://wso2.gateway.com/authorize");
+            defaultImplicitSecurity
+                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_IMPLICIT);
+            defaultImplicitSecurity.put(APIConstants.SWAGGER_SCOPES, new JSONArray());
+
+
+            swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
+            swaggerObj.put(APIConstants.SWAGGER_SCHEMES, schemes);
+
+            JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
+            if (securityDefinitions == null) {
+                securityDefinitions = new JSONObject();
+            }
+            securityDefinitions.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, defaultImplicitSecurity);
+            swaggerObj.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitions);
+            return swaggerObj;
+        } catch (ParseException e) {
+            handleException("Error while parsing API definition for " + api.getId().toString(), e);
+        }
+        return null;
+    }
+
     private Map<Documentation, API> filterDocumentResultsOfMultipleVersions(Map<Documentation, API> docMap) {
         Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
         if (!displayMultipleVersions) {
@@ -5159,5 +5469,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return docMap;
     }
-        
+
+    /**
+     * Validate application attributes and remove attributes that does not exist in the config
+     *
+     * @param applicationAttributes Application attributes provided
+     * @param keys Application attribute keys in config
+     * @return Validated application attributes
+     */
+    private Map<String, String> validateApplicationAttributes(Map<String, String> applicationAttributes, Set keys) {
+
+        Iterator iterator = applicationAttributes.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = (String) iterator.next();
+            if (!keys.contains(key)) {
+                iterator.remove();
+                applicationAttributes.remove(key);
+            }
+        }
+        return applicationAttributes;
+    }
 }

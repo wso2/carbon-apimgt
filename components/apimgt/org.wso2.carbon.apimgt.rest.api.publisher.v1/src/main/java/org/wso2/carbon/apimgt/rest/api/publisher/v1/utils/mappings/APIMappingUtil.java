@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -263,6 +264,54 @@ public class APIMappingUtil {
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         return model;
+    }
+
+    /**
+     * This method creates the API monetization information DTO
+     *
+     * @param apiIdentifier API identifier
+     * @return monetization information DTO
+     * @throws APIManagementException if failed to construct the DTO
+     */
+    public static APIMonetizationInfoDTO getMonetizationInfoDTO(APIIdentifier apiIdentifier)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = apiProvider.getAPI(apiIdentifier);
+        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
+        //set the information relatated to monetization to the DTO
+        apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
+        Map<String, String> monetizationPropertiesMap = new HashMap<>();
+
+        if (api.getMonetizationProperties() != null) {
+            JSONObject monetizationProperties = api.getMonetizationProperties();
+            for (Object propertyKey : monetizationProperties.keySet()) {
+                String key = (String) propertyKey;
+                monetizationPropertiesMap.put(key, (String) monetizationProperties.get(key));
+            }
+        }
+        apiMonetizationInfoDTO.setProperties(monetizationPropertiesMap);
+        return apiMonetizationInfoDTO;
+    }
+
+    /**
+     * Get map of monetized policies to plan mapping
+     *
+     * @param apiIdentifier API identifier
+     * @param monetizedPoliciesToPlanMapping map of monetized policies to plan mapping
+     * @return DTO of map of monetized policies to plan mapping
+     * @throws APIManagementException if failed to construct the DTO
+     */
+    public static APIMonetizationInfoDTO getMonetizedTiersDTO(APIIdentifier apiIdentifier,
+                                                              Map<String, String> monetizedPoliciesToPlanMapping)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = apiProvider.getAPI(apiIdentifier);
+        APIMonetizationInfoDTO apiMonetizationInfoDTO = new APIMonetizationInfoDTO();
+        apiMonetizationInfoDTO.setEnabled(api.getMonetizationStatus());
+        apiMonetizationInfoDTO.setProperties(monetizedPoliciesToPlanMapping);
+        return apiMonetizationInfoDTO;
     }
 
     /**
@@ -654,14 +703,16 @@ public class APIMappingUtil {
             for (Label label : gatewayLabels) {
                 LabelDTO labelDTO = new LabelDTO();
                 labelDTO.setName(label.getName());
-//                labelDTO.setDescription(label.getDescription()); todo check for description
+                labelDTO.setAccessUrls(label.getAccessUrls());
+                labelDTO.setDescription(label.getDescription());
                 labels.add(labelDTO);
             }
             dto.setLabels(labels);
         }
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
-        if (model.getApiSecurity() != null)
+        if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
+        }
         return dto;
     }
 

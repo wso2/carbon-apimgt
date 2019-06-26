@@ -298,7 +298,8 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         Set<Scope> scopes = api.getScopes();
 
         if (endpointsSet.length < 1) {
-            throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
+            throw new APIManagementException(
+                    "Error in creating JSON representation of the API" + identifier.getApiName());
         }
 
         JSONObject swaggerObject = new JSONObject();
@@ -349,14 +350,14 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
         JSONObject swaggerScopesObject;//++++++++
         JSONArray xScopesArray = new JSONArray();//+++++++
-        JSONObject securityDefinitionJsonObject = new JSONObject() ;//+++++++
-        JSONObject securityDefinitionAttr =new JSONObject();
+        JSONObject securityDefinitionJsonObject = new JSONObject();//+++++++
+        JSONObject securityDefinitionAttr = new JSONObject();
 
         if (scopes != null) {
             for (Scope scope : scopes) {
                 xWso2ScopesObject = new JSONObject();
                 swaggerScopesObject = new JSONObject();//++++++
-                swaggerScopesObject.put(scope.getName(),scope.getDescription());//+++++
+                swaggerScopesObject.put(scope.getName(), scope.getDescription());//+++++
                 xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
                 xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
                 xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
@@ -367,19 +368,20 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
             }
         }
 
-        securityDefinitionJsonObject.put("type","oauth2");//++++
-        securityDefinitionJsonObject.put("tokenUrl","https://test.com");//+++
-        securityDefinitionJsonObject.put("flow","password");//++++
+        securityDefinitionJsonObject.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
+        securityDefinitionJsonObject.put(APIConstants.SWAGGER_SECURITY_OAUTH2_TOKEN_URL, "https://test.com");//+++
+        securityDefinitionJsonObject
+                .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_PASSWORD);//++++
         if (!xScopesArray.isEmpty()) {
-            securityDefinitionJsonObject.put("scopes", xScopesArray);//++++++++
+            securityDefinitionJsonObject.put(APIConstants.SWAGGER_SCOPES, xScopesArray);//++++++++
         }
-        securityDefinitionAttr.put("OAuth2Security",securityDefinitionJsonObject);//++++
+        securityDefinitionAttr.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, securityDefinitionJsonObject);//++++
 
         scopesObject.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xWso2ScopesArray);
         securityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, scopesObject);
 
         swaggerObject.put(APIConstants.SWAGGER_X_WSO2_SECURITY, securityDefinitionObject);
-        swaggerObject.put("securityDefinitions",securityDefinitionAttr);//++++++
+        swaggerObject.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitionAttr);//++++++
 
         return swaggerObject.toJSONString();
     }

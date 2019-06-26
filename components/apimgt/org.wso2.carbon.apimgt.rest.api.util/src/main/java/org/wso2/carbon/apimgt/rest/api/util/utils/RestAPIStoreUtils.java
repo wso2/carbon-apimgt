@@ -166,7 +166,7 @@ public class RestAPIStoreUtils {
         //user don't have access
         return false;
     }
-    
+
     /**
      * Check whether the specified API exists and the current logged in user has access to it.
      * <p>
@@ -292,7 +292,7 @@ public class RestAPIStoreUtils {
             throw new APIMgtAuthorizationFailedException("Subscription is not allowed for " + userTenantDomain);
         }
 
-        //check whether the specified tier is within the allowed tiers for the API/API Product
+        //check whether the specified tier is within the allowed tiers for the API
         Iterator<Tier> iterator = tiers.iterator();
         boolean isTierAllowed = false;
         List<String> allowedTierList = new ArrayList<>();
@@ -311,7 +311,6 @@ public class RestAPIStoreUtils {
         if (apiConsumer.isTierDeneid(tier)) {
             throw new APIMgtAuthorizationFailedException("Tier " + tier + " is not allowed for user " + username);
         }
-
     }
 
     /**

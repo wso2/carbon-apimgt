@@ -17,6 +17,7 @@ import javax.xml.bind.annotation.*;
 public class LabelDTO   {
   
     private String name = null;
+    private String description = null;
     private List<String> accessUrls = new ArrayList<>();
 
   /**
@@ -35,6 +36,23 @@ public class LabelDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public LabelDTO description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
+  }
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   /**
@@ -65,12 +83,13 @@ public class LabelDTO   {
     }
     LabelDTO label = (LabelDTO) o;
     return Objects.equals(name, label.name) &&
+        Objects.equals(description, label.description) &&
         Objects.equals(accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, accessUrls);
+    return Objects.hash(name, description, accessUrls);
   }
 
   @Override
@@ -79,6 +98,7 @@ public class LabelDTO   {
     sb.append("class LabelDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -33,15 +33,17 @@ import Api from '../../../data/api';
 import Progress from '../../Shared/Progress';
 
 const LoadableSwitch = Loadable.Map({
-    loader: { 
+    loader: {
         ApiConsole: () => import(// eslint-disable-line function-paren-newline
         /* webpackChunkName: "ApiConsole" */
         /* webpackPrefetch: true */
-        './ApiConsole/ApiConsole'),
+            './ApiConsole/ApiConsole',
+        ),
         Overview: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Overview" */
             /* webpackPrefetch: true */
-            './Overview'),
+            './Overview',
+        ),
         Documentation: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Documentation" */
             /* webpackPrefetch: true */
@@ -61,31 +63,34 @@ const LoadableSwitch = Loadable.Map({
             /* webpackChunkName: "Sdk" */
             /* webpackPrefetch: true */
             './Sdk',
-        )
+        ),
     },
     render(loaded, props) {
-        let ApiConsole = loaded.ApiConsole.default;
-        let Overview = loaded.Overview.default;
-        let Documentation = loaded.Documentation.default;
-        let Credentials = loaded.Credentials.default;
-        let Comments = loaded.Comments.default;
-        let Sdk = loaded.Sdk.default;
-        const redirect_url = '/apis/' + props.api_uuid + '/overview';
+        const { api_uuid } = props;
+        const ApiConsole = loaded.ApiConsole.default;
+        const Overview = loaded.Overview.default;
+        const Documentation = loaded.Documentation.default;
+        const Credentials = loaded.Credentials.default;
+        const Comments = loaded.Comments.default;
+        const Sdk = loaded.Sdk.default;
+        const redirectURL = '/apis/' + api_uuid + '/overview';
 
-        return <Switch>
-            <Redirect exact from='/apis/:api_uuid' to={redirect_url} />
-            <Route path='/apis/:api_uuid/overview' component={Overview} />
-            <Route path='/apis/:api_uuid/credentials' component={Credentials} />
-            <Route path='/apis/:api_uuid/comments' component={Comments} />
-            <Route path='/apis/:api_uuid/test' component={ApiConsole} />
-            <Route path='/apis/:api_uuid/docs' component={Documentation} />
-            <Route path='/apis/:api_uuid/sdk' component={Sdk} />
-            <Route component={PageNotFound} />
-        </Switch>;
+        return (
+            <Switch>
+                <Redirect exact from='/apis/:api_uuid' to={redirectURL} />
+                <Route path='/apis/:api_uuid/overview' component={Overview} />
+                <Route path='/apis/:api_uuid/credentials' component={Credentials} />
+                <Route path='/apis/:api_uuid/comments' component={Comments} />
+                <Route path='/apis/:api_uuid/test' component={ApiConsole} />
+                <Route path='/apis/:api_uuid/docs' component={Documentation} />
+                <Route path='/apis/:api_uuid/sdk' component={Sdk} />
+                <Route component={PageNotFound} />
+            </Switch>
+        );
     },
     loading() {
-        return <Progress />
-    }
+        return <Progress />;
+    },
 });
 
 /**
@@ -183,9 +188,11 @@ class Details extends React.Component {
 
                     const subscribedApplications = [];
                     // get the application IDs of existing subscriptions
-                    subscriptions.list.map(element => subscribedApplications.push({ value: element.applicationId, 
-                        policy: element.policy, 
-                        subscriptionId: element.subscriptionId }));
+                    subscriptions.list.map(element => subscribedApplications.push({
+                        value: element.applicationId,
+                        policy: element.policy,
+                        subscriptionId: element.subscriptionId,
+                    }));
                     this.setState({ subscribedApplications });
 
                     // Removing subscribed applications from all the applications and get the available applications to subscribe
@@ -262,11 +269,22 @@ class Details extends React.Component {
      * @memberof Details
      */
     componentDidMount() {
+        this.updateActiveLink();
+        this.updateSubscriptionData();
+    }
+
+    /**
+     *
+     * Selects the active link for the side panel based on the URL
+     * @memberof Details
+     */
+    updateActiveLink() {
+        const { active } = this.state;
         const currentLink = this.props.location.pathname.match(/[^\/]+(?=\/$|$)/g);
-        if (currentLink && currentLink.length > 0) {
+
+        if (currentLink && currentLink.length > 0 && active !== currentLink[0]) {
             this.setState({ active: currentLink[0] });
         }
-        this.updateSubscriptionData();
     }
 
     /**
@@ -276,8 +294,10 @@ class Details extends React.Component {
      * @memberof Details
      */
     render() {
+        this.updateActiveLink();
+
         const { classes, theme } = this.props;
-        const { api } = this.state;
+        const { active } = this.state;
         const redirect_url = '/apis/' + this.props.match.params.api_uuid + '/overview';
         const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
@@ -291,15 +311,17 @@ class Details extends React.Component {
                             <Typography className={classes.leftLInkMainText}>ALL APIs</Typography>
                         </div>
                     </Link>
-                    <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                    <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {/* TODO: uncomment when the feature is working */}
+                    {/* <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
+                    <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {/* TODO: uncomment when the feature is working */}
+                    {/* <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
+                    <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>
-                    <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
+                    <InfoBar apiId={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
                     <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}

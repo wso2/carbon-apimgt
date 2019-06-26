@@ -91,7 +91,7 @@ export default class Application extends Resource {
      * @returns {promise} Set the generated token into current
      * instance and return tokenObject received as Promise object
      */
-    generateToken(type, validityPeriod,  selectedScopes) {
+    generateToken(type, validityPeriod, selectedScopes) {
         const promiseToken = this.client.then((client) => {
             const keys = this.keys.get(type);
             const accessToken = this.tokens.get(type);
@@ -122,13 +122,12 @@ export default class Application extends Resource {
      * @returns {promise} Set the generated token into current instance and return tokenObject
      * received as Promise object
      */
-    generateKeys(keyType, supportedGrantTypes, callbackUrl, tokenType) {
+    generateKeys(keyType, supportedGrantTypes, callbackUrl) {
         const promisedKeys = this.client.then((client) => {
             const requestContent = {
                 keyType, /* TODO: need to support dynamic key types ~tmkb */
                 grantTypesToBeSupported: supportedGrantTypes,
                 callbackUrl,
-                tokenType,
             };
             const payload = { applicationId: this.id, body: requestContent };
             return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload);
@@ -160,7 +159,7 @@ export default class Application extends Resource {
                 tokenType,
             };
             const payload = { applicationId: this.id, keyType, body: requestContent };
-            return client.apis.Applications.put_applications__applicationId__keys__keyType_(payload);
+            return client.apis['Application Keys'].put_applications__applicationId__keys__keyType_(payload);
         });
         return promisedPut.then((keysResponse) => {
             this.keys.set(keyType, keysResponse.obj);

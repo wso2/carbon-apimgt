@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
 
@@ -21,6 +22,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
   
   
   private ThrottleLimitDTO defaultLimit = null;
+  
+  
+  private MonetizationInfoDTO monetization = null;
   
   
   private Integer rateLimitCount = null;
@@ -47,6 +51,18 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
   }
   public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("monetization")
+  public MonetizationInfoDTO getMonetization() {
+    return monetization;
+  }
+  public void setMonetization(MonetizationInfoDTO monetization) {
+    this.monetization = monetization;
   }
 
   
@@ -122,6 +138,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
     sb.append("class SubscriptionThrottlePolicyDTO {\n");
     sb.append("  " + super.toString()).append("\n");
     sb.append("  defaultLimit: ").append(defaultLimit).append("\n");
+    sb.append("  monetization: ").append(monetization).append("\n");
     sb.append("  rateLimitCount: ").append(rateLimitCount).append("\n");
     sb.append("  rateLimitTimeUnit: ").append(rateLimitTimeUnit).append("\n");
     sb.append("  customAttributes: ").append(customAttributes).append("\n");

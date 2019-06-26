@@ -35,7 +35,7 @@ function BusinessInformation(props) {
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
                             Business Information
                         </Typography>
-                        <Link to={'/apis/' + api.id + '/documents'}>
+                        <Link to={'/apis/' + api.id + '/business info'}>
                             <Button variant='contained' color='default'>
                                 Edit
                             </Button>

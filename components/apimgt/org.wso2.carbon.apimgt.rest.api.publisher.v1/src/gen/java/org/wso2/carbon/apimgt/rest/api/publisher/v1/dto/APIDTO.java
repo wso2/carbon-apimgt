@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
@@ -158,6 +159,7 @@ public enum SubscriptionAvailabilityEnum {
     private SubscriptionAvailabilityEnum subscriptionAvailability = null;
     private List<String> subscriptionAvailableTenants = new ArrayList<>();
     private Map<String, String> additionalProperties = new HashMap<>();
+    private APIMonetizationInfoDTO monetization = null;
 
 @XmlType(name="AccessControlEnum")
 @XmlEnum(String.class)
@@ -748,6 +750,23 @@ public enum AccessControlEnum {
   }
 
   /**
+   **/
+  public APIDTO monetization(APIMonetizationInfoDTO monetization) {
+    this.monetization = monetization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("monetization")
+  public APIMonetizationInfoDTO getMonetization() {
+    return monetization;
+  }
+  public void setMonetization(APIMonetizationInfoDTO monetization) {
+    this.monetization = monetization;
+  }
+
+  /**
    * Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,  based on the restriction. 
    **/
   public APIDTO accessControl(AccessControlEnum accessControl) {
@@ -977,6 +996,7 @@ public enum AccessControlEnum {
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
+        Objects.equals(monetization, API.monetization) &&
         Objects.equals(accessControl, API.accessControl) &&
         Objects.equals(accessControlRoles, API.accessControlRoles) &&
         Objects.equals(businessInformation, API.businessInformation) &&
@@ -992,7 +1012,7 @@ public enum AccessControlEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpoint, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpoint, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -1031,6 +1051,7 @@ public enum AccessControlEnum {
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");

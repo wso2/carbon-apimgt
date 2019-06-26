@@ -41,7 +41,6 @@ public class SettingsMappingUtil {
         SettingsDTO settingsDTO = new SettingsDTO();
         if (isUserAvailable) {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
-            settingsDTO.setTokenUrl(APIUtil.getTokenUrl());
             settingsDTO.setScopes(GetScopeList());
         } else {
             settingsDTO.setScopes(GetScopeList());

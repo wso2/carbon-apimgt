@@ -91,10 +91,8 @@ class Resources extends React.Component {
      * @memberof Resources
      */
     componentDidMount() {
-        const api = new Api();
-        this.api_uuid = this.props.api.id;
-
-        const promised_api = this.api.getSwaggerByAPIId(this.api_uuid);
+        const { api } = this.props;
+        const promised_api = this.api.getSwaggerByAPIId(api.id);
         promised_api
             .then((response) => {
                 if (response.obj.paths !== undefined) {

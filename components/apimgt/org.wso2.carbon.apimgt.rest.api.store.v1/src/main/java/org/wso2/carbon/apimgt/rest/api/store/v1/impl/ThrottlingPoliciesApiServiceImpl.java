@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.ThrottlingPolicy;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -38,7 +38,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-        List<ThrottlingPolicy> throttlingPolicyList = getThrottlingPolicyList(policyLevel, xWSO2Tenant);
+        List<Tier> throttlingPolicyList = getThrottlingPolicyList(policyLevel, xWSO2Tenant);
         ThrottlingPolicyListDTO tierListDTO = ThrottlingPolicyMappingUtil.fromTierListToDTO(throttlingPolicyList,
                 policyLevel, limit, offset);
         ThrottlingPolicyMappingUtil.setPaginationParams(tierListDTO, policyLevel, limit, offset,
@@ -47,14 +47,60 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
     }
 
     @Override
-    public Response throttlingPoliciesPolicyLevelPolicyIdGet(String tierId, String tierLevel, String xWSO2Tenant,
+    public Response throttlingPoliciesPolicyLevelPolicyIdGet(String policyId, String policyLevel, String xWSO2Tenant,
             String ifNoneMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            }
+
+            ThrottlingPolicyDTO.PolicyLevelEnum policyType;
+            Tier foundTier = null;
+
+            if (StringUtils.isBlank(policyLevel)) {
+                RestApiUtil.handleBadRequest("policyLevel cannot be empty", log);
+            }
+
+            //retrieves the tier based on the given tier-level
+            if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
+                policyType = ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION;
+                foundTier = APIUtil.getTierFromCache(policyId, requestedTenantDomain);
+            } else if (ThrottlingPolicyDTO.PolicyLevelEnum.APPLICATION.toString().equals(policyLevel)) {
+                policyType = ThrottlingPolicyDTO.PolicyLevelEnum.APPLICATION;
+                Map<String, Tier> appTierMap = APIUtil
+                        .getTiers(APIConstants.TIER_APPLICATION_TYPE, requestedTenantDomain);
+                if (appTierMap != null) {
+                    foundTier = RestApiUtil.findTier(appTierMap.values(), policyId);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(
+                        "Policy level should be one of " +
+                                Arrays.toString(ThrottlingPolicyDTO.PolicyLevelEnum.values()), log);
+                return null;
+            }
+
+            //returns if the tier is found, otherwise send 404
+            if (foundTier != null) {
+                return Response.ok()
+                        .entity(ThrottlingPolicyMappingUtil.fromTierToDTO(foundTier, policyType.toString()))
+                        .build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, policyId, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the tier with name " + policyId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
-    public List<ThrottlingPolicy> getThrottlingPolicyList(String policyLevel,String xWSO2Tenant) {
-        List<ThrottlingPolicy> throttlingPolicyList = new ArrayList<>();
+    public List<Tier> getThrottlingPolicyList(String policyLevel,String xWSO2Tenant) {
+        List<Tier> throttlingPolicyList = new ArrayList<>();
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
 
         try {
@@ -68,16 +114,15 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
 
             //retrieves the tier based on the given tier-level
             if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
-                Map<String, ThrottlingPolicy> apiTierMap = APIUtil.getThrottlingPolicies(
-                        APIConstants.TIER_API_TYPE, requestedTenantDomain);
+                Map<String, Tier> apiTierMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, requestedTenantDomain);
                 if (apiTierMap != null) {
                     String username = RestApiUtil.getLoggedInUsername();
                     APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
                     Set<TierPermission> tierPermissions = apiConsumer.getTierPermissions();
                     for (TierPermission tierPermission : tierPermissions) {
-                        ThrottlingPolicy tier = apiTierMap.get(tierPermission.getTierName());
-                        tier.setThrottlingPolicyPermission(tierPermission);
+                        Tier tier = apiTierMap.get(tierPermission.getTierName());
+                        tier.setTierPermission(tierPermission);
                         apiTierMap.put(tierPermission.getTierName(), tier);
                     }
 
@@ -90,8 +135,8 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
                     throttlingPolicyList.addAll(apiTierMap.values());
                 }
             } else if (ThrottlingPolicyDTO.PolicyLevelEnum.APPLICATION.toString().equals(policyLevel)) {
-                Map<String, ThrottlingPolicy> appTierMap =
-                        APIUtil.getThrottlingPolicies(APIConstants.TIER_APPLICATION_TYPE, requestedTenantDomain);
+                Map<String, Tier> appTierMap =
+                        APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, requestedTenantDomain);
                 if (appTierMap != null) {
                     throttlingPolicyList.addAll(appTierMap.values());
                 }

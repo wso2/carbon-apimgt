@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExtendedSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
@@ -86,6 +87,23 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = ErrorDTO.class) })
     public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
         return delegate.subscriptionsSubscriptionIdGet(subscriptionId, ifNoneMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{subscriptionId}/usage")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get details of a pending invoice for a monetized subscription with meterd billing.", notes = "This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing. ", response = APIMonetizationUsageDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription")
+        })
+    }, tags={ "Subscription (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Details of a pending invoice returned. ", response = APIMonetizationUsageDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = ErrorDTO.class) })
+    public Response subscriptionsSubscriptionIdUsageGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId) {
+        return delegate.subscriptionsSubscriptionIdUsageGet(subscriptionId, securityContext);
     }
 
     @POST

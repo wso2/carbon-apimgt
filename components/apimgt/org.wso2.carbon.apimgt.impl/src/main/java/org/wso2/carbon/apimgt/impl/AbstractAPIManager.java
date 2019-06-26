@@ -18,12 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.commons.collections4.list.TreeList;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;

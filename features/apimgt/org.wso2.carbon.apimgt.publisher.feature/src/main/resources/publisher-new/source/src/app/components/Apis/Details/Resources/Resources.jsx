@@ -39,6 +39,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Alert from 'AppComponents/Shared/Alert';
 
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
@@ -188,10 +189,10 @@ class Resources extends React.Component {
 
     componentDidMount() {
         const api = new Api();
-        const promised_api_object = api.get(this.api_uuid);
+        const promised_api_object = Api.get(this.api_uuid);
         promised_api_object
-            .then((response) => {
-                this.setState({ api: response.obj });
+            .then((api) => {
+                this.setState({ api });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -256,10 +257,10 @@ class Resources extends React.Component {
     addResources() {
         const allMehtods = ['get', 'put', 'post', 'delete', 'patch', 'head'];
         const defaultGet = {
-            description: 'description',
-            produces: 'application/xml,application/json',
-            consumes: 'application/xml,application/json',
+            description: '',
             parameters: [],
+            'x-auth-type': 'Application & Application User',
+            'x-throttling-tier': 'Unlimited', //todo: handle when Unlimited tier is disabled
             responses: {
                 200: {
                     description: '',
@@ -268,9 +269,9 @@ class Resources extends React.Component {
         };
 
         const defaultPost = {
-            description: 'description',
-            produces: 'application/xml,application/json',
-            consumes: 'application/xml,application/json',
+            description: '',
+            'x-auth-type': 'Application & Application User',
+            'x-throttling-tier': 'Unlimited', //todo: handle when Unlimited tier is disabled
             responses: {
                 200: {
                     description: '',
@@ -295,8 +296,9 @@ class Resources extends React.Component {
         };
 
         const defaultDelete = {
-            description: 'description',
-            produces: 'application/xml,application/json',
+            description: '',
+            'x-auth-type': 'Application & Application User',
+            'x-throttling-tier': 'Unlimited', //todo: handle when Unlimited tier is disabled
             responses: {
                 200: {
                     description: '',
@@ -305,6 +307,8 @@ class Resources extends React.Component {
             parameters: [],
         };
         const defaultHead = {
+            'x-auth-type': 'Application & Application User',
+            'x-throttling-tier': 'Unlimited', //todo: handle when Unlimited tier is disabled
             responses: {
                 200: {
                     description: '',
@@ -387,10 +391,12 @@ class Resources extends React.Component {
     updateResources() {
         const tmpSwagger = this.state.swagger;
         tmpSwagger.paths = this.state.paths;
-        this.setState({ api: tmpSwagger });
-        const promised_api = this.api.updateSwagger(this.api_uuid, this.state.swagger);
+        const api = this.state.api;
+
+        const promised_api = api.updateSwagger(this.state.swagger);
         promised_api
-            .then((response) => {
+            .then(() => {
+                Alert.info(`API updated successfully!`);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
@@ -628,11 +634,9 @@ class Resources extends React.Component {
                             </div>
                         })}
                     </List>
-                    <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                     <Button variant="contained" color="primary" className={classes.buttonMain} onClick={this.updateResources} >
                         Save
                     </Button>
-                    </ApiPermissionValidation>
                 </div>
             </div>
         );

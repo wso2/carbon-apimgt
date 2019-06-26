@@ -209,4 +209,38 @@ public class RestApiPublisherUtils {
             IOUtils.closeQuietly(docInputStream);
         }
     }
+
+    /**
+     * This method validates monetization properties
+     *
+     * @param monetizationProperties map of monetization properties
+     * @return error message if there is an validation error with monetization properties.
+     */
+    public static String validateMonetizationProperties(Map<String, String> monetizationProperties) {
+
+        if (monetizationProperties != null) {
+            for (Map.Entry<String, String> entry : monetizationProperties.entrySet()) {
+                String monetizationPropertyKey = entry.getKey().trim();
+                String propertyValue = entry.getValue();
+                if (monetizationPropertyKey.contains(" ")) {
+                    return "Monetization property names should not contain space character. " +
+                            "Monetization property '" + monetizationPropertyKey + "' "
+                            + "contains space in it.";
+                }
+                // Maximum allowable characters of registry property name and value is 100 and 1000.
+                // Hence we are restricting them to be within 80 and 900.
+                if (monetizationPropertyKey.length() > 80) {
+                    return "Monetization property name can have maximum of 80 characters. " +
+                            "Monetization property '" + monetizationPropertyKey + "' + contains "
+                            + monetizationPropertyKey.length() + "characters";
+                }
+                if (propertyValue.length() > 900) {
+                    return "Monetization property value can have maximum of 900 characters. " +
+                            "Property '" + monetizationPropertyKey + "' + "
+                            + "contains a value with " + propertyValue.length() + "characters";
+                }
+            }
+        }
+        return "";
+    }
 }

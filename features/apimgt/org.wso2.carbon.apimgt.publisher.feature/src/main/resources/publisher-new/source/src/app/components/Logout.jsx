@@ -22,7 +22,6 @@ import qs from 'qs';
 import Alert from 'AppComponents/Shared/Alert';
 import PropTypes from 'prop-types';
 
-import ConfigManager from 'AppData/ConfigManager';
 import AuthManager from 'AppData/AuthManager';
 
 /**
@@ -56,19 +55,13 @@ class Logout extends Component {
      */
     componentDidMount() {
         const authManager = new AuthManager();
-        ConfigManager.getConfigs()
-            .environments.then((response) => {
-                const { environments } = response.data;
-                const promisedLogout = authManager.logoutFromEnvironments(environments);
-                promisedLogout.then(() => this.setState({ logoutSuccess: true })).catch((error) => {
-                    const message = 'Error while logging out';
-                    Alert.error(message);
-                    console.log(error);
-                });
-            })
+        const promisedLogout = authManager.logoutFromEnvironments();
+        promisedLogout
+            .then(() => this.setState({ logoutSuccess: true }))
             .catch((error) => {
-                console.error(error);
-                Alert.error('Error while receiving environment configurations');
+                const message = 'Error while logging out';
+                Alert.error(message);
+                console.log(error);
             });
     }
 

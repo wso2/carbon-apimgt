@@ -2998,7 +2998,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     @Override
     public List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
-           String fromDate, String toDate) {
+           String fromDate, String toDate, String providerName) {
         return null;
     }
 }
