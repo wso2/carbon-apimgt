@@ -1983,7 +1983,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if( api.isEndpointKerberosEnable() && api.getEndpointTargetSpn() !=null) {
             Map<String, String> kerberosProperties = new HashMap<String, String>();
-            kerberosProperties.put("targetSPN", api.getEndpointTargetSpn());
+            kerberosProperties.put("targetSpn", api.getEndpointTargetSpn());
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.kerberos.KerberosDelegationHandler", kerberosProperties);
         }
