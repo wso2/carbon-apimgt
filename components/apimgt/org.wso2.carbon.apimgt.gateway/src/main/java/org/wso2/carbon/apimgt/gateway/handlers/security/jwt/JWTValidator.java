@@ -78,61 +78,65 @@ public class JWTValidator {
             }
 
             JSONObject applicationObj = (JSONObject) payload.get("application");
-            JSONArray subscribedAPIs = (JSONArray) payload.get("subscribedAPIs");
 
             String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 
             JSONObject api = null;
-            for (int i = 0; i < subscribedAPIs.length(); i++) {
-                JSONObject subscribedAPIsJSONObject = subscribedAPIs.getJSONObject(i);
-                if (subscribedAPIsJSONObject.getString("context").equals(apiContext) &&
-                        subscribedAPIsJSONObject.getString("version").equals(apiVersion)) {
-                    api = subscribedAPIsJSONObject;
-                    break;
+
+            if (payload.get("subscribedAPIs") != null) {
+                JSONArray subscribedAPIs = (JSONArray) payload.get("subscribedAPIs");
+                for (int i = 0; i < subscribedAPIs.length(); i++) {
+                    JSONObject subscribedAPIsJSONObject = subscribedAPIs.getJSONObject(i);
+                    if (subscribedAPIsJSONObject.getString("context").equals(apiContext) &&
+                            subscribedAPIsJSONObject.getString("version").equals(apiVersion)) {
+                        api = subscribedAPIsJSONObject;
+                        break;
+                    }
                 }
             }
+
+            // Scope validation
+            String resourceScope = null;
+            Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+
+            if (vendorExtensions != null) {
+                resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
+            }
+
+            if (StringUtils.isNotBlank(resourceScope) && payload.getString("scope") != null) {
+                String[] tokenScopes = payload.getString("scope").split(" ");
+                boolean scopeFound = false;
+                for (String scope : tokenScopes) {
+                    if (scope.trim().equals(resourceScope)) {
+                        scopeFound = true;
+                        break;
+                    }
+                }
+                if (!scopeFound) {
+                    throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+                }
+            }
+
+            // Generate authentication context
+            AuthenticationContext authContext = new AuthenticationContext();
+            authContext.setAuthenticated(true);
+            authContext.setApiKey(payload.getString("jti"));
+            authContext.setKeyType(payload.getString("keytype"));
+            authContext.setUsername(payload.getString("sub"));
+            authContext.setApplicationId(String.valueOf(applicationObj.getInt("id")));
+            authContext.setApplicationName(applicationObj.getString("name"));
+            authContext.setApplicationTier(applicationObj.getString("tier"));
+            authContext.setSubscriber(payload.getString("sub"));
+            authContext.setConsumerKey(payload.getString("consumerKey"));
 
             if (api != null) {
-                // Scope validation
-                String resourceScope = null;
-                Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
-
-                if (vendorExtensions != null) {
-                    resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
-                }
-
-                if (StringUtils.isNotBlank(resourceScope) && payload.getString("scope") != null) {
-                    String[] tokenScopes = payload.getString("scope").split(" ");
-                    boolean scopeFound = false;
-                    for (String scope : tokenScopes) {
-                        if (scope.trim().equals(resourceScope)) {
-                            scopeFound = true;
-                            break;
-                        }
-                    }
-                    if (!scopeFound) {
-                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
-                    }
-                }
-
-                AuthenticationContext authContext = new AuthenticationContext();
-                authContext.setAuthenticated(true);
+                // If the user is subscribed to the API
                 authContext.setTier(api.getString("subscriptionTier"));
-                authContext.setApiKey(payload.getString("jti"));
-                authContext.setKeyType(payload.getString("keytype"));
-                authContext.setUsername(payload.getString("sub"));
-                authContext.setApplicationId(String.valueOf(applicationObj.getInt("id")));
-                authContext.setApplicationName(applicationObj.getString("name"));
-                authContext.setApplicationTier(applicationObj.getString("tier"));
-                authContext.setSubscriber(payload.getString("sub"));
-                authContext.setConsumerKey(payload.getString("consumerKey"));
                 authContext.setSubscriberTenantDomain(api.getString("subscriberTenantDomain"));
-                return authContext;
-            } else {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        "User is not subscribed to the API : " + apiContext + ", version: " + apiVersion);
             }
+
+            return authContext;
         }
         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
     }
