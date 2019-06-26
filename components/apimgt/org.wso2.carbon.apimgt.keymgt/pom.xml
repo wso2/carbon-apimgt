@@ -11,7 +11,6 @@
     License for the specific language governing permissions and ~
     limitations under the License.
 -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
@@ -129,7 +128,12 @@
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
         </dependency>
-	</dependencies>
+	<dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
@@ -191,7 +195,7 @@
 						<artifactId>surefire-junit47</artifactId>
 						<version>${maven.surefire.plugin.version}</version>
 					</dependency>
-				</dependencies>
+                </dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -236,4 +240,3 @@
 
 
 </project>
-

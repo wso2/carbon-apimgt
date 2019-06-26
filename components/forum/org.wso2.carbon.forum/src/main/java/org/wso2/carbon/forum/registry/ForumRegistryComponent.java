@@ -15,7 +15,6 @@
 *specific language governing permissions and limitations
 *under the License.
 */
-
 package org.wso2.carbon.forum.registry;
 
 import org.apache.commons.logging.Log;
@@ -43,20 +42,19 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-/**
- * @scr.component name="org.wso2.carbon.forum.services" immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="user.realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- */
+@Component(
+         name = "org.wso2.carbon.forum.services", 
+         immediate = true)
 public class ForumRegistryComponent {
 
     private static final Log log = LogFactory.getLog(ForumRegistryComponent.class);
@@ -65,53 +63,45 @@ public class ForumRegistryComponent {
 
     ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
 
+    @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
             log.debug("Forum Registry Component Activated");
         }
-
-        try{
+        try {
             TenantServiceCreator tenantServiceCreator = new TenantServiceCreator();
             BundleContext bundleContext = componentContext.getBundleContext();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantServiceCreator, null);
             createTopicsRootCollection(MultitenantConstants.SUPER_TENANT_ID);
             addRxtConfigs(MultitenantConstants.SUPER_TENANT_ID);
-        }catch(ForumException e){
+        } catch (ForumException e) {
             log.error("Could not activate Forum Registry Component " + e.getMessage());
             throw e;
         }
     }
 
     public static void addRxtConfigs(int tenantId) throws ForumException {
-        String forumRxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                "resources" + File.separator + "rxts" + File.separator + "forum";
-
+        String forumRxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "rxts" + File.separator + "forum";
         File file = new File(forumRxtDir);
-
-        //create a FilenameFilter
+        // create a FilenameFilter
         FilenameFilter filenameFilter = new FilenameFilter() {
+
             public boolean accept(File dir, String name) {
-                //if the file extension is .rxt return true, else false
+                // if the file extension is .rxt return true, else false
                 return name.endsWith(".rxt");
             }
         };
-
         String[] rxtFilePaths = file.list(filenameFilter);
         UserRegistry systemRegistry;
         try {
             systemRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
-                                                    //getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
+        // getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
         } catch (RegistryException e) {
             throw new ForumException("Failed to get registry", e);
         }
-
         for (String rxtPath : rxtFilePaths) {
-            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH +
-                    RegistryConstants.PATH_SEPARATOR + rxtPath;
-
-            resourcePath = RegistryUtils.getRelativePathToOriginal(resourcePath,
-                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
-
+            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH + RegistryConstants.PATH_SEPARATOR + rxtPath;
+            resourcePath = RegistryUtils.getRelativePathToOriginal(resourcePath, RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
             try {
                 if (systemRegistry.resourceExists(resourcePath)) {
                     continue;
@@ -131,39 +121,27 @@ public class ForumRegistryComponent {
         }
     }
 
-    public static void createTopicsRootCollection(int tenantId) throws ForumException{
+    public static void createTopicsRootCollection(int tenantId) throws ForumException {
         UserRegistry systemRegistry;
         try {
             systemRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
-
-            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                                TOPICS_ROOT);
-
-            if(systemRegistry.resourceExists(resourcePath)){
+            String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), TOPICS_ROOT);
+            if (systemRegistry.resourceExists(resourcePath)) {
                 return;
             }
-
             Collection collection = systemRegistry.newCollection();
             systemRegistry.put(resourcePath, collection);
-
             AuthorizationManager authorizationManager;
-
             try {
                 if (org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID == tenantId) {
-                    authorizationManager = ServiceReferenceHolder.getInstance().getRealmService().
-                            getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getAuthorizationManager();
+                    authorizationManager = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getAuthorizationManager();
                 } else {
-                    authorizationManager = new RegistryAuthorizationManager
-                            (ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry().getUserRealm());
+                    authorizationManager = new RegistryAuthorizationManager(ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry().getUserRealm());
                 }
-                String everyOneRole = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantUserRealm(tenantId).getRealmConfiguration().getEveryOneRoleName();
-
-                authorizationManager.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME, collection.getPath(),
-                        ActionConstants.GET.toString());
+                String everyOneRole = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId).getRealmConfiguration().getEveryOneRoleName();
+                authorizationManager.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME, collection.getPath(), ActionConstants.GET.toString());
                 authorizationManager.authorizeRole(everyOneRole, collection.getPath(), ActionConstants.GET.toString());
                 authorizationManager.authorizeRole(everyOneRole, collection.getPath(), ActionConstants.PUT.toString());
-
             } catch (UserStoreException e) {
                 log.error("Error when getting user store for applying permissions on forum root collection!", e);
                 throw new ForumException("Error when getting user store for applying permissions on forum root collection!", e);
@@ -172,7 +150,13 @@ public class ForumRegistryComponent {
             throw new ForumException("Failed to get registry", e);
         }
     }
-    
+
+    @Reference(
+             name = "registry.service", 
+             service = org.wso2.carbon.registry.core.service.RegistryService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (log.isDebugEnabled() && registryService != null) {
             log.debug("Registry service initialized");
@@ -184,16 +168,21 @@ public class ForumRegistryComponent {
         serviceReferenceHolder.setRegistryService(null);
     }
 
+    @Reference(
+             name = "user.realm.service", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled() && realmService != null) {
             log.debug("Realm service initialized");
         }
         serviceReferenceHolder.setRealmService(realmService);
-
-
     }
 
     protected void unsetRealmService(RealmService realmService) {
         serviceReferenceHolder.setRealmService(null);
     }
 }
+

@@ -17,7 +17,6 @@
  *  under the License.
  * /
  */
-
 package org.wso2.carbon.apimgt.jms.listener.internal;
 
 import org.apache.commons.logging.Log;
@@ -37,58 +36,48 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.apimgt.jms.listener.utils.ListenerConstants;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-
-/**
- * This component start the JMS listeners
- */
-
-/**
- * @scr.component name="org.wso2.apimgt.jms.listener" immediate="true"
- * @scr.reference name="throttle.data.service"
- * interface="org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService"
- * cardinality="1..1" policy="dynamic" bind="setAPIThrottleDataService" unbind="unsetAPIThrottleDataService"
- * org.wso2.andes.wso2.service.QpidNotificationService
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- */
-
+@Component(
+         name = "org.wso2.apimgt.jms.listener", 
+         immediate = true)
 public class JMSListenerComponent implements ServiceListener {
 
     private static final Log log = LogFactory.getLog(JMSListenerComponent.class);
+
     private JMSTransportHandler jmsTransportHandler;
+
     private BundleContext bundleContext;
+
     private ServiceRegistration registration;
 
+    @Activate
     protected void activate(ComponentContext context) {
         log.debug("Activating component...");
-
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         if (configuration != null) {
             if (!configuration.getThrottleProperties().getJmsConnectionProperties().isEnabled()) {
                 return;
             }
-
         } else {
             log.warn("API Manager Configuration not properly set.");
         }
-
         BundleContext bundleContext = context.getBundleContext();
         this.bundleContext = bundleContext;
         boolean andesBundlePresent = false;
-
         for (Bundle bundle : bundleContext.getBundles()) {
             if (ListenerConstants.ANDES_SYMBOLIC_NAME.equals(bundle.getSymbolicName())) {
-
                 // Searching for the QpidNotificationService. This service is exposed by andes,
                 // so if this service is exposed we know for sure andes has started properly.
-                String notificationServiceFilter = String.format("(%s=%s)", Constants.OBJECTCLASS,
-                                                                 ListenerConstants.QPID_SERVICE);
+                String notificationServiceFilter = String.format("(%s=%s)", Constants.OBJECTCLASS, ListenerConstants.QPID_SERVICE);
                 andesBundlePresent = true;
                 try {
-                    ServiceReference[] serviceReferences =
-                            bundleContext.getServiceReferences((String) null, notificationServiceFilter);
+                    ServiceReference[] serviceReferences = bundleContext.getServiceReferences((String) null, notificationServiceFilter);
                     // If the service is present we'd directly start the listener.
                     if (serviceReferences != null) {
                         startJMSListener();
@@ -101,35 +90,35 @@ public class JMSListenerComponent implements ServiceListener {
                 }
             }
         }
-
-        // If andes bundle is not in the environment, then listener should be configured to a jms publisher running
         // in a remote machine. That's why we start the listener.
         if (!andesBundlePresent) {
             startJMSListener();
         }
-
         return;
     }
 
     private void startJMSListener() {
         jmsTransportHandler = new JMSTransportHandler();
         jmsTransportHandler.subscribeForJmsEvents();
-        if(bundleContext != null) {
-            registration = bundleContext.registerService(
-                    JMSListenerShutDownService.class.getName(),
-                    new JMSListenerShutDownService() {
+        if (bundleContext != null) {
+            registration = bundleContext.registerService(JMSListenerShutDownService.class.getName(), new JMSListenerShutDownService() {
 
-                        @Override
-                        public void shutDownListener() {
-                            // Shutting down the listener
-                            log.debug("Shutdown service called... Starting to shutdown listener.");
-                            jmsTransportHandler.unSubscribeFromEvents();
-                        }
-                    }, null);
+                @Override
+                public void shutDownListener() {
+                    // Shutting down the listener
+                    log.debug("Shutdown service called... Starting to shutdown listener.");
+                    jmsTransportHandler.unSubscribeFromEvents();
+                }
+            }, null);
         }
     }
 
-
+    @Reference(
+             name = "throttle.data.service", 
+             service = org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIThrottleDataService")
     protected void setAPIThrottleDataService(APIThrottleDataService throttleDataService) {
         log.debug("Setting APIThrottleDataService");
         ServiceReferenceHolder.getInstance().setAPIThrottleDataService(throttleDataService);
@@ -140,6 +129,12 @@ public class JMSListenerComponent implements ServiceListener {
         ServiceReferenceHolder.getInstance().setAPIThrottleDataService(null);
     }
 
+    @Reference(
+             name = "api.manager.config.service", 
+             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService configurationService) {
         log.debug("Setting APIM Configuration Service");
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(configurationService);
@@ -150,14 +145,15 @@ public class JMSListenerComponent implements ServiceListener {
         ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating component");
         }
-        if(this.registration != null){
+        if (this.registration != null) {
             this.registration.unregister();
         }
-        if(jmsTransportHandler != null){
+        if (jmsTransportHandler != null) {
             // This method will make shutdown the Listener.
             log.debug("Unsubscribing from JMS Events...");
             jmsTransportHandler.unSubscribeFromEvents();
@@ -174,3 +170,4 @@ public class JMSListenerComponent implements ServiceListener {
         }
     }
 }
+
