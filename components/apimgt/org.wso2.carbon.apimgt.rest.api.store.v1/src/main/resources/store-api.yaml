@@ -3284,6 +3284,11 @@ definitions:
         additionalProperties:
           type: string
         example: External Reference ID, Billing Tier
+      subscriptionScopes:
+        type: array
+        items:
+          type: string
+        example: ["admin"]
 
 #-----------------------------------------------------
 # The Application Info resource
