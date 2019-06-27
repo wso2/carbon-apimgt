@@ -51,7 +51,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Remove an application ", notes = "This operation can be used to remove an application specifying its id. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application")
         })
     }, tags={ "Applications",  })
     @ApiResponses(value = { 
@@ -69,7 +69,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Generate application keys", notes = "Generate keys (Consumer key/secret) for application ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application"),
+            @AuthorizationScope(scope = "apim:app_update", description = "Update an application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -159,7 +160,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update grant types and callback url of an application ", notes = "This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response. ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application"),
+            @AuthorizationScope(scope = "apim:app_update", description = "Update an application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -213,7 +215,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update an application ", notes = "This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response. ", response = ApplicationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application"),
+            @AuthorizationScope(scope = "apim:app_update", description = "Update an application")
         })
     }, tags={ "Applications",  })
     @ApiResponses(value = { 
@@ -268,7 +271,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new application ", notes = "This operation can be used to create a new application specifying the details of the application in the payload. ", response = ApplicationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application")
         })
     }, tags={ "Applications" })
     @ApiResponses(value = { 
