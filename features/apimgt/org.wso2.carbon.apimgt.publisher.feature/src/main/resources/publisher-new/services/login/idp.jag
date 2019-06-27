@@ -73,8 +73,7 @@
         }
     }
 
-    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state +
-    "&redirect_uri=" + loginCallbackUrl;
+    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     var cookie = {
         'name': 'CLIENT_ID',
