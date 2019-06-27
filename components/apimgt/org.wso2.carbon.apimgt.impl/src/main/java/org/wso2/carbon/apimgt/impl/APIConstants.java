@@ -1099,7 +1099,6 @@ public final class APIConstants {
     public static final String CUSTOM_ERROR_MESSAGE = "ERROR_MESSAGE";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
-    public static final String SWAGGER_X_ROLES = "x-roles";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
