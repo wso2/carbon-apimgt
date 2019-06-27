@@ -688,28 +688,7 @@ public final class APIUtil {
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
                 api.setMonetizationProperties(jsonObj);
             }
-            //get labels from the artifact and set to API object
-            String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
-            if (labelArray != null && labelArray.length > 0) {
-                String tenantDomain = MultitenantUtils.getTenantDomain
-                        (replaceEmailDomainBack(api.getId().getProviderName()));
-                List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
-                List<Label> gatewayLabelListForAPI = new ArrayList<>();
-                for (String labelName : labelArray) {
-                    Label label = new Label();
-                    //set the name
-                    label.setName(labelName);
-                    //set the description and access URLs
-                    for (Label currentLabel : allLabelList) {
-                        if (labelName.equalsIgnoreCase(currentLabel.getName())) {
-                            label.setDescription(currentLabel.getDescription());
-                            label.setAccessUrls(currentLabel.getAccessUrls());
-                        }
-                    }
-                    gatewayLabelListForAPI.add(label);
-                }
-                api.setGatewayLabels(gatewayLabelListForAPI);
-            }
+            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
 
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
@@ -740,6 +719,39 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
+    }
+
+    /**
+     * This method return the gateway labels of an API
+     *
+     * @param artifact API artifact
+     * @param apiProviderName name of API provider
+     * @return List<Label> list of gateway labels
+     */
+    private static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
+            throws GovernanceException, APIManagementException {
+        String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
+        List<Label> gatewayLabelListForAPI = new ArrayList<>();
+
+        if (labelArray != null && labelArray.length > 0) {
+            String tenantDomain = MultitenantUtils.getTenantDomain
+                    (replaceEmailDomainBack(apiProviderName));
+            List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
+            for (String labelName : labelArray) {
+                Label label = new Label();
+                //set the name
+                label.setName(labelName);
+                //set the description and access URLs
+                for (Label currentLabel : allLabelList) {
+                    if (labelName.equalsIgnoreCase(currentLabel.getName())) {
+                        label.setDescription(currentLabel.getDescription());
+                        label.setAccessUrls(currentLabel.getAccessUrls());
+                    }
+                }
+                gatewayLabelListForAPI.add(label);
+            }
+        }
+        return gatewayLabelListForAPI;
     }
 
     /**
@@ -5193,7 +5205,7 @@ public final class APIUtil {
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
-
+            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, providerName));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);

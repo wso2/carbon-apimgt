@@ -31,12 +31,16 @@ import BusinessIcon from '@material-ui/icons/Business';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
-import { Redirect, Route, Switch, Link } from 'react-router-dom';
+import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
+import { PageNotFound } from 'AppComponents/Base/Errors';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
+
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
@@ -47,9 +51,6 @@ import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';
 import Security from './Security';
-import CustomIcon from '../../Shared/CustomIcon';
-import LeftMenuItem from '../../Shared/LeftMenuItem';
-import { PageNotFound } from '../../Base/Errors/index';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
@@ -95,9 +96,38 @@ const styles = theme => ({
 });
 
 /**
- * Base component for API specific Details page, This component will be mount for any request coming for /apis/:api_uuid
+ * Base component for API specific Details page,
+ * What this component do is, Handle all the request coming under `/apis/:api_uuid` path, If the :api_uuid or
+ *  the later part of the URL is not valid , This will return a `PageNotFound` component.
+ * For valid API request , This component will fetch the API and pass the API response data to below components in `api`
+ * prop name.
+ * Note: If you want to add new route or new page under APIs detail, add the desired path to `PATHS` constant mapping.
+ * This mapping will be used in parent component to directly return `PageNotFound` component, If user making a request
+ * to an undefined path segment.
  */
 class Details extends Component {
+    /**
+     * Return boolean , whether provided URL has a valid Route under the Details page.
+     * Check https://github.com/ReactTraining/react-router/blob/master/packages/react-router-dom/modules/NavLink.js
+     * code for the usage of public matchPath method
+     * @static
+     * @param {String} pathname location URL of an incoming request
+     * @memberof Details
+     * @returns {Boolean} whether URL matched with defined sub paths or not
+     */
+    static isValidURL(pathname) {
+        for (const [subPathKey, subPath] of Object.entries(Details.subPaths)) {
+            // Skip the BASE path , because it's will match for any `/apis/:apiUUID/*` values
+            if (subPathKey !== 'BASE') {
+                const matched = matchPath(pathname, subPath);
+                if (matched) {
+                    return matched;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Creates an instance of Details.
      * @param {any} props @inheritDoc
@@ -126,7 +156,13 @@ class Details extends Component {
      * @memberof Details
      */
     componentDidMount() {
-        this.setAPI();
+        const {
+            location: { pathname },
+        } = this.props;
+        // Load API data iff request page is valid
+        if (Details.isValidURL(pathname)) {
+            this.setAPI();
+        }
     }
 
     /**
@@ -166,6 +202,13 @@ class Details extends Component {
                 }
             });
     }
+
+    /**
+     *
+     *
+     * @param {*} newAPI
+     * @memberof Details
+     */
     updateAPI(newAPI) {
         const restAPI = new Api();
         /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
@@ -189,12 +232,20 @@ class Details extends Component {
                 }
             });
     }
+
+    /**
+     *
+     *
+     * @param {*} menuLink
+     * @memberof Details
+     */
     handleMenuSelect(menuLink) {
         this.props.history.push({
             pathname: '/apis/' + this.props.match.params.apiUUID + '/' + menuLink,
         });
         this.setState({ active: menuLink });
     }
+
     /**
      * Renders Grid container layout with NavBar place static in LHS, Components which coming as children for
      * Details page
@@ -203,9 +254,19 @@ class Details extends Component {
      */
     render() {
         const { api, apiNotFound, active } = this.state;
-        const { classes, theme, match } = this.props;
-        const redirectUrl = '/apis/' + match.params.api_uuid + '/' + active;
+        const {
+            classes,
+            theme,
+            match,
+            location: pageLocation,
+            location: { pathname }, // nested destructuring
+        } = this.props;
+        // pageLocation renaming is to prevent es-lint errors saying can't use global name location
+        if (!Details.isValidURL(pathname)) {
+            return <PageNotFound location={pageLocation} />;
+        }
 
+        const redirectUrl = '/apis/' + match.params.api_uuid + '/' + active;
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFountMessage = {
@@ -303,27 +364,29 @@ class Details extends Component {
                         <APIDetailsTopMenu api={api} />
                         <div className={classes.contentInside}>
                             <Switch>
-                                <Redirect exact from='/apis/:api_uuid' to={redirectUrl} />
-                                <Route path='/apis/:api_uuid/overview' component={() => <Overview />} />
-                                <Route path='/apis/:api_uuid/lifecycle' component={() => <LifeCycle api={api} />} />
+                                <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
+                                <Route path={Details.subPaths.OVERVIEW} component={() => <Overview />} />
+                                <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
-                                    path='/apis/:api_uuid/configuration'
+                                    path={Details.subPaths.CONFIGURATION}
                                     component={() => <Configuration api={api} />}
                                 />
-                                <Route path='/apis/:api_uuid/endpoints' component={() => <Endpoints api={api} />} />
-                                <Route path='/apis/:api_uuid/resources' component={() => <Resources api={api} />} />
-                                <Route path='/apis/:api_uuid/scopes' component={() => <Scope api={api} />} />
-                                <Route path='/apis/:api_uuid/documents' component={() => <Documents api={api} />} />
+                                <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
+                                <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
+                                <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
+                                <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
                                 <Route
-                                    path='/apis/:api_uuid/subscriptions'
+                                    path={Details.subPaths.SUBSCRIPTIONS}
                                     component={() => <Subscriptions api={api} />}
                                 />
-                                <Route path='/apis/:api_uuid/security' component={() => <Security api={api} />} />
-                                <Route path='/apis/:api_uuid/comments' component={() => <Comments api={api} />} />
-                                <Route path='/apis/:api_uuid/business info' component={() => <BusinessInformation />} />
-                                <Route path='/apis/:api_uuid/properties' component={() => <Properties />} />
-                                <Route path='/apis/:api_uuid/new_version' component={() => <CreateNewVersion />} />
-                                <Route component={PageNotFound} />
+                                <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
+                                <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
+                                <Route
+                                    path={Details.subPaths.BUSINESS_INFO}
+                                    component={() => <BusinessInformation />}
+                                />
+                                <Route path={Details.subPaths.PROPERTIES} component={() => <Properties />} />
+                                <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
                             </Switch>
                         </div>
                     </div>
@@ -332,6 +395,29 @@ class Details extends Component {
         );
     }
 }
+
+// Add your path here and refer it in above <Route/> component,
+// Paths that are not defined here will be returned with Not Found error
+// key name doesn't matter here, Use an appropriate name as the key
+Details.subPaths = {
+    BASE: '/apis/:api_uuid',
+    OVERVIEW: '/apis/:api_uuid/overview',
+    LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
+    CONFIGURATION: '/apis/:api_uuid/configuration',
+    ENDPOINTS: '/apis/:api_uuid/endpoints',
+    RESOURCES: '/apis/:api_uuid/resources',
+    SCOPES: '/apis/:api_uuid/scopes',
+    DOCUMENTS: '/apis/:api_uuid/documents',
+    SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
+    SECURITY: '/apis/:api_uuid/security',
+    COMMENTS: '/apis/:api_uuid/comments',
+    BUSINESS_INFO: '/apis/:api_uuid/business info',
+    PROPERTIES: '/apis/:api_uuid/properties',
+    NEW_VERSION: '/apis/:api_uuid/new_version',
+};
+
+// To make sure that paths will not change by outsiders, Basically an enum
+Object.freeze(Details.paths);
 
 Details.propTypes = {
     classes: PropTypes.shape({}).isRequired,

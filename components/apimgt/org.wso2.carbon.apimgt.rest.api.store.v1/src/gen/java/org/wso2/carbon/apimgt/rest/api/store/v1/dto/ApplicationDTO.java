@@ -63,6 +63,7 @@ public enum TokenTypeEnum {
     private Integer subscriptionCount = null;
     private List<ApplicationKeyDTO> keys = new ArrayList<>();
     private Map<String, String> attributes = new HashMap<>();
+    private List<String> subscriptionScopes = new ArrayList<>();
 
   /**
    **/
@@ -255,6 +256,23 @@ public enum TokenTypeEnum {
     this.attributes = attributes;
   }
 
+  /**
+   **/
+  public ApplicationDTO subscriptionScopes(List<String> subscriptionScopes) {
+    this.subscriptionScopes = subscriptionScopes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"admin\"]", value = "")
+  @JsonProperty("subscriptionScopes")
+  public List<String> getSubscriptionScopes() {
+    return subscriptionScopes;
+  }
+  public void setSubscriptionScopes(List<String> subscriptionScopes) {
+    this.subscriptionScopes = subscriptionScopes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -275,12 +293,13 @@ public enum TokenTypeEnum {
         Objects.equals(groups, application.groups) &&
         Objects.equals(subscriptionCount, application.subscriptionCount) &&
         Objects.equals(keys, application.keys) &&
-        Objects.equals(attributes, application.attributes);
+        Objects.equals(attributes, application.attributes) &&
+        Objects.equals(subscriptionScopes, application.subscriptionScopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes);
+    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes);
   }
 
   @Override
@@ -299,6 +318,7 @@ public enum TokenTypeEnum {
     sb.append("    subscriptionCount: ").append(toIndentedString(subscriptionCount)).append("\n");
     sb.append("    keys: ").append(toIndentedString(keys)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
+    sb.append("    subscriptionScopes: ").append(toIndentedString(subscriptionScopes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

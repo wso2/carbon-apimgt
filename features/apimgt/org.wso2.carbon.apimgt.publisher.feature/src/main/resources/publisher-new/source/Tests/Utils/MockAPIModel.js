@@ -16,6 +16,10 @@
  * under the License.
  */
 
+/**
+  * Swagger-parser library(https://apidevtools.org/swagger-parser/) is used for parsing the swagger YAML file
+  * Prism-HTTP module is used for generating the mock data from the swagger definition
+  */
 import { generateStatic } from '@stoplight/prism-http/lib/mocker/generator/JSONSchema';
 import SwaggerParser from 'swagger-parser';
 import fs from 'fs';
@@ -34,8 +38,6 @@ const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
  * @returns {*} Mocked API model
  */
 export default async function getMockedModel(modelName) {
-    const swaggerFile = fs.readFileSync(swaggerFilePath, 'utf8');
-    const { YAML } = SwaggerParser;
-    const swagger = await SwaggerParser.dereference(YAML.parse(swaggerFile));
+    const swagger = await SwaggerParser.dereference(swaggerFilePath);
     return generateStatic(swagger.definitions[modelName]);
 }
