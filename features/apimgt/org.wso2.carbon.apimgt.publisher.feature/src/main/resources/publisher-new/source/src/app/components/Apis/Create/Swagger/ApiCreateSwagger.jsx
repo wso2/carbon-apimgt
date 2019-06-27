@@ -144,13 +144,13 @@ class ApiCreateSwagger extends React.Component {
      * @param {Object} files File object passed from DropZone library
      * @memberof ApiCreateSwagger
      */
-    onDrop(files) {
-        this.state.files = files;
+    onDrop(newFiles) {
+        // this.state.files = files;
         this.setState((oldState) => {
-            const { valid, files } = oldState;
+            const { valid } = oldState;
             const validUpdated = valid;
-            validUpdated.swaggerFile.empty = files.length === 0;
-            return { valid: validUpdated, files };
+            validUpdated.swaggerFile.empty = newFiles.length === 0;
+            return { valid: validUpdated, newFiles };
         });
     }
 
@@ -176,7 +176,10 @@ class ApiCreateSwagger extends React.Component {
      */
     handleSubmit = (e) => {
         e.preventDefault();
-        if ((this.state.uploadMethod === 'file' && this.state.files.length === 0) || (this.state.uploadMethod === 'url' && !this.state.swaggerUrl)) {
+        if (
+            (this.state.uploadMethod === 'file' && this.state.files.length === 0) ||
+            (this.state.uploadMethod === 'url' && !this.state.swaggerUrl)
+        ) {
             this.setState(({ valid, files, swaggerUrl }) => {
                 const validUpdated = valid;
                 validUpdated.swaggerFile.empty = files.length === 0;
@@ -236,7 +239,7 @@ class ApiCreateSwagger extends React.Component {
 
     createAPICallback = (response) => {
         const uuid = JSON.parse(response.data).id;
-        const redirectURL = '/apis/'  + uuid + '/overview';
+        const redirectURL = '/apis/' + uuid + '/overview';
         this.props.history.push(redirectURL);
     };
 
@@ -266,20 +269,37 @@ class ApiCreateSwagger extends React.Component {
                             )}
                         </Typography>
                         <Typography type='caption' gutterBottom align='left'>
-                            <FormattedMessage id='fill.the.mandatory.fields' defaultMessage={'Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced configurations later.'} />
+                            <FormattedMessage
+                                id='fill.the.mandatory.fields'
+                                defaultMessage={'Fill the mandatory fields (Name, Version, Context)' +
+                                ' and create the API. Configure advanced configurations later.'}
+                            />
                         </Typography>
                     </div>
                     <form onSubmit={this.handleSubmit}>
                         <FormControl margin='normal' className={classes.FormControl}>
-                            <RadioGroup aria-label='inputType' name='inputType' value={uploadMethod} onChange={this.handleUploadMethodChange} className={classes.radioWrapper}>
-                                <FormControlLabel value='file' control={<Radio />} label={<FormattedMessage id='file' defaultMessage='File' />} />
-                                <FormControlLabel value='url' control={<Radio />} label={<FormattedMessage id='url' defaultMessage='URL' />} />
+                            <RadioGroup
+                                aria-label='inputType'
+                                name='inputType'
+                                value={uploadMethod}
+                                onChange={this.handleUploadMethodChange}
+                                className={classes.radioWrapper}
+                            >
+                                <FormControlLabel
+                                    value='file'
+                                    control={<Radio />}
+                                    label={<FormattedMessage id='file' defaultMessage='File' />}
+                                />
+                                <FormControlLabel
+                                    value='url'
+                                    control={<Radio />}
+                                    label={<FormattedMessage id='url' defaultMessage='URL' />}
+                                />
                             </RadioGroup>
                         </FormControl>
                         {uploadMethod === 'file' && (
                             <FormControl className={classes.FormControlOdd}>
-                                {files &&
-                                    files.length > 0 && (
+                                {files && files.length > 0 && (
                                     <div className={classes.fileNameWrapper}>
                                         <Typography variant='subtitle2' gutterBottom>
                                             <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
@@ -302,12 +322,19 @@ class ApiCreateSwagger extends React.Component {
                                 >
                                     <Backup className={classes.dropZoneIcon} />
                                     <div>
-                                        <FormattedMessage id='try.dropping.some.files.here.or.click.to.select.files.to.upload' defaultMessage={'Try dropping some files here, or click to select files to upload.'} />
+                                        <FormattedMessage
+                                            id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
+                                            defaultMessage={'Try dropping some files ' +
+                                            'here, or click to select files to upload.'}
+                                        />
                                     </div>
                                 </Dropzone>
                                 {valid.swaggerFile.empty && (
                                     <Typography variant='caption' gutterBottom className={classes.dropZoneError}>
-                                        <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                        <FormattedMessage
+                                            id='error.empty'
+                                            defaultMessage='This field can not be empty.'
+                                        />
                                     </Typography>
                                 )}
                             </FormControl>
@@ -320,7 +347,20 @@ class ApiCreateSwagger extends React.Component {
                                     id='swaggerUrl'
                                     label='Swagger Url'
                                     placeholder='eg: http://petstore.swagger.io/v2/swagger.json'
-                                    helperText={valid.swaggerUrl.empty ? <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' /> : <FormattedMessage id='create.new.swagger.help' defaultMessage='Give a swagger definition such as http://petstore.swagger.io/v2/swagger.json' />}
+                                    helperText={
+                                        valid.swaggerUrl.empty ? (
+                                            <FormattedMessage
+                                                id='error.empty'
+                                                defaultMessage='This field can not be empty.'
+                                            />
+                                        ) : (
+                                            <FormattedMessage
+                                                id='create.new.swagger.help'
+                                                defaultMessage={'Give a swagger definition such' +
+                                                ' as http://petstore.swagger.io/v2/swagger.json'}
+                                            />
+                                        )
+                                    }
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
@@ -334,10 +374,19 @@ class ApiCreateSwagger extends React.Component {
                         )}
 
                         <FormControl>
-                            <Grid container direction='row' alignItems='flex-start' spacing={16} className={classes.buttonSection}>
+                            <Grid
+                                container
+                                direction='row'
+                                alignItems='flex-start'
+                                spacing={16}
+                                className={classes.buttonSection}
+                            >
                                 <Grid item>
                                     {/* Allowing to create an API from swagger definition, based on scopes */}
-                                    <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.APIS}>
+                                    <ScopeValidation
+                                        resourceMethod={resourceMethod.POST}
+                                        resourcePath={resourcePath.APIS}
+                                    >
                                         <Button variant='contained' disabled={loading} color='primary' type='submit'>
                                             <FormattedMessage id='create.btn' defaultMessage='Create' />
                                         </Button>

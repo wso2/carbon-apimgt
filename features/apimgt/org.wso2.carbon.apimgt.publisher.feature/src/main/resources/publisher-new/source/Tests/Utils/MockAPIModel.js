@@ -17,12 +17,11 @@
  */
 
 /**
-  * Swagger-parser library(https://apidevtools.org/swagger-parser/) is used for parsing the swagger YAML file
-  * Prism-HTTP module is used for generating the mock data from the swagger definition
-  */
+ * Swagger-parser library(https://apidevtools.org/swagger-parser/) is used for parsing the swagger YAML file
+ * Prism-HTTP module is used for generating the mock data from the swagger definition
+ */
 import { generateStatic } from '@stoplight/prism-http/lib/mocker/generator/JSONSchema';
 import SwaggerParser from 'swagger-parser';
-import fs from 'fs';
 import path from 'path';
 
 const CARBON_APIMGT_ROOT = path.join(__dirname, '../../../../../../../../../../');
@@ -40,4 +39,16 @@ const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
 export default async function getMockedModel(modelName) {
     const swagger = await SwaggerParser.dereference(swaggerFilePath);
     return generateStatic(swagger.definitions[modelName]);
+}
+
+
+/**
+ *
+ * Return all the available scopes under securityDefinitions in publisher-api.yaml
+ * @export
+ * @returns {Array} All the scopes available in publisher-api swagger
+ */
+export async function getAllScopes() {
+    const swagger = await SwaggerParser.dereference(swaggerFilePath);
+    return Object.keys(swagger.securityDefinitions.OAuth2Security.scopes);
 }

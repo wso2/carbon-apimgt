@@ -94,7 +94,9 @@ class ScopeValidation extends React.Component {
      */
     render() {
         const { children } = this.props;
-        if (this.state.haveScope) {
+        const { haveScope } = this.state;
+        // haveScope = true;
+        if (haveScope) {
             return children || null;
         }
         return null;
@@ -107,8 +109,4 @@ ScopeValidation.propTypes = {
     resourceMethod: PropTypes.string.isRequired,
 };
 
-export {
-    ScopeValidation,
-    resourceMethod,
-    resourcePath,
-};
+export { ScopeValidation, resourceMethod, resourcePath };

@@ -87,7 +87,6 @@ class APICreateForm extends Component {
      * @memberof APICreateForm
      */
     inputChange({ target }) {
-        const { type } = this.props;
         const { name, value } = target;
         this.setState(({ api, valid }) => {
             const changes = api;
@@ -113,7 +112,7 @@ class APICreateForm extends Component {
                             },
                             type: 'http',
                         },
-                        type: 'production_endpoints'
+                        type: 'production_endpoints',
                     },
                     {
                         inline: {
@@ -135,8 +134,8 @@ class APICreateForm extends Component {
                             },
                             type: 'http',
                         },
-                        type: 'sandbox_endpoints'
-                    }
+                        type: 'sandbox_endpoints',
+                    },
                 ];
             } else {
                 changes[name] = value;
@@ -147,7 +146,8 @@ class APICreateForm extends Component {
             validUpdated.context.empty = !api.context;
             validUpdated.version.empty = !api.version;
             validUpdated.endpoint.empty = !api.endpoint;
-            // TODO we need to add the already existing error for (context) by doing an api call ( the swagger definition does not contain such api call)
+            // TODO we need to add the already existing error for (context)
+            // by doing an api call ( the swagger definition does not contain such api call)
             return { api: changes, valid: validUpdated };
         });
     }
@@ -160,8 +160,8 @@ class APICreateForm extends Component {
      */
     handleSubmit(e) {
         e.preventDefault();
-        const { api } = this.state;
-        if (!api.name || !api.context || !api.version || !api.endpoint) {
+        const { api: currentAPI } = this.state;
+        if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpoint) {
             // Checking the api name,version,context undefined or empty states
             this.setState((oldState) => {
                 const { valid, api } = oldState;
@@ -174,7 +174,7 @@ class APICreateForm extends Component {
             });
             return;
         }
-        api.save()
+        currentAPI.save()
             .then((newAPI) => {
                 const redirectURL = '/apis/' + newAPI.id + '/overview';
                 Alert.info(`${newAPI.name} created.`);
@@ -185,7 +185,7 @@ class APICreateForm extends Component {
                 if (error.response) {
                     Alert.error(error.response.body.message);
                 } else {
-                    Alert.error(`Something went wrong while creating ${api.name}`);
+                    Alert.error(`Something went wrong while creating ${currentAPI.name}`);
                 }
             });
     }
@@ -203,7 +203,10 @@ class APICreateForm extends Component {
                 <Grid item xs={12} md={6}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage id={type === 'ws' ? 'create.new.websocket.api' : 'create.new.rest.api'} defaultMessage='New REST API' />
+                            <FormattedMessage
+                                id={type === 'ws' ? 'create.new.websocket.api' : 'create.new.rest.api'}
+                                defaultMessage='New REST API'
+                            />
                         </Typography>
                         <Typography variant='h5' align='left' className={classes.subTitle}>
                             GATEWAY-URL/
@@ -212,7 +215,13 @@ class APICreateForm extends Component {
                     </div>
                     <form onSubmit={this.handleSubmit}>
                         <APIInputForm api={api} handleInputChange={this.inputChange} valid={valid} />
-                        <Grid container direction='row' alignItems='flex-start' spacing={16} className={classes.buttonSection}>
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='flex-start'
+                            spacing={16}
+                            className={classes.buttonSection}
+                        >
                             <Grid item>
                                 <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST}>
                                     <div>

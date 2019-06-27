@@ -15,15 +15,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React from 'react';
-import ConfirmDialog from './ConfirmDialog';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { MemoryRouter, Link } from 'react-router-dom';
 
-describe('<ConfirmDialog/> tests', () => {
-    test('should render the ConfirmDialog component', () => {
-        const wrapper = mount(<ConfirmDialog />);
+import APICreateTopMenu from './APICreateTopMenu';
+
+describe('<APICreateTopMenu/> tests', () => {
+    test('should render APICreateTopMenu without errors', () => {
+        const wrappedComponent = (
+            <MemoryRouter>
+                <APICreateTopMenu />
+            </MemoryRouter>
+        );
+        const wrapper = mountWithIntl(wrappedComponent);
+        // Show have a back link to home page
+        const backLink = wrapper.find(Link);
+        expect(backLink).toHaveLength(1);
+        expect(backLink.props().to).toEqual('/apis');
     });
-
-    test.todo('should return default props when they are not provided ');
-    test.todo('should trigger callback with `true` when click on ok ');
-    test.todo('should trigger callback with `false` when click on cancel ');
 });

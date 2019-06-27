@@ -24,7 +24,7 @@ import FormControl from '@material-ui/core/FormControl';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
-import Policies from '../../Details/LifeCycle/Policies';
+import Policies from 'AppComponents/Apis/Details/LifeCycle/Policies';
 
 const styles = theme => ({
     FormControl: {
@@ -91,7 +91,17 @@ class APIInputForm extends Component {
                         id='name'
                         label={<FormattedMessage id='name' defaultMessage='Name' />}
                         placeholder='myApiName'
-                        helperText={valid.name.empty ? <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' /> : <FormattedMessage id='api.create.name.helper' defaultMessage='API Name is unique. Special characters and empty space are not allowed' />}
+                        helperText={
+                            valid.name.empty ? (
+                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                            ) : (
+                                <FormattedMessage
+                                    id='api.create.name.helper'
+                                    defaultMessage={'API Name is unique. Special' +
+                                    ' characters and empty space are not allowed'}
+                                />
+                            )
+                        }
                         type='text'
                         name='name'
                         margin='normal'
@@ -116,7 +126,13 @@ class APIInputForm extends Component {
                         label={<FormattedMessage id='version' defaultMessage='Version' />}
                         id='version'
                         placeholder='E.g: 1.0.0'
-                        helperText={valid.version.empty ? <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' /> : ''}
+                        helperText={
+                            valid.version.empty ? (
+                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                            ) : (
+                                ''
+                            )
+                        }
                         type='text'
                         name='version'
                         margin='normal'
@@ -134,7 +150,20 @@ class APIInputForm extends Component {
                         id='context'
                         label={<FormattedMessage id='context' defaultMessage='Context' />}
                         placeholder='E.g: pet'
-                        helperText={valid.context.empty ? <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' /> : <FormattedMessage id='api.create.context.help' defaultMessage='The API context is used by the Gateway to identify the API. Therefore, the API context must be unique. You can define the APIs version as a parameter of its context by adding the {version} into the context. For example, {version}/phoneverify.' />}
+                        helperText={
+                            valid.context.empty ? (
+                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                            ) : (
+                                <FormattedMessage
+                                    id='api.create.context.help'
+                                    defaultMessage={'The API context is used by the Gateway' +
+                                     ' to identify the API. Therefore, the API context must' +
+                                     ' be unique. You can define the APIs version as a parameter' +
+                                     ' of its context by adding the {version}' +
+                                     ' into the context. For example, {version}/phoneverify.'}
+                                />
+                            )
+                        }
                         InputLabelProps={{
                             shrink: true,
                         }}
@@ -151,7 +180,17 @@ class APIInputForm extends Component {
                         fullWidth
                         id='endpoint'
                         placeholder='E.g: http://appserver/resource'
-                        helperText={valid.context.empty ? <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' /> : <FormattedMessage id='api.create.endpoint.help' defaultMessage='This is the actual endpoint where the API implementation can be found' />}
+                        helperText={
+                            valid.context.empty ? (
+                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                            ) : (
+                                <FormattedMessage
+                                    id='api.create.endpoint.help'
+                                    defaultMessage={'This is the actual endpoint' +
+                                    ' where the API implementation can be found'}
+                                />
+                            )
+                        }
                         InputLabelProps={{
                             shrink: true,
                         }}
