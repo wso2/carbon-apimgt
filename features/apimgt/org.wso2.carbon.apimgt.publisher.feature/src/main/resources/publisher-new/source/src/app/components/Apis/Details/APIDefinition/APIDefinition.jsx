@@ -100,17 +100,17 @@ class APIDefinition extends React.Component {
             format: null,
             convertTo: null,
         };
-        this.openEditor = this.openEditor.bind(this);
-        this.closeEditor = this.closeEditor.bind(this);
-        this.transition = this.transition.bind(this);
-        this.updateSwaggerContent = this.updateSwaggerContent.bind(this);
-        this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
-        this.hasJsonStructure = this.hasJsonStructure.bind(this);
         this.onDrop = this.onDrop.bind(this);
         this.handleNo = this.handleNo.bind(this);
         this.handleOk = this.handleOk.bind(this);
+        this.openEditor = this.openEditor.bind(this);
+        this.transition = this.transition.bind(this);
+        this.closeEditor = this.closeEditor.bind(this);
+        this.hasJsonStructure = this.hasJsonStructure.bind(this);
         this.onChangeFormatClick = this.onChangeFormatClick.bind(this);
-        this.validateSwagger = this.validateSwagger.bind(this);
+        this.updateSwaggerContent = this.updateSwaggerContent.bind(this);
+        this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
+        this.validateAndUpdateApiDefinition = this.validateAndUpdateApiDefinition.bind(this);
     }
 
     /**
@@ -154,7 +154,7 @@ class APIDefinition extends React.Component {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const content = e.target.result;
-                this.validateSwagger(content);
+                this.validateAndUpdateApiDefinition(content);
             };
             reader.readAsText(files[0]);
         } else {
@@ -182,20 +182,19 @@ class APIDefinition extends React.Component {
 
     /**
      * Validates the given api definition.
-     * @param {*} definition JSON/ YAML api definition.
-     * @return {boolean} True if valid, false otherwise.
+     * @param {*} apiDefinition JSON/ YAML api definition.
      */
-    validateSwagger(definition) {
+    validateAndUpdateApiDefinition(apiDefinition) {
         const { intl } = this.props;
         let swaggerObj = {};
-        if (this.hasJsonStructure(definition)) {
-            swaggerObj = JSON.parse(definition);
+        if (this.hasJsonStructure(apiDefinition)) {
+            swaggerObj = JSON.parse(apiDefinition);
         } else {
-            swaggerObj = yaml.safeLoad(definition);
+            swaggerObj = yaml.safeLoad(apiDefinition);
         }
         SwaggerParser.validate(swaggerObj, (err, api) => {
             if (api) {
-                this.setState({ swagger: definition }, () => { this.updateSwaggerDefinition(); });
+                this.setState({ swagger: apiDefinition }, () => { this.updateSwaggerDefinition(); });
             } else {
                 Alert.error(intl.formatMessage({
                     id: 'API.Definition.file.validation.failed',
