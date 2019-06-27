@@ -6921,4 +6921,117 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Add a file to a product document of source type FILE
+     *
+     * @param productId         APIProduct identifier the document belongs to
+     * @param documentation document
+     * @param filename      name of the file
+     * @param content       content of the file as an Input Stream
+     * @param contentType   content type of the file
+     * @throws APIManagementException if failed to add the file
+     */
+    public void addFileToProductDocumentation(APIProductIdentifier productId, Documentation documentation, String filename,
+            InputStream content, String contentType) throws APIManagementException {
+        if (Documentation.DocumentSourceType.FILE.equals(documentation.getSourceType())) {
+            contentType = "application/force-download";
+            ResourceFile icon = new ResourceFile(content, contentType);
+            String filePath = APIUtil.getDocumentationFilePath(productId, filename);
+            APIProduct apiProduct;
+            try {
+                apiProduct = getAPIProduct(productId);
+                String visibleRolesList = apiProduct.getVisibleRoles();
+                String[] visibleRoles = new String[0];
+                if (visibleRolesList != null) {
+                    visibleRoles = visibleRolesList.split(",");
+                }
+                APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
+                        filePath, registry);
+                documentation.setFilePath(addResourceFile(filePath, icon));
+                APIUtil.setFilePermission(filePath);
+            } catch (APIManagementException e) {
+                handleException("Failed to add file to product document " + documentation.getName(), e);
+            }
+        } else {
+            String errorMsg = "Cannot add file to the Product Document. Document " + documentation.getName()
+                    + "'s Source type is not FILE.";
+            handleException(errorMsg);
+        }
+    }
+
+    /**
+     * This method used to save the product documentation content
+     *
+     * @param apiProduct,               API Product
+     * @param documentationName, name of the inline documentation
+     * @param text,              content of the inline documentation
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add the document as a resource to registry
+     */
+    public void addProductDocumentationContent(APIProduct apiProduct, String documentationName, String text) throws APIManagementException {
+
+        APIProductIdentifier identifier = apiProduct.getId();
+        String documentationPath = APIUtil.getProductDocPath(identifier) + documentationName;
+        String contentPath = APIUtil.getProductDocContentPath(identifier, documentationName) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
+                RegistryConstants.PATH_SEPARATOR + documentationName;
+        boolean isTenantFlowStarted = false;
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            Resource docResource = registry.get(documentationPath);
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
+                    APIConstants.PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
+            Documentation doc = APIUtil.getDocumentation(docArtifact);
+
+            Resource docContent;
+
+            if (!registry.resourceExists(contentPath)) {
+                docContent = registry.newResource();
+            } else {
+                docContent = registry.get(contentPath);
+            }
+
+            /* This is a temporary fix for doc content replace issue. We need to add
+             * separate methods to add inline content resource in document update */
+            if (!APIConstants.NO_CONTENT_UPDATE.equals(text)) {
+                docContent.setContent(text);
+            }
+            docContent.setMediaType(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE);
+            registry.put(contentPath, docContent);
+            registry.addAssociation(documentationPath, contentPath, APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
+            String productPath = APIUtil.getAPIProductPath(identifier);
+            String[] authorizedRoles = getAuthorizedRoles(productPath);
+            String docVisibility = doc.getVisibility().name();
+            String visibility = apiProduct.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
+            }
+
+            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(),visibility, authorizedRoles,contentPath, registry);
+        } catch (RegistryException e) {
+            String msg = "Failed to add the documentation content of : "
+                    + documentationName + " of API Product :" + identifier.getName();
+            handleException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Failed to add the documentation content of : "
+                    + documentationName + " of API Product :" + identifier.getName();
+            handleException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
 }

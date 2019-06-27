@@ -108,6 +108,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_PRODUCT_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
+    public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String REST_API_STORE_VERSION_0 ="v0.14";
     public static final String REST_API_STORE_VERSION_1 ="v1";

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -85,14 +86,127 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,
+    @Override
+    public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,
             String documentId, String accept, String ifNoneMatch, MessageContext messageContext) {
+        Documentation documentation;
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API Product or the API Product does not exist
+            APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            documentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
+                return null;
+            }
+
+            //gets the content depending on the type of the document
+            if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+                String resource = documentation.getFilePath();
+                Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+                Object fileDataStream = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA);
+                Object contentType = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
+                contentType = contentType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : contentType;
+                String name = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME).toString();
+                return Response.ok(fileDataStream)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
+                        .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
+                        .build();
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+                String content = apiProvider.getDocumentationContent(productIdentifier, documentation.getName());
+                return Response.ok(content)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
+                        .build();
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.URL)) {
+                String sourceUrl = documentation.getSourceUrl();
+                return Response.seeOther(new URI(sourceUrl)).build();
+            }
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving document : " + documentId + " of API Product " + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving document " + documentId + " of the API Product" + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving source URI location of " + documentId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId,
+    @Override
+    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId,
             String documentId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch,
             MessageContext messageContext) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProductIdentifier productIdentifier = APIMappingUtil
+                    .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            APIProduct product = apiProvider.getAPIProduct(productIdentifier);
+            if (fileInputStream != null && inlineContent != null) {
+                RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
+            }
+
+            //retrieves the document and send 404 if not found
+            Documentation documentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                RestApiUtil
+                        .handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
+                return null;
+            }
+
+            //add content depending on the availability of either input stream or inline content
+            if (fileInputStream != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+                    RestApiUtil.handleBadRequest("Source type of product document " + documentId + " is not FILE", log);
+                }
+                RestApiPublisherUtils
+                        .attachFileToProductDocument(apiProductId, documentation, fileInputStream, fileDetail);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) && !documentation
+                        .getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+                    RestApiUtil.handleBadRequest(
+                            "Source type of product document " + documentId + " is not INLINE " + "or MARKDOWN", log);
+                }
+                apiProvider.addProductDocumentationContent(product, documentation.getName(), inlineContent);
+            } else {
+                RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
+            }
+
+            //retrieving the updated doc and the URI
+            Documentation updatedDoc = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc);
+            String uriString = RestApiConstants.RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT
+                    .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProductId)
+                    .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(documentDTO).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while adding content to the document: " + documentId + " of API Product "
+                                + apiProductId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving document content location : " + documentId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+        }
         return null;
     }
 

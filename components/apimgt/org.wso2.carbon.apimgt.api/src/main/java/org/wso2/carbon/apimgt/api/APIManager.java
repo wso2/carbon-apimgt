@@ -216,12 +216,12 @@ public interface APIManager {
     /**
      * This method used to get the content of a documentation
      *
-     * @param identifier,        API identifier
+     * @param identifier,        API/Product identifier
      * @param documentationName, name of the inline documentation
      * @return if failed to get doc content
      * @throws APIManagementException if the asking documentation content is unavailable
      */
-    String getDocumentationContent(APIIdentifier identifier, String documentationName) throws APIManagementException;
+    String getDocumentationContent(Identifier identifier, String documentationName) throws APIManagementException;
 
     /**
      * Retrieves the subscriber from the given access token

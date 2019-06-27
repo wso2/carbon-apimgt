@@ -395,7 +395,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
+    public String getDocumentationContent(Identifier identifier, String documentationName)
             throws APIManagementException {
         checkAccessControlPermission(identifier);
         return super.getDocumentationContent(identifier, documentationName);

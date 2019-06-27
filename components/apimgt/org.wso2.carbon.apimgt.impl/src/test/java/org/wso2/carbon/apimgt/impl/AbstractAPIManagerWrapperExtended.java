@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -41,7 +42,7 @@ public class AbstractAPIManagerWrapperExtended extends AbstractAPIManagerWrapper
     }
 
     @Override
-    protected String getTenantDomain(APIIdentifier identifier) {
+    protected String getTenantDomain(Identifier identifier) {
         return "abc.com";
     }
 

@@ -456,7 +456,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return MultitenantUtils.getTenantAwareUsername(username);
     }
 
-    protected String getTenantDomain(APIIdentifier identifier) {
+    protected String getTenantDomain(Identifier identifier) {
         return MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
     }
@@ -1359,11 +1359,21 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentation;
     }
 
-    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
+    public String getDocumentationContent(Identifier identifier, String documentationName)
             throws APIManagementException {
-        String contentPath = APIUtil.getAPIDocPath(identifier) +
-                APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
-                documentationName;
+        String contentPath = StringUtils.EMPTY;
+        String identifierType = StringUtils.EMPTY;
+        if (identifier instanceof APIIdentifier) {
+            contentPath = APIUtil.getAPIDocPath((APIIdentifier) identifier) +
+                    APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
+                    documentationName;
+            identifierType = APIConstants.API_IDENTIFIER_TYPE;
+        } else if (identifier instanceof APIProductIdentifier) {
+            contentPath = APIUtil.getProductDocPath((APIProductIdentifier) identifier) +
+                    APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
+                    documentationName;
+            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
+        }
         String tenantDomain = getTenantDomain(identifier);
         Registry registry;
 
@@ -1395,12 +1405,12 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "No document content found for documentation: "
-                    + documentationName + " of API: " + identifier.getApiName();
+                    + documentationName + " of "+ identifierType + " : " + identifier.getName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get document content found for documentation: "
-                    + documentationName + " of API: " + identifier.getApiName();
+                    + documentationName + " of " + identifierType + " : " + identifier.getName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
