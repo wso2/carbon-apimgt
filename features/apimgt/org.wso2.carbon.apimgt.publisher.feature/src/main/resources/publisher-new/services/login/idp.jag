@@ -20,16 +20,14 @@
     var log = new Log("Services login DCR request");
     var site = require("/site/conf/site.json");
     include("/services/constants.jag");
+    include("/services/jagg.jag");
 
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverUrl = utils.getServerURL();
-    var serverPort = utils.getManagementTransportPort(MGT_TRANSPORT.split(":")[0]);
-    application.put("serverPort", serverPort);
-
     var settingsAPIUrl = serverUrl + SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
 
-    var dcrUrl = MGT_TRANSPORT + HOST + ":" + serverPort + DCR_URL_SUFFIX;
+    var dcrUrl = MGT_TRANSPORT + HOST + ":" + getServerPort() + DCR_URL_SUFFIX;
     var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
     var loginCallbackUrl = serverUrl + site.context + LOGIN_CALLBACK_URL_SUFFIX;
     var logoutCallbackUrl = serverUrl + site.context + LOGOUT_CALLBACK_URL_SUFFIX;

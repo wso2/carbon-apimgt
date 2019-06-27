@@ -18,7 +18,9 @@
  */
 
     include("/services/constants.jag");
+    include("/services/jagg.jag");
     var site = require("/site/conf/site.json");
+
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var serverUrl = utils.getServerURL();
     var tokenRequestData = {
@@ -37,7 +39,7 @@
     var String = Packages.java.lang.String;
     var Integer = Packages.java.lang.Integer;
     var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = MGT_TRANSPORT + HOST + ":" +  application.get("serverPort") + TOKEN_URL_SUFFIX;
+    var tokenEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
     response.contentType = "application/json";
