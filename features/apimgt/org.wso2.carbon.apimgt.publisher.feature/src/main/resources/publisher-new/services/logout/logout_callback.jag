@@ -18,6 +18,7 @@
  */
 
     var log = new Log("Logout Callback Function");
+    var site = require("/site/conf/site.json");
     include("/services/constants.jag");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -73,7 +74,7 @@
     cookie = {
         'name': 'WSO2_AM_TOKEN_1_Default',
         'value': '',
-        'path': "/publisher-new/",
+        'path': site.context + "/",
         "secure": true,
         "maxAge": 2};
     response.addCookie(cookie);

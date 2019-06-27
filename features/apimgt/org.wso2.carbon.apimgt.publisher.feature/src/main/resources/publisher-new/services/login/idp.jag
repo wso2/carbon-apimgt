@@ -18,7 +18,6 @@
  */
 
     var log = new Log("Services login DCR request");
-
     var site = require("/site/conf/site.json");
     include("/services/constants.jag");
 
@@ -38,7 +37,7 @@
     var scopes = settingsResponse.data.scopes.join(" ");
     var referer = request.getHeader("Referer");
     var state = "";
-    // get the pathname excluding the 'publisher' segment
+    // get the pathname from query param 'referrer'
     // todo: remove (-new) section when publisher-new is replaced with store
     if (referer !== null) {
         state = referer.replace(/(https?:\/\/.*):(\d*)\/?(publisher)(-new)?(\/login\?referrer=)/g, '');
@@ -49,6 +48,7 @@
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId;
     systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
+
     if (systemApplicationDTO !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
     } else {
@@ -68,19 +68,20 @@
         clientId = result.data.clientId;
         var clientSecret = result.data.clientSecret;
 
-
         var addApplicationKey = systemApplicationDAO.addApplicationKey("admin_publisher", clientId, clientSecret);
         if (!addApplicationKey) {
             log.error("Error while persisting application information in system application DB table!!");
             log.error("Client ID = " + clientId);
         }
     }
-    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
+
+    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state +
+    "&redirect_uri=" + loginCallbackUrl;
     log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
     var cookie = {
         'name': 'CLIENT_ID',
         'value': clientId,
-        'path': "/publisher-new/",
+        'path': site.context + "/",
         "HttpOnly": false,
         "secure": true,
         "maxAge": -1

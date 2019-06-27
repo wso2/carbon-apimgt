@@ -75,10 +75,10 @@
     cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': accessTokenPart1, 'path': site.context + "/", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':idTokenPart2, 'path': "/store-new/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':idTokenPart2, 'path': site.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':idTokenPart1, 'path': "/store-new/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':idTokenPart1, 'path': site.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
     var state = request.getParameter("state");
