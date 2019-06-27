@@ -6863,5 +6863,62 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * Updates a given api product documentation
+     *
+     * @param productId         APIProductIdentifier
+     * @param documentation Documentation
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update docs
+     */
+    public void updateDocumentation(APIProductIdentifier productId, Documentation documentation) throws APIManagementException {
+
+        String productPath = APIUtil.getAPIProductPath(productId);
+        APIProduct product = getAPIProduct(productPath);
+        String docPath = APIUtil.getProductDocPath(productId) + documentation.getName();
+        try {
+            String docArtifactId = registry.get(docPath).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docArtifactId);
+            String docVisibility = documentation.getVisibility().name();
+            String[] authorizedRoles = new String[0];
+            String visibleRolesList = product.getVisibleRoles();
+            if (visibleRolesList != null) {
+                authorizedRoles = visibleRolesList.split(",");
+            }
+            String visibility = product.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
+            }
+
+            GenericArtifact updateDocArtifact = APIUtil.createDocArtifactContent(artifact, productId, documentation);
+            artifactManager.updateGenericArtifact(updateDocArtifact);
+            APIUtil.clearResourcePermissions(docPath, productId, ((UserRegistry) registry).getTenantId());
+
+            APIUtil.setResourcePermissions(product.getId().getProviderName(), visibility, authorizedRoles,
+                    artifact.getPath(), registry);
+
+            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+            if (docFilePath != null && !"".equals(docFilePath)) {
+                // The docFilePatch comes as
+                // /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
+                // We need to remove the
+                // /t/tenanatdoman/registry/resource/_system/governance section
+                // to set permissions.
+                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                APIUtil.setResourcePermissions(product.getId().getProviderName(), visibility, authorizedRoles, filePath,
+                        registry);
+            }
+
+        } catch (RegistryException e) {
+            handleException("Failed to update documentation", e);
+        }
+    }
 
 }

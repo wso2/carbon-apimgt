@@ -3565,17 +3565,17 @@ public final class APIUtil {
     /**
      * This function is to set resource permissions based on its visibility
      *
-     * @param artifactPath API resource path
+     * @param artifactPath API/Product resource path
      * @throws APIManagementException Throwing exception
      */
-    public static void clearResourcePermissions(String artifactPath, APIIdentifier apiId, int tenantId)
+    public static void clearResourcePermissions(String artifactPath, Identifier id, int tenantId)
             throws APIManagementException {
         try {
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
             String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(id.getProviderName()));
             if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
                     .equals(tenantDomain)) {
                 org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()

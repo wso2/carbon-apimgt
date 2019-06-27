@@ -1177,4 +1177,13 @@ public interface APIProvider extends APIManager {
     APIProduct getAPIDefinitionOfAPIProduct(String uuid) throws APIManagementException;
 
     List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Updates a given api product documentation
+     *
+     * @param productId         APIProductIdentifier
+     * @param documentation Documentation
+     * @throws APIManagementException if failed to update docs
+     */
+    void updateDocumentation(APIProductIdentifier productId, Documentation documentation) throws APIManagementException;
 }

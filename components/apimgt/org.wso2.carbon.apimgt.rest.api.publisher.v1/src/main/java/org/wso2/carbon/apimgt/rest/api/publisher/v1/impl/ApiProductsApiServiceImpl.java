@@ -161,8 +161,55 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdDocumentsDocumentIdPut(String apiProductId, String documentId,
+    @Override
+    public Response apiProductsApiProductIdDocumentsDocumentIdPut(String apiProductId, String documentId,
             DocumentDTO body, String ifMatch, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String sourceUrl = body.getSourceUrl();
+            Documentation oldDocument = apiProvider.getProductDocumentation(documentId, tenantDomain);
+
+            //validation checks for existence of the document
+            if (oldDocument == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
+                return null;
+            }
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER && org.apache.commons.lang3.StringUtils.isBlank(body.getOtherTypeName())) {
+                //check otherTypeName for not null if doc type is OTHER
+                RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
+                return null;
+            }
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
+                    (org.apache.commons.lang3.StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
+                RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
+                return null;
+            }
+
+            //overriding some properties
+            body.setName(oldDocument.getName());
+
+            Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
+            //this will fail if user does not have access to the API or the API does not exist
+            APIProductIdentifier apiIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            newDocumentation.setFilePath(oldDocument.getFilePath());
+            apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
+
+            //retrieve the updated documentation
+            newDocumentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating document : " + documentId + " of API Product " + apiProductId, e, log);
+            } else {
+                String errorMessage = "Error while updating the document " + documentId + " for API Product : " + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
         return null;
     }
 

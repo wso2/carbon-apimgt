@@ -3332,4 +3332,23 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentation;
     }
 
+    public APIProduct getAPIProduct(String productPath) throws APIManagementException {
+        try {
+            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
+                    APIConstants.API_PRODUCT_KEY);
+            Resource productResource = registry.get(productPath);
+            String artifactId = productResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + productPath);
+            }
+            GenericArtifact productArtifact = artifactManager.getGenericArtifact(artifactId);
+            return APIUtil.getAPIProduct(productArtifact, registry);
+
+        } catch (RegistryException e) {
+            String msg = "Failed to get API Product from : " + productPath;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
 }
