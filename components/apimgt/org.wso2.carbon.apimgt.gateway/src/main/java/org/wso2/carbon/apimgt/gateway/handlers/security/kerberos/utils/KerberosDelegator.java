@@ -62,15 +62,14 @@ public class KerberosDelegator {
                 try {
                     context.dispose();
                 } catch (GSSException e) {
-                    // ignore
-                    log.error("sdf",e);
+                    log.error("Error while disposing GSS Context",e);
                 }
             }
             if (delegationCredential != null) {
                 try {
                     delegationCredential.dispose();
                 } catch (GSSException e) {
-                    log.error("ERROR",e);
+                    log.error("Error while disposing GSS credential", e);
                     throw e;
                 }
             }
@@ -99,10 +98,9 @@ public class KerberosDelegator {
                         try {
                             context.dispose();
                         } catch (GSSException e) {
-                            log.error("ERROR",e);
+                            log.error("Error,failed to dispose GSS credential ", e);
                             throw e;
 
-                            // ignore
                         }
                     }
                 }
