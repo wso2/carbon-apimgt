@@ -26,26 +26,27 @@ import 'swagger-editor/dist/swagger-editor.css';
  * https://github.com/wso2/product-apim/issues/5071
  * */
 class SwaggerEditorDrawer extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {};
-    }
+    state = {};
 
+    /**
+     * @inheritDoc
+     */
     componentDidMount() {
         window.editor = SwaggerEditor({
             dom_id: '#swagger-editor',
             layout: 'EditorLayout',
             plugins: Object.values(plugins),
             supportedSubmitMethods: [],
-            debounce: 10,
             components: {},
-            showExtensions: false,
             swagger2GeneratorUrl: 'https://generator.swagger.io/api/swagger.json',
             oas3GeneratorUrl: 'https://generator3.swagger.io/openapi.json',
             swagger2ConverterUrl: 'https://converter.swagger.io/api/convert',
         });
     }
 
+    /**
+     * @inheritDoc
+     */
     render() {
         return (
             <div id='swagger-editor' />

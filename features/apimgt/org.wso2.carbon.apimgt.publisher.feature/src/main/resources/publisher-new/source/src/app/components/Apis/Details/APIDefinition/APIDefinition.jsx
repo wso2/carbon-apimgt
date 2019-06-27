@@ -16,17 +16,18 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import EditRounded from '@material-ui/icons/EditRounded';
 import CloudUploadRounded from '@material-ui/icons/CloudUploadRounded';
+import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
 import Typography from '@material-ui/core/Typography';
 import Slide from '@material-ui/core/Slide';
@@ -39,9 +40,12 @@ import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import Dropzone from 'react-dropzone';
 import qs from 'qs';
+import json2yaml from 'json2yaml';
+import SwaggerParser from 'swagger-parser';
 
-import SwaggerEditorDrawer from './SwaggerEditorDrawer';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+
+const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
 
 const styles = theme => ({
     titleWrapper: {
@@ -63,6 +67,20 @@ const styles = theme => ({
         position: 'relative',
         textAlign: 'center',
     },
+    topBar: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    converterWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        flex: '1',
+        fontSize: '0.6964285714285714rem',
+    },
+    downloadLink: {
+        color: 'black',
+    },
 });
 /**
  * This component holds the functionality of viewing the api definition content of an api. The initial view is a
@@ -71,12 +89,17 @@ const styles = theme => ({
  * 'Import API Definition'.
  * */
 class APIDefinition extends React.Component {
+    /**
+     * @inheritDoc
+     */
     constructor(props) {
         super(props);
         this.state = {
             openEditor: false,
+            swagger: null,
+            format: null,
+            convertTo: null,
         };
-        this.api = props.api;
         this.openEditor = this.openEditor.bind(this);
         this.closeEditor = this.closeEditor.bind(this);
         this.transition = this.transition.bind(this);
@@ -86,17 +109,24 @@ class APIDefinition extends React.Component {
         this.onDrop = this.onDrop.bind(this);
         this.handleNo = this.handleNo.bind(this);
         this.handleOk = this.handleOk.bind(this);
+        this.onChangeFormatClick = this.onChangeFormatClick.bind(this);
+        this.validateSwagger = this.validateSwagger.bind(this);
     }
 
+    /**
+     * @inheritdoc
+     */
     componentDidMount() {
-        const promisedApi = this.api.getSwagger(this.api.id);
-        const { location } = this.props;
+        const { location, api } = this.props;
+        const promisedApi = api.getSwagger(api.id);
         promisedApi
             .then((response) => {
-                this.setState({ swagger: JSON.stringify(response.obj, null, 1) });
+                this.setState({ swagger: json2yaml.stringify(response.obj), format: 'yaml', convertTo: 'json' });
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
                 const { status } = error.status;
                 if (status === 404) {
                     this.setState({ notFound: true });
@@ -110,32 +140,81 @@ class APIDefinition extends React.Component {
 
     /**
      * Handles the file upload.
+     * @param {object[]} files The uploaded file object array
      * */
-    onDrop(file) {
-        if (file[0]) {
+    onDrop(files) {
+        const file = files[0];
+        const { intl } = this.props;
+        if (files[0]) {
+            if (file.type === 'application/json') {
+                this.setState({ format: 'json', convertTo: 'yaml' });
+            } else {
+                this.setState({ format: 'yaml', convertTo: 'json' });
+            }
             const reader = new FileReader();
             reader.onload = (e) => {
                 const content = e.target.result;
-                this.setState({ swagger: content }, () => {
-                    this.updateSwaggerDefinition();
-                });
+                this.validateSwagger(content);
             };
-            reader.readAsText(file[0]);
+            reader.readAsText(files[0]);
         } else {
-            Alert.error('Unsupported file type.');
+            Alert.error(intl.formatMessage({
+                id: 'Unsupported.file.type',
+                defaultMessage: 'Unsupported File Type.',
+            }));
         }
     }
 
     /**
+     * Toggle the format of the api definition.
+     * JSON -> YAML, YAML -> JSON
+     */
+    onChangeFormatClick() {
+        const { format, swagger, convertTo } = this.state;
+        let formattedString = '';
+        if (convertTo === 'json') {
+            formattedString = JSON.stringify(yaml.load(swagger), null, 1);
+        } else {
+            formattedString = json2yaml.stringify(JSON.parse(swagger));
+        }
+        this.setState({ swagger: formattedString, format: convertTo, convertTo: format });
+    }
+
+    /**
+     * Validates the given api definition.
+     * @param {*} definition JSON/ YAML api definition.
+     * @return {boolean} True if valid, false otherwise.
+     */
+    validateSwagger(definition) {
+        const { intl } = this.props;
+        let swaggerObj = {};
+        if (this.hasJsonStructure(definition)) {
+            swaggerObj = JSON.parse(definition);
+        } else {
+            swaggerObj = yaml.safeLoad(definition);
+        }
+        SwaggerParser.validate(swaggerObj, (err, api) => {
+            if (api) {
+                this.setState({ swagger: definition }, () => { this.updateSwaggerDefinition(); });
+            } else {
+                Alert.error(intl.formatMessage({
+                    id: 'API.Definition.file.validation.failed',
+                    defaultMessage: 'API Definition file validation failed.',
+                }));
+            }
+        });
+    }
+
+    /**
      * Checks whether the swagger content is json type.
+     * @param {string} definition The swagger string.
+     * @return {boolean} Whether the content is a json or not.
      * */
-    hasJsonStructure() {
-        const { swagger } = this.state.swagger;
-        if (typeof swagger !== 'string') return false;
+    hasJsonStructure(definition) {
+        if (typeof definition !== 'string') return false;
         try {
-            const result = JSON.parse(swagger);
-            return Object.prototype.toString.call(result) === '[object Object]'
-                || Array.isArray(result);
+            const result = JSON.parse(definition);
+            return (result && typeof result === 'object');
         } catch (err) {
             return false;
         }
@@ -176,6 +255,8 @@ class APIDefinition extends React.Component {
 
     /**
      * Handles the transition of the drawer.
+     * @param {object} props list of props
+     * @return {object} The Slide transition component
      * */
     transition(props) {
         return <Slide direction='up' {...props} />;
@@ -192,36 +273,57 @@ class APIDefinition extends React.Component {
      * Updates swagger definition of the api.
      * */
     updateSwaggerDefinition() {
+        const { swagger } = this.state;
         let parsedContent = {};
-        if (this.hasJsonStructure()) {
-            parsedContent = JSON.parse(this.state.swagger);
+        const { api, intl } = this.props;
+        if (this.hasJsonStructure(swagger)) {
+            parsedContent = JSON.parse(swagger);
         } else {
             try {
-                parsedContent = yaml.load(this.state.swagger);
+                parsedContent = yaml.load(swagger);
             } catch (err) {
-                Alert.error('Error while updating the API Definition');
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Error.while.updating.the.API.Definition',
+                    defaultMessage: 'Error while updating the API Definition',
+                }));
                 return;
             }
         }
-        const promise = this.api.updateSwagger(parsedContent);
+        const promise = api.updateSwagger(parsedContent);
         promise.then((response) => {
-            if (response) Alert.success('API Definition Updated Successfully');
+            if (response) {
+                Alert.success(intl.formatMessage({
+                    id: 'API.Definition.Updated.Successfully',
+                    defaultMessage: 'API Definition Updated Successfully',
+                }));
+            }
         }).catch((err) => {
-            console.debug(err);
-            Alert.error('Error while updating the API Definition');
+            console.log(err);
+            Alert.error(intl.formatMessage({
+                id: 'Error.while.updating.the.API.Definition',
+                defaultMessage: 'Error while updating the API Definition',
+            }));
         });
     }
 
+    /**
+     * @inheritdoc
+     */
     render() {
-        const { swagger, openEditor, openDialog } = this.state;
+        const {
+            swagger, openEditor, openDialog, format, convertTo,
+        } = this.state;
         const { classes } = this.props;
-
+        const downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(swagger);
+        const fileName = 'swagger.' + format;
         const editorOptions = {
             selectOnLineNumbers: true,
             readOnly: true,
             smoothScrolling: true,
             wordWrap: 'on',
         };
+
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
@@ -231,27 +333,48 @@ class APIDefinition extends React.Component {
 
         return (
             <div className={classes.root}>
-                <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        API Definition
-                    </Typography>
-                    <Button size='small' className={classes.button} onClick={this.openEditor}>
-                        <EditRounded className={classes.buttonIcon} />
-                        Edit
-                    </Button>
-                    <Dropzone
-                        multiple={false}
-                        className={classes.dropzone}
-                        accept={['application/json', 'application/x-yaml']}
-                        onDrop={(dropFile) => {
-                            this.onDrop(dropFile);
-                        }}
-                    >
-                        <Button size='small' className={classes.button}>
-                            <CloudUploadRounded className={classes.buttonIcon} />
-                            Import API Definition
+                <div className={classes.topBar}>
+                    <div className={classes.titleWrapper}>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            API Definition
+                        </Typography>
+                        <Button size='small' className={classes.button} onClick={this.openEditor}>
+                            <EditRounded className={classes.buttonIcon} />
+                            Edit
                         </Button>
-                    </Dropzone>
+                        <Dropzone
+                            multiple={false}
+                            className={classes.dropzone}
+                            accept={['application/json', 'application/x-yaml']}
+                            onDrop={(files) => {
+                                this.onDrop(files);
+                            }}
+                        >
+                            <Button size='small' className={classes.button}>
+                                <CloudUploadRounded className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Import.definition'
+                                    defaultMessage='Import Definition'
+                                />
+                            </Button>
+                        </Dropzone>
+                        <a
+                            className={classes.downloadLink}
+                            href={downloadLink}
+                            download={fileName}
+                        >
+                            <Button size='small' className={classes.button} >
+                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                <FormattedMessage id='Download.Definition' defaultMessage='Download Definition' />
+                            </Button>
+                        </a>
+                    </div>
+                    <div className={classes.converterWrapper}>
+                        <Button size='small' className={classes.button} onClick={this.onChangeFormatClick} >
+                            <FormattedMessage id='Convert.to' defaultMessage='Convert to:' />
+                            {convertTo}
+                        </Button>
+                    </div>
                 </div>
                 <div>
                     <MonacoEditor
@@ -290,7 +413,9 @@ class APIDefinition extends React.Component {
                             />
                         </Button>
                     </Paper>
-                    <SwaggerEditorDrawer />
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <EditorDialog />
+                    </Suspense>
                 </Dialog>
                 <Dialog
                     open={openDialog}
@@ -300,21 +425,24 @@ class APIDefinition extends React.Component {
                 >
                     <DialogTitle id='alert-dialog-title'>
                         <Typography align='left'>
-                            Save API Definition
+                            <FormattedMessage id='Save.API.Definition' defaultMessage='Save API Definition' />
                         </Typography>
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText id='alert-dialog-description'>
-                            Do you want to save the API Definition?
-                            This will affect the existing resources.
+                            <FormattedMessage
+                                id='Do.you.want.to.save.the.API.Definition.This.will.affect.the.existing.resources.'
+                                defaultMessage='Do you want to save the API Definition?
+                                This will affect the existing resources.'
+                            />
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleNo} color='secondary'>
-                            No
+                            <FormattedMessage id='No' defaultMessage='No' />
                         </Button>
                         <Button onClick={this.handleOk} color='primary' autoFocus>
-                            Yes
+                            <FormattedMessage id='Yes' defaultMessage='Yes' />
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -322,9 +450,25 @@ class APIDefinition extends React.Component {
         );
     }
 }
+
 APIDefinition.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        button: PropTypes.shape({}),
+        popupHeader: PropTypes.shape({}),
+        buttonIcon: PropTypes.shape({}),
+        root: PropTypes.shape({}),
+        topBar: PropTypes.shape({}),
+        titleWrapper: PropTypes.shape({}),
+        mainTitle: PropTypes.shape({}),
+        converterWrapper: PropTypes.shape({}),
+        dropzone: PropTypes.shape({}),
+        downloadLink: PropTypes.shape({}),
+    }).isRequired,
+    api: PropTypes.shape({
+        updateSwagger: PropTypes.func,
+        getSwagger: PropTypes.func,
+        id: PropTypes.string,
+    }).isRequired,
     history: PropTypes.shape({
         push: PropTypes.object,
     }).isRequired,
@@ -332,5 +476,9 @@ APIDefinition.propTypes = {
         pathname: PropTypes.object,
     }).isRequired,
     resourceNotFountMessage: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
-export default withStyles(styles)(APIDefinition);
+export default injectIntl(withStyles(styles, { withTheme: true })(APIDefinition));
