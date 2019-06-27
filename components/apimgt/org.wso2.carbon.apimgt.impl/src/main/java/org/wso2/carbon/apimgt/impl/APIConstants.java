@@ -1343,6 +1343,11 @@ public final class APIConstants {
     public static final String API_PRODUCT_RESOURCE_COLLECTION = "products";
     public static final String API_PRODUCT_RESOURCE_NAME = "/product";
     public static final String API_PRODUCT_VERSION = "1.0.0";
+    public static final String PRODUCT_DOCUMENTATION_KEY = "productdocument";
+    public static final String DOC_PRODUCT_BASE_PATH = "overview_productBasePath";
+    public static final String PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/products";
+    public static final String API_IDENTIFIER_TYPE = "API";
+    public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";

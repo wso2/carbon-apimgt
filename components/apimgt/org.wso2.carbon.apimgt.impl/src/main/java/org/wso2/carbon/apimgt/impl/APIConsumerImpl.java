@@ -4949,23 +4949,31 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param identifier API identifier
      * @throws APIManagementException APIManagementException
      */
-    protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
+    protected void checkAccessControlPermission(Identifier identifier) throws APIManagementException {
         if (identifier == null || !isAccessControlRestrictionEnabled) {
             if (!isAccessControlRestrictionEnabled && log.isDebugEnabled() && identifier != null) {
                 log.debug(
-                        "Publisher access control restriction is not enabled. Hence the API " + identifier.getApiName()
+                        "Publisher access control restriction is not enabled. Hence the API/Product " + identifier.getName()
                                 + " should not be checked for further permission. Registry permission check "
                                 + "is sufficient");
             }
             return;
         }
-        String apiPath = APIUtil.getAPIPath(identifier);
+        String resourcePath = StringUtils.EMPTY;
+        String identifierType = StringUtils.EMPTY;
+        if (identifier instanceof APIIdentifier) {
+            resourcePath = APIUtil.getAPIPath((APIIdentifier) identifier);
+            identifierType = APIConstants.API_IDENTIFIER_TYPE;
+        } else if (identifier instanceof APIProductIdentifier) {
+            resourcePath = APIUtil.getAPIProductPath((APIProductIdentifier) identifier);
+            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
+        }
         Registry registry;
         try {
             // Need user name with tenant domain to get correct domain name from
             // MultitenantUtils.getTenantDomain(username)
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            String apiTenantDomain = getTenantDomain(identifier);
+            String apiTenantDomain = getTenantDomain(identifier.getProviderName());
             int apiTenantId = getTenantManager().getTenantId(apiTenantDomain);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
                 APIUtil.loadTenantRegistry(apiTenantId);
@@ -4978,23 +4986,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else {
                 registry = this.registry;
             }
-            Resource apiResource = registry.get(apiPath);
-            String accessControlProperty = apiResource.getProperty(APIConstants.ACCESS_CONTROL);
+            Resource resource = registry.get(resourcePath);
+            String accessControlProperty = resource.getProperty(APIConstants.ACCESS_CONTROL);
             if (accessControlProperty == null || accessControlProperty.trim().isEmpty() || accessControlProperty
                     .equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("API in the path  " + apiPath + " does not have any access control restriction");
+                    log.debug(identifierType + " in the path  " + resourcePath + " does not have any access control restriction");
                 }
                 return;
             }
             if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
                 return;
             }
-            String storeVisibilityRoles = apiResource.getProperty(APIConstants.STORE_VIEW_ROLES);
+            String storeVisibilityRoles = resource.getProperty(APIConstants.STORE_VIEW_ROLES);
             if (storeVisibilityRoles != null && !storeVisibilityRoles.trim().isEmpty()) {
                 String[] storeVisibilityRoleList = storeVisibilityRoles.split(",");
                 if (log.isDebugEnabled()) {
-                    log.debug("API has restricted access to users with the roles : " + Arrays
+                    log.debug(identifierType + " has restricted access to users with the roles : " + Arrays
                             .toString(storeVisibilityRoleList));
                 }
                 String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
@@ -5009,18 +5017,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug("API " + identifier + " cannot be accessed by user '" + username + "'. It "
+                    log.debug(identifierType + " " + identifier + " cannot be accessed by user '" + username + "'. It "
                             + "has a store visibility  restriction");
                 }
                 throw new APIManagementException(
-                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view  the API " + identifier);
+                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view  the " + identifierType + " " + identifier);
             }
         } catch (RegistryException e) {
             throw new APIManagementException(
-                    "Registry Exception while trying to check the store visibility restriction of API " + identifier
-                            .getApiName(), e);
+                    "Registry Exception while trying to check the store visibility restriction of " + identifierType + " " + identifier
+                            .getName(), e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API from : " + apiPath;
+            String msg = "Failed to get " + identifierType + " from : " + resourcePath;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }

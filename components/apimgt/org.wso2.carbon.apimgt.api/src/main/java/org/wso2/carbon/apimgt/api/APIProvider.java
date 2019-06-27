@@ -357,19 +357,19 @@ public interface APIProvider extends APIManager {
     /**
      * Removes a given documentation
      *
-     * @param apiId   APIIdentifier
+     * @param id   Identifier
      * @param docId UUID of the doc
      * @throws APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docId)throws APIManagementException;
+    public void removeDocumentation(Identifier id, String docId)throws APIManagementException;
     /**
-     * Adds Documentation to an API
+     * Adds Documentation to an API/Product
      *
-     * @param apiId         APIIdentifier
+     * @param id         API/Product Identifier
      * @param documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException;
+    void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException;
 
     /**
      * Add a file to a document of source type FILE 
@@ -1177,4 +1177,38 @@ public interface APIProvider extends APIManager {
     APIProduct getAPIDefinitionOfAPIProduct(String uuid) throws APIManagementException;
 
     List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Updates a given api product documentation
+     *
+     * @param productId         APIProductIdentifier
+     * @param documentation Documentation
+     * @throws APIManagementException if failed to update docs
+     */
+    void updateDocumentation(APIProductIdentifier productId, Documentation documentation) throws APIManagementException;
+
+    /**
+     * Add a file to a document of source type FILE
+     *
+     * @param prodcutId APIProduct identifier the document belongs to
+     * @param documentation document
+     * @param filename name of the file
+     * @param content content of the file as an Input Stream
+     * @param contentType content type of the file
+     * @throws APIManagementException if failed to add the file
+     */
+    void addFileToProductDocumentation(APIProductIdentifier prodcutId, Documentation documentation, String filename, InputStream content,
+            String contentType) throws APIManagementException;
+
+    /**
+     * This method used to save the documentation content
+     *
+     * @param apiProduct,        API Product
+     * @param documentationName, name of the inline documentation
+     * @param text,              content of the inline documentation
+     * @throws APIManagementException if failed to add the document as a resource to registry
+     */
+    public void addProductDocumentationContent(APIProduct apiProduct, String documentationName, String text) throws APIManagementException;
+
+
 }

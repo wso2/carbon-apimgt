@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -392,7 +393,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @param identifier API identifier
      * @throws APIManagementException APIManagementException
      */
-    protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
+    protected void checkAccessControlPermission(Identifier identifier) throws APIManagementException {
        // Implementation different based on invocation come from publisher or store
     }
 
@@ -455,7 +456,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return MultitenantUtils.getTenantAwareUsername(username);
     }
 
-    protected String getTenantDomain(APIIdentifier identifier) {
+    protected String getTenantDomain(Identifier identifier) {
         return MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
     }
@@ -1112,19 +1113,28 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Checks whether the given document already exists for the given api
+     * Checks whether the given document already exists for the given api/product
      *
-     * @param identifier API Identifier
+     * @param identifier API/Product Identifier
      * @param docName    Name of the document
-     * @return true if document already exists for the given api
+     * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    public boolean isDocumentationExist(APIIdentifier identifier, String docName) throws APIManagementException {
-        String docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
-                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + docName;
+    public boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException {
+        String docPath = "";
+        if (identifier instanceof APIIdentifier) {
+            docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
+                    + RegistryConstants.PATH_SEPARATOR + identifier.getName() + RegistryConstants.PATH_SEPARATOR
+                    + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
+                    + RegistryConstants.PATH_SEPARATOR + docName;
+        } else if (identifier instanceof APIProductIdentifier) {
+            docPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                    .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
+                    + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + docName;
+        }
+
         try {
             return registry.resourceExists(docPath);
         } catch (RegistryException e) {
@@ -1134,11 +1144,20 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
-        String apiResourcePath = APIUtil.getAPIPath(apiId);
+        String resourcePath = StringUtils.EMPTY;
+        String docArtifactKeyType = StringUtils.EMPTY;
+        if (id instanceof APIIdentifier) {
+            resourcePath = APIUtil.getAPIPath((APIIdentifier) id);
+            docArtifactKeyType = APIConstants.DOCUMENTATION_KEY;
+        } else if (id instanceof APIProductIdentifier) {
+            resourcePath = APIUtil.getAPIProductPath((APIProductIdentifier) id);
+            docArtifactKeyType = APIConstants.PRODUCT_DOCUMENTATION_KEY;
+        }
+
         try {
-            Association[] docAssociations = registry.getAssociations(apiResourcePath,
+            Association[] docAssociations = registry.getAssociations(resourcePath,
                     APIConstants.DOCUMENTATION_ASSOCIATION);
             if (docAssociations == null) {
                 return documentationList;
@@ -1148,13 +1167,19 @@ public abstract class AbstractAPIManager implements APIManager {
 
                 Resource docResource = registry.get(docPath);
                 GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
-                        APIConstants.DOCUMENTATION_KEY);
+                        docArtifactKeyType);
                 GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
                 Documentation doc = APIUtil.getDocumentation(docArtifact);
                 Date contentLastModifiedDate;
                 Date docLastModifiedDate = docResource.getLastModified();
                 if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType()) || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
-                    String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                    String contentPath = StringUtils.EMPTY;
+                    if (id instanceof APIIdentifier) {
+                        contentPath = APIUtil.getAPIDocContentPath((APIIdentifier) id, doc.getName());
+                    } else if (id instanceof APIProductIdentifier) {
+                        contentPath = APIUtil.getProductDocContentPath((APIProductIdentifier) id, doc.getName());
+                    }
+
                     contentLastModifiedDate = registry.get(contentPath).getLastModified();
                     doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
                             contentLastModifiedDate : docLastModifiedDate));
@@ -1165,7 +1190,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
         } catch (RegistryException e) {
-            String msg = "Failed to get documentations for api " + apiId.getApiName();
+            String msg = "Failed to get documentations for api/product " + id.getName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
@@ -1334,11 +1359,21 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentation;
     }
 
-    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
+    public String getDocumentationContent(Identifier identifier, String documentationName)
             throws APIManagementException {
-        String contentPath = APIUtil.getAPIDocPath(identifier) +
-                APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
-                documentationName;
+        String contentPath = StringUtils.EMPTY;
+        String identifierType = StringUtils.EMPTY;
+        if (identifier instanceof APIIdentifier) {
+            contentPath = APIUtil.getAPIDocPath((APIIdentifier) identifier) +
+                    APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
+                    documentationName;
+            identifierType = APIConstants.API_IDENTIFIER_TYPE;
+        } else if (identifier instanceof APIProductIdentifier) {
+            contentPath = APIUtil.getProductDocPath((APIProductIdentifier) identifier) +
+                    APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
+                    documentationName;
+            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
+        }
         String tenantDomain = getTenantDomain(identifier);
         Registry registry;
 
@@ -1370,12 +1405,12 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } catch (RegistryException e) {
             String msg = "No document content found for documentation: "
-                    + documentationName + " of API: " + identifier.getApiName();
+                    + documentationName + " of "+ identifierType + " : " + identifier.getName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get document content found for documentation: "
-                    + documentationName + " of API: " + identifier.getApiName();
+                    + documentationName + " of " + identifierType + " : " + identifier.getName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } finally {
@@ -3257,4 +3292,73 @@ public abstract class AbstractAPIManager implements APIManager {
         //todo : implement access control checks here and move to userawareAPIProvider
         return addResourceFile(resourcePath, resourceFile);
     }
+
+
+    /**
+     * Get an api product documentation by artifact Id
+     *
+     * @param docId                 artifact id of the document
+     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @return Document object which represents the artifact id
+     * @throws APIManagementException
+     */
+    public Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
+        Documentation documentation = null;
+        try {
+            Registry registryType;
+            boolean isTenantMode = (requestedTenantDomain != null);
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(
+                    requestedTenantDomain))) {
+                int tenantId = getTenantManager()
+                        .getTenantId(requestedTenantDomain);
+                registryType = getRegistryService()
+                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registryType, APIConstants
+                    .PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            APIProductIdentifier productIdentifier = APIUtil.getProductIdentifier(artifact.getPath());
+            checkAccessControlPermission(productIdentifier);
+            if (null != artifact) {
+                documentation = APIUtil.getDocumentation(artifact);
+                documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
+                Date lastModified = registryType.get(artifact.getPath()).getLastModified();
+                if (lastModified != null) {
+                    documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to get documentation details";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get documentation details";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return documentation;
+    }
+
+    public APIProduct getAPIProduct(String productPath) throws APIManagementException {
+        try {
+            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
+                    APIConstants.API_PRODUCT_KEY);
+            Resource productResource = registry.get(productPath);
+            String artifactId = productResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + productPath);
+            }
+            GenericArtifact productArtifact = artifactManager.getGenericArtifact(artifactId);
+            return APIUtil.getAPIProduct(productArtifact, registry);
+
+        } catch (RegistryException e) {
+            String msg = "Failed to get API Product from : " + productPath;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
 }

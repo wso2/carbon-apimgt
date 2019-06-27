@@ -87,6 +87,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
@@ -1585,9 +1586,14 @@ public final class APIUtil {
      * @return Generated path.
      * @fileName File name.
      */
-    public static String getDocumentationFilePath(APIIdentifier identifier, String fileName) {
-        return APIUtil.getAPIDocPath(identifier) + APIConstants.DOCUMENT_FILE_DIR +
-                RegistryConstants.PATH_SEPARATOR + fileName;
+    public static String getDocumentationFilePath(Identifier identifier, String fileName) {
+        if (identifier instanceof APIIdentifier) {
+            return APIUtil.getAPIDocPath((APIIdentifier) identifier) + APIConstants.DOCUMENT_FILE_DIR +
+                    RegistryConstants.PATH_SEPARATOR + fileName;
+        } else {
+            return APIUtil.getProductDocPath((APIProductIdentifier) identifier) + APIConstants.DOCUMENT_FILE_DIR +
+                    RegistryConstants.PATH_SEPARATOR + fileName;
+        }
     }
 
     public static String getOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
@@ -1712,12 +1718,12 @@ public final class APIUtil {
      * This utility method used to create documentation artifact content
      *
      * @param artifact      GovernanceArtifact
-     * @param apiId         APIIdentifier
+     * @param id            Identifier
      * @param documentation Documentation
      * @return GenericArtifact
      * @throws APIManagementException if failed to get GovernanceArtifact from Documentation
      */
-    public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, APIIdentifier apiId,
+    public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, Identifier id,
                                                            Documentation documentation) throws APIManagementException {
         try {
             artifact.setAttribute(APIConstants.DOC_NAME, documentation.getName());
@@ -1753,9 +1759,14 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.DOC_SOURCE_URL, documentation.getSourceUrl());
             artifact.setAttribute(APIConstants.DOC_FILE_PATH, documentation.getFilePath());
             artifact.setAttribute(APIConstants.DOC_OTHER_TYPE_NAME, documentation.getOtherTypeName());
-            String basePath = apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                    apiId.getApiName() + RegistryConstants.PATH_SEPARATOR + apiId.getVersion();
-            artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
+            String basePath = id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                    id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion();
+            if (id instanceof APIIdentifier) {
+                artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
+            } else if (id instanceof APIProductIdentifier) {
+                artifact.setAttribute(APIConstants.DOC_PRODUCT_BASE_PATH, basePath);
+            }
+
         } catch (GovernanceException e) {
             String msg = "Failed to create doc artifact content from :" + documentation.getName();
             log.error(msg, e);
@@ -3554,17 +3565,17 @@ public final class APIUtil {
     /**
      * This function is to set resource permissions based on its visibility
      *
-     * @param artifactPath API resource path
+     * @param artifactPath API/Product resource path
      * @throws APIManagementException Throwing exception
      */
-    public static void clearResourcePermissions(String artifactPath, APIIdentifier apiId, int tenantId)
+    public static void clearResourcePermissions(String artifactPath, Identifier id, int tenantId)
             throws APIManagementException {
         try {
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
             String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(id.getProviderName()));
             if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
                     .equals(tenantDomain)) {
                 org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
@@ -8522,4 +8533,45 @@ public final class APIUtil {
                 credentials.getBytes(Charset.forName( "UTF-8")));
         return new String(encodedCredentials, Charset.forName("UTF-8"));
     }
+
+     /* Utility method to get api identifier from api path.
+     *
+     * @param productPath Path of the API Product in registry
+     * @return relevant API Product Identifier
+     */
+    public static APIProductIdentifier getProductIdentifier(String productPath) {
+        int length = (APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
+        String relativePath = productPath.substring(length);
+        String[] values = relativePath.split(RegistryConstants.PATH_SEPARATOR);
+        if (values.length > 3) {
+            return new APIProductIdentifier(values[0], values[1], values[2]);
+        }
+        return null;
+    }
+
+    /**
+     * Utility method to get product documentation content file path
+     *
+     * @param productId             APIProductIdentifier
+     * @param documentationName String
+     * @return Doc content path
+     */
+    public static String getProductDocContentPath(APIProductIdentifier productId, String documentationName) {
+        return getProductDocPath(productId) + documentationName;
+    }
+
+    /**
+     * Utility method to get product documentation path
+     *
+     * @param productId APIProductIdentifier
+     * @return Doc path
+     */
+    public static String getProductDocPath(APIProductIdentifier productId) {
+        return APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                productId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                productId.getName() + RegistryConstants.PATH_SEPARATOR +
+                productId.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+
 }
