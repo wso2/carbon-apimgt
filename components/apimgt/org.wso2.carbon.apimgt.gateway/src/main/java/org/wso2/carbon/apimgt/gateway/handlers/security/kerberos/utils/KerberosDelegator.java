@@ -63,13 +63,15 @@ public class KerberosDelegator {
                     context.dispose();
                 } catch (GSSException e) {
                     // ignore
+                    log.error("sdf",e);
                 }
             }
             if (delegationCredential != null) {
                 try {
                     delegationCredential.dispose();
                 } catch (GSSException e) {
-                    // ignore
+                    log.error("ERROR",e);
+                    throw e;
                 }
             }
         }
@@ -97,6 +99,9 @@ public class KerberosDelegator {
                         try {
                             context.dispose();
                         } catch (GSSException e) {
+                            log.error("ERROR",e);
+                            throw e;
+
                             // ignore
                         }
                     }
@@ -143,6 +148,7 @@ public class KerberosDelegator {
         try {
             return new Oid(oid);
         } catch (GSSException e) {
+            log.error(e);
             // Won't happen as only valid strings are passed.
             return null;
         }
