@@ -1,6 +1,5 @@
 import React from 'react';
 import { ListItemIcon, Drawer, List, withStyles, ListItem, ListItemText } from '@material-ui/core';
-import EndpointsIcon from '@material-ui/icons/ZoomOutMapOutlined';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -68,14 +67,6 @@ const GlobalNavBar = (props) => {
                                         />
                                     </ListItemIcon>
                                     <ListItemText classes={{ primary: classes.listText }} primary='APIs' />
-                                </ListItem>
-                            </Link>
-                            <Link to='/endpoints'>
-                                <ListItem button>
-                                    <ListItemIcon>
-                                        <EndpointsIcon className={classes.leftLink_Icon} />
-                                    </ListItemIcon>
-                                    <ListItemText classes={{ primary: classes.listText }} primary='Endpoints' />
                                 </ListItem>
                             </Link>
                         </List>

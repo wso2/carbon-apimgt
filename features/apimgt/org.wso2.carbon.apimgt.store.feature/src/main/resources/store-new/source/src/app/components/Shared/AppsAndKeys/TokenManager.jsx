@@ -28,6 +28,7 @@ import Application from '../../../data/Application';
 import Loading from '../../Base/Loading/Loading';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
+import { ScopeValidation, resourceMethods, resourcePaths } from '../ScopeValidation';
 
 const styles = theme => ({
     root: {
@@ -161,8 +162,10 @@ class TokenManager extends React.Component {
         const { keyType } = this.props;
         const applicationKey = keys.get(keyType);
         this.application.then((application) => {
-            return application.updateKeys(applicationKey.tokenType, keyType, keyRequest.supportedGrantTypes,
-                keyRequest.callbackUrl, applicationKey.consumerKey, applicationKey.consumerSecret);
+            return application.updateKeys(
+                applicationKey.tokenType, keyType, keyRequest.supportedGrantTypes,
+                keyRequest.callbackUrl, applicationKey.consumerKey, applicationKey.consumerSecret,
+            );
         }).then((response) => {
             console.log('Keys updated successfully : ' + response);
         }).catch((error) => {
@@ -217,15 +220,20 @@ class TokenManager extends React.Component {
                     </ExpansionPanelDetails>
                 </ExpansionPanel>
                 <div className={classes.generateWrapper}>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        className={classes.button}
-                        onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
-                        noFound={notFound}
+                    <ScopeValidation
+                        resourcePath={resourcePaths.APPLICATION_GENERATE_KEYS}
+                        resourceMethod={resourceMethods.POST}
                     >
-                        {keys.size > 0 && keys.get(keyType) ? 'Update keys' : 'Generate Keys'}
-                    </Button>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            className={classes.button}
+                            onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
+                            noFound={notFound}
+                        >
+                            {keys.size > 0 && keys.get(keyType) ? 'Update keys' : 'Generate Keys'}
+                        </Button>
+                    </ScopeValidation>
                 </div>
             </div>
         );
