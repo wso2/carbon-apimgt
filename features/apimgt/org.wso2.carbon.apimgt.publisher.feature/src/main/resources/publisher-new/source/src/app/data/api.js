@@ -1160,6 +1160,21 @@ class API extends Resource {
     }
 
     /**
+     *
+     * Static method to search apis and documents based on content
+     * @static
+     * @param {Object} params APIs, Documents filtering parameters i:e { "name": "MyBank API"}
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    static search(params) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['API (Collection)'].get_search(params, Resource._requestMetaData());
+        });
+    }
+
+    /**
      * Get details of a given API
      * @param id {string} UUID of the api.
      * @param callback {function} A callback function to invoke after receiving successful response.
