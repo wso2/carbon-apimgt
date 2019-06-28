@@ -4891,8 +4891,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy policyIfExists = getAPIPolicy(username, apiPolicy.getPolicyName());
-                if (policyIfExists != null) {
+                Policy existingPolicy = getAPIPolicy(username, apiPolicy.getPolicyName());
+                if (existingPolicy != null) {
                     handleException("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists");
                 }
                 apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
@@ -4906,8 +4906,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy policyIfExists = getApplicationPolicy(username, appPolicy.getPolicyName());
-                if (policyIfExists != null) {
+                Policy existingPolicy = getApplicationPolicy(username, appPolicy.getPolicyName());
+                if (existingPolicy != null) {
                     handleException("Application Policy with name " + appPolicy.getPolicyName() + " already exists");
                 }
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
@@ -4918,8 +4918,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy policyIfExists = getSubscriptionPolicy(username, subPolicy.getPolicyName());
-                if (policyIfExists != null) {
+                Policy existingPolicy = getSubscriptionPolicy(username, subPolicy.getPolicyName());
+                if (existingPolicy != null) {
                     handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
                 }
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
@@ -4942,8 +4942,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
                 // checking if policy already exist
-                Policy policyIfExists = getGlobalPolicy(globalPolicy.getPolicyName());
-                if (policyIfExists != null) {
+                Policy existingPolicy = getGlobalPolicy(globalPolicy.getPolicyName());
+                if (existingPolicy != null) {
                     throw new APIManagementException("Policy Name Already Exist");
                 }
 
