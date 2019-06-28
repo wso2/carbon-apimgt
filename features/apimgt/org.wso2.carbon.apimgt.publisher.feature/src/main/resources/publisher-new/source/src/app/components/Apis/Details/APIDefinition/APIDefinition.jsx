@@ -107,8 +107,9 @@ class APIDefinition extends React.Component {
         this.transition = this.transition.bind(this);
         this.closeEditor = this.closeEditor.bind(this);
         this.hasJsonStructure = this.hasJsonStructure.bind(this);
+        this.getConvertToFormat = this.getConvertToFormat.bind(this);
         this.onChangeFormatClick = this.onChangeFormatClick.bind(this);
-        this.updateSwaggerContent = this.updateSwaggerContent.bind(this);
+        this.openUpdateConfirmation = this.openUpdateConfirmation.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
         this.validateAndUpdateApiDefinition = this.validateAndUpdateApiDefinition.bind(this);
     }
@@ -121,13 +122,17 @@ class APIDefinition extends React.Component {
         const promisedApi = api.getSwagger(api.id);
         promisedApi
             .then((response) => {
-                this.setState({ swagger: json2yaml.stringify(response.obj), format: 'yaml', convertTo: 'json' });
+                this.setState({
+                    swagger: json2yaml.stringify(response.obj),
+                    format: 'yaml',
+                    convertTo: this.getConvertToFormat('yaml'),
+                });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const { status } = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
@@ -145,18 +150,13 @@ class APIDefinition extends React.Component {
     onDrop(files) {
         const file = files[0];
         const { intl } = this.props;
-        if (files[0]) {
-            if (file.type === 'application/json') {
-                this.setState({ format: 'json', convertTo: 'yaml' });
-            } else {
-                this.setState({ format: 'yaml', convertTo: 'json' });
-            }
+        if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const content = e.target.result;
-                this.validateAndUpdateApiDefinition(content);
+                const { result } = e.target;
+                this.validateAndUpdateApiDefinition(result);
             };
-            reader.readAsText(files[0]);
+            reader.readAsText(file);
         } else {
             Alert.error(intl.formatMessage({
                 id: 'Unsupported.file.type',
@@ -181,20 +181,32 @@ class APIDefinition extends React.Component {
     }
 
     /**
+     * Util function to get the format which the definition can be converted to.
+     * @param {*} format : The current format of definition.
+     * @returns {string} The possible conversion format.
+     */
+    getConvertToFormat(format) {
+        return format === 'json' ? 'yaml' : 'json';
+    }
+
+    /**
      * Validates the given api definition.
      * @param {*} apiDefinition JSON/ YAML api definition.
      */
     validateAndUpdateApiDefinition(apiDefinition) {
         const { intl } = this.props;
         let swaggerObj = {};
+        let specFormat = null;
         if (this.hasJsonStructure(apiDefinition)) {
             swaggerObj = JSON.parse(apiDefinition);
+            specFormat = 'json';
         } else {
             swaggerObj = yaml.safeLoad(apiDefinition);
+            specFormat = 'yaml';
         }
         SwaggerParser.validate(swaggerObj, (err, api) => {
             if (api) {
-                this.setState({ swagger: apiDefinition }, () => { this.updateSwaggerDefinition(); });
+                this.updateSwaggerDefinition(apiDefinition, specFormat, this.getConvertToFormat(specFormat));
             } else {
                 Alert.error(intl.formatMessage({
                     id: 'API.Definition.file.validation.failed',
@@ -221,15 +233,15 @@ class APIDefinition extends React.Component {
 
     /**
      * Handles the yes button action of the save api definition confirmation dialog box.
-    */
+     */
     handleOk() {
         const updatedContent = window.localStorage.getItem('swagger-editor-content');
-        this.setState({ swagger: updatedContent, openDialog: false }, () => this.updateSwaggerDefinition());
+        this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(updatedContent, '', ''));
     }
 
     /**
      * Handles the No button action of the save api definition confirmation dialog box.
-    */
+     */
     handleNo() {
         this.setState({ openDialog: false });
     }
@@ -264,22 +276,24 @@ class APIDefinition extends React.Component {
     /**
      * Updates swagger content in the local storage.
      * */
-    updateSwaggerContent() {
+    openUpdateConfirmation() {
         this.setState({ openDialog: true });
     }
 
     /**
      * Updates swagger definition of the api.
+     * @param {string} swaggerContent The swagger file that needs to be updated.
+     * @param {string} specFormat The current format of the definition
+     * @param {string} toFormat The format it can be converted to.
      * */
-    updateSwaggerDefinition() {
-        const { swagger } = this.state;
-        let parsedContent = {};
+    updateSwaggerDefinition(swaggerContent, specFormat, toFormat) {
         const { api, intl } = this.props;
-        if (this.hasJsonStructure(swagger)) {
-            parsedContent = JSON.parse(swagger);
+        let parsedContent = {};
+        if (this.hasJsonStructure(swaggerContent)) {
+            parsedContent = JSON.parse(swaggerContent);
         } else {
             try {
-                parsedContent = yaml.load(swagger);
+                parsedContent = yaml.load(swaggerContent);
             } catch (err) {
                 console.log(err);
                 Alert.error(intl.formatMessage({
@@ -296,6 +310,11 @@ class APIDefinition extends React.Component {
                     id: 'API.Definition.Updated.Successfully',
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
+                if (specFormat && toFormat) {
+                    this.setState({ swagger: swaggerContent, format: specFormat, convertTo: toFormat });
+                } else {
+                    this.setState({ swagger: swaggerContent });
+                }
             }
         }).catch((err) => {
             console.log(err);
@@ -311,9 +330,9 @@ class APIDefinition extends React.Component {
      */
     render() {
         const {
-            swagger, openEditor, openDialog, format, convertTo,
+            swagger, openEditor, openDialog, format, convertTo, notFound,
         } = this.state;
-        const { classes } = this.props;
+        const { classes, resourceNotFountMessage } = this.props;
         const downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(swagger);
         const fileName = 'swagger.' + format;
         const editorOptions = {
@@ -323,8 +342,8 @@ class APIDefinition extends React.Component {
             wordWrap: 'on',
         };
 
-        if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
+        if (notFound) {
+            return <ResourceNotFound message={resourceNotFountMessage} />;
         }
         if (!swagger) {
             return <Progress />;
@@ -404,7 +423,7 @@ class APIDefinition extends React.Component {
                             className={classes.button}
                             variant='contained'
                             color='primary'
-                            onClick={this.updateSwaggerContent}
+                            onClick={this.openUpdateConfirmation}
                         >
                             <FormattedMessage
                                 id='documents.swagger.editor.update.content'
