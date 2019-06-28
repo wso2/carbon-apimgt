@@ -60,7 +60,6 @@ public enum TypeEnum {
     return this;
   }
 
-  
   @ApiModelProperty(example = "basic", value = "Accepts one of the following, basic or digest.")
   @JsonProperty("type")
   public TypeEnum getType() {
@@ -77,7 +76,6 @@ public enum TypeEnum {
     return this;
   }
 
-  
   @ApiModelProperty(example = "HTTP/idp.example.com@EXAMPLE.COM", value = "")
   @JsonProperty("targetSpn")
   public String getTargetSpn() {
@@ -94,7 +92,6 @@ public enum TypeEnum {
     return this;
   }
 
-  
   @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("username")
   public String getUsername() {
@@ -111,7 +108,6 @@ public enum TypeEnum {
     return this;
   }
 
-  
   @ApiModelProperty(example = "password", value = "")
   @JsonProperty("password")
   public String getPassword() {

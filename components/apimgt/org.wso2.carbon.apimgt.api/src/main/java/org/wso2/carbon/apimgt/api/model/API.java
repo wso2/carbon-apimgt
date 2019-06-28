@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.api.model;
 
 import org.apache.commons.lang3.StringUtils;
@@ -89,9 +89,8 @@ public class API implements Serializable {
     private boolean endpointAuthDigest = false;
     private String endpointUTUsername;
     private String endpointUTPassword;
-
-    private boolean endpointKerberosEnable= false;
-    private String  endpointTargetSpn;
+    private boolean endpointKerberosEnable = false;
+    private String endpointTargetSpn;
 
     private String transports;
     private String inSequence;
@@ -611,16 +610,20 @@ public class API implements Serializable {
     public void setApiResourcePatternsChanged(boolean apiResourcePatternsChanged) {
         this.apiResourcePatternsChanged = apiResourcePatternsChanged;
     }
+
     /**
      * @return the endpointTargetSpn
      */
     public String getEndpointTargetSpn() {
         return endpointTargetSpn;
     }
+
     /**
      * @param endpointTargetSpn the endpointTargetSpn to set
      */
-    public void setEndpointTargetSpn(String endpointTargetSpn) { this.endpointTargetSpn = endpointTargetSpn; }
+    public void setEndpointTargetSpn(String endpointTargetSpn) {
+        this.endpointTargetSpn = endpointTargetSpn;
+    }
 
     /**
      * @return the endpointUTUsername
@@ -681,12 +684,16 @@ public class API implements Serializable {
     /**
      * @return the endpointKerberosEnable
      */
-    public boolean isEndpointKerberosEnable() { return endpointKerberosEnable; }
+    public boolean isEndpointKerberosEnable() {
+        return endpointKerberosEnable;
+    }
 
     /**
      * @param endpointKerberosEnable the endpointKerberosEnable to set
      */
-    public void setEndpointKerberosEnable(boolean endpointKerberosEnable) { this.endpointKerberosEnable = endpointKerberosEnable; }
+    public void setEndpointKerberosEnable(boolean endpointKerberosEnable) {
+        this.endpointKerberosEnable = endpointKerberosEnable;
+    }
 
     public String getInSequence() {
         return inSequence;

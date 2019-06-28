@@ -283,7 +283,7 @@ public class APIMappingUtil {
     /**
      * Get map of monetized policies to plan mapping
      *
-     * @param apiIdentifier API identifier
+     * @param apiIdentifier                  API identifier
      * @param monetizedPoliciesToPlanMapping map of monetized policies to plan mapping
      * @return DTO of map of monetized policies to plan mapping
      * @throws APIManagementException if failed to construct the DTO
@@ -457,14 +457,14 @@ public class APIMappingUtil {
             APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
 
         switch (subscriptionAvailability) {
-        case CURRENT_TENANT:
-            return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
-        case ALL_TENANTS:
-            return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
-        case SPECIFIC_TENANTS:
-            return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
-        default:
-            return null; // how to handle this? 500 or 400
+            case CURRENT_TENANT:
+                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
+            case ALL_TENANTS:
+                return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
+            case SPECIFIC_TENANTS:
+                return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
+            default:
+                return null; // how to handle this? 500 or 400
         }
 
     }
@@ -487,10 +487,9 @@ public class APIMappingUtil {
         APIEndpointSecurityDTO securityDTO = dto.getEndpointSecurity();
         if (dto.getEndpointSecurity() != null && securityDTO.getType() != null) {
             api.setEndpointSecured(true);
-            if(APIEndpointSecurityDTO.TypeEnum.KERBEROS.equals(securityDTO.getType())){
+            if (APIEndpointSecurityDTO.TypeEnum.KERBEROS.equals(securityDTO.getType())) {
                 api.setEndpointKerberosEnable(true);
                 api.setEndpointTargetSpn(securityDTO.getTargetSpn());
-
             }
             api.setEndpointUTUsername(securityDTO.getUsername());
             api.setEndpointUTPassword(securityDTO.getPassword());
@@ -755,7 +754,7 @@ public class APIMappingUtil {
             if (api.isEndpointAuthDigest()) {
                 securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.DIGEST);
             }
-            if (api.isEndpointKerberosEnable()){
+            if (api.isEndpointKerberosEnable()) {
                 securityDTO.setType(APIEndpointSecurityDTO.TypeEnum.KERBEROS);
             }
             dto.setEndpointSecurity(securityDTO);
@@ -1154,13 +1153,13 @@ public class APIMappingUtil {
     /**
      * This method converts endpointconfig json to corresponding APIEndpointDTO object
      *
-     * @param type           production_endpoints, sandbox_endpoints
-     * @param endpointConfig endpoint config
+     * @param type                 production_endpoints, sandbox_endpoints
+     * @param endpointConfig       endpoint config
      * @param endpointProtocolType endpoint protocol type; eg: http
      * @return APIEndpointDTO apiEndpointDTO
      */
     public static APIEndpointDTO convertToAPIEndpointDTO(String type, JSONObject endpointConfig,
-            String endpointProtocolType) {
+                                                         String endpointProtocolType) {
 
         APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
         apiEndpointDTO.setType(type);
@@ -1176,10 +1175,10 @@ public class APIMappingUtil {
             }
             list.add(endpointConfigDTO);
             endpointEndpointConfigDTO.setList(list);
-            
+
             //todo: fix for other types of endpoints eg: load balanced, failover 
             endpointEndpointConfigDTO.setEndpointType(EndpointEndpointConfigDTO.EndpointTypeEnum.SINGLE);
-            
+
             endpointDTO.setEndpointConfig(endpointEndpointConfigDTO);
             endpointDTO.setType(endpointProtocolType);
             apiEndpointDTO.setInline(endpointDTO);
@@ -1225,13 +1224,13 @@ public class APIMappingUtil {
 
     /**
      * Returns workflow state DTO from the provided information
-     * 
-     * @param lifecycleStateDTO Lifecycle state DTO
+     *
+     * @param lifecycleStateDTO   Lifecycle state DTO
      * @param stateChangeResponse workflow response from API lifecycle change
      * @return workflow state DTO
      */
     public static WorkflowResponseDTO toWorkflowResponseDTO(LifecycleStateDTO lifecycleStateDTO,
-            APIStateChangeResponse stateChangeResponse) {
+                                                            APIStateChangeResponse stateChangeResponse) {
         WorkflowResponseDTO workflowResponseDTO = new WorkflowResponseDTO();
 
         if (WorkflowStatus.APPROVED.toString().equals(stateChangeResponse.getStateChangeStatus())) {

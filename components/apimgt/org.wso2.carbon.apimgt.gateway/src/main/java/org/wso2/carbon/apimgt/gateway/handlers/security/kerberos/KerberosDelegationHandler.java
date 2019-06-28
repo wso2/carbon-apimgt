@@ -1,22 +1,17 @@
 /*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *  *
- *  * WSO2 Inc. licenses this file to you under the Apache License,
- *  * Version 2.0 (the "License"); you may not use this file except
- *  * in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  * http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing,
- *  * software distributed under the License is distributed on an
- *  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  * KIND, either express or implied. See the License for the
- *  * specific language governing permissions and limitations
- *  * under the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.kerberos;
@@ -36,6 +31,10 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Map;
 import javax.security.auth.login.Configuration;
+
+/**
+ * This Handler is used for Kerberos Delegation.
+ */
 
 public class KerberosDelegationHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(KerberosDelegationHandler.class);
@@ -89,7 +88,7 @@ public class KerberosDelegationHandler extends AbstractHandler {
                 kerberosTicket = getDelegatedTicket(self, headers);
                 setKerberosHeader(headers, kerberosTicket);
             } catch (Exception e) {
-                throw new RuntimeException("Kerberos constrained delegation failed with login context name."+ loginContextName, e);
+                throw new RuntimeException("Kerberos constrained delegation failed with login context name." + loginContextName, e);
             } finally {
                 self.logout();
                 // Revert back to previous configs
@@ -120,7 +119,6 @@ public class KerberosDelegationHandler extends AbstractHandler {
             log.debug("Acquired delegated Kerberos ticket: " + delegatedKerberosTicket);
         }
         return delegatedKerberosTicket;
-
     }
 
     public boolean handleResponse(MessageContext messageContext) {
@@ -145,21 +143,21 @@ public class KerberosDelegationHandler extends AbstractHandler {
                 .getAxis2MessageContext();
         String outServerTokenString = null;
         headersMap.clear();
-            if (serverToken != null) {
-                outServerTokenString = Base64.getEncoder().encodeToString(serverToken);
-            }
-            axis2MessageContext.setProperty("HTTP_SC", "401");
-            if (outServerTokenString != null) {
-                headersMap.put(KerberosConstants.AUTHENTICATE_HEADER,
-                        KerberosConstants.NEGOTIATE + " " + outServerTokenString);
-            } else {
-                headersMap.put(KerberosConstants.AUTHENTICATE_HEADER, KerberosConstants.NEGOTIATE);
-            }
-            axis2MessageContext.setProperty("NO_ENTITY_BODY", true);
-            messageContext.setProperty("RESPONSE", true);
-            messageContext.setTo(null);
-            Axis2Sender.sendBack(messageContext);
-            return false;        
+        if (serverToken != null) {
+            outServerTokenString = Base64.getEncoder().encodeToString(serverToken);
+        }
+        axis2MessageContext.setProperty("HTTP_SC", "401");
+        if (outServerTokenString != null) {
+            headersMap.put(KerberosConstants.AUTHENTICATE_HEADER,
+                    KerberosConstants.NEGOTIATE + " " + outServerTokenString);
+        } else {
+            headersMap.put(KerberosConstants.AUTHENTICATE_HEADER, KerberosConstants.NEGOTIATE);
+        }
+        axis2MessageContext.setProperty("NO_ENTITY_BODY", true);
+        messageContext.setProperty("RESPONSE", true);
+        messageContext.setTo(null);
+        Axis2Sender.sendBack(messageContext);
+        return false;
     }
 
 }
