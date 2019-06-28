@@ -110,7 +110,6 @@ function Create(props) {
                 <FormattedMessage id='documents.markdown.editor.create.title' defaultMessage='Add New Document' />
             </Typography>
             <Divider />
-            {/* <Temp ref={createEditForm} /> */}
             <CreateEditForm
                 innerRef={(node) => {
                     createEditForm = node;
