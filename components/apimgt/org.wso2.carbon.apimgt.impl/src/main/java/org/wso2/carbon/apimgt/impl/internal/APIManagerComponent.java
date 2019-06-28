@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -275,6 +276,8 @@ public class APIManagerComponent {
             KeyManagerHolder.initializeKeyManager(configuration);
             //Initialise sql constants
             SQLConstantManagerFactory.initializeSQLConstantManager();
+            // Initialize PasswordResolver
+            PasswordResolverFactory.initializePasswordResolver();
             boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
             if (analyticsEnabled) {
                 ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
