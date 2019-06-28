@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentSearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
@@ -115,8 +116,13 @@ public class SearchResultMappingUtil {
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
-        resultListDTO.setNext(paginatedNext);
-        resultListDTO.setPrevious(paginatedPrevious);
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setNext(paginatedNext);
+        paginationDTO.setPrevious(paginatedPrevious);
+        paginationDTO.setOffset(offset);
+        paginationDTO.setLimit(limit);
+        paginationDTO.setTotal(size);
+        resultListDTO.setPagination(paginationDTO);
     }
 
 }

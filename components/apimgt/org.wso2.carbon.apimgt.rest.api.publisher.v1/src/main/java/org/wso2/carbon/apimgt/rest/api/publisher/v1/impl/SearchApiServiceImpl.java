@@ -98,15 +98,6 @@ public class SearchApiServiceImpl implements SearchApiService {
             resultListDTO.setCount(allmatchedResults.size());
             SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, resultListDTO.getCount());
 
-            //Add pagination section in the response
-            int totalLength = (Integer) result.get("length");
-
-            PaginationDTO paginationDTO = new PaginationDTO();
-            paginationDTO.setOffset(offset);
-            paginationDTO.setLimit(limit);
-            paginationDTO.setTotal(totalLength);
-            resultListDTO.setPagination(paginationDTO);
-
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving search results";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);

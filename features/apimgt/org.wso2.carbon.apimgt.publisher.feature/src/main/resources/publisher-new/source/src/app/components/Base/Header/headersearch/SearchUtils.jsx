@@ -119,8 +119,7 @@ function getSuggestionValue(suggestion) {
 function getSuggestions(value) {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
-    if (inputLength === 0 || (inputValue.includes(':') &&
-        (inputValue.trim().split(':').filter(x => x)).length === 1)) {
+    if (inputLength === 0 || /:(\s+|(?![\s\S]))/g.test(inputValue)) {
         return new Promise(resolve => resolve({ obj: { list: [] } }));
     } else {
         return API.search({ query: inputValue, limit: 8 });

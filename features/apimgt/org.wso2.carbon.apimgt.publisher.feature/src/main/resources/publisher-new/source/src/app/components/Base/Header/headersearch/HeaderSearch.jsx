@@ -117,7 +117,7 @@ class HeaderSearch extends React.Component {
     handleSuggestionsFetchRequested({ value }) {
         this.setState({ isLoading: true });
         getSuggestions(value).then((body) => {
-            this.setState({ suggestions: body.obj.list, isLoading: false });
+            this.setState({ isLoading: false, suggestions: body.obj.list });
         });
     }
 
