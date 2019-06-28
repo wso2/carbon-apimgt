@@ -487,7 +487,7 @@ public class APIMappingUtil {
         APIEndpointSecurityDTO securityDTO = dto.getEndpointSecurity();
         if (dto.getEndpointSecurity() != null && securityDTO.getType() != null) {
             api.setEndpointSecured(true);
-            if (APIEndpointSecurityDTO.TypeEnum.KERBEROS.equals(securityDTO.getType())) {
+            if ((securityDTO.getType(). equals (APIEndpointSecurityDTO.TypeEnum.KERBEROS))) {
                 api.setEndpointKerberosEnable(true);
                 api.setEndpointTargetSpn(securityDTO.getTargetSpn());
             }

@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.kerberos;
  * Constants for IWA federated authenticator application
  */
 public class KerberosConstants {
-
     public static final String UTF_8 = "UTF-8";
     public static final String AUTHENTICATE_HEADER = "WWW-Authenticate";
     public static final String LOGIN_CONFIG_PROPERTY = "java.security.auth.login.config";

@@ -37,19 +37,16 @@ import javax.security.auth.login.Configuration;
  */
 
 public class KerberosDelegationHandler extends AbstractHandler {
+
     private static final Log log = LogFactory.getLog(KerberosDelegationHandler.class);
     private static final boolean IS_DEBUG_ENABLED = Boolean.parseBoolean(System.getProperty("debug", "false"));
-
     private String targetSpn;
-
     public String getTargetSpn() {
         return targetSpn;
     }
-
     public void setTargetSpn(String targetSpn) {
         this.targetSpn = targetSpn;
     }
-
     public boolean handleRequest(MessageContext messageContext) {
 
         if (IS_DEBUG_ENABLED) {
@@ -57,21 +54,16 @@ public class KerberosDelegationHandler extends AbstractHandler {
             System.setProperty("sun.security.krb5.debug", "true");
             System.setProperty("sun.security.jgss.debug", "true");
         }
-
         Map headers = getTransportHeaders(messageContext);
         if (getKerberosHeader(headers) == null) {
             return isUserAuthorized(headers, messageContext, null);
         } else {
-
             String jaasConfigPathold = System.getProperty(KerberosConstants.LOGIN_CONFIG_PROPERTY);
             String krb5ConfigPathold = System.getProperty(KerberosConstants.KERBEROS_CONFIG_PROPERTY);
-
             String kerberosConfPath = Paths.get(CarbonUtils.getCarbonConfigDirPath(), "security", "kerberos")
                     .toString();
-
             String jaasConfigPath = Paths.get(kerberosConfPath, KerberosConstants.LOGIN_CONF_FILE_NAME).toString();
             System.setProperty(KerberosConstants.LOGIN_CONFIG_PROPERTY, jaasConfigPath);
-
             String krb5ConfigPath = Paths.get(kerberosConfPath, KerberosConstants.KERBEROS_CONF_FILE_NAME).toString();
             System.setProperty(KerberosConstants.KERBEROS_CONFIG_PROPERTY, krb5ConfigPath);
             String loginContextName = System.getProperty(KerberosConstants.LOGIN_CONTEXT_NAME, "KrbLogin");
@@ -80,7 +72,6 @@ public class KerberosDelegationHandler extends AbstractHandler {
                 log.debug("Kerberos jaas.conf file path set to : " + jaasConfigPath);
                 log.debug("Kerberos krb5.conf file path set to : " + krb5ConfigPath);
             }
-
             UserManager self = new UserManager();
             try {
                 String kerberosTicket;
@@ -102,7 +93,6 @@ public class KerberosDelegationHandler extends AbstractHandler {
             }
             return true;
         }
-
     }
 
     private String getDelegatedTicket(UserManager userManager, Map headers) throws Exception {
@@ -159,5 +149,4 @@ public class KerberosDelegationHandler extends AbstractHandler {
         Axis2Sender.sendBack(messageContext);
         return false;
     }
-
 }

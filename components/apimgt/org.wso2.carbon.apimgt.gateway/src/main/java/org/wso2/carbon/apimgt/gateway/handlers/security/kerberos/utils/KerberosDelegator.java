@@ -95,7 +95,6 @@ public class KerberosDelegator {
                         } catch (GSSException e) {
                             log.error("Error,failed to dispose GSS credential ", e);
                             throw e;
-
                         }
                     }
                 }
