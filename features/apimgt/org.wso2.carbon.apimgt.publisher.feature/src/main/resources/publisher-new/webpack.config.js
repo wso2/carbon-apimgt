@@ -29,6 +29,9 @@ const config = {
         chunkFilename: '[name].bundle.js',
         publicPath: 'site/public/dist/',
     },
+    node: {
+        fs: 'empty'
+    },
     watch: false,
     devtool: 'source-map', // todo: Commented out the source
     // mapping in case need to speed up the build time & reduce size
