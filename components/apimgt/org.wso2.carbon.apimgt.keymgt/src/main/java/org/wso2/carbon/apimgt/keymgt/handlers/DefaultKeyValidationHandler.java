@@ -52,7 +52,6 @@ import java.util.Set;
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     private static final Log log = LogFactory.getLog(DefaultKeyValidationHandler.class);
-    private static final String DEFAULT_SCOPE_VALIDATOR_NAME = "Role based scope validator";
 
     public DefaultKeyValidationHandler(){
         log.info(this.getClass().getName() + " Initialised");
@@ -195,10 +194,10 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
             for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
                 try {
-                    if (validator != null && ArrayUtils.isEmpty(scopeValidators) &&
-                            validator.getValidatorName().contains(DEFAULT_SCOPE_VALIDATOR_NAME)) {
+                    if (validator != null && ArrayUtils.isEmpty(scopeValidators)) {
                         // validate scopes for old created applications
                         isValid = validator.validateScope(accessTokenDO, resource);
+                        oAuth2ScopeValidators.clear();
                     } else if (validator != null && scopeValidators != null &&
                             appScopeValidators.contains(validator.getValidatorName())) {
                         //take the intersection of defined scope validators and scope validators registered for the apps
