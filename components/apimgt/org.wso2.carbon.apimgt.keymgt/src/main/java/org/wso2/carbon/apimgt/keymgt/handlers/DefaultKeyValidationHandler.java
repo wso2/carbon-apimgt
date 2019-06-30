@@ -180,8 +180,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 + ":" +
                 validationContext.getHttpVerb();
 
-        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = OAuthServerConfiguration.getInstance()
-                .getOAuth2ScopeValidators();
+        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = new HashSet<>(OAuthServerConfiguration.getInstance()
+                .getOAuth2ScopeValidators());
         //validate scope for filtered validators from db
         String[] scopeValidators;
         OAuthAppDO appInfo;
