@@ -5473,7 +5473,7 @@ public class APIStoreHostObject extends ScriptableObject {
             option.setManageSession(true);
             option.setProperty(HTTPConstants.COOKIE_STRING, sessionCookie);
 
-            org.wso2.carbon.identity.claim.metadata.mgt.stub.dto.LocalClaimDTO[] localClaimDTOS = null;
+            LocalClaimDTO[] localClaimDTOS = null;
             ArrayList<UserFieldDTO> userFieldDTOS = new ArrayList<UserFieldDTO>();
             localClaimDTOS = stub.getLocalClaims();
 
