@@ -702,16 +702,6 @@ public interface APIProvider extends APIManager {
     Monetization getMonetizationImplClass() throws APIManagementException;
 
     /**
-     * This method is used to initiate the web service calls and cluster messages related to stats publishing status
-     *
-     * @param receiverUrl   event receiver url
-     * @param user          username of the event receiver
-     * @param password      password of the event receiver
-     * @param updatedStatus status of the stat publishing state
-     */
-    void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus);
-    
-    /**
      * This method is to change registry lifecycle states for an API artifact
      *
      * @param  apiIdentifier apiIdentifier

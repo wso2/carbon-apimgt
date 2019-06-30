@@ -17,7 +17,7 @@
 package org.wso2.carbon.apimgt.impl.template;
 
 import org.apache.velocity.VelocityContext;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * This is a utility class with a bunch of methods to help in Template
