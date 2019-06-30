@@ -466,7 +466,7 @@ class CreateEditForm extends React.Component {
                             name='sourceUrl'
                             margin='normal'
                             value={sourceUrl}
-                            onChange={this.handleChange('URL')}
+                            onChange={this.handleChange('sourceUrl')}
                             InputLabelProps={{
                                 shrink: true,
                             }}

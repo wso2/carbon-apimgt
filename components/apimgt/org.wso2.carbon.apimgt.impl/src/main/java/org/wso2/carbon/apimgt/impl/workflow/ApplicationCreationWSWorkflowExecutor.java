@@ -85,8 +85,10 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
 
             payload = payload.replace("$1", application.getName());
             payload = payload.replace("$2", application.getTier());
-            payload = payload.replace("$3", application.getCallbackUrl() == null ? "" : application.getCallbackUrl());
-            payload = payload.replace("$4", application.getDescription());
+            payload = payload.replace("$3", application.getCallbackUrl() == null ? "" :
+                    application.getCallbackUrl());
+            payload = payload.replace("$4", application.getDescription() == null ? "" :
+                    application.getDescription());
             payload = payload.replace("$5", appWorkFlowDTO.getTenantDomain());
             payload = payload.replace("$6", appWorkFlowDTO.getUserName());
             payload = payload.replace("$7", appWorkFlowDTO.getExternalWorkflowReference());
