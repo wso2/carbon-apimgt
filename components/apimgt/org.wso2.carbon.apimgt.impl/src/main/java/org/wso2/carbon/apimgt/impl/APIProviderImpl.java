@@ -4808,7 +4808,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getAPIPolicy(username, apiPolicy.getPolicyName());
+                Policy existingPolicy = getAPIPolicy(userNameWithoutChange, apiPolicy.getPolicyName());
                 if (existingPolicy != null) {
                     handleException("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists");
                 }
@@ -4823,7 +4823,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getApplicationPolicy(username, appPolicy.getPolicyName());
+                Policy existingPolicy = getApplicationPolicy(userNameWithoutChange, appPolicy.getPolicyName());
                 if (existingPolicy != null) {
                     handleException("Application Policy with name " + appPolicy.getPolicyName() + " already exists");
                 }
@@ -4835,7 +4835,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getSubscriptionPolicy(username, subPolicy.getPolicyName());
+                Policy existingPolicy = getSubscriptionPolicy(userNameWithoutChange, subPolicy.getPolicyName());
                 if (existingPolicy != null) {
                     handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
                 }
