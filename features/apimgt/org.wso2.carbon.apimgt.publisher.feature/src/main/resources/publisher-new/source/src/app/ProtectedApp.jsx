@@ -92,16 +92,7 @@ export default class Protected extends Component {
         const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} user={user} />} user={user} />;
 
         if (!user) {
-            const { pathname } = window.location;
-            const params = qs.stringify({
-                // acc : Accumulated value, cv: Current value, ci: current index
-                referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
-            });
-            return (
-                <Switch>
-                    <Redirect to={{ pathname: '/login', search: params }} />
-                </Switch>
-            );
+            window.location = '/publisher-new/services/auth/login';
         }
         return (
             <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>

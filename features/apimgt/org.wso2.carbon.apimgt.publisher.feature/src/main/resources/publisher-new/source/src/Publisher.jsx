@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import AuthManager from 'AppData/AuthManager';
 import qs from 'qs';
@@ -155,12 +155,12 @@ class Publisher extends React.Component {
      */
     render() {
         const { user, userResolved } = this.state;
-        const { pathname } = window.location;
-        const params = qs.stringify({
-            referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
-        });
+
         if (!userResolved) {
             return <Progress />;
+        }
+        if (!user) {
+            window.location = '/publisher-new/services/auth/login';
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
@@ -169,7 +169,6 @@ class Publisher extends React.Component {
                         <Switch>
                             <Route path='/login' exact component={InitLogin} />
                             <Route path='/logout' component={Logout} />
-                            {!user && <Redirect to={{ pathname: '/login', search: params }} />}
                             <Route
                                 render={() => {
                                     return <LoadableProtectedApp user={user} />;

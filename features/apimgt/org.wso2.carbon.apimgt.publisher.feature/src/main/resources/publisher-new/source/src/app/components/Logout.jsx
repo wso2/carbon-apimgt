@@ -73,7 +73,9 @@ class Logout extends Component {
      */
     render() {
         const { logoutSuccess } = this.state;
-        return logoutSuccess && <Redirect to={{ pathname: '/login', search: this.referrer }} />;
+        if (logoutSuccess) {
+            window.location = '/publisher-new/services/auth/login';
+        }
     }
 }
 
