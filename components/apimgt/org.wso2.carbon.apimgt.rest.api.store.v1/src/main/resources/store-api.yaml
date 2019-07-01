@@ -4026,6 +4026,9 @@ definitions:
 
   SearchResult:
     title: Search Result
+    required:
+      - "name"
+    discriminator: "name"
     properties:
       id:
         type: string
@@ -4037,7 +4040,8 @@ definitions:
         type: string
         enum:
           - DOC
-          - API example: API
+          - API
+        example: API
 
   APISearchResult:
     title: API Result
@@ -4119,6 +4123,8 @@ definitions:
           apiProvider:
             type: string
             example: admin
+          apiUUID:
+            type: string
 #-----------------------------------------------------
 # The pagination resource
 #-----------------------------------------------------
