@@ -29,6 +29,17 @@ const SWAGGER_RELATIVE_PATH =
     'components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources/publisher-api.yaml';
 const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
 
+
+/**
+ *
+ *
+ * @export
+ * @returns
+ */
+export function resolveSwagger() {
+    return SwaggerParser.dereference(swaggerFilePath);
+}
+
 /**
  *
  * Return sample mocked model data for given definition name
@@ -37,10 +48,9 @@ const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
  * @returns {*} Mocked API model
  */
 export default async function getMockedModel(modelName) {
-    const swagger = await SwaggerParser.dereference(swaggerFilePath);
+    const swagger = await resolveSwagger();
     return generateStatic(swagger.definitions[modelName]);
 }
-
 
 /**
  *

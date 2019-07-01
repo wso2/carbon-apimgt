@@ -177,6 +177,8 @@ class Utils {
     }
 
     static getSwaggerURL() {
+        // eslint-disable-next-line no-debugger
+        // debugger;
         return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }
 

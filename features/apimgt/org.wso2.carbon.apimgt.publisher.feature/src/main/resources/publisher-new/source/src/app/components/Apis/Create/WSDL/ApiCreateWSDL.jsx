@@ -10,7 +10,7 @@ import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
-import APIInputForm from 'AppComponents/Apis/Create/Endpoint/APIInputForm';
+import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
 import Progress from 'AppComponents/Shared/Progress';
 
 import ProvideWSDL from './Steps/ProvideWSDL';

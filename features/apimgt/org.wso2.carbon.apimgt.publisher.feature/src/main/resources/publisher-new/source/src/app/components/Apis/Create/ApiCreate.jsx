@@ -22,7 +22,7 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { PageNotFound } from 'AppComponents/Base/Errors/index';
 
-import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint';
+import ApiCreateEndpoint from './Default/APICreateDefault';
 import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 import APICreateTopMenu from './Components/APICreateTopMenu';

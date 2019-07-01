@@ -160,6 +160,7 @@ class ApiCreateSwagger extends React.Component {
      * @memberof ApiCreateSwagger
      */
     swaggerUrlChange(event) {
+        // TODO: In below line, setting state attributes directly is invalid need to use setState ~tmkb
         this.state.swaggerUrl = event.target.value;
         this.setState(({ valid, swaggerUrl }) => {
             const validUpdated = valid;
@@ -176,22 +177,20 @@ class ApiCreateSwagger extends React.Component {
      */
     handleSubmit = (e) => {
         e.preventDefault();
-        if (
-            (this.state.uploadMethod === 'file' && this.state.files.length === 0) ||
-            (this.state.uploadMethod === 'url' && !this.state.swaggerUrl)
-        ) {
-            this.setState(({ valid, files, swaggerUrl }) => {
+        const { uploadMethod, files, swaggerUrl } = this.state;
+        if ((uploadMethod === 'file' && files.length === 0) || (uploadMethod === 'url' && !swaggerUrl)) {
+            this.setState(({ valid, files: currentFiles, swaggerUrl: currentSwaggerUrl }) => {
                 const validUpdated = valid;
-                validUpdated.swaggerFile.empty = files.length === 0;
-                validUpdated.swaggerUrl.empty = !swaggerUrl;
+                validUpdated.swaggerFile.empty = currentFiles.length === 0;
+                validUpdated.swaggerUrl.empty = !currentSwaggerUrl;
                 return { valid: validUpdated };
             });
             return;
         }
         this.setState({ loading: true });
-        const inputType = this.state.uploadMethod;
+        const inputType = uploadMethod;
         if (inputType === 'url') {
-            const url = this.state.swaggerUrl;
+            const url = swaggerUrl;
             const data = { url, type: 'swagger-url' };
             const newApi = new API();
             newApi
@@ -209,12 +208,12 @@ class ApiCreateSwagger extends React.Component {
                     console.log(errorResponse);
                 });
         } else if (inputType === 'file') {
-            if (this.state.files.length === 0) {
+            if (files.length === 0) {
                 Alert.error('Select a OpenAPI file to upload.');
                 console.log('Select a OpenAPI file to upload.');
                 return;
             }
-            const swagger = this.state.files[0];
+            const swagger = files[0];
             const newApi = new API();
             newApi
                 .create(swagger)
@@ -258,7 +257,7 @@ class ApiCreateSwagger extends React.Component {
                 <Grid item xs={12} md={6}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            {this.state.uploadMethod === 'file' ? (
+                            {uploadMethod === 'file' ? (
                                 <span>
                                     <FormattedMessage id='swagger.file.upload' defaultMessage='OpenAPI file upload' />
                                 </span>
@@ -271,8 +270,10 @@ class ApiCreateSwagger extends React.Component {
                         <Typography type='caption' gutterBottom align='left'>
                             <FormattedMessage
                                 id='fill.the.mandatory.fields'
-                                defaultMessage={'Fill the mandatory fields (Name, Version, Context)' +
-                                ' and create the API. Configure advanced configurations later.'}
+                                defaultMessage={
+                                    'Fill the mandatory fields (Name, Version, Context)' +
+                                    ' and create the API. Configure advanced configurations later.'
+                                }
                             />
                         </Typography>
                     </div>
@@ -324,8 +325,10 @@ class ApiCreateSwagger extends React.Component {
                                     <div>
                                         <FormattedMessage
                                             id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
-                                            defaultMessage={'Try dropping some files ' +
-                                            'here, or click to select files to upload.'}
+                                            defaultMessage={
+                                                'Try dropping some files ' +
+                                                'here, or click to select files to upload.'
+                                            }
                                         />
                                     </div>
                                 </Dropzone>
@@ -356,8 +359,10 @@ class ApiCreateSwagger extends React.Component {
                                         ) : (
                                             <FormattedMessage
                                                 id='create.new.swagger.help'
-                                                defaultMessage={'Give a swagger definition such' +
-                                                ' as http://petstore.swagger.io/v2/swagger.json'}
+                                                defaultMessage={
+                                                    'Give a swagger definition such' +
+                                                    ' as http://petstore.swagger.io/v2/swagger.json'
+                                                }
                                             />
                                         )
                                     }

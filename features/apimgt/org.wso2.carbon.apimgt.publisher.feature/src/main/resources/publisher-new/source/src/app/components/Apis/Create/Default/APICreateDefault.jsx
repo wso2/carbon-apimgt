@@ -27,7 +27,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
 import { FormattedMessage } from 'react-intl';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
-import APIInputForm from 'AppComponents/Apis/Create/Endpoint/APIInputForm';
+import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
 
 const styles = theme => ({
     root: {
