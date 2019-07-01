@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -53,6 +53,10 @@ import java.util.Set;
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     private static final Log log = LogFactory.getLog(DefaultKeyValidationHandler.class);
+    private static final String GRAPHQL_QUERY = "QUERY";
+    private static final String GRAPHQL_MUTATION = "MUTATION";
+    private static final String GRAPHQL_SUBSCRIPTION = "SUBSCRIPTION";
+
 
     public DefaultKeyValidationHandler(){
         log.info(this.getClass().getName() + " Initialised");
@@ -191,8 +195,39 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 + ":" +
                 validationContext.getHttpVerb();
 
-        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = new HashSet<>(OAuthServerConfiguration.getInstance()
-                .getOAuth2ScopeValidators());
+        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = new HashSet<> (OAuthServerConfiguration.getInstance().
+                getOAuth2ScopeValidators());
+
+        boolean isOperationValid = true;
+
+        if((validationContext.getHttpVerb().equals(GRAPHQL_QUERY))|| (validationContext.getHttpVerb().equals(GRAPHQL_MUTATION))
+                || (validationContext.getHttpVerb().equals(GRAPHQL_SUBSCRIPTION))){
+            String operationList = validationContext.getMatchingResource();
+            List<String> operationResourceArray = new ArrayList<String>(Arrays.asList(operationList.split(",")));
+
+            for (String operationResource : operationResourceArray){
+                for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
+                    try {
+                        resource = validationContext.getContext() + "/" + actualVersion + "/" + operationResource + ":" +
+                                validationContext.getHttpVerb();
+                        isOperationValid = validator.validateScope(accessTokenDO, resource);
+                        if (!isOperationValid) {
+                            log.debug(String.format("Scope validation failed for %s", validator.getValidatorName()));
+                            apiKeyValidationInfoDTO.setAuthorized(false);
+                            apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+                            return false;
+                        }
+                    } catch(IdentityOAuth2Exception e) {
+                        log.error("ERROR while validating token scope " + e.getMessage(), e);
+                        apiKeyValidationInfoDTO.setAuthorized(false);
+                        apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         //validate scope for filtered validators from db
         String[] scopeValidators;
         OAuthAppDO appInfo;
