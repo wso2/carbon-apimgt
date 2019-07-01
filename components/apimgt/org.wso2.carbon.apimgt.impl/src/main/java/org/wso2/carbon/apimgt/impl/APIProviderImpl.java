@@ -4891,7 +4891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getAPIPolicy(username, apiPolicy.getPolicyName());
+                Policy existingPolicy = apiMgtDAO.getAPIPolicy(apiPolicy.getPolicyName(), tenantId);
                 if (existingPolicy != null) {
                     handleException("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists");
                 }
@@ -4906,7 +4906,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getApplicationPolicy(username, appPolicy.getPolicyName());
+                Policy existingPolicy = apiMgtDAO.getApplicationPolicy(appPolicy.getPolicyName(), tenantId);
                 if (existingPolicy != null) {
                     handleException("Application Policy with name " + appPolicy.getPolicyName() + " already exists");
                 }
@@ -4918,7 +4918,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 //Check if there's a policy exists before adding the new policy
-                Policy existingPolicy = getSubscriptionPolicy(username, subPolicy.getPolicyName());
+                Policy existingPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
                 if (existingPolicy != null) {
                     handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
                 }
