@@ -1172,6 +1172,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
         try {
             APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            String response = apiDefinitionFromOpenAPISpec.validateAPIDefinition(apiDefinition);
+            if (response != null) {
+                RestApiUtil.handleBadRequest(response, log);
+            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
