@@ -117,6 +117,9 @@ paths:
         This operation provides you a list of available APIs qualifying under a given search condition.
 
         Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       x-examples:
         $ref: docs/examples/apis/apis.yaml#/get
       parameters:
@@ -196,6 +199,9 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK
                         Connection: keep-alive
                         Content-Length: 0"
+      security:
+        - OAuth2Security:
+            - apim:api_view
       summary: |
         Check given API attibute name is already exist
       description: |
@@ -267,6 +273,8 @@ paths:
         This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.
 
         There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `"provider" : "some_other_user"` in the payload so that the API's creator will be shown as `some_other_user` in the UI.
+      x-examples:
+        $ref: docs/examples/apis/apis.yaml#/post
       parameters:
         - in: body
           name: body
@@ -334,6 +342,9 @@ paths:
         - $ref: '#/parameters/If-None-Match'
       x-examples:
         $ref: docs/examples/apis/apis_id_get.yaml
+      security:
+        - OAuth2Security:
+            - apim:api_view
       tags:
         - API (Individual)
       responses:
@@ -511,6 +522,9 @@ paths:
       summary: Get swagger definition
       description: |
         This operation can be used to retrieve the swagger definition of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
@@ -655,6 +669,9 @@ paths:
       summary: Get the resource policy (inflow/outflow) definitions
       description: |
         This operation can be used to retrieve conversion policy resource definitions of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
       - $ref: '#/parameters/apiId'
       - in: query
@@ -730,6 +747,9 @@ paths:
       summary: Get the resource policy (inflow/outflow) definition for a given resource identifier.
       description: |
         This operation can be used to retrieve conversion policy resource definitions of an API given the resource identifier.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
       - $ref: '#/parameters/apiId'
       - $ref: '#/parameters/resourcePolicyId'
@@ -881,6 +901,9 @@ paths:
       summary: Get thumbnail image
       description: |
         This operation can be used to download a thumbnail image of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
@@ -1038,6 +1061,9 @@ paths:
 
     get:
       summary: Get all threat protection policies associated with an API
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
         - $ref: '#/parameters/apiId'
       tags:
@@ -1094,7 +1120,8 @@ paths:
 #-----------------------------------------------------
     get:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:api_view
       x-wso2-curl: "curl \"https://localhost:9443/api/am/publisher/v1.0//apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies\""
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1.0/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies
@@ -1644,7 +1671,9 @@ paths:
 # Configure monetization for a given API
 #---------------------------------------
     post:
-      x-scope: apim:api_publish
+      security:
+        - OAuth2Security:
+            - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize\""
       x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"properties\":{\r\n      \"vendor\":\"test\",\r\n      \"type\":\"postpaid\"\r\n   }\r\n}"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"properties\":{\r\n      \"vendor\":\"test\",\r\n      \"type\":\"postpaid\"\r\n   }\r\n}"
@@ -1694,7 +1723,9 @@ paths:
 # Get monetized policies for a given API
 #---------------------------------------
     get:
-      x-scope: apim:api_publish
+      security:
+        - OAuth2Security:
+            - apim:api_publish
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization\""
       x-wso2-request: "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"monetizedTiers\":{\r\n      \"tier1\":\"enabled\",\r\n      \"tier2\":\"disabled\"\r\n   }\r\n}"
@@ -3926,6 +3957,9 @@ paths:
       summary: Export information related to an API.
       description: |
         This operation can be used to export information related to a particular API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
         - name: query
           in: query
