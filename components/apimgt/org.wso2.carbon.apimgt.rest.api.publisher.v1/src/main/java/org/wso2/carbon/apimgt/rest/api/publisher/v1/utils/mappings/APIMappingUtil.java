@@ -102,7 +102,6 @@ import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isEndpointURLNonEmpty;
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.retrieveSavedEmailList;
 
 public class APIMappingUtil {
 
@@ -631,7 +630,7 @@ public class APIMappingUtil {
             dto.setType(APIDTO.TypeEnum.fromValue(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.toString().equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
             if (StringUtils.isEmpty(model.getTransports())) {
                 List<String> transports = new ArrayList<>();
                 transports.add(APIConstants.HTTPS_PROTOCOL);

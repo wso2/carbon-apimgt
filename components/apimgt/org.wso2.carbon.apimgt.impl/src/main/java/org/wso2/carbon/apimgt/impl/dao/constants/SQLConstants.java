@@ -424,6 +424,7 @@ public class SQLConstants {
             "   API.API_TIER," +
             "   API.API_PROVIDER," +
             "   NULL AS API_PRODUCT_NAME," +
+            "   NULL AS API_PRODUCT_TIER," +
             "   NULL AS API_PRODUCT_PROVIDER," +
             "   APS.RATE_LIMIT_COUNT," +
             "   APS.RATE_LIMIT_TIME_UNIT," +
@@ -447,48 +448,42 @@ public class SQLConstants {
             "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
             "   AND APS.NAME = SUB.TIER_ID" +
             " UNION " +
-            " SELECT DISTINCT " +
-            "   SUB.TIER_ID," +
-            "   SUBR.USER_ID," +
-            "   SUB.SUB_STATUS," +
-            "   APP.APPLICATION_ID," +
-            "   APP.NAME," +
-            "   APP.APPLICATION_TIER," +
-            "   APP.TOKEN_TYPE," +
-            "   AKM.KEY_TYPE," +
-            "   API.API_NAME," +
-            "   API.API_TIER," + //need to know backend api limit
-            "   API.API_PROVIDER," +
-            "   APIPRO.API_PRODUCT_NAME," +
-            "   APIPRO.API_PRODUCT_PROVIDER," +
-            "   APS.RATE_LIMIT_COUNT," +
-            "   APS.RATE_LIMIT_TIME_UNIT," +
-            "   APS.STOP_ON_QUOTA_REACH," +
-            "   API.API_ID" +
-            " FROM " +
-            "   AM_API AS API," +
-            "   AM_API_URL_MAPPING AS AUM," +
-            "   AM_API_PRODUCT_MAPPING AS APM," +
-            "   AM_SUBSCRIPTION AS SUB," +
-            "   AM_APPLICATION AS APP," +
-            "   AM_SUBSCRIBER AS SUBR," +
-            "   AM_APPLICATION_KEY_MAPPING AS AKM," +
-            "   AM_API_PRODUCT AS APIPRO, " +
-            "   AM_POLICY_SUBSCRIPTION APS" +
-            " WHERE " +
-            "   API.API_ID=AUM.API_ID" +
-            "   AND AUM.URL_MAPPING_ID=APM.URL_MAPPING_ID" +
-            "   AND SUB.API_PRODUCT_ID=APM.API_PRODUCT_ID" +
-            "   AND APM.API_PRODUCT_ID=APIPRO.API_PRODUCT_ID" +
-            "   AND APP.APPLICATION_ID=SUB.APPLICATION_ID" +
-            "   AND SUBR.SUBSCRIBER_ID=APP.SUBSCRIBER_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-            "   AND APS.NAME = SUB.TIER_ID" +
-            "   AND API.CONTEXT = ? " +
-            "   AND AKM.CONSUMER_KEY = ? " +
-            "   AND APS.TENANT_ID = ? " +
-            "   AND API.API_VERSION = ? " +
-            " ORDER BY API_PRODUCT_NAME ASC";
+            "SELECT DISTINCT " +
+            "SUB.TIER_ID, " +
+            "SUBR.USER_ID, " +
+            "SUB.SUB_STATUS, " +
+            "APP.APPLICATION_ID, " +
+            "APP.NAME, " +
+            "APP.APPLICATION_TIER, " +
+            "APP.TOKEN_TYPE, " +
+            "AKM.KEY_TYPE, " +
+            "NULL AS API_NAME, " +
+            "NULL AS API_TIER, " +
+            "NULL AS API_PROVIDER, " +
+            "APIPRO.API_PRODUCT_NAME, " +
+            "APIPRO.API_PRODUCT_TIER, " +
+            "APIPRO.API_PRODUCT_PROVIDER, " +
+            "APS.RATE_LIMIT_COUNT, " +
+            "APS.RATE_LIMIT_TIME_UNIT, " +
+            "APS.STOP_ON_QUOTA_REACH, " +
+            "APIPRO.API_PRODUCT_ID AS API_ID " +
+            "FROM " +
+            "AM_API_PRODUCT AS APIPRO, " +
+            "AM_APPLICATION AS APP, " +
+            "AM_SUBSCRIPTION AS SUB, " +
+            "AM_SUBSCRIBER AS SUBR, " +
+            "AM_APPLICATION_KEY_MAPPING AS AKM, " +
+            "AM_POLICY_SUBSCRIPTION AS APS " +
+            "WHERE " +
+            "APIPRO.API_PRODUCT_CONTEXT = ? " +
+            "AND APIPRO.API_PRODUCT_VERSION = ? " +
+            "AND SUB.API_PRODUCT_ID = APIPRO.API_PRODUCT_ID " +
+            "AND APP.APPLICATION_ID = SUB.APPLICATION_ID " +
+            "AND SUBR.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+            "AND AKM.APPLICATION_ID = APP.APPLICATION_ID " +
+            "AND APS.NAME = SUB.TIER_ID " +
+            "AND APS.TENANT_ID = ? " +
+            "ORDER BY API_PRODUCT_NAME ASC";
 
 
     public static final String UPDATE_TOKEN_PREFIX = "UPDATE ";
@@ -3266,6 +3261,16 @@ public class SQLConstants {
 				+ " where API.CONTEXT= ? AND API.API_VERSION = ? AND pol.TENANT_ID = ?"
 				/*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
 				+ " ORDER BY AUM.URL_MAPPING_ID";
+
+        public static final String GET_CONDITION_GROUPS_FOR_POLICIES_IN_PRODUCTS_SQL = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, AUM.URL_PATTERN, AUM.THROTTLING_TIER, " +
+                "AUM.MEDIATION_SCRIPT, AUM.URL_MAPPING_ID, POL.APPLICABLE_LEVEL, GRP.CONDITION_GROUP_ID " +
+                "FROM AM_API_URL_MAPPING AUM, AM_API_PRODUCT_MAPPING APM, AM_API_PRODUCT API, AM_API_THROTTLE_POLICY POL " +
+                "LEFT OUTER JOIN AM_CONDITION_GROUP GRP ON POL.POLICY_ID  = GRP.POLICY_ID " +
+                "WHERE APM.API_PRODUCT_ID = API.API_PRODUCT_ID " +
+                "AND API.API_PRODUCT_CONTEXT = ? AND API. API_PRODUCT_VERSION = ? AND POL.TENANT_ID = ? " +
+                "AND APM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.THROTTLING_TIER = POL.NAME " +
+                "ORDER BY AUM.URL_MAPPING_ID";
+
         public static final String ADD_BLOCK_CONDITIONS_SQL =
                 "INSERT INTO AM_BLOCK_CONDITIONS (TYPE, VALUE,ENABLED,DOMAIN,UUID) VALUES (?,?,?,?,?)";
         public static final String GET_BLOCK_CONDITIONS_SQL =

@@ -594,7 +594,15 @@ public class APIKeyValidator {
                 apiInfoDTOSpan =
                         Util.startSpan(APIMgtGatewayConstants.DO_GET_API_INFO_DTO, keySpan, Util.getGlobalTracer());
             }
-            apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
+
+            String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
+
+            if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType)) {
+                apiInfoDTO = doGetAPIProductInfo(apiContext, apiVersion);
+            } else {
+                apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
+            }
+
             if (Util.tracingEnabled()) {
                 Util.finishSpan(apiInfoDTOSpan);
             }
@@ -662,9 +670,20 @@ public class APIKeyValidator {
 
     @MethodStats
     private APIInfoDTO doGetAPIInfo(String context, String apiVersion) throws APISecurityException {
-        APIInfoDTO apiInfoDTO = new APIInfoDTO();
-
         ArrayList<URITemplate> uriTemplates = getAllURITemplates(context, apiVersion);
+
+        return mapToAPIInfo(uriTemplates, context, apiVersion);
+    }
+
+    @MethodStats
+    private APIInfoDTO doGetAPIProductInfo(String context, String apiVersion) throws APISecurityException {
+        ArrayList<URITemplate> uriTemplates = getAPIProductURITemplates(context, apiVersion);
+
+        return mapToAPIInfo(uriTemplates, context, apiVersion);
+    }
+
+    private APIInfoDTO mapToAPIInfo(ArrayList<URITemplate> uriTemplates, String context, String apiVersion) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
 
         apiInfoDTO.setApiName(context);
         apiInfoDTO.setContext(context);
@@ -699,7 +718,6 @@ public class APIKeyValidator {
 
         return apiInfoDTO;
     }
-
 
     /**
      * @param context     API context of API
@@ -818,6 +836,12 @@ public class APIKeyValidator {
     protected ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
             throws APISecurityException {
         return dataStore.getAllURITemplates(context, apiVersion);
+    }
+
+    @MethodStats
+    protected ArrayList<URITemplate> getAPIProductURITemplates(String context, String apiVersion)
+            throws APISecurityException {
+        return dataStore.getAPIProductURITemplates(context, apiVersion);
     }
 
     protected void setGatewayAPIResourceValidationEnabled(boolean gatewayAPIResourceValidationEnabled) {
