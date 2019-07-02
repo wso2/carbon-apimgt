@@ -32,6 +32,9 @@ public class APISubscriptionInfoDTO implements Serializable {
     private String apiName;
     private String version;
     private String context;
+    private int spikeArrestLimit;
+    private String spikeArrestUnit;
+    private boolean stopOnQuotaReach;
 
     private String subscriptionTier;
 
@@ -83,6 +86,30 @@ public class APISubscriptionInfoDTO implements Serializable {
 
     public void setSubscriptionTier(String subscriptionTier) {
         this.subscriptionTier = subscriptionTier;
+    }
+
+    public int getSpikeArrestLimit() {
+        return spikeArrestLimit;
+    }
+
+    public void setSpikeArrestLimit(int spikeArrestLimit) {
+        this.spikeArrestLimit = spikeArrestLimit;
+    }
+
+    public String getSpikeArrestUnit() {
+        return spikeArrestUnit;
+    }
+
+    public void setSpikeArrestUnit(String spikeArrestUnit) {
+        this.spikeArrestUnit = spikeArrestUnit;
+    }
+
+    public boolean isStopOnQuotaReach() {
+        return stopOnQuotaReach;
+    }
+
+    public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
+        this.stopOnQuotaReach = stopOnQuotaReach;
     }
 
     /**

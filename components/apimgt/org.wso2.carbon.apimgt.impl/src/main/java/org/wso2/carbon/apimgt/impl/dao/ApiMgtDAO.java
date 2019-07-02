@@ -12666,6 +12666,7 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, tenantId);
             ps.setString(2, applicationName);
+            ps.setInt(3, tenantId);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();
@@ -12674,6 +12675,9 @@ public class ApiMgtDAO {
                 infoDTO.setContext(rs.getString("API_CONTEXT"));
                 infoDTO.setVersion(rs.getString("API_VERSION"));
                 infoDTO.setSubscriptionTier(rs.getString("SP_TIER_ID"));
+                infoDTO.setSpikeArrestLimit(rs.getInt("SPIKE_ARREST_LIMIT"));
+                infoDTO.setSpikeArrestUnit(rs.getString("SPIKE_ARREST_UNIT"));
+                infoDTO.setStopOnQuotaReach(rs.getBoolean("STOP_ON_QUOTA_REACH"));
                 apiSubscriptionInfoDTOS.add(infoDTO);
             }
         } catch (SQLException e) {

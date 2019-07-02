@@ -31,6 +31,9 @@ public class SubscribedApiDTO implements Serializable {
 
     private String subscriptionTier;
     private String subscriberTenantDomain;
+    private int spikeArrestLimit;
+    private String spikeArrestUnit;
+    private boolean stopOnQuotaReach;
 
     public String getName() {
         return name;
@@ -78,5 +81,29 @@ public class SubscribedApiDTO implements Serializable {
 
     public void setSubscriberTenantDomain(String subscriberTenantDomain) {
         this.subscriberTenantDomain = subscriberTenantDomain;
+    }
+
+    public int getSpikeArrestLimit() {
+        return spikeArrestLimit;
+    }
+
+    public void setSpikeArrestLimit(int spikeArrestLimit) {
+        this.spikeArrestLimit = spikeArrestLimit;
+    }
+
+    public String getSpikeArrestUnit() {
+        return spikeArrestUnit;
+    }
+
+    public void setSpikeArrestUnit(String spikeArrestUnit) {
+        this.spikeArrestUnit = spikeArrestUnit;
+    }
+
+    public boolean isStopOnQuotaReach() {
+        return stopOnQuotaReach;
+    }
+
+    public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
+        this.stopOnQuotaReach = stopOnQuotaReach;
     }
 }
