@@ -25,6 +25,7 @@ describe(
     'Publisher application user authentication tests',
     () => {
         let page;
+        const publisherURL = 'https://localhost:9443/publisher-new';
         beforeAll(async () => {
             page = await global.__BROWSER__.newPage();
         }, timeout);
@@ -39,7 +40,7 @@ describe(
         });
 
         test('should able to login without error', async () => {
-            await page.goto('https://localhost:9443/publisher-new');
+            await page.goto(publisherURL);
             await page.type('input[name="username"]', 'admin');
             await page.type('input[name="password"]', 'admin');
             await Promise.all([page.$eval('#loginForm', form => form.submit()), page.waitForNavigation()]);
@@ -61,7 +62,7 @@ describe(
         });
 
         test('should not able to login with an invalid username', async () => {
-            await page.goto('https://localhost:9443/publisher-new');
+            await page.goto(publisherURL);
             await page.type('input[name="username"]', 'chuckNorris');
             await page.type('input[name="password"]', 'chuckNorris');
 
@@ -74,9 +75,9 @@ describe(
         });
 
         test('should return to original location after login', async () => {
-            const pathName = '/publisher-new/apis/create/rest';
+            const pathName = '/apis/create/rest';
 
-            await page.goto('https://localhost:9443' + pathName);
+            await page.goto(publisherURL + pathName);
             await page.type('input[name="username"]', 'admin');
             await page.type('input[name="password"]', 'admin');
             await Promise.all([page.$eval('#loginForm', form => form.submit()), page.waitForNavigation()]);
@@ -89,7 +90,7 @@ describe(
         });
 
         test('should be able to logout without an error', async () => {
-            await page.goto('https://localhost:9443/publisher-new');
+            await page.goto(publisherURL);
             await page.type('input[name="username"]', 'admin');
             await page.type('input[name="password"]', 'admin');
             await Promise.all([page.$eval('#loginForm', form => form.submit()), page.waitForNavigation()]);
