@@ -87,6 +87,10 @@
       {
         "Name": "apim:sub_manage",
         "Roles": "admin"
+      },
+      {
+        "Name" : "apim:monetization_usage_publish",
+        "Roles": "admin"
       }
     ]
   },

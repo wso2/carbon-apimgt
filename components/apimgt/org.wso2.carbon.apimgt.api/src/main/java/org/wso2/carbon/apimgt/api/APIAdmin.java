@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 
 import java.util.List;
 
@@ -89,4 +91,43 @@ public interface APIAdmin  {
 
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication)
             throws APIManagementException;
+
+    /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    Monetization getMonetizationImplClass() throws APIManagementException;
+
+    /**
+     * Get the info about the monetization usage publish job
+     *
+     * @throws APIManagementException if failed to get monetization usage publish info
+     */
+    MonetizationUsagePublishInfo getMonetizationUsagePublishInfo() throws APIManagementException;
+
+    /**
+     * Add the info about the monetization usage publish job
+     *
+     * @throws APIManagementException if failed to update monetization usage publish info
+     */
+    void addMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+            throws APIManagementException;
+
+    /**
+     * Update the info about the monetization usage publish job
+     *
+     * @throws APIManagementException if failed to update monetization usage publish info
+     */
+    void updateMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+            throws APIManagementException;
+
+    /**
+     * The method converts the date into timestamp
+     *
+     * @param date
+     * @return Timestamp in long format
+     */
+    long getTimestamp(String date);
 }
