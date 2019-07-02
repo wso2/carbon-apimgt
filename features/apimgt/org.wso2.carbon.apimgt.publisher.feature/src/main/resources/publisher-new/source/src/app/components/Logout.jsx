@@ -16,8 +16,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Component } from 'react';
 import qs from 'qs';
 import Alert from 'AppComponents/Shared/Alert';
 import PropTypes from 'prop-types';
@@ -76,6 +75,7 @@ class Logout extends Component {
         if (logoutSuccess) {
             window.location = '/publisher-new/services/auth/login';
         }
+        return logoutSuccess;
     }
 }
 

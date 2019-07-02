@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import qs from 'qs';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import { PageNotFound } from 'AppComponents/Base/Errors';
 import Apis from 'AppComponents/Apis/Apis';
@@ -100,6 +99,7 @@ export default class Protected extends Component {
                     <Base header={header}>
                         <Switch>
                             <Redirect exact from='/' to='/apis' />
+                            <Redirect exact from='/login' to='/apis' />
                             <Route path='/apis' component={Apis} />
                             <Route component={PageNotFound} />
                         </Switch>

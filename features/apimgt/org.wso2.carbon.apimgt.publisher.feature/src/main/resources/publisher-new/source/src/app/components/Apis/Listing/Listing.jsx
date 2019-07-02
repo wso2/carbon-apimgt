@@ -17,7 +17,6 @@
  */
 
 import React from 'react';
-import qs from 'qs';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api.js';
