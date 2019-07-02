@@ -73,7 +73,6 @@ describe(
             expect(authFailure).toEqual('true');
         });
 
-
         test('should return to original location after login', async () => {
             const pathName = '/publisher-new/apis/create/rest';
 
@@ -87,6 +86,22 @@ describe(
             await Promise.all([page.click('#approve'), page.waitForNavigation({ waitUntil: 'load' })]);
             const currentPageURL = await page.url();
             expect(currentPageURL).toContain(pathName);
+        });
+
+        test('should be able to logout without an error', async () => {
+            await page.goto('https://localhost:9443/publisher-new');
+            await page.type('input[name="username"]', 'admin');
+            await page.type('input[name="password"]', 'admin');
+            await Promise.all([page.$eval('#loginForm', form => form.submit()), page.waitForNavigation()]);
+            await page.click('input#approveCb[type="radio"]');
+            const consentSelector = await page.$('input#consent_select_all[type="checkbox"]');
+            if (consentSelector) await page.click('input#consent_select_all[type="checkbox"]');
+            await Promise.all([page.click('#approve'), page.waitForNavigation({ waitUntil: 'load' })]);
+            await page.click('#profile-menu-btn');
+            await page.click('#logout');
+            await Promise.all([page.click('#approve'), page.waitForNavigation({ waitUntil: 'load' })]);
+            const currentPageURL = await page.url();
+            expect(currentPageURL).toContain('/authenticationendpoint/login');
         });
     },
     timeout,
