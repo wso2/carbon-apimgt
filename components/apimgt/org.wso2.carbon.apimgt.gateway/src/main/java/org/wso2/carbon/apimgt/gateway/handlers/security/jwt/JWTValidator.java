@@ -85,6 +85,7 @@ public class JWTValidator {
             JSONObject api = null;
 
             if (payload.get("subscribedAPIs") != null) {
+                // Subscription validation
                 JSONArray subscribedAPIs = (JSONArray) payload.get("subscribedAPIs");
                 for (int i = 0; i < subscribedAPIs.length(); i++) {
                     JSONObject subscribedAPIsJSONObject = subscribedAPIs.getJSONObject(i);
@@ -93,6 +94,10 @@ public class JWTValidator {
                         api = subscribedAPIsJSONObject;
                         break;
                     }
+                }
+                if (api == null) {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                            "User is not subscribed to access the API: " + apiContext + ", version: " + apiVersion);
                 }
             }
 
