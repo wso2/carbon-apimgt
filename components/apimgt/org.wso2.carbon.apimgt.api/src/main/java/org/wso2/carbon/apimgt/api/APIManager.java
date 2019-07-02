@@ -755,4 +755,12 @@ public interface APIManager {
      * @throws APIManagementException if failed to get Documentation
      */
     Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
+    
+    /**
+     * Get open api definition for the product
+     * @param APIProduct product
+     * @return openapidoc 
+     * @throws APIManagementException
+     */
+    String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
 }

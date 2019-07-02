@@ -1604,6 +1604,19 @@ public final class APIUtil {
     public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
     }
+    
+    /**
+     * Utility method to get OpenAPI registry path for API product
+     * @param identifier product identifier
+     * @return path path to the 
+     */
+    public static String getAPIProductOpenAPIDefinitionFilePath(APIProductIdentifier identifier) {
+        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR
+                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + RegistryConstants.PATH_SEPARATOR
+                + identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion()
+                + RegistryConstants.PATH_SEPARATOR;
+    }
 
     /**
      * Utility method to get api path from APIIdentifier
