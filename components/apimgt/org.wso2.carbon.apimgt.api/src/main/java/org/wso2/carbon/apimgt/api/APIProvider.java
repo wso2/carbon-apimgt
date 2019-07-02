@@ -1156,25 +1156,19 @@ public interface APIProvider extends APIManager {
     /**
      * Update openapi definition to the product
      * @param apiDefinition definition to add to the product
-     * @param uuid uuid of the product
+     * @param product product
      * @throws APIManagementException
      */
-    void updateAPIDefinitionToAPIProduct(String apiDefinition, String uuid) throws APIManagementException;
+    void updateAPIDefinitionOfAPIProduct(String apiDefinition, APIProduct product) throws APIManagementException;
     
     /**
-     * Remove openapi definition to the product
-     * @param uuid uuid of the product
+     * Remove openapi definition of the product
+     * @param APIProduct product
      * @throws APIManagementException
      */
-    void removeAPIDefinitionToAPIProduct(String uuid) throws APIManagementException;
+    void removeAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
 
-    /**
-     * Get open api definition for the product
-     * @param uuid uuid
-     * @return APIProduct 
-     * @throws APIManagementException
-     */
-    APIProduct getAPIDefinitionOfAPIProduct(String uuid) throws APIManagementException;
+
 
     List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
 

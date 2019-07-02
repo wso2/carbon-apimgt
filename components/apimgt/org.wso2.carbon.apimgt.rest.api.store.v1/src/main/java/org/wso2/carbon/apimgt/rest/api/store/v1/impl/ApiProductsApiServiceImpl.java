@@ -115,9 +115,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if(!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            String apiSwagger = "";
-            if (!StringUtils.isEmpty(product.getDefinition())) {
-                apiSwagger = product.getDefinition();
+            String apiSwagger = apiConsumer.getAPIDefinitionOfAPIProduct(product);
+            
+            if (StringUtils.isEmpty(apiSwagger)) {
+                apiSwagger = "";
             }
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {

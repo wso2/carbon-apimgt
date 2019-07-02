@@ -187,6 +187,7 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.replaceEmailDomain;
 
@@ -6634,22 +6635,50 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateAPIDefinitionToAPIProduct(String apiDefinition, String uuid) throws APIManagementException {
-        apiMgtDAO.updateStringDataToProductTable(uuid, APIConstants.COLUMN_PRODUCT_DEFINITION, apiDefinition);
-        
+    public void updateAPIDefinitionOfAPIProduct(String definition, APIProduct product)
+            throws APIManagementException {
+        try {
+            String resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
+            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+            resource.setContent(definition);
+            resource.setMediaType("application/json");
+            registry.put(resourcePath, resource);
+
+            String[] visibleRoles = null;
+            if (product.getVisibleRoles() != null) {
+                visibleRoles = product.getVisibleRoles().split(",");
+            }
+
+            // Need to set anonymous if the visibility is public
+            APIUtil.clearResourcePermissions(resourcePath, product.getId(), ((UserRegistry) registry).getTenantId());
+            APIUtil.setResourcePermissions(product.getId().getProviderName(), product.getVisibility(), visibleRoles,
+                    resourcePath);
+
+        } catch (RegistryException e) {
+            handleException("Error while adding Swagger Definition for " + product.getId().getName() + '-'
+                    + product.getId().getProviderName(), e);
+        }
+
     }
 
     @Override
-    public void removeAPIDefinitionToAPIProduct(String uuid) throws APIManagementException {
-        apiMgtDAO.removeStringDataFromProductTable(uuid, APIConstants.COLUMN_PRODUCT_DEFINITION);   
+    public void removeAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException {
+        String apiDefinitionFilePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
+        try {
+            if (registry.resourceExists(apiDefinitionFilePath)) {
+                registry.delete(apiDefinitionFilePath);
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to remove the Definition from : " + apiDefinitionFilePath, e);
+        }
     }
  
-    @Override
-    public APIProduct getAPIDefinitionOfAPIProduct(String uuid) throws APIManagementException {
-        return apiMgtDAO.getProductDefinition(uuid);
-        
-    }
-
     @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);

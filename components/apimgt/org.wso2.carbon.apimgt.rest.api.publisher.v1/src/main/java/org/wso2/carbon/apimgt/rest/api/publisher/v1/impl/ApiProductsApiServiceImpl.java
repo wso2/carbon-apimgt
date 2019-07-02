@@ -509,12 +509,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            APIProduct productWithSwagger = apiProvider.getAPIDefinitionOfAPIProduct(apiProductId);
-            //Implement visibility related tasks using the retrieved product if needed
-
-            String apiSwagger = "";
-            if (!StringUtils.isEmpty(productWithSwagger.getDefinition())) {
-                apiSwagger = productWithSwagger.getDefinition();
+            String apiSwagger = apiProvider.getAPIDefinitionOfAPIProduct(retrievedProduct);
+            
+            if (StringUtils.isEmpty(apiSwagger)) {
+                apiSwagger = "";
             }
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
@@ -534,13 +532,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            //Implement visibility related tasks using the retrieved product if needed
-            apiProvider.updateAPIDefinitionToAPIProduct(apiDefinition, apiProductId);
-            APIProduct productWithSwagger = apiProvider.getAPIDefinitionOfAPIProduct(apiProductId);
 
-            String apiSwagger = "";
-            if (!StringUtils.isEmpty(productWithSwagger.getDefinition())) {
-                apiSwagger = productWithSwagger.getDefinition();
+            apiProvider.updateAPIDefinitionOfAPIProduct(apiDefinition, retrievedProduct);
+            String apiSwagger = apiProvider.getAPIDefinitionOfAPIProduct(retrievedProduct);
+
+            if (StringUtils.isEmpty(apiSwagger)) {
+                apiSwagger = "";
             }
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {

@@ -3360,5 +3360,34 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
     }
+    
+    @Override
+    public String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException {
+        String resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
+
+        JSONParser parser = new JSONParser();
+        String apiDocContent = null;
+        try {
+            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
+                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
+                apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                parser.parse(apiDocContent);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at " + resourcePath);
+                }
+            }
+        } catch (RegistryException e) {
+            handleException(
+                    "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + product.getId().getName() + '-'
+                            + product.getId().getProviderName(), e);
+        } catch (ParseException e) {
+            handleException(
+                    "Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + product.getId().getName() + '-'
+                    + product.getId().getProviderName() + " in " + resourcePath, e);
+        }
+        return apiDocContent;
+        
+    }
 
 }
