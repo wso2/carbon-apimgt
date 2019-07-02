@@ -134,6 +134,11 @@ public class JWTValidator {
                 // If the user is subscribed to the API
                 authContext.setTier(api.getString("subscriptionTier"));
                 authContext.setSubscriberTenantDomain(api.getString("subscriberTenantDomain"));
+                authContext.setSpikeArrestLimit(api.getInt("spikeArrestLimit"));
+                if (!JSONObject.NULL.equals(api.get("spikeArrestUnit"))) {
+                    authContext.setSpikeArrestUnit(api.getString("spikeArrestUnit"));
+                }
+                authContext.setStopOnQuotaReach(api.getBoolean("stopOnQuotaReach"));
             }
 
             return authContext;
