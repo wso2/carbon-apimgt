@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import AuthManager from 'AppData/AuthManager';
 import qs from 'qs';
@@ -25,7 +25,6 @@ import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
 import Progress from 'AppComponents/Shared/Progress';
 import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
-import InitLogin from 'AppComponents/Login/InitLogin';
 // Localization
 import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
 
@@ -167,7 +166,7 @@ class Publisher extends React.Component {
                 <PublisherRootErrorBoundary appName='Publisher Application'>
                     <Router basename='/publisher-new'>
                         <Switch>
-                            <Route path='/login' exact component={InitLogin} />
+                            <Redirect exact from='/login' to='/apis' />
                             <Route path='/logout' component={Logout} />
                             <Route
                                 render={() => {
