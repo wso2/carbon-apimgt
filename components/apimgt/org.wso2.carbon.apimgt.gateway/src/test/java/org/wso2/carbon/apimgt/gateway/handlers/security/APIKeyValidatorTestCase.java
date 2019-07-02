@@ -150,15 +150,16 @@ public class APIKeyValidatorTestCase {
                 thenReturn("true");
 
         try {
+            List<VerbInfoDTO> verbList = apiKeyValidator.findMatchingVerb(synCtx);
+            int length = verbList.toArray().length;
             //Test for ResourceNotFoundexception
-            assertNotNull(apiKeyValidator.findMatchingVerb(synCtx));
+            assertNotNull(verbList.get(0));
 //        todo    Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY)).thenReturn("url");
 
         } catch (ResourceNotFoundException e) {
             assert true;
         } catch (APISecurityException e) {
             fail("APISecurityException is thrown " + e);
-
         }
         APIKeyValidator apiKeyValidator1 = createAPIKeyValidator(false,
                 getDefaultURITemplates("/menu", "GET"), verbInfoDTO);
@@ -171,8 +172,10 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn((api));
 
         try {
+            List<VerbInfoDTO> verbInfoList = new ArrayList<>();
+            verbInfoList.add(verbInfoDTO);
             //Test for matching verb is found path
-            assertEquals("", verbInfoDTO, apiKeyValidator1.findMatchingVerb(synCtx));
+            assertEquals("", verbInfoList, apiKeyValidator1.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
             fail("ResourceNotFoundException exception is thrown " + e);
         } catch (APISecurityException e) {
@@ -281,7 +284,9 @@ public class APIKeyValidatorTestCase {
 
         try {
             //Test for matching verb is found path
-            assertEquals("", verbInfoDTO, apiKeyValidator1.findMatchingVerb(synCtx));
+            List<VerbInfoDTO> verbInfoList = new ArrayList<>();
+            verbInfoList.add(verbInfoDTO);
+            assertEquals("", verbInfoList, apiKeyValidator1.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
             fail("ResourceNotFoundException exception is thrown " + e);
         } catch (APISecurityException e) {
@@ -400,6 +405,8 @@ public class APIKeyValidatorTestCase {
                                                   final ArrayList<URITemplate> urlTemplates,
                                                   final VerbInfoDTO verbInfoDTO) {
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
+        List<VerbInfoDTO> verbInfoDTOList = new ArrayList<>();
+        verbInfoDTOList.add(verbInfoDTO);
         return new APIKeyValidator(axisConfig) {
             @Override
             protected String getKeyValidatorClientType() {
@@ -434,7 +441,7 @@ public class APIKeyValidatorTestCase {
                 } else {
                     Cache cache = Mockito.mock(Cache.class);
                     if (cacheName.equals("resourceCache")) {
-                        Mockito.when(cache.get("abc")).thenReturn(verbInfoDTO);
+                        Mockito.when(cache.get("abc")).thenReturn(verbInfoDTOList);
                     } else if (cacheName.equals("GATEWAY_TOKEN_CACHE")) {
                         Mockito.when(cache.get("abc")).thenReturn("token");
                     }
