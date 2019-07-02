@@ -552,7 +552,11 @@ class InfoBar extends React.Component {
      */
     getHttpsEP = (api) => {
         const epHybridUrl = api.endpointURLs.find(url => url.environmentType === 'hybrid');
-        return epHybridUrl.environmentURLs.https || epHybridUrl.environmentURLs.http;
+        if (epHybridUrl) {
+            return epHybridUrl.environmentURLs.https || epHybridUrl.environmentURLs.http;
+        } else {
+            return '';
+        }
     };
 
     /**

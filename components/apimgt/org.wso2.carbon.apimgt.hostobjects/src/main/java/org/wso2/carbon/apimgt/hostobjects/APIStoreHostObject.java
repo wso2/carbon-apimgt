@@ -1040,12 +1040,12 @@ public class APIStoreHostObject extends ScriptableObject {
 
             // The following condition is used to support API category in store
             if (null != state) {
-                if (state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
-                    statusList = new String[] { APIConstants.PUBLISHED, APIConstants.DEPRECATED };
-                } else if (state == APIConstants.PUBLISHED) {
-                    statusList = new String[] { APIConstants.PUBLISHED };
-                } else if (state == APIConstants.PROTOTYPED) {
-                    statusList = new String[] { APIConstants.PROTOTYPED };
+                if (APIConstants.PUBLISHED.equals(state) && displayAPIsWithMultipleStatus) {
+                    statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
+                } else if (APIConstants.PUBLISHED.equals(state)) {
+                    statusList = new String[]{APIConstants.PUBLISHED};
+                } else if (APIConstants.PROTOTYPED.equals(state)) {
+                    statusList = new String[]{APIConstants.PROTOTYPED};
                 }
             }
 
@@ -1759,12 +1759,12 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
         // The following condition is used to support API category in store
-        if(null != state){
-            if(state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
+        if (null != state) {
+            if (APIConstants.PUBLISHED.equals(state) && displayAPIsWithMultipleStatus) {
                 statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
-            }else if(state == APIConstants.PUBLISHED ){
+            } else if (APIConstants.PUBLISHED.equals(state)) {
                 statusList = new String[]{APIConstants.PUBLISHED};
-            }else if(state == APIConstants.PROTOTYPED){
+            } else if (APIConstants.PROTOTYPED.equals(state)) {
                 statusList = new String[]{APIConstants.PROTOTYPED};
             }
         }

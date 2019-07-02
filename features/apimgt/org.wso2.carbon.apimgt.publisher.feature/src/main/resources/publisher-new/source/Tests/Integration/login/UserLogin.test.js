@@ -22,7 +22,7 @@ jest.setTimeout(20000);
 const qs = require('qs');
 
 describe(
-    '/ (Home Page)',
+    'Publisher application user authentication tests',
     () => {
         let page;
         beforeAll(async () => {
@@ -60,7 +60,7 @@ describe(
             expectedCookies.forEach(expectedCookie => expect(availableCookies).toContain(expectedCookie));
         });
 
-        test('should not able to log with wrong username', async () => {
+        test('should not able to login with an invalid username', async () => {
             await page.type('input[name="username"]', 'chuckNorris');
             await page.type('input[name="password"]', 'chuckNorris');
 
@@ -71,6 +71,8 @@ describe(
             const { authFailure } = qs.parse(page.url().split('?')[1]);
             expect(authFailure).toEqual('true');
         });
+
+        test.todo('should return to original location after login');
     },
     timeout,
 );

@@ -37,32 +37,38 @@ const LoadableSwitch = Loadable.Map({
         ApiConsole: () => import(// eslint-disable-line function-paren-newline
         /* webpackChunkName: "ApiConsole" */
         /* webpackPrefetch: true */
-            './ApiConsole/ApiConsole',
+            // eslint-disable-next-line comma-dangle
+            './ApiConsole/ApiConsole'
         ),
         Overview: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Overview" */
             /* webpackPrefetch: true */
-            './Overview',
+            // eslint-disable-next-line comma-dangle
+            './Overview'
         ),
         Documentation: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Documentation" */
             /* webpackPrefetch: true */
-            './Documents/Documentation',
+            // eslint-disable-next-line comma-dangle
+            './Documents/Documentation'
         ),
         Credentials: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Credentials" */
             /* webpackPrefetch: true */
-            './Credentials/Credentials',
+            // eslint-disable-next-line comma-dangle
+            './Credentials/Credentials'
         ),
         Comments: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Comments" */
             /* webpackPrefetch: true */
-            './Comments/Comments',
+            // eslint-disable-next-line comma-dangle
+            './Comments/Comments'
         ),
         Sdk: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Sdk" */
             /* webpackPrefetch: true */
-            './Sdk',
+            // eslint-disable-next-line comma-dangle
+            './Sdk'
         ),
     },
     render(loaded, props) {
@@ -316,8 +322,7 @@ class Details extends React.Component {
                     {/* TODO: uncomment when the feature is working */}
                     {/* <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
                     <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    {/* TODO: uncomment when the feature is working */}
-                    {/* <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
+                    <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>

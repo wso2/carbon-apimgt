@@ -583,10 +583,21 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting the api base path out apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            //Getting specified mediation policy
+            Mediation mediation = apiProvider.getApiSpecificMediationPolicy(apiResourcePath,
+                    mediationPolicyId);
+            if (mediation != null) {
+                if (isAPIModified(api, mediation)) {
+                    apiProvider.updateAPI(api);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
+            }
             boolean deletionStatus = apiProvider.deleteApiSpecificMediationPolicy(apiResourcePath,
                     mediationPolicyId);
             if (deletionStatus) {
@@ -607,6 +618,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                         mediationPolicyId + "of API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -1815,6 +1829,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                                         String ifUnmodifiedSince) {
         try {
             APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            String response = apiDefinitionFromOpenAPISpec.validateAPIDefinition(apiDefinition);
+            if (response != null) {
+                RestApiUtil.handleBadRequest(response, log);
+            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
@@ -1882,5 +1900,42 @@ public class ApisApiServiceImpl extends ApisApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
+    }
+
+    /***
+     * To check if the API is modified or not when the given sequence is in API.
+     *
+     * @param api
+     * @param mediation
+     * @return if the API is modified or not
+     */
+    private boolean isAPIModified(API api, Mediation mediation) {
+        if (mediation != null) {
+            String sequenceName;
+            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(mediation.getType())) {
+                sequenceName = api.getInSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setInSequence(null);
+                    return true;
+                }
+            } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(mediation.getType())) {
+                sequenceName = api.getOutSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setOutSequence(null);
+                    return true;
+                }
+            } else {
+                sequenceName = api.getFaultSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setFaultSequence(null);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isSequenceExistsInAPI(String sequenceName, Mediation mediation) {
+        return StringUtils.isNotEmpty(sequenceName) && mediation.getName().equals(sequenceName);
     }
 }

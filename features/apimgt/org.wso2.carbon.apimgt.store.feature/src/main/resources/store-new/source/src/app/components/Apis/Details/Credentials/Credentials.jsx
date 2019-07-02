@@ -29,6 +29,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Grid from '@material-ui/core/Grid';
 import classNames from 'classnames';
+import Subscription from 'AppData/Subscription';
 import CustomIcon from '../../../Shared/CustomIcon';
 import TokenManager from '../../../Shared/AppsAndKeys/TokenManager';
 import SubscribeToApi from '../../../Shared/AppsAndKeys/SubscribeToApi';
@@ -36,8 +37,8 @@ import { ApiContext } from '../ApiContext';
 import Wizard from './Wizard';
 import InlineMessage from '../../../Shared/InlineMessage';
 import ExpressMode from './ExpressMode';
-import Subscription from '../../../../data/Subscription';
 import Alert from '../../../Shared/Alert';
+import { ScopeValidation, resourceMethods, resourcePaths } from '../../../Shared/ScopeValidation';
 
 /**
  *
@@ -80,6 +81,7 @@ const styles = theme => ({
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         fontSize: '11px',
         paddingLeft: theme.spacing.unit,
+        height: 35,
     },
     th: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -108,6 +110,7 @@ const styles = theme => ({
     },
     buttonElmText: {
         marginLeft: 20,
+        paddingTop: 5,
     },
     appBar: {
         background: theme.palette.background.paper,
@@ -239,6 +242,7 @@ class Credentials extends React.Component {
             if (updateSubscriptionData) updateSubscriptionData();
         });
     }
+    
     /**
      *
      *
@@ -296,46 +300,51 @@ class Credentials extends React.Component {
                                             )
                                         </Typography>
                                     </div>
-                                    {applicationsAvailable.length > 0 && (
-                                        <div>
-                                            <Button
-                                                variant='outlined'
-                                                size='small'
-                                                color='primary'
-                                                className={classes.buttonElm}
-                                                onClick={() => this.handleClickToggle('openAvailable')}
-                                            >
+                                    <ScopeValidation
+                                        resourcePath={resourcePaths.SUBSCRIPTIONS}
+                                        resourceMethod={resourceMethods.POST}
+                                    >
+                                        {applicationsAvailable.length > 0 && (
+                                            <div>
+                                                <Button
+                                                    variant='outlined'
+                                                    size='small'
+                                                    color='primary'
+                                                    className={classes.buttonElm}
+                                                    onClick={() => this.handleClickToggle('openAvailable')}
+                                                >
                                                 Subscribe to Available App
-                                            </Button>
-                                            <Typography
-                                                variant='caption'
-                                                component='p'
-                                                className={classes.buttonElmText}
-                                            >
-                                                {applicationsAvailable.length}
-                                                {' '}
+                                                </Button>
+                                                <Typography
+                                                    variant='caption'
+                                                    component='p'
+                                                    className={classes.buttonElmText}
+                                                >
+                                                    {applicationsAvailable.length}
+                                                    {' '}
                                                 Available
-                                            </Typography>
-                                        </div>
-                                    )}
-                                    <Button
-                                        variant='outlined'
-                                        size='small'
-                                        color='primary'
-                                        className={classes.buttonElm}
-                                        onClick={() => this.handleClickToggle('openNew')}
-                                    >
+                                                </Typography>
+                                            </div>
+                                        )}
+                                        <Button
+                                            variant='outlined'
+                                            size='small'
+                                            color='primary'
+                                            className={classes.buttonElm}
+                                            onClick={() => this.handleClickToggle('openNew')}
+                                        >
                                         Subscribe to New App
-                                    </Button>
-                                    <Button
-                                        variant='outlined'
-                                        size='small'
-                                        color='primary'
-                                        className={classes.buttonElm}
-                                        onClick={() => this.handleClickToggle('openExpress')}
-                                    >
+                                        </Button>
+                                        <Button
+                                            variant='outlined'
+                                            size='small'
+                                            color='primary'
+                                            className={classes.buttonElm}
+                                            onClick={() => this.handleClickToggle('openExpress')}
+                                        >
                                         Express Mode
-                                    </Button>
+                                        </Button>
+                                    </ScopeValidation>
                                 </div>
                                 {/*
                                 ****************************
@@ -367,21 +376,26 @@ class Credentials extends React.Component {
                                                                 icon='applications'
                                                             />
                                                         </Link>
-                                                        <a
-                                                            className={classes.button}
-                                                            onClick={() => this.handleSubscriptionDelete(
-                                                                app.subscriptionId,
-                                                                updateSubscriptionData,
-                                                            )}
+                                                        <ScopeValidation
+                                                            resourcePath={resourcePaths.SINGLE_SUBSCRIPTION}
+                                                            resourceMethod={resourceMethods.DELETE}
                                                         >
-                                                            <span>UNSUBSCRIBE</span>
-                                                            <CustomIcon
-                                                                width={16}
-                                                                height={16}
-                                                                strokeColor={theme.palette.primary.main}
-                                                                icon='subscriptions'
-                                                            />
-                                                        </a>
+                                                            <a
+                                                                className={classes.button}
+                                                                onClick={() => this.handleSubscriptionDelete(
+                                                                    app.subscriptionId,
+                                                                    updateSubscriptionData,
+                                                                )}
+                                                            >
+                                                                <span>UNSUBSCRIBE</span>
+                                                                <CustomIcon
+                                                                    width={16}
+                                                                    height={16}
+                                                                    strokeColor={theme.palette.primary.main}
+                                                                    icon='subscriptions'
+                                                                />
+                                                            </a>
+                                                        </ScopeValidation>
                                                         <a
                                                             className={classNames(classes.button, {
                                                                 [classes.activeLink]: selectedAppId

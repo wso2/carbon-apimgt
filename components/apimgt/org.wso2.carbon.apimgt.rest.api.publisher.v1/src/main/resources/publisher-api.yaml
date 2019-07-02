@@ -71,7 +71,7 @@ securityDefinitions:
   OAuth2Security:
     type: oauth2
     flow: password
-
+    tokenUrl: https://localhost:9443/token
     scopes:
       openid: Authorize access to user details
       apim:api_view: View API
@@ -111,17 +111,14 @@ paths:
 # Retrieving the list of all APIs qualifying under a given search condition
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"lifeCycleStatus\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"lifeCycleStatus\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
       summary: |
         Retrieve/Search APIs
       description: |
         This operation provides you a list of available APIs qualifying under a given search condition.
 
         Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+      x-examples:
+        $ref: docs/examples/apis.yaml#/get
       parameters:
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/offset'
@@ -4502,9 +4499,9 @@ paths:
           - apim:api_view
       produces:
         - application/json
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/search=query?sample"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/publisher/v1.0/search?limit=25&offset=0&query=test"
       x-wso2-request: |
-        GET https://localhost:9443/api/am/publisher/v0.13/search
+        GET https://localhost:9443/api/am/publisher/v1.0/search
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
       summary: |
@@ -6232,12 +6229,12 @@ definitions:
           $ref: '#/definitions/SearchResult'
       pagination:
         $ref: '#/definitions/Pagination'
-        # example:
-        #   next: "/client-certificates?limit=1&offset=2"
-        #   previous: "/client-certificates?limit=1&offset=0"
 
   SearchResult:
     title: Search Result
+    required:
+      - "name"
+    discriminator: "name"
     properties:
       id:
         type: string
@@ -6350,6 +6347,8 @@ definitions:
           apiProvider:
             type: string
             example: admin
+          apiUUID:
+              type: string
   #-----------------------------------------------------
   # The Resource policy List resource
   #-----------------------------------------------------

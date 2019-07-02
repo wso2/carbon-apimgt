@@ -67,7 +67,7 @@ public class JsonSchemaValidator extends AbstractMediator {
         String requestMethod;
         String contentType;
         axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Object contentTypeObject = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
+        Object contentTypeObject = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE);
         if (contentTypeObject != null) {
             contentType = contentTypeObject.toString();
         } else {
@@ -105,8 +105,9 @@ public class JsonSchemaValidator extends AbstractMediator {
                 AnalyzerHolder.returnObject(apimThreatAnalyzer);
             }
         } else {
-            GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
-                    APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
+            if (log.isDebugEnabled()) {
+                log.debug("JSON Schema Validator: " + APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
+            }
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
         if (validRequest) {

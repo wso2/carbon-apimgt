@@ -17,53 +17,79 @@
  */
 
 import React from 'react';
-import qs from 'qs';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api.js';
-import { Progress } from 'AppComponents/Shared';
-import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import SampleAPI from './SampleAPI/SampleAPI';
-import CardView from './CardView/CardView';
-import TableView from './TableView/TableView';
-import TopMenu from './components/TopMenu';
-import Listing from './Listing';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import getMockedModel from 'AppTests/Utils/MockAPIModel.js';
 import { unwrap } from '@material-ui/core/test-utils';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-
 import Configurations from 'Config';
+import { MemoryRouter } from 'react-router-dom';
+import AuthManager from 'AppData/AuthManager';
+import SampleAPI from './SampleAPI/SampleAPI';
+import Listing from './Listing';
 
-jest.mock('AppData/api.js');
+jest.mock('AppData/AuthManager');
+jest.mock('AppData/api.js', () => {
+    return function () {
+        return {
+            getAPIThumbnail: () => {
+                return Promise.resolve({});
+            },
+        };
+    };
+});
+
+const mockedHasScopes = jest.fn();
 const mockedAll = jest.fn();
 
 describe('APIs <Listing/> component tests', () => {
     beforeAll(() => {
         API.all = mockedAll.bind(API);
+        AuthManager.hasScopes = mockedHasScopes.bind(AuthManager);
     });
 
     afterEach(() => {
         mockedAll.mockReset();
     });
 
-    test('should shallow render the listing page', () => {
-        const { light } = Configurations.themes;
-        const ThemedListing = (
-            <MuiThemeProvider theme={createMuiTheme(light)}>
-                <Listing />
-            </MuiThemeProvider>
-        );
-        mockedAll.mockReturnValue(Promise.resolve({ obj: { list: [] } }));
-        const wrapper = mountWithIntl(ThemedListing);
-        expect(wrapper.contains('Create an API')).toBeTruthy();
-    });
-
-    test('should shallow render the listing page 2', async () => {
+    test('should shallow render the listing page', async () => {
         mockedAll.mockReturnValue(Promise.resolve({ obj: { list: [] } }));
         const UnWrappedListing = unwrap(Listing);
         const { light } = Configurations.themes;
         const wrapper = await shallow(<UnWrappedListing classes={{}} theme={createMuiTheme(light)} />);
         expect(wrapper.contains(<SampleAPI />)).toBeTruthy();
     });
+
+    test('should mount and render the listing page with given APIs list', async () => {
+        const { light } = Configurations.themes;
+        const ThemedListing = (
+            <MuiThemeProvider theme={createMuiTheme(light)}>
+                <MemoryRouter>
+                    <Listing />
+                </MemoryRouter>
+            </MuiThemeProvider>
+        );
+        const mockedModel = await getMockedModel('APIList');
+        mockedAll.mockReturnValue(Promise.resolve({ obj: mockedModel }));
+        mockedHasScopes.mockReturnValue(Promise.resolve(true));
+
+        let wrapper = await mountWithIntl(ThemedListing);
+        wrapper = await wrapper.update();
+        // Calling children() because Listing component has exported with withstyle wrapper
+        expect(wrapper
+            .find(Listing)
+            .children()
+            .state().apis).toEqual(mockedModel);
+
+        expect(wrapper.contains(mockedModel.list[0].name)).toBeTruthy();
+        expect(wrapper.contains(mockedModel.list[0].version)).toBeTruthy();
+        expect(wrapper.contains(mockedModel.list[0].context)).toBeTruthy();
+
+        expect(wrapper.contains('Create an API')).toBeTruthy();
+    });
+
+    test.todo('should remove the API from listing when clicked on delete button');
+    test.todo('should navigate to API overview page when clicked on API thumb');
+    test.todo('should show table view when clicked on toggle button');
 });
