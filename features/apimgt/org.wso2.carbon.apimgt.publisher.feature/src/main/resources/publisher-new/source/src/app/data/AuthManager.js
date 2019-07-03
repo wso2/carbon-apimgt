@@ -88,8 +88,6 @@ class AuthManager {
      * @returns {User | null} Is any user has logged in or not
      */
     static getUser(environmentName = Utils.getCurrentEnvironment().label) {
-        // eslint-disable-next-line no-debugger
-        debugger;
         const userData = localStorage.getItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
         if (!(userData && partialToken)) {
@@ -167,9 +165,6 @@ class AuthManager {
      * @memberof AuthManager
      */
     static hasScopes(resourcePath, resourceMethod) {
-        console.log('okkkkkkkkkkkk');
-        // eslint-disable-next-line no-debugger
-        debugger;
         const userscopes = AuthManager.getUser().scopes;
         const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
         return validScope.then((scope) => {

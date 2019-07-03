@@ -33,8 +33,6 @@ class InitLogin extends React.Component {
      * @memberof InitLogin
      */
     componentDidMount() {
-        // eslint-disable-next-line no-debugger
-        debugger;
         window.location = page;
     }
 

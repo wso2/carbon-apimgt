@@ -30,46 +30,68 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Policies from 'AppComponents/Apis/Details/LifeCycle/Policies';
 import APICreateForm from './APICreateDefault';
 
-jest.mock('AppData/AuthManager');
+const mockedGetUser = jest.fn();
+const mockedHasScopes = jest.fn();
+
+AuthManager.getUser = mockedGetUser.bind(AuthManager);
 
 describe('<APICreateForm/> tests', () => {
     let spec;
 
     afterEach(() => {
-        // jest.restoreAllMocks();
-        // jest.clearAllMocks();
-        // jest.resetModules();
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+        jest.resetModules();
+        jest.resetModuleRegistry();
         // eslint-disable-next-line no-underscore-dangle
         User._userMap.clear();
-        const originalAuthManager = require.requireActual('AppData/AuthManager');
-        AuthManager.hasScopes = originalAuthManager.default.hasScopes;
-        // AuthManager.getUser = originalAuthManager.default.getUser;
     });
     beforeAll(async () => {
         spec = await resolveSwagger();
     });
 
-    test('should render APICreateForm without any issues', async () => {
-        jest.mock('AppData/api.js', () => {
-            const originalAPI = require.requireActual('AppData/api.js');
+    test('should not show the policies dropdown if user dose not have required scopes', async () => {
+        const mockedResolve = Promise.resolve({ spec });
+        SwaggerClient.resolve = jest.fn(() => mockedResolve).bind(SwaggerClient);
+
+        const mockedPolicies = jest.fn();
+        API.policies = mockedPolicies.bind(API);
+
+        const mockedPoliciesData = await getMockedModel('ThrottlingPolicyList');
+        mockedPolicies.mockReturnValue(Promise.resolve({ obj: mockedPoliciesData }));
+
+        const mockedUser = new User('DEFAULT', 'admin');
+        const allScopes = await getAllScopes();
+        mockedUser.scopes = allScopes.filter(policy => policy !== 'apim:api_publish');
+        mockedGetUser.mockReturnValue(mockedUser);
+        const originalAuthManager = require.requireActual('AppData/AuthManager');
+
+        AuthManager.prototype.hasScopes = originalAuthManager.default.hasScopes;
+        jest.doMock('AppData/AuthManager', () => {
+            const originalAuthManagers = require.requireActual('AppData/AuthManager');
             return {
-                __esModule: true,
-                ...originalAPI,
+                hasScopes: originalAuthManagers.default.hasScopes,
             };
         });
+
+        const wrapper = await mountWithIntl(<APICreateForm />);
+        await new Promise(resolve => setImmediate(resolve));
+        await wrapper.update();
+        const policiesDropDown = await wrapper.find(Policies);
+        expect(policiesDropDown.length).toBe(0);
+    });
+
+    test('should render APICreateForm without any issues', async () => {
+        AuthManager.hasScopes = mockedHasScopes.bind(AuthManager);
         SwaggerClient.resolve = jest.fn(() => Promise.resolve({ spec })).bind(SwaggerClient);
 
         // Create mock functions to be used in static methods mocking
         // These are just dump jest mock function, Will return `undefined` unless otherwise specify a return value
-        const mockedGetUser = jest.fn();
-        const mockedHasScopes = jest.fn();
         const mockedPolicies = jest.fn();
 
         // Binding the mock functions to modules
         // Mock return values will be set in each individual test cases
         API.policies = mockedPolicies.bind(API);
-        AuthManager.getUser = mockedGetUser.bind(AuthManager);
-        AuthManager.hasScopes = mockedHasScopes.bind(AuthManager);
 
         // Mocking ES6 class module
         jest.mock('AppData/APIClientFactory', () => {
@@ -160,26 +182,6 @@ describe('<APICreateForm/> tests', () => {
 
     test('should not allow to submit new API with invalid inputs', () => {});
     test('should not allow to create new API without required inputs', () => {});
-    test('should not show the policies dropdown if user dose not have required scopes', async () => {
-        const mockedResolve = Promise.resolve({ spec });
-        SwaggerClient.resolve = jest.fn(() => mockedResolve).bind(SwaggerClient);
-        const mockedGetUser = jest.fn();
-        const mockedPolicies = jest.fn();
-        API.policies = mockedPolicies.bind(API);
-        const mockedPoliciesData = await getMockedModel('ThrottlingPolicyList');
-        mockedPolicies.mockReturnValue(Promise.resolve({ obj: mockedPoliciesData }));
-        // eslint-disable-next-line no-debugger
-        debugger;
-        // Create a mock user for testing
-        const mockedUser = new User('DEFAULT', 'admin');
-        const allScopes = await getAllScopes();
-        mockedUser.scopes = allScopes.filter(policy => policy !== 'apim:api_publish');
-        mockedGetUser.mockReturnValue(mockedUser);
-        AuthManager.getUser = mockedGetUser.bind(AuthManager);
-        const wrapper = await mountWithIntl(<APICreateForm />);
-        await wrapper.update();
-        const policiesDropDown = await wrapper.find(Policies);
-        expect(policiesDropDown.length).toBe(0);
-    });
+
     test('should not show the API create submit button if user do not have required scopes', () => {});
 });
