@@ -56,7 +56,7 @@ function ApiCreate(props) {
 }
 
 ApiCreate.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({ content: PropTypes.string }).isRequired,
 };
 
 export default withStyles(styles)(ApiCreate);
