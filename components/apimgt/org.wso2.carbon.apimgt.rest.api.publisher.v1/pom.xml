@@ -185,7 +185,7 @@
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>../../../docs/apidocs/publisher/v1/docs</directory>
+                            <directory>../../../docs/apidocs/publisher/v1</directory>
                             <includes>
                                 <include>**/*</include>
                             </includes>
@@ -228,7 +228,7 @@
                             <inputSpec>${project.basedir}/src/main/resources/publisher-api.yaml</inputSpec>
                             <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
                             <templateDirectory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</templateDirectory>
-                            <output>${project.parent.parent.basedir}/docs/apidocs/publisher/v1</output>
+                            <output>${project.build.directory}/apidocs</output>
                         </configuration>
                     </execution>
                 </executions>
@@ -237,13 +237,31 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>copy-generated-docs</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/apidocs/docs</directory>
+                                    <excludes>
+                                        <exclude>**/*.mustache</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>copy-common-doc-resources</id>
                         <phase>install</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1/docs</outputDirectory>
+                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</directory>
@@ -261,7 +279,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1/docs</outputDirectory>
+                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/src/main/resources/docs/static</directory>
