@@ -29,27 +29,16 @@ import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-/**
- * @scr.component name="org.wso2.apimgt.hostobjects" immediate="true"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- * @scr.reference name="user.realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="datasources.service" interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1" policy="dynamic" bind="setDataSourceService" unbind="unsetDataSourceService"
- */
+@Component(
+         name = "org.wso2.apimgt.hostobjects", 
+         immediate = true)
 public class HostObjectComponent {
 
     private static final Log log = LogFactory.getLog(HostObjectComponent.class);
@@ -58,10 +47,10 @@ public class HostObjectComponent {
 
     private static DataSourceService dataSourceService;
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
-                    (getClientRepoLocation(), getAxis2ClientXmlLocation());
+            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(), getAxis2ClientXmlLocation());
             ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
             if (log.isDebugEnabled()) {
                 log.debug("HostObjectComponent activated");
@@ -71,12 +60,19 @@ public class HostObjectComponent {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-       if (log.isDebugEnabled()){
-           log.debug("HostObjectComponent deactivated");
-       }
+        if (log.isDebugEnabled()) {
+            log.debug("HostObjectComponent deactivated");
+        }
     }
 
+    @Reference(
+             name = "api.manager.config.service", 
+             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         if (log.isDebugEnabled()) {
             log.debug("API manager configuration service bound to the API host objects");
@@ -96,6 +92,12 @@ public class HostObjectComponent {
         return configuration;
     }
 
+    @Reference(
+             name = "datasources.service", 
+             service = org.wso2.carbon.ndatasource.core.DataSourceService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting the Data Sources Service");
@@ -114,7 +116,13 @@ public class HostObjectComponent {
         return dataSourceService;
     }
 
-     protected void setConfigurationContextService(ConfigurationContextService configCtx) {
+    @Reference(
+             name = "config.context.service", 
+             service = org.wso2.carbon.utils.ConfigurationContextService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetConfigurationContextService")
+    protected void setConfigurationContextService(ConfigurationContextService configCtx) {
         HostObjectUtils.setConfigContextService(configCtx);
     }
 
@@ -122,6 +130,12 @@ public class HostObjectComponent {
         HostObjectUtils.setConfigContextService(null);
     }
 
+    @Reference(
+             name = "user.realm.service", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (realmService != null && log.isDebugEnabled()) {
             log.debug("Realm service initialized");
@@ -133,6 +147,12 @@ public class HostObjectComponent {
         ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 
+    @Reference(
+             name = "registry.service", 
+             service = org.wso2.carbon.registry.core.service.RegistryService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (registryService != null && log.isDebugEnabled()) {
             log.debug("Registry service initialized");
@@ -154,3 +174,4 @@ public class HostObjectComponent {
         return axis2ClientXml;
     }
 }
+

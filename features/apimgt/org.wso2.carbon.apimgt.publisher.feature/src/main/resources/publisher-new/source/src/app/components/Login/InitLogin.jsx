@@ -18,19 +18,31 @@
 
 import React from 'react';
 
+const page = '/publisher-new/services/auth/login';
+
 /**
  * This component is created to unify the login process from react UI.
  * If we need to change the login process in the future, Changing here will reflect
  * all the login redirection done in other places of the code
  * @class InitLogin
  */
-
-const page = '/publisher-new/services/auth/login';
 class InitLogin extends React.Component {
+    /**
+     *
+     * @inheritdoc
+     * @memberof InitLogin
+     */
     componentDidMount() {
         window.location = page;
     }
 
+
+    /**
+     *
+     * @inheritdoc
+     * @returns {React.Component}
+     * @memberof InitLogin
+     */
     render() {
         return `You will be redirected to ${page}`;
     }

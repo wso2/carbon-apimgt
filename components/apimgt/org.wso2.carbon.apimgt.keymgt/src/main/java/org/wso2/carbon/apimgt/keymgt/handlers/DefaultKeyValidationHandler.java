@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -52,7 +52,6 @@ import java.util.Set;
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     private static final Log log = LogFactory.getLog(DefaultKeyValidationHandler.class);
-    private static final String DEFAULT_SCOPE_VALIDATOR_NAME = "Role based scope validator";
 
     public DefaultKeyValidationHandler(){
         log.info(this.getClass().getName() + " Initialised");
@@ -181,8 +180,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 + ":" +
                 validationContext.getHttpVerb();
 
-        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = OAuthServerConfiguration.getInstance()
-                .getOAuth2ScopeValidators();
+        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = new HashSet<>(OAuthServerConfiguration.getInstance()
+                .getOAuth2ScopeValidators());
         //validate scope for filtered validators from db
         String[] scopeValidators;
         OAuthAppDO appInfo;
@@ -195,10 +194,10 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
             for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
                 try {
-                    if (validator != null && ArrayUtils.isEmpty(scopeValidators) &&
-                            validator.getValidatorName().contains(DEFAULT_SCOPE_VALIDATOR_NAME)) {
+                    if (validator != null && ArrayUtils.isEmpty(scopeValidators)) {
                         // validate scopes for old created applications
                         isValid = validator.validateScope(accessTokenDO, resource);
+                        oAuth2ScopeValidators.clear();
                     } else if (validator != null && scopeValidators != null &&
                             appScopeValidators.contains(validator.getValidatorName())) {
                         //take the intersection of defined scope validators and scope validators registered for the apps

@@ -24,11 +24,10 @@ var saveSubscriptionPolicy = function (action, policyName, description, defaultQ
             error: false
         };
     } catch (ex) {
-        var errorMessage = "Error occurred while saving policy (Cause:" + ex.message + ")";
-        log.error(errorMessage);
+        log.error(ex);
         return {
             error: true,
-            message: errorMessage
+            message:  ex.message.split(":")[1]
         };
     }
 };

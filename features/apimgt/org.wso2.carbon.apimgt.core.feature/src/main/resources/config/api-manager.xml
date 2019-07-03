@@ -681,6 +681,12 @@
     <!--Specify the implementation class of the monetization interface-->
     <Monetization>
         <MonetizationImpl>org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl</MonetizationImpl>
+        <UsagePublisher>
+            <Granularity>days</Granularity>
+            <!--Number of days to reduce from the current time to get the last publish time of monetization
+            usgae publish job, when there is no record of the last publish time.-->
+            <PublishTimeDurationInDays>1</PublishTimeDurationInDays>
+        </UsagePublisher>
     </Monetization>
 
     <OpenTracer>

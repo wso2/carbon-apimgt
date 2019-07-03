@@ -16,9 +16,16 @@
  * under the License.
  */
 import React, { Component } from 'react';
-import { withStyles, Grid, RadioGroup, Radio, Button, Tooltip, FormControl, Input, InputLabel, FormHelperText, FormControlLabel } from '@material-ui/core';
+import {
+    withStyles,
+    RadioGroup,
+    Radio,
+    Button,
+    FormControl,
+    FormHelperText,
+    FormControlLabel,
+} from '@material-ui/core';
 import ErrorOutline from '@material-ui/icons/ErrorOutline';
-import Done from '@material-ui/icons/Done';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
@@ -60,7 +67,7 @@ const styles = theme => ({
     },
     errorIcon: {
         color: theme.palette.error.main,
-        marginRight: theme.spacing.unit*2,
+        marginRight: theme.spacing.unit * 2,
     },
     fileNameWrapper: {
         display: 'flex',
@@ -86,7 +93,7 @@ const styles = theme => ({
         alignItems: 'center',
     },
     button: {
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
     },
 });
 
@@ -128,8 +135,12 @@ class ProvideWSDL extends Component {
         }
     }
 
+    getUploadMethod() {
+        return this.state.uploadMethod;
+    }
+
     toggleType = (event) => {
-        if(event.target.value  === 'file'){
+        if (event.target.value === 'file') {
             this.setState({ uploadMethod: event.target.value, file: null });
         } else {
             this.setState({ uploadMethod: event.target.value });
@@ -137,11 +148,7 @@ class ProvideWSDL extends Component {
         this.validateWSDL();
     };
 
-    getUploadMethod() {
-        return this.state.uploadMethod;
-    }
     handleUploadFile = (acceptedFiles) => {
-        this.state.file = acceptedFiles[0];
         this.validateWSDL((isValid, wsdlBean) => {
             console.info('(isValid, wsdlBean) = ', isValid, wsdlBean);
         });
@@ -169,15 +176,15 @@ class ProvideWSDL extends Component {
         const newAPI = new API();
         let promisedValidation;
         const wsdlBean = {};
-        let validNew = JSON.parse(JSON.stringify(valid));
+        const validNew = JSON.parse(JSON.stringify(valid));
         if (uploadMethod === 'file') {
             if (!file) {
-                //Update the parent's state
+                // Update the parent's state
                 validNew.wsdlFile.empty = true;
                 updateFileErrors(validNew);
                 return;
             }
-            //Update the parent's state
+            // Update the parent's state
             validNew.wsdlFile.empty = false;
             updateFileErrors(validNew);
 
@@ -185,13 +192,13 @@ class ProvideWSDL extends Component {
             promisedValidation = newAPI.validateWSDLFile(file);
         } else {
             if (!url) {
-                //Update the parent's state
+                // Update the parent's state
                 validNew.wsdlUrl.empty = true;
                 updateFileErrors(validNew);
                 return;
             }
 
-            //Update the parent's state
+            // Update the parent's state
             validNew.wsdlUrl.empty = false;
             updateFileErrors(validNew);
 
@@ -203,7 +210,7 @@ class ProvideWSDL extends Component {
                 const { isValid, wsdlInfo } = response.obj;
                 wsdlBean.info = wsdlInfo;
 
-                //Update the parent's state
+                // Update the parent's state
                 if (uploadMethod === 'file') {
                     validNew.wsdlFile.invalidFile = false;
                     updateFileErrors(validNew);
@@ -215,7 +222,7 @@ class ProvideWSDL extends Component {
                 updateWSDLBean(wsdlBean);
             })
             .catch((error) => {
-                //Update the parent's state
+                // Update the parent's state
                 if (uploadMethod === 'file') {
                     validNew.wsdlFile.invalidFile = true;
                     updateFileErrors(validNew);
@@ -225,7 +232,8 @@ class ProvideWSDL extends Component {
                 }
                 updateWSDLBean(wsdlBean);
                 const response = error.response && error.response.obj;
-                const message = 'Error while validating WSDL!! ' + response && '[' + response.message + '] ' + response.description;
+                const message =
+                    'Error while validating WSDL!! ' + response && '[' + response.message + '] ' + response.description;
                 this.setState({ isValid: false, errorMessage: message, loading: false });
                 console.error(error);
             });
@@ -238,32 +246,47 @@ class ProvideWSDL extends Component {
      */
     render() {
         const {
-            isValid, errorMessage, uploadMethod, file, url,
+            isValid, errorMessage, uploadMethod, file, url, loading,
         } = this.state;
         const { classes, valid } = this.props;
         const error = isValid === false; // Because of null case, which means validation haven't done yet
+        if (loading) {
+            return <Progress error={error} />;
+        }
         return (
             <React.Fragment>
                 <FormControl className={classes.FormControl}>
-                    <RadioGroup aria-label='swagger-upload-method' name='swagger-upload-method' value={uploadMethod} onChange={this.toggleType} className={classes.radioWrapper}>
-                        <FormControlLabel value='file' control={<Radio />} label='File' checked className={classes.radioGroup} />
+                    <RadioGroup
+                        aria-label='swagger-upload-method'
+                        name='swagger-upload-method'
+                        value={uploadMethod}
+                        onChange={this.toggleType}
+                        className={classes.radioWrapper}
+                    >
+                        <FormControlLabel
+                            value='file'
+                            control={<Radio />}
+                            label='File'
+                            checked
+                            className={classes.radioGroup}
+                        />
                         <FormControlLabel value='url' control={<Radio />} label='URL' className={classes.radioGroup} />
                     </RadioGroup>
                 </FormControl>
                 {uploadMethod === 'file' ? (
                     <React.Fragment>
-                        {file && 
+                        {file && (
                             <div className={classes.fileNameWrapper}>
                                 <Typography variant='subtitle2' gutterBottom>
                                     <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
                                 </Typography>
-                                    <div className={classes.fileName}>
-                                        <Typography variant='body2' gutterBottom>
-                                            {file.name} - {file.size} bytes
-                                        </Typography>
-                                    </div>
+                                <div className={classes.fileName}>
+                                    <Typography variant='body2' gutterBottom>
+                                        {file.name} - {file.size} bytes
+                                    </Typography>
+                                </div>
                             </div>
-                        }
+                        )}
                         {valid.wsdlFile.invalidFile && (
                             <div className={classes.errorMessageWrapper}>
                                 <ErrorOutline className={classes.errorIcon} />
@@ -281,12 +304,19 @@ class ProvideWSDL extends Component {
                         >
                             <Backup className={classes.dropZoneIcon} />
                             <div>
-                                <FormattedMessage id='try.dropping.some.files.here.or.click.to.select.files.to.upload' defaultMessage='Try dropping some files here, or click to select files to upload.' />
+                                <FormattedMessage
+                                    id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
+                                    defaultMessage='Try dropping some files here, or click to select files to upload.'
+                                />
                             </div>
                         </Dropzone>
                         <FormHelperText className={classes.errorMessage}>
-                            {valid.wsdlFile.empty && <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' /> }
-                            {valid.wsdlFile.invalidFile && <FormattedMessage id='error.invalid.wsdl.file' defaultMessage='Invalid WSDL File' />}
+                            {valid.wsdlFile.empty && (
+                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                            )}
+                            {valid.wsdlFile.invalidFile && (
+                                <FormattedMessage id='error.invalid.wsdl.file' defaultMessage='Invalid WSDL File' />
+                            )}
                         </FormHelperText>
                     </React.Fragment>
                 ) : (
@@ -294,28 +324,42 @@ class ProvideWSDL extends Component {
                         <FormControl fullWidth aria-describedby='url-text'>
                             <div className={classes.urlWrapper}>
                                 <TextField
-                                            error={valid.wsdlUrl.empty}
-                                            fullWidth
-                                            id='url'
-                                            label='WSDL Url'
-                                            placeholder='eg: https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'
-                                            helperText={<FormattedMessage id='create.new.wsdl.help' defaultMessage='Give a WSDL url such as https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl' />}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            type='text'
-                                            name='url'
-                                            margin='normal'
-                                            value={url}
-                                            onChange={this.updateURL}
+                                    error={valid.wsdlUrl.empty}
+                                    fullWidth
+                                    id='url'
+                                    label='WSDL Url'
+                                    placeholder={'eg: ' +
+                                    'https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'}
+                                    helperText={
+                                        <FormattedMessage
+                                            id='create.new.wsdl.help'
+                                            defaultMessage={'Give a WSDL url such as' +
+                                            ' https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'}
                                         />
-                                <Button variant="outlined" color="primary" className={classes.button} onClick={this.validateWSDL}>
+                                    }
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    type='text'
+                                    name='url'
+                                    margin='normal'
+                                    value={url}
+                                    onChange={this.updateURL}
+                                />
+                                <Button
+                                    variant='outlined'
+                                    color='primary'
+                                    className={classes.button}
+                                    onClick={this.validateWSDL}
+                                >
                                     LOAD WSDL
                                 </Button>
                             </div>
-                            
+
                             <FormHelperText className={classes.errorMessage}>
-                                {valid.wsdlUrl.empty && <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' /> }
+                                {valid.wsdlUrl.empty && (
+                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                )}
                                 {valid.wsdlUrl.invalidUrl && 'Invalid WSDL Url'}
                             </FormHelperText>
                         </FormControl>
@@ -341,6 +385,7 @@ ProvideWSDL.propTypes = {
     file: PropTypes.shape({}),
     classes: PropTypes.shape({}).isRequired,
     updateFileErrors: PropTypes.func.isRequired,
+    updateWSDLValidity: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(ProvideWSDL);

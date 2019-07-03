@@ -44,9 +44,14 @@ function Policies(props) {
 
                     {/* Throttling Policies */}
                     <Typography component='p' variant='body1'>
-                        {api.policies && api.policies.length !== 0 && api.policies.map( (item,index) => (
-                            <span>{item}{api.policies.length !== (index+1) && `, `} </span>    
-                        ))}
+                        {api.policies &&
+                            api.policies.length !== 0 &&
+                            api.policies.map((item, index) => (
+                                <span>
+                                    {item}
+                                    {api.policies.length !== index + 1 && ', '}{' '}
+                                </span>
+                            ))}
                     </Typography>
                 </Paper>
             )}
@@ -55,7 +60,7 @@ function Policies(props) {
 }
 
 Policies.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default Policies;

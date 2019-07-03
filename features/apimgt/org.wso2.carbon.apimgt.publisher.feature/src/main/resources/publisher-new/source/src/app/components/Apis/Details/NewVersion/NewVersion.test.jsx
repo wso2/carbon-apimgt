@@ -21,6 +21,7 @@ import { getExampleBodyById, getExampleResponseById } from 'AppTests/Utils/MockA
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
 import Configurations from 'Config';
 import { MemoryRouter, Redirect } from 'react-router-dom';
+import { resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import ApiContext from '../components/ApiContext';
 import NewVersion from './NewVersion';
@@ -28,7 +29,6 @@ import NewVersion from './NewVersion';
 const FIELD_EMPTY = 'This field cannot be empty';
 
 describe('Unit test for CreateNewVersion component', () => {
-
     /**
      * Mounts the CreateNewVersion component
      *
@@ -37,7 +37,7 @@ describe('Unit test for CreateNewVersion component', () => {
      */
     async function mountNewVersionComponent() {
         const { light } = Configurations.themes;
-        const api = await getExampleBodyById('/apis/{apiId}', 'get', 'getAPI');
+        const api = await getExampleBodyById(resourcePath.SINGLE_API, resourceMethod.GET, 'getAPI');
         const newVersion = (
             <ApiContext.Provider value={{ api }}>
                 <MemoryRouter>
@@ -69,7 +69,10 @@ describe('Unit test for CreateNewVersion component', () => {
 
     test('should create version properly after specifying version', async () => {
         const { mountedNewVersion, api } = await mountNewVersionComponent();
-        const newVersionResponse = await getExampleBodyById('/apis/copy-api', 'post', 'copyAPIWithoutDefaultVersion');
+        const newVersionResponse = await getExampleBodyById(
+            resourcePath.API_COPY, resourceMethod.POST,
+            'copyAPIWithoutDefaultVersion',
+        );
         const createNewAPIVersion = jest.fn();
         createNewAPIVersion.mockReturnValue(Promise.resolve({ obj: newVersionResponse }));
         api.createNewAPIVersion = createNewAPIVersion;
@@ -89,7 +92,10 @@ describe('Unit test for CreateNewVersion component', () => {
 
     test('should create version properly after specifying version and default version as true', async () => {
         const { mountedNewVersion, api } = await mountNewVersionComponent();
-        const newVersionResponse = await getExampleBodyById('/apis/copy-api', 'post', 'copyAPIWithDefaultVersion');
+        const newVersionResponse = await getExampleBodyById(
+            resourcePath.API_COPY, resourceMethod.POST,
+            'copyAPIWithDefaultVersion',
+        );
         const createNewAPIVersion = jest.fn();
         createNewAPIVersion.mockReturnValue(Promise.resolve({ obj: newVersionResponse }));
         api.createNewAPIVersion = createNewAPIVersion;
@@ -110,7 +116,10 @@ describe('Unit test for CreateNewVersion component', () => {
 
     test('should notify user when conflicting API version created', async () => {
         const { mountedNewVersion, api } = await mountNewVersionComponent();
-        const newVersionResponse = await getExampleResponseById('/apis/copy-api', 'post', 'copyWithConflictingVersion');
+        const newVersionResponse = await getExampleResponseById(
+            resourcePath.API_COPY, resourceMethod.POST,
+            'copyWithConflictingVersion',
+        );
         const createNewAPIVersion = jest.fn();
         const err = new Error(newVersionResponse.head.status.msg);
         err.response = newVersionResponse.body;

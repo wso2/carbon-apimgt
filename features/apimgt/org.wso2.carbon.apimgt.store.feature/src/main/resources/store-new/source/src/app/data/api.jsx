@@ -67,6 +67,19 @@ export default class API extends Resource {
             return promiseGet;
         }
     }
+    /*
+     Get the inline content of a given document
+     */
+    getInlineContentOfDocument(api_id, docId) {
+        const promised_getDocContent = this.client.then((client) => {
+            const payload = {
+                apiId: api_id,
+                documentId: docId
+            };
+            return client.apis['Documents'].get_apis__apiId__documents__documentId__content(payload);
+        });
+        return promised_getDocContent;
+    }
 
     /**
      * Get the Documents of an API
@@ -76,7 +89,7 @@ export default class API extends Resource {
      */
     getDocumentsByAPIId(id, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
+            return client.apis['Documents'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -92,17 +105,22 @@ export default class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of of getting document.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getFileForDocument(apiId, docId) {
-        const promiseGetDocContent = this.client.then((client) => {
-            const payload = { apiId, documentId: docId, Accept: 'application/octet-stream' };
-            return client.apis['API (Individual)'].get_apis__apiId__documents__documentId__content(
+    getFileForDocument(api_id, docId) {
+        const promised_getDocContent = this.client.then((client) => {
+            const payload = {
+                apiId: api_id,
+                documentId: docId,
+                Accept: 'application/octet-stream'
+            };
+            return client.apis['Documents'].get_apis__apiId__documents__documentId__content(
                 payload,
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
             );
         });
-        return promiseGetDocContent;
+        return promised_getDocContent;
     }
-
     /**
      * Get the swagger of an API
      * @param apiId {String} UUID of the API in which the swagger is needed
@@ -234,7 +252,7 @@ export default class API extends Resource {
      */
     updateApplication(application, callback = null) {
         const promiseGet = this.client.then((client) => {
-            const payload = { applicationId: application.id, body: application };
+            const payload = { applicationId: application.applicationId, body: application };
             return client.apis.Applications.put_applications__applicationId_(payload, this._requestMetaData());
         });
         if (callback) {

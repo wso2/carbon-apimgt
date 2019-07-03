@@ -20,7 +20,7 @@
   * Swagger-parser library(https://apidevtools.org/swagger-parser/) is used for parsing the swagger YAML file
   * Prism-HTTP module is used for generating the mock data from the swagger definition
   */
-import { generateStatic } from '@stoplight/prism-http/lib/mocker/generator/JSONSchema';
+import { generateStatic } from '@stoplight/prism-http/dist/mocker/generator/JSONSchema';
 
 /**
  *
@@ -32,6 +32,17 @@ import { generateStatic } from '@stoplight/prism-http/lib/mocker/generator/JSONS
 export default async function getMockedModel(modelName) {
     const swagger = await apiDef;
     return generateStatic(swagger.definitions[modelName]);
+}
+
+/**
+ *
+ * Return all the available scopes under securityDefinitions in publisher-api.yaml
+ * @export
+ * @returns {Array} All the scopes available in publisher-api swagger
+ */
+export async function getAllScopes() {
+    const swagger = await apiDef;
+    return Object.keys(swagger.securityDefinitions.OAuth2Security.scopes);
 }
 
 /**

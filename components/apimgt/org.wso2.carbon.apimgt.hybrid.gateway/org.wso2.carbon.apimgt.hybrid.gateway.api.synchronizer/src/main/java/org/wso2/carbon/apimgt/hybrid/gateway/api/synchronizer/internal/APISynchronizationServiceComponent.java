@@ -14,7 +14,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.internal;
 
 import org.apache.commons.logging.Log;
@@ -30,35 +29,22 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-/**
- * @scr.component name=
- * "APISynchronizationServiceComponent"
- * immediate="true"
- * @scr.reference name="realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService" cardinality="1..1"
- * policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="1..1"
- * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService
- * @scr.reference name="tenant.registryloader"
- * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader" cardinality="1..1"
- * policy="dynamic" bind="setTenantRegistryLoader" unbind="unsetTenantRegistryLoader"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService" cardinality="1..1"
- * policy="dynamic" bind="setConfigurationContextService" unbind="unsetConfigurationContextService"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- */
+@Component(
+         name = "APISynchronizationServiceComponent", 
+         immediate = true)
 public class APISynchronizationServiceComponent {
+
     private static final Log log = LogFactory.getLog(APISynchronizationServiceComponent.class);
 
     @Activate
     protected void activate(ComponentContext ctx) {
         BundleContext bundleContext = ctx.getBundleContext();
-        bundleContext.registerService(OnPremiseGatewayInitListener.class.getName(), new APISynchronizer(),
-                null);
+        bundleContext.registerService(OnPremiseGatewayInitListener.class.getName(), new APISynchronizer(), null);
     }
 
     @Deactivate
@@ -73,6 +59,12 @@ public class APISynchronizationServiceComponent {
      *
      * @param realmService realm service
      */
+    @Reference(
+             name = "realm.service", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         ServiceDataHolder.getInstance().setRealmService(realmService);
     }
@@ -91,6 +83,12 @@ public class APISynchronizationServiceComponent {
      *
      * @param tenantRegLoader tenant registry loader
      */
+    @Reference(
+             name = "tenant.registryloader", 
+             service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetTenantRegistryLoader")
     protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegLoader) {
         ServiceDataHolder.getInstance().setTenantRegLoader(tenantRegLoader);
     }
@@ -109,6 +107,12 @@ public class APISynchronizationServiceComponent {
      *
      * @param registryService service to get tenant data.
      */
+    @Reference(
+             name = "registry.service", 
+             service = org.wso2.carbon.registry.core.service.RegistryService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         ServiceDataHolder.getInstance().setRegistryService(registryService);
     }
@@ -136,6 +140,12 @@ public class APISynchronizationServiceComponent {
      *
      * @param ccService configuration context service
      */
+    @Reference(
+             name = "config.context.service", 
+             service = org.wso2.carbon.utils.ConfigurationContextService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService ccService) {
         ServiceDataHolder.getInstance().setConfigurationContextService(ccService);
     }
@@ -145,6 +155,12 @@ public class APISynchronizationServiceComponent {
      *
      * @param service API Manager Configuration Service
      */
+    @Reference(
+             name = "api.manager.config.service", 
+             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
         log.debug("API manager configuration service bound to Tenant Initializer.");
         ServiceDataHolder.getInstance().setAPIManagerConfigurationService(service);
@@ -160,3 +176,4 @@ public class APISynchronizationServiceComponent {
         ServiceDataHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 }
+

@@ -264,6 +264,12 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         return null;
     }
 
+    @Override
+    public String validateAPIDefinition(String apiDefinition) throws APIManagementException {
+
+        return null;
+    }
+
     /**
      * Retrieves the "Auth2" security scheme key
      *

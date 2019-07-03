@@ -39,9 +39,11 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
@@ -2632,6 +2634,55 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Error occurred while querying from Stream Processor.", e);
         }
         return new ArrayList<Result<APIUsageByApplication>>();
+    }
+
+    /**
+     * Implemented to get the API usage count for monetization.
+     *
+     * @param from : the start timestamp of the query.
+     * @param to   : the end timestamp of the query.
+     * @return JSON Object.
+     */
+    public JSONObject getUsageCountForMonetization(long from, long to)
+            throws APIMgtUsageQueryServiceClientException {
+
+        JSONObject jsonObject = null;
+        String granularity = null;
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        granularity = configuration.getFirstProperty(
+                APIConstants.MonetizationUsagePublisher.GRANULARITY_PROERTY_LOCATION);
+        if (StringUtils.isEmpty(granularity)) {
+            //set the default granularity to days, if it is not set in configuration
+            granularity = APIConstants.MonetizationUsagePublisher.DEFAULT_GRANULARITY;
+        }
+        StringBuilder query = new StringBuilder(
+                "from " + APIUsageStatisticsClientConstants.MONETIZATION_USAGE_RECORD_AGG
+                        + " within " + from
+                        + "L, " + to + "L per '" + granularity
+                        + "' select "
+                        + APIUsageStatisticsClientConstants.API_NAME + ", "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                        + "sum (requestCount) as requestCount "
+                        + "group by "
+                        + APIUsageStatisticsClientConstants.API_NAME + ", "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIUsageStatisticsClientConstants.APPLICATION_ID
+        );
+        try {
+            jsonObject = APIUtil.executeQueryOnStreamProcessor(
+                    APIUsageStatisticsClientConstants.MONETIZATION_USAGE_RECORD_APP,
+                    query.toString());
+        } catch (APIManagementException ex) {
+            String msg = "Unable to Retrieve monetization usage records";
+            handleException(msg, ex);
+        }
+        return jsonObject;
     }
 
     /**

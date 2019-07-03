@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import com.google.gson.Gson;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1172,6 +1172,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
         try {
             APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            String response = apiDefinitionFromOpenAPISpec.validateAPIDefinition(apiDefinition);
+            if (response != null) {
+                RestApiUtil.handleBadRequest(response, log);
+            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
