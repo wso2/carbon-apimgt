@@ -1559,17 +1559,20 @@ public class APIMappingUtil {
 
         for (int i = 0; i < dto.getApis().size(); i++) {
             ProductAPIDTO res = dto.getApis().get(i);
-            APIProductResource resource = new APIProductResource();
-            resource.setApiId(res.getApiId());
             List<ProductAPIOperationsDTO> productAPIOperationsDTO = res.getOperations();
             for (ProductAPIOperationsDTO resourceItem : productAPIOperationsDTO) {
+ 
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getHttpVerb());
                 template.setResourceURI(resourceItem.getUritemplate());
                 template.setUriTemplate(resourceItem.getUritemplate());
+                
+                APIProductResource resource = new APIProductResource();
+                resource.setApiId(res.getApiId());
                 resource.setUriTemplate(template);
+                productResources.add(resource);
             }
-            productResources.add(resource);
+            
         }
         product.setProductResources(productResources);
         return product;
