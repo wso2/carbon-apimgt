@@ -107,7 +107,13 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
                         <FormattedMessage id='apis.create.new.api' defaultMessage='APIs - Create New API' />
                     </Typography>
                     <Typography variant='caption' gutterBottom align='left'>
-                        <FormattedMessage id='fill.the.mandatory.fields' defaultMessage='Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced configurations later.' />
+                        <FormattedMessage
+                            id='fill.the.mandatory.fields'
+                            defaultMessage={
+                                'Fill the mandatory fields (Name, Version, Context)' +
+                                ' and create the API. Configure advanced configurations later.'
+                            }
+                        />
                     </Typography>
                 </div>
             </div>
