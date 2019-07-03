@@ -97,7 +97,7 @@
                             org.wso2.carbon.apimgt.hostobjects.oidc.*;
                         </Export-Package>
                         <Import-Package>
-                            com.nimbusds.*; version="[5.0.0,6.0.0)",
+                            com.nimbusds.*; version="${imp.pkg.version.com.nimbus}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
