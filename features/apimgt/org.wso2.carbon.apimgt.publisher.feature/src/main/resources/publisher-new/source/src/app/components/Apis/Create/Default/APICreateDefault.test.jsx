@@ -25,7 +25,7 @@ import { unwrap } from '@material-ui/core/test-utils';
 import { createMemoryHistory } from 'history';
 import SwaggerClient from 'swagger-client';
 
-import getMockedModel, { getAllScopes, resolveSwagger } from 'AppTests/Utils/MockAPIModel.js';
+import getMockedModel, { getAllScopes } from 'AppTests/Utils/MockAPIModel.js';
 import MenuItem from '@material-ui/core/MenuItem';
 import Policies from 'AppComponents/Apis/Details/LifeCycle/Policies';
 import APICreateForm from './APICreateDefault';
@@ -47,7 +47,7 @@ describe('<APICreateForm/> tests', () => {
         User._userMap.clear();
     });
     beforeAll(async () => {
-        spec = await resolveSwagger();
+        spec = await apiDef;
     });
 
     test('should not show the policies dropdown if user dose not have required scopes', async () => {
