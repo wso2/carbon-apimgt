@@ -27,12 +27,10 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import API from '../../../data/api';
 
 /**
- *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme object
  */
 const styles = theme => ({
     FormControl: {
@@ -48,84 +46,37 @@ const styles = theme => ({
         position: 'relative',
     },
 });
-/**
- *
- *
- * @class ApplicationCreate
- * @extends {Component}
- */
-class ApplicationCreate extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            quota: 'Unlimited',
-            tiers: [],
-            description: null,
-            name: null,
-        };
-        this.handleChange = this.handleChange.bind(this);
-    }
 
+const ApplicationCreate = (props) => {
     /**
-     *
-     *
-     * @memberof ApplicationCreate
-     */
-    componentDidMount() {
-        // Get all the tires to populate the drop down.
-        const api = new API();
-        const promiseTiers = api.getAllTiers('application');
-        promiseTiers
-            .then((response) => {
-                const tierResponseObj = response.body;
-                const tiers = [];
-                tierResponseObj.list.map(item => tiers.push(item.name));
-                this.setState({ tiers });
+    * This method is used to handle the updating of create application
+    * request object.
+    * @param {*} field field that should be updated in appliction request
+    * @param {*} event event fired
+    */
+    const handleChange = (field, event) => {
+        const { applicationRequest, updateApplicationRequest } = props;
+        const newRequest = { ...applicationRequest };
+        const { target: currentTarget } = event;
 
-                if (tiers.length > 0) {
-                    this.setState({ quota: tiers[0] });
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
-    /**
-     *
-     *
-     * @memberof ApplicationCreate
-     */
-    handleChange = name => (event) => {
-        this.setState({ [name]: event.target.value });
-    };
-
-    /**
-     *
-     *
-     * @returns {promise}
-     * @memberof ApplicationCreate
-     */
-    handleSubmit() {
-        const { name, quota, description } = this.state;
-        if (!name) {
-            return Promise.reject(new Error('Application name is required'));
-        } else {
-            const applicationData = {
-                name,
-                throttlingPolicy: quota,
-                description,
-            };
-            const newApi = new API();
-            return newApi.createApplication(applicationData);
+        switch (field) {
+            case 'name':
+                newRequest.name = currentTarget.value;
+                break;
+            case 'description':
+                newRequest.description = currentTarget.value;
+                break;
+            case 'throttlingPolicy':
+                newRequest.throttlingPolicy = currentTarget.value;
+                break;
+            case 'tokenType':
+                newRequest.tokenType = currentTarget.value;
+                break;
+            default:
+                break;
         }
-    }
+        updateApplicationRequest(newRequest);
+    };
 
     /**
      *
@@ -133,78 +84,79 @@ class ApplicationCreate extends Component {
      * @returns {Component}
      * @memberof ApplicationCreate
      */
-    render() {
-        const { classes } = this.props;
+    const {
+        classes, throttlingPolicyList, applicationRequest, isNameValid,
+    } = props;
+    return (
+        <form className={classes.container} noValidate autoComplete='off'>
+            <Grid container spacing={24} className={classes.root}>
+                <Grid item xs={12} md={6}>
+                    <FormControl margin='normal' className={classes.FormControl}>
+                        <TextField
+                            required
+                            label='Application Name'
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            helperText={`Enter a name to identify the Application. You will be able to pick this
+                                application when subscribing to APIs`}
+                            fullWidth
+                            name='name'
+                            onChange={e => handleChange('name', e)}
+                            placeholder='My Mobile Application'
+                            autoFocus
+                            className={classes.inputText}
+                            onBlur={e => props.validateName(e.target.value)}
+                            error={!isNameValid}
+                        />
+                    </FormControl>
 
-        return (
-            <form className={classes.container} noValidate autoComplete='off'>
-                <Grid container spacing={24} className={classes.root}>
-                    <Grid item xs={12} md={6}>
-                        <FormControl margin='normal' className={classes.FormControl}>
-                            <TextField
-                                required
-                                label='Application Name'
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                helperText='Enter a name to identify the Application. You will be able to pick this
-                                application when subscribing to APIs '
-                                fullWidth
-                                name='name'
-                                onChange={this.handleChange('name')}
-                                placeholder='My Mobile Application'
-                                autoFocus
-                                className={classes.inputText}
-                            />
-                        </FormControl>
-
-                        {this.state.tiers && (
-                            <FormControl margin='normal' className={classes.FormControlOdd}>
-                                <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
+                    {throttlingPolicyList && (
+                        <FormControl margin='normal' className={classes.FormControlOdd}>
+                            <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
                                     Per Token Quota
-                                </InputLabel>
-                                <Select
-                                    value={this.state.quota}
-                                    onChange={this.handleChange('quota')}
-                                    input={<Input name='quota' id='quota-helper' />}
-                                >
-                                    {this.state.tiers.map(tier => (
-                                        <MenuItem key={tier} value={tier}>
-                                            {tier}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                <Typography variant='caption'>
+                            </InputLabel>
+                            <Select
+                                value={applicationRequest.throttlingPolicy}
+                                onChange={e => handleChange('throttlingPolicy', e)}
+                                input={<Input name='quota' id='quota-helper' />}
+                            >
+                                {throttlingPolicyList.map(tier => (
+                                    <MenuItem key={tier} value={tier}>
+                                        {tier}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            <Typography variant='caption'>
                                     Assign API request quota per access token. Allocated quota will be shared among all
                                     the subscribed APIs of the application.
-                                </Typography>
-                            </FormControl>
-                        )}
-                        <FormControl margin='normal' className={classes.FormControl}>
-                            <TextField
-                                label='Application Description'
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                helperText='Describe the application'
-                                fullWidth
-                                multiline
-                                rowsMax='4'
-                                name='description'
-                                onChange={this.handleChange('description')}
-                                placeholder='This application is grouping apis for my mobile application'
-                                className={classes.inputText}
-                            />
+                            </Typography>
                         </FormControl>
-                    </Grid>
+                    )}
+                    <FormControl margin='normal' className={classes.FormControl}>
+                        <TextField
+                            label='Application Description'
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            helperText='Describe the application'
+                            fullWidth
+                            multiline
+                            rowsMax='4'
+                            name='description'
+                            onChange={e => handleChange('description', e)}
+                            placeholder='This application is grouping apis for my mobile application'
+                            className={classes.inputText}
+                        />
+                    </FormControl>
                 </Grid>
-            </form>
-        );
-    }
-}
+            </Grid>
+        </form>
+    );
+};
 
 ApplicationCreate.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(ApplicationCreate);
