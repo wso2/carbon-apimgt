@@ -55,7 +55,10 @@ public class JWTValidator {
 
     private static final Log log = LogFactory.getLog(JWTValidator.class);
 
-    public JWTValidator() {
+    private String apiLevelPolicy;
+
+    public JWTValidator(String apiLevelPolicy) {
+        this.apiLevelPolicy = apiLevelPolicy;
     }
 
     public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, Swagger swagger)
@@ -129,6 +132,7 @@ public class JWTValidator {
             authContext.setApiKey(payload.getString("jti"));
             authContext.setKeyType(payload.getString("keytype"));
             authContext.setUsername(payload.getString("sub"));
+            authContext.setApiTier(apiLevelPolicy);
             authContext.setApplicationId(String.valueOf(applicationObj.getInt("id")));
             authContext.setApplicationName(applicationObj.getString("name"));
             authContext.setApplicationTier(applicationObj.getString("tier"));

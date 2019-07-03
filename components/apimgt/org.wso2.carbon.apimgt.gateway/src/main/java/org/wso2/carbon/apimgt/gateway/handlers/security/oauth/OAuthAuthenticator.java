@@ -77,21 +77,23 @@ public class OAuthAuthenticator implements Authenticator {
     private boolean isMandatory;
     private String apiUUID;
     private Swagger swagger = null;
+    private String apiLevelPolicy;
 
     public OAuthAuthenticator() {
     }
 
     public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader,
-                              String apiUUID) {
+                              String apiUUID, String apiLevelPolicy) {
         this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
         this.isMandatory = isMandatory;
         this.apiUUID = apiUUID;
+        this.apiLevelPolicy = apiLevelPolicy;
     }
 
     public void init(SynapseEnvironment env) {
         this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
-        this.jwtValidator = new JWTValidator();
+        this.jwtValidator = new JWTValidator(apiLevelPolicy);
         initOAuthParams();
     }
 
