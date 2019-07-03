@@ -27,15 +27,15 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-import ApplicationCreate from '../../Shared/AppsAndKeys/ApplicationCreate';
+import API from 'AppData/api';
+import ApplicationCreateForm from '../../Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from '../../Shared/Alert';
 import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
-import API from '../../../data/api';
 
 /**
  *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme object
  */
 const styles = theme => ({
     appBar: {
@@ -57,16 +57,14 @@ const styles = theme => ({
     },
 });
 /**
- *
- *
- * @param {*} props
- * @returns
+ * @param {*} props properties
+ * @returns {Component}
  */
 function Transition(props) {
     return <Slide direction='up' {...props} />;
 }
 /**
- *Component used to handle application creation
+ * Component used to handle application creation
  * @class NewApp
  * @extends {React.Component}
  * @param {any} value @inheritDoc
@@ -93,7 +91,7 @@ class NewApp extends React.Component {
     /**
      * Get all the throttling Policies from backend and
      * update the state
-     * @memberof ApplicationCreate
+     * @memberof NewApp
      */
     componentDidMount() {
         // Get all the tires to populate the drop down.
@@ -217,7 +215,7 @@ class NewApp extends React.Component {
                         </Toolbar>
                     </AppBar>
                     <div className={classes.createFormWrapper}>
-                        <ApplicationCreate
+                        <ApplicationCreateForm
                             throttlingPolicyList={throttlingPolicyList}
                             applicationRequest={applicationRequest}
                             updateApplicationRequest={this.updateApplicationRequest}

@@ -24,11 +24,10 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-
-import ApplicationCreate from '../../../Shared/AppsAndKeys/ApplicationCreate';
+import API from 'AppData/api';
+import ApplicationCreateForm from '../../../Shared/AppsAndKeys/ApplicationCreateForm';
 import SubscribeToApi from '../../../Shared/AppsAndKeys/SubscribeToApi';
 import Keys from '../../../Shared/AppsAndKeys/KeyConfiguration';
 import Tokens from '../../../Shared/AppsAndKeys/Tokens';
@@ -105,7 +104,45 @@ class Wizard extends React.Component {
             supportedGrantTypes: ['client_credentials'],
             callbackUrl: 'https://wso2.am.com',
         },
+        applicationRequest: {
+            name: '',
+            throttlingPolicy: '',
+            description: '',
+            tokenType: null,
+        },
+        throttlingPolicyList: [],
     };
+
+    /**
+     * Get all the throttling Policies from backend and
+     * update the state
+     * @memberof NewApp
+     */
+    componentDidMount() {
+        // Get all the tires to populate the drop down.
+        const api = new API();
+        const promiseTiers = api.getAllTiers('application');
+        promiseTiers
+            .then((response) => {
+                const { applicationRequest } = this.state;
+                const throttlingPolicyList = response.body.list.map(item => item.name);
+                const newRequest = { ...applicationRequest };
+                if (throttlingPolicyList.length > 0) {
+                    [newRequest.throttlingPolicy] = throttlingPolicyList;
+                }
+                this.setState({ applicationRequest: newRequest, throttlingPolicyList });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    // eslint-disable-next-line react/no-unused-state
+                    this.setState({ notFound: true });
+                }
+            });
+    }
 
     /**
      *
@@ -117,10 +154,20 @@ class Wizard extends React.Component {
      * @memberof Wizard
      */
     getStepContent(step, api, applicationsAvailable) {
-        const { tab, keyRequest } = this.state;
+        const {
+            tab, keyRequest, throttlingPolicyList, applicationRequest, isNameValid,
+        } = this.state;
         switch (step) {
             case 0:
-                return <ApplicationCreate innerRef={node => (this.applicationCreate = node)} />;
+                return (
+                    <ApplicationCreateForm
+                        throttlingPolicyList={throttlingPolicyList}
+                        applicationRequest={applicationRequest}
+                        updateApplicationRequest={this.updateApplicationRequest}
+                        validateName={this.validateName}
+                        isNameValid={isNameValid}
+                    />
+                );
             case 1:
                 return <SubscribeToApi innerRef={node => (this.subscribeToApi = node)} newApp={this.newApp} api={api} applicationsAvailable={applicationsAvailable} />;
             case 2:
@@ -183,6 +230,24 @@ class Wizard extends React.Component {
         this.setState({ tab });
     };
 
+    validateName = (value) => {
+        if (!value || value.trim() === '') {
+            this.setState({ isNameValid: false });
+            return Promise.reject(new Error('Application name is required'));
+        }
+        this.setState({ isNameValid: true });
+        return Promise.resolve(true);
+    };
+
+    /**
+     * Update keyRequest state
+     * @param {Object} applicationRequest parameters requried for application
+     * create request
+     */
+    updateApplicationRequest = (applicationRequest) => {
+        this.setState({ applicationRequest });
+    }
+
     /**
      * @param {int} step current step
      * @memberof Wizard
@@ -203,29 +268,31 @@ class Wizard extends React.Component {
         const that = this;
         if (activeStep === 0) {
             // create application step
-            const promisedCreate = this.applicationCreate.handleSubmit();
-            if (promisedCreate) {
-                promisedCreate
-                    .then((response) => {
-                        const appCreated = JSON.parse(response.data);
-                        that.newApp = { value: appCreated.applicationId, label: appCreated.name };
-                        // Once application loading fixed this need to pass application ID and load app
-                        that.setState({
-                            activeStep: activeStep + 1,
-                        });
-                        console.log('Application created successfully.');
-                    })
-                    .catch((error) => {
-                        const { response } = error;
-                        if (response && response.body) {
-                            const message = response.body.description || 'Error while creating the application';
-                            Alert.error(message);
-                        } else {
-                            Alert.error(error.message);
-                        }
-                        console.error('Error while creating the application');
+
+            const { applicationRequest } = this.state;
+            const { updateApps } = this.props;
+            const api = new API();
+            this.validateName(applicationRequest.name)
+                .then(() => api.createApplication(applicationRequest))
+                .then((response) => {
+                    const appCreated = JSON.parse(response.data);
+                    this.newApp = { value: appCreated.applicationId, label: appCreated.name };
+                    console.log('Application created successfully.');
+                    // Once application loading fixed this need to pass application ID and load app
+                    that.setState({
+                        activeStep: activeStep + 1,
                     });
-            }
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response && response.body) {
+                        const message = response.body.description || 'Error while creating the application';
+                        Alert.error(message);
+                    } else {
+                        Alert.error(error.message);
+                    }
+                    console.error('Error while creating the application');
+                });
         } else if (activeStep === 1) {
             // subscribe step
             const promisedSubscribe = this.subscribeToApi.createSubscription();
