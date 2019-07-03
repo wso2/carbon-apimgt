@@ -41,6 +41,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
@@ -6419,45 +6420,65 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         List<APIProductResource> resources = product.getProductResources();
+        
+        // list to hold resouces which are actually in an existing api. If user has created an API product with invalid
+        // API or invalid resource of a valid API, that content will be removed .validResources array will have only
+        // legitimate apis
+        List<APIProductResource> validResources = new ArrayList<APIProductResource>();
         for (APIProductResource apiProductResource : resources) {
-            API api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
-            // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
+            API api = null;
+            try {
+                api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
+                // if API does not exist, getLightweightAPIByUUID() method throws exception. 
+            } catch (APIMgtResourceNotFoundException e) {
+                //If there is no API , this exception is thrown. We create the product without this invalid api.
+                log.warn("API does not exist for the given apiId: " + apiProductResource.getApiId());
+                continue;
+            }
+            if (api != null) {
+                apiProductResource.setApiIdentifier(api.getId());
+                apiProductResource.setProductIdentifier(product.getId());
+                URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
-            apiProductResource.setApiIdentifier(api.getId());
-            apiProductResource.setProductIdentifier(product.getId());
-            URITemplate uriTemplate = apiProductResource.getUriTemplate();
-
-            Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
-            if (uriTemplate == null) {
-                // TODO handle if no resource is defined. either throw an error or add all the resources of that API
-                // to the product
-            } else {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
-                if (templateMap.containsKey(key)) {
-
-                    //Since the template ID is not set from the request, we manually set it.
-                    uriTemplate.setId(templateMap.get(key).getId());
-
+                Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
+                if (uriTemplate == null) {
+                    //if no resources are define for the API, we ingore that api for the product
                 } else {
-                    throw new APIManagementException("API with id " + apiProductResource.getApiId()
-                            + " does not have a resource " + uriTemplate.getResourceURI()
-                            + " with http method " + uriTemplate.getHTTPVerb());
+                    String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+                    if (templateMap.containsKey(key)) {
+
+                        //Since the template ID is not set from the request, we manually set it.
+                        uriTemplate.setId(templateMap.get(key).getId());
+                        //request has a valid API id and a valid resource. we add it to valid resource map
+                        validResources.add(apiProductResource);
+
+                    } else {
+                        //ignore
+                        log.warn("API with id " + apiProductResource.getApiId()
+                                + " does not have a resource " + uriTemplate.getResourceURI()
+                                + " with http method " + uriTemplate.getHTTPVerb());
+
+                    }
                 }
             }
         }
-           
+        //set the valid resources only
+        product.setProductResources(validResources);
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
-        Map<String, String> failedToPublishEnvironments = publishToGateway(product);
-        if (!failedToPublishEnvironments.isEmpty()) {
-            Set<String> publishedEnvironments =
-                    new HashSet<String>(product.getEnvironments());
-            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
-            product.setEnvironments(publishedEnvironments);
-            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-            failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+        //Only publish to gateways if the state is in Published state and has atleast one resource
+        if("PUBLISHED".equals(product.getState()) && !validResources.isEmpty()) {
+            Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+            if (!failedToPublishEnvironments.isEmpty()) {
+                Set<String> publishedEnvironments =
+                        new HashSet<String>(product.getEnvironments());
+                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+                product.setEnvironments(publishedEnvironments);
+                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+            }
         }
 
         apiMgtDAO.addAPIProduct(product, tenantDomain);
