@@ -80,8 +80,20 @@ const GlobalNavBar = (props) => {
 GlobalNavBar.propTypes = {
     open: PropTypes.bool.isRequired,
     toggleGlobalNavBar: PropTypes.func.isRequired,
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        drawerStyles: PropTypes.string,
+        list: PropTypes.string,
+        listText: PropTypes.string,
+    }).isRequired,
+    theme: PropTypes.shape({
+        palette: PropTypes.shape({
+            getContrastText: PropTypes.func,
+            background: PropTypes.shape({
+                drawer: PropTypes.string,
+                leftMenu: PropTypes.string,
+            }),
+        }),
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(GlobalNavBar);

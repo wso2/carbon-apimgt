@@ -20,7 +20,7 @@
  * Swagger-parser library(https://apidevtools.org/swagger-parser/) is used for parsing the swagger YAML file
  * Prism-HTTP module is used for generating the mock data from the swagger definition
  */
-import { generateStatic } from '@stoplight/prism-http/lib/mocker/generator/JSONSchema';
+import { generateStatic } from '@stoplight/prism-http/dist/mocker/generator/JSONSchema';
 import SwaggerParser from 'swagger-parser';
 import path from 'path';
 

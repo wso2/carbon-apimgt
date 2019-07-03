@@ -166,8 +166,20 @@ class AppErrorBoundary extends React.Component {
 
 AppErrorBoundary.propTypes = {
     children: PropTypes.node.isRequired,
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        appBar: PropTypes.string,
+        toolbar: PropTypes.string,
+        errorDisplay: PropTypes.string,
+        errorDisplayContent: PropTypes.string,
+        errorTitle: PropTypes.string,
+        link: PropTypes.string,
+    }).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.shape({
+            logo: PropTypes.string,
+            title: PropTypes.string,
+        }),
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(AppErrorBoundary);
