@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUti
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.VisibilityEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -707,6 +708,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 if (!errorMessage.isEmpty()) {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
+            }
+            if (body.getVisibility() == null) {
+                //set the default visibility to PUBLIC
+                body.setVisibility(VisibilityEnum.PUBLIC);
             }
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
