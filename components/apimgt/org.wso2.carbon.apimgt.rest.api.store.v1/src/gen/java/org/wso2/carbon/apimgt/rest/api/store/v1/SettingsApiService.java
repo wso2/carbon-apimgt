@@ -19,5 +19,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SettingsApiService {
+      public Response settingsAttributesGet(String ifNoneMatch, MessageContext messageContext);
       public Response settingsGet(MessageContext messageContext);
 }

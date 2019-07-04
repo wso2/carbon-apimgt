@@ -19,12 +19,15 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONArray;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SettingsMappingUtil;
@@ -50,6 +53,24 @@ public class SettingsApiServiceImpl implements SettingsApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response settingsAttributesGet(String ifNoneMatch, MessageContext messageContext) {
+        return Response.ok().entity(getAllApplicationAttributes()).build();
+    }
+
+    private JSONArray getAllApplicationAttributes() {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            return apiConsumer.getAppAttributesFromConfig(tenantDomain);
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error occurred in reading application attributes from config", e, log);
         }
         return null;
     }

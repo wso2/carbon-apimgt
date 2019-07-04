@@ -1925,55 +1925,6 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The "Application Attributes" resource APIs
-######################################################
-  '/applications/attributes':
-#--------------------------------------------------------
-# Retrieve all application attributes from configuration
-#--------------------------------------------------------
-    get:
-      security:
-        - OAuth2Security:
-          - apim:subscribe
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1.0/applications/attributes\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1.0/applications/attributes
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"callbackUrl\": null,\n   \"subscriber\": \"admin\",\n   \"throttlingPolicy\": \"Unlimited\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"description\": null,\n   \"status\": \"APPROVED\",\n   \"name\": \"DefaultApplication\",\n   \"keys\": [   {\n      \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\",\n      \"consumerSecret\": \"KXQxmS8W3xDvvJH4AfR6xrhKIeIa\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\",\n      \"supportedGrantTypes\": null,\n      \"token\":       {\n         \"validityTime\": 3600,\n         \"accessToken\": \"3887da6d111f0429c6dff47a46e87209\",\n         \"tokenScopes\":          [\n            \"am_application_scope\",\n            \"default\"\n         ]\n      }\n   }]\n}"
-      summary: |
-        Get all application attributes from configuration
-      description: |
-        This operation can be used to retrieve the application attributes from configuration. It will not return hidden attributes.
-      parameters:
-        - $ref: '#/parameters/If-None-Match'
-      tags:
-        - Application Attributes
-      responses:
-        200:
-          description: |
-            OK.
-            Application attributes returned.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-          schema:
-            type: '#/definitions/ApplicationAttributeList'
-        404:
-          description: |
-            Not Found.
-            Requested application does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-
-######################################################
 # Export Application Resource API
 ######################################################
   /export/applications:
@@ -2787,6 +2738,55 @@ paths:
           description: |
             Not Found.
             Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Application Attributes" resource APIs
+######################################################
+  '/settings/attributes':
+#--------------------------------------------------------
+# Retrieve all application attributes from configuration
+#--------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1.0/applications/attributes\""
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/store/v1.0/settings/attributes
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n[\n {\n \"Description\": \"Sample description of the attribute\",\n \"Required\": true,\n \"Attribute\": \"External Reference Id\",\n \"Hidden\": false\n},\n {\n \"Description\": \"Sample description of the attribute\",\n \"Required\": true,\n \"Attribute\": \"Billing Id\",\n \"Hidden\": true,\n \"Default\": \"xxxx\"\n}\n]"
+      summary: |
+        Get all application attributes from configuration
+      description: |
+        This operation can be used to retrieve the application attributes from configuration. It will not return hidden attributes.
+      parameters:
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - Application Attributes
+      responses:
+        200:
+          description: |
+            OK.
+            Application attributes returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: '#/definitions/ApplicationAttributeList'
+        404:
+          description: |
+            Not Found.
+            Requested application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
 

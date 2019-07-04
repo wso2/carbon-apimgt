@@ -663,23 +663,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsAttributesGet(String ifNoneMatch, MessageContext messageContext) {
-        return Response.ok().entity(getAllApplicationAttributes()).build();
-    }
-
-    private JSONArray getAllApplicationAttributes() {
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            return apiConsumer.getAppAttributesFromConfig(tenantDomain);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred in reading application attributes from config", e, log);
-        }
-        return null;
-    }
-
-    @Override
     public Response applicationsApplicationIdScopesGet(String applicationId, Boolean filterByUserRoles,
             String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
