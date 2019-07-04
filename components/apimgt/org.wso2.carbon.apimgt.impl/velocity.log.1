@@ -1,13 +1,13 @@
-2019-06-06 11:31:20,052 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:20,052 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:20,053 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_resource_default.xml
-2019-06-06 11:31:20,053 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_resource_default.xml
-2019-06-06 11:31:20,055 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_resource_default.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,666 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,666 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,666 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,666 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,667 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:17,914 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:17,914 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:17,915 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_resource_default.xml
+2019-07-04 14:13:17,915 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_resource_default.xml
+2019-07-04 14:13:17,916 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_resource_default.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,451 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,451 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,451 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,451 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,451 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -65,46 +65,46 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,668 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,668 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,670 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,673 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,674 - Do unicode file recognition:  false
-2019-06-06 11:31:54,674 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,683 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,684 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,685 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,686 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,687 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,688 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,704 - Created '20' parsers.
-2019-06-06 11:31:54,711 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,711 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,711 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,711 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,711 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,711 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,724 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
-2019-06-06 11:31:54,724 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
-2019-06-06 11:31:54,733 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_resource.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,760 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,760 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,760 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,760 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,760 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,760 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,760 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,760 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,760 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,453 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,453 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,455 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,458 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,459 - Do unicode file recognition:  false
+2019-07-04 14:13:57,459 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,466 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,467 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,468 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,470 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,471 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,472 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,489 - Created '20' parsers.
+2019-07-04 14:13:57,495 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,496 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,496 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,496 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,496 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,496 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,510 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
+2019-07-04 14:13:57,510 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
+2019-07-04 14:13:57,518 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_resource.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,543 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,543 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,543 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,543 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,543 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,543 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,543 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,543 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,543 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -162,16 +162,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,760 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,543 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -229,72 +229,72 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,760 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,760 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,760 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,760 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,760 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,760 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,760 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,760 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,760 - Do unicode file recognition:  false
-2019-06-06 11:31:54,760 - Do unicode file recognition:  false
-2019-06-06 11:31:54,760 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,760 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,761 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,761 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,761 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,761 - Created '20' parsers.
-2019-06-06 11:31:54,761 - Created '20' parsers.
-2019-06-06 11:31:54,761 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,761 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,761 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,761 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,761 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,761 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,761 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,761 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,761 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,761 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,761 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,761 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,762 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
-2019-06-06 11:31:54,762 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
-2019-06-06 11:31:54,762 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
-2019-06-06 11:31:54,762 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
-2019-06-06 11:31:54,764 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_resource.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,764 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_resource.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,768 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,768 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,768 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,768 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,768 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,768 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,768 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,768 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,768 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,768 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,768 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,768 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,768 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,544 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,544 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,544 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,544 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,544 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,544 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,544 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,544 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,544 - Do unicode file recognition:  false
+2019-07-04 14:13:57,544 - Do unicode file recognition:  false
+2019-07-04 14:13:57,544 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,544 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,544 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,544 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,544 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,545 - Created '20' parsers.
+2019-07-04 14:13:57,545 - Created '20' parsers.
+2019-07-04 14:13:57,545 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,545 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,545 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,545 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,545 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,545 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,545 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,545 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,545 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,545 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,545 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,545 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,545 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
+2019-07-04 14:13:57,545 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
+2019-07-04 14:13:57,546 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
+2019-07-04 14:13:57,546 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_resource.xml
+2019-07-04 14:13:57,547 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_resource.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,547 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_resource.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,551 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,551 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,551 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,551 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,551 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,551 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,551 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,551 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,551 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,551 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,551 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,551 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,551 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -352,16 +352,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,768 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,551 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -419,16 +419,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,768 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,551 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -486,92 +486,92 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,768 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,768 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,768 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,768 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,768 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,768 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,768 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,768 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,768 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,768 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,768 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,768 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,768 - Do unicode file recognition:  false
-2019-06-06 11:31:54,768 - Do unicode file recognition:  false
-2019-06-06 11:31:54,768 - Do unicode file recognition:  false
-2019-06-06 11:31:54,769 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,769 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,769 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,769 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,769 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,769 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,769 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,770 - Created '20' parsers.
-2019-06-06 11:31:54,770 - Created '20' parsers.
-2019-06-06 11:31:54,770 - Created '20' parsers.
-2019-06-06 11:31:54,770 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,770 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,770 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,770 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,770 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,770 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,770 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,770 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,770 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,770 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,770 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,770 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,770 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,770 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,770 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,770 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,770 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,770 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,771 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_global.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,771 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_global.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,771 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_global.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,775 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,775 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,775 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,775 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,775 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,775 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,775 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,775 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,775 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,775 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,775 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,775 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,775 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,775 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,775 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,775 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,775 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,552 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,552 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,552 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,552 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,552 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,552 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,552 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,552 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,552 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,552 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,552 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,552 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,552 - Do unicode file recognition:  false
+2019-07-04 14:13:57,552 - Do unicode file recognition:  false
+2019-07-04 14:13:57,552 - Do unicode file recognition:  false
+2019-07-04 14:13:57,552 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,552 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,552 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,552 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,552 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,552 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,552 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,553 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,553 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,553 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,553 - Created '20' parsers.
+2019-07-04 14:13:57,553 - Created '20' parsers.
+2019-07-04 14:13:57,553 - Created '20' parsers.
+2019-07-04 14:13:57,553 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,553 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,553 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,553 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,553 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,553 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,553 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,553 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,553 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,553 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,553 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,553 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,553 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,553 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,553 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,553 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,553 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,553 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,554 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_global.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,554 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_global.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,554 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_global.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,559 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,559 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,559 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,559 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,559 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,559 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,559 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,559 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,559 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,559 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,559 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,559 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,559 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,559 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,559 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,559 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,559 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -629,16 +629,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,775 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,559 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -696,16 +696,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,775 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,559 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -763,16 +763,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,775 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,559 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -830,116 +830,116 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,776 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,776 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,776 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,776 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,776 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,776 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,776 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,776 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,776 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,776 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,776 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,776 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,776 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,776 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,776 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,776 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,776 - Do unicode file recognition:  false
-2019-06-06 11:31:54,776 - Do unicode file recognition:  false
-2019-06-06 11:31:54,776 - Do unicode file recognition:  false
-2019-06-06 11:31:54,776 - Do unicode file recognition:  false
-2019-06-06 11:31:54,776 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,776 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,776 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,776 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,776 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,776 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,776 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,776 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,776 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,776 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,776 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,776 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,776 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,776 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,776 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,776 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,777 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,777 - Created '20' parsers.
-2019-06-06 11:31:54,777 - Created '20' parsers.
-2019-06-06 11:31:54,777 - Created '20' parsers.
-2019-06-06 11:31:54,777 - Created '20' parsers.
-2019-06-06 11:31:54,777 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,777 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,777 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,777 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,777 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,777 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,777 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,777 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,777 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,777 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,777 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,777 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,777 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,777 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,777 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,777 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,777 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,777 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,777 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,777 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,777 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,777 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,777 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,777 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,779 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_app.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,779 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_app.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,779 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_app.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,779 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_app.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,785 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,785 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,785 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,785 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,785 - Log4JLogChute initialized using file 'velocity.log'
-2019-06-06 11:31:54,785 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,785 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,785 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,785 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,785 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
-2019-06-06 11:31:54,785 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,785 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,785 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,785 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,785 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
-2019-06-06 11:31:54,785 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,560 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,560 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,560 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,560 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,560 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,560 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,560 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,560 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,560 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,560 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,560 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,560 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,560 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,560 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,560 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,560 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,560 - Do unicode file recognition:  false
+2019-07-04 14:13:57,560 - Do unicode file recognition:  false
+2019-07-04 14:13:57,560 - Do unicode file recognition:  false
+2019-07-04 14:13:57,560 - Do unicode file recognition:  false
+2019-07-04 14:13:57,560 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,560 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,560 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,560 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,560 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,560 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,560 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,560 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,560 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,560 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,560 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,560 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,561 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,561 - Created '20' parsers.
+2019-07-04 14:13:57,561 - Created '20' parsers.
+2019-07-04 14:13:57,561 - Created '20' parsers.
+2019-07-04 14:13:57,561 - Created '20' parsers.
+2019-07-04 14:13:57,561 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,561 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,561 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,561 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,561 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,561 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,561 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,561 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,561 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,561 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,561 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,561 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,562 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,562 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,562 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,562 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,562 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,562 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,562 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,562 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,562 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,562 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,562 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,562 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,563 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_app.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,563 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_app.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,563 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_app.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,563 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_app.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,567 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,567 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,567 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,567 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,567 - Log4JLogChute initialized using file 'velocity.log'
+2019-07-04 14:13:57,567 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,567 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,567 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,567 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,567 - Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+2019-07-04 14:13:57,567 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,567 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,567 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,567 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,567 - Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+2019-07-04 14:13:57,567 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,567 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,567 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,567 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,567 - Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+2019-07-04 14:13:57,567 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -997,16 +997,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,785 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,567 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -1064,16 +1064,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,785 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,567 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -1131,16 +1131,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,785 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,567 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -1198,16 +1198,16 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,785 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
+2019-07-04 14:13:57,567 - Couldn't find class org.apache.velocity.runtime.log.AvalonLogChute or necessary supporting classes in classpath.
 java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at java.lang.Class.forName0(Native Method)
 	at java.lang.Class.forName(Class.java:348)
@@ -1265,122 +1265,122 @@ java.lang.NoClassDefFoundError: org/apache/log/format/Formatter
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
 Caused by: java.lang.ClassNotFoundException: org.apache.log.format.Formatter
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
-	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:338)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	at org.powermock.core.classloader.MockClassLoader.loadModifiedClass(MockClassLoader.java:202)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass1(DeferSupportingClassLoader.java:89)
 	at org.powermock.core.classloader.DeferSupportingClassLoader.loadClass(DeferSupportingClassLoader.java:79)
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
 	... 55 more
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,785 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
-2019-06-06 11:31:54,786 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,786 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,786 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,786 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,786 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
-2019-06-06 11:31:54,786 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,786 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,786 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,786 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,786 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,786 - Do unicode file recognition:  false
-2019-06-06 11:31:54,786 - Do unicode file recognition:  false
-2019-06-06 11:31:54,786 - Do unicode file recognition:  false
-2019-06-06 11:31:54,786 - Do unicode file recognition:  false
-2019-06-06 11:31:54,786 - Do unicode file recognition:  false
-2019-06-06 11:31:54,786 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,786 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,786 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,786 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,786 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
-2019-06-06 11:31:54,786 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,786 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,786 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,786 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,786 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,786 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
-2019-06-06 11:31:54,787 - Created '20' parsers.
-2019-06-06 11:31:54,787 - Created '20' parsers.
-2019-06-06 11:31:54,787 - Created '20' parsers.
-2019-06-06 11:31:54,787 - Created '20' parsers.
-2019-06-06 11:31:54,787 - Created '20' parsers.
-2019-06-06 11:31:54,787 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,787 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,787 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,787 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,787 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
-2019-06-06 11:31:54,787 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,787 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,787 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,787 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,787 - Velocimacro : Default library not found.
-2019-06-06 11:31:54,787 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,787 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,787 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,787 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,787 - Velocimacro : allowInline = true : VMs can be defined inline in templates
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,787 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
-2019-06-06 11:31:54,787 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,787 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,787 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,787 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,787 - Velocimacro : autoload off : VM system will not automatically reload global library macros
-2019-06-06 11:31:54,788 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,788 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,788 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,788 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,788 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,789 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,789 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,789 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,789 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,789 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
-2019-06-06 11:31:54,792 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,792 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,792 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,792 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
-2019-06-06 11:31:54,792 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,568 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Trying to use logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Using logger class org.apache.velocity.runtime.log.Log4JLogChute
+2019-07-04 14:13:57,568 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,568 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,568 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,568 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,568 - Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+2019-07-04 14:13:57,568 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,568 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,568 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,568 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,568 - ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,568 - Do unicode file recognition:  false
+2019-07-04 14:13:57,568 - Do unicode file recognition:  false
+2019-07-04 14:13:57,568 - Do unicode file recognition:  false
+2019-07-04 14:13:57,568 - Do unicode file recognition:  false
+2019-07-04 14:13:57,568 - Do unicode file recognition:  false
+2019-07-04 14:13:57,568 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,568 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,568 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,568 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,568 - FileResourceLoader : adding path '/home/nadee/Documents/RNDRotation/HoneyPotAPIFeature/carbon-apimgt-1/components/apimgt/org.wso2.carbon.apimgt.impl/target/test-classes/'
+2019-07-04 14:13:57,568 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,568 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,568 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,568 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,568 - ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,568 - Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Include
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,569 - Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+2019-07-04 14:13:57,569 - Created '20' parsers.
+2019-07-04 14:13:57,569 - Created '20' parsers.
+2019-07-04 14:13:57,569 - Created '20' parsers.
+2019-07-04 14:13:57,569 - Created '20' parsers.
+2019-07-04 14:13:57,569 - Created '20' parsers.
+2019-07-04 14:13:57,569 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,569 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,569 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,569 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,569 - Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+2019-07-04 14:13:57,569 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,569 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,569 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,569 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,569 - Velocimacro : Default library not found.
+2019-07-04 14:13:57,569 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,569 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,569 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,569 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,569 - Velocimacro : allowInline = true : VMs can be defined inline in templates
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,569 - Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+2019-07-04 14:13:57,569 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,569 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,569 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,569 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,569 - Velocimacro : autoload off : VM system will not automatically reload global library macros
+2019-07-04 14:13:57,570 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getKey(  ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,570 - Velocimacro : added #getRule(  policy ) : source = repository/resources/policy_templates/throttle_policy_template_sub.xml
+2019-07-04 14:13:57,572 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,572 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,572 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,572 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+2019-07-04 14:13:57,572 - ResourceManager : found repository/resources/policy_templates/throttle_policy_template_sub.xml with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader

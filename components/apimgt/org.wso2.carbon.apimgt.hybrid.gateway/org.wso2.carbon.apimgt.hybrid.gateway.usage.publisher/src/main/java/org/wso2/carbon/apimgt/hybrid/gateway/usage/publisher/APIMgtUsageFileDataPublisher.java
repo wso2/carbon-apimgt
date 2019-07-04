@@ -24,14 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsagePublisherException;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.dto.AlertTypeDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeAlertTypesPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeFaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestResponseStreamPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeThrottlePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.*;
 
 /**
  * Implementation of APIMgtUsageDataPublisher used for writing events into a File
@@ -130,5 +123,10 @@ public class APIMgtUsageFileDataPublisher implements APIMgtUsageDataPublisher {
         } catch (Exception e) {
             log.error("Error while publishing Request event", e);
         }
+    }
+
+    @Override
+    public void publishEvent(BotDataDTO botDataDTO) {
+
     }
 }

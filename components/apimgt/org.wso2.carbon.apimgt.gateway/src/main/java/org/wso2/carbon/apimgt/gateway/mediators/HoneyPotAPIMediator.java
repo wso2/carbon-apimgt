@@ -7,8 +7,9 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.throttling.HoneyAPIDataPublisher.HoneyAPIDataPublisher;
+import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
+import org.wso2.carbon.apimgt.usage.publisher.dto.BotDataDTO;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public class HoneyPotAPIMediator extends AbstractMediator {
         org.apache.axis2.context.MessageContext msgContext = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
 
-        String messageBody = null;
+        String messageBody;
 
         long currentTime = System.currentTimeMillis();
         String messageId = messageContext.getMessageID();
@@ -45,7 +46,17 @@ public class HoneyPotAPIMediator extends AbstractMediator {
         log.info("Detected Anonymous User | MessageId :" + messageId + "|" + " Request Method :" + apiMethod + "|" +
                 " Message Body : " + messageBody + "|" + " client Ip :" + clientIP + "|" + "Headers set :" + headerSet);
 
-        honeyAPIDataPublisher.publishEvent(currentTime, messageId, apiMethod, headerSet, messageBody, clientIP);
+        //honeyAPIDataPublisher.publishEvent(currentTime, messageId, apiMethod, headerSet, messageBody, clientIP);
+        BotDataDTO botDataDTO = new BotDataDTO();
+        botDataDTO.setCurrentTime(currentTime);
+        botDataDTO.setMessageID(messageId);
+        botDataDTO.setApiMethod(apiMethod);
+        botDataDTO.setHeaderSet(headerSet);
+        botDataDTO.setMessageBody(messageBody);
+        botDataDTO.setClientIp(clientIP);
+        APIMgtUsageDataBridgeDataPublisher apiMgtUsageDataBridgeDataPublisher = new APIMgtUsageDataBridgeDataPublisher();
+        apiMgtUsageDataBridgeDataPublisher.init();
+        apiMgtUsageDataBridgeDataPublisher.publishEvent(botDataDTO);
         return true;
 
     }

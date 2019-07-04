@@ -32,4 +32,6 @@ public interface APIMgtUsageDataPublisher {
     
     public void publishEvent(RequestResponseStreamDTO requestStream);
 
+    public void publishEvent(BotDataDTO botDataDTO);
+
 }
