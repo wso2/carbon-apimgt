@@ -111,7 +111,8 @@ public class ImportApiServiceImpl extends ImportApiService {
             }
             importExportManager.validateOwner(ownerId, applicationDetails.getGroupId());
 
-            if (APIUtil.isApplicationExist(ownerId, applicationDetails.getName(), applicationDetails.getGroupId()) && update != null && update){
+            // check whether we needs to update application or add it
+            if (APIUtil.isApplicationExist(ownerId, applicationDetails.getName(), applicationDetails.getGroupId()) && update != null && update) {
                 appId = APIUtil.getApplicationId(applicationDetails.getName(), ownerId);
                 Application application = consumer.getApplicationById(appId);
                 applicationDetails.setId(appId);
@@ -133,10 +134,11 @@ public class ImportApiServiceImpl extends ImportApiService {
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     importedApplicationDTO.getApplicationId());
 
-            if(skipApplicationKeys == null || !skipApplicationKeys) {
+            // check whether keys need to be skipped while import
+            if (skipApplicationKeys == null || !skipApplicationKeys) {
                 // Add application keys if present and if keys does not exists in the current application
-                if (applicationDetails.getKeys().size() > 0 && importedApplication.getKeys().size() == 0){
-                    for (APIKey apiKey: applicationDetails.getKeys()){
+                if (applicationDetails.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
+                    for (APIKey apiKey : applicationDetails.getKeys()) {
                         String decodedConsumerSecretBytes = apiKey.getConsumerSecret();
                         apiKey.setConsumerSecret(new String(Base64.decodeBase64(decodedConsumerSecretBytes)));
                         importExportManager.addApplicationKey(username, importedApplication, apiKey);

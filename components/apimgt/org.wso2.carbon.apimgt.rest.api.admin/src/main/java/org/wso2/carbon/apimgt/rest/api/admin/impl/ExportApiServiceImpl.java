@@ -89,12 +89,12 @@ public class ExportApiServiceImpl extends ExportApiService {
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
 
-            // export keys only if withKeys parameter present
+            // export keys for application
             if (withKeys == null || !withKeys) {
                 applicationDetails.getKeys().clear();
             } else {
                 // encode secrets when exporting
-                for (APIKey apiKey: applicationDetails.getKeys()){
+                for (APIKey apiKey : applicationDetails.getKeys()) {
                     byte[] consumerSecretBytes = apiKey.getConsumerSecret().getBytes(Charset.defaultCharset());
                     apiKey.setConsumerSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
                 }
