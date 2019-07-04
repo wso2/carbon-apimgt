@@ -52,6 +52,7 @@ public class ExportApiServiceImpl extends ExportApiService {
      *
      * @param appName  Search query
      * @param appOwner Owner of the Application
+     * @param withKeys Export keys with application
      * @return Zip file containing exported Application
      */
     @Override

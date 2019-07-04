@@ -60,11 +60,13 @@ public class ImportApiServiceImpl extends ImportApiService {
     /**
      * Import an Application which has been exported to a zip file
      *
-     * @param appOwner          target owner of the application
-     * @param preserveOwner     if true, preserve the original owner of the application
-     * @param skipSubscriptions if true, skip subscriptions of the application
-     * @param fileInputStream   content stream of the zip file which contains exported Application
-     * @param fileDetail        meta information of the zip file
+     * @param appOwner            target owner of the application
+     * @param preserveOwner       if true, preserve the original owner of the application
+     * @param skipSubscriptions   if true, skip subscriptions of the application
+     * @param fileInputStream     content stream of the zip file which contains exported Application
+     * @param fileDetail          meta information of the zip file
+     * @param skipApplicationKeys Skip application keys while importing
+     * @param update              update if existing application found or import
      * @return imported Application
      */
     @Override
