@@ -36,6 +36,7 @@ public class HoneyAPIDataPublisher{
         if (throttleProperties != null) {
             ThrottleProperties.DataPublisher dataPublisherConfiguration = ServiceReferenceHolder.getInstance()
                     .getThrottleProperties().getDataPublisher();
+
             if (dataPublisherConfiguration != null && dataPublisherConfiguration.isEnabled()) {
                 dataPublisherPool = HoneyDataPublisherPool.getInstance();
                 ThrottleProperties.DataPublisherThreadPool dataPublisherThreadPoolConfiguration = ServiceReferenceHolder

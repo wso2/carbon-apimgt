@@ -49,6 +49,8 @@ public class APIManagerAnalyticsConfiguration {
     private String alertTypeStreamVersion;
     private boolean skipWorkFlowEventReceiverConnection;
     private String datacenterId;
+    private String botDataStreamName;
+    private  String botDataStreamVersion;
     
     private APIManagerAnalyticsConfiguration() {
     }
@@ -78,6 +80,14 @@ public class APIManagerAnalyticsConfiguration {
             if (requestStreamName == null || requestStreamVersion == null) {
                 log.error("Request stream name or version is null. Check api-manager.xml");
             }
+
+
+            //botStream
+            botDataStreamName = config.getFirstProperty("Analytics.Streams.botData.Name");
+            log.info(botDataStreamName);
+            botDataStreamVersion = config.getFirstProperty("Analytics.Streams.botData.Version");
+            log.info(botDataStreamVersion);
+
             responseStreamName = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_NAME);
             responseStreamVersion = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_VERSION);
 
@@ -156,6 +166,14 @@ public class APIManagerAnalyticsConfiguration {
 
     public String getFaultStreamName() {
         return faultStreamName;
+    }
+
+    public String getBotDataStreamName(){
+        return botDataStreamName;
+    }
+
+    public String getBotStreamVersion(){
+        return botDataStreamVersion;
     }
 
     public String getFaultStreamVersion() {
