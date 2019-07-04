@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +27,10 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ImportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
@@ -43,6 +47,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -64,9 +69,11 @@ public class ImportApiServiceImpl extends ImportApiService {
      */
     @Override
     public Response importApplicationsPost(InputStream fileInputStream, Attachment fileDetail,
-                                           Boolean preserveOwner, Boolean skipSubscriptions, String appOwner) {
+                                           Boolean preserveOwner, Boolean skipSubscriptions, String appOwner,
+                                           Boolean skipApplicationKeys, Boolean update) {
         APIConsumer consumer;
         String ownerId;
+        int appId;
         String username = RestApiUtil.getLoggedInUsername();
         String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator +
                 APPLICATION_IMPORT_DIR_PREFIX +
@@ -76,6 +83,19 @@ public class ImportApiServiceImpl extends ImportApiService {
             FileBasedApplicationImportExportManager importExportManager =
                     new FileBasedApplicationImportExportManager(consumer, tempDirPath);
             Application applicationDetails = importExportManager.importApplication(fileInputStream);
+
+            // decode Oauth secrets
+            OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp("PRODUCTION");
+            if (productionOAuthApplicationInfo != null) {
+                String decodedConsumerSecretBytes = productionOAuthApplicationInfo.getClientSecret();
+                productionOAuthApplicationInfo.setClientSecret(new String(Base64.decodeBase64(decodedConsumerSecretBytes)));
+            }
+            OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp("SANDBOX");
+            if (sandboxOAuthApplicationInfo != null) {
+                String decodedConsumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret();
+                sandboxOAuthApplicationInfo.setClientSecret(new String(Base64.decodeBase64(decodedConsumerSecretBytes)));
+            }
+
             if (!StringUtils.isBlank(appOwner)) {
                 ownerId = appOwner;
             } else if (preserveOwner != null && preserveOwner) {
@@ -90,7 +110,17 @@ public class ImportApiServiceImpl extends ImportApiService {
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
             importExportManager.validateOwner(ownerId, applicationDetails.getGroupId());
-            int appId = consumer.addApplication(applicationDetails, ownerId);
+
+            if (APIUtil.isApplicationExist(ownerId, applicationDetails.getName(), applicationDetails.getGroupId()) && update != null && update){
+                appId = APIUtil.getApplicationId(applicationDetails.getName(), ownerId);
+                Application application = consumer.getApplicationById(appId);
+                applicationDetails.setId(appId);
+                applicationDetails.setUUID(application.getUUID());
+                consumer.updateApplication(applicationDetails);
+            } else {
+                appId = consumer.addApplication(applicationDetails, ownerId);
+            }
+
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = importExportManager
@@ -102,6 +132,18 @@ public class ImportApiServiceImpl extends ImportApiService {
                     .fromApplicationToInfoDTO(importedApplication);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     importedApplicationDTO.getApplicationId());
+
+            if(skipApplicationKeys == null || !skipApplicationKeys) {
+                // Add application keys if present and if keys does not exists in the current application
+                if (applicationDetails.getKeys().size() > 0 && importedApplication.getKeys().size() == 0){
+                    for (APIKey apiKey: applicationDetails.getKeys()){
+                        String decodedConsumerSecretBytes = apiKey.getConsumerSecret();
+                        apiKey.setConsumerSecret(new String(Base64.decodeBase64(decodedConsumerSecretBytes)));
+                        importExportManager.addApplicationKey(username, importedApplication, apiKey);
+                    }
+                }
+            }
+
             if (skippedAPIs.isEmpty()) {
                 return Response.created(location).entity(importedApplicationDTO).build();
             } else {

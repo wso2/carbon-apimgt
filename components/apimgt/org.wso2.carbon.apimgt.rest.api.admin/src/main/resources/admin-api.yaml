@@ -1903,6 +1903,12 @@ paths:
             Owner of the Application
           required: true
           type: string
+        - name: withKeys
+          in: query
+          description: |
+            Export application keys
+          required: false
+          type: boolean
       tags:
         - Application (Individual)
       responses:
@@ -1977,6 +1983,18 @@ paths:
           description: |
             Expected Owner of the Application in the Import Environment
           type: string
+        - name: skipApplicationKeys
+          in: query
+          description: |
+            Skip importing Keys of the Application
+          required: false
+          type: boolean
+        - name: update
+          in: query
+          description: |
+            Update if application exists
+          required: false
+          type: boolean
       tags:
         - Application (Individual)
       responses:

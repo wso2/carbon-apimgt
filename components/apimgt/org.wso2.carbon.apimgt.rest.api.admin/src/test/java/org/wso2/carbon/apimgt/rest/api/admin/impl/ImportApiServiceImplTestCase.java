@@ -108,7 +108,7 @@ public class ImportApiServiceImplTestCase {
                 "carbon.super", 0, Integer.MAX_VALUE, false)).thenReturn(matchedAPIs);
         Mockito.when(apiConsumer.getApplicationById(1)).thenReturn(new Application(1));
         Response response = importApiService.importApplicationsPost(fis, fileInfo, true,
-                false, "admin");
+                false, "admin", false, false);
         Assert.assertEquals(response.getStatus(), 207);
     }
 
@@ -141,7 +141,7 @@ public class ImportApiServiceImplTestCase {
                 "carbon.super", 0, Integer.MAX_VALUE, false)).thenReturn(matchedAPIs);
         Mockito.when(apiConsumer.getApplicationById(1)).thenReturn(new Application(1));
         Response response = importApiService.importApplicationsPost(fis, fileInfo, true,
-                false, "admin");
+                false, "admin", false, false);
         Assert.assertEquals(response.getStatus(), 207);
     }
 
@@ -165,7 +165,7 @@ public class ImportApiServiceImplTestCase {
         Mockito.when(apiConsumer.addApplication(Mockito.any(Application.class), Mockito.anyString()))
                 .thenThrow(APIManagementException.class);
         Response response = importApiService.importApplicationsPost(fis, null, false,
-                false, null);
+                false, null, true, false);
 
         Assert.assertNull("Error while importing Application", response);
     }
@@ -186,7 +186,7 @@ public class ImportApiServiceImplTestCase {
         FileInputStream fis;
         fis = new FileInputStream(file);
         Response response = importApiService.importApplicationsPost(fis, null, false,
-                false, "admin@hr.lk");
+                false, "admin@hr.lk", true, false);
         Assert.assertEquals(response.getStatus(), 403);
     }
 
