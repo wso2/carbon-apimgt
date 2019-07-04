@@ -1552,6 +1552,28 @@ public final class APIConstants {
         public static final String APPLICATION = "Application";
         public static final String NONE = "None";
     }
+
+    /**
+     * Constants for monetization usage publishing
+     */
+    public static class MonetizationUsagePublisher {
+
+        public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+        public static final String TIME_ZONE = "UTC";
+        public static final String COMPLETED = "COMPLETED";
+        public static final String RUNNING = "RUNNING";
+        public static final String INPROGRESS = "INPROGRESS";
+        public static final String INITIATED = "INITIATED";
+        public static final String SUCCESSFULL = "SUCCESSFULL";
+        public static final String FAILED = "FAILED";
+        public static final String ADDITIONAL_PROPERTY_LOCATION = "Monetization.AdditionalProperties.Property";
+        public static final String DEFAULT_GRANULARITY = "days";
+        public static final String DEFAULT_TIME_GAP_IN_DAYS = "1";
+        public static final String JOB_NAME = "USAGE_PUBLISHER";
+        public static final String FROM_TIME_CONFIGURATION_PROPERTY =
+                "Monetization.UsagePubliser.PublishTimeDurationInDays";
+        public static final String GRANULARITY_PROERTY_LOCATION = "Monetization.UsagePubliser.Granularity";
+    }
     // HTTP methods
     public static final String HTTP_GET = "GET";
     public static final String HTTP_POST = "POST";

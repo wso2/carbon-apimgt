@@ -23,8 +23,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -60,7 +60,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -2740,7 +2739,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
                 workflowDTO.setApplicationId(applicationId);
                 workflowDTO.setSubscriber(userId);
-                workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
+
+                Tier tier = null;
+                Set<Tier> policies = api.getAvailableTiers();
+                Iterator<Tier> iterator = policies.iterator();
+                boolean isPolicyAllowed = false;
+                while (iterator.hasNext()) {
+                    Tier policy = iterator.next();
+                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
+                        tier = policy;
+                    }
+                }
+                //check whether monetization is enabled for API and tier plan is commercial
+                if (api.getMonetizationStatus() == true && tier.getTierPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
+                    workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
+                } else {
+                    workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
+                }
             } catch (WorkflowException e) {
                 //If the workflow execution fails, roll back transaction by removing the subscription entry.
                 apiMgtDAO.removeSubscriptionById(subscriptionId);
@@ -2904,7 +2919,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             workflowDTO.setCreatedTime(System.currentTimeMillis());
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
-            removeSubscriptionWFExecutor.execute(workflowDTO);
+
+            Tier tier = null;
+            Set<Tier> policies = api.getAvailableTiers();
+            Iterator<Tier> iterator = policies.iterator();
+            boolean isPolicyAllowed = false;
+            while (iterator.hasNext()) {
+                Tier policy = iterator.next();
+                if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
+                    tier = policy;
+                }
+            }
+            //check whether monetization is enabled for API and tier plan is commercial
+            if (api.getMonetizationStatus() == true && tier.getTierPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
+                removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
+            } else {
+                removeSubscriptionWFExecutor.execute(workflowDTO);
+            }
 
             JSONObject subsLogObject = new JSONObject();
             subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getApiName());

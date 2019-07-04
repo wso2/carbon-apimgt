@@ -21,8 +21,6 @@ import ConfirmDialog from './ConfirmDialog';
 describe('<ConfirmDialog/> tests', () => {
     test('should render the ConfirmDialog component', () => {
         const wrapper = mount(<ConfirmDialog />);
-        // eslint-disable-next-line no-debugger
-        debugger;
     });
 
     test.todo('should return default props when they are not provided ');

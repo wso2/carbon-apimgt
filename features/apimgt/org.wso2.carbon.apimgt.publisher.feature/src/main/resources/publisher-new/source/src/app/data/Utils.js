@@ -176,6 +176,14 @@ class Utils {
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
     }
 
+
+    /**
+     *
+     * Get swagger definition URL
+     * @static
+     * @returns
+     * @memberof Utils
+     */
     static getSwaggerURL() {
         return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }

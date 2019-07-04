@@ -118,7 +118,7 @@ paths:
 
         Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
       x-examples:
-        $ref: docs/examples/apis.yaml#/get
+        $ref: docs/examples/apis/apis.yaml#/get
       parameters:
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/offset'
@@ -332,6 +332,8 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
+      x-examples:
+        $ref: docs/examples/apis/apis_id_get.yaml
       tags:
         - API (Individual)
       responses:
@@ -1158,11 +1160,6 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_create
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/copy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0\""
-      x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/copy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/25a84fc9-38c0-4578-95e8-29fb6b1c4771\nContent-Type: application/json\n\n{\r\n   \"id\": \"25a84fc9-38c0-4578-95e8-29fb6b1c4771\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"2.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"\\\\/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"description\\\":\\\"Created.\\\"}}}},\\\"\\\\/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"headers\\\":{},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application\\\\/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application\\\\/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.apache.org\\\\/licenses\\\\/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.pizzashack.com\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
       summary: Create a new API version
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
@@ -1178,6 +1175,8 @@ paths:
           default: false
           in: query
         - $ref: '#/parameters/apiId-Q'
+      x-examples:
+        $ref: docs/examples/apis/apis_copyapi.yaml#/post
       tags:
         - API (Individual)
       responses:
@@ -5427,8 +5426,13 @@ definitions:
           even if the request count exceeded within a unit time
         type: boolean
         example: true
-
-
+      monetizationProperties:
+        description:
+          Properties of a tier plan which are related to monetization
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
 #-----------------------------------------------------
 # The Subscription List resource
 #-----------------------------------------------------
@@ -6395,6 +6399,10 @@ definitions:
         items:
           $ref: '#/definitions/Environment'
       scopes:
+        type: array
+        items:
+          type: string
+      MonetizationProperties:
         type: array
         items:
           type: string

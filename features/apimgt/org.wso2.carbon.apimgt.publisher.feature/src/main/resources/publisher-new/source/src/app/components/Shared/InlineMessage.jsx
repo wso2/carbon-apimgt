@@ -47,7 +47,11 @@ class InlineMessage extends React.Component {
 }
 
 InlineMessage.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        root: PropTypes.string,
+        iconItem: PropTypes.string,
+        content: PropTypes.string,
+    }).isRequired,
     height: PropTypes.number,
     type: PropTypes.string,
     children: PropTypes.shape({}).isRequired,
