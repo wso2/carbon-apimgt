@@ -1465,7 +1465,7 @@ public final class APIConstants {
         public static final String DIGEST_AUTH = "DigestAuth";
     }
 
-    public enum APIType {
+    public enum APITransportType {
         HTTP, WS,
     }
 
@@ -1579,4 +1579,10 @@ public final class APIConstants {
     public static final String HTTP_HEAD = "HEAD";
     public static final String HTTP_OPTIONS = "OPTIONS";
     public static final String HTTP_PATCH = "PATCH";
+
+    // Supported API Types
+    public enum ApiTypes {
+        API,
+        PRODUCT_API
+    }
 }

@@ -6313,6 +6313,11 @@ public class ApiMgtDAO {
         }
     }
 
+    public ArrayList<URITemplate> getAPIProductURITemplates(String apiContext, String version)
+                                                                    throws APIManagementException {
+        return getAPIProductURITemplatesAdvancedThrottle(apiContext, version);
+    }
+
     public ArrayList<URITemplate> getAllURITemplatesOldThrottle(String apiContext, String version) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -6358,7 +6363,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         int tenantId;
-        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
+        ArrayList<URITemplate> uriTemplates = new ArrayList<>();
 
         String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
         if (apiTenantDomain != null) {
@@ -6377,85 +6382,123 @@ public class ApiMgtDAO {
             prepStmt.setInt(3, tenantId);
 
             rs = prepStmt.executeQuery();
-            Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
-            while (rs != null && rs.next()) {
 
-                String httpVerb = rs.getString("HTTP_METHOD");
-                String authType = rs.getString("AUTH_SCHEME");
-                String urlPattern = rs.getString("URL_PATTERN");
-                String policyName = rs.getString("THROTTLING_TIER");
-                String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
-                String applicableLevel = rs.getString("APPLICABLE_LEVEL");
-                String policyConditionGroupId = "_condition_" + conditionGroupId;
-
-                String key = httpVerb + ":" + urlPattern;
-                if (mapByHttpVerbURLPatternToId.containsKey(key)) {
-                    if (StringUtils.isEmpty(conditionGroupId)) {
-                        continue;
-                    }
-
-                    // Converting ConditionGroup to a lightweight ConditionGroupDTO.
-                    ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
-                    groupDTO.setConditionGroupId(policyConditionGroupId);
-//					mapByHttpVerbURLPatternToId.get(key).add(policyConditionGroupId);
-                    mapByHttpVerbURLPatternToId.get(key).add(groupDTO);
-
-                } else {
-                    String script = null;
-                    URITemplate uriTemplate = new URITemplate();
-                    uriTemplate.setThrottlingTier(policyName);
-                    uriTemplate.setAuthType(authType);
-                    uriTemplate.setHTTPVerb(httpVerb);
-                    uriTemplate.setUriTemplate(urlPattern);
-                    uriTemplate.setApplicableLevel(applicableLevel);
-                    InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                    if (mediationScriptBlob != null) {
-                        script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                    }
-
-                    uriTemplate.setMediationScript(script);
-                    Set<ConditionGroupDTO> conditionGroupIdSet = new HashSet<ConditionGroupDTO>();
-                    mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
-                    uriTemplates.add(uriTemplate);
-                    if (StringUtils.isEmpty(conditionGroupId)) {
-                        continue;
-                    }
-                    ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
-                    groupDTO.setConditionGroupId(policyConditionGroupId);
-                    conditionGroupIdSet.add(groupDTO);
-
-                }
-
-            }
-
-            for (URITemplate uriTemplate : uriTemplates) {
-                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                if (mapByHttpVerbURLPatternToId.containsKey(key)) {
-                    if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
-                        Set<ConditionGroupDTO> conditionGroupDTOs = mapByHttpVerbURLPatternToId.get(key);
-                        ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
-                        defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
-                        conditionGroupDTOs.add(defaultGroup);
-//						uriTemplate.getThrottlingConditions().addAll(mapByHttpVerbURLPatternToId.get(key));
-                        uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
-                        uriTemplate.setConditionGroups(conditionGroupDTOs.toArray(new ConditionGroupDTO[]{}));
-                    }
-
-                }
-
-                if (uriTemplate.getThrottlingConditions().isEmpty()) {
-                    uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
-                    ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
-                    defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
-                    uriTemplate.setConditionGroups(new ConditionGroupDTO[]{defaultGroup});
-                }
-
-            }
+            uriTemplates = extractURITemplates(rs);
         } catch (SQLException e) {
             handleException("Error while fetching all URL Templates", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
+
+        return uriTemplates;
+    }
+
+
+    public ArrayList<URITemplate> getAPIProductURITemplatesAdvancedThrottle(String apiContext, String version)
+            throws APIManagementException {
+        int tenantId;
+        ArrayList<URITemplate> uriTemplates = new ArrayList<>();
+
+        String apiTenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
+        if (apiTenantDomain != null) {
+            tenantId = APIUtil.getTenantIdFromTenantDomain(apiTenantDomain);
+        } else {
+            tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        }
+
+        // TODO : FILTER RESULTS ONLY FOR ACTIVE APIs
+        String query = SQLConstants.ThrottleSQLConstants.GET_CONDITION_GROUPS_FOR_POLICIES_IN_PRODUCTS_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            prepStmt.setString(1, apiContext);
+            prepStmt.setString(2, version);
+            prepStmt.setInt(3, tenantId);
+
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                uriTemplates = extractURITemplates(rs);
+            }
+        } catch (SQLException e) {
+            handleException("Error while fetching all URL Templates", e);
+        }
+
+        return uriTemplates;
+    }
+
+    private ArrayList<URITemplate> extractURITemplates(ResultSet rs) throws SQLException, APIManagementException {
+        Map<String, Set<ConditionGroupDTO>> mapByHttpVerbURLPatternToId = new HashMap<String, Set<ConditionGroupDTO>>();
+        ArrayList<URITemplate> uriTemplates = new ArrayList<URITemplate>();
+
+        while (rs != null && rs.next()) {
+            String httpVerb = rs.getString("HTTP_METHOD");
+            String authType = rs.getString("AUTH_SCHEME");
+            String urlPattern = rs.getString("URL_PATTERN");
+            String policyName = rs.getString("THROTTLING_TIER");
+            String conditionGroupId = rs.getString("CONDITION_GROUP_ID");
+            String applicableLevel = rs.getString("APPLICABLE_LEVEL");
+            String policyConditionGroupId = "_condition_" + conditionGroupId;
+
+            String key = httpVerb + ":" + urlPattern;
+            if (mapByHttpVerbURLPatternToId.containsKey(key)) {
+
+                if (StringUtils.isEmpty(conditionGroupId)) {
+                    continue;
+                }
+
+                // Converting ConditionGroup to a lightweight ConditionGroupDTO.
+                ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
+                groupDTO.setConditionGroupId(policyConditionGroupId);
+                mapByHttpVerbURLPatternToId.get(key).add(groupDTO);
+            } else {
+                String script = null;
+                URITemplate uriTemplate = new URITemplate();
+                uriTemplate.setThrottlingTier(policyName);
+                uriTemplate.setAuthType(authType);
+                uriTemplate.setHTTPVerb(httpVerb);
+                uriTemplate.setUriTemplate(urlPattern);
+                uriTemplate.setApplicableLevel(applicableLevel);
+                InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+
+                if (mediationScriptBlob != null) {
+                    script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                }
+
+                uriTemplate.setMediationScript(script);
+                Set<ConditionGroupDTO> conditionGroupIdSet = new HashSet<ConditionGroupDTO>();
+                mapByHttpVerbURLPatternToId.put(key, conditionGroupIdSet);
+                uriTemplates.add(uriTemplate);
+
+                if (StringUtils.isEmpty(conditionGroupId)) {
+                    continue;
+                }
+
+                ConditionGroupDTO groupDTO = createConditionGroupDTO(Integer.parseInt(conditionGroupId));
+                groupDTO.setConditionGroupId(policyConditionGroupId);
+                conditionGroupIdSet.add(groupDTO);
+            }
+        }
+
+        for (URITemplate uriTemplate : uriTemplates) {
+            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+            if (mapByHttpVerbURLPatternToId.containsKey(key)) {
+                if (!mapByHttpVerbURLPatternToId.get(key).isEmpty()) {
+                    Set<ConditionGroupDTO> conditionGroupDTOs = mapByHttpVerbURLPatternToId.get(key);
+                    ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+                    defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+                    conditionGroupDTOs.add(defaultGroup);
+                    uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
+                    uriTemplate.setConditionGroups(conditionGroupDTOs.toArray(new ConditionGroupDTO[]{}));
+                }
+            }
+
+            if (uriTemplate.getThrottlingConditions().isEmpty()) {
+                uriTemplate.getThrottlingConditions().add(APIConstants.THROTTLE_POLICY_DEFAULT);
+                ConditionGroupDTO defaultGroup = new ConditionGroupDTO();
+                defaultGroup.setConditionGroupId(APIConstants.THROTTLE_POLICY_DEFAULT);
+                uriTemplate.setConditionGroups(new ConditionGroupDTO[]{defaultGroup});
+            }
+
+        }
+
         return uriTemplates;
     }
 
@@ -12037,9 +12080,8 @@ public class ApiMgtDAO {
                 if (!defaultVersionInvoked) {
                     ps.setString(4, version);
                     ps.setString(5, context);
-                    ps.setString(6, consumerKey);
+                    ps.setString(6, version);
                     ps.setInt(7, apiOwnerTenantId);
-                    ps.setString(8, version);
 
                 }
             }
@@ -12146,11 +12188,11 @@ public class ApiMgtDAO {
                     String subscriberTenant = MultitenantUtils.getTenantDomain(subscriberUserId);
                     int apiId = rs.getInt("API_ID");
                     int subscriberTenantId = APIUtil.getTenantId(subscriberUserId);
-                    int apiTenantId = APIUtil.getTenantId(API_PROVIDER);
+
                     //TODO isContentAware
                     boolean isContentAware =
                             isAnyPolicyContentAware(conn, apiTier, APP_TIER, SUB_TIER,
-                                    subscriberTenantId, apiTenantId, apiId);
+                                    subscriberTenantId, apiOwnerTenantId, apiId);
                     infoDTO.setContentAware(isContentAware);
 
                     //TODO this must implement as a part of throttling implementation.

@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -113,7 +112,7 @@ public class APIMappingUtil {
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition = null;
 
-        if (!APIConstants.APIType.WS.toString().equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
             apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
             if (apiSwaggerDefinition != null) {
                 apiSwaggerDefinition = APIUtil.removeXMediationScriptsFromSwagger(apiSwaggerDefinition);

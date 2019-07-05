@@ -114,6 +114,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
                 }
             }
 
+            context.put("apiStatus", apiProduct.getState());
             context.put("aggregates", aggregateResources);
         }
 
