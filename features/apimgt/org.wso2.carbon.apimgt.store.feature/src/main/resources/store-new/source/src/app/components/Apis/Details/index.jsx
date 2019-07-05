@@ -206,6 +206,7 @@ class Details extends React.Component {
                     for (let i = 0; i < applications.list.length; i++) {
                         const applicationId = applications.list[i].applicationId;
                         const applicationName = applications.list[i].name;
+                        const applicationStatus = applications.list[i].status;
                         // include the application only if it does not has an existing subscriptions
                         let applicationSubscribed = false;
                         for (let j = 0; j < subscribedApplications.length; j++) {
@@ -214,7 +215,7 @@ class Details extends React.Component {
                                 subscribedApplications[j].label = applicationName;
                             }
                         }
-                        if (!applicationSubscribed) {
+                        if (!applicationSubscribed && applicationStatus === 'APPROVED') {
                             applicationsAvailable.push({ value: applicationId, label: applicationName });
                         }
                     }
