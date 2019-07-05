@@ -36,10 +36,11 @@ import AppsTableContent from './AppsTableContent';
 import Loading from '../../Base/Loading/Loading';
 import Application from '../../../data/Application';
 import NewApp from '../Create/NewApp';
+import ApplicationTableHead from './ApplicationTableHead';
 /**
  *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme object
  */
 const styles = theme => ({
     card: {
@@ -99,90 +100,17 @@ const styles = theme => ({
         width: theme.custom.contentAreaWidth,
     },
 });
-/**
- *
- *
- * @class ApplicationTableHead
- * @extends {Component}
- */
-class ApplicationTableHead extends Component {
-    static propTypes = {
-        onRequestSort: PropTypes.func.isRequired,
-        order: PropTypes.string.isRequired,
-        orderBy: PropTypes.string.isRequired,
-    };
 
-    createSortHandler = property => (event) => {
-        this.props.onRequestSort(event, property);
-    };
-
-    render() {
-        const columnData = [
-            {
-                id: 'name',
-                numeric: false,
-                disablePadding: true,
-                label: 'Name',
-                sorting: true,
-            },
-            {
-                id: 'throttlingTier',
-                numeric: false,
-                disablePadding: false,
-                label: 'Policy',
-                sorting: true,
-            },
-            {
-                id: 'lifeCycleStatus',
-                numeric: false,
-                disablePadding: false,
-                label: 'Workflow Status',
-                sorting: true,
-            },
-            {
-                id: 'subscriptions',
-                numeric: false,
-                disablePadding: false,
-                label: 'Subscriptions',
-                sorting: true,
-            },
-            {
-                id: 'actions',
-                numeric: false,
-                disablePadding: false,
-                label: 'Actions',
-                sorting: false,
-            },
-        ];
-        const { order, orderBy } = this.props;
-        return (
-            <TableHead>
-                <TableRow>
-                    {columnData.map((column) => {
-                        return (
-                            <TableCell key={column.id} numeric={column.numeric} sortDirection={orderBy === column.id ? order : false}>
-                                {column.sorting ? (
-                                    <TableSortLabel active={orderBy === column.id} direction={order} onClick={this.createSortHandler(column.id)}>
-                                        {column.label}
-                                    </TableSortLabel>
-                                ) : (
-                                    column.label
-                                )}
-                            </TableCell>
-                        );
-                    }, this)}
-                </TableRow>
-            </TableHead>
-        );
-    }
-}
 /**
- *
- *
+ * @inheritdoc
  * @class Listing
  * @extends {Component}
  */
 class Listing extends Component {
+    /**
+     *
+     * @param {any} props properties
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -198,8 +126,6 @@ class Listing extends Component {
     }
 
     /**
-     *
-     *
      * @memberof Listing
      */
     componentDidMount() {
@@ -207,49 +133,70 @@ class Listing extends Component {
     }
 
     /**
-     *
-     *
      * @memberof Listing
      */
     updateApps = () => {
-        const promised_applications = Application.all();
-        promised_applications
+        const { history, location } = this.props;
+        const promisedApplications = Application.all();
+        promisedApplications
             .then((applications) => {
-                const apps = new Map(); // Applications list put into map, to make it efficient when deleting apps (referring back to an App)
+                // Applications list put into map, to make it efficient when deleting apps (referring back to an App)
+                const apps = new Map();
                 applications.list.map(app => apps.set(app.applicationId, app)); // Store application against its UUID
                 this.setState({ data: apps });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
+                    // eslint-disable-next-line react/no-unused-state
                     this.setState({ notFound: true });
                 } else if (status === 401) {
+                    // eslint-disable-next-line react/no-unused-state
                     this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
+                    const params = qs.stringify({ reference: location.pathname });
+                    history.push({ pathname: '/login', search: params });
                 }
             });
     };
 
     /**
-     *
-     *
-     * @memberof Listing
+     * @param{*} event event
+     * @param{*} property sorting method
      */
     handleRequestSort = (event, property) => {
-        const orderBy = property;
-        let order = 'desc';
-        if (this.state.orderBy === property && this.state.order === 'desc') {
-            order = 'asc';
+        const { orderBy, order } = this.state;
+        let currentOrder = 'desc';
+        if (orderBy === property && order === 'desc') {
+            currentOrder = 'asc';
         }
-        this.setState({ order, orderBy });
+        this.setState({ order: currentOrder, orderBy });
+    };
+
+
+    /**
+     *
+     * @param {*} event event
+     * @param {*} page page
+     * @memberof Listing
+     */
+    handleChangePage = (event, page) => {
+        this.setState({ page });
+    };
+
+    /**
+     *
+     * @inheritdoc
+     * @memberof Listing
+     */
+    handleChangeRowsPerPage = (event) => {
+        this.setState({ rowsPerPage: event.target.value });
     };
 
     /**
      *
      *
-     * @param {*} event
+     * @param {*} event event
      * @memberof Listing
      */
     handleAppDelete(event) {
@@ -271,28 +218,7 @@ class Listing extends Component {
     }
 
     /**
-     *
-     *
-     * @memberof Listing
-     */
-    handleChangePage = (event, page) => {
-        this.setState({ page });
-    };
-
-    /**
-     *
-     *
-     * @memberof Listing
-     */
-    handleChangeRowsPerPage = (event) => {
-        this.setState({ rowsPerPage: event.target.value });
-    };
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof Listing
+     * @inheritdoc
      */
     render() {
         const {
@@ -320,7 +246,7 @@ class Listing extends Component {
                                     <React.Fragment>No Applications created</React.Fragment>
                                 ) : (
                                     <React.Fragment>
-                                        Displaying
+                                            Displaying
                                         {' '}
                                         {this.state.data.count}
                                         {' '}
@@ -369,7 +295,7 @@ class Listing extends Component {
                             <div className={classes.appContent}>
                                 <InlineMessage type='info' style={{ width: 1000, padding: theme.spacing.unit * 2 }}>
                                     <Typography variant='headline' component='h3'>
-                                        Create New Application
+                                            Create New Application
                                     </Typography>
                                     <Typography component='p'>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</Typography>
                                     <NewApp updateApps={this.updateApps} />
@@ -383,8 +309,8 @@ class Listing extends Component {
     }
 }
 Listing.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Listing);
