@@ -56,7 +56,7 @@ function Scopes(props) {
 }
 
 Scopes.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default Scopes;

@@ -75,6 +75,22 @@
       {
         "Name": "apim:label_read",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:app_update",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:app_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:sub_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name" : "apim:monetization_usage_publish",
+        "Roles": "admin"
       }
     ]
   },

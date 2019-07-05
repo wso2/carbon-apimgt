@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.4.229-SNAPSHOT</version>
+        <version>6.5.12-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -231,6 +231,11 @@
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.localentry.stub</artifactId>
         </dependency>
+    <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -251,6 +256,18 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>org.opensaml.httpclient.https.disableHostnameVerification</name>
+                            <value>true</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -294,7 +311,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -314,7 +330,6 @@
                         <Import-Package>
                             !javax.xml.soap,
                             javax.xml.stream.*; version="${javax.xml.stream.imp.pkg.version}",
-                            org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.axis2; version="${axis2.osgi.version.range}",
                             org.apache.axis2.description; version="${axis2.osgi.version.range}",
@@ -342,6 +357,7 @@
                             javax.net.ssl,
                             javax.xml.namespace,
                             org.apache.http.*,
+                            org.apache.commons.lang3;version="${apache.commons.lang3.version}",
                             org.apache.commons.*,
                             org.apache.commons.lang3.*,
                             org.apache.synapse.*,

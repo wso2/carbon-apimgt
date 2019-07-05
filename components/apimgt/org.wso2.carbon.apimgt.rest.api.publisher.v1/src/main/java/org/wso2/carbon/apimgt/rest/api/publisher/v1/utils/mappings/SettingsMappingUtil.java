@@ -17,17 +17,18 @@
 */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -59,6 +60,7 @@ public class SettingsMappingUtil {
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
+            settingsDTO.setMonetizationProperties(getMonetizationProperties());
         }
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
@@ -84,5 +86,20 @@ public class SettingsMappingUtil {
             scopeList.add(entry.getKey());
         }
         return scopeList;
+    }
+
+    /**
+     * This method returns the monetization properties from configuration
+     *
+     * @return List<String> monetization properties
+     * @throws APIManagementException
+     */
+    private List<String> getMonetizationProperties() throws APIManagementException {
+
+        List<String> properties = new ArrayList<>();
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        properties = configuration.getProperty(APIConstants.MonetizationUsagePublisher.ADDITIONAL_PROPERTY_LOCATION);
+        return properties;
     }
 }

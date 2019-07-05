@@ -1,6 +1,5 @@
 import React from 'react';
 import { ListItemIcon, Drawer, List, withStyles, ListItem, ListItemText } from '@material-ui/core';
-import EndpointsIcon from '@material-ui/icons/ZoomOutMapOutlined';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -70,14 +69,6 @@ const GlobalNavBar = (props) => {
                                     <ListItemText classes={{ primary: classes.listText }} primary='APIs' />
                                 </ListItem>
                             </Link>
-                            <Link to='/endpoints'>
-                                <ListItem button>
-                                    <ListItemIcon>
-                                        <EndpointsIcon className={classes.leftLink_Icon} />
-                                    </ListItemIcon>
-                                    <ListItemText classes={{ primary: classes.listText }} primary='Endpoints' />
-                                </ListItem>
-                            </Link>
                         </List>
                     </div>
                 </div>
@@ -89,8 +80,20 @@ const GlobalNavBar = (props) => {
 GlobalNavBar.propTypes = {
     open: PropTypes.bool.isRequired,
     toggleGlobalNavBar: PropTypes.func.isRequired,
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        drawerStyles: PropTypes.string,
+        list: PropTypes.string,
+        listText: PropTypes.string,
+    }).isRequired,
+    theme: PropTypes.shape({
+        palette: PropTypes.shape({
+            getContrastText: PropTypes.func,
+            background: PropTypes.shape({
+                drawer: PropTypes.string,
+                leftMenu: PropTypes.string,
+            }),
+        }),
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(GlobalNavBar);

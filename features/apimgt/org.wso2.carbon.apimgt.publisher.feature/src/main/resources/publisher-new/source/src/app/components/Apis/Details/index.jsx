@@ -27,6 +27,7 @@ import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 // import CommentsIcon from '@material-ui/icons/CommentRounded';
 import BusinessIcon from '@material-ui/icons/Business';
+import CodeIcon from '@material-ui/icons/Code';
 // import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
@@ -51,6 +52,7 @@ import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';
 import Security from './Security';
+import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
@@ -298,22 +300,28 @@ class Details extends Component {
                             Icon={<ConfigurationIcon />}
                         />
                         <LeftMenuItem
-                            text='lifecycle'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<LifeCycleIcon />}
-                        />
-                        <LeftMenuItem
                             text='endpoints'
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<EndpointIcon />}
                         />
                         <LeftMenuItem
+                            text='api definition'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<CodeIcon />}
+                        />
+                        <LeftMenuItem
                             text='resources'
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<ResourcesIcon />}
+                        />
+                        <LeftMenuItem
+                            text='lifecycle'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<LifeCycleIcon />}
                         />
                         {/* TODO: uncomment when component run without errors */}
                         {/* <LeftMenuItem
@@ -366,6 +374,10 @@ class Details extends Component {
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route path={Details.subPaths.OVERVIEW} component={() => <Overview />} />
+                                <Route
+                                    path={Details.subPaths.API_DEFINITION}
+                                    component={() => <APIDefinition api={api} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
@@ -396,12 +408,13 @@ class Details extends Component {
     }
 }
 
-// Add your path here and refer to it in above <Route/> component,
+// Add your path here and refer it in above <Route/> component,
 // Paths that are not defined here will be returned with Not Found error
 // key name doesn't matter here, Use an appropriate name as the key
 Details.subPaths = {
     BASE: '/apis/:api_uuid',
     OVERVIEW: '/apis/:api_uuid/overview',
+    API_DEFINITION: '/apis/:api_uuid/api definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
@@ -420,7 +433,12 @@ Details.subPaths = {
 Object.freeze(Details.paths);
 
 Details.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        LeftMenu: PropTypes.string,
+        content: PropTypes.string,
+        leftLInkMain: PropTypes.string,
+        contentInside: PropTypes.string,
+    }).isRequired,
     match: PropTypes.shape({
         params: PropTypes.object,
     }).isRequired,
@@ -430,7 +448,11 @@ Details.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.object,
     }).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.shape({
+            leftMenuIconMainSize: PropTypes.number,
+        }),
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Details);

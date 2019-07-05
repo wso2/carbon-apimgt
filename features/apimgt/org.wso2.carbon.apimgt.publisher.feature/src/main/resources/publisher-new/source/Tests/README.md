@@ -5,6 +5,10 @@ We run mainly two types of tests
 -   Unit tests
 -   Integration test
 
+# Prerequisites
+
+Require NodeJs 8.0 or higher, and npm 5.0 or higher.You may use [`nvm`](https://github.com/nvm-sh/nvm) for installing/managing Node and NPM tools.
+
 # How to run
 
 Before running either unit tests or integration test, Go to the application root directory where `package.json` file is located (i:e `<carbon-apimgt-root>/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher-new/`) and run `npm install` command to download all the dependencies.
@@ -48,7 +52,23 @@ You probably missed some `wrapper.update()` calls there. This is an asynchronous
 
 For more info refer [this issue](https://github.com/airbnb/enzyme/issues/450#issuecomment-225075145)
 
+## When mounting, not all components get rendered in component hierarchy
 
+If you expect a component to be there in the rendered output but it's not there, That means you probably have check for the component before all the asynchronous calls get succeed (or get executed).
+
+This could mostly happen if you have mocked an API response with a `Promise.resolve()` and haven't use `await` on the dom update or haven't flush the pending Promise resolves.
+
+So in this case either you have to use
+```javascript
+await new Promise(resolve => setImmediate(resolve));
+```
+To wait for all the promises to get resolve (Exhausts all promises queued) ( source: [this comment](https://github.com/facebook/jest/issues/2157#issuecomment-279171856))
+
+Or you need to use `await` for all the wrapper modification. i:e Event simulations etc.
+
+## Error: Uncaught [TypeError: Cannot read property 'getPartialToken' of null]
+
+This is exception is thrown if you haven't mocked the REST API calls. So use `Jest.fn()` or `Jest.mock('path/to/module')` to mock the relevant API calls.
 
 ## Mounting and testing components return by higher order components (HOC)
 
@@ -68,7 +88,15 @@ Do the following as required
 -   For [React Intl](https://github.com/formatjs/react-intl/blob/master/docs/Testing-with-React-Intl.md) wrapper
 
 
-    Use the [IntlHelper.js](source/Tests/Utils/IntlHelper.js) If we could not servive with this Util we might need to add [this package](https://github.com/joetidee/enzyme-react-intl) to get the full support
+    Use the [IntlHelper.js](source/Tests/Utils/IntlHelper.js) If we could not survive with this Util we might need to add [this package](https://github.com/joetidee/enzyme-react-intl) to get the full support
+    i:e
+    ```javascript
+    import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+    .
+    .
+    .
+    let wrapper = await mountWithIntl(ThemedListing);
+    ```
 
 -   React router
 
@@ -83,6 +111,8 @@ Use `MemoryRouter` for wrapping the component, for example in [Listing.test.jsx]
 ```
 
 - Material-UI [testing](https://material-ui.com/guides/testing/)
+
+  - If you's test involves inserting, reading , modifying a value in material-ui component, checkout their test implementation for that component in [materia-ui git repo](https://github.com/mui-org/material-ui/tree/master/packages/material-ui/src). You will be able to get an idea of how to implement testing for your use case using material-ui components
 
 Use `unwrap` util from material ui test utils to unwrap the `withStyle` decorations,
 
@@ -99,4 +129,5 @@ When enzyme mounting use actual theme object and `MuiThemeProvider` component to
 
 If you want to change the mocked function behavior between different test cases within one test description(file), Use `mockReset` , `mockRestore` or `mockClear` accordingly. FOr more info refer this [issue](https://github.com/facebook/jest/issues/5143)
 
-# For quick lookup [Jest cheat sheet](https://github.com/sapegin/jest-cheat-sheet)
+# For a quick lookup on Jest features
+ - [Jest cheat sheet](https://github.com/sapegin/jest-cheat-sheet)

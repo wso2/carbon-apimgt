@@ -34,9 +34,8 @@ const showEndpoint = function (api, type) {
                 return api.endpoint[i].inline.endpointConfig.list[0].url;
             }
         }
-    } else {
-        return null;
     }
+    return null;
 };
 function Endpoints(props) {
     const { parentClasses } = props;
@@ -90,7 +89,7 @@ function Endpoints(props) {
 }
 
 Endpoints.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default Endpoints;

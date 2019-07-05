@@ -30,8 +30,8 @@ const LoadableProtectedApp = Loadable({
     loader: () => import(// eslint-disable-line function-paren-newline
         /* webpackChunkName: "ProtectedApp" */
         /* webpackPrefetch: true */
-        './app/ProtectedApp',
-    ),
+        // eslint-disable-next-line function-paren-newline
+        './app/ProtectedApp'),
     loading: Progress,
 });
 

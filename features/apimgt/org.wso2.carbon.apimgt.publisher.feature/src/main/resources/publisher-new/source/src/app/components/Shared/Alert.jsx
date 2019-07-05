@@ -97,7 +97,8 @@ class Alert {
                         transitionName: 'move-down',
                         style: {
                             zIndex: '2000',
-                            bottom: 0,
+                            top: 0,
+                            right: 0,
                             marginLeft: '2%',
                             position: 'fixed',
                         },
