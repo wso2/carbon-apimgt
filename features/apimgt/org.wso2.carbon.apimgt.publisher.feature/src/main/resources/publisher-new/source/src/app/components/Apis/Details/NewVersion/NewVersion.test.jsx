@@ -121,9 +121,9 @@ describe('Unit test for CreateNewVersion component', () => {
             'copyWithConflictingVersion',
         );
         const createNewAPIVersion = jest.fn();
-        const err = new Error(newVersionResponse.head.status.msg);
+        const err = new Error(newVersionResponse.status.msg);
         err.response = newVersionResponse.body;
-        err.status = newVersionResponse.head.status.code;
+        err.status = newVersionResponse.status.code;
         createNewAPIVersion.mockReturnValue(Promise.reject(err));
         api.createNewAPIVersion = createNewAPIVersion;
 

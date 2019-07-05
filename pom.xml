@@ -83,6 +83,13 @@
                     <groupId>io.swagger</groupId>
                     <artifactId>swagger-codegen-maven-plugin</artifactId>
                     <version>${io.swagger.codegen.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.wso2.carbon.apimgt</groupId>
+                            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+                            <version>${carbon.apimgt.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
