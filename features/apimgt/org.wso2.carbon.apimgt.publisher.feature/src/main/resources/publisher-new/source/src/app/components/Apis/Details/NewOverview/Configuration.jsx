@@ -53,7 +53,7 @@ function Configuration(props) {
                     <div className={parentClasses.imageContainer}>
                         <div className={parentClasses.imageWrapper}>
                             {/* Thumbnail */}
-                            <ThumbnailView api={api} width={200} height={200} isEditable={true} />
+                            <ThumbnailView api={api} width={200} height={200} isEditable />
                             {/* Provider */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                 Provider
@@ -209,8 +209,9 @@ function Configuration(props) {
                                     disableHoverListener
                                     title={
                                         <React.Fragment>
-                                            A custom authorization header can be defined as a replacement to the default{' '}
-                                            <strong>Authorization</strong> header used to send a request. If a value is
+                                            A custom authorization header can be defined as a replacement to the default
+                                            <strong>Authorization</strong>
+                                            header used to send a request. If a value is
                                             specified here, it will be used as the header field to send the access token
                                             in a request to consume the API
                                         </React.Fragment>
@@ -302,7 +303,7 @@ function Configuration(props) {
 }
 
 Configuration.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default Configuration;

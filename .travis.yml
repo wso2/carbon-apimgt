@@ -8,7 +8,6 @@ script: mvn clean install -Dmaven.test.skip -q -B -V | grep -v DEBUG; exit "${PI
 
 cache:
   directories:
-  - $HOME/.m2_1
-  - $HOME/.m2
-  - features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher-new/node_modules
-  - features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/store-new/node_modules
+   - $HOME/.m2
+   - /home/travis/build/wso2/carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher-new/node_modules
+   - /home/travis/build/wso2/carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/store-new/node_modules

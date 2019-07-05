@@ -26,39 +26,39 @@ import org.wso2.carbon.apimgt.hybrid.gateway.common.OnPremiseGatewayInitListener
 import org.wso2.carbon.apimgt.hybrid.gateway.throttling.synchronizer.ThrottlingSynchronizer;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-/**
- * @scr.component name="micro.gateway.throttling.synchronizer.component" immediate="true"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- * @scr.reference name="user.realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- */
+@Component(
+         name = "micro.gateway.throttling.synchronizer.component", 
+         immediate = true)
 public class ThrottlingSynchronizerComponent {
 
     private static final Log log = LogFactory.getLog(ThrottlingSynchronizerComponent.class);
 
-
+    @Activate
     protected void activate(ComponentContext ctx) {
         BundleContext bundleContext = ctx.getBundleContext();
-        bundleContext.registerService(OnPremiseGatewayInitListener.class.getName(), new ThrottlingSynchronizer(),
-                null);
+        bundleContext.registerService(OnPremiseGatewayInitListener.class.getName(), new ThrottlingSynchronizer(), null);
         if (log.isDebugEnabled()) {
             log.debug("OnPremise Throttling Synchronizer bundle is activated");
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
     }
 
+    @Reference(
+             name = "api.manager.config.service", 
+             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
         log.debug("API manager configuration service bound to Throttling Synchronizer");
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(service);
@@ -69,6 +69,12 @@ public class ThrottlingSynchronizerComponent {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 
+    @Reference(
+             name = "user.realm.service", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (realmService != null && log.isDebugEnabled()) {
             log.debug("Realm service initialized");
@@ -80,6 +86,12 @@ public class ThrottlingSynchronizerComponent {
         ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 
+    @Reference(
+             name = "config.context.service", 
+             service = org.wso2.carbon.utils.ConfigurationContextService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService configCtx) {
         ServiceReferenceHolder.getInstance().setConfigContextService(configCtx);
     }
@@ -87,6 +99,5 @@ public class ThrottlingSynchronizerComponent {
     protected void unsetConfigurationContextService(ConfigurationContextService configCtx) {
         ServiceReferenceHolder.getInstance().setConfigContextService(null);
     }
-
-
 }
+

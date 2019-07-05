@@ -29,6 +29,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
 import ApplicationCreate from '../../Shared/AppsAndKeys/ApplicationCreate';
 import Alert from '../../Shared/Alert';
+import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
 /**
  *
  *
@@ -127,9 +128,16 @@ class NewApp extends React.Component {
         const { classes } = this.props;
         return (
             <React.Fragment>
-                <Button variant='contained' color='primary' className={classes.button} onClick={this.handleClickOpen}>
+                <ScopeValidation resourcePath={resourcePaths.APPLICATIONS} resourceMethod={resourceMethods.POST}>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        className={classes.button}
+                        onClick={this.handleClickOpen}
+                    >
                     ADD NEW APPLICATION
-                </Button>
+                    </Button>
+                </ScopeValidation>
                 <Dialog fullScreen open={this.state.open} onClose={this.handleClose} TransitionComponent={Transition}>
                     <AppBar className={classes.appBar}>
                         <Toolbar>

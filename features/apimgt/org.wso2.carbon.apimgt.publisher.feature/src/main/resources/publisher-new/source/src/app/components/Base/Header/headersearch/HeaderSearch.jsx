@@ -1,11 +1,30 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue } from './searchUtils';
+import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue } from './SearchUtils';
 
 const styles = theme => ({
     container: {
@@ -73,6 +92,20 @@ class HeaderSearch extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.clearOnBlur = this.clearOnBlur.bind(this);
         this.renderSuggestionsContainer = this.renderSuggestionsContainer.bind(this);
+        this.onSuggestionSelected = this.onSuggestionSelected.bind(this);
+    }
+
+    /**
+     * To provide accessibility for Enter key upon suggestion selection
+     * @param {React.SyntheticEvent} event event
+     * @param {Object} suggestion This is either API object or document coming from search API call
+     */
+    onSuggestionSelected(event, { suggestion }) {
+        if (event.key === 'Enter') {
+            const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview` :
+                `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+            this.props.history.push(path);
+        }
     }
 
     /**
@@ -83,10 +116,11 @@ class HeaderSearch extends React.Component {
      */
     handleSuggestionsFetchRequested({ value }) {
         this.setState({ isLoading: true });
-        getSuggestions(value).then(({ body }) => {
-            this.setState({ suggestions: body.list, isLoading: false });
+        getSuggestions(value).then((body) => {
+            this.setState({ isLoading: false, suggestions: body.obj.list });
         });
     }
+
 
     /**
      * Handle the suggestions clear Synthetic event
@@ -178,6 +212,7 @@ class HeaderSearch extends React.Component {
                 getSuggestionValue={getSuggestionValue}
                 renderSuggestion={renderSuggestion}
                 renderSuggestionsContainer={this.renderSuggestionsContainer}
+                onSuggestionSelected={this.onSuggestionSelected}
                 inputProps={{
                     autoFocus,
                     classes,
@@ -200,6 +235,9 @@ HeaderSearch.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     smSearch: PropTypes.bool,
     toggleSmSearch: PropTypes.func,
+    history: PropTypes.shape({
+        push: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles)(HeaderSearch);
+export default withRouter(withStyles(styles)(HeaderSearch));

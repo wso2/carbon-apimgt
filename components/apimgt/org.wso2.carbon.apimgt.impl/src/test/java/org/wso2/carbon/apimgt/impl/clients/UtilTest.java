@@ -37,7 +37,7 @@ public class UtilTest {
 
     public UtilTest() throws NoSuchAlgorithmException {
         KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
-        keygen.initialize(1024);
+        keygen.initialize(2048);
         privateKey = keygen.generateKeyPair().getPrivate();
     }
 

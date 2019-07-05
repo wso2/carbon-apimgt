@@ -363,7 +363,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get monetization status for each tier in a given API", notes = "This operation can be used to get monetization status for each tier in a given API ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
@@ -381,7 +381,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Configure monetization for a given API", notes = "This operation can be used to configure monetization for a given API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
@@ -597,7 +597,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of the subscription throttling policies of an API ", notes = "This operation can be used to retrieve details of the subscription throttling policy of an API by specifying the API Id.  `X-WSO2-Tenant` header can be used to retrive API subscription throttling policies that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = ThrottlingPolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 

@@ -39,9 +39,11 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
@@ -604,13 +606,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         "from " + tableName + " on " + idListQuery.toString() + " within " + getTimestamp(startDate)
                                 + "L, " + getTimestamp(endDate) + "L per '" + granularity + "' select "
                                 + APIUsageStatisticsClientConstants.API_NAME + ", "
+                                + APIUsageStatisticsClientConstants.API_VERSION + ", "
                                 + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                                 + APIUsageStatisticsClientConstants.API_METHOD + ", "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                                 + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ", "
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + " group by "
+                                + "sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                                + ") as total_request_count group by "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                                 + APIUsageStatisticsClientConstants.API_NAME + ", "
+                                + APIUsageStatisticsClientConstants.API_VERSION + ", "
                                 + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                                 + APIUsageStatisticsClientConstants.API_METHOD + ", "
                                 + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
@@ -618,6 +623,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                                 query);
                 String apiName;
+                String apiVersion;
                 String apiCreator;
                 String callType;
                 String applicationId;
@@ -627,23 +633,24 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
                     for (Object record : jArray) {
                         JSONArray recordArray = (JSONArray) record;
-                        if (recordArray.size() == 6) {
+                        if (recordArray.size() == 7) {
                             apiName = (String) recordArray.get(0);
-                            apiCreator = (String) recordArray.get(1);
+                            apiVersion = (String) recordArray.get(1);
+                            apiCreator = (String) recordArray.get(2);
                             apiName = apiName + " (" + apiCreator + ")";
-                            callType = (String) recordArray.get(2);
-                            applicationId = (String) recordArray.get(3);
-                            apiResourceTemplate = (String) recordArray.get(4);
+                            callType = (String) recordArray.get(3);
+                            applicationId = (String) recordArray.get(4);
+                            apiResourceTemplate = (String) recordArray.get(5);
                             List<String> callTypeList = new ArrayList<String>();
                             callTypeList.add(apiResourceTemplate + " (" + callType + ")");
                             List<Integer> hitCountList = new ArrayList<Integer>();
-                            long hitCount = (Long) recordArray.get(5);
+                            long hitCount = (Long) recordArray.get(6);
                             hitCountList.add((int) hitCount);
                             String appName = subscriberAppsMap.get(applicationId);
                             boolean found = false;
                             for (AppCallTypeDTO dto : appApiCallTypeList) {
                                 if (dto.getAppName().equals(appName)) {
-                                    dto.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
+                                    dto.addToApiCallTypeArray(apiName, apiVersion, callTypeList, hitCountList);
                                     found = true;
                                     break;
                                 }
@@ -651,7 +658,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             if (!found) {
                                 appCallTypeDTO = new AppCallTypeDTO();
                                 appCallTypeDTO.setAppName(appName);
-                                appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
+                                appCallTypeDTO.addToApiCallTypeArray(apiName, apiVersion, callTypeList, hitCountList);
                                 appApiCallTypeList.add(appCallTypeDTO);
                             }
                         }
@@ -1514,10 +1521,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                             + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
                             + APIUsageStatisticsClientConstants.API_METHOD + ", "
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ", "
+                            + "sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                            + ") as total_request_count, "
                             + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ", "
-                            + APIUsageStatisticsClientConstants.TIME_STAMP + ";";
-
+                            + APIUsageStatisticsClientConstants.TIME_STAMP + " group by "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
@@ -2621,6 +2634,55 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Error occurred while querying from Stream Processor.", e);
         }
         return new ArrayList<Result<APIUsageByApplication>>();
+    }
+
+    /**
+     * Implemented to get the API usage count for monetization.
+     *
+     * @param from : the start timestamp of the query.
+     * @param to   : the end timestamp of the query.
+     * @return JSON Object.
+     */
+    public JSONObject getUsageCountForMonetization(long from, long to)
+            throws APIMgtUsageQueryServiceClientException {
+
+        JSONObject jsonObject = null;
+        String granularity = null;
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        granularity = configuration.getFirstProperty(
+                APIConstants.MonetizationUsagePublisher.GRANULARITY_PROERTY_LOCATION);
+        if (StringUtils.isEmpty(granularity)) {
+            //set the default granularity to days, if it is not set in configuration
+            granularity = APIConstants.MonetizationUsagePublisher.DEFAULT_GRANULARITY;
+        }
+        StringBuilder query = new StringBuilder(
+                "from " + APIUsageStatisticsClientConstants.MONETIZATION_USAGE_RECORD_AGG
+                        + " within " + from
+                        + "L, " + to + "L per '" + granularity
+                        + "' select "
+                        + APIUsageStatisticsClientConstants.API_NAME + ", "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                        + "sum (requestCount) as requestCount "
+                        + "group by "
+                        + APIUsageStatisticsClientConstants.API_NAME + ", "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIUsageStatisticsClientConstants.APPLICATION_ID
+        );
+        try {
+            jsonObject = APIUtil.executeQueryOnStreamProcessor(
+                    APIUsageStatisticsClientConstants.MONETIZATION_USAGE_RECORD_APP,
+                    query.toString());
+        } catch (APIManagementException ex) {
+            String msg = "Unable to Retrieve monetization usage records";
+            handleException(msg, ex);
+        }
+        return jsonObject;
     }
 
     /**

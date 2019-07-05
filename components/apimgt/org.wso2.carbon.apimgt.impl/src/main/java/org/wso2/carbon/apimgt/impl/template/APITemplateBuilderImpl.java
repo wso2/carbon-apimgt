@@ -110,8 +110,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                                             "org.apache.velocity.runtime.log.Log4JLogChute" );
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
-            velocityengine.init();
+            initVelocityEngine(velocityengine);
 
             Template t = null;
 
@@ -164,8 +165,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                                             "org.apache.velocity.runtime.log.Log4JLogChute" );
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
-            velocityengine.init();
+            initVelocityEngine(velocityengine);
 
             Template t = velocityengine.getTemplate(this.getPrototypeTemplatePath());
 
@@ -189,8 +191,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                                             "org.apache.velocity.runtime.log.Log4JLogChute" );
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
-            velocityengine.init();
+            initVelocityEngine(velocityengine);
 
             ConfigContext configcontext = new APIConfigContext(this.api);
             configcontext = new TransportConfigContext(configcontext, api);
@@ -253,8 +256,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                         "org.apache.velocity.runtime.log.Log4JLogChute" );
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
+
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
-            velocityengine.init();
+            initVelocityEngine(velocityengine);
 
             context.put("type", endpointType);
 
@@ -379,6 +383,27 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                 this.velocityLogPath = "not-defined";
             }
             return this.velocityLogPath;
+        }
+    }
+
+    /**
+     * Initialize velocity engine
+     * @param velocityengine velocity engine object reference
+     * @throws APITemplateException in case of an error
+     */
+    private void initVelocityEngine(VelocityEngine velocityengine) throws APITemplateException {
+        Thread thread = Thread.currentThread();
+        ClassLoader loader = thread.getContextClassLoader();
+        thread.setContextClassLoader(this.getClass().getClassLoader());
+
+        try {
+            velocityengine.init();
+        } catch (Exception e) {
+            String msg = "Error while initiating the Velocity engine";
+            log.error(msg, e);
+            throw new APITemplateException(msg, e);
+        } finally {
+            thread.setContextClassLoader(loader);
         }
     }
 }

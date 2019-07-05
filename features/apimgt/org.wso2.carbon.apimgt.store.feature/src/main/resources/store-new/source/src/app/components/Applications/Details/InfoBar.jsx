@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { KeyboardArrowLeft, ArrowDropDownOutlined, ArrowDropUpOutlined } from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
-
+import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
 import CheckCircle from '@material-ui/icons/CheckCircle';
@@ -32,9 +32,8 @@ import API from '../../../data/api';
 import VerticalDivider from '../../Shared/VerticalDivider';
 
 /**
- *
- *
- * @param {*} theme
+ * @param {*} theme theme details
+ * @returns {Object}
  */
 const styles = theme => ({
     root: {
@@ -174,6 +173,9 @@ const styles = theme => ({
         display: 'inline-block',
         paddingTop: 3,
     },
+    button: {
+        textDecoration: 'none',
+    },
 });
 /**
  *
@@ -182,6 +184,9 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class InfoBar extends React.Component {
+    /**
+    * @param {Object} props props passed from above
+    */
     constructor(props) {
         super(props);
         this.state = {
@@ -192,8 +197,6 @@ class InfoBar extends React.Component {
     }
 
     /**
-     *
-     *
      * @memberof InfoBar
      */
     componentDidMount() {
@@ -223,8 +226,8 @@ class InfoBar extends React.Component {
     }
 
     /**
-     *
      * Toggles the showOverview state
+     * @param {boolean} todo toggle state
      * @memberof InfoBar
      */
     toggleOverview(todo) {
@@ -236,13 +239,13 @@ class InfoBar extends React.Component {
     }
 
     /**
-     *
-     *
-     * @returns
+     * @returns {div}
      * @memberof InfoBar
      */
     render() {
-        const { classes, theme, resourceNotFountMessage } = this.props;
+        const {
+            classes, theme, resourceNotFountMessage, applicationId,
+        } = this.props;
         const {
             application, tierDescription, showOverview, notFound,
         } = this.state;
@@ -308,6 +311,19 @@ class InfoBar extends React.Component {
                                             Lifecycle Status
                                         </Typography>
                                     </div>
+                                    <div className={classes.infoItem}>
+                                        <Link
+                                            to={'/application/edit/' + applicationId}
+                                            className={classes.button}
+                                        >
+                                            <Button
+                                                variant='contained'
+                                                color='default'
+                                            >
+                                                Edit
+                                            </Button>
+                                        </Link>
+                                    </div>
                                 </div>
                                 <Typography>{application.description}</Typography>
                             </div>
@@ -330,8 +346,8 @@ class InfoBar extends React.Component {
 }
 
 InfoBar.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(InfoBar);

@@ -46,9 +46,11 @@ public class ImportApi  {
     @ApiParam(value = "Zip archive consisting of exported Application Configuration.\n : details") @Multipart(value = "file" ) Attachment fileDetail,
     @ApiParam(value = "Preserve Original Creator of the Application\n") @QueryParam("preserveOwner")  Boolean preserveOwner,
     @ApiParam(value = "Skip importing Subscriptions of the Application\n") @QueryParam("skipSubscriptions")  Boolean skipSubscriptions,
-    @ApiParam(value = "Expected Owner of the Application in the Import Environment\n") @QueryParam("appOwner")  String appOwner)
+    @ApiParam(value = "Expected Owner of the Application in the Import Environment\n") @QueryParam("appOwner")  String appOwner,
+    @ApiParam(value = "Skip importing Keys of the Application\n") @QueryParam("skipApplicationKeys")  Boolean skipApplicationKeys,
+    @ApiParam(value = "Update if application exists\n") @QueryParam("update")  Boolean update)
     {
-    return delegate.importApplicationsPost(fileInputStream,fileDetail,preserveOwner,skipSubscriptions,appOwner);
+    return delegate.importApplicationsPost(fileInputStream,fileDetail,preserveOwner,skipSubscriptions,appOwner,skipApplicationKeys,update);
     }
 }
 

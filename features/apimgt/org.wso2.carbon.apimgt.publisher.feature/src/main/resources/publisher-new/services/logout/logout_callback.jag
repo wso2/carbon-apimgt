@@ -1,0 +1,104 @@
+<%
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+    var log = new Log("Logout Callback Function");
+    var site = require("/site/conf/site.json");
+    include("/services/constants.jag");
+    include("/services/jagg.jag");
+    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+    var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+    var systemApplicationDAO = new SystemApplicationDTO();
+    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
+
+    var clientId = systemApplicationDTO.getConsumerKey();
+    var clientSecret = systemApplicationDTO.getConsumerSecret();
+    var Base64 = org.apache.axiom.om.util.Base64;
+    var String = Packages.java.lang.String;
+    var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
+    var tokenRevokeEndpoint = MGT_TRANSPORT + HOST  + ":" + getServerPort() + REVOKE_URL_SUFFIX;
+
+    var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default").value;
+    var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value;
+    var token = tokenP1 + tokenP2;
+    var tokenRevokeRequestData = {
+        "token": token
+    };
+    var result = post(tokenRevokeEndpoint, tokenRevokeRequestData, {"Authorization": "Basic " + base64encoded});
+
+    var cookie = {
+        'name': 'AM_ACC_TOKEN_DEFAULT_P2',
+        'value': '',
+        'path': site.context + "/",
+        "HttpOnly": true,
+        "secure": true,
+        "maxAge": 2
+    };
+    response.addCookie(cookie);
+
+    cookie = {
+        'name': 'AM_ACC_TOKEN_DEFAULT_P2',
+        'value': '',
+        'path': "/api/am/publisher/",
+        "HttpOnly": true,
+        "secure": true,
+        "maxAge": 2
+    };
+    response.addCookie(cookie);
+
+    cookie = {
+        'name': 'AM_REF_TOKEN_DEFAULT_P2',
+        'value': '',
+        'path': site.context + "/",
+        "HttpOnly": true,
+        "secure": true,
+        "maxAge": 2
+    };
+    response.addCookie(cookie);
+
+    cookie = {
+        'name': 'WSO2_AM_TOKEN_1_Default',
+        'value': '',
+        'path': site.context + "/",
+        "secure": true,
+        "maxAge": 2};
+    response.addCookie(cookie);
+
+    cookie = {
+        'name': 'AM_ID_TOKEN_DEFAULT_P2',
+        'value': '',
+        'path': site.context + "/services/logout",
+        "secure": true,
+        "maxAge": 2
+    };
+    response.addCookie(cookie);
+
+    cookie = {
+        'name': 'AM_ID_TOKEN_DEFAULT_P1',
+        'value': '',
+        'path': site.context + "/services/logout",
+        "secure": true,
+        "maxAge": 2
+    };
+    response.addCookie(cookie);
+
+    log.debug("redirecting to login");
+    response.sendRedirect(site.context + "/login");
+
+%>

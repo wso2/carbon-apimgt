@@ -21,9 +21,6 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axis2.clustering.ClusteringAgent;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
@@ -75,7 +72,6 @@ import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -121,7 +117,6 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
@@ -136,7 +131,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -966,34 +960,6 @@ public class APIProviderImplTest {
         assertEquals(apiMap, apiProvider.searchAPIsByDoc("testTerm", "testType"));
     }
 
-    @Test
-    public void testCallStatUpdateService() throws APIManagementException {
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
-        ConfigurationContextService configurationContextService = Mockito.mock(ConfigurationContextService.class);
-        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
-        AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
-        ClusteringAgent clusteringAgent = Mockito.mock(ClusteringAgent.class);
-
-        Map<String, Environment> map = new HashMap<String, Environment>();
-        Environment environment = new Environment();
-        map.put("env", environment);
-
-        APIManagerConfigurationService apiManagerConfigurationService =
-                Mockito.mock(APIManagerConfigurationService.class);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(ServiceReferenceHolder.getContextService()).thenReturn(configurationContextService);
-        Mockito.when(configurationContextService.getServerConfigContext()).thenReturn(configurationContext);
-        Mockito.when(configurationContext.getAxisConfiguration()).thenReturn(axisConfiguration);
-        Mockito.when(axisConfiguration.getClusteringAgent()).thenReturn(clusteringAgent);
-        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
-        Mockito.when(sh.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(map);
-
-        apiProvider.callStatUpdateService("testUrl", "testUser",
-                "testPassword", true);
-    }
 
     @Test
     public void testRemoveTier() throws APIManagementException, RegistryException {

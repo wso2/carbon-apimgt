@@ -120,9 +120,18 @@ Header.defaultProps = {
 };
 
 Header.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        appBar: PropTypes.string,
+        menuIcon: PropTypes.string,
+        toolbar: PropTypes.string,
+    }).isRequired,
     avatar: PropTypes.element,
-    theme: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.shape({
+            logo: PropTypes.string,
+            title: PropTypes.string,
+        }),
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Header);

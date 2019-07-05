@@ -186,7 +186,10 @@ Listing.propTypes = {
     location: PropTypes.shape({
         pathname: PropTypes.string,
     }).isRequired,
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        content: PropTypes.string,
+        contentInside: PropTypes.string,
+    }).isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,
