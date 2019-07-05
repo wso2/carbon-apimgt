@@ -270,7 +270,6 @@ class Wizard extends React.Component {
             // create application step
 
             const { applicationRequest } = this.state;
-            const { updateApps } = this.props;
             const api = new API();
             this.validateName(applicationRequest.name)
                 .then(() => api.createApplication(applicationRequest))

@@ -155,6 +155,9 @@ class ExpressMode extends Component {
             });
     };
 
+    /**
+     * @inheritdoc
+     */
     render() {
         const { classes, api } = this.props;
         const {
@@ -199,13 +202,13 @@ class ExpressMode extends Component {
                         <Grid item xs={3}>
                             <div className={classes.arrowTextContainer}>
                                 <Typography variant='body1'>
-                                Subscribe 
-{' '}
-<strong>{api.name}</strong>
-{' '}
-to Application
-{' '}
-<strong>{appName}</strong>
+                                Subscribe
+                                    {' '}
+                                    <strong>{api.name}</strong>
+                                    {' '}
+                                        to Application
+                                    {' '}
+                                    <strong>{appName}</strong>
                                 </Typography>
                                 <ArrowForward />
                             </div>
@@ -219,16 +222,13 @@ to Application
                             <ApplicationCreate innerRef={(node) => { this.applicationCreate = node; }} />
                         </Grid>
                         <Grid item xs={3}>
-
                             <SubscribeToApi
                                 innerRef={(node) => { this.subscribeToApi = node; }}
                                 newApp={newApp}
                                 api={api}
                                 applicationsAvailable={applicationsAvailable}
                             />
-;
-
-</Grid>
+                        </Grid>
                         <Grid item xs={6}>
                             <Keys innerRef={(node) => { this.keys = node; }} selectedApp={newApp} keyType='SANDBOX' />
 

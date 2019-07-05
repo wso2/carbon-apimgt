@@ -28,9 +28,9 @@ import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
 import API from 'AppData/api';
-import ApplicationCreateForm from '../../Shared/AppsAndKeys/ApplicationCreateForm';
-import Alert from '../../Shared/Alert';
-import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
+import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
+import Alert from 'AppComponents/Shared/Alert';
+import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 
 /**
  *

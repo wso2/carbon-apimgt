@@ -23,19 +23,15 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
 import qs from 'qs';
 import TablePagination from '@material-ui/core/TablePagination';
-import CustomIcon from '../../Shared/CustomIcon';
-import InlineMessage from '../../Shared/InlineMessage';
-import Alert from '../../Base/Alert';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Alert from 'AppComponents/Base/Alert';
+import Loading from 'AppComponents/Base/Loading/Loading';
+import Application from 'AppData/Application';
+import NewApp from 'AppComponents/Applications/Create/NewApp';
 import AppsTableContent from './AppsTableContent';
-import Loading from '../../Base/Loading/Loading';
-import Application from '../../../data/Application';
-import NewApp from '../Create/NewApp';
 import ApplicationTableHead from './ApplicationTableHead';
 /**
  *
@@ -116,7 +112,6 @@ class Listing extends Component {
         this.state = {
             order: 'asc',
             orderBy: 'name',
-            selected: [],
             data: null,
             alertMessage: null,
             page: 0,
@@ -152,10 +147,7 @@ class Listing extends Component {
                     // eslint-disable-next-line react/no-unused-state
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    // eslint-disable-next-line react/no-unused-state
-                    this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: location.pathname });
-                    history.push({ pathname: '/login', search: params });
+                    window.location = '/store-new/services/configs';
                 }
             });
     };
@@ -200,19 +192,18 @@ class Listing extends Component {
      * @memberof Listing
      */
     handleAppDelete(event) {
+        const { data } = this.state;
         const id = event.currentTarget.getAttribute('data-appId');
-        const app = this.state.data.get(id);
+        const newData = new Map([...data]);
+        const app = newData.get(id);
         app.deleting = true;
-        this.state.data.set(id, app);
-        this.setState({ data: this.state.data });
-
+        this.setState({ data: newData });
         const message = 'Application: ' + app.name + ' deleted successfully!';
-        const promised_delete = Application.deleteApp(id);
-        promised_delete.then((ok) => {
+        const promisedDelete = Application.deleteApp(id);
+        promisedDelete.then((ok) => {
             if (ok) {
-                const { data } = this.state;
-                data.delete(id);
-                this.setState({ data: this.state.data, alertMessage: message });
+                newData.delete(id);
+                this.setState({ data: newData, alertMessage: message });
             }
         });
     }
@@ -228,7 +219,6 @@ class Listing extends Component {
             return <Loading />;
         }
         const { classes, theme } = this.props;
-        const bull = <span className={classes.bullet}>•</span>;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
         return (
             <main className={classes.content}>
@@ -240,17 +230,17 @@ class Listing extends Component {
                         <Typography variant='display1' className={classes.mainTitle}>
                             Applications
                         </Typography>
-                        {this.state.data && (
+                        {data && (
                             <Typography variant='caption' gutterBottom align='left'>
-                                {this.state.data.count === 0 ? (
+                                {data.count === 0 ? (
                                     <React.Fragment>No Applications created</React.Fragment>
                                 ) : (
                                     <React.Fragment>
                                             Displaying
                                         {' '}
-                                        {this.state.data.count}
+                                        {data.count}
                                         {' '}
-                                        {this.state.data.count === 1 ? 'Application' : 'Applications'}
+                                        {data.count === 1 ? 'Application' : 'Applications'}
                                     </React.Fragment>
                                 )}
                             </Typography>
@@ -268,11 +258,25 @@ class Listing extends Component {
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
                                 <Typography variant='caption' gutterBottom align='left'>
-                                    An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
+                                    An application is a logical collection of APIs. Applications allow you to use a
+                                    single access token to invoke a collection of APIs and to subscribe to one
+                                    API multiple times with different SLA levels. The DefaultApplication is
+                                    pre-created and allows unlimited access by default.
                                 </Typography>
                                 <Table>
-                                    <ApplicationTableHead order={order} orderBy={orderBy} onRequestSort={this.handleRequestSort} />
-                                    <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data} page={page} rowsPerPage={rowsPerPage} order={order} orderBy={orderBy} />
+                                    <ApplicationTableHead
+                                        order={order}
+                                        orderBy={orderBy}
+                                        onRequestSort={this.handleRequestSort}
+                                    />
+                                    <AppsTableContent
+                                        handleAppDelete={this.handleAppDelete}
+                                        apps={data}
+                                        page={page}
+                                        rowsPerPage={rowsPerPage}
+                                        order={order}
+                                        orderBy={orderBy}
+                                    />
                                 </Table>
                                 <TablePagination
                                     component='div'
@@ -297,7 +301,13 @@ class Listing extends Component {
                                     <Typography variant='headline' component='h3'>
                                             Create New Application
                                     </Typography>
-                                    <Typography component='p'>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</Typography>
+                                    <Typography component='p'>
+                                        An application is a logical collection of APIs. Applications
+                                        allow you to use a single access token to invoke a collection
+                                        of APIs and to subscribe to one API multiple times with different
+                                        SLA levels. The DefaultApplication is pre-created and allows unlimited
+                                        access by default.
+                                    </Typography>
                                     <NewApp updateApps={this.updateApps} />
                                 </InlineMessage>
                             </div>

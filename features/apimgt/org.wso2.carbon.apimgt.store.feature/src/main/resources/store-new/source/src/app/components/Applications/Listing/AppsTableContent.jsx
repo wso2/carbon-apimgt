@@ -28,15 +28,13 @@ import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Subscription from '../../../data/Subscription';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 /**
  *
- *
- * @param {*} order
- * @param {*} orderBy
- * @returns
+ * @param {*} order order
+ * @param {*} orderBy orderby
+ * @returns {Boolean}
  */
 function getSorting(order, orderBy) {
     return order === 'desc' ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
@@ -55,7 +53,6 @@ class AppsTableContent extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            subscriptions: false,
             notFound: false,
         };
         this.APPLICATION_STATES = {
@@ -65,38 +62,8 @@ class AppsTableContent extends Component {
         };
     }
 
-    // /**
-    //  * Get all applications
-    //  * @memberof AppsTableContent
-    //  */
-    // componentDidMount() {
-    //     const client = new Subscription();
-    //     const { apps } = this.props;
-    //     const appIds = [...apps.keys()];
-    //     const promises = appIds.map(appId => client.getSubscriptions(null, appId).then((response) => {
-    //         response.appId = appId;
-    //         return response;
-    //     }));
-
-    //     Promise.all(promises)
-    //         .then((response) => {
-    //             response.map((data) => {
-    //                 const app = apps.get(data.appId);
-    //                 app.subscriptions = data.body.count;
-    //                 apps.set(app.applicationId, app);
-    //             });
-    //             this.setState({ subscriptions: true });
-    //         })
-    //         .catch((error) => {
-    //             this.setState({ notFound: true });
-    //             console.error(error);
-    //         });
-    // }
-
     /**
-     *
-     *
-     * @returns
+     * @inheritdoc
      * @memberof AppsTableContent
      */
     render() {
