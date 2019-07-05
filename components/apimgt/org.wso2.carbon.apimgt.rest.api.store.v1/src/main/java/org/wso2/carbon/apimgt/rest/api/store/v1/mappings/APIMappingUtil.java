@@ -90,7 +90,7 @@ public class APIMappingUtil {
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition = null;
 
-        if (!APIConstants.APIType.WS.toString().equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
             apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
         }
         dto.setApiDefinition(apiSwaggerDefinition);

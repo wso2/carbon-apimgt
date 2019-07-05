@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 public class APIProductResource {
 
     private String apiName;
@@ -25,6 +29,7 @@ public class APIProductResource {
     private APIIdentifier apiIdentifier;
     private APIProductIdentifier productIdentifier;
     private URITemplate uriTemplate;
+    private String endpointConfig;
 
     private String inSequenceName = "";
     private String outSequenceName = "";
@@ -77,6 +82,7 @@ public class APIProductResource {
         this.uriTemplate = uriTemplate;
     }
 
+    // Used by velocity template to generate synapse definition
     public String getInSequenceName() {
         return inSequenceName;
     }
@@ -85,6 +91,7 @@ public class APIProductResource {
         this.inSequenceName = inSequenceName;
     }
 
+    // Used by velocity template to generate synapse definition
     public String getFaultSequenceName() {
         return faultSequenceName;
     }
@@ -93,11 +100,34 @@ public class APIProductResource {
         this.faultSequenceName = faultSequenceName;
     }
 
+    // Used by velocity template to generate synapse definition
     public String getOutSequenceName() {
         return outSequenceName;
     }
 
     public void setOutSequenceName(String outSequenceName) {
         this.outSequenceName = outSequenceName;
+    }
+
+    public String getEndpointConfig() {
+        return endpointConfig;
+    }
+
+    // Used by velocity template to generate synapse definition
+    public JSONObject getEndpointConfigAsJSON() throws ParseException {
+        JSONParser parser = new JSONParser();
+
+        Object config = parser.parse(endpointConfig);
+
+        return (JSONObject) config;
+    }
+
+    public void setEndpointConfig(String endpointConfig) {
+        this.endpointConfig = endpointConfig;
+    }
+
+    // Used by velocity template to generate synapse definition
+    public String getEndpointKey() {
+        return apiIdentifier.getApiName() + "--v" + apiIdentifier.getVersion();
     }
 }

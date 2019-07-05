@@ -212,7 +212,7 @@ public class APIGatewayManager {
                         //Deploy the fault sequence first since it has to be available by the time the API is deployed.
                         deployAPIFaultSequence(client, api, tenantDomain, environment);
                         deployClientCertificates(client, api, tenantDomain);
-                        if (!APIConstants.APIType.WS.toString().equals(api.getType())) {
+                        if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
                             //Add the API
                             if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
                                 client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
@@ -421,7 +421,7 @@ public class APIGatewayManager {
 
                     APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
                     unDeployClientCertificates(client, api, tenantDomain);
-                    if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
+                    if(!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
                         APIIdentifier id = api.getId();
                         if (client.getApi(tenantDomain, id) != null) {
                             if (debugEnabled) {

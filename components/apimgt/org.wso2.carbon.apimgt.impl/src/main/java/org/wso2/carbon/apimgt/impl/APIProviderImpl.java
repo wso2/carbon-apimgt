@@ -90,7 +90,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -188,9 +187,7 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.replaceEmailDomain;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -1309,7 +1306,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // wsdls for each update.
                 //check for wsdl endpoint
                 org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
-                boolean isWSAPI = APIConstants.APIType.WS.toString().equals(api.getType());
+                boolean isWSAPI = APIConstants.APITransportType.WS.toString().equals(api.getType());
                 String wsdlURL;
                 if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
                         ("production_endpoints")) {
@@ -2231,6 +2228,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
                     APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
         }
+
+        authProperties.put("apiType", APIConstants.ApiTypes.PRODUCT_API.name());
         vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                 authProperties);
         Map<String, String> properties = new HashMap<String, String>();
@@ -6360,7 +6359,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (APIProductResource apiProductResource : resources) {
             API api = null;
             try {
-                api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
+                api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
                 // if API does not exist, getLightweightAPIByUUID() method throws exception. 
             } catch (APIMgtResourceNotFoundException e) {
                 //If there is no API , this exception is thrown. We create the product without this invalid api.
@@ -6370,6 +6369,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api != null) {
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
+		apiProductResource.setEndpointConfig(api.getEndpointConfig());
                 URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
                 Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
@@ -6530,13 +6530,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
-                api = super.getLightweightAPI(emailReplacedAPIIdentifier);
+                api = super.getAPI(emailReplacedAPIIdentifier);
             } else {
-                api = super.getLightweightAPIByUUID(apiProductResource.getApiId(), tenantDomain);
+                api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
             }
             // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
             apiProductResource.setApiIdentifier(api.getId());
             apiProductResource.setProductIdentifier(product.getId());
+            apiProductResource.setEndpointConfig(api.getEndpointConfig());
             URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
             Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
@@ -6631,7 +6632,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Failed to remove the Definition from : " + apiDefinitionFilePath, e);
         }
     }
- 
+
     @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);
