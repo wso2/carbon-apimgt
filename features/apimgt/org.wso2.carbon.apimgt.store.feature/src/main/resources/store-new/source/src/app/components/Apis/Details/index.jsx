@@ -196,7 +196,8 @@ class Details extends React.Component {
                     // get the application IDs of existing subscriptions
                     subscriptions.list.map(element => subscribedApplications.push({
                         value: element.applicationId,
-                        policy: element.policy,
+                        policy: element.throttlingPolicy,
+                        status: element.status,
                         subscriptionId: element.subscriptionId,
                     }));
                     this.setState({ subscribedApplications });
