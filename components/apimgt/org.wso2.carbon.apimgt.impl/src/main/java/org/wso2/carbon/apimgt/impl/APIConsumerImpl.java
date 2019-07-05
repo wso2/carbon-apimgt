@@ -2925,8 +2925,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setTierName(subscription.getTier().getName());
             }
             workflowDTO.setApiProvider(identifier.getProviderName());
+            API api = null;
             if (apiIdentifier != null) {
-                API api = getAPI(apiIdentifier);
+                api = getAPI(apiIdentifier);
                 workflowDTO.setApiContext(api.getContext());
                 workflowDTO.setApiName(apiIdentifier.getApiName());
                 workflowDTO.setApiVersion(apiIdentifier.getVersion());
@@ -2960,17 +2961,21 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
 
             Tier tier = null;
-            Set<Tier> policies = api.getAvailableTiers();
-            Iterator<Tier> iterator = policies.iterator();
-            boolean isPolicyAllowed = false;
-            while (iterator.hasNext()) {
-                Tier policy = iterator.next();
-                if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
-                    tier = policy;
+            if (api != null) {
+
+                Set<Tier> policies = api.getAvailableTiers();
+                Iterator<Tier> iterator = policies.iterator();
+                boolean isPolicyAllowed = false;
+                while (iterator.hasNext()) {
+                    Tier policy = iterator.next();
+                    if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
+                        tier = policy;
+                    }
                 }
             }
+            //TODO add monetization for API product
             //check whether monetization is enabled for API and tier plan is commercial
-            if (api.getMonetizationStatus() == true && tier.getTierPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
+            if (api != null && api.getMonetizationStatus() == true && tier.getTierPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
                 removeSubscriptionWFExecutor.deleteMonetizedSubscription(workflowDTO, api);
             } else {
                 removeSubscriptionWFExecutor.execute(workflowDTO);
