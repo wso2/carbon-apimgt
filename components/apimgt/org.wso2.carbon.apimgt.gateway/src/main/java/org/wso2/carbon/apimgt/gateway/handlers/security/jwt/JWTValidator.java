@@ -23,6 +23,7 @@ import com.nimbusds.jwt.SignedJWT;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,13 +35,18 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
@@ -56,9 +62,11 @@ public class JWTValidator {
     private static final Log log = LogFactory.getLog(JWTValidator.class);
 
     private String apiLevelPolicy;
+    private boolean isGatewayTokenCacheEnabled;
 
     public JWTValidator(String apiLevelPolicy) {
         this.apiLevelPolicy = apiLevelPolicy;
+        this.isGatewayTokenCacheEnabled = isGatewayTokenCacheEnabled();
     }
 
     public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, Swagger swagger)
@@ -67,23 +75,114 @@ public class JWTValidator {
         if (splitToken.length != 3) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
         }
+        JSONObject payload = null;
+        boolean isVerified = false;
+        String tokenSignature = splitToken[2];
 
-        JSONObject payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
-        boolean isVerified = verifyToken(jwtToken, payload.getString("sub"));
+        String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                getProperty(Constants.Configuration.HTTP_METHOD);
+        String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
 
+        String cacheKey = getAccessTokenCacheKey(tokenSignature, apiContext, apiVersion, matchingResource, httpMethod);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+        // Validate from cache
+        if (isGatewayTokenCacheEnabled) {
+            String cacheToken = (String) getGatewayTokenCache().get(tokenSignature);
+            if (cacheToken != null) {
+                isVerified = true;
+            } else if (getInvalidTokenCache().get(tokenSignature) != null) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        "Invalid JWT token");
+            }
+        }
+
+        // Not found in cache
+        if (!isVerified) {
+            payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
+            isVerified = verifyToken(jwtToken, payload.getString("sub"));
+            if (isGatewayTokenCacheEnabled) {
+                // Add token to tenant token cache
+                if (isVerified) {
+                    getGatewayTokenCache().put(tokenSignature, tenantDomain);
+                } else {
+                    getInvalidTokenCache().put(tokenSignature, tenantDomain);
+                }
+
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    try {
+                        // Start super tenant flow
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        // Add token to super tenant token cache
+                        if (isVerified) {
+                            getGatewayTokenCache().put(tokenSignature, tenantDomain);
+                        } else {
+                            getInvalidTokenCache().put(tokenSignature, tenantDomain);
+                        }
+                    } finally {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+
+                }
+            }
+        }
+
+        // If token signature is verified
         if (isVerified) {
-            // Check whether the token is expired or not
+            if (isGatewayTokenCacheEnabled && getGatewayKeyCache().get(cacheKey) != null) {
+                // Token is found in the key cache
+                payload = (JSONObject) getGatewayKeyCache().get(cacheKey);
+            } else {
+                // Scope validation
+                String resourceScope = null;
+                Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+
+                if (vendorExtensions != null) {
+                    resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
+                }
+
+                if (StringUtils.isNotBlank(resourceScope) && payload.getString("scope") != null) {
+                    String[] tokenScopes = payload.getString("scope").split(" ");
+                    boolean scopeFound = false;
+                    for (String scope : tokenScopes) {
+                        if (scope.trim().equals(resourceScope)) {
+                            scopeFound = true;
+                            break;
+                        }
+                    }
+                    if (!scopeFound) {
+                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+                    }
+                }
+
+                // Retrieve payload from token
+                if (payload == null) {
+                    payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
+                }
+
+                if (isGatewayTokenCacheEnabled) {
+                    getGatewayKeyCache().put(cacheKey, payload);
+                }
+            }
+
+            // Check whether the token is expired or not. Payload information should be available for this check.
             long currentTime = System.currentTimeMillis() / 1000;
             long expiredTime = payload.getLong("exp");
             if (currentTime > expiredTime) {
+                // Expired token is moved from valid token cache to the invalid token cache
+                if (isGatewayTokenCacheEnabled) {
+                    getGatewayTokenCache().remove(tokenSignature);
+                    getInvalidTokenCache().put(tokenSignature, tenantDomain);
+                }
                 throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
                         "JWT token is expired");
             }
 
             JSONObject applicationObj = (JSONObject) payload.get("application");
-
-            String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-            String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 
             JSONObject api = null;
 
@@ -101,28 +200,6 @@ public class JWTValidator {
                 if (api == null) {
                     throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                             "User is not subscribed to access the API: " + apiContext + ", version: " + apiVersion);
-                }
-            }
-
-            // Scope validation
-            String resourceScope = null;
-            Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
-
-            if (vendorExtensions != null) {
-                resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
-            }
-
-            if (StringUtils.isNotBlank(resourceScope) && payload.getString("scope") != null) {
-                String[] tokenScopes = payload.getString("scope").split(" ");
-                boolean scopeFound = false;
-                for (String scope : tokenScopes) {
-                    if (scope.trim().equals(resourceScope)) {
-                        scopeFound = true;
-                        break;
-                    }
-                }
-                if (!scopeFound) {
-                    throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
                 }
             }
 
@@ -252,4 +329,37 @@ public class JWTValidator {
         return null;
     }
 
+    private boolean isGatewayTokenCacheEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+            String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+            return Boolean.parseBoolean(cacheEnabled);
+        } catch (Exception e) {
+            log.error("Did not found valid API Validation Information cache configuration. " +
+                    "Use default configuration.", e);
+        }
+        return true;
+    }
+
+    private Cache getGatewayTokenCache() {
+        return getCacheFromCacheManager(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+    }
+
+    private Cache getInvalidTokenCache() {
+        return getCacheFromCacheManager(APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME);
+    }
+
+    private Cache getGatewayKeyCache() {
+        return getCacheFromCacheManager(APIConstants.GATEWAY_KEY_CACHE_NAME);
+    }
+
+    private Cache getCacheFromCacheManager(String cacheName) {
+        return Caching.getCacheManager(
+                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(cacheName);
+    }
+
+    private String getAccessTokenCacheKey(String accessToken, String apiContext, String apiVersion,
+                                          String resourceUri, String httpVerb) {
+        return accessToken + ":" + apiContext + ":" + apiVersion + ":" + resourceUri + ":" + httpVerb;
+    }
 }
