@@ -93,6 +93,7 @@ public class ExportApiServiceImpl extends ExportApiService {
             // export keys for application
             if (withKeys == null || !withKeys) {
                 applicationDetails.getKeys().clear();
+                applicationDetails.clearOAuthApps();
             } else {
                 // encode secrets when exporting
                 for (APIKey apiKey : applicationDetails.getKeys()) {
