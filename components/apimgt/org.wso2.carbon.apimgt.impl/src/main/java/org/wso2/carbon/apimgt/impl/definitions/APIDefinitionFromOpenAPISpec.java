@@ -105,7 +105,8 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             continue;
                         }
                         //Only continue for supported operations
-                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
+                                APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) {
                             isHttpVerbDefined = true;
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();

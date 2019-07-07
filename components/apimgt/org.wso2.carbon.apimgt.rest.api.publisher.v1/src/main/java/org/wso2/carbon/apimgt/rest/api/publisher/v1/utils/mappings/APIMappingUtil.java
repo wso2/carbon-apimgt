@@ -620,6 +620,9 @@ public class APIMappingUtil {
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(scopeDTOS);
         }
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+        List<APIOperationsDTO> apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+        dto.setOperations(apiOperationsDTO);
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -919,15 +922,15 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
 
         if (operations == null || operations.isEmpty()) {
-            operations = getDefaultOperationsList();
+            operations = getDefaultOperationsList(model.getType());
         }
 
         for (APIOperationsDTO operation : operations) {
             URITemplate template = new URITemplate();
 
-            String uriTempVal = operation.getUritemplate();
+            String uriTempVal = operation.getTarget();
 
-            String httpVerb = operation.getHttpVerb();
+            String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
                 for (String scopeKey : scopeList) {
@@ -945,7 +948,8 @@ public class APIMappingUtil {
 
             }
             //Only continue for supported operations
-            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
+                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -969,13 +973,24 @@ public class APIMappingUtil {
 
                 uriTemplates.add(template);
             } else {
-                handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                        + "' is invalid");
+
+                if(model.getType().equals(APIConstants.GRAPHQL_API)){
+                    handleException("The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
+                } else {
+                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
+                            + "' is invalid");
+                }
             }
 
             if (!isHttpVerbDefined) {
-                handleException("Resource '" + uriTempVal + "' has global parameters without " +
-                        "HTTP methods");
+                if(model.getType().equals(APIConstants.GRAPHQL_API)) {
+                    handleException("Operation '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type");
+                } else {
+                    handleException("Resource '" + uriTempVal + "' has global parameters without " +
+                            "HTTP methods");
+                }
             }
         }
 
@@ -1378,8 +1393,8 @@ public class APIMappingUtil {
         } else {
             operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         }
-        operationsDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-        operationsDTO.setUritemplate(uriTemplate.getUriTemplate());
+        operationsDTO.setVerb(uriTemplate.getHTTPVerb());
+        operationsDTO.setTarget(uriTemplate.getUriTemplate());
         if (uriTemplate.getScope() != null) {
             operationsDTO.setScopes(new ArrayList<String>() {{
                 add(uriTemplate.getScope().getName());
@@ -1394,13 +1409,21 @@ public class APIMappingUtil {
      *
      * @return a default operations list
      */
-    private static List<APIOperationsDTO> getDefaultOperationsList() {
+    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
+        String[] suportMethods = null;
+
+        if(apiType.equals(APIConstants.GRAPHQL_API)) {
+            suportMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+        } else {
+            suportMethods = RestApiConstants.SUPPORTED_METHODS;
+        }
+
         for (String verb : RestApiConstants.SUPPORTED_METHODS) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
-            operationsDTO.setUritemplate("/*");
-            operationsDTO.setHttpVerb(verb);
+            operationsDTO.setTarget("/*");
+            operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             operationsDTOs.add(operationsDTO);

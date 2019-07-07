@@ -987,6 +987,12 @@ public final class APIConstants {
     public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
     public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
     public static final String GRAPHQL_API_OPERATION_VERB_INFO_DTO = "OPERATION_VERB_INFO_DTO";
+    public static final String[] GRAPHQL_SUPPORTED_METHODS = {"QUERY", "MUTATION", "SUBSCRIPTION"};
+    //URI Authentication Schemes
+    public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<String>(
+                    Arrays.asList(new String[]{ "QUERY", "MUTATION", "SUBSCRIPTION", "head", "options"})));
+
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
