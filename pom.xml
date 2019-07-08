@@ -1251,7 +1251,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <version>${fasterxml.jackson.databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -1549,7 +1549,7 @@
         <carbon.identity-outbound-auth-samlsso.version>5.1.23</carbon.identity-outbound-auth-samlsso.version>
 
         <carbon.governance.version>4.8.0</carbon.governance.version>
-        <carbon.deployment.version>4.9.1</carbon.deployment.version>
+        <carbon.deployment.version>4.9.4</carbon.deployment.version>
         <carbon.multitenancy.version>4.7.2</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
@@ -1684,6 +1684,7 @@
         <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
         <velocity.version>1.7</velocity.version>
         <fasterxml.jackson.version>2.9.9</fasterxml.jackson.version>
+        <fasterxml.jackson.databind.version>2.9.9.1</fasterxml.jackson.databind.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.3.0</carbon.broker.version>
         <waffle-jna.version>1.6.wso2v6</waffle-jna.version>
