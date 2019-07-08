@@ -74,7 +74,7 @@ class APICreateForm extends Component {
                 name: { empty: false, alreadyExists: false },
                 context: { empty: false, alreadyExists: false },
                 version: { empty: false },
-                endpoint: { empty: false },
+                endpointConfig: { empty: false },
             },
         };
         this.inputChange = this.inputChange.bind(this);
@@ -91,52 +91,16 @@ class APICreateForm extends Component {
         this.setState(({ api, valid }) => {
             const changes = api;
             if (name === 'endpoint') {
-                changes[name] = [
+                changes.endpointConfig =
                     {
-                        inline: {
-                            name: `${api.name}_inline_production`,
-                            endpointConfig: {
-                                list: [
-                                    {
-                                        url: value,
-                                        timeout: '1000',
-                                    },
-                                ],
-                                endpointType: 'SINGLE',
-                            },
-                            endpointSecurity: {
-                                enabled: false,
-                                type: 'basic',
-                                username: 'basic',
-                                password: 'basic',
-                            },
-                            type: 'http',
+                        endpoint_type: 'http',
+                        sandbox_endpoints: {
+                            url: value,
                         },
-                        type: 'production_endpoints',
-                    },
-                    {
-                        inline: {
-                            name: `${api.name}_inline_sandbox`,
-                            endpointConfig: {
-                                list: [
-                                    {
-                                        url: value,
-                                        timeout: '1000',
-                                    },
-                                ],
-                                endpointType: 'SINGLE',
-                            },
-                            endpointSecurity: {
-                                enabled: false,
-                                type: 'basic',
-                                username: 'basic',
-                                password: 'basic',
-                            },
-                            type: 'http',
+                        production_endpoints: {
+                            url: value,
                         },
-                        type: 'sandbox_endpoints',
-                    },
-                ];
+                    };
             } else {
                 changes[name] = value;
             }
@@ -145,7 +109,7 @@ class APICreateForm extends Component {
             validUpdated.name.empty = !api.name;
             validUpdated.context.empty = !api.context;
             validUpdated.version.empty = !api.version;
-            validUpdated.endpoint.empty = !api.endpoint;
+            validUpdated.endpointConfig.empty = !api.endpointConfig;
             // TODO we need to add the already existing error for (context)
             // by doing an api call ( the swagger definition does not contain such api call)
             return { api: changes, valid: validUpdated };
@@ -161,7 +125,7 @@ class APICreateForm extends Component {
     handleSubmit(e) {
         e.preventDefault();
         const { api: currentAPI } = this.state;
-        if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpoint) {
+        if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpointConfig) {
             // Checking the api name,version,context undefined or empty states
             this.setState((oldState) => {
                 const { valid, api } = oldState;
@@ -169,7 +133,7 @@ class APICreateForm extends Component {
                 validUpdated.name.empty = !api.name;
                 validUpdated.context.empty = !api.context;
                 validUpdated.version.empty = !api.version;
-                validUpdated.endpoint.empty = !api.endpoint;
+                validUpdated.endpointConfig.empty = !api.endpointConfig;
                 return { valid: validUpdated };
             });
             return;
