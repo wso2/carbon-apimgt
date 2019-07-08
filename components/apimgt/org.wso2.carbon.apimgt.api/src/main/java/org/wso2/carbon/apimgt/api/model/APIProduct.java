@@ -45,6 +45,10 @@ public class APIProduct {
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
     private Set<String> environments;
+
+    // API security at the gateway level.
+    private String apiSecurity = "oauth2";
+
     private String transports;
     private String responseCache;
     private int cacheTimeout;
@@ -53,6 +57,11 @@ public class APIProduct {
     // Used for keeping Production & Sandbox Throttling limits.
     private String productionMaxTps;
     private String sandboxMaxTps;
+
+    //Custom authorization header specific to the API
+    private String authorizationHeader;
+
+    private CORSConfiguration corsConfiguration;
 
     /**
      * Publisher access control related parameters.
@@ -304,4 +313,27 @@ public class APIProduct {
                 + tenantDomain + ", productResources=" + productResources + "]";
     }
 
+    public String getApiSecurity() {
+        return apiSecurity;
+    }
+
+    public void setApiSecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
+    }
+
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
+    }
+
+    public CORSConfiguration getCorsConfiguration() {
+        return corsConfiguration;
+    }
+
+    public void setCorsConfiguration(CORSConfiguration corsConfiguration) {
+        this.corsConfiguration = corsConfiguration;
+    }
 }

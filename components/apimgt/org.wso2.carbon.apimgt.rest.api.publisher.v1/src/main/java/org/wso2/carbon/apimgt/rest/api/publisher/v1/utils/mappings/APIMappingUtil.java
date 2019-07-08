@@ -1438,6 +1438,11 @@ public class APIMappingUtil {
             }
             productDto.setAdditionalProperties(additionalPropertiesMap);
         }
+
+        if (product.getApiSecurity() != null) {
+            productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
+        }
+
         return productDto;
     }
     
@@ -1573,7 +1578,25 @@ public class APIMappingUtil {
             }
             
         }
+
+        APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
+        CORSConfiguration corsConfiguration;
+        if (apiCorsConfigurationDTO != null) {
+            corsConfiguration =
+                    new CORSConfiguration(apiCorsConfigurationDTO.isCorsConfigurationEnabled(),
+                            apiCorsConfigurationDTO.getAccessControlAllowOrigins(),
+                            apiCorsConfigurationDTO.isAccessControlAllowCredentials(),
+                            apiCorsConfigurationDTO.getAccessControlAllowHeaders(),
+                            apiCorsConfigurationDTO.getAccessControlAllowMethods());
+
+        } else {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        product.setCorsConfiguration(corsConfiguration);
+
         product.setProductResources(productResources);
+        product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
+        product.setAuthorizationHeader(dto.getAuthorizationHeader());
         return product;
     }
     

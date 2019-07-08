@@ -2217,6 +2217,67 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler", Collections
                         .<String, String>emptyMap());
 
+        Map<String, String> corsProperties = new HashMap<>();
+        corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE,
+                APIConstants.IMPLEMENTATION_TYPE_ENDPOINT);
+
+        //Get authorization header from the API object or from the tenant registry
+        String authorizationHeader;
+        if (!StringUtils.isBlank(apiProduct.getAuthorizationHeader())) {
+            authorizationHeader = apiProduct.getAuthorizationHeader();
+        } else {
+            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
+            // in tenant registry
+            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
+        }
+        if (!StringUtils.isBlank(authorizationHeader)) {
+            corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+
+        if (apiProduct.getCorsConfiguration() != null &&
+                apiProduct.getCorsConfiguration().isCorsConfigurationEnabled()) {
+            CORSConfiguration corsConfiguration = apiProduct.getCorsConfiguration();
+            if (corsConfiguration.getAccessControlAllowHeaders() != null) {
+                StringBuilder allowHeaders = new StringBuilder();
+                for (String header : corsConfiguration.getAccessControlAllowHeaders()) {
+                    allowHeaders.append(header).append(',');
+                }
+                if (allowHeaders.length() != 0) {
+                    allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_HEADERS_HANDLER_VALUE, allowHeaders.toString());
+                }
+            }
+            if (corsConfiguration.getAccessControlAllowOrigins() != null) {
+                StringBuilder allowOrigins = new StringBuilder();
+                for (String origin : corsConfiguration.getAccessControlAllowOrigins()) {
+                    allowOrigins.append(origin).append(',');
+                }
+                if (allowOrigins.length() != 0) {
+                    allowOrigins.deleteCharAt(allowOrigins.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_ORIGIN_HANDLER_VALUE, allowOrigins.toString());
+                }
+            }
+            if (corsConfiguration.getAccessControlAllowMethods() != null) {
+                StringBuilder allowedMethods = new StringBuilder();
+                for (String methods : corsConfiguration.getAccessControlAllowMethods()) {
+                    allowedMethods.append(methods).append(',');
+                }
+                if (allowedMethods.length() != 0) {
+                    allowedMethods.deleteCharAt(allowedMethods.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_METHODS_HANDLER_VALUE, allowedMethods.toString());
+                }
+            }
+            if (corsConfiguration.isAccessControlAllowCredentials()) {
+                corsProperties.put(APIConstants.CORSHeaders.ALLOW_CREDENTIALS_HANDLER_VALUE,
+                        String.valueOf(corsConfiguration.isAccessControlAllowCredentials()));
+            }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
+                    , corsProperties);
+        } else if (APIUtil.isCORSEnabled()) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
+                    , corsProperties);
+        }
+
         Map<String, String> authProperties = new HashMap<String, String>();
 
         //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
