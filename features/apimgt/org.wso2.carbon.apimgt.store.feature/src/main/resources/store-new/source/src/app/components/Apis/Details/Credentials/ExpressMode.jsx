@@ -28,7 +28,7 @@ import Alert from '../../../Shared/Alert';
 // import ApiContext from '../../ApiContext'
 import API from '../../../../data/api';
 import Application from '../../../../data/Application';
-import ApplicationCreate from '../../../Shared/AppsAndKeys/ApplicationCreate';
+import ApplicationCreate from '../../../Shared/AppsAndKeys/ApplicationCreateForm';
 import SubscribeToApi from '../../../Shared/AppsAndKeys/SubscribeToApi';
 import Keys from '../../../Shared/AppsAndKeys/KeyConfiguration';
 import { ApiContext } from '../ApiContext';
@@ -155,6 +155,9 @@ class ExpressMode extends Component {
             });
     };
 
+    /**
+     * @inheritdoc
+     */
     render() {
         const { classes, api } = this.props;
         const {
@@ -199,7 +202,13 @@ class ExpressMode extends Component {
                         <Grid item xs={3}>
                             <div className={classes.arrowTextContainer}>
                                 <Typography variant='body1'>
-                                Subscribe <strong>{api.name}</strong> to Application <strong>{appName}</strong>
+                                Subscribe
+                                    {' '}
+                                    <strong>{api.name}</strong>
+                                    {' '}
+                                        to Application
+                                    {' '}
+                                    <strong>{appName}</strong>
                                 </Typography>
                                 <ArrowForward />
                             </div>
@@ -213,14 +222,12 @@ class ExpressMode extends Component {
                             <ApplicationCreate innerRef={(node) => { this.applicationCreate = node; }} />
                         </Grid>
                         <Grid item xs={3}>
-
                             <SubscribeToApi
                                 innerRef={(node) => { this.subscribeToApi = node; }}
                                 newApp={newApp}
                                 api={api}
                                 applicationsAvailable={applicationsAvailable}
-                            />;
-
+                            />
                         </Grid>
                         <Grid item xs={6}>
                             <Keys innerRef={(node) => { this.keys = node; }} selectedApp={newApp} keyType='SANDBOX' />

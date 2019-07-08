@@ -40,9 +40,9 @@ import Typography from '@material-ui/core/Typography';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
 import Application from '../../../data/Application';
-import Tokens from '../../Shared/AppsAndKeys/Tokens';
-import ViewToken from '../../Shared/AppsAndKeys/ViewToken';
-import ViewCurl from '../../Shared/AppsAndKeys/ViewCurl';
+import Tokens from './Tokens';
+import ViewToken from './ViewToken';
+import ViewCurl from './ViewCurl';
 
 const styles = theme => ({
     button: {
@@ -80,6 +80,9 @@ const styles = theme => ({
     },
 });
 
+/**
+ * Class used to displays in key generation UI
+ */
 class ViewKeys extends React.Component {
     state = {
         showCS: false,
@@ -87,13 +90,6 @@ class ViewKeys extends React.Component {
         showToken: false,
         showCurl: false,
     };
-
-    /**
-     * Fetch Application object by ID coming from URL path params and fetch related keys to display
-     */
-    componentDidMount() {
-        this.updateUI();
-    }
 
     /**
      * Handle onClick of the copy icon
@@ -126,32 +122,6 @@ class ViewKeys extends React.Component {
      */
     handleMouseDownGeneric = (event) => {
         event.preventDefault();
-    };
-
-    /**
-     * Update the application keys
-     * @param data
-     * */
-    updateUI = () => {
-        const { selectedApp } = this.props;
-        const promiseApp = Application.get(selectedApp.appId);
-
-        promiseApp
-            .then((application) => {
-                return application.getKeys();
-            })
-            .then((keys) => {
-                this.setState({ keys });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.error(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
     };
 
     /**
@@ -203,13 +173,16 @@ class ViewKeys extends React.Component {
             });
     };
 
+    /**
+     * @inheritdoc
+     */
     render() {
         const {
-            notFound, showCS, showToken, showCurl, keys, secretCopied, tokenCopied, keyCopied, open,
+            notFound, showCS, showToken, showCurl, secretCopied, tokenCopied, keyCopied, open,
             token, tokenScopes, tokenValidityTime,
         } = this.state;
         const {
-            keyType, classes, fullScreen, selectedApp,
+            keyType, classes, fullScreen, selectedApp, keys,
         } = this.props;
 
         if (notFound) {
@@ -333,8 +306,8 @@ class ViewKeys extends React.Component {
                                 </div>
                                 <FormControl>
                                     <FormHelperText id='access-token-helper-text'>
-                                                Above token has a validity period of {validityPeriod} seconds.
-                                                And the token has ( {accessTokenScopes.join(', ')} ) scopes.
+                                        {`Above token has a validity period of ${validityPeriod}seconds.
+                                            And the token has (${accessTokenScopes.join(', ')}) scopes.`}
                                     </FormHelperText>
                                 </FormControl>
                             </Grid>
@@ -348,17 +321,20 @@ class ViewKeys extends React.Component {
                             >
                                 <DialogTitle
                                     id='responsive-dialog-title'
-                                >{showCurl ? 'Get CURL to Generate Access Token' : 'Generate Access Token'}
+                                >
+                                    {showCurl ? 'Get CURL to Generate Access Token' : 'Generate Access Token'}
                                 </DialogTitle>
                                 <DialogContent>
                                     {!showCurl && (
                                         <DialogContentText>
                                             {!showToken
-                                            && <Tokens
-                                                innerRef={(node) => { this.tokens = node; }}
-                                                selectedApp={selectedApp}
-                                                keyType={keyType}
-                                            />}
+                                            && (
+                                                <Tokens
+                                                    innerRef={(node) => { this.tokens = node; }}
+                                                    selectedApp={selectedApp}
+                                                    keyType={keyType}
+                                                />
+                                            )}
                                             {showToken && <ViewToken token={this.token} />}
                                         </DialogContentText>
                                     )}

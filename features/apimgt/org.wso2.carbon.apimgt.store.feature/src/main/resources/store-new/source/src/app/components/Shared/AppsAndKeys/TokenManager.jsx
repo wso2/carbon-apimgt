@@ -28,6 +28,7 @@ import Application from '../../../data/Application';
 import Loading from '../../Base/Loading/Loading';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
+import WaitingForApproval from './WaitingForApproval';
 import { ScopeValidation, resourceMethods, resourcePaths } from '../ScopeValidation';
 
 const styles = theme => ({
@@ -75,6 +76,11 @@ class TokenManager extends React.Component {
                 supportedGrantTypes: ['client_credentials'],
                 callbackUrl: 'https://wso2.am.com',
             },
+        };
+        this.keyStates = {
+            COMPLETED: 'COMPLETED',
+            CREATED: 'CREATED',
+            REJECTED: 'REJECTED',
         };
         if (selectedApp) {
             this.appId = selectedApp.appId || selectedApp.value;
@@ -138,7 +144,6 @@ class TokenManager extends React.Component {
             if (updateSubscriptionData) {
                 updateSubscriptionData();
             }
-            this.viewKeys.updateUI();
             const newKeys = new Map([...keys]);
             newKeys.set(keyType, response);
             this.setState({ keys: newKeys });
@@ -186,9 +191,12 @@ class TokenManager extends React.Component {
     render() {
         const { classes, selectedApp, keyType } = this.props;
         const { keys, keyRequest, notFound } = this.state;
-
         if (!keys) {
             return <Loading />;
+        }
+        const key = keys.get(keyType);
+        if (key && key.keyState !== this.keyStates.COMPLETED) {
+            return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }
         return (
             <div className={classes.root}>
@@ -200,7 +208,7 @@ class TokenManager extends React.Component {
                 <ViewKeys
                     selectedApp={selectedApp}
                     keyType={keyType}
-                    innerRef={node => (this.viewKeys = node)}
+                    keys={keys}
                 />
 
                 <ExpansionPanel>
