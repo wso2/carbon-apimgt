@@ -1609,4 +1609,9 @@ public final class APIConstants {
         API,
         PRODUCT_API
     }
+    //Constants for user API ratings
+    public static final String API_ID = "apiId";
+    public static final String RATING_ID = "ratingId";
+    public static final String RATING = "rating";
+    public static final String USER_NAME ="username";
 }

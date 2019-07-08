@@ -39,6 +39,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_API = "API";
     public static final String RESOURCE_API_PRODUCT = "API Product";
     public static final String RESOURCE_PRODUCT_DOCUMENTATION = "product documentation";
+    public static final String RESOURCE_RATING = "Rating";
     public static final String RESOURCE_APPLICATION = "application";
     public static final String RESOURCE_SUBSCRIPTION = "subscription";
     public static final String RESOURCE_DOCUMENTATION = "documentation";
@@ -98,6 +99,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_TIERS_APPLICATION = RESOURCE_PATH_TIERS + "/application";
     public static final String RESOURCE_PATH_TIERS_RESOURCE = RESOURCE_PATH_TIERS + "/resource";
     public static final String RESOURCE_PATH_TAGS = "/tags";
+    public static final String RESOURCE_PATH_RATINGS = "/ratings";
     public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS = RESOURCE_PATH_API_PRODUCTS + "/" + APIPRODUCTID_PARAM + "/documents";
@@ -156,6 +158,9 @@ public final class RestApiConstants {
 
     public static final String DOCUMENTS_GET_PAGINATION_URL =
             RESOURCE_PATH_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
+    public static final String RATINGS_GET_PAGINATION_URL =
+            RESOURCE_PATH_RATINGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String TIERS_GET_PAGINATION_URL =
             RESOURCE_PATH_TIERS + "/" + TIER_LEVEL_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
