@@ -1438,6 +1438,11 @@ public class APIMappingUtil {
             }
             productDto.setAdditionalProperties(additionalPropertiesMap);
         }
+
+        if (product.getApiSecurity() != null) {
+            productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
+        }
+
         return productDto;
     }
     
@@ -1574,6 +1579,7 @@ public class APIMappingUtil {
             
         }
         product.setProductResources(productResources);
+        product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         return product;
     }
     

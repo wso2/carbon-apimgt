@@ -6402,6 +6402,13 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
+      securityScheme:
+        type: array
+        description: |
+          Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If
+          it is not set OAuth2 will be set as the security for the current API.
+        items:
+          type: string
       subscriptionAvailability:
         type: string
         description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.

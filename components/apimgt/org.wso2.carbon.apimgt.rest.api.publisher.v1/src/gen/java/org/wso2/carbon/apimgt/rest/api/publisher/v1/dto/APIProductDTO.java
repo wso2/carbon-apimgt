@@ -134,6 +134,7 @@ public enum AccessControlEnum {
     private List<String> gatewayEnvironments = new ArrayList<>();
     private List<String> transport = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<>();
 
 @XmlType(name="SubscriptionAvailabilityEnum")
 @XmlEnum(String.class)
@@ -441,6 +442,24 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   * Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. 
+   **/
+  public APIProductDTO securityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @JsonProperty("securityScheme")
+  public List<String> getSecurityScheme() {
+    return securityScheme;
+  }
+  public void setSecurityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
+  }
+
+  /**
    * The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
    **/
   public APIProductDTO subscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
@@ -553,6 +572,7 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
         Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(policies, apIProduct.policies) &&
+        Objects.equals(securityScheme, apIProduct.securityScheme) &&
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, apIProduct.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, apIProduct.additionalProperties) &&
@@ -562,7 +582,7 @@ public enum SubscriptionAvailabilityEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
   }
 
   @Override
@@ -585,6 +605,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
+    sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");

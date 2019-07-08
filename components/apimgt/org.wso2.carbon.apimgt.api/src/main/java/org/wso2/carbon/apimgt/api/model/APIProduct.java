@@ -45,6 +45,10 @@ public class APIProduct {
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
     private Set<String> environments;
+
+    // API security at the gateway level.
+    private String apiSecurity = "oauth2";
+
     private String transports;
     private String responseCache;
     private int cacheTimeout;
@@ -304,4 +308,11 @@ public class APIProduct {
                 + tenantDomain + ", productResources=" + productResources + "]";
     }
 
+    public String getApiSecurity() {
+        return apiSecurity;
+    }
+
+    public void setApiSecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
+    }
 }
