@@ -6402,6 +6402,11 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
+      authorizationHeader:
+        type: string
+        description: |
+          Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified
+          in tenant or system level will be used.
       securityScheme:
         type: array
         description: |
@@ -6429,6 +6434,8 @@ definitions:
         description : Map of custom properties of API
       businessInformation:
         $ref: '#/definitions/APIProductBusinessInformation'
+      corsConfiguration:
+        $ref: '#/definitions/APICorsConfiguration'
       apis:
         description: |
           APIs and resources in the API Product.

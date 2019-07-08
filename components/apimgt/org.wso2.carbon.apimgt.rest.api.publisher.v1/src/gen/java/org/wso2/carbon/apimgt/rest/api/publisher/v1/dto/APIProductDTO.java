@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import javax.validation.constraints.*;
@@ -134,6 +135,7 @@ public enum AccessControlEnum {
     private List<String> gatewayEnvironments = new ArrayList<>();
     private List<String> transport = new ArrayList<>();
     private List<String> policies = new ArrayList<>();
+    private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<>();
 
 @XmlType(name="SubscriptionAvailabilityEnum")
@@ -172,6 +174,7 @@ public enum SubscriptionAvailabilityEnum {
     private List<String> subscriptionAvailableTenants = new ArrayList<>();
     private Map<String, String> additionalProperties = new HashMap<>();
     private APIProductBusinessInformationDTO businessInformation = null;
+    private APICorsConfigurationDTO corsConfiguration = null;
     private List<ProductAPIDTO> apis = new ArrayList<>();
 
   /**
@@ -442,6 +445,24 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. 
+   **/
+  public APIProductDTO authorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
+  @JsonProperty("authorizationHeader")
+  public String getAuthorizationHeader() {
+    return authorizationHeader;
+  }
+  public void setAuthorizationHeader(String authorizationHeader) {
+    this.authorizationHeader = authorizationHeader;
+  }
+
+  /**
    * Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. 
    **/
   public APIProductDTO securityScheme(List<String> securityScheme) {
@@ -530,6 +551,23 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   **/
+  public APIProductDTO corsConfiguration(APICorsConfigurationDTO corsConfiguration) {
+    this.corsConfiguration = corsConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("corsConfiguration")
+  public APICorsConfigurationDTO getCorsConfiguration() {
+    return corsConfiguration;
+  }
+  public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
+    this.corsConfiguration = corsConfiguration;
+  }
+
+  /**
    * APIs and resources in the API Product. 
    **/
   public APIProductDTO apis(List<ProductAPIDTO> apis) {
@@ -572,17 +610,19 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
         Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(policies, apIProduct.policies) &&
+        Objects.equals(authorizationHeader, apIProduct.authorizationHeader) &&
         Objects.equals(securityScheme, apIProduct.securityScheme) &&
         Objects.equals(subscriptionAvailability, apIProduct.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, apIProduct.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, apIProduct.additionalProperties) &&
         Objects.equals(businessInformation, apIProduct.businessInformation) &&
+        Objects.equals(corsConfiguration, apIProduct.corsConfiguration) &&
         Objects.equals(apis, apIProduct.apis);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, apis);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, apis);
   }
 
   @Override
@@ -605,11 +645,13 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
+    sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
+    sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("}");
     return sb.toString();

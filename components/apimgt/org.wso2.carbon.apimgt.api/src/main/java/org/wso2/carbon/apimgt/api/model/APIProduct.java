@@ -58,6 +58,11 @@ public class APIProduct {
     private String productionMaxTps;
     private String sandboxMaxTps;
 
+    //Custom authorization header specific to the API
+    private String authorizationHeader;
+
+    private CORSConfiguration corsConfiguration;
+
     /**
      * Publisher access control related parameters.
      * AccessControl -> Specifies whether that particular API Product is restricted to certain set of publishers and creators.
@@ -314,5 +319,21 @@ public class APIProduct {
 
     public void setApiSecurity(String apiSecurity) {
         this.apiSecurity = apiSecurity;
+    }
+
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
+    }
+
+    public CORSConfiguration getCorsConfiguration() {
+        return corsConfiguration;
+    }
+
+    public void setCorsConfiguration(CORSConfiguration corsConfiguration) {
+        this.corsConfiguration = corsConfiguration;
     }
 }
