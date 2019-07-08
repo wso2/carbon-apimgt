@@ -6,7 +6,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
-import org.wso2.carbon.apimgt.gateway.throttling.HoneyAPIDataPublisher.HoneyAPIDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.BotDataDTO;
 
@@ -19,7 +18,7 @@ import java.util.Map;
 public class HoneyPotAPIMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(HoneyPotAPIMediator.class);
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
-    private static volatile HoneyAPIDataPublisher honeyAPIDataPublisher = new HoneyAPIDataPublisher();
+    //private static volatile HoneyAPIDataPublisher honeyAPIDataPublisher = new HoneyAPIDataPublisher();
 
     @Override
     public boolean mediate(MessageContext messageContext) {
