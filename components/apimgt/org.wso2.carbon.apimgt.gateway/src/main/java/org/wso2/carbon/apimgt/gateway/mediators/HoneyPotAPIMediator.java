@@ -46,7 +46,6 @@ public class HoneyPotAPIMediator extends AbstractMediator {
         log.info("Detected Anonymous User | MessageId :" + messageId + "|" + " Request Method :" + apiMethod + "|" +
                 " Message Body : " + messageBody + "|" + " client Ip :" + clientIP + "|" + "Headers set :" + headerSet);
 
-        //honeyAPIDataPublisher.publishEvent(currentTime, messageId, apiMethod, headerSet, messageBody, clientIP);
         BotDataDTO botDataDTO = new BotDataDTO();
         botDataDTO.setCurrentTime(currentTime);
         botDataDTO.setMessageID(messageId);

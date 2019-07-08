@@ -7,6 +7,16 @@ var saveEmailList  = function () {
 
     var emailList=request.getParameter("emailList");
     try {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+                if(!isAnalyticsEnabled) {
+
+                    return {
+                        error:true,
+                        message:"Please enable statistics to see this page"
+                    };
+
+                }
         var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
         var addEmailList = new APIAdminImpl();
         var addEmailListDB = addEmailList.addHoneyPotAPiEmailAlertConfiguration(emailList);
@@ -27,6 +37,16 @@ var saveEmailList  = function () {
 
 var deleteEmails = function (uuid){
     try {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+                if(!isAnalyticsEnabled) {
+
+                    return {
+                        error:true,
+                        message:"Please enable statistics to see this page"
+                    };
+
+                }
         var uuid=request.getParameter("uuid");
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
@@ -51,6 +71,16 @@ var retrieveSavedEmailList = function () {
     var gson = com.google.gson.Gson();
 
     try {
+       var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+               var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+               if(!isAnalyticsEnabled) {
+
+                   return {
+                       error:true,
+                       message:"Please enable statistics to see this page"
+                   };
+
+               }
        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
        var allSavedEmailList = APIAdminImpl.retrieveSavedHoneyPotAPIAlertEmailList();
        var allSavedEmailListJson = JSON.parse(gson.toJson(allSavedEmailList));

@@ -12,9 +12,7 @@ jagg.block("honeypot-api-alert-list", {
     getOutputs:function (inputs) {
         var alertData, result;
         result = jagg.module("honeypot-api-alerts").getAlert();
-        //new Log('result').info(stringify(result));
         alertData = result.alertData;
-        //new Log('alertData').info(stringify(alertData));
 
         // we put results to the session.
        // session.put("alertData", alertData);
