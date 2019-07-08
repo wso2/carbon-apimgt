@@ -117,7 +117,7 @@ public class HoneyPotIPBasedThrottleHandler extends AbstractHandler {
         boolean reCreate = false;
         if (entry.isDynamic()) {
             if ((!entry.isCached()) || (entry.isExpired()) || throttle == null) {
-                log.info("++++++++++++Is dynamic ++++");
+                //log.info("++++++++++++Is dynamic ++++");
                 entryValue = synCtx.getEntry(this.policyKey);
                 if (this.version != entry.getVersion()) {
                     //log.info("++++++++++++Is dynamic and isCached+++++");

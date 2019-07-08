@@ -80,9 +80,6 @@ public class APIManagerAnalyticsConfiguration {
             if (requestStreamName == null || requestStreamVersion == null) {
                 log.error("Request stream name or version is null. Check api-manager.xml");
             }
-
-
-            //botStream
             botDataStreamName = config.getFirstProperty("Analytics.Streams.botData.Name");
             log.info(botDataStreamName);
             botDataStreamVersion = config.getFirstProperty("Analytics.Streams.botData.Version");

@@ -8,8 +8,7 @@
     <div class="content-data">
 
     <%
-    var log = new Log();
-    if(outputs.alertData.size()) { %>
+    if(outputs.alertData.length != 0) { %>
     <table class="table table-responsive table-striped" >
         <thead>
             <tr>
@@ -19,40 +18,29 @@
                 <th class=""><b>Headers Set</b></th>
                 <th class=""><b>Message Body</b></th>
                 <th class=""><b>Client IP</b></th>
-                <th class=""><b>Remove</b></th>
+
             </tr>
         </thead>
 
        <%
-         var log = new Log();
          var ArrayList = Packages.java.util.ArrayList;
          var alertInfo = outputs.alertData;
-         var AlertData =  Packages.org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
-         var alertData = new AlertData();
+        var alertData=outputs['alertData'];
+        var len=alertData.length.toFixed(0);
 
-        for(i=0; i < alertInfo.size(); i++) {
-            alertData = alertInfo.get(i);
-            var time = alertData.getCurrentTime();
+
+        for(var i=0; i<alertData.length;i++) {
+            var time = alertData[i]['records']['REQUEST_TIME'];
             var recordTime = new Date(time).toLocaleString();
         %>
 
         <tr>
-
             <td><b><%print(recordTime);%></b></td>
-            <td><%print(alertData.getMessageID());%></td>
-            <td><%print(alertData.getApiMethod());%></td>
-            <td><%print(alertData.getHeaderSet());%></td>
-            <td><%print(alertData.getMessageBody());%></td>
-            <td><%print(alertData.getClientIp());%></td>
-            <td class="text-right">
-            <a id="deleteButton" onclick="deleteAlert('<%=alertData.getMessageID()%>')" class="btn padding-reduce-on-grid-view">
-                    <span class="fw-stack">
-                        <i class="fw fw-circle-outline fw-stack-2x"></i>
-                        <i class="fw fw-delete fw-stack-1x"></i>
-                    </span>
-                    <span class="hidden-xs"><%=i18n.localize("Delete")%></span>
-                </a>
-            </td>
+            <td><%print(alertData[i]['records']['MESSAGE_ID']);%></td>
+            <td><%print(alertData[i]['records']['HTTP_METHOD']);%></td>
+            <td><%print(alertData[i]['records']['HEADERS']);%></td>
+            <td><%print(alertData[i]['records']['MESSAGE_BODY']);%></td>
+            <td><%print(alertData[i]['records']['CLIENT_IP']);%></td>
          </tr>
          <%}%>
     </table>
