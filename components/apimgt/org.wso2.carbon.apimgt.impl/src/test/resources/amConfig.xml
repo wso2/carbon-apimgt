@@ -1,7 +1,7 @@
 <APIManager>
     <DataSourceName>java:/comp/env/jdbc/WSO2AM_DB</DataSourceName>
     <Database>
-        <URL>jdbc:h2:target/repository/database/WSO2AM_DB;AUTO_SERVER=TRUE</URL>
+        <URL>jdbc:h2:./target/repository/database/WSO2AM_DB;AUTO_SERVER=TRUE</URL>
         <Username>wso2carbon</Username>
         <Password>wso2carbon</Password>
         <Driver>org.h2.Driver</Driver>
