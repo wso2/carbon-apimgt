@@ -242,8 +242,6 @@ class Resources extends React.Component {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
                     this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
                 }
             });
     }
@@ -405,8 +403,6 @@ class Resources extends React.Component {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
                     this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
                 }
             });
     }
@@ -499,7 +495,11 @@ class Resources extends React.Component {
         this.setState({showScopes: !this.state.showScopes, showAddResource: false});
     }
     render() {
-        const { api, showAddResource, apiScopes, showScopes } = this.state;
+        const { api, showAddResource, apiScopes, showScopes, isAuthorize } = this.state;
+
+        if (!isAuthorize) {
+            window.location = '/publisher-new/services/auth/login';
+        }
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }

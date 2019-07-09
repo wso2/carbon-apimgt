@@ -22,4 +22,8 @@ describe('<ConfirmDialog/> tests', () => {
     test('should render the ConfirmDialog component', () => {
         const wrapper = mount(<ConfirmDialog />);
     });
+
+    test.todo('should return default props when they are not provided ');
+    test.todo('should trigger callback with `true` when click on ok ');
+    test.todo('should trigger callback with `false` when click on cancel ');
 });

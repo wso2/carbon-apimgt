@@ -10,7 +10,7 @@ import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
-import APIInputForm from 'AppComponents/Apis/Create/Endpoint/APIInputForm';
+import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
 import Progress from 'AppComponents/Shared/Progress';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
@@ -27,7 +27,7 @@ const styles = theme => ({
         marginTop: 0,
         paddingLeft: theme.spacing.unit * 4,
         paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit*2,
+        paddingBottom: theme.spacing.unit * 2,
         width: theme.custom.contentAreaWidth,
     },
     buttonProgress: {
@@ -52,17 +52,35 @@ const styles = theme => ({
     },
 });
 
+/**
+ *
+ *
+ * @returns
+ */
 function getSteps() {
-    return [<FormattedMessage id='select.wsdl' defaultMessage='Select WSDL' />, <FormattedMessage id='create.api' defaultMessage='Create API' />];
+    const steps = [
+        <FormattedMessage id='select.wsdl' defaultMessage='Select WSDL' />,
+        <FormattedMessage id='create.api' defaultMessage='Create API' />,
+    ];
+    return steps;
 }
 
+/**
+ *
+ * Simple util method to check whether provided object is empty
+ * @param {Object} obj any
+ * @returns {boolean} check
+ */
 function isEmpty(obj) {
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) return false;
-    }
-    return true;
+    return Object.entries(obj).length === 0 && obj.constructor === Object;
 }
 
+/**
+ *
+ *
+ * @class APICreateWSDL
+ * @extends {React.Component}
+ */
 class APICreateWSDL extends React.Component {
     /**
      * Creates an instance of ApiCreateWSDL.
@@ -159,14 +177,15 @@ class APICreateWSDL extends React.Component {
                 changes[name] = value;
             }
 
-             // Checking validity.
-             const validUpdated = valid;
-             validUpdated.name.empty = !api.name;
-             validUpdated.context.empty = !api.context;
-             validUpdated.version.empty = !api.version;
-             validUpdated.endpoint.empty = !api.endpoint;
-             // TODO we need to add the already existing error for (context) by doing an api call ( the swagger definition does not contain such api call)
-             return { api: changes, valid: validUpdated };
+            // Checking validity.
+            const validUpdated = valid;
+            validUpdated.name.empty = !api.name;
+            validUpdated.context.empty = !api.context;
+            validUpdated.version.empty = !api.version;
+            validUpdated.endpoint.empty = !api.endpoint;
+            // TODO we need to add the already existing error for
+            // (context) by doing an api call ( the swagger definition does not contain such api call)
+            return { api: changes, valid: validUpdated };
         });
     }
 
@@ -217,12 +236,12 @@ class APICreateWSDL extends React.Component {
     handleNext = () => {
         const { activeStep, wsdlBean, valid } = this.state;
         let uploadMethod;
-        if(this.provideWSDL){
-          uploadMethod = this.provideWSDL.getUploadMethod() ;
+        if (this.provideWSDL) {
+            uploadMethod = this.provideWSDL.getUploadMethod();
         } else if (wsdlBean.file) {
-          uploadMethod = "file";
+            uploadMethod = 'file';
         } else {
-          uploadMethod = "url";
+            uploadMethod = 'url';
         }
         const validNew = JSON.parse(JSON.stringify(valid));
 
@@ -258,24 +277,25 @@ class APICreateWSDL extends React.Component {
                 }
             }
             this.setState({
-              activeStep: activeStep + 1,
+                activeStep: activeStep + 1,
             });
-        } else if (activeStep === 1) { // Handling Finish step ( validating the input fields )
-          const { api } = this.state;
-          if (!api.name || !api.context || !api.version || !api.endpoint) {
-            // Checking the api name,version,context undefined or empty states
-            this.setState((oldState) => {
-                const { valid, api } = oldState;
-                const validUpdated = valid;
-                validUpdated.name.empty = !api.name;
-                validUpdated.context.empty = !api.context;
-                validUpdated.version.empty = !api.version;
-                validUpdated.endpoint.empty = !api.endpoint;
-                return { valid: validUpdated };
-            });
-            return;
-          }
-          this.createWSDLAPI();
+        } else if (activeStep === 1) {
+            // Handling Finish step ( validating the input fields )
+            const { api: currentAPI } = this.state;
+            if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpoint) {
+                // Checking the api name,version,context undefined or empty states
+                this.setState((oldState) => {
+                    const { valid: isValid, api } = oldState;
+                    const validUpdated = isValid;
+                    validUpdated.name.empty = !api.name;
+                    validUpdated.context.empty = !api.context;
+                    validUpdated.version.empty = !api.version;
+                    validUpdated.endpoint.empty = !api.endpoint;
+                    return { valid: validUpdated };
+                });
+                return;
+            }
+            this.createWSDLAPI();
         }
     };
 
@@ -291,11 +311,17 @@ class APICreateWSDL extends React.Component {
         });
     };
 
+    /**
+     *
+     *
+     * @returns
+     * @memberof APICreateWSDL
+     */
     render() {
         const { classes } = this.props;
         const steps = getSteps();
         const {
-            doValidate, activeStep, wsdlBean, api, loading, valid,
+            doValidate, activeStep, wsdlBean, api, valid, loading,
         } = this.state;
         const uploadMethod = wsdlBean.url ? 'url' : 'file';
         const provideWSDLProps = {
@@ -306,16 +332,22 @@ class APICreateWSDL extends React.Component {
             valid,
             updateFileErrors: this.updateFileErrors,
         };
+        if (loading) {
+            return <Progress />;
+        }
         return (
             <Grid container spacing={24} className={classes.root}>
                 <Grid item xs={12} xl={6}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage id='design.a.new.rest.api.using.wsdl' defaultMessage='Design a new REST API using WSDL' />
+                            <FormattedMessage
+                                id='design.a.new.rest.api.using.wsdl'
+                                defaultMessage='Design a new REST API using WSDL'
+                            />
                         </Typography>
                     </div>
                     <Stepper activeStep={activeStep} className={classes.stepper}>
-                        {steps.map((label, index) => {
+                        {steps.map((label) => {
                             const props = {};
                             const labelProps = {};
 
@@ -338,14 +370,21 @@ class APICreateWSDL extends React.Component {
                         {activeStep === 1 && (
                             <React.Fragment>
                                 <APIInputForm api={api} handleInputChange={this.updateApiInputs} valid={valid} />
-                                <BindingInfo updateApiInputs={this.updateApiInputs} wsdlBean={wsdlBean} classes={classes} api={api} />
+                                <BindingInfo
+                                    updateApiInputs={this.updateApiInputs}
+                                    wsdlBean={wsdlBean}
+                                    classes={classes}
+                                    api={api}
+                                />
                             </React.Fragment>
                         )}
                     </div>
                     <div>
                         {activeStep === steps.length ? (
                             <div>
-                                <Typography className={classes.instructions}>All steps completed - you&quot;re finished</Typography>
+                                <Typography className={classes.instructions}>
+                                    All steps completed - you&quot;re finished
+                                </Typography>
                                 <Button onClick={this.handleReset} className={classes.button}>
                                     Reset
                                 </Button>
@@ -353,11 +392,28 @@ class APICreateWSDL extends React.Component {
                         ) : (
                             <div>
                                 <div>
-                                    <Button disabled={activeStep === 0} onClick={this.handleBack} className={classes.button}>
+                                    <Button
+                                        disabled={activeStep === 0}
+                                        onClick={this.handleBack}
+                                        className={classes.button}
+                                    >
                                         Back
                                     </Button>
-                                    <Button variant='contained' color='primary' onClick={this.handleNext} className={classes.button} disabled={(valid.wsdlFile.invalidFile && uploadMethod === 'file') || (valid.wsdlUrl.invalidUrl && uploadMethod === 'url')}>
-                                        {activeStep === steps.length - 1 ? 'Finish' : <FormattedMessage id='next' defaultMessage='Next' />}
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        onClick={this.handleNext}
+                                        className={classes.button}
+                                        disabled={
+                                            (valid.wsdlFile.invalidFile && uploadMethod === 'file') ||
+                                            (valid.wsdlUrl.invalidUrl && uploadMethod === 'url')
+                                        }
+                                    >
+                                        {activeStep === steps.length - 1 ? (
+                                            'Finish'
+                                        ) : (
+                                            <FormattedMessage id='next' defaultMessage='Next' />
+                                        )}
                                     </Button>
                                 </div>
                             </div>
@@ -370,7 +426,8 @@ class APICreateWSDL extends React.Component {
 }
 
 APICreateWSDL.propTypes = {
-    classes: PropTypes.object,
+    classes: PropTypes.shape({}).isRequired,
+    history: PropTypes.shape({ push: PropTypes.func }).isRequired,
 };
 
 export default withStyles(styles)(APICreateWSDL);

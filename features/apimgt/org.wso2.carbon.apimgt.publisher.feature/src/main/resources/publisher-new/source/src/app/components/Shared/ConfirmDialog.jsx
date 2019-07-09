@@ -4,7 +4,8 @@ import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 
 /**
- * React component for handling confirmation dialog box
+ * React component for handling confirmation dialog box.
+ * TODO: Convert this to functional component ~tmkb
  * @class ConfirmDialog
  * @extends {React.Component}
  */
@@ -29,6 +30,8 @@ class ConfirmDialog extends React.Component {
      * @memberof ConfirmDialog
      */
     render() {
+        // TODO: Use defaultProps member to assign default values to properties instead
+        // of using || (logical OR) comparison
         const {
             title, message, labelCancel, labelOk, open,
         } = this.props;

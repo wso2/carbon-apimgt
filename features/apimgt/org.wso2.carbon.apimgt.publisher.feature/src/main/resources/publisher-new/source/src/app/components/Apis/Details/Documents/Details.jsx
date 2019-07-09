@@ -132,8 +132,7 @@ class Details extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
+                    window.location = '/publisher-new/services/auth/login';
                 }
             });
     }

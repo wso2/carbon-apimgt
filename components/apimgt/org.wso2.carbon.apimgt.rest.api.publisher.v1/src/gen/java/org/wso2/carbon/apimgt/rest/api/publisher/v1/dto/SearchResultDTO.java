@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import javax.validation.constraints.*;
 
 
@@ -76,8 +78,9 @@ public enum TypeEnum {
   }
 
   
-  @ApiModelProperty(example = "TestAPI", value = "")
+  @ApiModelProperty(example = "TestAPI", required = true, value = "")
   @JsonProperty("name")
+  @NotNull
   public String getName() {
     return name;
   }

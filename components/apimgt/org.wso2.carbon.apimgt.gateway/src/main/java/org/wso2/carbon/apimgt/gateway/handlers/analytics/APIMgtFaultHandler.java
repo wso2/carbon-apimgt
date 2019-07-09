@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -57,6 +58,11 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                     REQUEST_START_TIME));
             String keyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
             String correlationID = GatewayUtils.getAndSetCorrelationID(messageContext);
+
+            JSONObject obj = new JSONObject();
+            obj.put("keyType", keyType);
+            obj.put("correlationID", correlationID);
+            String metaClientType = obj.toJSONString();
 
             FaultPublisherDTO faultPublisherDTO = new FaultPublisherDTO();
             String consumerKey = (String) messageContext.getProperty(APIMgtGatewayConstants.CONSUMER_KEY);
@@ -106,7 +112,7 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             String protocol = (String) messageContext.getProperty(
                     SynapseConstants.TRANSPORT_IN_NAME);
             faultPublisherDTO.setProtocol(protocol);
-            faultPublisherDTO.setMetaClientType(keyType);
+            faultPublisherDTO.setMetaClientType(metaClientType);
             faultPublisherDTO.setGatewaType(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
             if (log.isDebugEnabled()) {
                 log.debug("Publishing fault event from gateway to analytics for: " + messageContext.getProperty(

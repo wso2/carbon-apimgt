@@ -21,7 +21,7 @@ import io.swagger.models.Swagger;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -53,6 +53,8 @@ import java.net.URL;
 import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -204,7 +206,25 @@ public class BasicAuthCredentialValidator {
                 String resourceRoles = null;
                 Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
                 if (vendorExtensions != null) {
-                    resourceRoles = (String) vendorExtensions.get(APIConstants.SWAGGER_X_ROLES);
+                    String resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
+                    if (StringUtils.isNotBlank(resourceScope)) {
+                        LinkedHashMap swaggerWSO2Security = (LinkedHashMap) swagger.getVendorExtensions()
+                                .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+                        if (swaggerWSO2Security != null) {
+                            LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
+                                    .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
+                            if (swaggerObjectAPIM != null) {
+                                ArrayList<LinkedHashMap> scopes = (ArrayList<LinkedHashMap>) swaggerObjectAPIM
+                                        .get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                                for (LinkedHashMap scope : scopes) {
+                                    if (resourceScope.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
+                                        resourceRoles = (String) scope.get(APIConstants.SWAGGER_ROLES);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (StringUtils.isNotBlank(resourceRoles)) {

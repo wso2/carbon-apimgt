@@ -22,83 +22,59 @@ import { Link } from 'react-router-dom';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-
+import Typography from '@material-ui/core/Typography';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Subscription from '../../../data/Subscription';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 /**
  *
- *
- * @param {*} order
- * @param {*} orderBy
- * @returns
+ * @param {*} order order
+ * @param {*} orderBy orderby
+ * @returns {Boolean}
  */
 function getSorting(order, orderBy) {
-    return order === 'desc' ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1) : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
+    return order === 'desc' ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
+        : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
 }
 /**
  *
  *
- * @class AppsTableBody
+ * @class AppsTableContent
  * @extends {Component}
  */
-class AppsTableBody extends Component {
+class AppsTableContent extends Component {
+    /**
+     * @inheritdoc
+     */
     constructor(props) {
         super(props);
         this.state = {
-            subscriptions: false,
             notFound: false,
+        };
+        this.APPLICATION_STATES = {
+            CREATED: 'CREATED',
+            APPROVED: 'APPROVED',
+            REJECTED: 'REJECTED',
         };
     }
 
     /**
-     *
-     *
-     * @memberof AppsTableBody
-     */
-    componentDidMount() {
-        const client = new Subscription();
-        const { apps } = this.props;
-        const appIds = [...apps.keys()];
-        const promises = appIds.map(appId => client.getSubscriptions(null, appId).then((response) => {
-            response.appId = appId;
-            return response;
-        }));
-
-        Promise.all(promises)
-            .then((response) => {
-                response.map((data) => {
-                    const app = apps.get(data.appId);
-                    app.subscriptions = data.body.count;
-                    apps.set(app.applicationId, app);
-                });
-                this.setState({ subscriptions: true });
-            })
-            .catch((error) => {
-                this.setState({ notFound: true });
-                console.error(error);
-            });
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof AppsTableBody
+     * @inheritdoc
+     * @memberof AppsTableContent
      */
     render() {
         const {
             apps, handleAppDelete, page, rowsPerPage, order, orderBy,
         } = this.props;
-        const { subscriptions, notFound } = this.state;
+        const { notFound } = this.state;
         const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page * rowsPerPage);
         let appsTableData = [];
 
-        if (subscriptions) {
+        if (apps) {
             appsTableData = [...apps.values()].map((app) => {
                 app.deleting = false;
                 return app;
@@ -116,24 +92,62 @@ class AppsTableBody extends Component {
                         return (
                             <TableRow key={app.applicationId}>
                                 <TableCell>
-                                    <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
+                                    {app.status === this.APPLICATION_STATES.APPROVED ? (
+                                        <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
+                                    ) : (
+                                        app.name
+                                    )
+                                    }
                                 </TableCell>
-                                <TableCell>{app.throttlingTier}</TableCell>
-                                <TableCell>{app.lifeCycleStatus}</TableCell>
-                                <TableCell>{app.subscriptions}</TableCell>
+                                <TableCell>{app.throttlingPolicy}</TableCell>
                                 <TableCell>
-                                    <Tooltip title='Edit'>
-                                        <Link to={'application/edit/' + app.applicationId}>
-                                            <IconButton>
-                                                <EditIcon aria-label='Edit' />
+                                    {app.status === this.APPLICATION_STATES.APPROVED && (
+                                        <Typography variant='subheading' gutterBottom>ACTIVE</Typography>
+                                    )}
+                                    {app.status === this.APPLICATION_STATES.CREATED && (
+                                        <Typography variant='subheading' gutterBottom>
+                                            INACTIVE
+                                            <Typography variant='caption'>
+                                            waiting for approval
+                                            </Typography>
+                                        </Typography>
+                                    )}
+                                    {app.status === this.APPLICATION_STATES.REJECTED && (
+                                        <Typography variant='subheading' gutterBottom>REJECTED</Typography>
+                                    )}
+                                </TableCell>
+                                <TableCell>{app.subscriptionCount}</TableCell>
+                                <TableCell>
+                                    <ScopeValidation
+                                        resourcePath={resourcePaths.SINGLE_APPLICATION}
+                                        resourceMethod={resourceMethods.PUT}
+                                    >
+                                        {app.status === this.APPLICATION_STATES.APPROVED && (
+                                            <Tooltip title='Edit'>
+                                                <Link to={'application/edit/' + app.applicationId}>
+                                                    <IconButton>
+                                                        <EditIcon aria-label='Edit' />
+                                                    </IconButton>
+                                                </Link>
+                                            </Tooltip>
+                                        )}
+                                    </ScopeValidation>
+                                    <ScopeValidation
+                                        resourcePath={resourcePaths.SINGLE_APPLICATION}
+                                        resourceMethod={resourceMethods.DELETE}
+                                    >
+                                        <Tooltip title='Delete'>
+                                            <IconButton
+                                                disabled={app.deleting}
+                                                data-appId={app.applicationId}
+                                                onClick={handleAppDelete}
+                                                color='default'
+                                                aria-label='Delete'
+                                            >
+                                                <DeleteIcon />
                                             </IconButton>
-                                        </Link>
-                                    </Tooltip>
-                                    <Tooltip title='Delete'>
-                                        <IconButton disabled={app.deleting} data-appId={app.applicationId} onClick={handleAppDelete} color='default' aria-label='Delete'>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Tooltip>
+                                        </Tooltip>
+                                    </ScopeValidation>
                                     {app.deleting && <CircularProgress size={24} />}
                                 </TableCell>
                             </TableRow>
@@ -148,4 +162,4 @@ class AppsTableBody extends Component {
         );
     }
 }
-export default AppsTableBody;
+export default AppsTableContent;

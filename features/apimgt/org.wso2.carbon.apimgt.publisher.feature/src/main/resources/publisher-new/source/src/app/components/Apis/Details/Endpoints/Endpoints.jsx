@@ -59,17 +59,17 @@ class Endpoints extends Component {
         console.info('handle submit');
     }
     showEndpoint (api, type) {
-        if(api.endpoint.length > 0){
-            for(var i=0; i< api.endpoint.length; i++){
-                if( type === "prod" && api.endpoint[i].type === "http"){
-                    return api.endpoint[i].inline.endpointConfig.list[0].url;
-                } else if( type === "sand" && api.endpoint[i].type === "sandbox_endpoints"){
-                    return api.endpoint[i].inline.endpointConfig.list[0].url;
-                }
+        if (api.endpointConfig) {
+            if (type === 'prod') {
+                return api.getProductionEndpoint();
             }
-            
+            if (type === 'sand') {
+                return api.getSandboxEndpoint();
+            }
         }
-    }
+        return null;
+    };
+
     render() {
         const { classes } = this.props;
         return (

@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import com.google.gson.Gson;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -151,7 +151,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
             boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
             boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST == body.getType();
 
@@ -160,117 +159,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Endpoint URLs should be valid web socket URLs", log);
             }
 
-            List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
-            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
-                for (String apiSecurityScheme : apiSecuritySchemes) {
-                    if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                        RestApiUtil.handleBadRequest("Mutual SSL Based authentication is not supported in this server", log);
-                    }
-                }
-            }
-            if (body.getAccessControlRoles() != null) {
-                String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
-
-                if (!errorMessage.isEmpty()) {
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                }
-            }
-            if (body.getAdditionalProperties() != null) {
-                String errorMessage = RestApiPublisherUtils
-                        .validateAdditionalProperties(body.getAdditionalProperties());
-                if (!errorMessage.isEmpty()) {
-                    RestApiUtil.handleBadRequest(errorMessage, log);
-                }
-            }
-            if (body.getContext() == null) {
-                RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
-            } else if (body.getContext().endsWith("/")) {
-                RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
-            }
-            if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
-                RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
-                        + " already exists.", log);
-            }
-
-            //Get all existing versions of  api been adding
-            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
-            if (apiVersions.size() > 0) {
-                //If any previous version exists
-                for (String version : apiVersions) {
-                    if (version.equalsIgnoreCase(body.getVersion())) {
-                        //If version already exists
-                        if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                            RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
-                                    "adding the API. A duplicate API already exists for "
-                                    + body.getName() + "-" + body.getVersion(), log);
-                        } else {
-                            RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
-                                    body.getName() + " already exists with different " +
-                                    "context", log);
-                        }
-                    }
-                }
-            } else {
-                //If no any previous version exists
-                if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                    RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
-                            "already exists for " + body.getContext(), log);
-                }
-            }
-
-            //Check if the user has admin permission before applying a different provider than the current user
-            String provider = body.getProvider();
-            if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
-                if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("User " + username + " does not have admin permission ("
-                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" +
-                                provider + ") overridden with current user (" + username + ")");
-                    }
-                    provider = username;
-                }
-            } else {
-                //Set username in case provider is null or empty
-                provider = username;
-            }
-
-            List<String> tiersFromDTO = body.getPolicies();
-            //If tiers are not defined, the api should be a PROTOTYPED one,
-/*            if (!APIConstants.PROTOTYPED.equals(body.getLifeCycleStatus()) &&
-                    (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
-                RestApiUtil.handleBadRequest("No tier defined for the API", log);
-            }*/
-            //check whether the added API's tiers are all valid
-            Set<Tier> definedTiers = apiProvider.getTiers();
-            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
-            if (invalidTiers.size() > 0) {
-                RestApiUtil.handleBadRequest(
-                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
-            }
-            APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiThrottlingPolicy());
-            if (apiPolicy == null && body.getApiThrottlingPolicy() != null) {
-                RestApiUtil.handleBadRequest(
-                        "Specified policy " + body.getApiThrottlingPolicy() + " is invalid", log);
-            }
-//            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(body.getWsdlUri())) {todo check
-//                String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
-//                body.setApiDefinition(swaggerStr);
-//            }
-            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
-            //Overriding some properties:
-            //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
-            if (!APIConstants.PROTOTYPED.equals(apiToAdd.getStatus())) {
-                apiToAdd.setStatus(APIConstants.CREATED);
-            }
-            //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
-            //  the owner as a different user
-            apiToAdd.setApiOwner(provider);
-
-            //attach micro-geteway labels
-            apiToAdd = assignLabelsToDTO(body,apiToAdd);
-
-            //adding the api
-            apiProvider.addAPI(apiToAdd);
+            API apiToAdd = createAPIByDTO(body);
             if (isSoapToRestConvertedApi) {
                 if (StringUtils.isNotBlank(apiToAdd.getWsdlUrl())) {
                     String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
@@ -309,6 +198,122 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     *
+     * @param body APIDTO of the API
+     * @return API
+     * @throws APIManagementException
+     */
+    private API createAPIByDTO(APIDTO body) throws APIManagementException {
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String username = RestApiUtil.getLoggedInUsername();
+        List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
+        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
+            for (String apiSecurityScheme : apiSecuritySchemes) {
+                if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
+                    RestApiUtil.handleBadRequest("Mutual SSL Based authentication is not supported in this server", log);
+                }
+            }
+        }
+        if (body.getAccessControlRoles() != null) {
+            String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
+
+            if (!errorMessage.isEmpty()) {
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        }
+        if (body.getAdditionalProperties() != null) {
+            String errorMessage = RestApiPublisherUtils
+                    .validateAdditionalProperties(body.getAdditionalProperties());
+            if (!errorMessage.isEmpty()) {
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        }
+        if (body.getContext() == null) {
+            RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
+        } else if (body.getContext().endsWith("/")) {
+            RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
+        }
+        if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
+            RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
+                    + " already exists.", log);
+        }
+
+        //Get all existing versions of  api been adding
+        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
+        if (apiVersions.size() > 0) {
+            //If any previous version exists
+            for (String version : apiVersions) {
+                if (version.equalsIgnoreCase(body.getVersion())) {
+                    //If version already exists
+                    if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                        RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
+                                "adding the API. A duplicate API already exists for "
+                                + body.getName() + "-" + body.getVersion(), log);
+                    } else {
+                        RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
+                                body.getName() + " already exists with different " +
+                                "context", log);
+                    }
+                }
+            }
+        } else {
+            //If no any previous version exists
+            if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
+                        "already exists for " + body.getContext(), log);
+            }
+        }
+
+        //Check if the user has admin permission before applying a different provider than the current user
+        String provider = body.getProvider();
+        if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
+            if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User " + username + " does not have admin permission ("
+                            + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" +
+                            provider + ") overridden with current user (" + username + ")");
+                }
+                provider = username;
+            }
+        } else {
+            //Set username in case provider is null or empty
+            provider = username;
+        }
+
+        List<String> tiersFromDTO = body.getPolicies();
+
+        //check whether the added API's tiers are all valid
+        Set<Tier> definedTiers = apiProvider.getTiers();
+        List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+        if (invalidTiers.size() > 0) {
+            RestApiUtil.handleBadRequest(
+                    "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+        }
+        APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiThrottlingPolicy());
+        if (apiPolicy == null && body.getApiThrottlingPolicy() != null) {
+            RestApiUtil.handleBadRequest(
+                    "Specified policy " + body.getApiThrottlingPolicy() + " is invalid", log);
+        }
+
+        API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
+        //Overriding some properties:
+        //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
+        if (!APIConstants.PROTOTYPED.equals(apiToAdd.getStatus())) {
+            apiToAdd.setStatus(APIConstants.CREATED);
+        }
+        //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
+        //  the owner as a different user
+        apiToAdd.setApiOwner(provider);
+
+        //attach micro-geteway labels
+        assignLabelsToDTO(body,apiToAdd);
+
+        //adding the api
+        apiProvider.addAPI(apiToAdd);
+        return apiToAdd;
     }
 
     @Override

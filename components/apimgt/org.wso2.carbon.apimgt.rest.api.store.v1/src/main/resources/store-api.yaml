@@ -75,6 +75,9 @@ securityDefinitions:
     scopes:
       openid: Authorize access to user details
       apim:subscribe: Subscribe API
+      apim:app_update: Update an application
+      apim:app_manage: Manage application
+      apim:sub_manage: Manage subscriptions
       apim:self-signup: Self Sign-up
       apim:dedicated_gateway: Updating dedicated Gateway
       apim:store_setting: Retrieve store settings
@@ -96,6 +99,8 @@ paths:
       x-wso2-request: |
         GET https://localhost:9443/api/am/store/v1.0/apis
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This API provide Account Status Validation.\",\n         \"status\": \"PUBLISHED\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account/1.0.0\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"status\": \"PUBLISHED\",\n         \"name\": \"api1\",\n         \"context\": \"/api1/1.0.0\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"2.0.0\",\n         \"description\": \"Verify a phone number\",\n         \"status\": \"PUBLISHED\",\n         \"name\": \"PhoneVerification\",\n         \"context\": \"/phoneverify/2.0.0\",\n         \"id\": \"c43a325c-260b-4302-81cb-768eafaa3aed\"\n      }\n   ],\n   \"count\": 3,\n   \"next\": \"\"\n}"
+      x-examples:
+        $ref: docs/examples/apis/apis.yaml#/get
       summary: |
         Retrieve/Search APIs
       description: |
@@ -1209,7 +1214,7 @@ paths:
     post:
       security:
         - OAuth2Security:
-          - apim:subscribe
+          - apim:app_manage
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/store/v1.0/applications\""
       x-wso2-request: "POST https://localhost:9443/api/am/store/v1.0/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingPolicy\": \"Unlimited\",\n    \"description\": \"sample app description\",\n    \"name\": \"sampleapp\",\n    \"callbackUrl\": \"http://my.server.com/callback\"\n \"groupId\": \"org1\"\n}"
@@ -1341,7 +1346,8 @@ paths:
     put:
       security:
         - OAuth2Security:
-          - apim:subscribe
+          - apim:app_manage
+          - apim:app_update
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v1.0/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\""
       x-wso2-request: "PUT https://localhost:9443/api/am/store/v1.0/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n   \"callbackUrl\": \"\",\n   \"throttlingPolicy\": \"Bronze\",\n   \"description\": \"sample app description updated\",\n   \"name\": \"sampleapp\",\n    \"groupId\": \"org1\"\n}"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingPolicy\": \"Bronze\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description updated\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
@@ -1407,7 +1413,7 @@ paths:
     delete:
       security:
         - OAuth2Security:
-          - apim:subscribe
+          - apim:app_manage
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://localhost:9443/api/am/store/v1.0/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4\""
       x-wso2-request: |
         DELETE https://localhost:9443/api/am/store/v1.0/applications/367a2361-8db5-4140-8133-c6c8dc7fa0c4
@@ -1463,7 +1469,8 @@ paths:
       summary: Generate application keys
       security:
         - OAuth2Security:
-          - apim:subscribe
+          - apim:app_manage
+          - apim:app_update
       description: |
         Generate keys (Consumer key/secret) for application
       parameters:
@@ -1662,7 +1669,8 @@ paths:
     put:
       security:
         - OAuth2Security:
-          - apim:subscribe
+          - apim:app_manage
+          - apim:app_update
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v1.0/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524/keys/SANDBOX\""
       x-wso2-request: |
         PUT https://localhost:9443/api/am/store/v1.0/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/SANDBOX
@@ -2162,7 +2170,7 @@ paths:
     post:
       security:
         - OAuth2Security:
-          - apim:subscribe
+          - apim:sub_manage
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST  -d @data.json \"https://localhost:9443/api/am/store/v1.0/subscriptions\""
       x-wso2-request: "POST https://localhost:9443/api/am/store/v1.0/subscriptions\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingPolicy\": \"Gold\",\n    \"apiIdentifier\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n}"
       x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v1.0/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"throttlingPolicy\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}"
@@ -2336,7 +2344,7 @@ paths:
     delete:
       security:
         - OAuth2Security:
-          - apim:subscribe
+          - apim:sub_manage
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://localhost:9443/api/am/store/v1.0/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\""
       x-wso2-request: |
@@ -3278,6 +3286,11 @@ definitions:
         additionalProperties:
           type: string
         example: External Reference ID, Billing Tier
+      subscriptionScopes:
+        type: array
+        items:
+          type: string
+        example: ["admin"]
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -4015,6 +4028,9 @@ definitions:
 
   SearchResult:
     title: Search Result
+    required:
+      - "name"
+    discriminator: "name"
     properties:
       id:
         type: string
@@ -4026,7 +4042,8 @@ definitions:
         type: string
         enum:
           - DOC
-          - API example: API
+          - API
+        example: API
 
   APISearchResult:
     title: API Result
@@ -4108,6 +4125,8 @@ definitions:
           apiProvider:
             type: string
             example: admin
+          apiUUID:
+            type: string
 #-----------------------------------------------------
 # The pagination resource
 #-----------------------------------------------------

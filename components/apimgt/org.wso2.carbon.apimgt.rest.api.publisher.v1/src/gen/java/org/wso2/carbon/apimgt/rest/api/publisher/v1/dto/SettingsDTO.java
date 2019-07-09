@@ -19,6 +19,7 @@ public class SettingsDTO   {
   
     private List<EnvironmentDTO> environment = new ArrayList<>();
     private List<String> scopes = new ArrayList<>();
+    private List<String> monetizationProperties = new ArrayList<>();
 
   /**
    **/
@@ -54,6 +55,23 @@ public class SettingsDTO   {
     this.scopes = scopes;
   }
 
+  /**
+   **/
+  public SettingsDTO monetizationProperties(List<String> monetizationProperties) {
+    this.monetizationProperties = monetizationProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("MonetizationProperties")
+  public List<String> getMonetizationProperties() {
+    return monetizationProperties;
+  }
+  public void setMonetizationProperties(List<String> monetizationProperties) {
+    this.monetizationProperties = monetizationProperties;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -65,12 +83,13 @@ public class SettingsDTO   {
     }
     SettingsDTO settings = (SettingsDTO) o;
     return Objects.equals(environment, settings.environment) &&
-        Objects.equals(scopes, settings.scopes);
+        Objects.equals(scopes, settings.scopes) &&
+        Objects.equals(monetizationProperties, settings.monetizationProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment, scopes);
+    return Objects.hash(environment, scopes, monetizationProperties);
   }
 
   @Override
@@ -80,6 +99,7 @@ public class SettingsDTO   {
     
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    monetizationProperties: ").append(toIndentedString(monetizationProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

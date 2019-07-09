@@ -132,38 +132,15 @@ class SampleAPI extends Component {
                 technicalOwner: 'John Doe',
                 technicalOwnerEmail: 'architecture@pizzashack.com',
             },
-            endpoint: [
-                {
-                    inline: {
-                        endpointConfig: {
-                            list: [
-                                {
-                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                                    timeout: '1000',
-                                },
-                            ],
-                            endpointType: 'SINGLE',
-                        },
-                        type: 'http',
-                    },
-                    type: 'production_endpoints',
+            endpointConfig: {
+                endpoint_type: 'http',
+                sandbox_endpoints: {
+                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
                 },
-                {
-                    inline: {
-                        endpointConfig: {
-                            list: [
-                                {
-                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                                    timeout: '1000',
-                                },
-                            ],
-                            endpointType: 'SINGLE',
-                        },
-                        type: 'http',
-                    },
-                    type: 'sandbox_endpoints',
+                production_endpoints: {
+                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
                 },
-            ],
+            },
             operations: [
                 {
                     uritemplate: '/order/{orderId}',
