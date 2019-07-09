@@ -128,7 +128,7 @@ class Tokens extends React.Component {
             console.warn('No Application found!');
             return false;
         }
-        if (timeout || timeout.length === 0) {
+        if (!timeout || timeout.length === 0) {
             timeout = 3600;
         }
         return application.generateToken(keyType, timeout, scopesSelected);

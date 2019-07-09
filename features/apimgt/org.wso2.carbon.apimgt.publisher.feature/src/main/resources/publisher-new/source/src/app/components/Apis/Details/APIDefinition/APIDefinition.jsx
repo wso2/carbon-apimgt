@@ -39,7 +39,6 @@ import MonacoEditor from 'react-monaco-editor';
 import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import Dropzone from 'react-dropzone';
-import qs from 'qs';
 import json2yaml from 'json2yaml';
 import SwaggerParser from 'swagger-parser';
 
@@ -118,7 +117,7 @@ class APIDefinition extends React.Component {
      * @inheritdoc
      */
     componentDidMount() {
-        const { location, api } = this.props;
+        const { api } = this.props;
         const promisedApi = api.getSwagger(api.id);
         promisedApi
             .then((response) => {
@@ -136,8 +135,7 @@ class APIDefinition extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    const params = qs.stringify({ reference: location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
+                    window.location = '/publisher-new/services/auth/login';
                 }
             });
     }
