@@ -121,7 +121,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
       x-examples:
-        $ref: docs/examples/apis/apis.yaml#/get
+        $ref: docs/examples/apis/apis_get.yaml
       parameters:
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/offset'
@@ -274,7 +274,7 @@ paths:
 
         There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `"provider" : "some_other_user"` in the payload so that the API's creator will be shown as `some_other_user` in the UI.
       x-examples:
-        $ref: docs/examples/apis/apis.yaml#/post
+        $ref: docs/examples/apis/apis_post.yaml
       parameters:
         - in: body
           name: body
@@ -651,7 +651,7 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
-            
+
   ################################################################
   # The resource policy definitions of "Individual API" resource APIs
   ################################################################
@@ -1417,7 +1417,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
-        
+
       tags:
         - API (Individual)
       responses:
@@ -5054,6 +5054,7 @@ definitions:
           - PRIVATE
           - RESTRICTED
         example: PUBLIC
+        default: PUBLIC
       visibleRoles:
         type: array
         description: The user roles that are able to access the API in Store
@@ -5097,6 +5098,7 @@ definitions:
           - all_tenants
           - specific_tenants
         example: current_tenant
+        default: all_tenants
       subscriptionAvailableTenants:
         type: array
         items:
@@ -5119,6 +5121,7 @@ definitions:
         enum:
           - NONE
           - RESTRICTED
+        default: NONE
       accessControlRoles:
         type: array
         description: The user roles that are able to view/modify as API publisher or creator.
@@ -5138,15 +5141,100 @@ definitions:
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
-      endpoint:
-        type: array
-        items:
-         properties:
-          inline:
-           $ref: '#/definitions/Endpoint'
-          type:
-            type: string
-            example: "production_endpoints"
+      endpointConfig:
+        type: object
+        description: |
+          Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.
+
+          `Simple REST Endpoint`
+            {
+              "endpoint_type": "http",
+              "sandbox_endpoints":       {
+                 "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+              },
+              "production_endpoints":       {
+                 "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+              }
+            }
+
+          `Loadbalanced Endpoint`
+
+            {
+              "endpoint_type": "load_balance",
+              "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+              "sessionManagement": "",
+              "sandbox_endpoints":       [
+                          {
+                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/1"
+                 },
+                          {
+                    "endpoint_type": "http",
+                    "template_not_supported": false,
+                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/2"
+                 }
+              ],
+              "production_endpoints":       [
+                          {
+                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/3"
+                 },
+                          {
+                    "endpoint_type": "http",
+                    "template_not_supported": false,
+                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/4"
+                 }
+              ],
+              "sessionTimeOut": "",
+              "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+            }
+
+          `Failover Endpoint`
+
+            {
+              "production_failovers":[
+                 {
+                    "endpoint_type":"http",
+                    "template_not_supported":false,
+                    "url":"https://localhost:9443/am/sample/pizzashack/v1/api/1"
+                 }
+              ],
+              "endpoint_type":"failover",
+              "sandbox_endpoints":{
+                 "url":"https://localhost:9443/am/sample/pizzashack/v1/api/2"
+              },
+              "production_endpoints":{
+                 "url":"https://localhost:9443/am/sample/pizzashack/v1/api/3"
+              },
+              "sandbox_failovers":[
+                 {
+                    "endpoint_type":"http",
+                    "template_not_supported":false,
+                    "url":"https://localhost:9443/am/sample/pizzashack/v1/api/4"
+                 }
+              ]
+            }
+
+          `Default Endpoint`
+
+            {
+              "endpoint_type":"default",
+              "sandbox_endpoints":{
+                 "url":"default"
+              },
+              "production_endpoints":{
+                 "url":"default"
+              }
+            }
+
+        example:
+          {
+            "endpoint_type": "http",
+            "sandbox_endpoints":       {
+              "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            },
+            "production_endpoints":       {
+              "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            }
+          }
       scopes:
         type: array
         items:
@@ -6129,7 +6217,7 @@ definitions:
         type: string
         format: dateTime
         example: "2019-02-31T23:59:60Z"
-        
+
 
 #-----------------------------------------------------
 # The workflow executor's response resource

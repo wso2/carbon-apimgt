@@ -132,7 +132,7 @@ describe('<APICreateForm/> tests', () => {
         await wrapper
             .find('#context input')
             .simulate('change', { target: { name: 'context', value: sampleAPIData.context } });
-        const { url } = sampleAPIData.endpoint[0].inline.endpointConfig.list[0];
+        const { url } = sampleAPIData.endpointConfig.production_endpoints;
         await wrapper.find('#endpoint input').simulate('change', { target: { name: 'endpoint', value: url } });
         await wrapper
             .find(Policies)
@@ -173,8 +173,7 @@ describe('<APICreateForm/> tests', () => {
         expect(api.context).toEqual(sampleAPIData.context);
         expect(api.policies).toContain(mockedPoliciesData.list[0].name);
 
-        expect(api.getProductionEndpoint().endpointConfig.list.length).toBeGreaterThanOrEqual(1);
-        expect(api.getProductionEndpoint().endpointConfig.list[0].url).toEqual(url);
+        expect(api.getProductionEndpoint()).toEqual(url);
 
         // Cleaning up the mock implementation
         APISaveSpy.mockRestore();
