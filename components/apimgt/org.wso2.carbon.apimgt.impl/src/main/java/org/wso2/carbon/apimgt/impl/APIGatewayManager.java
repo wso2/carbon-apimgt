@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -113,9 +114,12 @@ public class APIGatewayManager {
                 continue;
             }
             APIGatewayAdminClient client;
+            LocalEntryAdminClient localEntryAdminClient;
+
             try {
                 client = new APIGatewayAdminClient(environment);
                 String operation;
+                String definition = "";
                 long apiGetStartTime = System.currentTimeMillis();
                 APIData apiData = client.getApi(tenantDomain, api.getId());
                 endTime = System.currentTimeMillis();
@@ -124,6 +128,22 @@ public class APIGatewayManager {
                 }
                 // If the API exists in the Gateway
                 if (apiData != null) {
+                    localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+
+                    if(api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
+                        definition = api.getGraphQLSchema();
+                        localEntryAdminClient.deleteEntry(api.getUUID());
+                        localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
+                                definition + "</localEntry>");
+                    } else {
+                        definition = api.getSwaggerDefinition();
+                        localEntryAdminClient.deleteEntry(api.getUUID());
+                        localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
+                                definition.replaceAll("&(?!amp;)", "&amp;").
+                                        replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                                + "</localEntry>");
+                    }
+
                     startTime = System.currentTimeMillis();
                     // If the Gateway type is 'production' and the production url
                     // has been removed

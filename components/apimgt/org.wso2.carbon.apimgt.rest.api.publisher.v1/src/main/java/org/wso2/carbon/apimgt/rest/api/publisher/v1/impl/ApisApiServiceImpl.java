@@ -202,6 +202,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
+            boolean isGraphQL = APIDTO.TypeEnum.GRAPHQL == body.getType();
             boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
             boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST == body.getType();
 
@@ -385,6 +386,68 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         APIDTO apiToReturn = getAPIByID(apiId);
         return Response.ok().entity(apiToReturn).build();
+    }
+
+    @Override
+    public Response apisApiIdGraphqlSchemaGet(String apiId, String accept, String ifNoneMatch, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
+                    tenantDomain);
+            String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+            GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
+            dto.setSchemaDefinition(schemaContent);
+            dto.setName(apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
+                                log);
+            } else {
+                String errorMessage = "Error while retrieving schema of API: " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdGraphqlSchemaPost(String apiId, GraphQLSchemaDTO body, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
+                    tenantDomain);
+            String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+            GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
+            dto.setSchemaDefinition(schemaContent);
+            dto.setName(apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
+                                log);
+            } else {
+                String errorMessage = "Error while retrieving schema of API: " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -919,7 +982,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves API Lifecycle state information
-     *
+     * 
      * @param apiId API Id
      * @param ifNoneMatch If-None-Match header value
      * @return API Lifecycle state information
@@ -1673,6 +1736,161 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
+    }
+
+    @Override
+    public Response apisImportGraphQLSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
+                                                String additionalProperties, String ifMatch, MessageContext messageContext) {
+        APIDTO additionalPropertiesAPI = null;
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        InputStreamReader fileContent;
+        BufferedReader contentBufferReader;
+        StringBuilder contentBuilder = new StringBuilder();
+        String content = "";
+
+        try {
+            if (!StringUtils.isBlank(additionalProperties)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Deseriallizing additionalProperties: " + additionalProperties);
+                }
+            }
+            additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(additionalPropertiesAPI.getId(),
+                    tenantDomain);
+
+            fileContent = new InputStreamReader(fileInputStream);
+            contentBufferReader = new BufferedReader(fileContent);
+            while ((content = contentBufferReader.readLine()) != null) {
+                contentBuilder.append(content);
+            }
+
+            String schema = contentBuilder.toString();
+
+            if (schema == null) {
+                String errorMessage = "GraphQLSchema cannot be empty.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+
+            String resourcePath = apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
+                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
+
+            if (apiProvider.checkIfResourceExists(resourcePath)) {
+                RestApiUtil.handleConflict("schema resource already exists for the API " +
+                        additionalPropertiesAPI.getId(), log);
+            }
+
+            apiProvider.uploadGraphqlSchema(resourcePath, schema);
+            API apiToAdd = createAPIByDTO(additionalPropertiesAPI);
+            APIIdentifier createdApiId = apiToAdd.getId();
+
+            //Retrieve the newly added API to send in the response payload
+            API createdApi = apiProvider.getAPI(createdApiId);
+            APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
+
+            //This URI used to set the location header of the POST response
+            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
+
+            return Response.created(createdApiUri).entity(createdApiDTO).build();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
+                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location : " + additionalPropertiesAPI.getProvider() + "-" +
+                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+    } catch (IOException e) {
+        String errorMessage = "Error while retrieving content from file : " + additionalPropertiesAPI.getProvider() + "-" +
+                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + "-" /*+ body.getEndpointConfig()*/;
+        RestApiUtil.handleInternalServerError(errorMessage, e, log);
+    }
+        return null;
+    }
+
+    @Override
+    public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream,
+            Attachment fileDetail, MessageContext messageContext) {
+        // do some magic!
+        return Response.ok().entity("magic!").build();
+    }
+
+    @Override
+    public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+
+        InputStreamReader fileContent = null;
+        BufferedReader contentBufferReader = null;
+        boolean isvalid = true;
+        String errorMessage = "";
+        String content = "";
+        StringBuilder contentBuilder = new StringBuilder();
+        Parser parser = new Parser();
+        SchemaParser schemaParser = new SchemaParser();
+        SchemaGenerator schemaGenerator = new SchemaGenerator();
+        TypeDefinitionRegistry typeRegistry = null;
+        Set<SchemaValidationError> validationErrors = null;
+        GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
+
+        try {
+            fileContent = new InputStreamReader(fileInputStream);
+            contentBufferReader = new BufferedReader(fileContent);
+            while ((content = contentBufferReader.readLine()) != null) {
+                contentBuilder.append(content);
+            }
+            String schema = contentBuilder.toString();
+
+            if (schema == null) {
+                errorMessage = "GraphQL Schema cannot be empty or null to validate it";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+
+            typeRegistry = schemaParser.parse(schema);
+            GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
+            SchemaValidator schemaValidation = new SchemaValidator();
+            validationErrors = schemaValidation.validateSchema(graphQLSchema);
+
+            if (validationErrors.toArray().length > 0) {
+                isvalid = false;
+                errorMessage = "InValid Schema";
+            } else {
+                validationResponse.setIsValid(isvalid);
+                GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
+                List<APIOperationsDTO> operationlist = new ArrayList();
+                // graphQLInfo.setGraphQLSchema(schema);
+
+                Map<java.lang.String, graphql.language.TypeDefinition> operationList = typeRegistry.types();
+                for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
+                    ArrayList<String> types = new ArrayList<>();
+                    int index = 0;
+                    if (entry.getValue().getName().equals("Query") || entry.getValue().getName().equals("Mutation")
+                            || entry.getValue().getName().equals("Subscription")) {
+                        for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
+                            APIOperationsDTO operation = new APIOperationsDTO();
+                            operation.setVerb(entry.getKey());
+                            operation.setTarget(fieldDef.getName());
+                            operationlist.add(operation);
+                        }
+                    }
+                }
+                graphQLInfo.setOperations(operationlist);
+                validationResponse.setGraphQLInfo(graphQLInfo);
+            }
+        } catch (SchemaProblem e) {
+            isvalid = false;
+            errorMessage = e.getMessage();
+        } catch (IOException e) {
+            isvalid = false;
+            errorMessage = e.getMessage();
+        }
+
+        if(isvalid == false) {
+            validationResponse.setIsValid(isvalid);
+            validationResponse.setErrorMessage(errorMessage);
+        }
+        return Response.ok().entity(validationResponse).build();
     }
 
     @Override

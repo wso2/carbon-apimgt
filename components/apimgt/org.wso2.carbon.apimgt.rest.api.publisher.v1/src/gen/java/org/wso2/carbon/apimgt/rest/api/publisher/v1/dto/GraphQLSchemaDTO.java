@@ -25,7 +25,7 @@ public class GraphQLSchemaDTO   {
   }
 
   
-  @ApiModelProperty(example = "admin--HackerNewsAPI2.0.graphql", required = true, value = "")
+  @ApiModelProperty(example = "admin--HackerNewsAPI.graphql", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
