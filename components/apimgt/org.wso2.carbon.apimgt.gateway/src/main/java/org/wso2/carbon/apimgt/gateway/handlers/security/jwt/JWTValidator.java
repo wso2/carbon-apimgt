@@ -136,7 +136,14 @@ public class JWTValidator {
             if (isGatewayTokenCacheEnabled && getGatewayKeyCache().get(cacheKey) != null) {
                 // Token is found in the key cache
                 payload = (JSONObject) getGatewayKeyCache().get(cacheKey);
+                checkTokenExpiration(tokenSignature, payload, tenantDomain);
             } else {
+                // Retrieve payload from token
+                if (payload == null) {
+                    payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
+                }
+                checkTokenExpiration(tokenSignature, payload, tenantDomain);
+
                 // Scope validation
                 String resourceScope = null;
                 Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
@@ -159,27 +166,9 @@ public class JWTValidator {
                     }
                 }
 
-                // Retrieve payload from token
-                if (payload == null) {
-                    payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
-                }
-
                 if (isGatewayTokenCacheEnabled) {
                     getGatewayKeyCache().put(cacheKey, payload);
                 }
-            }
-
-            // Check whether the token is expired or not. Payload information should be available for this check.
-            long currentTime = System.currentTimeMillis() / 1000;
-            long expiredTime = payload.getLong("exp");
-            if (currentTime > expiredTime) {
-                // Expired token is moved from valid token cache to the invalid token cache
-                if (isGatewayTokenCacheEnabled) {
-                    getGatewayTokenCache().remove(tokenSignature);
-                    getInvalidTokenCache().put(tokenSignature, tenantDomain);
-                }
-                throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
-                        "JWT token is expired");
             }
 
             JSONObject applicationObj = (JSONObject) payload.get("application");
@@ -231,7 +220,21 @@ public class JWTValidator {
         }
         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
     }
-
+    
+    private void checkTokenExpiration(String tokenSignature, JSONObject payload, String tenantDomain) throws APISecurityException {
+        // Check whether the token is expired or not.
+        long currentTime = System.currentTimeMillis() / 1000;
+        long expiredTime = payload.getLong("exp");
+        if (currentTime > expiredTime) {
+            // Expired token is moved from valid token cache to the invalid token cache
+            if (isGatewayTokenCacheEnabled) {
+                getGatewayTokenCache().remove(tokenSignature);
+                getInvalidTokenCache().put(tokenSignature, tenantDomain);
+            }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
+                    "JWT token is expired");
+        }
+    }
 
     private boolean verifyToken(String jwtToken, String username) throws APISecurityException {
         Certificate publicCert;
