@@ -1713,7 +1713,7 @@
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
         <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
-        <jaeger.core.version>0.30.0</jaeger.core.version>
+        <jaeger.core.version>0.35.5</jaeger.core.version>
         <jaeger.thrift.version>0.30.4</jaeger.thrift.version>
         <jaeger.client.version>0.30.4</jaeger.client.version>
         <zipkin.sender.okhttp3.version>2.8.2</zipkin.sender.okhttp3.version>
