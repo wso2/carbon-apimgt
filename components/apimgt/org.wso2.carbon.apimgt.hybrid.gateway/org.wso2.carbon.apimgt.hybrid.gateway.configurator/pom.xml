@@ -19,7 +19,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.hybrid.gateway</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.5.17-SNAPSHOT</version>
+        <version>6.5.17</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
