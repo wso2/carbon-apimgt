@@ -17,6 +17,7 @@
  * under the License.
  */
 
+ // TODO: Wrap these consts with an object and do `require` when needed ~tmkb
 var MGT_TRANSPORT = "https://";
 var HOST = "localhost";
 var SETTINGS_REST_API_URL_SUFFIX = "/api/am/publisher/v1.0/settings";
