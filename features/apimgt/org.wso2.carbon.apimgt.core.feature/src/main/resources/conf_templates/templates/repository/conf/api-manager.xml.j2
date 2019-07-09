@@ -494,6 +494,18 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
                 <URI>/api/am/store/{version}/apis</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
@@ -535,6 +547,14 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/store/{version}/search</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
         </WhiteListedURIs>
@@ -785,6 +805,17 @@
             <SupportedLanguages>{{apim.sdk.supported_languages}}</SupportedLanguages>
         </ClientGeneration>
     </SwaggerCodegen>
+
+    <!--Specify the implementation class of the monetization interface-->
+    <Monetization>
+        <MonetizationImpl>{{apim.monetization.monetization_impl}}</MonetizationImpl>
+        <UsagePublisher>
+            <Granularity>{{apim.monetization.granularity}}</Granularity>
+            <!--Number of days to reduce from the current time to get the last publish time of monetization
+            usgae publish job, when there is no record of the last publish time.-->
+            <PublishTimeDurationInDays>{{apim.monetization.publish_duration}}</PublishTimeDurationInDays>
+        </UsagePublisher>
+    </Monetization>
 
     <OpenTracer>
         <RemoteTracer>
