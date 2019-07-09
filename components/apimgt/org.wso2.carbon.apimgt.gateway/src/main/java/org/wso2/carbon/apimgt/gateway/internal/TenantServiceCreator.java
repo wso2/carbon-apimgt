@@ -112,6 +112,17 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             if (!authFailureHandlerSequenceNameFile.exists()) {
                 createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
             }
+
+            String threatFaultConfigLocation = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + threatFaultSequenceName + ".xml";
+            File threatFaultXml = new File(threatFaultConfigLocation);
+            if (!threatFaultXml.exists()) {
+                FileUtils.copyFile(new File(synapseConfigRootPath + threatFaultSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                threatFaultSequenceName + ".xml"));
+            }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);
         } catch (Exception e) {
