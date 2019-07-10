@@ -14,34 +14,32 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import Grow from '@material-ui/core/Slide';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
 import EndpointListing from './EndpointListing';
-import EndpointConfig from './EndpointConfig';
 
 
 const styles = theme => ({
     overviewWrapper: {
-        padding: '5px',
-        marginRight: '5px',
+        padding: theme.spacing.unit,
+        marginRight: theme.spacing.unit,
     },
     listing: {
-        margin: '10px',
-        padding: '10px',
+        margin: theme.spacing.unit,
+        padding: theme.spacing.unit,
     },
     endpointName: {
         fontSize: '1.2rem',
     },
     endpointTypesWrapper: {
-        paddingLeft: '10px',
+        paddingLeft: theme.spacing.unit,
     },
 });
 /**
@@ -51,24 +49,8 @@ const styles = theme => ({
  */
 function EndpointOverview(props) {
     const { classes, api } = props;
-    const [endpoints, setEndpoints] = useState([]);
-    const [selectedEndpoint, setSelectedEndpoint] = useState(0);
-    const [openConfigs, setOpenConfigs] = useState(false);
+    const { endpointConfig } = api;
 
-    /**
-     * Get the selected endpoint from the endpoint listing component.
-     * @param {number} endPoint : The index of the selected endpoint.
-     */
-    function getEndpoint(endPoint) {
-        setOpenConfigs(!openConfigs);
-        console.log('getEps clicked');
-    }
-
-    function editEndpoint(endpointDo) {
-        console.log(endpointDo);
-    }
-
-    console.log(api);
     return (
         <div className={classes.overviewWrapper}>
             <Grid container>
@@ -79,20 +61,24 @@ function EndpointOverview(props) {
                                 <FormattedMessage id='Production.Endpoints' defaultMessage='Production Endpoints' />
                             </Typography>
                             <EndpointListing
-                                getSelected={getEndpoint}
-                                endpoints={endpoints}
-                                setEndpoints={setEndpoints}
-                                epType='prod'
+                                // getSelected={getEndpoint}
+                                apiEndpoints={endpointConfig.production_endpoints}
+                                failOvers={endpointConfig.production_failovers}
+                                // setEndpoints={setEndpoints}
+                                epType={endpointConfig.endpoint_type}
+                                category='prod'
                             />
                             <Divider />
                             <Typography className={classes.endpointName}>
                                 <FormattedMessage id='Sandbox.Endpoints' defaultMessage='Sandbox Endpoints' />
                             </Typography>
                             <EndpointListing
-                                getSelected={getEndpoint}
-                                endpoints={endpoints}
-                                setEndpoints={setEndpoints}
-                                epType='sandbox'
+                                // getSelected={getEndpoint}
+                                apiEndpoints={endpointConfig.sandbox_endpoints}
+                                // setEndpoints={setEndpoints}
+                                failOvers={endpointConfig.sandbox_failovers}
+                                epType={endpointConfig.endpoint_type}
+                                category='sandbox'
                             />
                         </div>
                     </Paper>

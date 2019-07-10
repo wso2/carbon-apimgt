@@ -52,6 +52,10 @@ const styles = theme => ({
     configSubContainer: {
         paddingBottom: '10px',
     },
+    textField: {
+        marginRight: theme.spacing.unit,
+        width: '45%',
+    },
 });
 /**
  * The base component for advanced endpoint configurations.
@@ -176,6 +180,7 @@ function SuspendTimeoutConfig(props) {
                     </Select>
                 </FormControl>
                 <TextField
+                    className={classes.textField}
                     id='initial-duration-input'
                     label={
                         <FormattedMessage id='Initial.Durtion.ms' defaultMessage='Initial Duration (ms)' />
@@ -184,6 +189,7 @@ function SuspendTimeoutConfig(props) {
                     type='number'
                 />
                 <TextField
+                    className={classes.textField}
                     id='max-duration-input'
                     label={
                         <FormattedMessage id='Max.Duration.ms' defaultMessage='Max Duration (ms)' />
@@ -192,6 +198,7 @@ function SuspendTimeoutConfig(props) {
                     type='number'
                 />
                 <TextField
+                    className={classes.textField}
                     id='factor-input'
                     label={
                         <FormattedMessage id='Factor' defaultMessage='Factor' />
@@ -224,6 +231,7 @@ function SuspendTimeoutConfig(props) {
                     </Select>
                 </FormControl>
                 <TextField
+                    className={classes.textField}
                     id='retries-input'
                     label={
                         <FormattedMessage id='Retries.Before.Suspension' defaultMessage='Retries Before Suspension' />
@@ -232,6 +240,7 @@ function SuspendTimeoutConfig(props) {
                     margin='normal'
                 />
                 <TextField
+                    className={classes.textField}
                     id='retry-delay-input'
                     label={<FormattedMessage id='Retry.Delay.ms' defaultMessage='Retry Delay (ms)' />}
                     type='number'
@@ -262,6 +271,7 @@ function SuspendTimeoutConfig(props) {
                     </Select>
                 </FormControl>
                 <TextField
+                    className={classes.textField}
                     id='duration-input'
                     label={<FormattedMessage id='Duration.ms' defaultMessage='Duration (ms)' />}
                     type='number'

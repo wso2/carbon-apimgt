@@ -24,7 +24,7 @@ const styles = theme => ({
         display: 'flex',
     },
     textField: {
-        marginLeft: '5px',
+        marginLeft: theme.spacing.unit,
     },
     advancedConfigWrapper: {
         width: '100%',

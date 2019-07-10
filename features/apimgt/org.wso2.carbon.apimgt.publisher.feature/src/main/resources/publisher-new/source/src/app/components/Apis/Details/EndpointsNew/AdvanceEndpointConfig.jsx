@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Dialog,
     Button,
@@ -35,6 +35,7 @@ import {
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import PropTypes from 'prop-types';
 import Certificates from './AdvancedConfig/Certificates';
 import EndpointSecurity from './AdvancedConfig/EndpointSecurity';
 import SuspendTimeoutConfig from './AdvancedConfig/SuspendTimeoutConfig';
@@ -70,13 +71,14 @@ const styles = theme => ({
         display: 'flex',
     },
     dialogHeader: {
-        padding: '10px',
+        padding: theme.spacing.unit,
         fontSize: '100%',
     },
 });
 /**
  * The base component for advanced endpoint configurations.
- * @param {any} props T
+ * @param {any} props The input props.
+ * @returns {any} HTML representation of the component.
  */
 function AdvancedEndpointConfig(props) {
     const { classes } = props;
@@ -108,7 +110,6 @@ function AdvancedEndpointConfig(props) {
     };
 
     const getConfigurationContent = (configType) => {
-        console.log(configType);
         if (configType === 'security') {
             return (<EndpointSecurity />);
         }
@@ -134,9 +135,14 @@ function AdvancedEndpointConfig(props) {
                     id='panel1bh-header'
                 >
                     <Typography className={classes.heading}>
-
+                        <FormattedMessage id='Ádvanced.Configuration' defaultMessage='Advanced Configuration' />
                     </Typography>
-                    <Typography className={classes.secondaryHeading}>Security, Certificates, Suspend</Typography>
+                    <Typography className={classes.secondaryHeading}>
+                        <FormattedMessage
+                            id='Security.Certificate.Suspend'
+                            defaultMessage='Security Certificates Suspend'
+                        />
+                    </Typography>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
                     <List className={classes.advancedConfigList}>
@@ -184,5 +190,9 @@ function AdvancedEndpointConfig(props) {
         </div>
     );
 }
+
+AdvancedEndpointConfig.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+};
 
 export default injectIntl(withStyles(styles)(AdvancedEndpointConfig));

@@ -20,10 +20,15 @@ import { withStyles } from '@material-ui/core/styles';
 import AddCircle from '@material-ui/icons/AddCircle';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import PropTypes from 'prop-types';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
-    addEpBtnContainer: {
-        flexGrow: 1,
+    addEpButtonWrapper: {
+        display: 'flex',
+    },
+    addAnotherText: {
+        padding: theme.spacing.unit * 2,
     },
 });
 
@@ -39,8 +44,8 @@ const styles = theme => ({
  * @returns {any} The HTML content of the Endpoint Add component.
  */
 function EndpointAdd(props) {
-    const { classes } = props;
-    const [type, setType] = useState(props.type);
+    const { classes, endpointType } = props;
+    const [type, setType] = useState('');
 
     const addEndpointClick = (epType) => {
         setType(epType);
@@ -48,42 +53,43 @@ function EndpointAdd(props) {
     };
 
     useEffect(() => {
-        setType(props.type);
-    }, [props.type]);
-
-    console.log('Type from props', type);
+        setType(endpointType);
+    }, [endpointType]);
     return (
-        <div>
-            {(type === 0) ?
-                <Grid container direction='row'>
-                    <Grid item xs={6}>
-                        <Typography>Add Another</Typography>
-                    </Grid>
-                    <Grid
-                        container
-                        alignItems='flex-end'
-                        item
-                        xs={6}
-                        className={classes.addEpBtnContainer}
-                    >
-                        <div>
-                            <Button id='loadBalanceAdd' onClick={() => addEndpointClick(1)}>
-                                <AddCircle /><Typography>Load Balanced Endpoint</Typography>
-                            </Button>
-                            <Button id='failOverAdd' onClick={() => addEndpointClick(2)}>
-                                <AddCircle /><Typography>Fail Over Endpoint</Typography>
-                            </Button>
-                        </div>
-                    </Grid>
-                </Grid> :
-                <Grid item container alignItems='flex-start' xs={6} className={classes.addEpBtnContainer}>
-                    <Button onClick={() => addEndpointClick(type)}>
-                        <AddCircle />
-                    </Button>
-                </Grid>
-            }
-        </div>
+        <Grid container direction='row' >
+            <div className={classes.addAnotherText}>
+                <Typography>
+                    <FormattedMessage id='Add.Another' defaultMessage='Add Another' />
+                </Typography>
+            </div>
+            <Button
+                id='loadBalanceAdd'
+                disabled={type !== 'load_balance' && type !== 'http'}
+                onClick={() => addEndpointClick('load_balance')}
+            >
+                <AddCircle />
+                <Typography>
+                    <FormattedMessage id='Load.Balance.Endpoint' defaultMessage='Load Balanced Endpoint' />
+                </Typography>
+            </Button>
+            <Button
+                id='failOverAdd'
+                disabled={type !== 'failover' && type !== 'http'}
+                onClick={() => addEndpointClick('failover')}
+            >
+                <AddCircle />
+                <Typography>
+                    <FormattedMessage id='Fail.Over.Endpoint' defaultMessage='Fail Over Endpoint' />
+                </Typography>
+            </Button>
+        </Grid>
     );
 }
 
-export default withStyles(styles)(EndpointAdd);
+EndpointAdd.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
+    endpointType: PropTypes.string.isRequired,
+    onAddEndpointClick: PropTypes.func.isRequired,
+};
+
+export default injectIntl(withStyles(styles)(EndpointAdd));

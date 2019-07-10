@@ -47,9 +47,9 @@ const styles = theme => ({
         width: '100%',
     },
     listingWrapper: {
-        paddingLeft: '10px',
-        paddingRight: '10px',
-        marginRight: '5px',
+        paddingLeft: theme.spacing.unit,
+        paddingRight: theme.spacing.unit,
+        marginRight: theme.spacing.unit,
     },
     epTypeWrapper: {
         display: 'flex',
@@ -71,53 +71,49 @@ const styles = theme => ({
  * @returns {any} The HTML view of the ep listing component.
  */
 function EndpointListing(props) {
-    const { classes, epType } = props;
-    const [endpointType, setEndpointType] = useState(0);
-    const [endpoints, setEndpoints] = useState([{ value: 'http(s)://appserver/service' }]);
-    const [isLBConfigOpen, setOpenLBConfigDialog] = useState(false); //Loadbalance Config
+    const {
+        classes,
+        category,
+        apiEndpoints,
+        epType,
+        failOvers,
+    } = props;
+    const [endpointType, setEndpointType] = useState('http');
+    const [endpoints, setEndpoints] = useState([{ url: 'http(s)://appserver/service' }]);
+    const [isLBConfigOpen, setOpenLBConfigDialog] = useState(false);
     const [openEndpointConfig, setOpenEndpointConfig] = useState(false);
     const [selectedEP, setselectedEP] = useState(undefined);
+    const [selectedEPInfo, setSelectedEPInfo] = useState({});
 
     const addEndpoint = (type) => {
         setEndpointType(type);
-        setEndpoints(endpoints.concat([{ value: 'http(s)://appserver/service' }]));
+        setEndpoints(endpoints.concat([{ url: 'http(s)://appserver/service' }]));
     };
 
     const removeEndpoint = (index) => {
         const currentEndpoints = endpoints.filter((ep, id) => { return id !== index; });
         setEndpoints(currentEndpoints);
         if (currentEndpoints.length === 1) {
-            console.log('Count 0');
-            setEndpointType(0);
+            setEndpointType('http');
         }
     };
 
-    const openDialog = () => {
-        setOpenLBConfigDialog(!isLBConfigOpen);
-    };
-
-    const handleEpChange = (epIndex, event) => {
-        console.log(epIndex, event.target.value);
-        const modifiedEndpoints = endpoints.map((ep, index) => {
-            if (epIndex !== index) return ep;
-            return { value: event.target.value };
-        });
-        setEndpoints(modifiedEndpoints);
-    };
-
-    const handleEpSelect = (event) => {
-        // getSelected(index);
+    const handleEpSelect = (event, index) => {
         const newSelection = event.currentTarget;
         setOpenEndpointConfig(prev => selectedEP !== newSelection || !prev);
         setselectedEP(newSelection);
-        console.log('EP selected', event.currentTarget);
+        setSelectedEPInfo(endpoints[index]);
     };
 
     const getEndpointTypeSeparator = () => {
-        if (endpointType === 0) {
-            return (<div />);
+        if (endpointType === 'failover') {
+            return (
+                <div className={classes.epTypeName}>
+                    <Typography>FailOver</Typography>
+                </div>
+            );
         }
-        if (endpointType === 1) {
+        if (endpointType === 'load_balance') {
             return (
                 <div className={classes.epTypeWrapper}>
                     <div className={classes.epTypeName}>
@@ -136,30 +132,42 @@ function EndpointListing(props) {
                 </div>);
         }
         return (
-            <div className={classes.epTypeName}>
-                <Typography>FailOver</Typography>
-            </div>
+            <div />
         );
     };
+
+    useEffect(() => {
+        setEndpointType(epType);
+        if (apiEndpoints !== null && epType === 'failover') {
+            setEndpoints([apiEndpoints].concat(failOvers));
+        } else {
+            setEndpoints(apiEndpoints);
+        }
+    }, [apiEndpoints, epType, failOvers]);
+
     return (
         <div className={classes.listingWrapper}>
             <Grid container direction='column' xs={12}>
                 <List>
-                    <ListItem id={epType + '-0'} button onClick={handleEpSelect}>
-                        <ListItemText primary={endpoints[0].value} />
+                    <ListItem id={category + '_0'} button onClick={event => handleEpSelect(event, 0)}>
+                        <ListItemText primary={endpoints[0].url} />
                     </ListItem>
                 </List>
                 <Grid xs={12}>
                     <Divider variant='middle' />
-                    <EndpointAdd onAddEndpointClick={addEndpoint} type={endpointType} />
+                    <EndpointAdd onAddEndpointClick={addEndpoint} endpointType={endpointType} />
                     {getEndpointTypeSeparator()}
                     <List>
                         {
                             (endpoints.map((ep, index) => {
                                 if (index > 0) {
                                     return (
-                                        <ListItem button id={epType + '-' + index} onClick={handleEpSelect}>
-                                            <ListItemText primary={endpoints[index].value} />
+                                        <ListItem
+                                            button
+                                            id={category + '_' + index}
+                                            onClick={event => handleEpSelect(event, index)}
+                                        >
+                                            <ListItemText primary={endpoints[index].url} />
                                             <ListItemSecondaryAction >
                                                 <Button onClick={() => removeEndpoint(index)}>
                                                     <RemoveCircle />
@@ -212,7 +220,7 @@ function EndpointListing(props) {
                     },
                 }}
             >
-                <EndpointConfig />
+                <EndpointConfig epInfo={selectedEPInfo} />
             </Popper>
         </div>
     );
@@ -226,6 +234,9 @@ EndpointListing.propTypes = {
         epConfig: PropTypes.shape({}),
     }).isRequired,
     epType: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
+    apiEndpoints: PropTypes.shape({}).isRequired,
+    failOvers: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointListing));

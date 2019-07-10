@@ -29,7 +29,6 @@ const sessionManagementOps = [
  * @returns {any} The HTML contents of the Configuration component.
  */
 function LoadBalanceConfig(props) {
-    const { api } = props;
     const [algorithm, setAlgorithm] = useState(algorithms[0]); // TODO: GEt from the props
     const [sessionMgtOp, setSessionManagement] = useState(sessionManagementOps[0]); // TODO: GEt from the props
     const [epTimeout, setEpTimeout] = useState(300);
@@ -37,13 +36,11 @@ function LoadBalanceConfig(props) {
 
     const handleAlogorithmChange = (event) => {
         const index = event.target.value;
-        console.log(algorithms[index].value);
         setAlgorithm(algorithms[index]);
     };
 
     const handleSessionMgtChange = (event) => {
         const index = event.target.value;
-        console.log(sessionManagementOps[index], api);
         setSessionManagement(sessionManagementOps[index]);
     };
 
@@ -115,6 +112,6 @@ function LoadBalanceConfig(props) {
 
 LoadBalanceConfig.propTypes = {
     api: PropTypes.shape({}).isRequired,
-}
+};
 
 export default LoadBalanceConfig;

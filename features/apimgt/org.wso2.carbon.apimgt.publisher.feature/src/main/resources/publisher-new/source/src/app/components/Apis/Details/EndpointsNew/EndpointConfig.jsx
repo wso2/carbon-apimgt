@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Grid,
     Typography,
@@ -44,10 +44,9 @@ const styles = theme => ({
  * @returns {any} The HTML view of the component.
  */
 function EndpointConfig(props) {
-    const { classes } = props;
+    const { classes, epInfo } = props;
     const [endpoint, setEndpoint] = useState('');
     const [maxTps, setMaxTps] = useState(300);
-
 
     const handleEndpointInputChange = (event) => {
         setEndpoint(event.target.value);
@@ -57,6 +56,10 @@ function EndpointConfig(props) {
     const onMaxTPSChange = (event) => {
         setMaxTps(event.target.value);
     };
+
+    useEffect(() => {
+        setEndpoint(epInfo.url);
+    }, [epInfo]);
 
     return (
         <Paper className={classes.epConfigWrapper}>
@@ -89,6 +92,7 @@ function EndpointConfig(props) {
 EndpointConfig.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     editEndpoint: PropTypes.func.isRequired,
+    epInfo: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointConfig));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -62,10 +62,6 @@ const styles = theme => ({
 function Endpoints(props) {
     const { classes } = props;
     const [productionChecked, setProductionChecked] = useState(true);
-
-    useEffect(() => {
-        console.log(productionChecked);
-    }, [productionChecked]);
 
     return (
         <div className={classes.root}>
