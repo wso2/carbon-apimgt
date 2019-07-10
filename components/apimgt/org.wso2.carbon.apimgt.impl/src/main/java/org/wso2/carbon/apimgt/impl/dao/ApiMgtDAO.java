@@ -13594,6 +13594,7 @@ public class ApiMgtDAO {
                                 rs.getString("API_VERSION"));
                         resource.setProductIdentifier(productIdentifier);
                         resource.setApiIdentifier(apiId);
+                        resource.setApiName(rs.getString("API_NAME"));
                         URITemplate uriTemplate = new URITemplate();
                         uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
                         uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));

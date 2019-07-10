@@ -8491,6 +8491,14 @@ public final class APIUtil {
             List<APIProductResource> resources = ApiMgtDAO.getInstance().
                     getAPIProductResourceMappings(apiProductIdentifier);
 
+            for (APIProductResource resource : resources) {
+                String apiPath = APIUtil.getAPIPath(resource.getApiIdentifier());
+
+                Resource productResource = registry.get(apiPath);
+                String artifactId = productResource.getUUID();
+                resource.setApiId(artifactId);
+            }
+
             apiProduct.setProductResources(resources);
 
         } catch (GovernanceException e) {
