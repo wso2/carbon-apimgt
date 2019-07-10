@@ -36,12 +36,11 @@
     var introspectResult = post(introspectEndpoint, data , {
         "Authorization": "Basic " + utils.getBase64EncodedAdminCredentials(),
         "Content-Type": "application/x-www-form-urlencoded"
-    });
-    introspectResult.data = JSON.parse(introspectResult.data);
+    }, "json");
     log.debug("Introspection result json: " + introspectResult);
-    response.contentType = "application/json";
-
-    if (introspectResult.data.active) {
+    // For more info about response.xhr object refer http://jaggeryjs.org/documentation.jag?api=xhr
+    if (introspectResult.xhr.status === 200) {
+        response.contentType = "application/json";
         print(introspectResult.data);
     } else {
         log.warn("Something went wrong while introspecting the token " + tokenP1 + tokenP2 );
