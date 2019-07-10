@@ -134,9 +134,8 @@ class NewApp extends React.Component {
     }
 
     /**
-     * Update keyRequest state
+     * Update Application Request state
      * @param {Object} applicationRequest parameters requried for application
-     * create request
      */
     updateApplicationRequest = (applicationRequest) => {
         this.setState({ applicationRequest });
@@ -220,14 +219,14 @@ class NewApp extends React.Component {
      */
     saveApplication = () => {
         const { applicationRequest } = this.state;
-        const { updateApps } = this.props;
+        const { updateApps, handleClose } = this.props;
         const api = new API();
         this.validateName(applicationRequest.name)
             .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.createApplication(applicationRequest))
             .then(() => {
                 console.log('Application created successfully.');
-                this.setState({ open: false });
+                handleClose();
                 updateApps();
             })
             .catch((error) => {
@@ -242,19 +241,6 @@ class NewApp extends React.Component {
             });
     };
 
-    /**
-     * @memberof NewApp
-     */
-    handleClose = () => {
-        this.setState({ open: false });
-    };
-
-    /**
-     * @memberof NewApp
-     */
-    handleClickOpen = () => {
-        this.setState({ open: true });
-    };
 
     validateName = (value) => {
         const { intl } = this.props;
@@ -275,9 +261,11 @@ class NewApp extends React.Component {
      */
     render() {
         const {
-            throttlingPolicyList, applicationRequest, isNameValid, open, allAppAttributes,
+            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes,
         } = this.state;
-        const { classes } = this.props;
+        const {
+            classes, open, handleClickOpen, handleClose,
+        } = this.props;
         return (
             <React.Fragment>
                 <ScopeValidation resourcePath={resourcePaths.APPLICATIONS} resourceMethod={resourceMethods.POST}>
@@ -285,7 +273,7 @@ class NewApp extends React.Component {
                         variant='contained'
                         color='primary'
                         className={classes.button}
-                        onClick={this.handleClickOpen}
+                        onClick={handleClickOpen}
                     >
                         <FormattedMessage
                             defaultMessage='ADD NEW APPLICATION'
@@ -293,10 +281,10 @@ class NewApp extends React.Component {
                         />
                     </Button>
                 </ScopeValidation>
-                <Dialog fullScreen open={open} onClose={this.handleClose} TransitionComponent={Transition}>
+                <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
                     <AppBar className={classes.appBar}>
                         <Toolbar>
-                            <IconButton color='inherit' onClick={this.handleClose} aria-label='Close'>
+                            <IconButton color='inherit' onClick={handleClose} aria-label='Close'>
                                 <CloseIcon />
                             </IconButton>
                             <Typography variant='title' color='inherit' className={classes.flex}>
@@ -305,7 +293,7 @@ class NewApp extends React.Component {
                                     id='Applications.Create.NewApp.create.new.application.title'
                                 />
                             </Typography>
-                            <Button color='inherit' onClick={this.handleClose}>
+                            <Button color='inherit' onClick={handleClose}>
                                 <FormattedMessage
                                     defaultMessage='Save'
                                     id='Applications.Create.NewApp.save.application'
@@ -327,7 +315,7 @@ class NewApp extends React.Component {
                         />
                     </div>
                     <div className={classes.buttonWrapper}>
-                        <Button variant='outlined' className={classes.button} onClick={this.handleClose}>
+                        <Button variant='outlined' className={classes.button} onClick={handleClose}>
                             <FormattedMessage
                                 defaultMessage='Cancel'
                                 id='Applications.Create.NewApp.cancel'

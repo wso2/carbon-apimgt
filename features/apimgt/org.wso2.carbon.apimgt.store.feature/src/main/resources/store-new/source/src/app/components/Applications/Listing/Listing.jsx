@@ -31,8 +31,10 @@ import Alert from 'AppComponents/Base/Alert';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
 import NewApp from 'AppComponents/Applications/Create/NewApp';
+import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import AppsTableContent from './AppsTableContent';
 import ApplicationTableHead from './ApplicationTableHead';
+
 /**
  *
  * @inheritdoc
@@ -95,6 +97,10 @@ const styles = theme => ({
         paddingTop: theme.spacing.unit,
         width: theme.custom.contentAreaWidth,
     },
+    dialogContainer: {
+        width: 1000,
+        padding: theme.spacing.unit * 2,
+    },
 });
 
 /**
@@ -116,6 +122,7 @@ class Listing extends Component {
             alertMessage: null,
             page: 0,
             rowsPerPage: 10,
+            open: false,
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -131,7 +138,6 @@ class Listing extends Component {
      * @memberof Listing
      */
     updateApps = () => {
-        const { history, location } = this.props;
         const promisedApplications = Application.all();
         promisedApplications
             .then((applications) => {
@@ -186,8 +192,20 @@ class Listing extends Component {
     };
 
     /**
-     *
-     *
+     * @memberof NewApp
+     */
+    handleClose = () => {
+        this.setState({ open: false });
+    };
+
+    /**
+     * @memberof Listing
+     */
+    handleClickOpen = () => {
+        this.setState({ open: true });
+    };
+
+    /**
      * @param {*} event event
      * @memberof Listing
      */
@@ -213,7 +231,7 @@ class Listing extends Component {
      */
     render() {
         const {
-            data, order, orderBy, alertMessage, rowsPerPage, page,
+            data, order, orderBy, alertMessage, rowsPerPage, page, open,
         } = this.state;
         if (!data) {
             return <Loading />;
@@ -246,9 +264,14 @@ class Listing extends Component {
                             </Typography>
                         )}
                     </div>
-                    {data.size !== 0 && (
+                    {(data.size !== 0 || open) && (
                         <div className={classes.createLinkWrapper}>
-                            <NewApp updateApps={this.updateApps} />
+                            <NewApp
+                                updateApps={this.updateApps}
+                                open={open}
+                                handleClickOpen={this.handleClickOpen}
+                                handleClose={this.handleClose}
+                            />
                         </div>
                     )}
                 </div>
@@ -296,21 +319,17 @@ class Listing extends Component {
                                 />
                             </div>
                         ) : (
-                            <div className={classes.appContent}>
-                                <InlineMessage type='info' style={{ width: 1000, padding: theme.spacing.unit * 2 }}>
-                                    <Typography variant='headline' component='h3'>
-                                            Create New Application
-                                    </Typography>
-                                    <Typography component='p'>
-                                        An application is a logical collection of APIs. Applications
-                                        allow you to use a single access token to invoke a collection
-                                        of APIs and to subscribe to one API multiple times with different
-                                        SLA levels. The DefaultApplication is pre-created and allows unlimited
-                                        access by default.
-                                    </Typography>
-                                    <NewApp updateApps={this.updateApps} />
-                                </InlineMessage>
-                            </div>
+                            <GenericDisplayDialog
+                                classes={classes}
+                                handleClick={this.handleClickOpen}
+                                heading='Create New Application'
+                                caption={`An application is a logical collection of APIs. Applications
+                                          allow you to use a single access token to invoke a collection
+                                          of APIs and to subscribe to one API multiple times with different
+                                          SLA levels. The DefaultApplication is pre-created and allows unlimited
+                                          access by default.`}
+                                buttonText='ADD NEW APPLICATION'
+                            />
                         )}
                     </Grid>
                 </Grid>
