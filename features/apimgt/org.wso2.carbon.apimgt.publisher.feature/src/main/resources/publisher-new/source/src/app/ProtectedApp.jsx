@@ -30,6 +30,7 @@ import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
 import Configurations from 'Config';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
+import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 
 const themes = [];
 themes.push(createMuiTheme(Configurations.themes.light));
@@ -91,7 +92,7 @@ export default class Protected extends Component {
         const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} user={user} />} user={user} />;
 
         if (!user) {
-            window.location = '/publisher-new/services/auth/login';
+            return <RedirectToLogin />;
         }
         return (
             <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>

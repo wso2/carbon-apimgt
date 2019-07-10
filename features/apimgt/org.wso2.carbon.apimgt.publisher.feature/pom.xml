@@ -185,6 +185,11 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <environmentVariables>
+                                <PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
+                                    true
+                                </PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
+                            </environmentVariables>
                             <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
