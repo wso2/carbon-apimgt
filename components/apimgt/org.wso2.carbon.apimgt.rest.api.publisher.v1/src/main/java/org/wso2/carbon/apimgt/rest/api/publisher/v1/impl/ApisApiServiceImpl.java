@@ -1756,8 +1756,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(additionalPropertiesAPI.getId(),
-                    tenantDomain);
+            API apiToAdd = createAPIByDTO(additionalPropertiesAPI);
+            APIIdentifier createdApiId = apiToAdd.getId();
+
+            //Retrieve the newly added API to send in the response payload
+            API createdApi = apiProvider.getAPI(createdApiId);
 
             fileContent = new InputStreamReader(fileInputStream);
             contentBufferReader = new BufferedReader(fileContent);
@@ -1772,8 +1775,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
 
-            String resourcePath = apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
+            String resourcePath = createdApiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    createdApiId.getApiName() + createdApiId.getVersion() +
                     APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
             resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
 
@@ -1783,11 +1786,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             apiProvider.uploadGraphqlSchema(resourcePath, schema);
-            API apiToAdd = createAPIByDTO(additionalPropertiesAPI);
-            APIIdentifier createdApiId = apiToAdd.getId();
-
-            //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
 
             //This URI used to set the location header of the POST response

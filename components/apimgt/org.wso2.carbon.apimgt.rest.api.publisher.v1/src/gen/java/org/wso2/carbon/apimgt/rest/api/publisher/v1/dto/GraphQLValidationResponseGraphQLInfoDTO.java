@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.*;
 public class GraphQLValidationResponseGraphQLInfoDTO   {
   
     private List<APIOperationsDTO> operations = new ArrayList<>();
+    private Object graphQLSchema = null;
 
   /**
    **/
@@ -40,6 +41,23 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
     this.operations = operations;
   }
 
+  /**
+   **/
+  public GraphQLValidationResponseGraphQLInfoDTO graphQLSchema(Object graphQLSchema) {
+    this.graphQLSchema = graphQLSchema;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("graphQLSchema")
+  public Object getGraphQLSchema() {
+    return graphQLSchema;
+  }
+  public void setGraphQLSchema(Object graphQLSchema) {
+    this.graphQLSchema = graphQLSchema;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -50,12 +68,13 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
       return false;
     }
     GraphQLValidationResponseGraphQLInfoDTO graphQLValidationResponseGraphQLInfo = (GraphQLValidationResponseGraphQLInfoDTO) o;
-    return Objects.equals(operations, graphQLValidationResponseGraphQLInfo.operations);
+    return Objects.equals(operations, graphQLValidationResponseGraphQLInfo.operations) &&
+        Objects.equals(graphQLSchema, graphQLValidationResponseGraphQLInfo.graphQLSchema);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(operations);
+    return Objects.hash(operations, graphQLSchema);
   }
 
   @Override
@@ -64,6 +83,7 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
     sb.append("class GraphQLValidationResponseGraphQLInfoDTO {\n");
     
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
+    sb.append("    graphQLSchema: ").append(toIndentedString(graphQLSchema)).append("\n");
     sb.append("}");
     return sb.toString();
   }
