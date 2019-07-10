@@ -1,3 +1,4 @@
+const APP_CONTEXT = '/publisher-new';
 const Configurations = {
     themes: {
         light: {
@@ -39,8 +40,8 @@ const Configurations = {
                 leftMenuWidth: 200,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
-                logo: '/publisher-new/site/public/images/logo.png',
-                backgroundImage: '/publisher-new/site/public/images/back-light.png',
+                logo: APP_CONTEXT + '/site/public/images/logo.png',
+                backgroundImage: APP_CONTEXT + '/site/public/images/back-light.png',
                 title: 'WSO2 APIM Publisher',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
@@ -67,7 +68,7 @@ const Configurations = {
                         { prime: 0xff9700ff, sub: 0xfe5722ff },
                     ],
                 },
-                // lifeCycleImage: '/publisher-new/public/app/images/logo.png',
+                // lifeCycleImage: APP_CONTEXT + '/public/app/images/logo.png',
                 // Uncomment above if you want to add a custom image to the lifecycle diagram.
                 adminRole: 'admin',
                 commentsLimit: 5,
@@ -113,8 +114,8 @@ const Configurations = {
                 leftMenuWidth: 200,
                 contentAreaWidth: 1240,
                 drawerWidth: 200,
-                logo: '/publisher-new/site/public/images/logo.png',
-                backgroundImage: '/publisher-new/site/public/images/back-light.png',
+                logo: APP_CONTEXT + '/site/public/images/logo.png',
+                backgroundImage: APP_CONTEXT + '/site/public/images/back-light.png',
                 title: 'WSO2 APIM Publisher',
                 defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' )
                 showApiHelp: false, // API detials page has a right hand side panel showing it's related help. Set this to false if you want to hide it.
@@ -141,7 +142,7 @@ const Configurations = {
                         { prime: 0xff9700ff, sub: 0xfe5722ff },
                     ],
                 },
-                // lifeCycleImage: '/publisher-new/public/app/images/logo.png',
+                // lifeCycleImage: APP_CONTEXT + '/public/app/images/logo.png',
                 // Uncomment above if you want to add a custom image to the lifecycle diagram.
                 adminRole: 'admin',
                 commentsLimit: 5,
@@ -150,7 +151,7 @@ const Configurations = {
         },
     },
     app: {
-        context: '/publisher-new',
+        context: APP_CONTEXT,
     },
 };
 if (typeof module !== 'undefined') {
