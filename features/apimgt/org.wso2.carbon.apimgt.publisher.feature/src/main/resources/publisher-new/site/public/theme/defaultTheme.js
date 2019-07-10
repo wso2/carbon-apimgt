@@ -149,6 +149,9 @@ const Configurations = {
             },
         },
     },
+    app: {
+        context: '/publisher-new',
+    },
 };
 if (typeof module !== 'undefined') {
     module.exports = Configurations; // Added for tests

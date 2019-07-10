@@ -38,6 +38,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import MonacoEditor from 'react-monaco-editor';
 import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+
 import Dropzone from 'react-dropzone';
 import json2yaml from 'json2yaml';
 import SwaggerParser from 'swagger-parser';
@@ -135,11 +137,10 @@ class APIDefinition extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    window.location = '/publisher-new/services/auth/login';
+                    doRedirectToLogin();
                 }
             });
     }
-
 
     /**
      * Handles the file upload.
@@ -223,7 +224,7 @@ class APIDefinition extends React.Component {
         if (typeof definition !== 'string') return false;
         try {
             const result = JSON.parse(definition);
-            return (result && typeof result === 'object');
+            return result && typeof result === 'object';
         } catch (err) {
             return false;
         }
@@ -302,25 +303,27 @@ class APIDefinition extends React.Component {
             }
         }
         const promise = api.updateSwagger(parsedContent);
-        promise.then((response) => {
-            if (response) {
-                Alert.success(intl.formatMessage({
-                    id: 'API.Definition.Updated.Successfully',
-                    defaultMessage: 'API Definition Updated Successfully',
-                }));
-                if (specFormat && toFormat) {
-                    this.setState({ swagger: swaggerContent, format: specFormat, convertTo: toFormat });
-                } else {
-                    this.setState({ swagger: swaggerContent });
+        promise
+            .then((response) => {
+                if (response) {
+                    Alert.success(intl.formatMessage({
+                        id: 'API.Definition.Updated.Successfully',
+                        defaultMessage: 'API Definition Updated Successfully',
+                    }));
+                    if (specFormat && toFormat) {
+                        this.setState({ swagger: swaggerContent, format: specFormat, convertTo: toFormat });
+                    } else {
+                        this.setState({ swagger: swaggerContent });
+                    }
                 }
-            }
-        }).catch((err) => {
-            console.log(err);
-            Alert.error(intl.formatMessage({
-                id: 'Error.while.updating.the.API.Definition',
-                defaultMessage: 'Error while updating the API Definition',
-            }));
-        });
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Error.while.updating.the.API.Definition',
+                    defaultMessage: 'Error while updating the API Definition',
+                }));
+            });
     }
 
     /**
@@ -368,25 +371,18 @@ class APIDefinition extends React.Component {
                         >
                             <Button size='small' className={classes.button}>
                                 <CloudUploadRounded className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Import.definition'
-                                    defaultMessage='Import Definition'
-                                />
+                                <FormattedMessage id='Import.definition' defaultMessage='Import Definition' />
                             </Button>
                         </Dropzone>
-                        <a
-                            className={classes.downloadLink}
-                            href={downloadLink}
-                            download={fileName}
-                        >
-                            <Button size='small' className={classes.button} >
+                        <a className={classes.downloadLink} href={downloadLink} download={fileName}>
+                            <Button size='small' className={classes.button}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />
                                 <FormattedMessage id='Download.Definition' defaultMessage='Download Definition' />
                             </Button>
                         </a>
                     </div>
                     <div className={classes.converterWrapper}>
-                        <Button size='small' className={classes.button} onClick={this.onChangeFormatClick} >
+                        <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
                             <FormattedMessage id='Convert.to' defaultMessage='Convert to:' />
                             {convertTo}
                         </Button>
@@ -401,12 +397,7 @@ class APIDefinition extends React.Component {
                         options={editorOptions}
                     />
                 </div>
-                <Dialog
-                    fullScreen
-                    open={openEditor}
-                    onClose={this.closeEditor}
-                    TransitionComponent={this.transition}
-                >
+                <Dialog fullScreen open={openEditor} onClose={this.closeEditor} TransitionComponent={this.transition}>
                     <Paper square className={classes.popupHeader}>
                         <IconButton
                             className={classes.button}
