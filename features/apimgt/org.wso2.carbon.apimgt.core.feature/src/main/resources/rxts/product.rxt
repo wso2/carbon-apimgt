@@ -80,9 +80,15 @@
             <field type="text">
                 <name>Environments</name>
             </field>
+            <field type="text-area">
+                <name>Cors Configuration</name>
+            </field>
             <field type="text">
                 <name>Transports</name>
             </field>
+             <field type="text">
+                    <name>Authorization Header</name>
+             </field>
     </table>
 </content>
 

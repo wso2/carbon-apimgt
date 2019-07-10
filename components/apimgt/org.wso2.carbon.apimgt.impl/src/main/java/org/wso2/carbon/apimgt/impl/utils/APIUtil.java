@@ -80,6 +80,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -8475,6 +8476,8 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             apiProduct.setEnvironments(extractEnvironmentsForAPI(environments));
             apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            apiProduct.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -8484,6 +8487,20 @@ public final class APIUtil {
             Map<String, Tier> definedTiers = getTiers(tenantId);
             Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, productName);
             apiProduct.setAvailableTiers(availableTier);
+
+            List<APIProductResource> resources = ApiMgtDAO.getInstance().
+                    getAPIProductResourceMappings(apiProductIdentifier);
+
+            for (APIProductResource resource : resources) {
+                String apiPath = APIUtil.getAPIPath(resource.getApiIdentifier());
+
+                Resource productResource = registry.get(apiPath);
+                String artifactId = productResource.getUUID();
+                resource.setApiId(artifactId);
+            }
+
+            apiProduct.setProductResources(resources);
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API Product for artifact ";
             throw new APIManagementException(msg, e);
