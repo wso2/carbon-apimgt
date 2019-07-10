@@ -79,6 +79,7 @@ class TokenManager extends React.Component {
         };
         this.keyStates = {
             COMPLETED: 'COMPLETED',
+            APPROVED: 'APPROVED',
             CREATED: 'CREATED',
             REJECTED: 'REJECTED',
         };
@@ -195,7 +196,7 @@ class TokenManager extends React.Component {
             return <Loading />;
         }
         const key = keys.get(keyType);
-        if (key && key.keyState !== this.keyStates.COMPLETED) {
+        if (key && (key.keyState === this.keyStates.CREATED || key.keyState === this.keyStates.REJECTED)) {
             return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }
         return (

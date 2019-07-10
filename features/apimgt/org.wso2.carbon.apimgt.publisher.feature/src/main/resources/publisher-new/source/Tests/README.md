@@ -35,7 +35,7 @@ Jest will pickup the files for test which are ending with `.test.jsx` or `.test.
 
 # Troubleshooting
 
-> Feel free to update this guide , If you able to find better alternatives
+> Feel free to update this guide , If you able to find better alternatives or if you find anything that is worth adding here
 
 ## Mounted wrapper does not contain the expected rendered react elements
 

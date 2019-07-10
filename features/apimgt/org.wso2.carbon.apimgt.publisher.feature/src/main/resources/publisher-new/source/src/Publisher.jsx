@@ -25,6 +25,9 @@ import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
 import Progress from 'AppComponents/Shared/Progress';
 import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
+import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
+import Configurations from 'Config';
+
 // Localization
 import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
 
@@ -159,12 +162,12 @@ class Publisher extends React.Component {
             return <Progress />;
         }
         if (!user) {
-            window.location = '/publisher-new/services/auth/login';
+            return <RedirectToLogin />;
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
                 <PublisherRootErrorBoundary appName='Publisher Application'>
-                    <Router basename='/publisher-new'>
+                    <Router basename={Configurations.app.context}>
                         <Switch>
                             <Redirect exact from='/login' to='/apis' />
                             <Route path='/logout' component={Logout} />
