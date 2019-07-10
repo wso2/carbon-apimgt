@@ -44,6 +44,7 @@ function renderInput(inputProps) {
     } = inputProps; // `isLoading` has destructured here to prevent passing unintended prop to TextField
     return (
         <TextField
+            id='searchQuery'
             InputProps={{
                 inputRef: ref,
                 className: classes.input,
