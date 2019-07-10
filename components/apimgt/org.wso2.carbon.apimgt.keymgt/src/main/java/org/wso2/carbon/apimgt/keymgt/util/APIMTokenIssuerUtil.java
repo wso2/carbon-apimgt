@@ -66,9 +66,6 @@ public class APIMTokenIssuerUtil {
             subscribedApiDTO.setPublisher(api.getProviderId());
             subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
             subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
-            subscribedApiDTO.setSpikeArrestLimit(api.getSpikeArrestLimit());
-            subscribedApiDTO.setSpikeArrestUnit(api.getSpikeArrestUnit());
-            subscribedApiDTO.setStopOnQuotaReach(api.isStopOnQuotaReach());
             subscribedApiDTOList.add(subscribedApiDTO);
         }
         jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
