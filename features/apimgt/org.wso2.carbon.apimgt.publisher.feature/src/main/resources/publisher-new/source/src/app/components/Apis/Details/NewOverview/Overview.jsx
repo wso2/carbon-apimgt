@@ -117,15 +117,15 @@ function Overview(props) {
     const { classes } = props;
     return (
         <ApiContext.Consumer>
-            {({ api }) => (
+            {({ api, isAPIProduct }) => (
                 <Grid container spacing={24}>
                     {console.info(api)}
                     <Grid item xs={12}>
                         <Grid container>
-                            <CheckItem itemSuccess itemLabel='Endpoints' />
+                            {isAPIProduct ? null : (<CheckItem itemSuccess itemLabel='Endpoints' />)}
                             <CheckItem itemSuccess={false} itemLabel='Policies' />
                             <CheckItem itemSuccess itemLabel='Resources' />
-                            <CheckItem itemSuccess={false} itemLabel='Scopes' />
+                            {isAPIProduct ? null : (<CheckItem itemSuccess={false} itemLabel='Scopes' />)}
                             <CheckItem itemSuccess={false} itemLabel='Documents' />
                             <CheckItem itemSuccess={false} itemLabel='Business Information' />
                             <CheckItem itemSuccess={false} itemLabel='Description' />
@@ -140,9 +140,9 @@ function Overview(props) {
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Lifecycle parentClasses={classes} />
-                                <Endpoints parentClasses={classes} api={api} />
+                                {isAPIProduct ? null : (<Endpoints parentClasses={classes} api={api} />)}
                                 <BusinessInformation parentClasses={classes} />
-                                <Scopes parentClasses={classes} />
+                                {isAPIProduct ? null : (<Scopes parentClasses={classes} />)}
                                 <Documents parentClasses={classes} api={api} />
                                 <Policies parentClasses={classes} />
                             </Grid>

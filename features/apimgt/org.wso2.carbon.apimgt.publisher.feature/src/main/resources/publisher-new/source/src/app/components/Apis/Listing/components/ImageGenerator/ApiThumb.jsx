@@ -110,7 +110,7 @@ class APIThumb extends Component {
      * @memberof APIThumb
      */
     render() {
-        const { classes, api } = this.props;
+        const { classes, api, isAPIProduct } = this.props;
         const { isHover, loading } = this.state;
 
         return (
@@ -122,7 +122,14 @@ class APIThumb extends Component {
                 raised={isHover}
                 className={classes.card}
             >
-                <CardMedia src='None' component={ThumbnailView} height={140} title='Thumbnail' api={api} />
+                <CardMedia
+                    src='None'
+                    component={ThumbnailView}
+                    height={140}
+                    title='Thumbnail'
+                    api={api}
+                    isAPIProduct={isAPIProduct}
+                />
                 <CardContent className={classes.apiDetails}>
                     <Typography gutterBottom variant='headline' component='h2'>
                         {api.name}
@@ -140,14 +147,16 @@ class APIThumb extends Component {
                                 {api.context}
                             </Typography>
                         </Grid>
-                        <Grid item md={6}>
-                            <FormattedMessage id='version' defaultMessage='Version' />:
-                            <Typography variant='body2'>{api.version}</Typography>
-                        </Grid>
+                        {isAPIProduct ? null : (
+                            <Grid item md={6}>
+                                <FormattedMessage id='version' defaultMessage='Version' />:
+                                <Typography variant='body2'>{api.version}</Typography>
+                            </Grid>
+                        )}
                     </Grid>
                 </CardContent>
                 <CardActions className={classes.apiActions}>
-                    <Chip label={api.lifeCycleStatus} color='default' />
+                    <Chip label={isAPIProduct ? api.state : api.lifeCycleStatus} color='default' />
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>
@@ -162,6 +171,7 @@ APIThumb.propTypes = {
         id: PropTypes.string,
     }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
+    isAPIProduct: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(APIThumb);
