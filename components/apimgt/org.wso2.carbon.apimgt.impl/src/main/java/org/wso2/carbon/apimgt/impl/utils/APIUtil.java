@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
+import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -105,6 +106,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.DefaultPasswordResolverImpl;
+import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
@@ -682,28 +685,16 @@ public final class APIUtil {
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
-            //get labels from the artifact and set to API object
-            String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
-            if (labelArray != null && labelArray.length > 0) {
-                String tenantDomain = MultitenantUtils.getTenantDomain
-                        (replaceEmailDomainBack(api.getId().getProviderName()));
-                List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
-                List<Label> gatewayLabelListForAPI = new ArrayList<>();
-                for (String labelName : labelArray) {
-                    Label label = new Label();
-                    //set the name
-                    label.setName(labelName);
-                    //set the description and access URLs
-                    for (Label currentLabel : allLabelList) {
-                        if (labelName.equalsIgnoreCase(currentLabel.getName())) {
-                            label.setDescription(currentLabel.getDescription());
-                            label.setAccessUrls(currentLabel.getAccessUrls());
-                        }
-                    }
-                    gatewayLabelListForAPI.add(label);
-                }
-                api.setGatewayLabels(gatewayLabelListForAPI);
+            //set data and status related to monetization
+            api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
+                    (APIConstants.API_MONETIZATION_STATUS)));
+            String monetizationInfo = artifact.getAttribute(APIConstants.API_MONETIZATION_PROPERTIES);
+            if (StringUtils.isNotBlank(monetizationInfo)) {
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
+                api.setMonetizationProperties(jsonObj);
             }
+            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
 
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
@@ -729,8 +720,44 @@ public final class APIUtil {
         } catch (UserStoreException e) {
             String msg = "Failed to get User Realm of API Provider";
             throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Failed to get parse monetization information.";
+            throw new APIManagementException(msg, e);
         }
         return api;
+    }
+
+    /**
+     * This method return the gateway labels of an API
+     *
+     * @param artifact API artifact
+     * @param apiProviderName name of API provider
+     * @return List<Label> list of gateway labels
+     */
+    private static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
+            throws GovernanceException, APIManagementException {
+        String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
+        List<Label> gatewayLabelListForAPI = new ArrayList<>();
+
+        if (labelArray != null && labelArray.length > 0) {
+            String tenantDomain = MultitenantUtils.getTenantDomain
+                    (replaceEmailDomainBack(apiProviderName));
+            List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
+            for (String labelName : labelArray) {
+                Label label = new Label();
+                //set the name
+                label.setName(labelName);
+                //set the description and access URLs
+                for (Label currentLabel : allLabelList) {
+                    if (labelName.equalsIgnoreCase(currentLabel.getName())) {
+                        label.setDescription(currentLabel.getDescription());
+                        label.setAccessUrls(currentLabel.getAccessUrls());
+                    }
+                }
+                gatewayLabelListForAPI.add(label);
+            }
+        }
+        return gatewayLabelListForAPI;
     }
 
     /**
@@ -1230,6 +1257,14 @@ public final class APIUtil {
 
             //attaching micro-gateway labels to the API
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+
+            //set monetization status (i.e - enabled or disabled)
+            artifact.setAttribute(APIConstants.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
+            //set additional monetization data
+            if (api.getMonetizationProperties() != null) {
+                artifact.setAttribute(APIConstants.API_MONETIZATION_PROPERTIES,
+                        api.getMonetizationProperties().toJSONString());
+            }
 
             String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
             if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
@@ -2160,8 +2195,8 @@ public final class APIUtil {
                         if (password != null) {
 
                             String value = password.getText();
-
-                            store.setPassword(replaceSystemProperty(value));
+                            PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
+                            store.setPassword(replaceSystemProperty(passwordResolver.getPassword(value)));
                             store.setUsername(replaceSystemProperty(storeElem.getFirstChildWithName(
                                     new QName(APIConstants.EXTERNAL_API_STORE_USERNAME)).getText()));
                             //Set store login username
@@ -5178,7 +5213,7 @@ public final class APIUtil {
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
-
+            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, providerName));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -6051,7 +6086,7 @@ public final class APIUtil {
 
     public static String getSequencePath(APIIdentifier identifier, String pathFlow) {
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                replaceEmailDomain(identifier.getProviderName()) + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         return artifactPath + RegistryConstants.PATH_SEPARATOR + pathFlow + RegistryConstants.PATH_SEPARATOR;
     }
@@ -6513,6 +6548,16 @@ public final class APIUtil {
         return false;
     }
 
+    public static int getManagementTransportPort (String mgtTransport){
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+        if (mgtTransportPort <= 0) {
+            mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+        }
+        return mgtTransportPort;
+    }
+
     public static String getServerURL() throws APIManagementException {
         String hostName = ServerConfiguration.getInstance().getFirstProperty(APIConstants.HOST_NAME);
 
@@ -6525,12 +6570,7 @@ public final class APIUtil {
         }
 
         String mgtTransport = CarbonUtils.getManagementTransport();
-        AxisConfiguration axisConfiguration = ServiceReferenceHolder
-                .getContextService().getServerConfigContext().getAxisConfiguration();
-        int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
-        if (mgtTransportPort <= 0) {
-            mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
-        }
+        int mgtTransportPort = getManagementTransportPort(mgtTransport);
         String serverUrl = mgtTransport + "://" + hostName.toLowerCase();
         // If it's well known HTTPS port, skip adding port
         if (mgtTransportPort != APIConstants.DEFAULT_HTTPS_PORT) {
@@ -7140,6 +7180,9 @@ public final class APIUtil {
                 if (policy instanceof SubscriptionPolicy) {
                     SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
                     setBillingPlanAndCustomAttributesToTier(subscriptionPolicy, tier);
+                    if(StringUtils.equals(subscriptionPolicy.getBillingPlan(),APIConstants.COMMERCIAL_TIER_PLAN)){
+                        tier.setMonetizationAttributes(subscriptionPolicy.getMonetizationPlanProperties());
+                    }
                 }
 
                 if (limit instanceof RequestCountLimit) {
@@ -8209,13 +8252,76 @@ public final class APIUtil {
         return grantTypes;
     }
 
-    public static String getTokenUrl() throws APIManagementException {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.REVOKE_API_URL).
-                replace(REVOKE, TOKEN);
+    public static Map<String, Environment> getEnvironments(){
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration().getApiGatewayEnvironments();
     }
-
     private static QName getQNameWithIdentityNS(String localPart) {
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
+    }
+
+    /**
+     * Return the admin username read from the user-mgt.xml
+     * @return
+     * @throws APIMgtInternalException
+     */
+    public static String getAdminUsername () throws APIMgtInternalException {
+        String adminName = "admin";
+        try {
+            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+
+            adminName = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getRealmConfiguration().getAdminUserName();
+
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting admin username from user-mgt.xml", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        return adminName;
+    }
+
+    /**
+     * Return the admin password read from the user-mgt.xml
+     * @return
+     * @throws APIMgtInternalException
+     */
+    public static String getAdminPassword () throws APIMgtInternalException {
+        String adminPassword = "admin";
+        try {
+            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+
+            adminPassword = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getRealmConfiguration().getAdminUserName();
+
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting admin password from user-mgt.xml", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        return adminPassword;
+    }
+
+    /**
+     * This method returns the base64 encoded for the given username and password
+     * @return base64 encoded username and password
+     */
+    public static String getBase64EncodedAdminCredentials() throws APIMgtInternalException {
+        String credentials = getAdminUsername() + ":" + getAdminPassword();
+        byte[] encodedCredentials = Base64.encodeBase64(
+                credentials.getBytes(Charset.forName( "UTF-8")));
+        return new String(encodedCredentials, Charset.forName("UTF-8"));
     }
 }

@@ -73,6 +73,7 @@ securityDefinitions:
     flow: password
     tokenUrl: https://localhost:9443/token
     scopes:
+      openid: Authorize access to user details
       apim:api_view: View API
       apim:api_create: Create API
       apim:api_update: Update API
@@ -110,17 +111,17 @@ paths:
 # Retrieving the list of all APIs qualifying under a given search condition
 #-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"lifeCycleStatus\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"lifeCycleStatus\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
       summary: |
         Retrieve/Search APIs
       description: |
         This operation provides you a list of available APIs qualifying under a given search condition.
 
         Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-examples:
+        $ref: docs/examples/apis/apis_get.yaml
       parameters:
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/offset'
@@ -198,6 +199,9 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK
                         Connection: keep-alive
                         Content-Length: 0"
+      security:
+        - OAuth2Security:
+            - apim:api_view
       summary: |
         Check given API attibute name is already exist
       description: |
@@ -269,6 +273,8 @@ paths:
         This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.
 
         There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `"provider" : "some_other_user"` in the payload so that the API's creator will be shown as `some_other_user` in the UI.
+      x-examples:
+        $ref: docs/examples/apis/apis_post.yaml
       parameters:
         - in: body
           name: body
@@ -334,6 +340,11 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
+      x-examples:
+        $ref: docs/examples/apis/apis_id_get.yaml
+      security:
+        - OAuth2Security:
+            - apim:api_view
       tags:
         - API (Individual)
       responses:
@@ -511,6 +522,9 @@ paths:
       summary: Get swagger definition
       description: |
         This operation can be used to retrieve the swagger definition of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
@@ -637,7 +651,7 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
-            
+
   ################################################################
   # The resource policy definitions of "Individual API" resource APIs
   ################################################################
@@ -655,6 +669,9 @@ paths:
       summary: Get the resource policy (inflow/outflow) definitions
       description: |
         This operation can be used to retrieve conversion policy resource definitions of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
       - $ref: '#/parameters/apiId'
       - in: query
@@ -730,6 +747,9 @@ paths:
       summary: Get the resource policy (inflow/outflow) definition for a given resource identifier.
       description: |
         This operation can be used to retrieve conversion policy resource definitions of an API given the resource identifier.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
       - $ref: '#/parameters/apiId'
       - $ref: '#/parameters/resourcePolicyId'
@@ -881,6 +901,9 @@ paths:
       summary: Get thumbnail image
       description: |
         This operation can be used to download a thumbnail image of an API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
@@ -926,7 +949,7 @@ paths:
 #----------------------------------------------------------------------------
 # Upload a thumbnail image to a certain API
 #----------------------------------------------------------------------------
-    post:
+    put:
       consumes:
         - multipart/form-data
       security:
@@ -948,6 +971,7 @@ paths:
         --------------------------5e542e0e5b50e1e4--
       x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\r\nContent-Type: application/json\r\n\r\n{\r\n   \"relativePath\": \"/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\",\r\n   \"mediaType\": \"image/jpeg\"\r\n}"
       summary: Upload a thumbnail image
+      operationId: updateAPIThumbnail
       description: |
         This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`.
       parameters:
@@ -1037,6 +1061,9 @@ paths:
 
     get:
       summary: Get all threat protection policies associated with an API
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
         - $ref: '#/parameters/apiId'
       tags:
@@ -1093,7 +1120,8 @@ paths:
 #-----------------------------------------------------
     get:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:api_view
       x-wso2-curl: "curl \"https://localhost:9443/api/am/publisher/v1.0//apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies\""
       x-wso2-request: |
         GET https://localhost:9443/api/am/publisher/v1.0/apis/268c9e55-3dc1-4f47-82e7-977e5343d077/subscription-policies
@@ -1159,11 +1187,6 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_create
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/copy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0\""
-      x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/copy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/25a84fc9-38c0-4578-95e8-29fb6b1c4771\nContent-Type: application/json\n\n{\r\n   \"id\": \"25a84fc9-38c0-4578-95e8-29fb6b1c4771\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"2.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"\\\\/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"description\\\":\\\"Created.\\\"}}}},\\\"\\\\/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"headers\\\":{},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application\\\\/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application\\\\/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.apache.org\\\\/licenses\\\\/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.pizzashack.com\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
       summary: Create a new API version
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
@@ -1173,7 +1196,14 @@ paths:
           type: string
           in: query
           required: true
+        - name: defaultVersion
+          description: Specifies whether new API should be added as default version.
+          type: boolean
+          default: false
+          in: query
         - $ref: '#/parameters/apiId-Q'
+      x-examples:
+        $ref: docs/examples/apis/apis_copyapi.yaml#/post
       tags:
         - API (Individual)
       responses:
@@ -1387,7 +1417,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
-        
+
       tags:
         - API (Individual)
       responses:
@@ -1630,6 +1660,151 @@ paths:
           description: |
             Not Found.
             Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+#########################################################
+# The "Configure Monetization" Processing Function resource API
+#########################################################
+  /apis/{apiId}/monetize:
+#---------------------------------------
+# Configure monetization for a given API
+#---------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"properties\":{\r\n      \"vendor\":\"test\",\r\n      \"type\":\"postpaid\"\r\n   }\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"properties\":{\r\n      \"vendor\":\"test\",\r\n      \"type\":\"postpaid\"\r\n   }\r\n}"
+      summary: Configure monetization for a given API
+      description: |
+        This operation can be used to configure monetization for a given API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Monetization data object
+          required: true
+          schema:
+            $ref: '#/definitions/APIMonetizationInfo'
+      tags:
+        - API (Individual)
+      responses:
+        201:
+          description: |
+            OK.
+            Monetization status changed successfully.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#########################################################
+# The get monetizied policies processing function resource API
+#########################################################
+  /apis/{apiId}/monetization:
+#---------------------------------------
+# Get monetized policies for a given API
+#---------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization\""
+      x-wso2-request: "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetization\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\r\n   \"enabled\":\"true\",\r\n   \"monetizedTiers\":{\r\n      \"tier1\":\"enabled\",\r\n      \"tier2\":\"disabled\"\r\n   }\r\n}"
+      summary: Get monetization status for each tier in a given API
+      description: |
+        This operation can be used to get monetization status for each tier in a given API
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Monetization status for each tier returned successfully.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Get Total Revenue" Processing Function resource API
+######################################################
+  /apis/{apiId}/revenue:
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/revenue"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/64eca60b-2e55-4c38-8603-e9e6bad7d809/revenue
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"object\": \"invoice\",\n   \"account_country\": \"US\",\n   \"account_name\": \"test.com\",\n   \"amount_due\": \"0\",\n   \"amount_paid\": \"0\"\n  \"amount_remaining\": \"0\"\n}"
+      security:
+        - OAuth2Security:
+          - apim:api_publish
+      summary: Get total revenue details of a given monetized API with meterd billing.
+      description: |
+        This operation can be used to get details of total revenue details of a given monetized API with meterd billing.
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Details of a total revenue returned.
+          schema:
+            $ref: '#/definitions/APIRevenue'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+            Last-Modified:
+              description: 'Date and time the resource has been modified the last time. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+        '304':
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        '404':
+          description: |
+            Not Found.
+            Requested Subscription does not exist.
           schema:
             $ref: '#/definitions/Error'
 
@@ -2960,6 +3135,54 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The get usage billing resource APIs
+######################################################
+  '/subscriptions/{subscriptionId}/usage':
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"object\": \"invoice\",\n   \"account_country\": \"US\",\n   \"account_name\": \"test.com\",\n   \"amount_due\": \"0\",\n   \"amount_paid\": \"0\"\n  \"amount_remaining\": \"0\"\n}"
+      security:
+        - OAuth2Security:
+          - apim:subscription_view
+      summary: Get details of a pending invoice for a monetized subscription with meterd billing.
+      description: |
+        This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing.
+      parameters:
+        - $ref: '#/parameters/subscriptionId'
+      tags:
+        - Subscription (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Details of a pending invoice returned.
+          schema:
+            $ref: '#/definitions/APIMonetizationUsage'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+            Last-Modified:
+              description: 'Date and time the resource has been modified the last time. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+        '304':
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        '404':
+          description: |
+            Not Found.
+            Requested Subscription does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # The "Block Subscription" Processing Function resource API
 ######################################################
   /subscriptions/block-subscription:
@@ -3734,6 +3957,9 @@ paths:
       summary: Export information related to an API.
       description: |
         This operation can be used to export information related to a particular API.
+      security:
+        - OAuth2Security:
+            - apim:api_view
       parameters:
         - name: query
           in: query
@@ -4306,9 +4532,9 @@ paths:
           - apim:api_view
       produces:
         - application/json
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/search=query?sample"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/publisher/v1.0/search?limit=25&offset=0&query=test"
       x-wso2-request: |
-        GET https://localhost:9443/api/am/publisher/v0.13/search
+        GET https://localhost:9443/api/am/publisher/v1.0/search
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
       summary: |
@@ -4828,6 +5054,7 @@ definitions:
           - PRIVATE
           - RESTRICTED
         example: PUBLIC
+        default: PUBLIC
       visibleRoles:
         type: array
         description: The user roles that are able to access the API in Store
@@ -4871,6 +5098,7 @@ definitions:
           - all_tenants
           - specific_tenants
         example: current_tenant
+        default: all_tenants
       subscriptionAvailableTenants:
         type: array
         items:
@@ -4881,6 +5109,8 @@ definitions:
         additionalProperties:
           type: string
         description : Map of custom properties of API
+      monetization:
+        $ref: '#/definitions/APIMonetizationInfo'
       accessControl:
         type: string
         description: |
@@ -4891,6 +5121,7 @@ definitions:
         enum:
           - NONE
           - RESTRICTED
+        default: NONE
       accessControlRoles:
         type: array
         description: The user roles that are able to view/modify as API publisher or creator.
@@ -4910,15 +5141,100 @@ definitions:
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
-      endpoint:
-        type: array
-        items:
-         properties:
-          inline:
-           $ref: '#/definitions/Endpoint'
-          type:
-            type: string
-            example: "production_endpoints"
+      endpointConfig:
+        type: object
+        description: |
+          Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.
+
+          `Simple REST Endpoint`
+            {
+              "endpoint_type": "http",
+              "sandbox_endpoints":       {
+                 "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+              },
+              "production_endpoints":       {
+                 "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+              }
+            }
+
+          `Loadbalanced Endpoint`
+
+            {
+              "endpoint_type": "load_balance",
+              "algoCombo": "org.apache.synapse.endpoints.algorithms.RoundRobin",
+              "sessionManagement": "",
+              "sandbox_endpoints":       [
+                          {
+                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/1"
+                 },
+                          {
+                    "endpoint_type": "http",
+                    "template_not_supported": false,
+                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/2"
+                 }
+              ],
+              "production_endpoints":       [
+                          {
+                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/3"
+                 },
+                          {
+                    "endpoint_type": "http",
+                    "template_not_supported": false,
+                    "url": "https://localhost:9443/am/sample/pizzashack/v1/api/4"
+                 }
+              ],
+              "sessionTimeOut": "",
+              "algoClassName": "org.apache.synapse.endpoints.algorithms.RoundRobin"
+            }
+
+          `Failover Endpoint`
+
+            {
+              "production_failovers":[
+                 {
+                    "endpoint_type":"http",
+                    "template_not_supported":false,
+                    "url":"https://localhost:9443/am/sample/pizzashack/v1/api/1"
+                 }
+              ],
+              "endpoint_type":"failover",
+              "sandbox_endpoints":{
+                 "url":"https://localhost:9443/am/sample/pizzashack/v1/api/2"
+              },
+              "production_endpoints":{
+                 "url":"https://localhost:9443/am/sample/pizzashack/v1/api/3"
+              },
+              "sandbox_failovers":[
+                 {
+                    "endpoint_type":"http",
+                    "template_not_supported":false,
+                    "url":"https://localhost:9443/am/sample/pizzashack/v1/api/4"
+                 }
+              ]
+            }
+
+          `Default Endpoint`
+
+            {
+              "endpoint_type":"default",
+              "sandbox_endpoints":{
+                 "url":"default"
+              },
+              "production_endpoints":{
+                 "url":"default"
+              }
+            }
+
+        example:
+          {
+            "endpoint_type": "http",
+            "sandbox_endpoints":       {
+              "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            },
+            "production_endpoints":       {
+              "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            }
+          }
       scopes:
         type: array
         items:
@@ -5232,8 +5548,13 @@ definitions:
           even if the request count exceeded within a unit time
         type: boolean
         example: true
-
-
+      monetizationProperties:
+        description:
+          Properties of a tier plan which are related to monetization
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
 #-----------------------------------------------------
 # The Subscription List resource
 #-----------------------------------------------------
@@ -5299,6 +5620,29 @@ definitions:
             type: string
             example: 01234567-0123-0123-0123-012345678901
 
+  #-----------------------------------------------------
+  # The API monetization usage resource
+  #-----------------------------------------------------
+  APIMonetizationUsage:
+    title: API monetization usage object
+    properties:
+      properties:
+        type: object
+        description: Map of custom properties related to monetization usage
+        additionalProperties:
+          type: string
+
+  #-----------------------------------------------------
+  # The API revenue resource
+  #-----------------------------------------------------
+  APIRevenue:
+    title: API revenue data object
+    properties:
+      properties:
+        type: object
+        description: Map of custom properties related to API revenue
+        additionalProperties:
+          type: string
 
 #-----------------------------------------------------
 # The Mediation Policy resource
@@ -5873,7 +6217,7 @@ definitions:
         type: string
         format: dateTime
         example: "2019-02-31T23:59:60Z"
-        
+
 
 #-----------------------------------------------------
 # The workflow executor's response resource
@@ -6006,12 +6350,12 @@ definitions:
           $ref: '#/definitions/SearchResult'
       pagination:
         $ref: '#/definitions/Pagination'
-        # example:
-        #   next: "/client-certificates?limit=1&offset=2"
-        #   previous: "/client-certificates?limit=1&offset=0"
 
   SearchResult:
     title: Search Result
+    required:
+      - "name"
+    discriminator: "name"
     properties:
       id:
         type: string
@@ -6055,6 +6399,24 @@ definitions:
           thumbnailUri:
             type: string
             example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+
+  #-----------------------------------------------------
+  # The API monetization resource
+  #-----------------------------------------------------
+  APIMonetizationInfo:
+    title: API monetization object
+    required:
+      - enabled
+    properties:
+      enabled:
+        type: boolean
+        description: Flag to indicate the monetization status
+        example: true
+      properties:
+        type: object
+        description: Map of custom properties related to monetization
+        additionalProperties:
+          type: string
 
   DocumentSearchResult:
     title: Document Result
@@ -6106,6 +6468,8 @@ definitions:
           apiProvider:
             type: string
             example: admin
+          apiUUID:
+              type: string
   #-----------------------------------------------------
   # The Resource policy List resource
   #-----------------------------------------------------
@@ -6150,15 +6514,17 @@ definitions:
   # The settings resource
   #-----------------------------------------------------
   Settings:
-    title: Settings
+    title: SettingsDTO
     properties:
-      tokenUrl:
-        type: string
       environment:
         type: array
         items:
           $ref: '#/definitions/Environment'
       scopes:
+        type: array
+        items:
+          type: string
+      MonetizationProperties:
         type: array
         items:
           type: string

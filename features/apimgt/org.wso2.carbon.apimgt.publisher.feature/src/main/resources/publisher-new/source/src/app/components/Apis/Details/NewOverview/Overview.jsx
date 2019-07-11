@@ -33,7 +33,6 @@ import Documents from './Documents';
 import AdditionalProperties from './AdditionalProperties';
 import Lifecycle from './Lifecycle';
 
-
 const styles = theme => ({
     root: {
         ...theme.mixins.gutters(),
@@ -100,7 +99,7 @@ const styles = theme => ({
         fontSize: theme.typography.pxToRem(14),
         border: '1px solid #dadde9',
         '& b': {
-          fontWeight: theme.typography.fontWeightMedium,
+            fontWeight: theme.typography.fontWeightMedium,
         },
     },
     lifecycleWrapper: {

@@ -29,6 +29,9 @@ const config = {
         chunkFilename: '[name].bundle.js',
         publicPath: 'site/public/dist/',
     },
+    node: {
+        fs: 'empty'
+    },
     watch: false,
     devtool: 'source-map', // todo: Commented out the source
     // mapping in case need to speed up the build time & reduce size
@@ -36,6 +39,7 @@ const config = {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
+            AppTests: path.resolve(__dirname, 'source/Tests/'),
         },
         extensions: ['.js', '.jsx'],
     },
@@ -76,6 +80,7 @@ const config = {
     },
     externals: {
         Config: 'Configurations',
+        MaterialIcons: 'MaterialIcons',
     },
     plugins: [],
 };

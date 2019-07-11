@@ -27,12 +27,15 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-import ApplicationCreate from '../../Shared/AppsAndKeys/ApplicationCreate';
-import Alert from '../../Shared/Alert';
+import API from 'AppData/api';
+import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
+import Alert from 'AppComponents/Shared/Alert';
+import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
+
 /**
  *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme object
  */
 const styles = theme => ({
     appBar: {
@@ -54,56 +57,92 @@ const styles = theme => ({
     },
 });
 /**
- *
- *
- * @param {*} props
- * @returns
+ * @param {*} props properties
+ * @returns {Component}
  */
 function Transition(props) {
     return <Slide direction='up' {...props} />;
 }
 /**
- *
- *
+ * Component used to handle application creation
  * @class NewApp
  * @extends {React.Component}
+ * @param {any} value @inheritDoc
  */
 class NewApp extends React.Component {
-    state = {
-        open: false,
-    };
+    /**
+     * @param {*} props properties
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            open: false,
+            applicationRequest: {
+                name: '',
+                throttlingPolicy: '',
+                description: '',
+                tokenType: null,
+            },
+            isNameValid: true,
+            throttlingPolicyList: [],
+        };
+    }
 
     /**
-     *
-     *
+     * Get all the throttling Policies from backend and
+     * update the state
      * @memberof NewApp
      */
-    handleClickOpen = () => {
-        this.setState({ open: true });
-    };
+    componentDidMount() {
+        // Get all the tires to populate the drop down.
+        const api = new API();
+        const promiseTiers = api.getAllTiers('application');
+        promiseTiers
+            .then((response) => {
+                const { applicationRequest } = this.state;
+                const throttlingPolicyList = response.body.list.map(item => item.name);
+                const newRequest = { ...applicationRequest };
+                if (throttlingPolicyList.length > 0) {
+                    [newRequest.throttlingPolicy] = throttlingPolicyList;
+                }
+                this.setState({ applicationRequest: newRequest, throttlingPolicyList });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    // eslint-disable-next-line react/no-unused-state
+                    this.setState({ notFound: true });
+                }
+            });
+    }
 
     /**
-     *
-     *
-     * @memberof NewApp
+     * Update keyRequest state
+     * @param {Object} applicationRequest parameters requried for application
+     * create request
      */
-    handleClose = () => {
-        this.setState({ open: false });
-    };
+    updateApplicationRequest = (applicationRequest) => {
+        this.setState({ applicationRequest });
+    }
 
     /**
-     *
-     *
+     * Validate and send the application create
+     * request to the backend
      * @memberof NewApp
      */
     saveApplication = () => {
-        this.applicationCreate.handleSubmit()
-            .then((response) => {
-                const appCreated = JSON.parse(response.data);
-                // Once application loading fixed this need to pass application ID and load app
+        const { applicationRequest } = this.state;
+        const { updateApps } = this.props;
+        const api = new API();
+        this.validateName(applicationRequest.name)
+            .then(() => api.createApplication(applicationRequest))
+            .then(() => {
                 console.log('Application created successfully.');
                 this.setState({ open: false });
-                this.props.updateApps();
+                updateApps();
             })
             .catch((error) => {
                 const { response } = error;
@@ -118,19 +157,50 @@ class NewApp extends React.Component {
     };
 
     /**
-     *
-     *
-     * @returns
+     * @memberof NewApp
+     */
+    handleClose = () => {
+        this.setState({ open: false });
+    };
+
+    /**
+     * @memberof NewApp
+     */
+    handleClickOpen = () => {
+        this.setState({ open: true });
+    };
+
+    validateName = (value) => {
+        if (!value || value.trim() === '') {
+            this.setState({ isNameValid: false });
+            return Promise.reject(new Error('Application name is required'));
+        }
+        this.setState({ isNameValid: true });
+        return Promise.resolve(true);
+    };
+
+    /**
+     * @inheritdoc
      * @memberof NewApp
      */
     render() {
+        const {
+            throttlingPolicyList, applicationRequest, isNameValid, open,
+        } = this.state;
         const { classes } = this.props;
         return (
             <React.Fragment>
-                <Button variant='contained' color='primary' className={classes.button} onClick={this.handleClickOpen}>
-                    ADD NEW APPLICATION
-                </Button>
-                <Dialog fullScreen open={this.state.open} onClose={this.handleClose} TransitionComponent={Transition}>
+                <ScopeValidation resourcePath={resourcePaths.APPLICATIONS} resourceMethod={resourceMethods.POST}>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        className={classes.button}
+                        onClick={this.handleClickOpen}
+                    >
+                        ADD NEW APPLICATION
+                    </Button>
+                </ScopeValidation>
+                <Dialog fullScreen open={open} onClose={this.handleClose} TransitionComponent={Transition}>
                     <AppBar className={classes.appBar}>
                         <Toolbar>
                             <IconButton color='inherit' onClick={this.handleClose} aria-label='Close'>
@@ -145,13 +215,24 @@ class NewApp extends React.Component {
                         </Toolbar>
                     </AppBar>
                     <div className={classes.createFormWrapper}>
-                        <ApplicationCreate innerRef={node => (this.applicationCreate = node)} />
+                        <ApplicationCreateForm
+                            throttlingPolicyList={throttlingPolicyList}
+                            applicationRequest={applicationRequest}
+                            updateApplicationRequest={this.updateApplicationRequest}
+                            validateName={this.validateName}
+                            isNameValid={isNameValid}
+                        />
                     </div>
                     <div className={classes.buttonWrapper}>
                         <Button variant='outlined' className={classes.button} onClick={this.handleClose}>
                             Cancel
                         </Button>
-                        <Button variant='contained' color='primary' className={classes.button} onClick={this.saveApplication}>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            className={classes.button}
+                            onClick={this.saveApplication}
+                        >
                             ADD NEW APPLICATION
                         </Button>
                     </div>
@@ -162,7 +243,7 @@ class NewApp extends React.Component {
 }
 
 NewApp.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(NewApp);

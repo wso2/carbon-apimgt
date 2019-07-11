@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -199,6 +200,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+                    JSONArray scopes= apiConsumer.getScopesForApplicationSubscription(username, application.getId());
+                    applicationDTO.setSubscriptionScopes(scopes);
                     return Response.ok().entity(applicationDTO).build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
@@ -342,10 +345,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "is already registered")) {
-                RestApiUtil
-                        .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
-                                e,
-                                log);
+                RestApiUtil.handleResourceAlreadyExistsError("Keys already generated for the application " +
+                        applicationId, e, log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while generating keys for application " + applicationId, e,
                         log);

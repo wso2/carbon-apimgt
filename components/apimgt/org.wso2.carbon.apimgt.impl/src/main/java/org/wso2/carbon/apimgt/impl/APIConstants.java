@@ -272,6 +272,9 @@ public final class APIConstants {
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
     public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
+    public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
+    public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
+    public static final String API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY = "oauth_basic_auth_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
@@ -377,6 +380,17 @@ public final class APIConstants {
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
     public static final String FEDERATED_USER = "FEDERATED";
 
+    //Monetization related constants
+    public static final String MONETIZATION_IMPL = "Monetization." + "MonetizationImpl";
+    public static final String TYPE = "type";
+    public static final String CURRENCY = "currencyType";
+    public static final String BILLING_CYCLE = "billingCycle";
+    public static final String FIXED_RATE = "fixedRate";
+    public static final String FIXED_PRICE = "fixedPrice";
+    public static final String PRICE_PER_REQUEST = "pricePerRequest";
+    public static final String API_MONETIZATION_STATUS = "isMonetizationEnabled";
+    public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";
+
     //documentation rxt
 
     public static final String DOC_NAME = "overview_name";
@@ -446,6 +460,8 @@ public final class APIConstants {
     public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
     public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
+
+    public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -669,6 +685,7 @@ public final class APIConstants {
     public static final String BILLING_AND_USAGE_CONFIGURATION = "EnableBillingAndUsage";
 
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
+    public static final String BASIC_AUTH_APPLICATION_NAME = "BasicAuthApplication";
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
             "Policy");
@@ -827,6 +844,9 @@ public final class APIConstants {
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
     public static final String POLICY_CACHE_CONTEXT = "POLICY:";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
+    public static final String GATEWAY_USERNAME_CACHE_NAME = "gatewayUsernameCache";
+    public static final String GATEWAY_INVALID_USERNAME_CACHE_NAME = "gatewayInvalidUsernameCache";
+    public static final String GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME = "gatewayBasicAuthResourceCache";
     public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
@@ -1118,8 +1138,9 @@ public final class APIConstants {
     public static final String SWAGGER_RESPONSE_200 = "200";
     public static final String SWAGGER_SECURITY_DEFINITIONS = "securityDefinitions";
     public static final String SWAGGER_APIM_DEFAULT_SECURITY = "default";
-    public static final String OPEN_API_V3 = "3.0.0";
+    public static final String OPEN_API_V3 = "3.0.x";
     public static final String OPEN_API = "openapi";
+    public static final String OPEN_API_VERSION_REGEX = "3\\.0\\.\\d{1,}";
 
     //swagger v1.2 constants
     public static final String SWAGGER_RESOURCES = "resources";
@@ -1165,6 +1186,7 @@ public final class APIConstants {
     public static final String API_DATA_PRODUCTION_ENDPOINTS = "production_endpoints";
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String API_DATA_URL = "url";
+    public static final String API_UUID = "apiUUID";
 
     public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
     public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
@@ -1536,4 +1558,34 @@ public final class APIConstants {
         public static final String APPLICATION = "Application";
         public static final String NONE = "None";
     }
+
+    /**
+     * Constants for monetization usage publishing
+     */
+    public static class MonetizationUsagePublisher {
+
+        public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+        public static final String TIME_ZONE = "UTC";
+        public static final String COMPLETED = "COMPLETED";
+        public static final String RUNNING = "RUNNING";
+        public static final String INPROGRESS = "INPROGRESS";
+        public static final String INITIATED = "INITIATED";
+        public static final String SUCCESSFULL = "SUCCESSFULL";
+        public static final String FAILED = "FAILED";
+        public static final String ADDITIONAL_PROPERTY_LOCATION = "Monetization.AdditionalProperties.Property";
+        public static final String DEFAULT_GRANULARITY = "days";
+        public static final String DEFAULT_TIME_GAP_IN_DAYS = "1";
+        public static final String JOB_NAME = "USAGE_PUBLISHER";
+        public static final String FROM_TIME_CONFIGURATION_PROPERTY =
+                "Monetization.UsagePubliser.PublishTimeDurationInDays";
+        public static final String GRANULARITY_PROERTY_LOCATION = "Monetization.UsagePubliser.Granularity";
+    }
+    // HTTP methods
+    public static final String HTTP_GET = "GET";
+    public static final String HTTP_POST = "POST";
+    public static final String HTTP_PUT = "PUT";
+    public static final String HTTP_DELETE = "DELETE";
+    public static final String HTTP_HEAD = "HEAD";
+    public static final String HTTP_OPTIONS = "OPTIONS";
+    public static final String HTTP_PATCH = "PATCH";
 }

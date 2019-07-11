@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.4.211-SNAPSHOT</version>
+        <version>6.5.24-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -185,6 +185,11 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <environmentVariables>
+                                <PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
+                                    true
+                                </PUPPETEER_SKIP_CHROMIUM_DOWNLOAD>
+                            </environmentVariables>
                             <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -205,6 +210,22 @@
                             <arguments>
                                 <argument>run</argument>
                                 <argument>${npm.build.command}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>node test</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <workingDirectory>${basedir}/src/main/resources/publisher-new</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>test</argument>
                             </arguments>
                         </configuration>
                     </execution>

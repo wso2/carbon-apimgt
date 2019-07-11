@@ -17,21 +17,26 @@
 */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -40,21 +45,32 @@ public class SettingsMappingUtil {
 
     private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
+    /**
+     * This method feeds data into the settingsDTO
+     * @param isUserAvailable check if user is logged in
+     * @return SettingsDTO
+     * @throws APIManagementException
+     */
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException {
         SettingsDTO settingsDTO = new SettingsDTO();
+        EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
         if (isUserAvailable) {
-            //todo: set the environment
-            settingsDTO.setEnvironment(null);
-            settingsDTO.setScopes(GetScopeList());
-            settingsDTO.setTokenUrl(APIUtil.getTokenUrl());
-        } else {
-            //todo: set the environment
-            settingsDTO.setEnvironment(null);
-            settingsDTO.setScopes(GetScopeList());
+            Map<String, Environment> environments = APIUtil.getEnvironments();
+            if (environments != null) {
+                environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
+            }
+            settingsDTO.setEnvironment(environmentListDTO.getList());
+            settingsDTO.setMonetizationProperties(getMonetizationProperties());
         }
+        settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
     }
 
+    /**
+     * This method returns the scope list from the publisher-api.yaml
+     * @return  List<String> scope list
+     * @throws APIManagementException
+     */
     private List<String> GetScopeList() throws APIManagementException {
         String definition = null;
         try {
@@ -70,5 +86,20 @@ public class SettingsMappingUtil {
             scopeList.add(entry.getKey());
         }
         return scopeList;
+    }
+
+    /**
+     * This method returns the monetization properties from configuration
+     *
+     * @return List<String> monetization properties
+     * @throws APIManagementException
+     */
+    private List<String> getMonetizationProperties() throws APIManagementException {
+
+        List<String> properties = new ArrayList<>();
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        properties = configuration.getProperty(APIConstants.MonetizationUsagePublisher.ADDITIONAL_PROPERTY_LOCATION);
+        return properties;
     }
 }

@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -22,6 +24,7 @@ public class APIInfoDTO   {
     private String provider = null;
     private String lifeCycleStatus = null;
     private String thumbnailUri = null;
+    private List<String> throttlingPolicies = new ArrayList<>();
 
   /**
    **/
@@ -160,6 +163,24 @@ public class APIInfoDTO   {
     this.thumbnailUri = thumbnailUri;
   }
 
+  /**
+   * List of throttling policies of the API
+   **/
+  public APIInfoDTO throttlingPolicies(List<String> throttlingPolicies) {
+    this.throttlingPolicies = throttlingPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"Unlimited\",\"Bronze\"]", value = "List of throttling policies of the API")
+  @JsonProperty("throttlingPolicies")
+  public List<String> getThrottlingPolicies() {
+    return throttlingPolicies;
+  }
+  public void setThrottlingPolicies(List<String> throttlingPolicies) {
+    this.throttlingPolicies = throttlingPolicies;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -177,12 +198,13 @@ public class APIInfoDTO   {
         Objects.equals(version, apIInfo.version) &&
         Objects.equals(provider, apIInfo.provider) &&
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
-        Objects.equals(thumbnailUri, apIInfo.thumbnailUri);
+        Objects.equals(thumbnailUri, apIInfo.thumbnailUri) &&
+        Objects.equals(throttlingPolicies, apIInfo.throttlingPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, thumbnailUri);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, thumbnailUri, throttlingPolicies);
   }
 
   @Override
@@ -198,6 +220,7 @@ public class APIInfoDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    throttlingPolicies: ").append(toIndentedString(throttlingPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

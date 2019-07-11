@@ -374,10 +374,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                             //if application level not throttled means it does not throttled at any level.
                             if (!isApplicationLevelThrottled) {
                                 boolean keyTemplatesAvailable = getThrottleDataHolder().isKeyTemplatesPresent();
-                                if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser, applicationLevelThrottleKey,
-                                                                                    subscriptionLevelThrottleKey, apiLevelThrottleKey, subscriptionLevelThrottleKey, apiContext,
-                                                                                    apiVersion, subscriberTenantDomain, apiTenantDomain, applicationId,
-                                                                                    getThrottleDataHolder().getKeyTemplateMap(), synCtx)) {
+                                if (!keyTemplatesAvailable || !validateCustomPolicy(authorizedUser,
+                                        applicationLevelThrottleKey, resourceLevelThrottleKey, apiLevelThrottleKey,
+                                        subscriptionLevelThrottleKey, apiContext, apiVersion, subscriberTenantDomain,
+                                        apiTenantDomain, applicationId, getThrottleDataHolder().getKeyTemplateMap(),
+                                        synCtx)) {
                                     //Pass message context and continue to avoid performance issue.
                                     //Did not throttled at any level. So let message go and publish event.
                                     //publish event to Global Policy Server
@@ -385,20 +386,19 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         isThrottled = true;
 
                                     } else {
-                                        throttleDataPublisher.publishNonThrottledEvent(
-                                                applicationLevelThrottleKey, applicationLevelTier,
-                                                apiLevelThrottleKey, apiLevelTier,
+                                        throttleDataPublisher.publishNonThrottledEvent(applicationLevelThrottleKey,
+                                                applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
                                                 subscriptionLevelThrottleKey, subscriptionLevelTier,
-                                                resourceLevelThrottleKey, resourceLevelTier,
-                                                authorizedUser, apiContext, apiVersion, subscriberTenantDomain,
-                                                apiTenantDomain, applicationId, synCtx, authContext);
+                                                resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext,
+                                                apiVersion, subscriberTenantDomain, apiTenantDomain, applicationId,
+                                                synCtx, authContext);
                                     }
                                 } else {
                                     if (log.isDebugEnabled()) {
                                         log.debug("Request throttled at custom throttling");
                                     }
                                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
-                                                       APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
+                                            APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
                                     isThrottled = true;
 
                                 }

@@ -25,7 +25,6 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import PeopleOutlineIcon from '@material-ui/icons/PeopleOutline';
 import ApiContext from '../components/ApiContext';
- 
 
 function Lifecycle(props) {
     const { parentClasses } = props;
@@ -45,11 +44,16 @@ function Lifecycle(props) {
                     </div>
 
                     {/* LifeCycle Status */}
-                        <Typography variant='h5' className={classNames({[parentClasses.subtitle]: true, [parentClasses.lifecycleWrapper]:true})}>
-                            <PeopleOutlineIcon className={parentClasses.lifecycleIcon}/>
-                            {api.lifeCycleStatus}
-                        </Typography>
-                   
+                    <Typography
+                        variant='h5'
+                        className={classNames({
+                            [parentClasses.subtitle]: true,
+                            [parentClasses.lifecycleWrapper]: true,
+                        })}
+                    >
+                        <PeopleOutlineIcon className={parentClasses.lifecycleIcon} />
+                        {api.lifeCycleStatus}
+                    </Typography>
                 </Paper>
             )}
         </ApiContext.Consumer>
@@ -57,7 +61,7 @@ function Lifecycle(props) {
 }
 
 Lifecycle.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default Lifecycle;

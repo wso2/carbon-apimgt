@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.4.211-SNAPSHOT</version>
+        <version>6.5.24-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -249,6 +249,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
+       <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -273,10 +279,22 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>org.opensaml.httpclient.https.disableHostnameVerification</name>
+                            <value>true</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -313,7 +331,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -333,7 +350,6 @@
                         <Import-Package>
                             !javax.xml.soap,
                             javax.xml.stream.*; version="${javax.xml.stream.imp.pkg.version}",
-                            org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.apache.axis2; version="${axis2.osgi.version.range}",
                             org.apache.axis2.description; version="${axis2.osgi.version.range}",
@@ -361,6 +377,7 @@
                             javax.net.ssl,
                             javax.xml.namespace,
                             org.apache.http.*,
+                            org.apache.commons.lang3;version="${apache.commons.lang3.version}",
                             org.apache.commons.*,
                             org.apache.commons.lang3.*,
                             org.apache.synapse.*,

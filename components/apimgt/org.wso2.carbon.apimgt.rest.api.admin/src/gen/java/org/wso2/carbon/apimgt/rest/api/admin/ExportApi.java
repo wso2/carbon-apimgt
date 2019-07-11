@@ -41,14 +41,10 @@ public class ExportApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
     public Response exportApplicationsGet(@ApiParam(value = "Application Name\n",required=true) @QueryParam("appName")  String appName,
-    @ApiParam(value = "Owner of the Application\n",required=true) @QueryParam("appOwner")  String appOwner)
+    @ApiParam(value = "Owner of the Application\n",required=true) @QueryParam("appOwner")  String appOwner,
+    @ApiParam(value = "Export application keys\n") @QueryParam("withKeys")  Boolean withKeys)
     {
-    return delegate.exportApplicationsGet(appName,appOwner);
-    }
-
-    public String exportApplicationsGetGetLastUpdatedTime(String appName,String appOwner)
-    {
-        return delegate.exportApplicationsGetGetLastUpdatedTime(appName,appOwner);
+    return delegate.exportApplicationsGet(appName,appOwner,withKeys);
     }
 }
 

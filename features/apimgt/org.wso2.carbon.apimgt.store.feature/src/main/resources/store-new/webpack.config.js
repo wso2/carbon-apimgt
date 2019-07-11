@@ -36,11 +36,17 @@ const config = {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
+            AppTests: path.resolve(__dirname, 'source/Tests/'),
         },
         extensions: ['.js', '.jsx'],
     },
     module: {
         rules: [
+            {
+                test: /\.js$/,
+                use: ['source-map-loader'],
+                enforce: 'pre',
+            },
             {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,

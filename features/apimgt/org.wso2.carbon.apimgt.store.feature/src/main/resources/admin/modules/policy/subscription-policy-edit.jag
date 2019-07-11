@@ -2,14 +2,17 @@
 var log = new Log();
 
 var saveSubscriptionPolicy = function (action, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
-                                       defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes) {
+                                       defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit,
+                                       stopOnQuotaReach, tierPlan, attributes, monetizationPlan, fixedRate, billingCycle, pricePerRequest, currencyType) {
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
 
         var policy = constructPolicyObject(provider, policyName, description, defaultQuotaPolicy, defaultRequestCount,
-                defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes);
+                                defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount,
+                                rateLimitTimeUnit, stopOnQuotaReach, tierPlan, attributes, monetizationPlan,
+                                fixedRate, billingCycle, pricePerRequest, currencyType);
 
         if (action == "add") {
             apiProvider.addPolicy(policy);
@@ -21,11 +24,10 @@ var saveSubscriptionPolicy = function (action, policyName, description, defaultQ
             error: false
         };
     } catch (ex) {
-        var errorMessage = "Error occurred while saving policy (Cause:" + ex.message + ")";
-        log.error(errorMessage);
+        log.error(ex);
         return {
             error: true,
-            message: errorMessage
+            message:  ex.message.split(":")[1]
         };
     }
 };
@@ -55,7 +57,7 @@ var updateThrottleTierPermissions = function (tierPermission) {
 
 var constructPolicyObject = function (userName, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
                                       defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, rateLimitCount, rateLimitTimeUnit,
-                                      stopOnQuotaReach, tierPlan, attributes) {
+                                      stopOnQuotaReach, tierPlan, attributes, monetizationPlan, fixedRate, billingCycle, pricePerRequest, currencyType) {
     var SubscriptionPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
     var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
     var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
@@ -85,6 +87,26 @@ var constructPolicyObject = function (userName, policyName, description, default
     subscriptionPolicy.setCustomAttributes(new String(JsonString).getBytes("UTF-8"));
 
     subscriptionPolicy.setBillingPlan(tierPlan);
+
+    if (tierPlan == "FREE") {
+        subscriptionPolicy.setMonetizationPlan(null);
+        var HashMap = Packages.java.util.HashMap;
+        var monetizationPropertyMap = new HashMap();
+        subscriptionPolicy.setMonetizationPlanProperties(monetizationPropertyMap);
+    } else if (tierPlan == "COMMERCIAL") {
+        subscriptionPolicy.setMonetizationPlan(monetizationPlan);
+        var HashMap = Packages.java.util.HashMap;
+        var monetizationPropertyMap = new HashMap();
+        monetizationPropertyMap.put("billingCycle", billingCycle);
+        if (monetizationPlan == "FixedRate") {
+            monetizationPropertyMap.put("fixedPrice", fixedRate);
+        } else if (monetizationPlan == "DynamicRate") {
+            monetizationPropertyMap.put("pricePerRequest", pricePerRequest);
+        }
+        monetizationPropertyMap.put("currencyType", currencyType);
+        subscriptionPolicy.setMonetizationPlanProperties(monetizationPropertyMap);
+    }
+
     var default_quotaPolicy = new QuotaPolicy();
 
     if (defaultQuotaPolicy == "requestCount") {

@@ -19,12 +19,16 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.rest.api.admin.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -32,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,10 +52,11 @@ public class ExportApiServiceImpl extends ExportApiService {
      *
      * @param appName  Search query
      * @param appOwner Owner of the Application
+     * @param withKeys Export keys with application
      * @return Zip file containing exported Application
      */
     @Override
-    public Response exportApplicationsGet(String appName, String appOwner) {
+    public Response exportApplicationsGet(String appName, String appOwner, Boolean withKeys) {
         APIConsumer consumer;
         String exportedFilePath;
         Application applicationDetails = null;
@@ -83,6 +89,30 @@ public class ExportApiServiceImpl extends ExportApiService {
                 log.error(errorMsg);
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
+
+            // export keys for application
+            if (withKeys == null || !withKeys) {
+                applicationDetails.getKeys().clear();
+            } else {
+                // encode secrets when exporting
+                for (APIKey apiKey : applicationDetails.getKeys()) {
+                    byte[] consumerSecretBytes = apiKey.getConsumerSecret().getBytes(Charset.defaultCharset());
+                    apiKey.setConsumerSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                }
+            }
+
+            // encode Oauth secrets
+            OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp("PRODUCTION");
+            if (productionOAuthApplicationInfo != null) {
+                byte[] consumerSecretBytes = productionOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
+                productionOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+            }
+            OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp("SANDBOX");
+            if (sandboxOAuthApplicationInfo != null) {
+                byte[] consumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
+                sandboxOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+            }
+
             exportedFilePath = importExportManager.exportApplication(applicationDetails,
                     DEFAULT_APPLICATION_EXPORT_DIR);
             String zippedFilePath = importExportManager.createArchiveFromExportedAppArtifacts(exportedFilePath,
@@ -100,7 +130,6 @@ public class ExportApiServiceImpl extends ExportApiService {
         return responseBuilder.build();
     }
 
-    @Override
     public String exportApplicationsGetGetLastUpdatedTime(String appName, String appOwner) {
         return null;
     }

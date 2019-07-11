@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.wso2.carbon.apimgt</groupId>
 		<artifactId>feature-categories</artifactId>
-		<version>6.4.211-SNAPSHOT</version>
+		<version>6.5.24-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -99,8 +99,6 @@
 								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.basicauth.server:${carbon.identity-local-auth-basicauth.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.identity.application.authenticator.samlsso.server:${carbon.identity-outbound-auth-samlsso.version}</importFeatureDef>
 								<importFeatureDef>org.wso2.carbon.claim.mgt:${carbon.identity.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.analytics.common.la.apim:${analytics.shared.version}</importFeatureDef>
-								<importFeatureDef>org.wso2.analytics.common.data.agents.log4j:${analytics.shared.version}</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -29,6 +30,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -41,6 +43,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
@@ -58,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -86,6 +90,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
@@ -159,6 +164,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1894,23 +1900,62 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         if (api.getApiSecurity() != null) {
             apiSecurity = api.getApiSecurity();
+            ArrayList<String> securityLevels = new ArrayList<>();
             String[] apiSecurityLevels = apiSecurity.split(",");
             boolean isOauth2 = false;
             boolean isMutualSSL = false;
+            boolean isBasicAuth = false;
+            boolean isMutualSSLMandatory = false;
+            boolean isOauthBasicAuthMandatory = false;
+
+            boolean securitySchemeFound = false;
+
             for (String apiSecurityLevel : apiSecurityLevels) {
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
                     isOauth2 = true;
+                    securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+                    securitySchemeFound = true;
                 }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                     isMutualSSL = true;
+                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL);
+                    securitySchemeFound = true;
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_BASIC_AUTH)) {
+                    isBasicAuth = true;
+                    securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
+                    securitySchemeFound = true;
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
+                    isMutualSSLMandatory = true;
+                    securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+                }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
+                    isOauthBasicAuthMandatory = true;
+                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
                 }
             }
-            apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
-            if (isOauth2 && isMutualSSL) {
-                apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2 + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (isMutualSSL) {
-                apiSecurity = APIConstants.API_SECURITY_MUTUAL_SSL;
+
+            // If no security schema found, set OAuth2 as default
+            if (!securitySchemeFound) {
+                isOauth2 = true;
+                securityLevels.add(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
             }
+            // If Only OAuth2/Basic-Auth specified, set it as mandatory
+            if (!isMutualSSL && !isOauthBasicAuthMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+            }
+            // If Only Mutual SSL specified, set it as mandatory
+            if (!isBasicAuth && !isOauth2 && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
+            }
+            // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
+            // set OAuth2/Basic-Auth as mandatory
+            if ((isOauth2 || isBasicAuth) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+            }
+
+            apiSecurity = String.join(",", securityLevels);
         }
         if (log.isDebugEnabled()) {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
@@ -2070,6 +2115,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
                         APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
             }
+            authProperties.put(APIConstants.API_UUID, api.getUUID());
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
             Map<String, String> properties = new HashMap<String, String>();
@@ -2444,12 +2490,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                     api.getId().getVersion(), api.getId().getProviderName());
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                JSONObject swaggerObject = (JSONObject) new JSONParser()
-                        .parse(definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry));
-                JSONObject infoObject = (JSONObject) swaggerObject.get("info");
+                String apiDefinition = definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry);
+                LinkedHashMap map = new ObjectMapper().readValue(apiDefinition, LinkedHashMap.class);
+                Map infoObject = (Map) map.get("info");
                 infoObject.remove("version");
                 infoObject.put("version", newAPI.getId().getVersion());
-                definitionFromOpenAPISpec.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
+                String json = new ObjectMapper().writeValueAsString(map);
+                definitionFromOpenAPISpec.saveAPIDefinition(newAPI, json, registry);
             }
 
             // copy wsdl in case of a SOAP API
@@ -4208,89 +4255,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return new ArrayList<>(sequenceList);
     }
 
-    /**
-     * This method is used to initiate the web service calls and cluster messages related to stats publishing status
-     *
-     * @param receiverUrl   event receiver url
-     * @param user          username of the event receiver
-     * @param password      password of the event receiver
-     * @param updatedStatus status of the stat publishing state
-     */
-    public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus) {
-
-        //all mandatory parameters should not be null in order to start the process
-        if (receiverUrl != null && user != null && password != null) {
-
-            if (log.isDebugEnabled()) {
-                log.debug("Updating Stats publishing status of Store/Publisher domain to : " + updatedStatus);
-            }
-
-            //get the cluster message agent to publisher-store domain
-            ClusteringAgent clusteringAgent = ServiceReferenceHolder.getContextService().getServerConfigContext().
-                    getAxisConfiguration().getClusteringAgent();
-
-            if (clusteringAgent != null) {
-                //changing stat publishing status at other nodes via a cluster message
-                try {
-                    clusteringAgent.sendMessage(new StatUpdateClusterMessage(updatedStatus, receiverUrl, user, password), true);
-                } catch (ClusteringFault clusteringFault) {
-                    //error is only logged because initially gateway has modified the status
-                    String errorMessage = "Failed to send cluster message to Publisher/Store domain and " +
-                            "update stats publishing status.";
-                    log.error(errorMessage, clusteringFault);
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully updated Stats publishing status to : " + updatedStatus);
-                }
-            }
-
-            Map<String, Environment> gatewayEnvironments = getAPIManagerConfiguration().getApiGatewayEnvironments();
-
-            Set gatewayEntries = gatewayEnvironments.entrySet();
-            Iterator<Map.Entry<String, Environment>> gatewayIterator = gatewayEntries.iterator();
-
-            while (gatewayIterator.hasNext()) {
-
-                Environment currentGatewayEnvironment = gatewayIterator.next().getValue();
-                String gatewayServiceUrl = currentGatewayEnvironment.getServerURL();
-                String gatewayUserName = currentGatewayEnvironment.getUserName();
-                String gatewayPassword = currentGatewayEnvironment.getPassword();
-
-                try {
-                    //get the stub and the call the admin service with the credentials
-                    GatewayStatsUpdateServiceStub stub =
-                            new GatewayStatsUpdateServiceStub(gatewayServiceUrl + APIConstants.GATEWAY_STATS_SERVICE);
-                    ServiceClient gatewayServiceClient = stub._getServiceClient();
-                    CarbonUtils.setBasicAccessSecurityHeaders(gatewayUserName, gatewayPassword, gatewayServiceClient);
-                    stub.updateStatPublishGateway(receiverUrl, user, password, updatedStatus);
-                } catch (AxisFault e) {
-                    //error is only logged because the process should be executed in all gateway environments
-                    log.error("Error in calling Stats update web service in Gateway Environment : " +
-                            currentGatewayEnvironment.getName(), e);
-                } catch (RemoteException e) {
-                    //error is only logged because the change is affected in gateway environments,
-                    // and the process should be executed in all environments and domains
-                    log.error("Error in updating Stats publish status in Gateway : " +
-                            currentGatewayEnvironment.getName(), e);
-                } catch (GatewayStatsUpdateServiceAPIManagementExceptionException e) {
-                    //error is only logged because the process should continue in other gateways
-                    log.error("Error in Stat Update web service call to Gateway : " +
-                            currentGatewayEnvironment.getName(), e);
-                } catch (GatewayStatsUpdateServiceClusteringFaultException e) {
-                    //error is only logged because the status should be updated in other gateways
-                    log.error("Failed to send cluster message to update stats publishing status in Gateway : " +
-                            currentGatewayEnvironment.getName(), e);
-                } catch (GatewayStatsUpdateServiceExceptionException e) {
-                    //error is only logged because the process should continue in other gateways
-                    log.error("Updating EventingConfiguration failed, a dirty Stat publishing status exists in : " +
-                            currentGatewayEnvironment.getName(), e);
-                }
-            }
-        } else {
-            //if at least one mandatory parameter is null, the process is not initiated
-            log.error("Event receiver URL and username and password all should not be null.");
-        }
-    }
 
     @Override
     public boolean isSynapseGateway() throws APIManagementException {
@@ -4843,6 +4807,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             if (policy instanceof APIPolicy) {
                 APIPolicy apiPolicy = (APIPolicy) policy;
+                //Check if there's a policy exists before adding the new policy
+                Policy existingPolicy = getAPIPolicy(userNameWithoutChange, apiPolicy.getPolicyName());
+                if (existingPolicy != null) {
+                    handleException("Advanced Policy with name " + apiPolicy.getPolicyName() + " already exists");
+                }
                 apiPolicy.setUserLevel(PolicyConstants.ACROSS_ALL);
                 apiPolicy = apiMgtDAO.addAPIPolicy(apiPolicy);
                 executionFlows = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy);
@@ -4853,6 +4822,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+                //Check if there's a policy exists before adding the new policy
+                Policy existingPolicy = getApplicationPolicy(userNameWithoutChange, appPolicy.getPolicyName());
+                if (existingPolicy != null) {
+                    handleException("Application Policy with name " + appPolicy.getPolicyName() + " already exists");
+                }
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
                 String policyFile = appPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + appPolicy.getPolicyName();
                 executionFlows.put(policyFile, policyString);
@@ -4860,10 +4834,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 policyLevel = PolicyConstants.POLICY_LEVEL_APP;
             } else if (policy instanceof SubscriptionPolicy) {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
+                //Check if there's a policy exists before adding the new policy
+                Policy existingPolicy = getSubscriptionPolicy(userNameWithoutChange, subPolicy.getPolicyName());
+                if (existingPolicy != null) {
+                    handleException("Subscription Policy with name " + subPolicy.getPolicyName() + " already exists");
+                }
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
                 String policyFile = subPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" + subPolicy.getPolicyName();
                 executionFlows.put(policyFile, policyString);
                 apiMgtDAO.addSubscriptionPolicy(subPolicy);
+                String monetizationPlan = subPolicy.getMonetizationPlan();
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                    createMonetizationPlan(subPolicy);
+                }
                 policyLevel = PolicyConstants.POLICY_LEVEL_SUB;
             } else if (policy instanceof GlobalPolicy) {
                 GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -4874,9 +4858,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     throw new APIManagementException("Invalid Execution Plan");
                 }
 
-                // checking if keytemplate already exist
-                if (apiMgtDAO.isKeyTemplatesExist(globalPolicy)) {
-                    throw new APIManagementException("Key Template Already Exist");
+                // checking if policy already exist
+                Policy existingPolicy = getGlobalPolicy(globalPolicy.getPolicyName());
+                if (existingPolicy != null) {
+                    throw new APIManagementException("Policy Name Already Exist");
                 }
 
                 String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" + globalPolicy.getPolicyName();
@@ -4911,6 +4896,138 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), false);
             throw new PolicyDeploymentFailureException(msg, e);
         }
+    }
+
+    @Override
+    public void configureMonetizationInAPIArtifact(API api) throws APIManagementException {
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            if (artifactManager == null) {
+                handleException("Artifact manager is null when updating monetization data for API ID " + api.getId());
+            }
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            //set monetization status (i.e - enabled or disabled)
+            artifact.setAttribute(APIConstants.API_MONETIZATION_STATUS,
+                    Boolean.toString(api.getMonetizationStatus()));
+            //clear existing monetization properties
+            artifact.removeAttribute(APIConstants.API_MONETIZATION_PROPERTIES);
+            //set new additional monetization data
+            if (api.getMonetizationProperties() != null) {
+                artifact.setAttribute(APIConstants.API_MONETIZATION_PROPERTIES,
+                        api.getMonetizationProperties().toJSONString());
+            }
+            artifactManager.updateGenericArtifact(artifact);
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                handleException("Error while rolling back the transaction (monetization status update) for API: " +
+                        api.getId().getApiName(), re);
+            }
+            handleException("Error while performing registry transaction (monetization status update) operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException e) {
+                handleException("Error occurred while rolling back the transaction (monetization status update).", e);
+            }
+        }
+    }
+
+    /**
+     * This methods creates a monetization plan for a given subscription policy
+     *
+     * @param subPolicy subscription policy
+     * @return true if successful, false otherwise
+     * @throws APIManagementException if failed to create a monetization plan
+     */
+    private boolean createMonetizationPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+
+        Monetization monetizationImplementation = getMonetizationImplClass();
+        if (monetizationImplementation != null) {
+            try {
+                return monetizationImplementation.createBillingPlan(subPolicy);
+            } catch (MonetizationException e) {
+                APIUtil.handleException("Failed to create monetization plan for : " + subPolicy.getPolicyName(), e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * This methods updates the monetization plan for a given subscription policy
+     *
+     * @param subPolicy subscription policy
+     * @return true if successful, false otherwise
+     * @throws APIManagementException if failed to update the plan
+     */
+    private boolean updateMonetizationPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+
+        Monetization monetizationImplementation = getMonetizationImplClass();
+        if (monetizationImplementation != null) {
+            try {
+                return monetizationImplementation.updateBillingPlan(subPolicy);
+            } catch (MonetizationException e) {
+                APIUtil.handleException("Failed to update monetization plan for : " + subPolicy.getPolicyName(), e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * This methods delete the monetization plan for a given subscription policy
+     *
+     * @param subPolicy subscription policy
+     * @return true if successful, false otherwise
+     * @throws APIManagementException if failed to delete the plan
+     */
+    private boolean deleteMonetizationPlan(SubscriptionPolicy subPolicy) throws APIManagementException {
+
+        Monetization monetizationImplementation = getMonetizationImplClass();
+        if (monetizationImplementation != null) {
+            try {
+                return monetizationImplementation.deleteBillingPlan(subPolicy);
+            } catch (MonetizationException e) {
+                APIUtil.handleException("Failed to delete monetization plan of : " + subPolicy.getPolicyName(), e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    public Monetization getMonetizationImplClass() throws APIManagementException {
+
+        APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        Monetization monetizationImpl = null;
+        if (configuration == null) {
+            log.error("API Manager configuration is not initialized.");
+        } else {
+            String monetizationImplClass = configuration.getFirstProperty(APIConstants.MONETIZATION_IMPL);
+            if (monetizationImplClass == null) {
+                monetizationImpl = new DefaultMonetizationImpl();
+            } else {
+                try {
+                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                    APIUtil.handleException("Failed to load monetization implementation class.", e);
+                }
+            }
+        }
+        return monetizationImpl;
     }
 
     public void updatePolicy(Policy policy) throws APIManagementException {
@@ -4998,6 +5115,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
                 apiMgtDAO.updateSubscriptionPolicy(subPolicy);
+                String monetizationPlan = subPolicy.getMonetizationPlan();
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                //call the monetization extension point to create plans (if any)
+                if (StringUtils.isNotBlank(monetizationPlan) && MapUtils.isNotEmpty(monetizationPlanProperties)) {
+                    updateMonetizationPlan(subPolicy);
+                }
                 String policyFile = subPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" + policyName;
                 policiesToUndeploy.add(policyFile);
                 executionFlows.put(policyFile, policyString);
@@ -5009,10 +5132,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // validating custom execution plan
                 if (!deploymentManager.validateExecutionPlan(policyString)) {
                     throw new APIManagementException("Invalid Execution Plan");
-                }
-                // checking if keytemplate already exist for another policy
-                if (apiMgtDAO.isKeyTemplatesExist(globalPolicy)) {
-                    throw new APIManagementException("Key Template Already Exist");
                 }
 
                 // getting key templates before updating database
@@ -5115,6 +5234,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         policyName;
                 policyFileNames.add(policyFile);
             }
+            //call the monetization extension point to delete plans if any
+            deleteMonetizationPlan(subscriptionPolicy);
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
             if (globalPolicy.isDeployed()) {

@@ -95,8 +95,8 @@ class Policies extends Component {
         const { classes } = this.props;
         return (
             <React.Fragment>
-                <FormControl clsssName={classes.FormControl}>
-                    <InputLabel htmlFor='name-multiple'>
+                <FormControl className={classes.FormControl}>
+                    <InputLabel htmlFor='policy-selector'>
                         <FormattedMessage id="business.plans" defaultMessage="Business Plans" />
                     </InputLabel>
                     <Select
@@ -107,7 +107,7 @@ class Policies extends Component {
                         name='policies'
                         value={api.policies || []}
                         onChange={handleInputChange}
-                        input={<Input id='name-multiple' />}
+                        input={<Input id='policy-selector' />}
                         MenuProps={{
                             PaperProps: {
                                 style: {

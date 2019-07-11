@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
@@ -51,6 +52,7 @@ public class MutualSSLAuthenticator implements Authenticator {
     private String apiLevelPolicy;
     private String requestOrigin;
     private static String challengeString;
+    private boolean isMandatory;
 
     // <UniqueIdentifierName,Tier> -Format
     private HashMap<String, String> certificates;
@@ -66,7 +68,7 @@ public class MutualSSLAuthenticator implements Authenticator {
      * @param apiLevelPolicy     API level throttling policy.
      * @param certificateDetails Details of certificates associated with the particular API.
      */
-    public MutualSSLAuthenticator(String apiLevelPolicy, String certificateDetails) {
+    public MutualSSLAuthenticator(String apiLevelPolicy, boolean isMandatory, String certificateDetails) {
         this.apiLevelPolicy = apiLevelPolicy;
         certificates = new HashMap<>();
         if (StringUtils.isNotEmpty(certificateDetails)) {
@@ -80,6 +82,7 @@ public class MutualSSLAuthenticator implements Authenticator {
                 }
             }
         }
+        this.isMandatory = isMandatory;
     }
 
     @Override
@@ -93,7 +96,7 @@ public class MutualSSLAuthenticator implements Authenticator {
     }
 
     @Override
-    public boolean authenticate(MessageContext messageContext) throws APISecurityException {
+    public AuthenticationResponse authenticate(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
         // try to retrieve the certificate
@@ -112,12 +115,16 @@ public class MutualSSLAuthenticator implements Authenticator {
                 log.debug("Mutual SSL authentication has not happened in the transport level for the API "
                         + getAPIIdentifier(messageContext).toString() + ", hence API invocation is not allowed");
             }
-            throw new APISecurityException(APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE,
-                    APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE);
+            return new AuthenticationResponse(false, isMandatory, !isMandatory,
+                    APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE, APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE);
         } else {
-            setAuthContext(messageContext, sslCertObject);
+            try {
+                setAuthContext(messageContext, sslCertObject);
+            } catch (APISecurityException ex) {
+                return new AuthenticationResponse(false, isMandatory, !isMandatory, ex.getErrorCode(), ex.getMessage());
+            }
         }
-        return true;
+        return new AuthenticationResponse(true, isMandatory, true, 0, null);
     }
 
     /**
@@ -213,5 +220,10 @@ public class MutualSSLAuthenticator implements Authenticator {
     @Override
     public String getRequestOrigin() {
         return requestOrigin;
+    }
+
+    @Override
+    public int getPriority() {
+        return 0;
     }
 }

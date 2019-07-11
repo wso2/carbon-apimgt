@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -698,6 +699,120 @@ public class ApiMgtDAO {
                 }
             }
             handleException("Error in adding new subscriber: " + e.getMessage(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+    }
+
+    /**
+     * Derives info about monetization usage publish job
+     *
+     * @return ifno about the monetization usage publish job
+     * @throws APIManagementException
+     */
+    public MonetizationUsagePublishInfo getMonetizationUsagePublishInfo() throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String query = SQLConstants.GET_MONETIZATION_USAGE_PUBLISH_INFO;
+            ps = conn.prepareStatement(query);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                MonetizationUsagePublishInfo monetizationUsagePublishInfo = new MonetizationUsagePublishInfo();
+                monetizationUsagePublishInfo.setId(rs.getString("ID"));
+                monetizationUsagePublishInfo.setState(rs.getString("STATE"));
+                monetizationUsagePublishInfo.setStatus(rs.getString("STATUS"));
+                monetizationUsagePublishInfo.setStartedTime(rs.getLong("STARTED_TIME"));
+                monetizationUsagePublishInfo.setLastPublishTime(rs.getLong("LAST_PUBLISHED_TIME"));
+                return monetizationUsagePublishInfo;
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving Monetization Usage Publish Info: ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return null;
+    }
+
+    /**
+     * Add info about monetization usage publish job
+     *
+     * @throws APIManagementException
+     */
+    public void addMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+            throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String query = SQLConstants.ADD_MONETIZATION_USAGE_PUBLISH_INFO;
+            ps = conn.prepareStatement(query);
+
+            ps.setString(1, monetizationUsagePublishInfo.getId());
+            ps.setString(2, monetizationUsagePublishInfo.getState());
+            ps.setString(3, monetizationUsagePublishInfo.getStatus());
+            ps.setString(4, Long.toString(monetizationUsagePublishInfo.getStartedTime()));
+            ps.setString(5, Long.toString(monetizationUsagePublishInfo.getLastPublishTime()));
+            ps.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Error while rolling back the failed operation", ex);
+                }
+            }
+            handleException("Error while adding monetization usage publish Info: ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+    }
+
+    /**
+     * Updates info about monetization usage publish job
+     *
+     * @throws APIManagementException
+     */
+    public void updateUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+                throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            String query = SQLConstants.UPDATE_MONETIZATION_USAGE_PUBLISH_INFO;
+            ps = conn.prepareStatement(query);
+
+            ps.setString(1, monetizationUsagePublishInfo.getState());
+            ps.setString(2, monetizationUsagePublishInfo.getStatus());
+            ps.setLong(3, monetizationUsagePublishInfo.getStartedTime());
+            ps.setLong(4, monetizationUsagePublishInfo.getLastPublishTime());
+            ps.setString(5, monetizationUsagePublishInfo.getId());
+            ps.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Error while rolling back the failed operation", ex);
+                }
+            }
+            handleException("Error while updating monetization usage publish Info: " + e.getMessage(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -9530,6 +9645,18 @@ public class ApiMgtDAO {
             policyStatement.setString(15, policy.getBillingPlan());
             if (hasCustomAttrib) {
                 policyStatement.setBytes(16, policy.getCustomAttributes());
+                policyStatement.setString(17, policy.getMonetizationPlan());
+                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+            } else {
+                policyStatement.setString(16, policy.getMonetizationPlan());
+                policyStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+
             }
             policyStatement.executeUpdate();
 
@@ -10101,6 +10228,17 @@ public class ApiMgtDAO {
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                monetizationPlanProperties.put(APIConstants.FIXED_PRICE,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
+                monetizationPlanProperties.put(APIConstants.BILLING_CYCLE,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
+                monetizationPlanProperties.put(APIConstants.PRICE_PER_REQUEST,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
+                monetizationPlanProperties.put(APIConstants.CURRENCY,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
+                subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -10986,17 +11124,38 @@ public class ApiMgtDAO {
                 updateStatement.setBinaryStream(12, new ByteArrayInputStream(policy.getCustomAttributes()),
                         lengthOfStream);
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(13, policy.getPolicyName());
-                    updateStatement.setInt(14, policy.getTenantId());
+                    updateStatement.setString(13, policy.getMonetizationPlan());
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(18, policy.getPolicyName());
+                    updateStatement.setInt(19, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(13, policy.getUUID());
+                    updateStatement.setString(13, policy.getMonetizationPlan());
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(18, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
-                    updateStatement.setString(12, policy.getPolicyName());
-                    updateStatement.setInt(13, policy.getTenantId());
+                    updateStatement.setString(12, policy.getMonetizationPlan());
+                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(17, policy.getPolicyName());
+                    updateStatement.setInt(18, policy.getTenantId());
+
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
-                    updateStatement.setString(12, policy.getUUID());
+                    updateStatement.setString(12, policy.getMonetizationPlan());
+                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(17, policy.getUUID());
                 }
             }
             updateStatement.executeUpdate();

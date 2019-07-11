@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
@@ -115,7 +115,7 @@ public enum VisibilityEnum {
     }
 }
 
-    private VisibilityEnum visibility = null;
+    private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
     private List<String> visibleRoles = new ArrayList<>();
     private List<String> visibleTenants = new ArrayList<>();
     private APIEndpointSecurityDTO endpointSecurity = null;
@@ -155,9 +155,10 @@ public enum SubscriptionAvailabilityEnum {
     }
 }
 
-    private SubscriptionAvailabilityEnum subscriptionAvailability = null;
+    private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     private List<String> subscriptionAvailableTenants = new ArrayList<>();
     private Map<String, String> additionalProperties = new HashMap<>();
+    private APIMonetizationInfoDTO monetization = null;
 
 @XmlType(name="AccessControlEnum")
 @XmlEnum(String.class)
@@ -191,14 +192,14 @@ public enum AccessControlEnum {
     }
 }
 
-    private AccessControlEnum accessControl = null;
+    private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<>();
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
-    private List<APIEndpointDTO> endpoint = new ArrayList<>();
+    private Object endpointConfig = null;
     private List<ScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
@@ -748,6 +749,23 @@ public enum AccessControlEnum {
   }
 
   /**
+   **/
+  public APIDTO monetization(APIMonetizationInfoDTO monetization) {
+    this.monetization = monetization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("monetization")
+  public APIMonetizationInfoDTO getMonetization() {
+    return monetization;
+  }
+  public void setMonetization(APIMonetizationInfoDTO monetization) {
+    this.monetization = monetization;
+  }
+
+  /**
    * Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,  based on the restriction. 
    **/
   public APIDTO accessControl(AccessControlEnum accessControl) {
@@ -869,20 +887,21 @@ public enum AccessControlEnum {
   }
 
   /**
+   * Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  &#x60;Simple REST Endpoint&#x60;   {     \&quot;endpoint_type\&quot;: \&quot;http\&quot;,     \&quot;sandbox_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     },     \&quot;production_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     }   }  &#x60;Loadbalanced Endpoint&#x60;    {     \&quot;endpoint_type\&quot;: \&quot;load_balance\&quot;,     \&quot;algoCombo\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;,     \&quot;sessionManagement\&quot;: \&quot;\&quot;,     \&quot;sandbox_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;        }     ],     \&quot;production_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ],     \&quot;sessionTimeOut\&quot;: \&quot;\&quot;,     \&quot;algoClassName\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;   }  &#x60;Failover Endpoint&#x60;    {     \&quot;production_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        }     ],     \&quot;endpoint_type\&quot;:\&quot;failover\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;     },     \&quot;sandbox_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ]   }  &#x60;Default Endpoint&#x60;    {     \&quot;endpoint_type\&quot;:\&quot;default\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     }   } 
    **/
-  public APIDTO endpoint(List<APIEndpointDTO> endpoint) {
-    this.endpoint = endpoint;
+  public APIDTO endpointConfig(Object endpointConfig) {
+    this.endpointConfig = endpointConfig;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
-  @JsonProperty("endpoint")
-  public List<APIEndpointDTO> getEndpoint() {
-    return endpoint;
+  @ApiModelProperty(example = "{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"},\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"}}", value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  `Simple REST Endpoint`   {     \"endpoint_type\": \"http\",     \"sandbox_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     },     \"production_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     }   }  `Loadbalanced Endpoint`    {     \"endpoint_type\": \"load_balance\",     \"algoCombo\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\",     \"sessionManagement\": \"\",     \"sandbox_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/2\"        }     ],     \"production_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/3\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ],     \"sessionTimeOut\": \"\",     \"algoClassName\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\"   }  `Failover Endpoint`    {     \"production_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        }     ],     \"endpoint_type\":\"failover\",     \"sandbox_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\"     },     \"production_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/3\"     },     \"sandbox_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ]   }  `Default Endpoint`    {     \"endpoint_type\":\"default\",     \"sandbox_endpoints\":{        \"url\":\"default\"     },     \"production_endpoints\":{        \"url\":\"default\"     }   } ")
+  @JsonProperty("endpointConfig")
+  public Object getEndpointConfig() {
+    return endpointConfig;
   }
-  public void setEndpoint(List<APIEndpointDTO> endpoint) {
-    this.endpoint = endpoint;
+  public void setEndpointConfig(Object endpointConfig) {
+    this.endpointConfig = endpointConfig;
   }
 
   /**
@@ -977,6 +996,7 @@ public enum AccessControlEnum {
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
+        Objects.equals(monetization, API.monetization) &&
         Objects.equals(accessControl, API.accessControl) &&
         Objects.equals(accessControlRoles, API.accessControlRoles) &&
         Objects.equals(businessInformation, API.businessInformation) &&
@@ -984,7 +1004,7 @@ public enum AccessControlEnum {
         Objects.equals(workflowStatus, API.workflowStatus) &&
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
-        Objects.equals(endpoint, API.endpoint) &&
+        Objects.equals(endpointConfig, API.endpointConfig) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies);
@@ -992,7 +1012,7 @@ public enum AccessControlEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpoint, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -1031,6 +1051,7 @@ public enum AccessControlEnum {
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
@@ -1038,7 +1059,7 @@ public enum AccessControlEnum {
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
+    sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");

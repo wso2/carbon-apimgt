@@ -29,13 +29,17 @@ const renderAdditionalProperties = function (additionalProperties) {
     const items = [];
     for (const key in additionalProperties) {
         if (Object.prototype.hasOwnProperty.call(additionalProperties, key)) {
-            items.push(<Typography component='p' variant='body1'>
-                <strong>{key}</strong>: {additionalProperties[key]}
-            </Typography>);
+            const additionalPropertiesTypography = (
+                <Typography component='p' variant='body1'>
+                    <strong>{key}</strong>: {additionalProperties[key]}
+                </Typography>
+            );
+            items.push(additionalPropertiesTypography);
         }
     }
     return items;
 };
+
 function AdditionalProperties(props) {
     const { parentClasses } = props;
     return (
@@ -53,7 +57,7 @@ function AdditionalProperties(props) {
                         </Link>
                     </div>
 
-                    {renderAdditionalProperties(api.additionalProperties)}                        
+                    {renderAdditionalProperties(api.additionalProperties)}
                 </Paper>
             )}
         </ApiContext.Consumer>
@@ -61,7 +65,7 @@ function AdditionalProperties(props) {
 }
 
 AdditionalProperties.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default AdditionalProperties;

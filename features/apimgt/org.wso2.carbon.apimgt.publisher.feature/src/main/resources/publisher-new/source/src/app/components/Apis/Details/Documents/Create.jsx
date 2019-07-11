@@ -1,36 +1,143 @@
-import React from 'react';
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, { useRef } from 'react';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import Button from '@material-ui/core/Button';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
+import Alert from 'AppComponents/Shared/Alert';
+import CreateEditForm from './CreateEditForm';
+import Api from 'AppData/api';
 
 const styles = theme => ({
-  root: {
-    ...theme.mixins.gutters(),
-    paddingTop: theme.spacing.unit * 2,
-    paddingBottom: theme.spacing.unit * 2,
-  },
+    addNewWrapper: {
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        border: 'solid 1px ' + theme.palette.grey['300'],
+        borderRadius: theme.shape.borderRadius,
+        marginTop: theme.spacing.unit * 2,
+        marginBottom: theme.spacing.unit * 3,
+    },
+    addNewHeader: {
+        padding: theme.spacing.unit * 2,
+        backgroundColor: theme.palette.grey['300'],
+        fontSize: theme.typography.h6.fontSize,
+        color: theme.typography.h6.color,
+        fontWeight: theme.typography.h6.fontWeight,
+    },
+    addNewOther: {
+        padding: theme.spacing.unit * 2,
+    },
+    button: {
+        marginLeft: theme.spacing.unit * 2,
+        textTransform: theme.custom.leftMenuTextStyle,
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+    },
 });
 
 function Create(props) {
-  const { classes } = props;
+    const restAPI = new Api();
+    const { classes, toggleAddDocs, intl } = props;
+    let createEditForm = useRef(null);
 
-  return (
-    <div>
-      <Paper className={classes.root} elevation={1}>
-        <Typography variant="h5" component="h3">
-          This is a sheet of paper.
-        </Typography>
-        <Typography component="p">
-          Paper can be used to build surface or other elements for your application.
-        </Typography>
-      </Paper>
-    </div>
-  );
+    const addDocument = (apiId) => {
+        const promiseWrapper = createEditForm.addDocument(apiId);
+        promiseWrapper.docPromise
+            .then((doc) => {
+                const { documentId, name } = doc.body;
+                if (promiseWrapper.file && documentId) {
+                    const filePromise = restAPI.addFileToDocument(apiId, documentId, promiseWrapper.file[0]);
+                    filePromise
+                        .then((doc) => {
+                            Alert.info(`${name} ${intl.formatMessage({
+                                id: 'documents.markdown.editor.create.create.file.successfully',
+                                defaultMessage: 'File uploaded successfully.',
+                            })}`);
+                            props.getDocumentsList();
+                            toggleAddDocs();
+                        })
+                        .catch((error) => {
+                            if (process.env.NODE_ENV !== 'production') {
+                                console.log(error);
+                                Alert.error(intl.formatMessage({
+                                    id: 'documents.markdown.editor.create.error',
+                                    defaultMessage: 'Error uploading the file',
+                                }));
+                            }
+                        });
+                } else {
+                    Alert.info(`${doc.name} ${intl.formatMessage({
+                        id: 'documents.markdown.editor.create.add.successfully',
+                        defaultMessage: ' added successfully.',
+                    })}`);
+                    props.getDocumentsList();
+                    toggleAddDocs();
+                }
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                    Alert.error(intl.formatMessage({
+                        id: 'documents.markdown.editor.create.error',
+                        defaultMessage: 'Error adding the document',
+                    }));
+                }
+            });
+    };
+
+    return (
+        <div className={classes.addNewWrapper}>
+            <Typography className={classes.addNewHeader}>
+                <FormattedMessage id='documents.markdown.editor.create.title' defaultMessage='Add New Document' />
+            </Typography>
+            <Divider />
+            <CreateEditForm
+                innerRef={(node) => {
+                    createEditForm = node;
+                }}
+            />
+            <Divider />
+            <ApiContext.Consumer>
+                {({ api }) => (
+                    <div className={classes.addNewOther}>
+                        <Button variant='contained' color='primary' onClick={() => addDocument(api.id)}>
+                            <FormattedMessage
+                                id='documents.markdown.editor.create.add.document'
+                                defaultMessage='Add Document'
+                            />
+                        </Button>
+                        <Button className={classes.button} onClick={toggleAddDocs}>
+                            <FormattedMessage id='documents.markdown.editor.create.cancel' defaultMessage='Cancel' />
+                        </Button>
+                    </div>
+                )}
+            </ApiContext.Consumer>
+        </div>
+    );
 }
 
 Create.propTypes = {
-  classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(Create);
+export default injectIntl(withStyles(styles)(Create));

@@ -99,6 +99,11 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         return null;
     }
 
+    /**
+     * Returns the throttling policies which belongs to the given policy level
+     * @param policyLevel
+     * @return list of throttling policies
+     */
     public List<Tier> getThrottlingPolicyList(String policyLevel,String xWSO2Tenant) {
         List<Tier> throttlingPolicyList = new ArrayList<>();
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);

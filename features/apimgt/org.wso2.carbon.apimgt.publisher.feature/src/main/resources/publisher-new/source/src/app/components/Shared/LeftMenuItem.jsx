@@ -130,8 +130,30 @@ function LeftMenuItem(props) {
     );
 }
 LeftMenuItem.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        divider: PropTypes.string,
+        leftLInk: PropTypes.string,
+        leftLink_IconLeft: PropTypes.string,
+        noIcon: PropTypes.string,
+        leftLink_Icon: PropTypes.string,
+        leftLInkText: PropTypes.string,
+        leftLInkText_IconLeft: PropTypes.string,
+        leftLInkText_NoText: PropTypes.string,
+    }).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.shape({
+            leftMenu: PropTypes.string,
+            leftMenuIconSize: PropTypes.number,
+        }),
+        palette: PropTypes.shape({
+            getContrastText: PropTypes.func,
+            background: PropTypes.shape({
+                leftMenu: PropTypes.string,
+                appBar: PropTypes.string,
+            }),
+            leftMenu: PropTypes.string,
+        }),
+    }).isRequired,
     Icon: PropTypes.element.isRequired,
     text: PropTypes.string.isRequired,
     handleMenuSelect: PropTypes.func.isRequired,

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.4.211-SNAPSHOT</version>
+        <version>6.5.24-SNAPSHOT</version>
 	    <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -210,6 +210,8 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.jayway.jsonpath:json-path:${com.jayway.jsonpath.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.commons-text:commons-text:${org.wso2.orbit.commons-text.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</importBundleDef>

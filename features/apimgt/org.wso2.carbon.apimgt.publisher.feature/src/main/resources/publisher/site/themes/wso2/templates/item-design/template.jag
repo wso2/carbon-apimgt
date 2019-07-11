@@ -60,9 +60,11 @@
         implement_w_link = '#';
     }
 
+    // When only mutual ssl or basic auth is selected tiers need not be selected.
     var manage_wlabel = "";
-    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") || api.availableTiers != "" || api
-        .availableSubscriptionPolicy != "")) {
+    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") ||
+        (api.apisecurity_oauth2 == "" && api.apisecurity_basic_auth != "") || api.availableTiers != ""
+        || api.availableSubscriptionPolicy != "")) {
         manage_wlabel = "completed";
     } else {
         var manage_w_link = '#';
@@ -487,9 +489,6 @@
 										</div>
 										<% } %>
 										</div>
-										 <div class="message message-info" id="openAPISpec3Warning" style="display: none">
-                                            <p><%=i18n.localize("Client side SDK generation feature is currently not available for APIs in OpenAPI 3.0 specification")%></p>
-		                                </div>
 										<hr/>
 										<%if(api!=null){%>
 											<input type = "hidden" name = "bizOwner" value = "<%=encode.forHtmlAttribute(api.bizOwner)%>" />

@@ -1,9 +1,29 @@
 <%
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+    include("/services/constants.jag");
+    include("/services/jagg.jag");
 
     var log = new Log("Jaggery service for token introspection");
+    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-    var userInfoEndpoint = "https://localhost:8243/userinfo";
-    var introspectEndpoint = "https://localhost:9443/oauth2/introspect"
+    var userInfoEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + "/oauth2/userinfo";
+    var introspectEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + "/oauth2/introspect";
     var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default").value;
     var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value;
     var token = tokenP1 + tokenP2;
@@ -14,31 +34,20 @@
 
     var data = {token: token }
     var introspectResult = post(introspectEndpoint, data , {
-        "Authorization": "Basic YWRtaW46YWRtaW4=", // TODO: get super admin username password from configs and do encoding ~tmkb
+        "Authorization": "Basic " + utils.getBase64EncodedAdminCredentials(),
         "Content-Type": "application/x-www-form-urlencoded"
-    });
-
-    log.debug("Intropspection result json: " + introspectResult);
-    response.contentType = "application/json";
-
-    var scopes = "apim:api_delete apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:mediation_policy_view apim:api_workflow openid"; // TODO: fetch from introspect request
-
-    if (introspectResult.data.active) {
+    }, "json");
+    log.debug("Introspection result json: " + introspectResult);
+    // For more info about response.xhr object refer http://jaggeryjs.org/documentation.jag?api=xhr
+    if (introspectResult.xhr.status === 200) {
+        response.contentType = "application/json";
         print(introspectResult.data);
     } else {
         log.warn("Something went wrong while introspecting the token " + tokenP1 + tokenP2 );
-
-        // TODO: remove mock once the introspect API issue get resolved ~tmkb
-        var mock = {
-            "exp": 1464161608,
-            "username": JSON.parse(userResult.data).sub,
-            "active": true,
-            "token_type": "Bearer",
-            "client_id": "rgfKVdnMQnJSSr_pKFTxj3apiwYa",
-            "iat": 1464158008,
-            "scope": scopes
-          };
-          print(mock);
+        log.error(introspectResult);
+        response.status = 500;
+        response.contentType = "text/plain";
+        response.content = "Something went wrong while introspecting the token!!";
     }
 
 %>

@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -280,6 +281,12 @@ public class APIMappingUtil {
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        Set<Tier> throttlingPolicies = api.getAvailableTiers();
+        List<String> throttlingPolicyNames = new ArrayList<>();
+        for (Tier tier : throttlingPolicies) {
+            throttlingPolicyNames.add(tier.getName());
+        }
+        apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
         //        if (api.getScopes() != null) {
         //            apiInfoDTO.setScopes(getScopeInfoDTO(api.getScopes()));
         //        }

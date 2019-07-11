@@ -25,9 +25,9 @@ import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import Api from 'AppData/api';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 
 function RenderMethodBase(props) {
     const { theme, method } = props;
@@ -43,7 +43,9 @@ function RenderMethodBase(props) {
 }
 
 RenderMethodBase.propTypes = {
-    classes: PropTypes.object.isRequired,
+    method: PropTypes.string.isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 const RenderMethod = withTheme()(RenderMethodBase);
@@ -65,15 +67,14 @@ class Resources extends React.Component {
         super(props);
         this.state = {
             paths: null,
-            swagger: {},
         };
         this.restApi = new Api();
     }
 
     componentDidMount() {
-        this.api_uuid = this.props.api.id;
-        const promised_api = this.restApi.getSwagger(this.api_uuid);
-        promised_api
+        const { id } = this.props.api;
+        const promisedAPI = this.restApi.getSwagger(id);
+        promisedAPI
             .then((response) => {
                 if (response.obj.paths !== undefined) {
                     this.setState({ paths: response.obj.paths });
@@ -85,8 +86,7 @@ class Resources extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    const params = JSON.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
+                    doRedirectToLogin();
                 }
             });
     }
@@ -102,51 +102,50 @@ class Resources extends React.Component {
         const { classes, parentClasses, api } = this.props;
 
         return (
-                    <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
-                        {console.info("api....", api)}
-                        <div className={parentClasses.titleWrapper}>
-                            <Typography variant='h5' component='h3' className={parentClasses.title}>
-                                Resources
-                            </Typography>
-                            <Link to={'/apis/' + api.id + '/resources'}>
-                                <Button variant='contained' color='default'>
-                                    Edit
-                                </Button>
-                            </Link>
-                        </div>
-                        <div className={classes.root}>
-                            <div className={classes.contentWrapper}>
-                                {Object.keys(paths).map((key) => {
-                                    const path = paths[key];
-                                    return (
-                                        <div className={classes.root}>
-                                            <Typography className={classes.heading} variant='body1'>
-                                                {key}
-                                            </Typography>
-                                            {Object.keys(path).map((innerKey) => {
-                                                return <RenderMethod method={innerKey} />;
-                                            })}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </Paper>
+            <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
+                {console.info('api....', api)}
+                <div className={parentClasses.titleWrapper}>
+                    <Typography variant='h5' component='h3' className={parentClasses.title}>
+                        Resources
+                    </Typography>
+                    <Link to={'/apis/' + api.id + '/resources'}>
+                        <Button variant='contained' color='default'>
+                            Edit
+                        </Button>
+                    </Link>
+                </div>
+                <div className={classes.root}>
+                    <div className={classes.contentWrapper}>
+                        {Object.keys(paths).map((key) => {
+                            const path = paths[key];
+                            return (
+                                <div className={classes.root}>
+                                    <Typography className={classes.heading} variant='body1'>
+                                        {key}
+                                    </Typography>
+                                    {Object.keys(path).map((innerKey) => {
+                                        return <RenderMethod method={innerKey} />;
+                                    })}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </Paper>
         );
     }
 }
 Resources.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    method: PropTypes.string.isRequired,
     history: PropTypes.shape({
         push: PropTypes.shape({}),
     }).isRequired,
     location: PropTypes.shape({
         pathname: PropTypes.shape({}),
     }).isRequired,
-    parentClasses: PropTypes.object.isRequired,
-    api: PropTypes.shape({}).isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({ id: PropTypes.string }).isRequired,
 };
 
 export default withStyles(styles)(Resources);

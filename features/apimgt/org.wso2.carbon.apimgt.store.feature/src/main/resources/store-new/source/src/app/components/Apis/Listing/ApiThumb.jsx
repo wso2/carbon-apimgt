@@ -126,8 +126,7 @@ class ApiThumb extends React.Component {
         const details_link = '/apis/' + this.props.api.id;
         const { api, classes, theme } = this.props;
         const { imageThumbnail } = theme.custom;
-
-        const { name, version, context } = this.props.api;
+        const { name, version, context, provider } = this.props.api;
         const { rating } = this.state;
         const starColor = theme.palette.getContrastText(theme.custom.imageThumbnail.contentBackgroundColor);
         const imageWidth = theme.custom.imageThumbnail.width;
@@ -150,7 +149,9 @@ class ApiThumb extends React.Component {
                         </Typography>
                     </Link>
                     <Typography variant='caption' gutterBottom align='left'>
-                        By: provider}
+                        By: 
+                        {provider}
+
                     </Typography>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>

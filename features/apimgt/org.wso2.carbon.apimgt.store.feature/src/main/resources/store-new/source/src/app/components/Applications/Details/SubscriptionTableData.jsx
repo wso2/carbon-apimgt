@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
 import React from 'react';
 import { Link } from 'react-router-dom';
 import TableCell from '@material-ui/core/TableCell';
@@ -29,6 +28,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
+import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
+
 /**
  *
  *
@@ -43,47 +44,67 @@ class SubscriptionTableData extends React.Component {
         };
         this.handleRequestClose = this.handleRequestClose.bind(this);
         this.handleRequestOpen = this.handleRequestOpen.bind(this);
+        this.handleRequestDelete = this.handleRequestDelete.bind(this);
     }
-/**
- *
- *
- * @memberof SubscriptionTableData
- */
-handleRequestClose() {
+
+    /**
+     *
+     *
+     * @memberof SubscriptionTableData
+     */
+    handleRequestClose() {
         this.setState({ openMenu: false });
     }
-/**
- *
- *
- * @memberof SubscriptionTableData
- */
-handleRequestOpen() {
+    /**
+    *
+    *
+    * @memberof SubscriptionTableData
+    */
+    handleRequestOpen() {
         this.setState({ openMenu: true });
     }
-/**
- *
- *
- * @returns
- * @memberof SubscriptionTableData
- */
-render() {
+
+    /**
+     *
+     * Handle onclick for subscription delete
+     * @memberof SubscriptionTableData
+     */
+    handleRequestDelete(subscriptionId) {
+        const { handleSubscriptionDelete } = this.props;
+        this.setState({ openMenu: false });
+        if (handleSubscriptionDelete) {
+            handleSubscriptionDelete(subscriptionId);
+        }
+    }
+
+    /**
+    *
+    *
+    * @returns
+    * @memberof SubscriptionTableData
+    */
+    render() {
         const {
-            apiName, lifeCycleStatus, policy, subscriptionId, apiIdentifier
+            apiInfo, status, throttlingPolicy, subscriptionId, apiId
         } = this.props.subscription;
         return (
             <TableRow hover>
                 <TableCell style={{paddingLeft: 0}}>
-                    <Link to={'/apis/' + apiIdentifier}>{apiName}</Link>
+                    <Link to={'/apis/' + apiId}>{apiInfo.name}</Link>
                 </TableCell>
-                <TableCell>{policy}</TableCell>
-                <TableCell>{lifeCycleStatus}</TableCell>
+                <TableCell>{throttlingPolicy}</TableCell>
+                <TableCell>{status}</TableCell>
 
                 <TableCell>
                     <div>
-                        {/* Scope validation should be implemente here */}
-                        <IconButton aria-label='Delete' onClick={this.handleRequestOpen}>
-                            <Delete />
-                        </IconButton>
+                        <ScopeValidation
+                            resourcePath={resourcePaths.SINGLE_SUBSCRIPTION}
+                            resourceMethod={resourceMethods.DELETE}
+                        >
+                            <IconButton aria-label='Delete' onClick={this.handleRequestOpen}>
+                                <Delete />
+                            </IconButton>
+                        </ScopeValidation>
 
                         <Dialog open={this.state.openMenu} transition={Slide}>
                             <DialogTitle>Confirm</DialogTitle>
@@ -94,8 +115,7 @@ render() {
                                 <Button dense color='primary' onClick={this.handleRequestClose}>
                                     Cancel
                                 </Button>
-                                <Button dense color='primary' onClick={() =>
-                                    this.props.handleSubscriptionDelete(subscriptionId)}>
+                                <Button dense color='primary' onClick={() => this.handleRequestDelete(subscriptionId)}>
                                     Delete
                                 </Button>
                             </DialogActions>
@@ -105,7 +125,7 @@ render() {
             </TableRow>
         );
     }
-};
+}
 
 export default SubscriptionTableData;
 

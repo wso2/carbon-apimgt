@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -7,7 +24,7 @@ import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
-import ThumbnailView from 'AppComponents/Apis/Listing/components/ThumbnailView';
+import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import ApiContext from '../components/ApiContext';
 
 function Configuration(props) {
@@ -36,7 +53,7 @@ function Configuration(props) {
                     <div className={parentClasses.imageContainer}>
                         <div className={parentClasses.imageWrapper}>
                             {/* Thumbnail */}
-                            <ThumbnailView api={api} width={200} height={200} />
+                            <ThumbnailView api={api} width={200} height={200} isEditable />
                             {/* Provider */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                 Provider
@@ -192,8 +209,9 @@ function Configuration(props) {
                                     disableHoverListener
                                     title={
                                         <React.Fragment>
-                                            A custom authorization header can be defined as a replacement to the default{' '}
-                                            <strong>Authorization</strong> header used to send a request. If a value is
+                                            A custom authorization header can be defined as a replacement to the default
+                                            <strong>Authorization</strong>
+                                            header used to send a request. If a value is
                                             specified here, it will be used as the header field to send the access token
                                             in a request to consume the API
                                         </React.Fragment>
@@ -285,7 +303,7 @@ function Configuration(props) {
 }
 
 Configuration.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default Configuration;

@@ -37,32 +37,38 @@ const LoadableSwitch = Loadable.Map({
         ApiConsole: () => import(// eslint-disable-line function-paren-newline
         /* webpackChunkName: "ApiConsole" */
         /* webpackPrefetch: true */
-            './ApiConsole/ApiConsole',
+            // eslint-disable-next-line comma-dangle
+            './ApiConsole/ApiConsole'
         ),
         Overview: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Overview" */
             /* webpackPrefetch: true */
-            './Overview',
+            // eslint-disable-next-line comma-dangle
+            './Overview'
         ),
         Documentation: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Documentation" */
             /* webpackPrefetch: true */
-            './Documents/Documentation',
+            // eslint-disable-next-line comma-dangle
+            './Documents/Documentation'
         ),
         Credentials: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Credentials" */
             /* webpackPrefetch: true */
-            './Credentials/Credentials',
+            // eslint-disable-next-line comma-dangle
+            './Credentials/Credentials'
         ),
         Comments: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Comments" */
             /* webpackPrefetch: true */
-            './Comments/Comments',
+            // eslint-disable-next-line comma-dangle
+            './Comments/Comments'
         ),
         Sdk: () => import(// eslint-disable-line function-paren-newline
             /* webpackChunkName: "Sdk" */
             /* webpackPrefetch: true */
-            './Sdk',
+            // eslint-disable-next-line comma-dangle
+            './Sdk'
         ),
     },
     render(loaded, props) {
@@ -190,7 +196,8 @@ class Details extends React.Component {
                     // get the application IDs of existing subscriptions
                     subscriptions.list.map(element => subscribedApplications.push({
                         value: element.applicationId,
-                        policy: element.policy,
+                        policy: element.throttlingPolicy,
+                        status: element.status,
                         subscriptionId: element.subscriptionId,
                     }));
                     this.setState({ subscribedApplications });
@@ -200,6 +207,7 @@ class Details extends React.Component {
                     for (let i = 0; i < applications.list.length; i++) {
                         const applicationId = applications.list[i].applicationId;
                         const applicationName = applications.list[i].name;
+                        const applicationStatus = applications.list[i].status;
                         // include the application only if it does not has an existing subscriptions
                         let applicationSubscribed = false;
                         for (let j = 0; j < subscribedApplications.length; j++) {
@@ -208,7 +216,7 @@ class Details extends React.Component {
                                 subscribedApplications[j].label = applicationName;
                             }
                         }
-                        if (!applicationSubscribed) {
+                        if (!applicationSubscribed && applicationStatus === 'APPROVED') {
                             applicationsAvailable.push({ value: applicationId, label: applicationName });
                         }
                     }
@@ -313,13 +321,14 @@ class Details extends React.Component {
                     </Link>
                     <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {/* TODO: uncomment when the feature is working */}
+                    {/* <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
                     <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>
-                    <InfoBar api_uuid={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
+                    <InfoBar apiId={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
                     <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}

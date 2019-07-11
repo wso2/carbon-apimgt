@@ -30,8 +30,8 @@ const LoadableProtectedApp = Loadable({
     loader: () => import(// eslint-disable-line function-paren-newline
         /* webpackChunkName: "ProtectedApp" */
         /* webpackPrefetch: true */
-        './app/ProtectedApp',
-    ),
+        // eslint-disable-next-line function-paren-newline
+        './app/ProtectedApp'),
     loading: Progress,
 });
 
@@ -63,7 +63,7 @@ class Store extends React.Component {
         return (
             <Router basename='/store-new'>
                 <Switch>
-                    <Route path={"/login"} render={() => <Login appName={"store-new"} appLabel={"STORE"}/>}/>
+                    <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
                     <Route path='/logout' component={Logout} />
                     <Route path='/sign-up' component={SignUp} />
                     <Route path='/policy/privacy-policy' component={PrivacyPolicy} />

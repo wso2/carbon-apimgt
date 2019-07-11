@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.keymgt.listeners;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -42,6 +43,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.user.api.Permission;
 
 import java.util.Map;
 import java.util.Set;
@@ -69,13 +71,48 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         return getOrderId() - 1;
     }
 
+    @Override
+    public boolean doPostUpdateCredential(String userName, Object credential, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
+        clearGatewayUsernameCache(userName);
+        return super.doPostUpdateCredential(userName, credential, userStoreManager);
+    }
+
+    @Override
+    public boolean doPostUpdateCredentialByAdmin(String userName, Object credential, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
+        clearGatewayUsernameCache(userName);
+        return super.doPostUpdateCredentialByAdmin(userName, credential, userStoreManager);
+    }
+
+    @Override
+    public boolean doPostUpdateRoleListOfUser(String userName, String[] deletedRoles, String[] newRoles, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
+        clearGatewayUsernameCache(userName);
+        return super.doPostUpdateRoleListOfUser(userName, deletedRoles, newRoles, userStoreManager);
+    }
+
+    @Override
+    public boolean doPostUpdateUserListOfRole(String roleName, String[] deletedUsers, String[] newUsers, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
+        clearGatewayUsernameCache((String[]) ArrayUtils.addAll(newUsers, deletedUsers));
+        return super.doPostUpdateUserListOfRole(roleName, deletedUsers, newUsers, userStoreManager);
+    }
+
+    @Override
+    public boolean doPostAddUser(String userName, Object credential, String[] roleList, Map<String, String> claims, String profile, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
+        clearGatewayUsernameCache(userName);
+        return super.doPostAddUser(userName, credential, roleList, claims, profile, userStoreManager);
+    }
+
+    @Override
+    public boolean doPostDeleteUser(String userName, UserStoreManager userStoreManager) throws org.wso2.carbon.user.core.UserStoreException {
+        clearGatewayUsernameCache(userName);
+        return super.doPostDeleteUser(userName, userStoreManager);
+    }
+
     /**
      * Deleting user from the identity database prerequisites. Remove pending approval requests for the user and remove
      * the gateway key cache.
      */
     @Override
     public boolean doPreDeleteUser(String username, UserStoreManager userStoreManager) {
-
         boolean isTenantFlowStarted = false;
         ApiMgtDAO apiMgtDAO = getDAOInstance();
         try {
@@ -184,6 +221,65 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         }
 
         return true;
+    }
+
+    /**
+     * Removes a given username that is cached on the API Gateway.
+     *
+     * @param username The username to be cleared from the cache
+     */
+    private void clearGatewayUsernameCache(String username) {
+        APIManagerConfiguration config = getApiManagerConfiguration();
+        Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+
+        for (Environment environment : gatewayEnvs.values()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Going to remove tokens from the cache of the Gateway '" + environment.getName() + "'");
+            }
+            try {
+                APIAuthenticationAdminClient client = getApiAuthenticationAdminClient(environment);
+                client.invalidateCachedUsername(getEndUserName(username));
+
+                log.debug("Removed cached usernames of the Gateway.");
+            } catch (AxisFault axisFault) {
+                //log and continue invalidating caches of other Gateways (if any).
+                log.error("Error occurred while invalidating the Gateway Username Cache of Gateway '" +
+                        environment.getName() + "'", axisFault);
+            }
+        }
+    }
+
+    /**
+     * Removes a given list of username that is cached on the API Gateway.
+     *
+     * @param username_list The list of username to be cleared from the cache
+     */
+    private void clearGatewayUsernameCache(String[] username_list) {
+        APIManagerConfiguration config = getApiManagerConfiguration();
+        Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
+
+        for (Environment environment : gatewayEnvs.values()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Going to remove tokens from the cache of the Gateway '" + environment.getName() + "'");
+            }
+            try {
+                APIAuthenticationAdminClient client = getApiAuthenticationAdminClient(environment);
+                for (int i = 0; i < username_list.length; i++) {
+                    username_list[i] = getEndUserName(username_list[i]);
+                }
+                client.invalidateCachedUsernames(username_list);
+
+                log.debug("Removed cached usernames of the Gateway.");
+            } catch (AxisFault axisFault) {
+                //log and continue invalidating caches of other Gateways (if any).
+                log.error("Error occurred while invalidating the Gateway Username Cache of Gateway '" +
+                        environment.getName() + "'", axisFault);
+            }
+        }
+    }
+
+    private String getEndUserName(String username) {
+        return username + "@" + getTenantDomain();
     }
 
     protected APIAuthenticationAdminClient getApiAuthenticationAdminClient(Environment environment) throws AxisFault {

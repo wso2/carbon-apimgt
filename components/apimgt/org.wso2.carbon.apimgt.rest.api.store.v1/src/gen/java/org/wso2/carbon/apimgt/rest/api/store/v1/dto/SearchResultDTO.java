@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import javax.validation.constraints.*;
 
 
@@ -21,7 +23,7 @@ public class SearchResultDTO   {
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("DOC") DOC(String.valueOf("DOC"));
+    @XmlEnumValue("DOC") DOC(String.valueOf("DOC")), @XmlEnumValue("API") API(String.valueOf("API"));
 
 
     private String value;
@@ -76,8 +78,9 @@ public enum TypeEnum {
   }
 
   
-  @ApiModelProperty(example = "TestAPI", value = "")
+  @ApiModelProperty(example = "TestAPI", required = true, value = "")
   @JsonProperty("name")
+  @NotNull
   public String getName() {
     return name;
   }
@@ -93,7 +96,7 @@ public enum TypeEnum {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "API", value = "")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
