@@ -1703,7 +1703,7 @@
         <woodstox-core.version>5.2.1</woodstox-core.version>
         <apache.commons.version>2.6.2</apache.commons.version>
         <apache.commons.lang3.version>3.9</apache.commons.lang3.version>
-        <io.swagger.codegen.version>2.4.5</io.swagger.codegen.version>
+        <io.swagger.codegen.version>2.4.7</io.swagger.codegen.version>
 
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
@@ -1712,7 +1712,7 @@
         <re2j.version>1.2.wso2v1</re2j.version>
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-project-info-reports-plugin.version>2.7</maven-project-info-reports-plugin.version>
-        <swagger-codegen-maven-plugin.version>2.3.1</swagger-codegen-maven-plugin.version>
+        <swagger-codegen-maven-plugin.version>2.4.7</swagger-codegen-maven-plugin.version>
         <jaeger.core.version>0.30.0</jaeger.core.version>
         <jaeger.thrift.version>0.30.4</jaeger.thrift.version>
         <jaeger.client.version>0.30.4</jaeger.client.version>
