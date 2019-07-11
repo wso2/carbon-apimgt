@@ -590,9 +590,11 @@ public class APIMappingUtil {
         }
 
         //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
-        List<APIOperationsDTO> operationsDTOs = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-        dto.setOperations(operationsDTOs);
+        if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
+            String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+            List<APIOperationsDTO> operationsDTOs = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+            dto.setOperations(operationsDTOs);
+        }
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
