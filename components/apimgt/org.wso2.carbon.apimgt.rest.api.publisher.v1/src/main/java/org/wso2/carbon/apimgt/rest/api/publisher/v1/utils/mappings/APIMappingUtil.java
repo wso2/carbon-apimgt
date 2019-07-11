@@ -1370,23 +1370,37 @@ public class APIMappingUtil {
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
         List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
-        
+        //Aggregate API resources to each relevant API.
+        Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
         List<APIProductResource> resources = product.getProductResources();
         for (APIProductResource apiProductResource : resources) {
-            ProductAPIDTO productAPI = new ProductAPIDTO();
-            productAPI.setApiId(apiProductResource.getApiId());
-            productAPI.setName(apiProductResource.getApiName());
-            List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
-            URITemplate template = apiProductResource.getUriTemplate();
+            String uuid = apiProductResource.getApiId();
+            if(aggregatedAPIs.containsKey(uuid)) {
+                ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
+                URITemplate template = apiProductResource.getUriTemplate();
+                List<ProductAPIOperationsDTO> operations = productAPI.getOperations();
+                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
+                operation.setHttpVerb(template.getHTTPVerb());
+                operation.setUritemplate(template.getResourceURI());
+                operations.add(operation);
 
-            ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-            operation.setHttpVerb(template.getHTTPVerb());
-            operation.setUritemplate(template.getResourceURI());
-            operations.add(operation);
+            } else {
+                ProductAPIDTO productAPI = new ProductAPIDTO();
+                productAPI.setApiId(uuid);
+                productAPI.setName(apiProductResource.getApiName());
+                List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
+                URITemplate template = apiProductResource.getUriTemplate();
 
-            productAPI.setOperations(operations);
-            apis.add(productAPI);  
+                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
+                operation.setHttpVerb(template.getHTTPVerb());
+                operation.setUritemplate(template.getResourceURI());
+                operations.add(operation);
+
+                productAPI.setOperations(operations);
+                aggregatedAPIs.put(uuid, productAPI);
+            }
         }
+        apis = new ArrayList<ProductAPIDTO>(aggregatedAPIs.values());
         productDto.setApis(apis);
         
         String subscriptionAvailability = product.getSubscriptionAvailability();
