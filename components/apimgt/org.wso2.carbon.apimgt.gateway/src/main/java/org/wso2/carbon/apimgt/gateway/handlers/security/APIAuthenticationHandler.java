@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -30,6 +32,7 @@ import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
@@ -88,6 +91,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
+    private Swagger swagger;
 
     public String getApiUUID() {
         return apiUUID;
@@ -281,7 +285,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
         if (isOAuthProtected) {
             authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
-                    removeOAuthHeadersFromOutMessage, apiUUID, apiLevelPolicy);
+                    removeOAuthHeadersFromOutMessage, apiLevelPolicy);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
@@ -303,6 +307,21 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+        // Read swagger from local entry
+        if (swagger == null && apiUUID != null) {
+            synchronized (this) {
+                if (swagger == null) {
+                    Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID);
+                    if (localEntryObj != null) {
+                        SwaggerParser parser = new SwaggerParser();
+                        swagger = parser.parse(localEntryObj.getValue().toString());
+                    }
+                }
+            }
+        }
+        // Add swagger to message context
+        messageContext.setProperty(APIMgtGatewayConstants.API_SWAGGER, swagger);
+
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =

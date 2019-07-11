@@ -17,14 +17,12 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
 import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -75,19 +73,16 @@ public class OAuthAuthenticator implements Authenticator {
     private String requestOrigin;
     private String remainingAuthHeader;
     private boolean isMandatory;
-    private String apiUUID;
-    private Swagger swagger = null;
     private String apiLevelPolicy;
 
     public OAuthAuthenticator() {
     }
 
     public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader,
-                              String apiUUID, String apiLevelPolicy) {
+                              String apiLevelPolicy) {
         this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
         this.isMandatory = isMandatory;
-        this.apiUUID = apiUUID;
         this.apiLevelPolicy = apiLevelPolicy;
     }
 
@@ -257,24 +252,20 @@ public class OAuthAuthenticator implements Authenticator {
             //Start JWT token validation
             if (StringUtils.countMatches(apiKey, ".") == 2) { // JWT token contains two dots
 
-                // Read swagger from local entry
-                if (swagger == null && apiUUID != null) {
-                    Entry localEntryObj = (Entry) synCtx.getConfiguration().getLocalRegistry().get(apiUUID);
-                    if (localEntryObj != null) {
-                        SwaggerParser parser = new SwaggerParser();
-                        swagger = parser.parse(localEntryObj.getValue().toString());
-                    }
-                }
-
                 try {
-                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, swagger);
-                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
-
-                    if (log.isDebugEnabled()) {
+                    Swagger swagger = (Swagger) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
+                    if (swagger == null) {
+                        log.debug("Swagger is missing in the gateway. " +
+                                "Therefore, JWT authentication cannot be performed.");
+                        return new AuthenticationResponse(false, isMandatory, true,
+                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                                "JWT authentication cannot be performed.");
+                    } else {
+                        AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx ,swagger);
+                        APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
                         log.debug("User is authorized using JWT token to access the resource.");
+                        return new AuthenticationResponse(true, isMandatory, false, 0, null);
                     }
-                    return new AuthenticationResponse(true, isMandatory, false,
-                            0, null);
                 } catch (APISecurityException ex) {
                     return new AuthenticationResponse(false, isMandatory, true,
                             ex.getErrorCode(), ex.getMessage());
