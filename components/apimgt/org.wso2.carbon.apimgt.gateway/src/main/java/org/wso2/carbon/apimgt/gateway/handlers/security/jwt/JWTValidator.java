@@ -68,7 +68,8 @@ public class JWTValidator {
         this.isGatewayTokenCacheEnabled = isGatewayTokenCacheEnabled();
     }
 
-    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, Swagger swagger)
+    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, Swagger swagger,
+                                              String authenticationscheme)
             throws APISecurityException {
         String[] splitToken = jwtToken.split("\\.");
         if (splitToken.length != 3) {
@@ -136,12 +137,14 @@ public class JWTValidator {
                 // Token is found in the key cache
                 payload = (JSONObject) getGatewayKeyCache().get(cacheKey);
                 checkTokenExpiration(tokenSignature, payload, tenantDomain);
+                validateTokenGrantType(payload.getString("grantType"), authenticationscheme);
             } else {
                 // Retrieve payload from token
                 if (payload == null) {
                     payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
                 }
                 checkTokenExpiration(tokenSignature, payload, tenantDomain);
+                validateTokenGrantType(payload.getString("grantType"), authenticationscheme);
 
                 // Scope validation
                 String resourceScope = SwaggerUtils.getScopesOfResource(swagger, synCtx);
@@ -231,6 +234,20 @@ public class JWTValidator {
             }
             throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
                     "JWT token is expired");
+        }
+    }
+
+    private void validateTokenGrantType(String grantType, String authenticationScheme) throws APISecurityException {
+        if ((APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS.equals(grantType) &&
+                APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authenticationScheme)) ||
+                (APIConstants.GRANT_TYPE_PASSWORD.equals(grantType) &&
+                        APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authenticationScheme))) {
+            // 1) tokens of client credentials grant type are not allowed to access when
+            // the resource authentication is set to Application User only
+            // 2) tokens of password grant type are not allowed to access when
+            // the resource authentication is set to Application only
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE,
+                    APISecurityConstants.getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE));
         }
     }
 

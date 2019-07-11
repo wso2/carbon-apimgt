@@ -430,6 +430,7 @@ public final class APIConstants {
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
     public static final String TENANT_PREFIX = "/t/";
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+    public static final String GRANT_TYPE_PASSWORD = "password";
     public static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     public static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     public static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";

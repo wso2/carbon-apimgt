@@ -273,7 +273,8 @@ public class OAuthAuthenticator implements Authenticator {
             //Start JWT token validation
             if (isJwtToken) {
                 try {
-                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, swagger);
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, swagger,
+                            authenticationScheme);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
                     log.debug("User is authorized using JWT token to access the resource.");
                     return new AuthenticationResponse(true, isMandatory, false, 0, null);
