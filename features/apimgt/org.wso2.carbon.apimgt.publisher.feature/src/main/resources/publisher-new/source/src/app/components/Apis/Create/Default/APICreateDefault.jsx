@@ -91,16 +91,15 @@ class APICreateForm extends Component {
         this.setState(({ api, valid }) => {
             const changes = api;
             if (name === 'endpoint') {
-                changes.endpointConfig =
-                    {
-                        endpoint_type: 'http',
-                        sandbox_endpoints: {
-                            url: value,
-                        },
-                        production_endpoints: {
-                            url: value,
-                        },
-                    };
+                changes.endpointConfig = {
+                    endpoint_type: 'http',
+                    sandbox_endpoints: {
+                        url: value,
+                    },
+                    production_endpoints: {
+                        url: value,
+                    },
+                };
             } else {
                 changes[name] = value;
             }
@@ -138,7 +137,8 @@ class APICreateForm extends Component {
             });
             return;
         }
-        currentAPI.save()
+        currentAPI
+            .save()
             .then((newAPI) => {
                 const redirectURL = '/apis/' + newAPI.id + '/overview';
                 Alert.info(`${newAPI.name} created.`);
@@ -167,10 +167,11 @@ class APICreateForm extends Component {
                 <Grid item xs={12} md={6}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id={type === 'ws' ? 'create.new.websocket.api' : 'create.new.rest.api'}
-                                defaultMessage='New REST API'
-                            />
+                            {type === 'ws' ? (
+                                <FormattedMessage id='create.new.websocket.api' defaultMessage='New WebSocket API' />
+                            ) : (
+                                <FormattedMessage id='create.new.rest.api' defaultMessage='New REST API' />
+                            )}
                         </Typography>
                         <Typography variant='h5' align='left' className={classes.subTitle}>
                             GATEWAY-URL/
