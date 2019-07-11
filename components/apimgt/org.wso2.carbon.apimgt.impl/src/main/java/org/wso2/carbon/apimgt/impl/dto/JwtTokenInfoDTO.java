@@ -38,6 +38,7 @@ public class JwtTokenInfoDTO implements Serializable {
     private String keyType;
     private ApplicationDTO application;
     private String consumerKey;
+    private String grantType;
     private List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
 
@@ -136,5 +137,13 @@ public class JwtTokenInfoDTO implements Serializable {
 
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
+    }
+
+    public String getGrantType() {
+        return grantType;
+    }
+
+    public void setGrantType(String grantType) {
+        this.grantType = grantType;
     }
 }

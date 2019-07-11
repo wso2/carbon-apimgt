@@ -92,6 +92,7 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                     jwtTokenInfoDTO.setApplication(applicationDTO);
                     jwtTokenInfoDTO.setKeyType(application.getKeyType());
                     jwtTokenInfoDTO.setConsumerKey(clientId);
+                    jwtTokenInfoDTO.setGrantType(tokReqMsgCtx.getOauth2AccessTokenReqDTO().getGrantType());
                     APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
                     String accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
                     if (log.isDebugEnabled()) {
