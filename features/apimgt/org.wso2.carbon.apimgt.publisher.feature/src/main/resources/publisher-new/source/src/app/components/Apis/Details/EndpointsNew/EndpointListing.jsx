@@ -26,17 +26,17 @@ import {
     DialogActions,
     withStyles,
     ListItemText,
-    Popper,
+    ListItemAvatar,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import KeyboardArrowRightRounded from '@material-ui/icons/KeyboardArrowRight';
 
 import RemoveCircle from '@material-ui/icons/RemoveCircle';
 import EndpointAdd from './EndpointAdd';
-import EndpointConfig from './EndpointConfig';
 import LoadBalanceConfig from './LoadBalanceConfig';
 
 const styles = theme => ({
@@ -77,13 +77,12 @@ function EndpointListing(props) {
         apiEndpoints,
         epType,
         failOvers,
+        getSelectedEndpoint,
+        selectedEpIndex,
     } = props;
     const [endpointType, setEndpointType] = useState('http');
     const [endpoints, setEndpoints] = useState([{ url: 'http(s)://appserver/service' }]);
     const [isLBConfigOpen, setOpenLBConfigDialog] = useState(false);
-    const [openEndpointConfig, setOpenEndpointConfig] = useState(false);
-    const [selectedEP, setselectedEP] = useState(undefined);
-    const [selectedEPInfo, setSelectedEPInfo] = useState({});
 
     const addEndpoint = (type) => {
         setEndpointType(type);
@@ -99,10 +98,7 @@ function EndpointListing(props) {
     };
 
     const handleEpSelect = (event, index) => {
-        const newSelection = event.currentTarget;
-        setOpenEndpointConfig(prev => selectedEP !== newSelection || !prev);
-        setselectedEP(newSelection);
-        setSelectedEPInfo(endpoints[index]);
+        getSelectedEndpoint(index, epType, category);
     };
 
     const getEndpointTypeSeparator = () => {
@@ -146,11 +142,15 @@ function EndpointListing(props) {
     }, [apiEndpoints, epType, failOvers]);
 
     return (
-        <div className={classes.listingWrapper}>
+        <div className={classes.listingWrapper} >
             <Grid container direction='column' xs={12}>
                 <List>
                     <ListItem id={category + '_0'} button onClick={event => handleEpSelect(event, 0)}>
                         <ListItemText primary={endpoints[0].url} />
+                        <ListItemSecondaryAction >
+                            {(selectedEpIndex[0] === 0 && selectedEpIndex[1] === category) ?
+                                <KeyboardArrowRightRounded /> : <div />}
+                        </ListItemSecondaryAction>
                     </ListItem>
                 </List>
                 <Grid xs={12}>
@@ -167,11 +167,15 @@ function EndpointListing(props) {
                                             id={category + '_' + index}
                                             onClick={event => handleEpSelect(event, index)}
                                         >
-                                            <ListItemText primary={endpoints[index].url} />
-                                            <ListItemSecondaryAction >
+                                            <ListItemAvatar>
                                                 <Button onClick={() => removeEndpoint(index)}>
                                                     <RemoveCircle />
                                                 </Button>
+                                            </ListItemAvatar>
+                                            <ListItemText primary={endpoints[index].url} />
+                                            <ListItemSecondaryAction >
+                                                {(selectedEpIndex[0] === index && selectedEpIndex[1] === category) ?
+                                                    <KeyboardArrowRightRounded /> : <div />}
                                             </ListItemSecondaryAction>
                                         </ListItem>
                                     );
@@ -203,28 +207,13 @@ function EndpointListing(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Popper
-                open={openEndpointConfig}
-                anchorEl={selectedEP}
-                placement='right-start'
-                modifiers={{
-                    flip: {
-                        enabled: true,
-                    },
-                    preventOverflow: {
-                        enabled: true,
-                        boundariesElement: 'scrollParent',
-                    },
-                    arrow: {
-                        enabled: true,
-                    },
-                }}
-            >
-                <EndpointConfig epInfo={selectedEPInfo} />
-            </Popper>
         </div>
     );
 }
+
+EndpointListing.defaultProps = {
+    selectedEpIndex: 0,
+};
 
 EndpointListing.propTypes = {
     classes: PropTypes.shape({
@@ -237,6 +226,8 @@ EndpointListing.propTypes = {
     category: PropTypes.string.isRequired,
     apiEndpoints: PropTypes.shape({}).isRequired,
     failOvers: PropTypes.shape({}).isRequired,
+    getSelectedEndpoint: PropTypes.func.isRequired,
+    selectedEpIndex: PropTypes.number,
 };
 
 export default injectIntl(withStyles(styles)(EndpointListing));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -24,7 +24,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
 import EndpointListing from './EndpointListing';
-
+import EndpointConfig from './EndpointConfig';
 
 const styles = theme => ({
     overviewWrapper: {
@@ -50,7 +50,45 @@ const styles = theme => ({
 function EndpointOverview(props) {
     const { classes, api } = props;
     const { endpointConfig } = api;
+    const [selectedEndpointInfo, setSelectedEndpointInfo] = useState({});
+    const [selectedEpIndex, setSelectedEpIndex] = useState([]);
 
+    const getSelectedEndpoint = (index, type, category) => {
+        setSelectedEpIndex([index, category]);
+        setSelectedEndpointInfo(() => {
+            let selected = {};
+            switch (type) {
+                case 'load_balance':
+                    if (category === 'prod') {
+                        selected = endpointConfig.production_endpoints[index];
+                    }
+                    if (category === 'sandbox') {
+                        selected = (endpointConfig.sandbox_endpoints[index]);
+                    }
+                    break;
+                case 'failover':
+                    if (category === 'prod') {
+                        if (index === 0) {
+                            selected = (endpointConfig.production_endpoints);
+                        } else {
+                            selected = (endpointConfig.production_failovers[index - 1]);
+                        }
+                    }
+                    if (category === 'sandbox') {
+                        if (index === 0) {
+                            selected = (endpointConfig.sandbox_endpoints);
+                        } else {
+                            selected = (endpointConfig.sandbox_failovers[index - 1]);
+                        }
+                    }
+                    break;
+                default:
+                    selected = ({ url: 'http://myendpoint/server' });
+                    break;
+            }
+            return selected;
+        });
+    };
     return (
         <div className={classes.overviewWrapper}>
             <Grid container>
@@ -61,11 +99,12 @@ function EndpointOverview(props) {
                                 <FormattedMessage id='Production.Endpoints' defaultMessage='Production Endpoints' />
                             </Typography>
                             <EndpointListing
-                                // getSelected={getEndpoint}
+                                getSelectedEndpoint={getSelectedEndpoint}
                                 apiEndpoints={endpointConfig.production_endpoints}
                                 failOvers={endpointConfig.production_failovers}
-                                // setEndpoints={setEndpoints}
+                                selectedEpIndex={selectedEpIndex}
                                 epType={endpointConfig.endpoint_type}
+                                // TODO : addEndpoint={addEndpoint}
                                 category='prod'
                             />
                             <Divider />
@@ -73,18 +112,20 @@ function EndpointOverview(props) {
                                 <FormattedMessage id='Sandbox.Endpoints' defaultMessage='Sandbox Endpoints' />
                             </Typography>
                             <EndpointListing
-                                // getSelected={getEndpoint}
+                                getSelectedEndpoint={getSelectedEndpoint}
                                 apiEndpoints={endpointConfig.sandbox_endpoints}
-                                // setEndpoints={setEndpoints}
+                                selectedEpIndex={selectedEpIndex}
                                 failOvers={endpointConfig.sandbox_failovers}
                                 epType={endpointConfig.endpoint_type}
+                                // TODO : addEndpoint={addEndpoint}
                                 category='sandbox'
                             />
                         </div>
                     </Paper>
                 </Grid>
-                {/* <Grid item xs={6}>
-                </Grid> */}
+                <Grid item xs={6}>
+                    <EndpointConfig epInfo={selectedEndpointInfo} />
+                </Grid>
             </Grid>
         </div>
     );

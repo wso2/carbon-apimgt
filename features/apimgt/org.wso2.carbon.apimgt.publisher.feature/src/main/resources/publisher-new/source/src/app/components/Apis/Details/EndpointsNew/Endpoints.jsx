@@ -110,7 +110,7 @@ function Endpoints(props) {
                                     </div>
                                     <Divider variant='middle' />
                                     <Collapse in={!productionChecked}>
-                                        Portotyped
+                                        <FormattedMessage id='Prototype' defaultMessage='Prototype' />
                                     </Collapse>
                                     {/* {(productionChecked === false) ? <EndpointOverview /> : <div />} */}
                                 </Grid>

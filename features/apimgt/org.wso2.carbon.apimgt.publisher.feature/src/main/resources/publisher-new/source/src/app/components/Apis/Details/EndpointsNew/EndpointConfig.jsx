@@ -59,8 +59,7 @@ function EndpointConfig(props) {
 
     useEffect(() => {
         setEndpoint(epInfo.url);
-    }, [epInfo]);
-
+    }, [props]);
     return (
         <Paper className={classes.epConfigWrapper}>
             <Typography>Endpoint Configuration</Typography>
@@ -73,6 +72,7 @@ function EndpointConfig(props) {
                     placeholder='http(s)://appserver/service'
                     onChange={handleEndpointInputChange}
                     margin='normal'
+                    onBlur={() => { console.log('blur'); }}
                 />
                 <TextField
                     id='maxTps'
