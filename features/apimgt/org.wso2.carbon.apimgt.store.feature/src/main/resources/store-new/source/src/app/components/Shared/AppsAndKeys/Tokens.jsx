@@ -161,7 +161,7 @@ class Tokens extends React.Component {
                             shrink: true,
                         }}
                         helperText={<FormattedMessage
-                            id='subscription.scopes.description'
+                            id='token.expiration.description'
                             defaultMessage={'You can set an expiration period to determine the validity period of ' +
                             'the token after generation. Set this to a negative value to ensure that the token never' +
                             ' expires.'}
