@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.gateway.utils.SwaggerUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -100,6 +101,8 @@ public class OAuthAuthenticator implements Authenticator {
 
     @MethodStats
     public AuthenticationResponse authenticate(MessageContext synCtx) {
+        boolean isJwtToken = false;
+        Swagger swagger = null;
         String apiKey = null;
         boolean defaultVersionInvoked = false;
         TracingSpan getClientDomainSpan = null;
@@ -175,7 +178,25 @@ public class OAuthAuthenticator implements Authenticator {
         }
         String authenticationScheme;
         try {
-            authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+            if (StringUtils.countMatches(apiKey, ".") == 2) { // JWT token contains two dots
+                isJwtToken = true;
+                swagger = (Swagger) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
+                if (swagger == null) {
+                    log.debug("Swagger is missing in the gateway. " +
+                            "Therefore, JWT authentication cannot be performed.");
+                    return new AuthenticationResponse(false, isMandatory, true,
+                            APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                            "JWT authentication cannot be performed.");
+                }
+                authenticationScheme = SwaggerUtils.getResourceAuthenticationScheme(swagger, synCtx);
+                VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+                verbInfoDTO.setHttpVerb(httpMethod);
+                verbInfoDTO.setAuthType(authenticationScheme);
+                verbInfoDTO.setThrottling(SwaggerUtils.getResourceThrottlingTier(swagger, synCtx));
+                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
+            } else {
+                authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
+            }
         } catch (APISecurityException ex) {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
         }
@@ -250,22 +271,13 @@ public class OAuthAuthenticator implements Authenticator {
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
         } else {
             //Start JWT token validation
-            if (StringUtils.countMatches(apiKey, ".") == 2) { // JWT token contains two dots
-
+            if (isJwtToken) {
                 try {
-                    Swagger swagger = (Swagger) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
-                    if (swagger == null) {
-                        log.debug("Swagger is missing in the gateway. " +
-                                "Therefore, JWT authentication cannot be performed.");
-                        return new AuthenticationResponse(false, isMandatory, true,
-                                APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                                "JWT authentication cannot be performed.");
-                    } else {
-                        AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx ,swagger);
-                        APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
-                        log.debug("User is authorized using JWT token to access the resource.");
-                        return new AuthenticationResponse(true, isMandatory, false, 0, null);
-                    }
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, swagger);
+                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
+                    log.debug("User is authorized using JWT token to access the resource.");
+                    return new AuthenticationResponse(true, isMandatory, false, 0, null);
+
                 } catch (APISecurityException ex) {
                     return new AuthenticationResponse(false, isMandatory, true,
                             ex.getErrorCode(), ex.getMessage());
