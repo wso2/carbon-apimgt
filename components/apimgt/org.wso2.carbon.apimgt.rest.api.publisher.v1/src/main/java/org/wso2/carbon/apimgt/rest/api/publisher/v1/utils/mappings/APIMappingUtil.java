@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -56,6 +57,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -594,8 +596,9 @@ public class APIMappingUtil {
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
             List<APIOperationsDTO> operationsDTOs = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
             dto.setOperations(operationsDTOs);
+            List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
+            dto.setScopes(scopeDTOS);
         }
-
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
@@ -1316,5 +1319,38 @@ public class APIMappingUtil {
             operationsDTOs.add(operationsDTO);
         }
         return operationsDTOs;
+    }
+
+    /**
+     * Extract scopes from the swagger
+     *
+     * @param swagger swagger document
+     * @return list of scopes
+     * @throws APIManagementException throw if parsing exception occur
+     */
+    private static List<ScopeDTO> getScopesFromSwagger(String swagger) throws APIManagementException {
+
+        JSONParser parser = new JSONParser();
+        List<ScopeDTO> scopes = new ArrayList<>();
+        try {
+            JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
+            JSONObject securityObj = (JSONObject) swaggerObj.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+            JSONObject apimSecurityObj = (JSONObject) securityObj.get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
+            JSONArray scopesList = (JSONArray) apimSecurityObj.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+            scopesList.forEach((scope) -> {
+                ScopeDTO scopeDTO = new ScopeDTO();
+                JSONObject scopeObj = (JSONObject) scope;
+                scopeDTO.setName((String) scopeObj.get(APIConstants.SWAGGER_NAME));
+                scopeDTO.setDescription((String) scopeObj.get(APIConstants.SWAGGER_DESCRIPTION));
+                ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
+                bindingsDTO.setValues(Arrays.asList(((String) scopeObj.get(APIConstants.SWAGGER_ROLES)).split(",")));
+                scopeDTO.setBindings(bindingsDTO);
+                scopes.add(scopeDTO);
+            });
+
+        } catch (ParseException e) {
+            throw new APIManagementException("Error occurred while parsing swagger.");
+        }
+        return scopes;
     }
 }
