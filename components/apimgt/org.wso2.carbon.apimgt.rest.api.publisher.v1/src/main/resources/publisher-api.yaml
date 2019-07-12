@@ -6396,7 +6396,14 @@ definitions:
           State of the API product. Only published api products are visible on the store
         enum:
           - CREATED
-          - PUBLISHED        
+          - PUBLISHED
+      securityScheme:
+        type: array
+        description: |
+          Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If
+          it is not set OAuth2 will be set as the security for the current API.
+        items:
+          type: string
 
   #-----------------------------------------------------
   # The Detailed API Product resource
@@ -6530,6 +6537,10 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ProductAPI'
+      scopes:
+        type: array
+        items:
+          $ref: '#/definitions/Scope'
   #-----------------------------------------------------
   # The API and its resources in a API Product resource
   #-----------------------------------------------------              
