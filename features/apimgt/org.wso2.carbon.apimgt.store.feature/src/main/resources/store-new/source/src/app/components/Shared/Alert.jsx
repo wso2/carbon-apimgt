@@ -120,21 +120,6 @@ class Alert {
             Alert.defaultDuration = options.duration;
         }
     }
-
-    /**
-     * If the provided message is an i18n FormattedMessage element, the method will convert to the required locale
-     * before returning. Otherwise return the message itself.
-     *
-     * @param {FormattedMessage | string} message i18n FormattedMessage or string message
-     * @returns {string} formatted message
-     */
-    static getI18nConvertedMessage(message) {
-        if (message.props) {
-            return Alert.intl.formatMessage({ id: message.props.id, defaultMessage: message.props.defaultMessage });
-        } else {
-            return message;
-        }
-    }
 }
 
 Alert.messageInstance = null;
@@ -147,37 +132,29 @@ Alert.defaultTop = 0;
 
 export default {
     info: (message, duration, onClose) => {
-        message = Alert.getI18nConvertedMessage(message);
         const msg = new Alert(message, 'info', duration, onClose);
         msg.show();
         return msg;
     },
     success: (message, duration, onClose) => {
-        message = Alert.getI18nConvertedMessage(message);
         const msg = new Alert(message, 'success', duration, onClose);
         msg.show();
         return msg;
     },
     error: (message, duration, onClose) => {
-        message = Alert.getI18nConvertedMessage(message);
         const msg = new Alert(message, 'error', duration, onClose);
         msg.show();
         return msg;
     },
     warning: (message, duration, onClose) => {
-        message = Alert.getI18nConvertedMessage(message);
         const msg = new Alert(message, 'warning', duration, onClose);
         msg.show();
         return msg;
     },
     loading: (message, duration, onClose) => {
-        message = Alert.getI18nConvertedMessage(message);
         const msg = new Alert(message, 'loading', duration, onClose);
         msg.show();
         return msg;
-    },
-    init: (intl) => {
-        Alert.intl = intl;
     },
     configs: Alert.config,
 };

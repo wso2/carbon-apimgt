@@ -178,14 +178,14 @@ class ApplicationEdit extends Component {
             appName, id, quota, appDescription, appLifeCycleStatus,
         } = this.state;
         const {
-            history,
+            history, intl,
         } = this.props;
         event.preventDefault();
         if (!appName) {
-            Alert.error(<FormattedMessage
-                id='Applications.Edit.app.name.required'
-                defaultMessage='Application name is required'
-            />);
+            Alert.error(intl.formatMessage({
+                id: 'Applications.Edit.app.name.required',
+                defaultMessage: 'Application name is required',
+            }));
         } else {
             const updatedApplication = {
                 applicationId: id,
@@ -201,17 +201,17 @@ class ApplicationEdit extends Component {
                     const appId = response.body.applicationId;
                     const redirectUrl = '/applications/' + appId;
                     history.push(redirectUrl);
-                    Alert.info(<FormattedMessage
-                        id='Applications.Edit.app.updated.success'
-                        defaultMessage='Application updated successfully'
-                    />);
+                    Alert.info(intl.formatMessage({
+                        id: 'Applications.Edit.app.updated.success',
+                        defaultMessage: 'Application updated successfully',
+                    }));
                     console.log('Application updated successfully.');
                 })
                 .catch((error) => {
-                    Alert.error(<FormattedMessage
-                        id='Applications.Edit.error.update.app'
-                        defaultMessage='Error while updating application'
-                    />);
+                    Alert.error(intl.formatMessage({
+                        id: 'Applications.Edit.error.update.app',
+                        defaultMessage: 'Error while updating application',
+                    }));
                     console.log('Error while updating application ' + error);
                 });
         }
@@ -377,6 +377,7 @@ class ApplicationEdit extends Component {
         );
     }
 }
+
 ApplicationEdit.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,

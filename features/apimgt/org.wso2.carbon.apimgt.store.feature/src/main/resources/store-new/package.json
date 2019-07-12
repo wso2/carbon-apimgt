@@ -7,7 +7,7 @@
         "test": "jest",
         "test:integration": "jest -c source/Tests/Integration/jest.config.js",
         "test:coverage": "jest --coverage",
-        "build:prod": "extract-messages -l=en -d en -o site/public/locales --flat true 'source/src/app/components/**/*.jsx'; NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
+        "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
         "lint": "eslint source/**/*.js source/**/*.jsx source/src/app/**/*.jsx",
