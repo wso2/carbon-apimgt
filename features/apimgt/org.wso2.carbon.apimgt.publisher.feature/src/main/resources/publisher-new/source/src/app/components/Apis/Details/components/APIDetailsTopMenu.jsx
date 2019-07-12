@@ -94,7 +94,7 @@ const DetailsTopMenu = ({ classes, theme }) => {
                     <VerticalDivider height={70} />
                     {isAPIProduct ? null :
                         (<CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />)}
-                    <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} />
+                    <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
                 </div>
             )}
         </ApiContext.Consumer>
