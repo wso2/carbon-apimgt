@@ -24,6 +24,7 @@ import Grid from '@material-ui/core/Grid';
 import CheckItem from './CheckItem';
 import ApiContext from '../components/ApiContext';
 import Resources from './Resources';
+import ProductResources from './ProductResources';
 import Policies from './Policies';
 import Configuration from './Configuration';
 import Endpoints from './Endpoints';
@@ -135,7 +136,8 @@ function Overview(props) {
                         <Grid container spacing={24}>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Configuration parentClasses={classes} />
-                                <Resources parentClasses={classes} api={api} />
+                                {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
+                                    (<Resources parentClasses={classes} api={api} />)}
                                 <AdditionalProperties parentClasses={classes} />
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>

@@ -47,6 +47,7 @@ import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Resources from './Resources/Resources';
+import ProductResources from './Resources/ProductResources';
 import Endpoints from './Endpoints/Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
@@ -355,12 +356,14 @@ class Details extends Component {
                             active={active}
                             Icon={<ConfigurationIcon />}
                         />
-                        <LeftMenuItem
-                            text='endpoints'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<EndpointIcon />}
-                        />
+                        {isAPIProduct ? null : (
+                            <LeftMenuItem
+                                text='endpoints'
+                                handleMenuSelect={this.handleMenuSelect}
+                                active={active}
+                                Icon={<EndpointIcon />}
+                            />
+                        )}
                         <LeftMenuItem
                             text='api definition'
                             handleMenuSelect={this.handleMenuSelect}
@@ -482,6 +485,7 @@ Details.subPaths = {
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
     RESOURCES: '/apis/:api_uuid/resources',
+    RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',
     DOCUMENTS: '/apis/:api_uuid/documents',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
