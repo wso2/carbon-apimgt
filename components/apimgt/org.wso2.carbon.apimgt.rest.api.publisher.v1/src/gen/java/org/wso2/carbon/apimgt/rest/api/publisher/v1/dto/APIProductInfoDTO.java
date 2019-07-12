@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -54,6 +56,7 @@ public enum StateEnum {
 }
 
     private StateEnum state = null;
+    private List<String> securityScheme = new ArrayList<>();
 
   /**
    * UUID of the api product 
@@ -179,6 +182,24 @@ public enum StateEnum {
     this.state = state;
   }
 
+  /**
+   * Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. 
+   **/
+  public APIProductInfoDTO securityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @JsonProperty("securityScheme")
+  public List<String> getSecurityScheme() {
+    return securityScheme;
+  }
+  public void setSecurityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -195,12 +216,13 @@ public enum StateEnum {
         Objects.equals(description, apIProductInfo.description) &&
         Objects.equals(provider, apIProductInfo.provider) &&
         Objects.equals(thumbnailUri, apIProductInfo.thumbnailUri) &&
-        Objects.equals(state, apIProductInfo.state);
+        Objects.equals(state, apIProductInfo.state) &&
+        Objects.equals(securityScheme, apIProductInfo.securityScheme);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, securityScheme);
   }
 
   @Override
@@ -215,6 +237,7 @@ public enum StateEnum {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("}");
     return sb.toString();
   }

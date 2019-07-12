@@ -9,6 +9,7 @@ import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import javax.validation.constraints.*;
 
 
@@ -176,6 +177,7 @@ public enum SubscriptionAvailabilityEnum {
     private APIProductBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private List<ProductAPIDTO> apis = new ArrayList<>();
+    private List<ScopeDTO> scopes = new ArrayList<>();
 
   /**
    * UUID of the api product 
@@ -585,6 +587,23 @@ public enum SubscriptionAvailabilityEnum {
     this.apis = apis;
   }
 
+  /**
+   **/
+  public APIProductDTO scopes(List<ScopeDTO> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("scopes")
+  public List<ScopeDTO> getScopes() {
+    return scopes;
+  }
+  public void setScopes(List<ScopeDTO> scopes) {
+    this.scopes = scopes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -617,12 +636,13 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(additionalProperties, apIProduct.additionalProperties) &&
         Objects.equals(businessInformation, apIProduct.businessInformation) &&
         Objects.equals(corsConfiguration, apIProduct.corsConfiguration) &&
-        Objects.equals(apis, apIProduct.apis);
+        Objects.equals(apis, apIProduct.apis) &&
+        Objects.equals(scopes, apIProduct.scopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, apis);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, apis, scopes);
   }
 
   @Override
@@ -653,6 +673,7 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
+    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");
     return sb.toString();
   }
