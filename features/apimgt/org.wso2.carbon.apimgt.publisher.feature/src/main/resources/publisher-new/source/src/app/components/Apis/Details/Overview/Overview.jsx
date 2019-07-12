@@ -325,7 +325,7 @@ class Overview extends Component {
                             id='api-endpoint-production'
                             label={isEditable && 'Endpoint'}
                             value={
-                                api.getProductionEndpoint() && api.getProductionEndpoint().endpointConfig.list[0].url
+                                api.getProductionEndpoint()
                             }
                             placeholder='No Value!'
                             helperText='Production'
@@ -340,7 +340,7 @@ class Overview extends Component {
                             fullWidth
                             id='api-endpoint-sandbox'
                             label={isEditable && 'Endpoint'}
-                            value={api.getSandboxEndpoint() && api.getSandboxEndpoint().endpointConfig.list[0].url}
+                            value={api.getSandboxEndpoint()}
                             placeholder='No Value!'
                             helperText='Sandbox'
                             margin='normal'

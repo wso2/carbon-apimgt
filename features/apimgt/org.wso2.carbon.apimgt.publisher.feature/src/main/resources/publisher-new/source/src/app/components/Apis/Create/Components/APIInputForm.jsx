@@ -81,8 +81,7 @@ class APIInputForm extends Component {
             api, handleInputChange, classes, valid, isAPIProduct,
         } = this.props;
         const policiesProps = { handleInputChange, api, policies };
-        const endpoints = api.getProductionEndpoint().endpointConfig.list;
-        const endpoint = endpoints && endpoints[0];
+        const endpoint = api.getProductionEndpoint();
         return (
             <React.Fragment>
                 <FormControl margin='normal' className={classes.FormControl}>
@@ -195,7 +194,7 @@ class APIInputForm extends Component {
                                     <FormattedMessage
                                         id='api.create.endpoint.help'
                                         defaultMessage={'This is the actual endpoint' +
-                                        ' where the API implementation can be found'}
+                                    ' where the API implementation can be found'}
                                     />
                                 )
                             }
@@ -206,7 +205,7 @@ class APIInputForm extends Component {
                             type='text'
                             name='endpoint'
                             margin='normal'
-                            value={endpoint && endpoint.url}
+                            value={endpoint}
                             onChange={handleInputChange}
                         />
                     </FormControl>

@@ -83,20 +83,23 @@ class APICreateForm extends Component {
             loading,
         } = this.state;
         let id = 'create.new.rest.api';
+        let defaultMessage = 'New REST API';
         if (isAPIProduct) {
             // products do not support versioning. setting it to default
             api.version = '1.0.0';
             id = 'create.new.api.product';
+            defaultMessage = 'New API Product';
         }
         return (
             <Grid container spacing={24} className={classes.root}>
                 <Grid item xs={12} md={6}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id={type === 'ws' ? 'create.new.websocket.api' : { id }}
-                                defaultMessage={isAPIProduct ? 'New API Product' : 'New REST API'}
-                            />
+                            {type === 'ws' ? (
+                                <FormattedMessage id='create.new.websocket.api' defaultMessage='New WebSocket API' />
+                            ) : (
+                                <FormattedMessage id={id} defaultMessage={defaultMessage} />
+                            )}
                         </Typography>
                         <Typography variant='h5' align='left' className={classes.subTitle}>
                             GATEWAY-URL/

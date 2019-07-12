@@ -19,9 +19,8 @@
 import React, {Component} from 'react'
 import Base from './Base/index'
 import Apis from './Apis/Apis'
-import APIProducts from './APIProducts/APIProducts'
 import Login from './Login/Login'
 import Logout from './Logout'
 import Applications from './Applications/Applications'
 
-export {Base, Apis, APIProducts, Login, Logout, Applications}
+export {Base, Apis, Login, Logout, Applications}

@@ -17,34 +17,51 @@
  */
 
 import React from 'react';
+import Configurations from 'Config';
 
-const page = '/publisher-new/services/auth/login';
+
+const page = Configurations.app.context + '/services/auth/login';
+
+/**
+ *
+ * Just doing the redirection, If you want to trigger redirection to login page , Import this util method and use.
+ * Note: Don't use this method inside a render method. It will cause to cancel the initial request in Chrome
+ * and re-trigger same request
+ * Sample usage:
+ * import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin'
+ *
+ * componentDidMount() {
+ *      doRedirectToLogin();
+ * }
+ * @export
+ */
+export function doRedirectToLogin() {
+    window.location = page;
+}
 
 /**
  * This component is created to unify the login process from react UI.
  * If we need to change the login process in the future, Changing here will reflect
  * all the login redirection done in other places of the code
- * @class InitLogin
+ * @class RedirectToLogin
  */
-class InitLogin extends React.Component {
+export default class RedirectToLogin extends React.Component {
     /**
      *
      * @inheritdoc
-     * @memberof InitLogin
+     * @memberof RedirectToLogin
      */
     componentDidMount() {
-        window.location = page;
+        doRedirectToLogin();
     }
-
 
     /**
      *
      * @inheritdoc
      * @returns {React.Component}
-     * @memberof InitLogin
+     * @memberof RedirectToLogin
      */
     render() {
         return `You will be redirected to ${page}`;
     }
 }
-export default InitLogin;

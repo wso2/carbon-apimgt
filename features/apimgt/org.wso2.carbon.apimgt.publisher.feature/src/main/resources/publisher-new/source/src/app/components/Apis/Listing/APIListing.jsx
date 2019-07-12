@@ -17,8 +17,8 @@
  */
 
 import React, { Component } from 'react';
-import qs from 'qs';
 import PropTypes from 'prop-types';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import API from 'AppData/api.js';
 import Listing from './Listing';
 
@@ -52,8 +52,7 @@ class APIListing extends Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
+                    doRedirectToLogin();
                 }
             });
     }

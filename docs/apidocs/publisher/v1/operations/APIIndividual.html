@@ -4120,53 +4120,50 @@ Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
 Content-Type: application/json
 
 {
-  &quot;name&quot; : &quot;pizza-api&quot;,
+  &quot;name&quot; : &quot;PizzaShackAPI&quot;,
+  &quot;description&quot; : &quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
+  &quot;context&quot; : &quot;/pizzashack&quot;,
   &quot;version&quot; : &quot;1.0.0&quot;,
-  &quot;context&quot; : &quot;/pizza-api&quot;,
-  &quot;isDefaultVersion&quot; : false,
-  &quot;gatewayEnvironments&quot; : [ &quot;Production and Sandbox&quot; ],
   &quot;transport&quot; : [ &quot;http&quot;, &quot;https&quot; ],
-  &quot;visibility&quot; : &quot;PUBLIC&quot;,
-  &quot;endpoint&quot; : [ {
-    &quot;inline&quot; : {
-      &quot;name&quot; : &quot;pizza-api_inline_production&quot;,
-      &quot;endpointConfig&quot; : {
-        &quot;list&quot; : [ {
-          &quot;url&quot; : &quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;,
-          &quot;timeout&quot; : &quot;1000&quot;
-        } ],
-        &quot;endpointType&quot; : &quot;SINGLE&quot;
-      },
-      &quot;endpointSecurity&quot; : {
-        &quot;enabled&quot; : false,
-        &quot;type&quot; : &quot;basic&quot;,
-        &quot;username&quot; : &quot;basic&quot;,
-        &quot;password&quot; : &quot;basic&quot;
-      },
-      &quot;type&quot; : &quot;http&quot;
+  &quot;tags&quot; : [ &quot;pizza&quot; ],
+  &quot;policies&quot; : [ &quot;Unlimited&quot; ],
+  &quot;gatewayEnvironments&quot; : [ &quot;Production and Sandbox&quot; ],
+  &quot;endpointConfig&quot; : {
+    &quot;endpoint_type&quot; : &quot;http&quot;,
+    &quot;sandbox_endpoints&quot; : {
+      &quot;url&quot; : &quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;
     },
-    &quot;type&quot; : &quot;production_endpoints&quot;
+    &quot;production_endpoints&quot; : {
+      &quot;url&quot; : &quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;
+    }
+  },
+  &quot;operations&quot; : [ {
+    &quot;uritemplate&quot; : &quot;/order/{orderId}&quot;,
+    &quot;httpVerb&quot; : &quot;GET&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;
   }, {
-    &quot;inline&quot; : {
-      &quot;name&quot; : &quot;pizza-api_inline_sandbox&quot;,
-      &quot;endpointConfig&quot; : {
-        &quot;list&quot; : [ {
-          &quot;url&quot; : &quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;,
-          &quot;timeout&quot; : &quot;1000&quot;
-        } ],
-        &quot;endpointType&quot; : &quot;SINGLE&quot;
-      },
-      &quot;endpointSecurity&quot; : {
-        &quot;enabled&quot; : false,
-        &quot;type&quot; : &quot;basic&quot;,
-        &quot;username&quot; : &quot;basic&quot;,
-        &quot;password&quot; : &quot;basic&quot;
-      },
-      &quot;type&quot; : &quot;http&quot;
-    },
-    &quot;type&quot; : &quot;sandbox_endpoints&quot;
-  } ],
-  &quot;policies&quot; : [ &quot;Unlimited&quot; ]
+    &quot;id&quot; : &quot;&quot;,
+    &quot;uritemplate&quot; : &quot;/order/{orderId}&quot;,
+    &quot;httpVerb&quot; : &quot;DELETE&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;
+  }, {
+    &quot;uritemplate&quot; : &quot;/order/{orderId}&quot;,
+    &quot;httpVerb&quot; : &quot;PUT&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;
+  }, {
+    &quot;uritemplate&quot; : &quot;/menu&quot;,
+    &quot;httpVerb&quot; : &quot;GET&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;
+  }, {
+    &quot;uritemplate&quot; : &quot;/order&quot;,
+    &quot;httpVerb&quot; : &quot;POST&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;
+  } ]
 }</code></div>
 
                 <div class="pointer" data-toggle="collapse" data-target="#response-apisPost">
@@ -4177,11 +4174,13 @@ Content-Type: application/json
                 </div>
                     <div id="response-apisPost" class="pre collapse in"><code class="json">HTTP 1/1 201 Created
 Content-Type: application/json
+Location: https://localhost:9443/api/am/publisher/v1.0/apis/35ee8a2d-d9ef-4d6d-8626-377f9f9fc580
 
 {
-  &quot;id&quot; : &quot;089e2454-17d0-4839-b1fe-a238fe15664e&quot;,
-  &quot;name&quot; : &quot;pizza-api&quot;,
-  &quot;context&quot; : &quot;/pizza-api&quot;,
+  &quot;id&quot; : &quot;35ee8a2d-d9ef-4d6d-8626-377f9f9fc580&quot;,
+  &quot;name&quot; : &quot;PizzaShackAPI&quot;,
+  &quot;description&quot; : &quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
+  &quot;context&quot; : &quot;/pizzashack&quot;,
   &quot;version&quot; : &quot;1.0.0&quot;,
   &quot;provider&quot; : &quot;admin&quot;,
   &quot;lifeCycleStatus&quot; : &quot;CREATED&quot;,
@@ -4189,7 +4188,7 @@ Content-Type: application/json
   &quot;isDefaultVersion&quot; : false,
   &quot;type&quot; : &quot;HTTP&quot;,
   &quot;transport&quot; : [ &quot;http&quot;, &quot;https&quot; ],
-  &quot;tags&quot; : [ ],
+  &quot;tags&quot; : [ &quot;pizza&quot; ],
   &quot;policies&quot; : [ &quot;Unlimited&quot; ],
   &quot;securityScheme&quot; : [ &quot;oauth2&quot;, &quot;oauth_basic_auth_mandatory&quot; ],
   &quot;visibility&quot; : &quot;PUBLIC&quot;,
@@ -4198,6 +4197,7 @@ Content-Type: application/json
   &quot;gatewayEnvironments&quot; : [ &quot;Production and Sandbox&quot; ],
   &quot;labels&quot; : [ ],
   &quot;mediationPolicies&quot; : [ ],
+  &quot;subscriptionAvailability&quot; : &quot;ALL_TENANTS&quot;,
   &quot;subscriptionAvailableTenants&quot; : [ ],
   &quot;additionalProperties&quot; : { },
   &quot;accessControl&quot; : &quot;NONE&quot;,
@@ -4210,66 +4210,48 @@ Content-Type: application/json
     &quot;accessControlAllowHeaders&quot; : [ &quot;authorization&quot;, &quot;Access-Control-Allow-Origin&quot;, &quot;Content-Type&quot;, &quot;SOAPAction&quot; ],
     &quot;accessControlAllowMethods&quot; : [ &quot;GET&quot;, &quot;PUT&quot;, &quot;POST&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;, &quot;OPTIONS&quot; ]
   },
-  &quot;endpoint&quot; : [ {
-    &quot;inline&quot; : {
-      &quot;endpointConfig&quot; : {
-        &quot;endpointType&quot; : &quot;SINGLE&quot;,
-        &quot;list&quot; : [ {
-          &quot;url&quot; : &quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;,
-          &quot;timeout&quot; : &quot;1000&quot;,
-          &quot;attributes&quot; : [ ]
-        } ]
-      },
-      &quot;type&quot; : &quot;http&quot;
+  &quot;endpointConfig&quot; : {
+    &quot;endpoint_type&quot; : &quot;http&quot;,
+    &quot;sandbox_endpoints&quot; : {
+      &quot;url&quot; : &quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;
     },
-    &quot;type&quot; : &quot;production_endpoints&quot;
-  }, {
-    &quot;inline&quot; : {
-      &quot;endpointConfig&quot; : {
-        &quot;endpointType&quot; : &quot;SINGLE&quot;,
-        &quot;list&quot; : [ {
-          &quot;url&quot; : &quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;,
-          &quot;timeout&quot; : &quot;1000&quot;,
-          &quot;attributes&quot; : [ ]
-        } ]
-      },
-      &quot;type&quot; : &quot;http&quot;
-    },
-    &quot;type&quot; : &quot;sandbox_endpoints&quot;
-  } ],
+    &quot;production_endpoints&quot; : {
+      &quot;url&quot; : &quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;
+    }
+  },
   &quot;scopes&quot; : [ ],
   &quot;operations&quot; : [ {
     &quot;id&quot; : &quot;&quot;,
-    &quot;uritemplate&quot; : &quot;/*&quot;,
-    &quot;httpVerb&quot; : &quot;PATCH&quot;,
-    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
-    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
-    &quot;scopes&quot; : [ ]
-  }, {
-    &quot;id&quot; : &quot;&quot;,
-    &quot;uritemplate&quot; : &quot;/*&quot;,
-    &quot;httpVerb&quot; : &quot;POST&quot;,
-    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
-    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
-    &quot;scopes&quot; : [ ]
-  }, {
-    &quot;id&quot; : &quot;&quot;,
-    &quot;uritemplate&quot; : &quot;/*&quot;,
+    &quot;uritemplate&quot; : &quot;/order/{orderId}&quot;,
     &quot;httpVerb&quot; : &quot;GET&quot;,
     &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
     &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
     &quot;scopes&quot; : [ ]
   }, {
     &quot;id&quot; : &quot;&quot;,
-    &quot;uritemplate&quot; : &quot;/*&quot;,
+    &quot;uritemplate&quot; : &quot;/order/{orderId}&quot;,
     &quot;httpVerb&quot; : &quot;DELETE&quot;,
     &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
     &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
     &quot;scopes&quot; : [ ]
   }, {
     &quot;id&quot; : &quot;&quot;,
-    &quot;uritemplate&quot; : &quot;/*&quot;,
+    &quot;uritemplate&quot; : &quot;/order/{orderId}&quot;,
     &quot;httpVerb&quot; : &quot;PUT&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
+    &quot;scopes&quot; : [ ]
+  }, {
+    &quot;id&quot; : &quot;&quot;,
+    &quot;uritemplate&quot; : &quot;/menu&quot;,
+    &quot;httpVerb&quot; : &quot;GET&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
+    &quot;scopes&quot; : [ ]
+  }, {
+    &quot;id&quot; : &quot;&quot;,
+    &quot;uritemplate&quot; : &quot;/order&quot;,
+    &quot;httpVerb&quot; : &quot;POST&quot;,
     &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
     &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
     &quot;scopes&quot; : [ ]
