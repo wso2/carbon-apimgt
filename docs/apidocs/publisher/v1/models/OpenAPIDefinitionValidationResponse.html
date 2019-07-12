@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>APIDefinitionValidationResponse_wsdlInfo_endpoints</h2>
+        <h2>OpenAPIDefinitionValidationResponse</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,33 +21,48 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>name</p>
+                            <p>isValid</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">Name of the endpoint</p></td>
+                        <td class="parameter"><p class="marked">This attribute declares whether this definition is valid or not. </p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#boolean">boolean</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">StockQuoteSoap</p></td>
+                        <td class="parameter"> <p class="marked">true</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>location</p>
+                            <p>content</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">Endpoint URL</p></td>
+                        <td class="parameter"><p class="marked">OpenAPI definition content. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">http://www.webservicex.net/stockquote.asmx</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>errors</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">If there are more than one error list them out. For example, list out validation errors by each field. </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#array">array</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                 </tbody>
             </table>

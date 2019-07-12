@@ -93,10 +93,15 @@ public abstract class APIDefinition {
      *
      * @param api api
      * @param swagger swagger definition
+     * @param syncOperations whether to sync operations between API and swagger. If true, the operations of the swagger
+     *                       will be synced from the API's operations. Additional operations of the swagger will be
+     *                       removed and new operations of API will be added. If false, all the operations will be
+     *                       taken from swagger.
      * @return API definition in string format
-     * @throws APIManagementException
+     * @throws APIManagementException if error occurred when generating API Definition
      */
-    public abstract String generateAPIDefinition(API api, String swagger) throws APIManagementException;
+    public abstract String generateAPIDefinition(API api, String swagger, boolean syncOperations)
+            throws APIManagementException;
 
     /**
      * This method returns the timestamps for a given API
@@ -146,12 +151,22 @@ public abstract class APIDefinition {
     }
 
     /**
-     * This method validates the given API swagger definition
+     * This method validates the given OpenAPI definition by content
      *
-     * @param apiDefinition
-     * @return
-     * @throws APIManagementException
+     * @param apiDefinition OpenAPI Definition content
+     * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
+     * @return APIDefinitionValidationResponse object with validation information
      */
-    public abstract String validateAPIDefinition(String apiDefinition) throws APIManagementException;
+    public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
+            boolean returnJsonContent);
+
+    /**
+     * This method validates the given OpenAPI definition by URL
+     *
+     * @param url URL of the API definition
+     * @param returnJsonContent whether to return the converted json form of the
+     * @return APIDefinitionValidationResponse object with validation information
+     */
+    public abstract APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent);
 
 }

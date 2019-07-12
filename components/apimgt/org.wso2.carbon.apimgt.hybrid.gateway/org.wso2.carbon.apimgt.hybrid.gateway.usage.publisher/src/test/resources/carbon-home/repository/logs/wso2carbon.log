@@ -1,7 +1,4 @@
-TID: [2019-06-26 20:58:53,972]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.UploadedUsageCleanUpTask} -  Uploaded API Usage data in the db will be cleaned up to : 2019-06-06 20:58:53.971 {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.UploadedUsageCleanUpTask}
-TID: [2019-06-26 20:58:55,600]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileCleanupTask} -  API Usage data files will be cleaned up to : 2019-06-06 {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileCleanupTask}
-TID: [2019-06-26 20:58:56,074]  WARN {org.apache.axiom.util.stax.dialect.StAXDialectDetector} -  Unable to determine dialect of the StAX implementation at jar:file:/home/tharindud/.m2/repository/org/apache/ws/commons/axiom/wso2/axiom/1.2.11-wso2v16/axiom-1.2.11-wso2v16.jar!/ {org.apache.axiom.util.stax.dialect.StAXDialectDetector}
-TID: [2019-06-26 20:58:58,906] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher} -  Error while publishing Request event {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher}
+TID: [2019-07-23 00:24:39,720] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher} -  Error while publishing Request event {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher}
 java.lang.NullPointerException
 	at org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestResponseStreamPublisherDTO.createPayload(DataBridgeRequestResponseStreamPublisherDTO.java:70)
 	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher.publishEvent(APIMgtUsageFileDataPublisher.java:129)
@@ -49,7 +46,7 @@ java.lang.NullPointerException
 	at org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:203)
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
-TID: [2019-06-26 20:58:58,930] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while rotating the file : /media/tharindud/dev/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
+TID: [2019-07-23 00:24:39,767] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while rotating the file : /Users/malinthaa/wso2apim/gitworkspace/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
 org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException: Error occurred while reading the config file : on-premise-gateway.properties
 	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:83)
 	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.<init>(ConfigManager.java:45)
@@ -68,52 +65,26 @@ Caused by: java.io.FileNotFoundException: null/on-premise-gateway.properties (No
 	at java.io.FileInputStream.<init>(FileInputStream.java:93)
 	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:73)
 	... 9 more
-TID: [2019-06-26 20:58:58,932] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while rotating the file : /media/tharindud/dev/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
-org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException: Error occurred while reading the config file : on-premise-gateway.properties
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:83)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.<init>(ConfigManager.java:45)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.getConfigManager(ConfigManager.java:57)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter.writeToFile(UsageFileWriter.java:118)
+TID: [2019-07-23 00:24:40,303]  WARN {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while writing event [streamId-KS-org.wso2.apimgt.statistics.request:1.0.0-ES-timestamp-KS-12324343-ES-metadata-KS-null-ES-correlationData-KS-null-ES-payLoadData-KS-null] to the file : /Users/malinthaa/wso2apim/gitworkspace/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
+java.io.IOException: Stream closed
+	at java.io.BufferedWriter.ensureOpen(BufferedWriter.java:116)
+	at java.io.BufferedWriter.write(BufferedWriter.java:221)
+	at java.io.Writer.write(Writer.java:157)
+	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter.writeToFile(UsageFileWriter.java:132)
 	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:180)
 	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:151)
 	at com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
 	at java.lang.Thread.run(Thread.java:748)
-Caused by: java.io.FileNotFoundException: null/on-premise-gateway.properties (No such file or directory)
-	at java.io.FileInputStream.open0(Native Method)
-	at java.io.FileInputStream.open(FileInputStream.java:195)
-	at java.io.FileInputStream.<init>(FileInputStream.java:138)
-	at java.io.FileInputStream.<init>(FileInputStream.java:93)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:73)
-	... 9 more
-TID: [2019-06-26 20:58:58,935] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while rotating the file : /media/tharindud/dev/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
-org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException: Error occurred while reading the config file : on-premise-gateway.properties
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:83)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.<init>(ConfigManager.java:45)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.getConfigManager(ConfigManager.java:57)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter.writeToFile(UsageFileWriter.java:118)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:180)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:151)
-	at com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-	at java.lang.Thread.run(Thread.java:748)
-Caused by: java.io.FileNotFoundException: null/on-premise-gateway.properties (No such file or directory)
-	at java.io.FileInputStream.open0(Native Method)
-	at java.io.FileInputStream.open(FileInputStream.java:195)
-	at java.io.FileInputStream.<init>(FileInputStream.java:138)
-	at java.io.FileInputStream.<init>(FileInputStream.java:93)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:73)
-	... 9 more
-TID: [2019-06-26 20:59:01,037]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Started publishing API usage in file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 1213232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
-TID: [2019-06-26 20:59:31,041]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Completed publishing API Usage from file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 1213232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
-TID: [2019-06-26 20:59:31,054]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Started publishing API usage in file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 121232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
-TID: [2019-06-26 21:00:01,056]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Completed publishing API Usage from file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 121232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
-TID: [2019-06-27 12:13:43,639]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.UploadedUsageCleanUpTask} -  Uploaded API Usage data in the db will be cleaned up to : 2019-06-07 12:13:43.638 {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.UploadedUsageCleanUpTask}
-TID: [2019-06-27 12:13:45,782]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileCleanupTask} -  API Usage data files will be cleaned up to : 2019-06-07 {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileCleanupTask}
-TID: [2019-06-27 12:13:46,174]  WARN {org.apache.axiom.util.stax.dialect.StAXDialectDetector} -  Unable to determine dialect of the StAX implementation at jar:file:/media/tharindud/dev/m2apimgt/org/apache/ws/commons/axiom/wso2/axiom/1.2.11-wso2v16/axiom-1.2.11-wso2v16.jar!/ {org.apache.axiom.util.stax.dialect.StAXDialectDetector}
-TID: [2019-06-27 12:13:48,737] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher} -  Error while publishing Request event {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher}
+TID: [2019-07-23 00:24:40,759]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.UploadedUsageCleanUpTask} -  Uploaded API Usage data in the db will be cleaned up to : 2019-07-03 00:24:40.758 {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.UploadedUsageCleanUpTask}
+TID: [2019-07-23 00:24:41,167]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileCleanupTask} -  API Usage data files will be cleaned up to : 2019-07-03 {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileCleanupTask}
+TID: [2019-07-23 00:24:42,400]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Started publishing API usage in file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 121232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 00:25:12,413]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Completed publishing API Usage from file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 121232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 00:25:12,431]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Started publishing API usage in file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 1213232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 00:25:42,440]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Completed publishing API Usage from file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 1213232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 00:25:42,774]  WARN {org.apache.axiom.util.stax.dialect.StAXDialectDetector} -  Unable to determine dialect of the StAX implementation at jar:file:/Users/malinthaa/.m2/repository/org/apache/ws/commons/axiom/wso2/axiom/1.2.11-wso2v16/axiom-1.2.11-wso2v16.jar!/ {org.apache.axiom.util.stax.dialect.StAXDialectDetector}
+TID: [2019-07-23 10:20:25,889] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher} -  Error while publishing Request event {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher}
 java.lang.NullPointerException
 	at org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestResponseStreamPublisherDTO.createPayload(DataBridgeRequestResponseStreamPublisherDTO.java:70)
 	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.APIMgtUsageFileDataPublisher.publishEvent(APIMgtUsageFileDataPublisher.java:129)
@@ -161,64 +132,22 @@ java.lang.NullPointerException
 	at org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(ForkedBooter.java:203)
 	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:155)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:103)
-TID: [2019-06-27 12:13:48,777] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while rotating the file : /media/tharindud/dev/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
-org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException: Error occurred while reading the config file : on-premise-gateway.properties
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:83)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.<init>(ConfigManager.java:45)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.getConfigManager(ConfigManager.java:57)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter.writeToFile(UsageFileWriter.java:118)
+TID: [2019-07-23 10:20:26,672]  WARN {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while writing event [streamId-KS-org.wso2.apimgt.statistics.request:1.0.0-ES-timestamp-KS-12324343-ES-metadata-KS-null-ES-correlationData-KS-null-ES-payLoadData-KS-null] to the file : /Users/malinthaa/wso2apim/gitworkspace/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
+java.io.IOException: Stream closed
+	at java.io.BufferedWriter.ensureOpen(BufferedWriter.java:116)
+	at java.io.BufferedWriter.write(BufferedWriter.java:221)
+	at java.io.Writer.write(Writer.java:157)
+	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter.writeToFile(UsageFileWriter.java:132)
 	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:180)
 	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:151)
 	at com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
 	at java.lang.Thread.run(Thread.java:748)
-Caused by: java.io.FileNotFoundException: null/on-premise-gateway.properties (No such file or directory)
-	at java.io.FileInputStream.open0(Native Method)
-	at java.io.FileInputStream.open(FileInputStream.java:195)
-	at java.io.FileInputStream.<init>(FileInputStream.java:138)
-	at java.io.FileInputStream.<init>(FileInputStream.java:93)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:73)
-	... 9 more
-TID: [2019-06-27 12:13:48,786] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while rotating the file : /media/tharindud/dev/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
-org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException: Error occurred while reading the config file : on-premise-gateway.properties
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:83)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.<init>(ConfigManager.java:45)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.getConfigManager(ConfigManager.java:57)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter.writeToFile(UsageFileWriter.java:118)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:180)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:151)
-	at com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-	at java.lang.Thread.run(Thread.java:748)
-Caused by: java.io.FileNotFoundException: null/on-premise-gateway.properties (No such file or directory)
-	at java.io.FileInputStream.open0(Native Method)
-	at java.io.FileInputStream.open(FileInputStream.java:195)
-	at java.io.FileInputStream.<init>(FileInputStream.java:138)
-	at java.io.FileInputStream.<init>(FileInputStream.java:93)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:73)
-	... 9 more
-TID: [2019-06-27 12:13:48,788] ERROR {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter} -  Error occurred while rotating the file : /media/tharindud/dev/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter}
-org.wso2.carbon.apimgt.hybrid.gateway.common.exception.OnPremiseGatewayException: Error occurred while reading the config file : on-premise-gateway.properties
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:83)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.<init>(ConfigManager.java:45)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.getConfigManager(ConfigManager.java:57)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.UsageFileWriter.writeToFile(UsageFileWriter.java:118)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:180)
-	at org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.FileDataPublisher$EventQueueWorker.onEvent(FileDataPublisher.java:151)
-	at com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:128)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-	at java.lang.Thread.run(Thread.java:748)
-Caused by: java.io.FileNotFoundException: null/on-premise-gateway.properties (No such file or directory)
-	at java.io.FileInputStream.open0(Native Method)
-	at java.io.FileInputStream.open(FileInputStream.java:195)
-	at java.io.FileInputStream.<init>(FileInputStream.java:138)
-	at java.io.FileInputStream.<init>(FileInputStream.java:93)
-	at org.wso2.carbon.apimgt.hybrid.gateway.common.config.ConfigManager.init(ConfigManager.java:73)
-	... 9 more
-TID: [2019-06-27 12:13:51,280]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Started publishing API usage in file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 1213232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
-TID: [2019-06-27 12:14:21,285]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Completed publishing API Usage from file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 1213232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
-TID: [2019-06-27 12:14:21,302]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Started publishing API usage in file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 121232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
-TID: [2019-06-27 12:14:51,306]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Completed publishing API Usage from file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 121232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 10:20:27,163]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.UploadedUsageCleanUpTask} -  Uploaded API Usage data in the db will be cleaned up to : 2019-07-03 10:20:27.162 {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.UploadedUsageCleanUpTask}
+TID: [2019-07-23 10:20:27,586]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileCleanupTask} -  API Usage data files will be cleaned up to : 2019-07-03 {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.tasks.APIUsageFileCleanupTask}
+TID: [2019-07-23 10:20:28,912]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Started publishing API usage in file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 121232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 10:20:58,916]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Completed publishing API Usage from file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 121232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 10:20:58,935]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Started publishing API usage in file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 1213232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 10:21:28,936]  INFO {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher} -  Completed publishing API Usage from file : [ Tenant : ccc2222, FileName : api-usage-data.dat.1511772769858.046b6c7f-0b8a-43b9-b35d-6489e6daee91.zip, TimeStamp : 1213232] {org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.UploadedUsagePublisher}
+TID: [2019-07-23 10:21:29,352]  WARN {org.apache.axiom.util.stax.dialect.StAXDialectDetector} -  Unable to determine dialect of the StAX implementation at jar:file:/Users/malinthaa/.m2/repository/org/apache/ws/commons/axiom/wso2/axiom/1.2.11-wso2v16/axiom-1.2.11-wso2v16.jar!/ {org.apache.axiom.util.stax.dialect.StAXDialectDetector}
