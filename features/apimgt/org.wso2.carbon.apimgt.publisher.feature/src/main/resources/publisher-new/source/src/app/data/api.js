@@ -471,6 +471,20 @@ class API extends Resource {
             }, this._requestMetaData());
         });
     }
+    
+    /**
+     * Delete the current api product instance
+     * @param id {String} UUID of the API which want to delete
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    deleteProduct() {
+        return this.client.then((client) => {
+            return client.apis['API Product (Individual)'].delete_api_products__apiProductId_({
+                apiProductId: this.id
+            }, this._requestMetaData());
+        });
+    }
 
     /**
      * Get the life cycle state of an API given its id (UUID)

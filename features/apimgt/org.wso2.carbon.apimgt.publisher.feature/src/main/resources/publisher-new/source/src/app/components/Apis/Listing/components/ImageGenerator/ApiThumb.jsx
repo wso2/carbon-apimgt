@@ -82,17 +82,30 @@ class APIThumb extends Component {
     handleApiDelete() {
         const { id } = this.props.api;
         this.setState({ loading: true });
-        const { updateAPIsList } = this.props;
-        const promisedDelete = API.delete(id);
-        promisedDelete.then((response) => {
-            if (response.status !== 200) {
-                Alert.info('Something went wrong while deleting the API!');
-                return;
-            }
-            updateAPIsList(id);
-            Alert.info(`API ${id} deleted Successfully`);
-            this.setState({ loading: false });
-        });
+        const { updateAPIsList, isAPIProduct } = this.props;
+        if (isAPIProduct) {
+            const promisedDelete = API.deleteProduct(id);
+            promisedDelete.then((response) => {
+                if (response.status !== 200) {
+                    Alert.info('Something went wrong while deleting the API Product!');
+                    return;
+                }
+                updateAPIsList(id);
+                Alert.info(`API Product ${id} deleted Successfully`);
+                this.setState({ loading: false });
+            });
+        } else {
+            const promisedDelete = API.delete(id);
+            promisedDelete.then((response) => {
+                if (response.status !== 200) {
+                    Alert.info('Something went wrong while deleting the API!');
+                    return;
+                }
+                updateAPIsList(id);
+                Alert.info(`API ${id} deleted Successfully`);
+                this.setState({ loading: false });
+            });
+        }
     }
 
     /**
@@ -157,7 +170,7 @@ class APIThumb extends Component {
                 </CardContent>
                 <CardActions className={classes.apiActions}>
                     <Chip label={isAPIProduct ? api.state : api.lifeCycleStatus} color='default' />
-                    <DeleteApiButton onClick={this.handleApiDelete} api={api} />
+                    <DeleteApiButton onClick={this.handleApiDelete} api={api} isAPIProduct={isAPIProduct} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>
             </Card>
