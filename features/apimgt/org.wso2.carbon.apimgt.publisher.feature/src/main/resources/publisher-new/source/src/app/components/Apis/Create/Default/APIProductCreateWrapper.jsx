@@ -47,8 +47,6 @@ class APIProductCreateWrapper extends Component {
      */
     handleSubmit(e) {
         e.preventDefault();
-        // eslint-disable-next-line no-debugger
-        debugger;
         const { api: currentAPI } = this.state;
         if (!currentAPI.name || !currentAPI.context) {
             // Checking the api name,context undefined or empty states
