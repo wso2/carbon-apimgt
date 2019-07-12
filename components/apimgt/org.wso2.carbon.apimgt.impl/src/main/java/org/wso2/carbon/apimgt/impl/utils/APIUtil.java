@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
+import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -105,6 +106,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.DefaultPasswordResolverImpl;
+import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
@@ -2187,8 +2190,8 @@ public final class APIUtil {
                         if (password != null) {
 
                             String value = password.getText();
-
-                            store.setPassword(replaceSystemProperty(value));
+                            PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
+                            store.setPassword(replaceSystemProperty(passwordResolver.getPassword(value)));
                             store.setUsername(replaceSystemProperty(storeElem.getFirstChildWithName(
                                     new QName(APIConstants.EXTERNAL_API_STORE_USERNAME)).getText()));
                             //Set store login username

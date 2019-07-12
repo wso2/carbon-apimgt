@@ -62,7 +62,6 @@
             "Authorization": authorizationHeader,
             "Content-Type": "application/json"
         }, "json");
-
         clientId = result.data.clientId;
         var clientSecret = result.data.clientSecret;
 

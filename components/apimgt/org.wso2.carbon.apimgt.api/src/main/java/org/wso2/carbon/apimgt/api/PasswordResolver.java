@@ -1,4 +1,3 @@
-<%
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -12,20 +11,20 @@
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
+ * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
 
- // TODO: Wrap these consts with an object and do `require` when needed ~tmkb
-var MGT_TRANSPORT = "https://";
-var HOST = "localhost";
-var SETTINGS_REST_API_URL_SUFFIX = "/api/am/publisher/v1.0/settings";
-var DCR_URL_SUFFIX =  "/client-registration/v0.14/register";
-var AUTHORIZE_ENDPOINT_SUFFIX = "/oauth2/authorize";
-var TOKEN_URL_SUFFIX = "/oauth2/token";
-var REVOKE_URL_SUFFIX = "/oauth2/revoke";
-var LOGIN_CALLBACK_URL_SUFFIX = "/services/auth/callback/login";
-var LOGOUT_CALLBACK_URL_SUFFIX = "/services/auth/callback/logout"
+package org.wso2.carbon.apimgt.api;
 
-%>
+public interface PasswordResolver {
+
+    /**
+     * Get the resolved password
+     *
+     * @param encryptedPassword password string given in registry configuration
+     * @return password as as string
+     */
+    String getPassword(String encryptedPassword);
+}
