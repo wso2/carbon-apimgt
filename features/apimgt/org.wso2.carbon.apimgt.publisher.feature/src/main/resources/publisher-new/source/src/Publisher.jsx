@@ -87,7 +87,7 @@ class Publisher extends React.Component {
      */
     componentDidMount() {
         const locale = languageWithoutRegionCode || language;
-        this.loadLocale(locale);
+        this.loadLocale('si');
         const user = AuthManager.getUser();
         if (user) {
             const hasViewScope = user.scopes.includes('apim:api_view');
@@ -141,8 +141,8 @@ class Publisher extends React.Component {
      */
     loadLocale(locale = 'en') {
         fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
-            .then((resp) => {
-                const data = resp.json();
+            .then(resp => resp.json())
+            .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
                 this.setState({ messages: defineMessages({ ...data }) });
