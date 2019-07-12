@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import API from 'AppData/api.js';
 import Alert from 'AppComponents/Shared/Alert';
 import APICreateDefault from './APICreateDefault';
-
+import APICreateTopMenu from '../Components/APICreateTopMenu';
 /**
  * Wrapper for API create component. this wrapper is used when creating
  * an API
@@ -116,13 +116,17 @@ class APICreateWrapper extends Component {
      * @inheritDoc
      */
     render() {
-        return (<APICreateDefault
-            api={this.state.api}
-            handleSubmit={this.handleSubmit}
-            inputChange={this.inputChange}
-            isAPIProduct={false}
-            valid={this.state.valid}
-        />);
+        return (
+            <React.Fragment>
+                <APICreateTopMenu />
+                <APICreateDefault
+                    api={this.state.api}
+                    handleSubmit={this.handleSubmit}
+                    inputChange={this.inputChange}
+                    isAPIProduct={false}
+                    valid={this.state.valid}
+                />
+            </React.Fragment>);
     }
 }
 

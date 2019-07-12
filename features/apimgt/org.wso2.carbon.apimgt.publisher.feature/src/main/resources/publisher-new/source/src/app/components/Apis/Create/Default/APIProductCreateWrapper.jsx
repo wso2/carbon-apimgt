@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import API from 'AppData/api.js';
 import Alert from 'AppComponents/Shared/Alert';
 import APICreateDefault from './APICreateDefault';
+import APIProductDetailsTopMenu from '../Components/APIProductCreateTopMenu';
 
 /**
  * Wrapper for API create component. this wrapper is used when creating
@@ -148,13 +149,17 @@ class APIProductCreateWrapper extends Component {
      * @inheritDoc
      */
     render() {
-        return (<APICreateDefault
-            api={this.state.api}
-            handleSubmit={this.handleSubmit}
-            inputChange={this.inputChange}
-            isAPIProduct
-            valid={this.state.valid}
-        />);
+        return (
+            <React.Fragment>
+                <APIProductDetailsTopMenu />
+                <APICreateDefault
+                    api={this.state.api}
+                    handleSubmit={this.handleSubmit}
+                    inputChange={this.inputChange}
+                    isAPIProduct
+                    valid={this.state.valid}
+                />
+            </React.Fragment>);
     }
 }
 
