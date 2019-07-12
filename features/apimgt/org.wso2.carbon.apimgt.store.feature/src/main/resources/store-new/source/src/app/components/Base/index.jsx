@@ -6,7 +6,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import ListItem from '@material-ui/core/ListItem';
-
+import { injectIntl } from 'react-intl';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
 import Utils from '../../data/Utils';
@@ -39,6 +39,7 @@ import Paper from '@material-ui/core/Paper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import HowToReg from '@material-ui/icons/HowToReg';
 import VerticalDivider from '../Shared/VerticalDivider';
+import Alert from '../Shared/Alert';
 
 const styles = theme => ({
     appBar: {
@@ -195,10 +196,14 @@ class Layout extends React.Component {
         document.body.style.height = null;
         document.body.style.margin = null;
     }
-    render() {
-        const { classes, theme } = this.props;
-        const user = AuthManager.getUser();
 
+    render() {
+        const { classes, theme, intl } = this.props;
+
+        // Initialize Alert with i18n
+        Alert.init(intl);
+
+        const user = AuthManager.getUser();
         return (
             <React.Fragment>
                 <div className={classes.wrapper}>
@@ -330,6 +335,7 @@ class Layout extends React.Component {
 Layout.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Layout);
+export default injectIntl(withStyles(styles, { withTheme: true })(Layout));

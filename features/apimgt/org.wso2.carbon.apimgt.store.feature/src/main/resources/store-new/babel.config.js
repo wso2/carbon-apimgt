@@ -31,6 +31,7 @@ module.exports = {
                 'react-intl-auto',
                 {
                     removePrefix: 'source.src.app.components',
+                    useKey: true,
                 },
             ]],
         },
