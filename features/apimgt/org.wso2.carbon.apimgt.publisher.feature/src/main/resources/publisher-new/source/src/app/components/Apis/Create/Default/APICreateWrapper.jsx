@@ -35,7 +35,7 @@ class APICreateWrapper extends Component {
                 name: { empty: false, alreadyExists: false },
                 context: { empty: false, alreadyExists: false },
                 version: { empty: false },
-                endpoint: { empty: false },
+                endpointConfig: { empty: false },
             },
         };
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -50,7 +50,7 @@ class APICreateWrapper extends Component {
     handleSubmit(e) {
         e.preventDefault();
         const { api: currentAPI } = this.state;
-        if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpoint) {
+        if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpointConfig) {
             // Checking the api name,version,context undefined or empty states
             this.setState((oldState) => {
                 const { valid, api } = oldState;
@@ -58,12 +58,13 @@ class APICreateWrapper extends Component {
                 validUpdated.name.empty = !api.name;
                 validUpdated.context.empty = !api.context;
                 validUpdated.version.empty = !api.version;
-                validUpdated.endpoint.empty = !api.endpoint;
+                validUpdated.endpointConfig.empty = !api.endpointConfig;
                 return { valid: validUpdated };
             });
             return;
         }
-        currentAPI.save()
+        currentAPI
+            .save()
             .then((newAPI) => {
                 const redirectURL = '/apis/' + newAPI.id + '/overview';
                 Alert.info(`${newAPI.name} created.`);
@@ -88,52 +89,15 @@ class APICreateWrapper extends Component {
         this.setState(({ api, valid }) => {
             const changes = api;
             if (name === 'endpoint') {
-                changes[name] = [
-                    {
-                        inline: {
-                            name: `${api.name}_inline_production`,
-                            endpointConfig: {
-                                list: [
-                                    {
-                                        url: value,
-                                        timeout: '1000',
-                                    },
-                                ],
-                                endpointType: 'SINGLE',
-                            },
-                            endpointSecurity: {
-                                enabled: false,
-                                type: 'basic',
-                                username: 'basic',
-                                password: 'basic',
-                            },
-                            type: 'http',
-                        },
-                        type: 'production_endpoints',
+                changes.endpointConfig = {
+                    endpoint_type: 'http',
+                    sandbox_endpoints: {
+                        url: value,
                     },
-                    {
-                        inline: {
-                            name: `${api.name}_inline_sandbox`,
-                            endpointConfig: {
-                                list: [
-                                    {
-                                        url: value,
-                                        timeout: '1000',
-                                    },
-                                ],
-                                endpointType: 'SINGLE',
-                            },
-                            endpointSecurity: {
-                                enabled: false,
-                                type: 'basic',
-                                username: 'basic',
-                                password: 'basic',
-                            },
-                            type: 'http',
-                        },
-                        type: 'sandbox_endpoints',
+                    production_endpoints: {
+                        url: value,
                     },
-                ];
+                };
             } else {
                 changes[name] = value;
             }
@@ -142,7 +106,7 @@ class APICreateWrapper extends Component {
             validUpdated.name.empty = !api.name;
             validUpdated.context.empty = !api.context;
             validUpdated.version.empty = !api.version;
-            validUpdated.endpoint.empty = !api.endpoint;
+            validUpdated.endpointConfig.empty = !api.endpointConfig;
             // TODO we need to add the already existing error for (context)
             // by doing an api call ( the swagger definition does not contain such api call)
             return { api: changes, valid: validUpdated };

@@ -181,34 +181,34 @@ class APIInputForm extends Component {
                     />
                 </FormControl>
                 {isAPIProduct ? null : (
-                <FormControl margin='normal' className={classes.FormControlOdd}>
-                    <TextField
-                        error={valid.version.empty}
-                        fullWidth
-                        id='endpoint'
-                        placeholder='E.g: http://appserver/resource'
-                        helperText={
-                            valid.context.empty ? (
-                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
-                            ) : (
-                                <FormattedMessage
-                                    id='api.create.endpoint.help'
-                                    defaultMessage={'This is the actual endpoint' +
+                    <FormControl margin='normal' className={classes.FormControlOdd}>
+                        <TextField
+                            error={valid.version.empty}
+                            fullWidth
+                            id='endpoint'
+                            placeholder='E.g: http://appserver/resource'
+                            helperText={
+                                valid.context.empty ? (
+                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                ) : (
+                                    <FormattedMessage
+                                        id='api.create.endpoint.help'
+                                        defaultMessage={'This is the actual endpoint' +
                                     ' where the API implementation can be found'}
-                                />
-                            )
-                        }
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        label={<FormattedMessage id='endpoint' defaultMessage='Endpoint' />}
-                        type='text'
-                        name='endpoint'
-                        margin='normal'
-                        value={endpoint}
-                        onChange={handleInputChange}
-                    />
-                </FormControl>
+                                    />
+                                )
+                            }
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            label={<FormattedMessage id='endpoint' defaultMessage='Endpoint' />}
+                            type='text'
+                            name='endpoint'
+                            margin='normal'
+                            value={endpoint}
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
                 )}
                 <FormControl margin='normal' className={classes.FormControl}>
                     <ScopeValidation
