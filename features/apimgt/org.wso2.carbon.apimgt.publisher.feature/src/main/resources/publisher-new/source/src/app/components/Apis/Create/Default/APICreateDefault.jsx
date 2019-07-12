@@ -84,11 +84,11 @@ class APICreateForm extends Component {
         } = this.state;
         let id = 'create.new.rest.api';
         let defaultMessage = 'New REST API';
+        let version = (api.version ? api.version : '{apiVersion}') + '/';
         if (isAPIProduct) {
-            // products do not support versioning. setting it to default
-            api.version = '1.0.0';
             id = 'create.new.api.product';
             defaultMessage = 'New API Product';
+            version = '';
         }
         return (
             <Grid container spacing={24} className={classes.root}>
@@ -102,8 +102,7 @@ class APICreateForm extends Component {
                             )}
                         </Typography>
                         <Typography variant='h5' align='left' className={classes.subTitle}>
-                            GATEWAY-URL/
-                            {api.version ? api.version : '{apiVersion}'}/{api.context ? api.context : '{context}'}
+                            GATEWAY-URL/{version}{api.context ? api.context : '{context}'}
                         </Typography>
                     </div>
                     <form onSubmit={handleSubmit}>

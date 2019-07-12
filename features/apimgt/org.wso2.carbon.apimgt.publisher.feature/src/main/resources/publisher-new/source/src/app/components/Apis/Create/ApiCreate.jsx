@@ -26,7 +26,6 @@ import APICreateWrapper from './/Default/APICreateWrapper';
 import APIProductCreateWrapper from './/Default/APIProductCreateWrapper';
 import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
-import APICreateTopMenu from './Components/APICreateTopMenu';
 
 const styles = {
     content: {
@@ -45,7 +44,6 @@ function ApiCreate(props) {
     const { classes } = props;
     return (
         <main className={classes.content}>
-            <APICreateTopMenu />
             <Switch>
                 <Route path='/apis/create/rest' component={APICreateWrapper} />
                 <Route path='/api-products/create' component={APIProductCreateWrapper} />
