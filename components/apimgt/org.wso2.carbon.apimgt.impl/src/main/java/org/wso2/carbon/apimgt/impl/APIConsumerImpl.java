@@ -2763,7 +2763,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setSubscriber(userId);
 
                 Tier tier = null;
-                Set<Tier> policies = api.getAvailableTiers();
+                Set<Tier> policies = Collections.emptySet();
+                if (api != null) {
+                    policies = api.getAvailableTiers();
+                } else if (product != null) {
+                    policies = product.getAvailableTiers();
+                }
+
                 Iterator<Tier> iterator = policies.iterator();
                 boolean isPolicyAllowed = false;
                 while (iterator.hasNext()) {
@@ -2772,8 +2778,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         tier = policy;
                     }
                 }
+                boolean isMonetizationEnabled = false;
+
+                if (api != null) {
+                    isMonetizationEnabled = api.getMonetizationStatus();
+                }
+
                 //check whether monetization is enabled for API and tier plan is commercial
-                if (api.getMonetizationStatus() == true && tier.getTierPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
+                if (isMonetizationEnabled == true && tier.getTierPlan().equals(APIConstants.COMMERCIAL_TIER_PLAN)) {
                     workflowResponse = addSubscriptionWFExecutor.monetizeSubscription(workflowDTO, api);
                 } else {
                     workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);

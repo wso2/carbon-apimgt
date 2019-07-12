@@ -46,7 +46,9 @@ public class APIProduct {
     private JSONObject additionalProperties = new JSONObject();
     private Set<String> environments;
 
-    // API security at the gateway level.
+    /**
+     * API security at the gateway level.
+     */
     private String apiSecurity = "oauth2";
 
     private String transports;
@@ -54,11 +56,15 @@ public class APIProduct {
     private int cacheTimeout;
     private String thumbnailUrl;
 
-    // Used for keeping Production & Sandbox Throttling limits.
+    /**
+     * Used for keeping Production & Sandbox Throttling limits.
+     */
     private String productionMaxTps;
     private String sandboxMaxTps;
 
-    //Custom authorization header specific to the API
+    /**
+     * Custom authorization header specific to the API
+     */
     private String authorizationHeader;
 
     private CORSConfiguration corsConfiguration;
