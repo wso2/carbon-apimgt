@@ -23,7 +23,7 @@ import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import Configurations from 'Config';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { Apis, Applications, Base } from './components';
-import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreate';
+import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreateForm';
 import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
 import AuthManager from './data/AuthManager';
 import ApplicationEdit from './components/Applications/Edit/ApplicationEdit';
@@ -170,7 +170,7 @@ export default class ProtectedApp extends Component {
             .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages: defineMessages(data) });
+                this.setState({ messages: defineMessages({ ...data }) });
             });
     }
 

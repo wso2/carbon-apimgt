@@ -92,6 +92,7 @@ class Avatar extends Component {
         return (
             <React.Fragment>
                 <IconButton
+                    id='profile-menu-btn'
                     aria-owns='profile-menu-appbar'
                     aria-haspopup='true'
                     color='inherit'
@@ -110,7 +111,7 @@ class Avatar extends Component {
                                         {/* <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>
                                          <MenuItem onClick={this.toggleMenu}>My account</MenuItem> */}
                                         <Link to={{ pathname: '/services/logout' }}>
-                                            <MenuItem onClick={this.doOIDCLogout}>Logout</MenuItem>
+                                            <MenuItem onClick={this.doOIDCLogout} id='logout'>Logout</MenuItem>
                                         </Link>
                                         {/* TODO: uncomment when component run without errors */}
                                         {/* <Divider />

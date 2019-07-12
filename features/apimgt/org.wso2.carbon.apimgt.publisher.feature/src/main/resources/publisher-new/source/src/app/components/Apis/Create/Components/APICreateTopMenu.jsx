@@ -26,8 +26,6 @@ import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
-// import { FormattedMessage } from 'react-intl';
-
 const styles = theme => ({
     rightIcon: {
         marginLeft: theme.spacing.unit,

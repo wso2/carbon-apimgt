@@ -23,11 +23,32 @@ module.exports = {
         },
         production: {
             presets: ['@babel/preset-env', '@babel/preset-react'],
-            plugins: ['@babel/plugin-syntax-dynamic-import', '@babel/plugin-proposal-class-properties'],
+            plugins: [
+                '@babel/plugin-proposal-class-properties',
+                [
+                    'react-intl-auto',
+                    {
+                        removePrefix: 'app/',
+                    },
+                ],
+                '@babel/plugin-syntax-dynamic-import',
+
+            ],
         },
         development: {
             presets: ['@babel/preset-env', '@babel/preset-react'],
-            plugins: ['@babel/plugin-syntax-dynamic-import', '@babel/plugin-proposal-class-properties'],
+            plugins: [
+                '@babel/plugin-proposal-class-properties',
+                [
+                    'react-intl-auto',
+                    {
+                        removePrefix: 'app/',
+                    },
+                ],
+                '@babel/plugin-syntax-dynamic-import',
+
+            ],
+
         },
     },
 };
