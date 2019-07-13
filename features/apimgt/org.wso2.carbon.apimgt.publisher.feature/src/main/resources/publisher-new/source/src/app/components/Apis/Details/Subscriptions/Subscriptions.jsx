@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl } from 'react-intl';
 import withStyles from '@material-ui/core/styles/withStyles';
 
 import API from 'AppData/api';
@@ -48,11 +49,16 @@ class Subscriptions extends Component {
     }
 
     render() {
+        const { intl } = this.props;
         const { api } = this.state;
         const { resourceNotFoundMessage } = this.props;
 
         if (this.state.notFound) {
-            return <ResourceNotFound message={resourceNotFoundMessage} />;
+            return (<ResourceNotFound message={intl.formatMessage({
+                id: 'Apis.Details.Subscriptions.Subscriptions.resource.not.found.msg',
+                defaultMessage: resourceNotFoundMessage,
+            })}
+            />);
         }
 
         if (!api) {
@@ -76,6 +82,7 @@ Subscriptions.propTypes = {
         id: PropTypes.string,
     }).isRequired,
     resourceNotFoundMessage: PropTypes.string,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(Subscriptions);
+export default injectIntl(withStyles(styles)(Subscriptions));
