@@ -32,6 +32,7 @@ import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import AddCircle from '@material-ui/icons/AddCircle';
 import Divider from '@material-ui/core/Divider';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import AddPolicy from './AddPolicy';
 
@@ -130,11 +131,15 @@ class SecurityOverview extends Component {
     }
 
     deletePolicy(id) {
+        const { intl } = this.props;
         const associatedApi = this.state.api;
         const promisedPolicyDelete = this.api.deleteThreatProtectionPolicyFromApi(associatedApi.id, id);
         promisedPolicyDelete.then((response) => {
             if (response.status === 200) {
-                Alert.info('Policy removed successfully.');
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Security.SecurityOverview.policy.remove.success',
+                    defaultMessage: 'Policy removed successfully.',
+                }));
 
                 //   remove policy from local api
                 const index = associatedApi.threatProtectionPolicies.list.indexOf({ policyId: id });
@@ -142,7 +147,10 @@ class SecurityOverview extends Component {
                 this.setState({ api: associatedApi });
                 this.updatePolicyData();
             } else {
-                Alert.error('Failed to remove policy.');
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Security.SecurityOverview.policy.remove.failure',
+                    defaultMessage: 'Failed to remove policy.',
+                }));
             }
         });
     }
@@ -171,11 +179,17 @@ class SecurityOverview extends Component {
                 <div className={classes.contentWrapper}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            Threat Protection Policies
+                            <FormattedMessage
+                                id='Apis.Details.Security.SecurityOverview.threat.protection.policies'
+                                defaultMessage='Threat Protection Policies'
+                            />
                         </Typography>
                         <Button size='small' className={classes.button} onClick={this.toggleShowAddPolicy}>
                             <AddCircle className={classes.buttonIcon} />
-                            Add New Threat Protection Policy
+                            <FormattedMessage
+                                id='Apis.Details.Security.SecurityOverview.add.threat.protection.policy'
+                                defaultMessage='Add New Threat Protection Policy'
+                            />
                         </Button>
                     </div>
                 </div>
@@ -192,15 +206,33 @@ class SecurityOverview extends Component {
                 <div className={classes.contentWrapper}>
                     <div className={classes.addNewWrapper}>
                         <Typography className={classes.addNewHeader}>
-                            Manage Threat Protection Policies
+                            <FormattedMessage
+                                id='Apis.Details.Security.SecurityOverview.manage.threat.protection.policies'
+                                defaultMessage='Manage Threat Protection Policies'
+                            />
                         </Typography>
                         <Divider className={classes.divider} />
                         <Table className={classes.table}>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Policy Name</TableCell>
-                                    <TableCell>Policy Type</TableCell>
-                                    <TableCell>Policy</TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Security.SecurityOverview.policy.name'
+                                            defaultMessage='Policy Name'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Security.SecurityOverview.policy.type'
+                                            defaultMessage='Policy Type'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Security.SecurityOverview.policy'
+                                            defaultMessage='Policy'
+                                        />
+                                    </TableCell>
                                     <TableCell />
                                 </TableRow>
                             </TableHead>
@@ -218,7 +250,10 @@ class SecurityOverview extends Component {
                                             <TableCell>
                                                 <span>
                                                     <Button color='accent' onClick={() => this.deletePolicy(n.uuid)} >
-                                                        Delete
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Security.SecurityOverview.delete'
+                                                            defaultMessage='Delete'
+                                                        />
                                                     </Button>
                                                 </span>
                                             </TableCell>
@@ -241,7 +276,8 @@ SecurityOverview.propTypes = {
             api_uuid: PropTypes.string,
         }),
     }).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 
-export default withStyles(styles)(SecurityOverview);
+export default injectIntl(withStyles(styles)(SecurityOverview));
