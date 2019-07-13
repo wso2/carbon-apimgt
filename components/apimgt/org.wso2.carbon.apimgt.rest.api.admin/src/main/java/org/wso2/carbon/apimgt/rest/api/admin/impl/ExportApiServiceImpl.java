@@ -46,6 +46,8 @@ public class ExportApiServiceImpl extends ExportApiService {
     private static final Log log = LogFactory.getLog(ExportApiServiceImpl.class);
     private static final String APPLICATION_EXPORT_DIR_PREFIX = "exported-app-archives-";
     private static final String DEFAULT_APPLICATION_EXPORT_DIR = "exported-application";
+    private static final String PRODUCTION = "PRODUCTION";
+    private static final String SANDBOX = "SANDBOX";
 
     /**
      * Export an existing Application
@@ -98,12 +100,12 @@ public class ExportApiServiceImpl extends ExportApiService {
                 applicationDetails.clearOAuthApps();
             } else {
                 // encode Oauth secrets
-                OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp("PRODUCTION");
+                OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp(PRODUCTION);
                 if (productionOAuthApplicationInfo != null) {
                     byte[] consumerSecretBytes = productionOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
                     productionOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
                 }
-                OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp("SANDBOX");
+                OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp(SANDBOX);
                 if (sandboxOAuthApplicationInfo != null) {
                     byte[] consumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
                     sandboxOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
