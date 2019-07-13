@@ -16,15 +16,15 @@
  * under the License.
  */
 
-import React from 'react'
+import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 const LoadingAnimation = (props) => {
     return (
         <div>
-            <CircularProgress style={{margin: "auto", display: "block"}}/>
+            <CircularProgress style={{ margin: 'auto', display: 'block' }} />
         </div>
     );
 };
 
-export default LoadingAnimation
+export default LoadingAnimation;
