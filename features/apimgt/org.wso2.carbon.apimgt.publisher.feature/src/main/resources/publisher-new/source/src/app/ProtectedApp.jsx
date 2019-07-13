@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import qs from 'qs';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import { PageNotFound } from 'AppComponents/Base/Errors';
 import Apis from 'AppComponents/Apis/Apis';
@@ -31,6 +30,7 @@ import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
 import Configurations from 'Config';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
+import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 
 const themes = [];
 themes.push(createMuiTheme(Configurations.themes.light));
@@ -92,16 +92,7 @@ export default class Protected extends Component {
         const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} user={user} />} user={user} />;
 
         if (!user) {
-            const { pathname } = window.location;
-            const params = qs.stringify({
-                // acc : Accumulated value, cv: Current value, ci: current index
-                referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
-            });
-            return (
-                <Switch>
-                    <Redirect to={{ pathname: '/login', search: params }} />
-                </Switch>
-            );
+            return <RedirectToLogin />;
         }
         return (
             <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>

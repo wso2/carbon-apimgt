@@ -43,9 +43,8 @@ import SwaggerUI from './SwaggerUI';
 import Application from '../../../../data/Application';
 
 /**
- *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme
  */
 const styles = theme => ({
     inputAdornmentStart: {
@@ -83,7 +82,7 @@ const styles = theme => ({
 class ApiConsole extends React.Component {
     /**
      *Creates an instance of ApiConsole.
-     * @param {*} props
+     * @param {*} props properties
      * @memberof ApiConsole
      */
     constructor(props) {
@@ -99,8 +98,6 @@ class ApiConsole extends React.Component {
     }
 
     /**
-     *
-     *
      * @memberof ApiConsole
      */
     componentDidMount() {
@@ -142,7 +139,7 @@ class ApiConsole extends React.Component {
                 return this.apiClient.getSubscriptions(apiID);
             })
             .then((subscriptionsResponse) => {
-                subscriptions = subscriptionsResponse.obj.list;
+                subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED');
 
                 if (subscriptions && subscriptions.length > 0) {
                     selectedApplication = subscriptions[0].applicationId;
@@ -155,8 +152,8 @@ class ApiConsole extends React.Component {
                         .then((appKeys) => {
                             if (appKeys.get('SANDBOX')) {
                                 selectedKeyType = 'SANDBOX';
-                                ({ accessToken } = appKeys.get('PRODUCTION').token);
-                            } else {
+                                ({ accessToken } = appKeys.get('SANDBOX').token);
+                            } else if (appKeys.get('PRODUCTION')) {
                                 selectedKeyType = 'PRODUCTION';
                                 ({ accessToken } = appKeys.get('PRODUCTION').token);
                             }
@@ -213,7 +210,7 @@ class ApiConsole extends React.Component {
     /**
      *
      * Provids the access token to the Swagger UI
-     * @returns access token
+     * @returns {*} access token
      * @memberof ApiConsole
      */
     accessTokenProvider() {
@@ -222,8 +219,8 @@ class ApiConsole extends React.Component {
     }
 
     /**
-     *
      * Handle onChange of inputs
+     * @param {*} event event
      * @memberof ApiConsole
      */
     handleChanges(event) {
@@ -245,7 +242,6 @@ class ApiConsole extends React.Component {
     }
 
     /**
-     *
      * Load the swagger file of the selected environemnt
      * @memberof ApiConsole
      */
@@ -270,7 +266,6 @@ class ApiConsole extends React.Component {
     }
 
     /**
-     *
      * Load the access token for given key type
      * @memberof ApiConsole
      */
@@ -285,7 +280,6 @@ class ApiConsole extends React.Component {
     }
 
     /**
-     *
      * Load the selected application information
      * @memberof ApiConsole
      */
@@ -307,9 +301,7 @@ class ApiConsole extends React.Component {
     }
 
     /**
-     *
-     *
-     * @returns
+     * @inheritdoc
      * @memberof ApiConsole
      */
     render() {
@@ -341,9 +333,9 @@ class ApiConsole extends React.Component {
                                 <Typography component='p'>
                                     <FormattedMessage
                                         id='api.console.require.access.token'
-                                        defaultMessage={'You require an access token to try the API. Please log ' +
-                                        'in and subscribe to the API to generate an access token. If you already ' +
-                                        'have an access token, please provide it below.'}
+                                        defaultMessage={'You require an access token to try the API. Please log '
+                                        + 'in and subscribe to the API to generate an access token. If you already '
+                                        + 'have an access token, please provide it below.'}
                                     />
                                 </Typography>
                             </Paper>
@@ -370,13 +362,15 @@ class ApiConsole extends React.Component {
                                         ))}
                                     </Select>
                                 </FormControl>
-                                { subscriptions.length === 0 &&
-                                <FormHelperText>
-                                    <FormattedMessage
-                                        id='require.application.subscribe'
-                                        defaultMessage='Please subscribe to an application'
-                                    />
-                                </FormHelperText>
+                                { subscriptions.length === 0
+                                && (
+                                    <FormHelperText>
+                                        <FormattedMessage
+                                            id='require.application.subscribe'
+                                            defaultMessage='Please subscribe to an application'
+                                        />
+                                    </FormHelperText>
+                                )
                                 }
                             </Grid>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>

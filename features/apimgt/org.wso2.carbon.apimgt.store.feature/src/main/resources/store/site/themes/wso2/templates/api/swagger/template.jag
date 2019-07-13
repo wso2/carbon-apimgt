@@ -289,6 +289,9 @@ var show_environments = function(){
     $("#micro-gateways").children("option[class='microgw-label']").show();
 
     var options = $("#environment_name").children('optgroup').children("option[class='hybrid'], option[class='microgw-label'], option[class='" + type + "']");
+    if (type === undefined){
+        options = $("#environment_name").children("option");
+    }
       if (options.length < 2) {
         $(".env_name").hide();
         $(".OnEnvironment").hide();
@@ -307,7 +310,7 @@ var show_environments = function(){
       $(".env_name").hide();
       $(".OnEnvironment").hide();
     }
-    $(".env_name").selectpicker("refresh");
+    $(".env_name").selectpicker();
     select_environment();
   };
 
@@ -363,7 +366,6 @@ function checkOnKeyPress(e) {
 }
 </script>
 <div id="authorizations" class="col-md-12 col-lg-12">
-
 <% if(isOauthProtected && subscriptions != null && subscriptions.length > 0) { %>
 <form class="form-horizontal">
       <div class="form-group oauth-apps">
@@ -467,16 +469,79 @@ function checkOnKeyPress(e) {
             <h4><i class="icon fw fw-info"></i>Notice </h4>
             <p><%=i18n.localize("Please subscribe to the API to generate an access token.")%>&nbsp;<%=i18n.localize("If you already have an access token, please provide it below.")%></p>
         </div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="" class="col-sm-3 control-label OnEnvironment">On Environment</label>
+                <div class="col-sm-9">
+                    <select id="environment_name" class="env_name">
+                        <%
+                        var envir = JSON.parse(api.serverURL);
+                        for(var types in envir){
+                            var endpointType=envir[types];
+                            for(var endpoint in endpointType){
+                                if(endpointType[endpoint]["showInConsole"]){
+                                %>
+                                    <option value="<%=encode.forHtmlAttribute(endpoint)%>" class="<%=types%>"><%=encode.forHtml(endpoint)%></option>
+                                <% }
+                            }
+                        }
+                        %>
+                    </select>
+                </div>
+            </div>
+        </form>
     <% }else if (isOauthProtected && !isMutualSSLProtected) { %>
         <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice</h4>
             <p><%=i18n.localize("You require an access token to try the API. Please login and subscribe to the API to generate an access token.")%> &nbsp; <%=i18n.localize("If you already have an access token, please provide it below.")%></p>
         </div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="" class="col-sm-3 control-label OnEnvironment">On Environment</label>
+                <div class="col-sm-9">
+                    <select id="environment_name" class="env_name">
+                        <%
+                        var envir = JSON.parse(api.serverURL);
+                        for(var types in envir){
+                            var endpointType=envir[types];
+                            for(var endpoint in endpointType){
+                                if(endpointType[endpoint]["showInConsole"]){
+                                %>
+                                    <option value="<%=encode.forHtmlAttribute(endpoint)%>" class="<%=types%>"><%=encode.forHtml(endpoint)%></option>
+                                <% }
+                            }
+                        }
+                        %>
+                    </select>
+                </div>
+            </div>
+        </form>
     <% } else if (isOauthProtected && isMutualSSLProtected) { %>
         <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice</h4>
             <p><%=i18n.localize("You can use either the client certificate or the access token to access this API.")%> &nbsp; <%=i18n.localize("If you already have an access token, please provide it below.")%></p>
         </div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="" class="col-sm-3 control-label OnEnvironment">On Environment</label>
+                <div class="col-sm-9">
+                    <select id="environment_name" class="env_name">
+                        <%
+                        var envir = JSON.parse(api.serverURL);
+                        for(var types in envir){
+                            var endpointType=envir[types];
+                            for(var endpoint in endpointType){
+                                if(endpointType[endpoint]["showInConsole"]){
+                                %>
+                                    <option value="<%=encode.forHtmlAttribute(endpoint)%>" class="<%=types%>"><%=encode.forHtml(endpoint)%></option>
+                                <% }
+                            }
+                        }
+                        %>
+                    </select>
+                </div>
+            </div>
+        </form>
     <% } else { %>
          <div class="message message-info remove-margin-top">
             <h4><i class="icon fw fw-info"></i>Notice </h4>

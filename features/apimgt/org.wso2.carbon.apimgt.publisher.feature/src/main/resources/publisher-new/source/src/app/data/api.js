@@ -41,16 +41,15 @@ class API extends Resource {
             ];
             this.visibility = "PUBLIC";
             this.context = context;
-            this.endpoint = [{
-                inline: {
-                    endpointConfig: {
-                        list: [
-
-                        ]
-                    }
+            this.endpointConfig = {
+                endpoint_type: 'http',
+                sandbox_endpoints: {
+                    url: '',
                 },
-                type: 'production_endpoints'
-            }]
+                production_endpoints : {
+                    url: ''
+                }
+            };
         }
         this._data = properties;
         for (const key in properties) {
@@ -142,37 +141,30 @@ class API extends Resource {
     }
 
     setInlineProductionEndpoint(serviceURL) {
-        this.endpoint = this.endpoint.map(endpoint => {
-            if (endpoint.type.toLowerCase() === 'production') {
-                endpoint.inline.endpointConfig.list = [{
-                    url: serviceURL
-                }]
-            }
-            return endpoint;
-        })
+        this.endpointConfig.production_endpoints.url = serviceURL;
+        return this.endpointConfig;
     }
 
     getProductionEndpoint() {
-        const productionEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'production_endpoints')[0];
-        if (!productionEndpoint) {
-            return null;
-        } else if (productionEndpoint.inline) {
-            return productionEndpoint.inline;
+        if (!this.endpointConfig.production_endpoints) {
+            return "";
+        }
+        if (Array.isArray(this.endpointConfig.production_endpoints)) {
+            return this.endpointConfig.production_endpoints[0].url;
         } else {
-            throw new Exception('Not Implemented for global Endpoints');
+            return this.endpointConfig.production_endpoints.url;
         }
     }
 
     getSandboxEndpoint() {
-        const sandboxEndpoint = this.endpoint.filter(endpoint => endpoint.type.toLowerCase() === 'sandbox_endpoints')[0];
-        if (!sandboxEndpoint) {
-            return null;
-        } else if (sandboxEndpoint.inline) {
-            return sandboxEndpoint.inline;
-        } else {
-            throw new Exception('Not Implemented for global Endpoints');
+        if (!this.endpointConfig.sandbox_endpoints) {
+            return "";
         }
-
+        if (Array.isArray(this.endpointConfig.sandbox_endpoints)) {
+            return this.endpointConfig.sandbox_endpoints[0].url;
+        } else {
+            return this.endpointConfig.sandbox_endpoints.url;
+        }
     }
 
     save() {
@@ -609,99 +601,6 @@ class API extends Resource {
         } else {
             return promise_subscription;
         }
-    }
-
-    /**
-     * Add endpoint via POST HTTP method, need to provided endpoint properties and callback function as argument
-     * @param body {Object} Endpoint to be added
-     */
-    addEndpoint(body) {
-        const promised_addEndpoint = this.client.then((client) => {
-            const payload = {
-                body,
-                'Content-Type': 'application/json'
-            };
-            return client.apis['Endpoint (Collection)'].post_endpoints(payload, this._requestMetaData());
-        });
-
-        return promised_addEndpoint;
-    }
-
-    /**
-     * Delete an Endpoint given its identifier
-     * @param id {String} UUID of the Endpoint which want to delete
-     * @returns {promise}
-     */
-    deleteEndpoint(id) {
-        const promised_delete = this.client.then((client) => {
-            return client.apis['Endpoint (individual)'].delete_endpoints__endpointId_({
-                    endpointId: id,
-                    'Content-Type': 'application/json',
-                },
-                this._requestMetaData(),
-            );
-        });
-        return promised_delete;
-    }
-
-    /**
-     * Get All Global Endpoints.
-     * @deprecated Use Endpoint.all() method instead
-     * @returns {Promise} Promised all list of endpoint
-     */
-    getEndpoints() {
-        return this.client.then((client) => {
-            return client.apis['Endpoint (Collection)'].get_endpoints({}, this._requestMetaData());
-        });
-    }
-
-    /**
-     * Get endpoint object by its UUID.
-     * @deprecated Use Endpoint.get(uuid) static method instead
-     * @param id {String} UUID of the endpoint
-     * @returns {Promise.<TResult>}
-     */
-    getEndpoint(id) {
-        return this.client.then((client) => {
-            return client.apis['Endpoint (individual)'].get_endpoints__endpointId_({
-                    endpointId: id,
-                    'Content-Type': 'application/json',
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * Update endpoint object.
-     * @param data {Object} Endpoint to be updated
-     * @returns {Promise.<TResult>}
-     */
-    updateEndpoint(data) {
-        return this.client.then((client) => {
-            return client.apis['Endpoint (individual)'].put_endpoints__endpointId_({
-                    endpointId: data.id,
-                    body: data,
-                    'Content-Type': 'application/json',
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * Check if an endpoint name already exists.
-     * @param {String} endpointName - Name of the Endpoint
-     * @return {Promise}
-     */
-    checkIfEndpointExists(endpointName) {
-        return this.client.then((client) => {
-            return client.apis['Endpoint (Collection)'].head_endpoints({
-                    name: endpointName,
-                },
-                this._requestMetaData(),
-            );
-        });
     }
 
     /**

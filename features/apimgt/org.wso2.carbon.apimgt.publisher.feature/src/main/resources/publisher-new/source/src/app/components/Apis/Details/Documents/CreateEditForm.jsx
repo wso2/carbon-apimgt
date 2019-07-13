@@ -386,7 +386,7 @@ class CreateEditForm extends React.Component {
                             label='Other Document Category *'
                             helperText={
                                 <FormattedMessage
-                                    id='documents.markdown.editor.create.name.description'
+                                    id='documents.markdown.editor.create.name.document.description'
                                     defaultMessage='Provide the document category'
                                 />
                             }

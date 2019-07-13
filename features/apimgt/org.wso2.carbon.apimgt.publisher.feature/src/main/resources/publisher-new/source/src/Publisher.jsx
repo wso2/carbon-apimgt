@@ -25,7 +25,9 @@ import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
 import Progress from 'AppComponents/Shared/Progress';
 import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
-import InitLogin from 'AppComponents/Login/InitLogin';
+import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
+import Configurations from 'Config';
+
 // Localization
 import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
 
@@ -139,11 +141,11 @@ class Publisher extends React.Component {
      */
     loadLocale(locale = 'en') {
         fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
-            .then(resp => resp.json())
-            .then((data) => {
+            .then((resp) => {
+                const data = resp.json();
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages: defineMessages(data) });
+                this.setState({ messages: defineMessages({ ...data }) });
             });
     }
 
@@ -155,21 +157,20 @@ class Publisher extends React.Component {
      */
     render() {
         const { user, userResolved } = this.state;
-        const { pathname } = window.location;
-        const params = qs.stringify({
-            referrer: pathname.split('/').reduce((acc, cv, ci) => (ci <= 1 ? '' : acc + '/' + cv)),
-        });
+
         if (!userResolved) {
             return <Progress />;
+        }
+        if (!user) {
+            return <RedirectToLogin />;
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
                 <PublisherRootErrorBoundary appName='Publisher Application'>
-                    <Router basename='/publisher-new'>
+                    <Router basename={Configurations.app.context}>
                         <Switch>
-                            <Route path='/login' exact component={InitLogin} />
+                            <Redirect exact from='/login' to='/apis' />
                             <Route path='/logout' component={Logout} />
-                            {!user && <Redirect to={{ pathname: '/login', search: params }} />}
                             <Route
                                 render={() => {
                                     return <LoadableProtectedApp user={user} />;

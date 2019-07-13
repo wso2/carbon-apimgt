@@ -207,6 +207,14 @@ EditableRow.propTypes = {
     handleDelete: PropTypes.shape({}).isRequired,
     apiAdditionalProperties: PropTypes.shape({}).isRequired,
 };
+
+
+/**
+ *
+ *
+ * @class Properties
+ * @extends {React.Component}
+ */
 class Properties extends React.Component {
     constructor(props) {
         super(props);
@@ -320,6 +328,13 @@ class Properties extends React.Component {
         }
         return items;
     }
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof Properties
+     */
     render() {
         const { classes } = this.props;
         const {
@@ -329,7 +344,7 @@ class Properties extends React.Component {
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        API Properties
+                        <FormattedMessage defaultMessage='API Properties' />
                     </Typography>
                     <Button size='small' className={classes.button} onClick={this.toggleAddProperty}>
                         <AddCircle className={classes.buttonIcon} />

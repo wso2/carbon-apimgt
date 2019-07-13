@@ -46,6 +46,7 @@ import Api from 'AppData/api';
 import Resource from './Resource';
 import { Progress } from 'AppComponents/Shared';
 import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 
 const styles = theme => ({
     root: {
@@ -102,7 +103,7 @@ const styles = theme => ({
         padding: theme.spacing.unit*2,
     },
     radioGroup: {
-        display: 'flex', 
+        display: 'flex',
         flexDirection: 'row',
         width: 300,
     },
@@ -242,8 +243,6 @@ class Resources extends React.Component {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
                     this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
                 }
             });
     }
@@ -405,8 +404,6 @@ class Resources extends React.Component {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
                     this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
                 }
             });
     }
@@ -499,7 +496,11 @@ class Resources extends React.Component {
         this.setState({showScopes: !this.state.showScopes, showAddResource: false});
     }
     render() {
-        const { api, showAddResource, apiScopes, showScopes } = this.state;
+        const { api, showAddResource, apiScopes, showScopes, isAuthorize } = this.state;
+
+        if (!isAuthorize) {
+            doRedirectToLogin();
+        }
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
@@ -522,11 +523,11 @@ class Resources extends React.Component {
                     </Button>
                     <Button size="small" className={classes.button} onClick={this.toggleAssignScopes}>
                         <ScopesIcon className={classes.buttonIcon} />
-                        Assign Global Scope for API 
+                        Assign Global Scope for API
                     </Button>
                 </div>
                 <div className={classes.contentWrapper}>
-                    {showAddResource && 
+                    {showAddResource &&
                     <React.Fragment>
                         <div className={classes.addNewWrapper}>
                             <Typography className={classes.addNewHeader}>
@@ -540,10 +541,10 @@ class Resources extends React.Component {
                                     label="URL Pattern"
                                     margin="normal"
                                     variant="outlined"
-                                    id='tmpResourceName' 
+                                    id='tmpResourceName'
                                     className={classes.addResource}
-                                    value={this.state.tmpResourceName} 
-                                    onChange={this.onChangeInput('tmpResourceName')} 
+                                    value={this.state.tmpResourceName}
+                                    onChange={this.onChangeInput('tmpResourceName')}
                                     />
                                     <div className={classes.radioGroup}>
                                         {plainOptions.map((option, index) => (
@@ -603,7 +604,7 @@ class Resources extends React.Component {
                           </div>
                       </React.Fragment>
                     }
-                    
+
                     <List>
                         {this.state.paths && (
                             <ListItem>
@@ -622,7 +623,7 @@ class Resources extends React.Component {
                             const that = this;
                             return <div>
                                 <ExpansionPanel defaultExpanded className={classes.expansionPanel}>
-                                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}> 
+                                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                                     <Typography className={classes.heading} variant='h6'>{key}</Typography>
                                     </ExpansionPanelSummary>
                                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
