@@ -89,13 +89,17 @@ public class ImportApiServiceImpl extends ImportApiService {
             // decode Oauth secrets
             OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp("PRODUCTION");
             if (productionOAuthApplicationInfo != null) {
-                String decodedConsumerSecretBytes = productionOAuthApplicationInfo.getClientSecret();
-                productionOAuthApplicationInfo.setClientSecret(new String(Base64.decodeBase64(decodedConsumerSecretBytes)));
+                String encodedConsumerSecretBytes = productionOAuthApplicationInfo.getClientSecret();
+                String decodedConsumerSecret = new String(Base64.decodeBase64(encodedConsumerSecretBytes));
+                productionOAuthApplicationInfo.setClientSecret(decodedConsumerSecret);
+                applicationDetails.addKey(getAPIKeyFromOauthApp("PRODUCTION", productionOAuthApplicationInfo));
             }
             OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp("SANDBOX");
             if (sandboxOAuthApplicationInfo != null) {
-                String decodedConsumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret();
-                sandboxOAuthApplicationInfo.setClientSecret(new String(Base64.decodeBase64(decodedConsumerSecretBytes)));
+                String encodedConsumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret();
+                String decodedConsumerSecret = new String(Base64.decodeBase64(encodedConsumerSecretBytes));
+                sandboxOAuthApplicationInfo.setClientSecret(decodedConsumerSecret);
+                applicationDetails.addKey(getAPIKeyFromOauthApp("SANDBOX", sandboxOAuthApplicationInfo));
             }
 
             if (!StringUtils.isBlank(appOwner)) {
@@ -127,7 +131,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = importExportManager
-                        .importSubscriptions(applicationDetails, username, appId);
+                        .importSubscriptions(applicationDetails, username, appId, update);
             }
             Application importedApplication = consumer.getApplicationById(appId);
             importedApplication.setOwner(ownerId);
@@ -138,11 +142,9 @@ public class ImportApiServiceImpl extends ImportApiService {
 
             // check whether keys need to be skipped while import
             if (skipApplicationKeys == null || !skipApplicationKeys) {
-                // Add application keys if present and if keys does not exists in the current application
+                // Add application keys if present and keys does not exists in the current application
                 if (applicationDetails.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
                     for (APIKey apiKey : applicationDetails.getKeys()) {
-                        String decodedConsumerSecretBytes = apiKey.getConsumerSecret();
-                        apiKey.setConsumerSecret(new String(Base64.decodeBase64(decodedConsumerSecretBytes)));
                         importExportManager.addApplicationKey(username, importedApplication, apiKey);
                     }
                 }
@@ -162,6 +164,26 @@ public class ImportApiServiceImpl extends ImportApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * This extracts information for creating an APIKey from an OAuthApplication
+     * @param type Type of the OAuthApp(SANDBOX or PRODUCTION)
+     * @param oAuthApplicationInfo OAuth Application information
+     * @return An APIKey containing keys from OAuthApplication
+     */
+    private APIKey getAPIKeyFromOauthApp(String type, OAuthApplicationInfo oAuthApplicationInfo){
+        APIKey apiKey = new APIKey();
+        apiKey.setType(type);
+        apiKey.setConsumerKey(oAuthApplicationInfo.getClientId());
+        apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
+        apiKey.setGrantTypes((String) oAuthApplicationInfo.getParameter("grant_types"));
+        if (apiKey.getGrantTypes().contains("implicit") && apiKey.getGrantTypes().contains("code")){
+            apiKey.setCallbackUrl((String) oAuthApplicationInfo.getParameter("redirect_uris"));
+        }
+        apiKey.setValidityPeriod(3600);
+        apiKey.setTokenScope("am_application_scope default");
+        return apiKey;
     }
 
     public String importApplicationsPostGetLastUpdatedTime(InputStream fileInputStream, Attachment fileDetail,

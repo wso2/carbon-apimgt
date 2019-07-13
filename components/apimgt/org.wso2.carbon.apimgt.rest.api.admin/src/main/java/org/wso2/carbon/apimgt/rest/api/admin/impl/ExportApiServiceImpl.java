@@ -90,28 +90,24 @@ public class ExportApiServiceImpl extends ExportApiService {
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
 
+            // clear all duplicate keys with tokens
+            applicationDetails.getKeys().clear();
+
             // export keys for application
             if (withKeys == null || !withKeys) {
-                applicationDetails.getKeys().clear();
                 applicationDetails.clearOAuthApps();
             } else {
-                // encode secrets when exporting
-                for (APIKey apiKey : applicationDetails.getKeys()) {
-                    byte[] consumerSecretBytes = apiKey.getConsumerSecret().getBytes(Charset.defaultCharset());
-                    apiKey.setConsumerSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                // encode Oauth secrets
+                OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp("PRODUCTION");
+                if (productionOAuthApplicationInfo != null) {
+                    byte[] consumerSecretBytes = productionOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
+                    productionOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
                 }
-            }
-
-            // encode Oauth secrets
-            OAuthApplicationInfo productionOAuthApplicationInfo = applicationDetails.getOAuthApp("PRODUCTION");
-            if (productionOAuthApplicationInfo != null) {
-                byte[] consumerSecretBytes = productionOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
-                productionOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
-            }
-            OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp("SANDBOX");
-            if (sandboxOAuthApplicationInfo != null) {
-                byte[] consumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
-                sandboxOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                OAuthApplicationInfo sandboxOAuthApplicationInfo = applicationDetails.getOAuthApp("SANDBOX");
+                if (sandboxOAuthApplicationInfo != null) {
+                    byte[] consumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret().getBytes(Charset.defaultCharset());
+                    sandboxOAuthApplicationInfo.setClientSecret(new String(Base64.encodeBase64(consumerSecretBytes)));
+                }
             }
 
             exportedFilePath = importExportManager.exportApplication(applicationDetails,
