@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Grid,
     Button,
@@ -27,6 +27,7 @@ import {
     withStyles,
     ListItemText,
     ListItemAvatar,
+    Icon,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -53,15 +54,44 @@ const styles = theme => ({
     },
     epTypeWrapper: {
         display: 'flex',
+        padding: '5px',
+        // justifyContent: 'space-between',
     },
     epTypeName: {
-        justifyContent: 'flex-start',
-        width: '50%',
+        paddingTop: '5px',
+        fontWeight: 600,
     },
     epConfig: {
         justifyContent: 'flex-end',
-        paddingLeft: '30%',
-        width: '50%',
+    },
+    leftArrow: {
+        paddingTop: '6px',
+    },
+    leftArrowLight: {
+        color: '#c5c5c5',
+        paddingTop: '6px',
+    },
+    dialogHeader: {
+        fontWeight: 600,
+    },
+    listItemOdd: {
+        background: '#ececec',
+        borderRadius: '5px',
+        '&:hover': {
+            backgroundColor: theme.palette.grey[300],
+        },
+        '&:focus': {
+            backgroundColor: theme.palette.grey[400],
+        },
+    },
+    listItem: {
+        borderRadius: '5px',
+        '&:hover': {
+            backgroundColor: theme.palette.grey[300],
+        },
+        '&:focus': {
+            backgroundColor: theme.palette.grey[400],
+        },
     },
 });
 
@@ -79,13 +109,16 @@ function EndpointListing(props) {
         failOvers,
         getSelectedEndpoint,
         selectedEpIndex,
+        addNewEndpoint,
     } = props;
     const [endpointType, setEndpointType] = useState('http');
-    const [endpoints, setEndpoints] = useState([{ url: 'http(s)://appserver/service' }]);
+    const [endpoints, setEndpoints] = useState([]);
     const [isLBConfigOpen, setOpenLBConfigDialog] = useState(false);
+    const selectedRef = useRef(null);
 
     const addEndpoint = (type) => {
         setEndpointType(type);
+        // addNewEndpoint(category, type);
         setEndpoints(endpoints.concat([{ url: 'http(s)://appserver/service' }]));
     };
 
@@ -98,14 +131,20 @@ function EndpointListing(props) {
     };
 
     const handleEpSelect = (event, index) => {
-        getSelectedEndpoint(index, epType, category);
+        console.log(event.currentTarget.offset);
+        getSelectedEndpoint(index, epType, category, event.currentTarget);
     };
 
     const getEndpointTypeSeparator = () => {
         if (endpointType === 'failover') {
             return (
-                <div className={classes.epTypeName}>
-                    <Typography>FailOver</Typography>
+                <div className={classes.epTypeWrapper}>
+                    <Typography className={classes.epTypeName}>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.EndpointListing.failovers'
+                            defaultMessage='Failovers'
+                        />
+                    </Typography>
                 </div>
             );
         }
@@ -113,16 +152,18 @@ function EndpointListing(props) {
             return (
                 <div className={classes.epTypeWrapper}>
                     <div className={classes.epTypeName}>
-                        <Typography>
-                            <FormattedMessage id='Loadbalance' defaultMessage='Loadbalance' />
+                        <Typography className={classes.epTypeName}>
+                            <FormattedMessage
+                                id='Apis.Details.EndpointsNew.EndpointListing.loadbalance'
+                                defaultMessage='Loadbalance'
+                            />
                         </Typography>
-                        <Divider />
                     </div>
                     <div className={classes.epConfig}>
                         <Button onClick={() => setOpenLBConfigDialog(true)}>
-                            <Typography>
-                                <FormattedMessage id='Configure' defaultMessage='Configure' />
-                            </Typography>
+                            <Icon>
+                                settings
+                            </Icon>
                         </Button>
                     </div>
                 </div>);
@@ -133,28 +174,49 @@ function EndpointListing(props) {
     };
 
     useEffect(() => {
+        console.log('in use effect', apiEndpoints, category, epType);
+        console.log(epType);
         setEndpointType(epType);
-        if (apiEndpoints !== null && epType === 'failover') {
-            setEndpoints([apiEndpoints].concat(failOvers));
-        } else {
-            setEndpoints(apiEndpoints);
-        }
+        setEndpoints(() => {
+            if (apiEndpoints !== null && epType === 'failover') {
+                return ([apiEndpoints].concat(failOvers));
+            } else {
+                if (apiEndpoints !== undefined) {
+                    return Array.isArray(apiEndpoints) ? apiEndpoints : [apiEndpoints];
+                }
+                return [{ url: 'http://myservice/' }];
+            }
+        });
     }, [apiEndpoints, epType, failOvers]);
 
+    console.log(
+        selectedEpIndex[0], selectedEpIndex[1],
+        (selectedEpIndex[0] === 0), (selectedEpIndex[1] === category), category,
+    );
+
+    console.log('endpoints: ', endpoints);
+
     return (
-        <div className={classes.listingWrapper} >
+        <div className={classes.listingWrapper} ref={selectedRef}>
             <Grid container direction='column' xs={12}>
                 <List>
-                    <ListItem id={category + '_0'} button onClick={event => handleEpSelect(event, 0)}>
-                        <ListItemText primary={endpoints[0].url} />
+                    <ListItem
+                        id={category + '_0'}
+                        button
+                        onClick={event => handleEpSelect(event, 0)}
+                        className={classes.listItem}
+                        ref={selectedRef}
+                    >
+                        <ListItemText primary={endpoints.length > 0 ? endpoints[0].url : 'http://service/resource'} />
                         <ListItemSecondaryAction >
-                            {(selectedEpIndex[0] === 0 && selectedEpIndex[1] === category) ?
-                                <KeyboardArrowRightRounded /> : <div />}
+                            <KeyboardArrowRightRounded
+                                className={(selectedEpIndex[0] === 0 && selectedEpIndex[1] === category) ?
+                                    classes.leftArrow : classes.leftArrowLight}
+                            />
                         </ListItemSecondaryAction>
                     </ListItem>
                 </List>
                 <Grid xs={12}>
-                    <Divider variant='middle' />
                     <EndpointAdd onAddEndpointClick={addEndpoint} endpointType={endpointType} />
                     {getEndpointTypeSeparator()}
                     <List>
@@ -163,6 +225,7 @@ function EndpointListing(props) {
                                 if (index > 0) {
                                     return (
                                         <ListItem
+                                            className={index % 2 === 1 ? classes.listItemOdd : classes.listItem}
                                             button
                                             id={category + '_' + index}
                                             onClick={event => handleEpSelect(event, index)}
@@ -172,10 +235,17 @@ function EndpointListing(props) {
                                                     <RemoveCircle />
                                                 </Button>
                                             </ListItemAvatar>
-                                            <ListItemText primary={endpoints[index].url} />
+                                            <ListItemText primary={
+                                                endpoints[index] ? endpoints[index].url : 'http://service/resource'}
+                                            />
                                             <ListItemSecondaryAction >
-                                                {(selectedEpIndex[0] === index && selectedEpIndex[1] === category) ?
-                                                    <KeyboardArrowRightRounded /> : <div />}
+                                                <KeyboardArrowRightRounded
+                                                    className={
+                                                        (selectedEpIndex[0] === index &&
+                                                            selectedEpIndex[1] === category) ?
+                                                            classes.leftArrow : classes.leftArrowLight
+                                                    }
+                                                />
                                             </ListItemSecondaryAction>
                                         </ListItem>
                                     );
@@ -188,9 +258,9 @@ function EndpointListing(props) {
             </Grid>
             <Dialog open={isLBConfigOpen}>
                 <DialogTitle>
-                    <Typography varient='h4'>
+                    <Typography className={classes.dialogHeader}>
                         <FormattedMessage
-                            id='Loadbalance.Endpoint.Configuration'
+                            id='Apis.Details.EndpointsNew.EndpointListing.loadbalance.endpoint.configuration'
                             defaultMessage='Load Balance Endpoint Configuration'
                         />
                     </Typography>
@@ -200,10 +270,10 @@ function EndpointListing(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenLBConfigDialog(false)} color='primary'>
-                        Close
+                        <FormattedMessage id='Apis.Details.EndpointsNew.EndpointListing.close' defaultMessage='Close' />
                     </Button>
                     <Button onClick={() => setOpenLBConfigDialog(false)} color='primary' autoFocus>
-                        Save
+                        <FormattedMessage id='Apis.Details.EndpointsNew.EndpointListing.save' defaultMessage='Save' />
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -228,6 +298,7 @@ EndpointListing.propTypes = {
     failOvers: PropTypes.shape({}).isRequired,
     getSelectedEndpoint: PropTypes.func.isRequired,
     selectedEpIndex: PropTypes.number,
+    addNewEndpoint: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointListing));

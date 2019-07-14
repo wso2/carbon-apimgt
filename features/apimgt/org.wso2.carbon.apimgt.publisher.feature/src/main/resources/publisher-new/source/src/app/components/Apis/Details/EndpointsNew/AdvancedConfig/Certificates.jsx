@@ -16,12 +16,37 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { TextField, Button, Grid, withStyles } from '@material-ui/core';
+import { TextField, Icon, Grid, withStyles } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import Dropzone from 'react-dropzone';
 
 const styles = theme => ({
     fileinput: {
         display: 'none',
+    },
+    dropzone: {
+        border: '1px dashed ' + theme.palette.primary.main,
+        borderRadius: '5px',
+        cursor: 'pointer',
+        height: 75,
+        padding: `${theme.spacing.unit * 2}px 0px`,
+        position: 'relative',
+        textAlign: 'center',
+        width: '100%',
+        margin: '10px 0',
+    },
+    dropZoneWrapper: {
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        '& span.material-icons': {
+            color: theme.palette.primary.main,
+        },
+    },
+    uploadedFile: {
+        fontSize: 11,
     },
 });
 /**
@@ -39,8 +64,8 @@ function Certificates(props) {
         setAlias(event.target.value);
     };
 
-    const handleCertUpload = (event) => {
-        const certificateFile = event.target.files[0];
+    const onDrop = (file) => {
+        const certificateFile = file[0];
         let encodedContent = '';
         if (certificateFile) {
             const reader = new FileReader();
@@ -53,10 +78,14 @@ function Certificates(props) {
     };
     return (
         <Grid>
+            {/* TODO: Add list of existing certificates */}
             <div>
                 <TextField
                     id='certificateAlias'
-                    label={<FormattedMessage id='Alias' defaultMessage='Alias' />}
+                    label={<FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.Certificates.alias'
+                        defaultMessage='Alias'
+                    />}
                     value={alias}
                     placeholder='My Alias'
                     onChange={handleAliasChange}
@@ -65,41 +94,35 @@ function Certificates(props) {
                 />
             </div>
             <div>
-                <TextField
-                    id='certificateName'
-                    label=''
-                    value={certificate.name}
-                    placeholder='My Alias'
-                    onChange={handleAliasChange}
-                    margin='normal'
-                    fullWidth
-                    InputProps={
-                        { readOnly: true }
+                <Dropzone
+                    multiple={false}
+                    accept={'application/pkcs8, application/pkcs10, application/pkix-crl, application/pkcs7-mime,' +
+                        'application/x-x509-ca-cert,' +
+                        'application/x-x509-user-cert,' +
+                        'application/x-pkcs7-crl,' +
+                        'application/x-pkcs12,' +
+                        'application/x-pkcs7-certificates,' +
+                        'application/x-pkcs7-certreqresp,' +
+                        '.p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
                     }
-                />
-                <input
-                    accept='
-                        application/pkcs8,
-                        application/pkcs10,
-                        application/pkix-crl,
-                        application/pkcs7-mime,
-                        application/x-x509-ca-cert,
-                        application/x-x509-user-cert,
-                        application/x-pkcs7-crl,
-                        application/x-pkcs12,
-                        application/x-pkcs7-certificates,
-                        application/x-pkcs7-certreqresp,
-                        .p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
-                    className={classes.fileinput}
-                    id='outlined-button-file'
-                    type='file'
-                    onChange={handleCertUpload}
-                />
-                <label id='input-label' htmlFor='outlined-button-file'>
-                    <Button variant='outlined' component='span' className={classes.button}>
-                        Upload
-                    </Button>
-                </label>
+                    className={classes.dropzone}
+                    activeClassName={classes.acceptDrop}
+                    rejectClassName={classes.rejectDrop}
+                    onDrop={(dropFile) => {
+                        onDrop(dropFile);
+                    }}
+                >
+                    <div className={classes.dropZoneWrapper}>
+                        <Icon className={classes.dropIcon} style={{ fontSize: 56 }}>
+                            cloud_upload
+                        </Icon>
+                        {certificate.name && (
+                            <div className={classes.uploadedFile}>
+                                <Icon>file</Icon> {certificate.name}
+                            </div>
+                        )}
+                    </div>
+                </Dropzone>
             </div>
         </Grid>
     );

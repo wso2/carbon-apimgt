@@ -17,6 +17,7 @@
 import React, { useState } from 'react';
 import { TextField, MenuItem, Grid } from '@material-ui/core';
 import PropTypes from 'prop-types';
+import {FormattedMessage} from "react-intl";
 
 
 const algorithms = [{ id: 0, value: 'Round-Robbin' }, { id: 1, value: 'other' }];
@@ -60,7 +61,10 @@ function LoadBalanceConfig(props) {
                 <TextField
                     id='algorithmSelect'
                     select
-                    label='Algorithm'
+                    label={<FormattedMessage
+                        id='Apis.Details.EndpointsNew.LoadBalanceConfig.algorithm'
+                        defaultMessage='Algorithm'
+                    />}
                     value={algorithm.id}
                     onChange={handleAlogorithmChange}
                     helperText='Please select the Loadbalance Algorithm.'
@@ -75,7 +79,10 @@ function LoadBalanceConfig(props) {
                 {(algorithm.id === 1) ?
                     <TextField
                         id='customAlgoInput'
-                        label='Class Name for Algorithm'
+                        label={<FormattedMessage
+                            id='Apis.Details.EndpointsNew.LoadBalanceConfig.class.name.for.algorithm'
+                            defaultMessage='Class Name for Algorithm'
+                        />}
                         value={customAlogrithm}
                         onChange={customAlogrithmChange}
                         helperText='Enter the class name of the loadbalance algorithm'
@@ -84,7 +91,10 @@ function LoadBalanceConfig(props) {
                 <TextField
                     id='sessionMgtSelect'
                     select
-                    label='Session Management'
+                    label={<FormattedMessage
+                        id='Apis.Details.EndpointsNew.LoadBalanceConfig.session.management'
+                        defaultMessage='Session Management'
+                    />}
                     value={sessionMgtOp.id}
                     onChange={handleSessionMgtChange}
                     helperText='Please select the Session Management mechanism.'
@@ -98,7 +108,10 @@ function LoadBalanceConfig(props) {
                 </TextField>
                 <TextField
                     id='sessionTimeout'
-                    label='Session Timeout (Millis)'
+                    label={<FormattedMessage
+                        id='Apis.Details.EndpointsNew.LoadBalanceConfig.session.timeout'
+                        defaultMessage='Session Timeout (Millis)'
+                    />}
                     value={epTimeout}
                     onChange={handleTimeoutChange}
                     type='number'

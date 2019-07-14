@@ -30,17 +30,47 @@ const styles = theme => ({
         width: '100%',
     },
 });
-const securitySchemas = [{ value: 'Not-Secured', key: 'none' }, { value: 'Secured', key: 'secured' }];
-const authTypes = [{ key: 'basic', value: 'Basic Auth' }, { key: 'digest', value: 'Digest Auth' }];
+
 /**
  * The base component for advanced endpoint configurations.
  * @param {any} props The props that are being passed
  * @returns {any} The html representation of the component.
  */
 function EndpointSecurity(props) {
-    const { classes } = props;
+    const { classes, intl } = props;
     const [securitySchema, setSecuritySchema] = useState('Not-Secured');
     const [authType, setAuthType] = useState('Basic Auth');
+
+    const securitySchemas = [
+        {
+            value: intl.formatMessage({
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.not.secured',
+                defaultMessage: 'Not-Secured',
+            }),
+            key: 'none',
+        },
+        {
+            value: intl.formatMessage({
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.secured',
+                defaultMessage: 'Secured',
+            }),
+            key: 'secured',
+        }];
+    const authTypes = [
+        {
+            key: 'basic',
+            value: intl.formatMessage({
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.basic',
+                defaultMessage: 'Basic Auth',
+            }),
+        },
+        {
+            key: 'digest',
+            value: intl.formatMessage({
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.digest.auth',
+                defaultMessage: 'Digest Auth',
+            }),
+        }];
 
     const onSelectSecuritySchema = (event) => {
         setSecuritySchema(event.target.value);
@@ -56,7 +86,10 @@ function EndpointSecurity(props) {
                 <TextField
                     id='security-schema-select'
                     select
-                    label={<FormattedMessage id='Endpoint.Security.Schema' defaultMessage='Endpoint Security Schema' />}
+                    label={<FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.endpoint.security.schema'
+                        defaultMessage='Endpoint Security Schema'
+                    />}
                     className={classes.textField}
                     value={securitySchema}
                     onChange={onSelectSecuritySchema}
@@ -67,7 +100,8 @@ function EndpointSecurity(props) {
                     }}
                     helperText={
                         <FormattedMessage
-                            id='Select.The.Endpoint.Security.Schema'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.
+                            EndpointSecurity.select.endpoint.security.schema'
                             defaultMessage='Select the endpoint security schema'
                         />
                     }
@@ -83,7 +117,10 @@ function EndpointSecurity(props) {
                     <TextField
                         id='security-authType-select'
                         select
-                        label={<FormattedMessage id='Auth.Type' defaultMessage='Auth Type' />}
+                        label={<FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.auth.type'
+                            defaultMessage='Auth Type'
+                        />}
                         className={classes.textField}
                         value={authType}
                         onChange={onSelectAuthType}
@@ -94,7 +131,8 @@ function EndpointSecurity(props) {
                         }}
                         helperText={
                             <FormattedMessage
-                                id='Select.the.auth.type.of.the.endpoint'
+                                id='Apis.Details.EndpointsNew.AdvancedConfig
+                                .EndpointSecurity.select.auth.type.of.endpoint'
                                 defaultMessage='Select the auth type of the endpoint'
                             />
                         }
@@ -110,8 +148,15 @@ function EndpointSecurity(props) {
                         <TextField
                             required
                             id='auth-userName'
-                            label={<FormattedMessage id='User.Name' defaultMessage='User Name' />}
-                            placeholder='User Name'
+                            label={<FormattedMessage
+                                id='Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.user.name.input'
+                                defaultMessage='User Name'
+                            />}
+                            placeholder={
+                                <FormattedMessage
+                                    id='Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.user.name.placeholder'
+                                    defaultMessage='User Name'
+                                />}
                             className={classes.textField}
                             margin='normal'
                         />
@@ -119,8 +164,15 @@ function EndpointSecurity(props) {
                             required
                             type='password'
                             id='auth-password'
-                            label={<FormattedMessage id='Password' defaultMessage='Password' />}
-                            placeholder='Password'
+                            label={<FormattedMessage
+                                id='Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.password.input'
+                                defaultMessage='Password'
+                            />}
+                            placeholder={
+                                <FormattedMessage
+                                    id='Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.password.placeholder'
+                                    defaultMessage='Password'
+                                />}
                             className={classes.textField}
                             margin='normal'
                         />

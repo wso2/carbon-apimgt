@@ -25,7 +25,6 @@ import {
     InputLabel,
     Select,
     Input,
-    Divider,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -51,6 +50,12 @@ const styles = theme => ({
     },
     configSubContainer: {
         paddingBottom: '10px',
+        borderRadius: '5px',
+        marginTop: '5px',
+        borderColor: theme.palette.grey[400],
+        borderWidth: 'thin',
+        borderStyle: 'solid',
+        padding: '5px',
     },
     textField: {
         marginRight: theme.spacing.unit,
@@ -71,79 +76,100 @@ function SuspendTimeoutConfig(props) {
         {
             key: '101001',
             value: '101001 : ' + intl.formatMessage({
-                id: 'Receiver IO error receiving', defaultMessage: 'Receiver IO error receiving',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.receiver.io.error.receiving',
+                defaultMessage: 'Receiver IO error receiving',
             }),
         },
         {
             key: '101500',
             value: '101500 : ' + intl.formatMessage({
-                id: 'Sender.IO.error.sending', defaultMessage: 'Sender IO Error Sending',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.sender.io.error.sending',
+                defaultMessage: 'Sender IO Error Sending',
             }),
         },
         {
             key: '101000',
             value: '101000 : ' + intl.formatMessage({
-                id: 'Receiver.IO.Error.Sending', defaultMessage: 'Retriever IO Error Sending',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.receiver.io.error.sending',
+                defaultMessage: 'Retriever IO Error Sending',
             }),
         },
         {
             key: '101501',
             value: '101501 : ' + intl.formatMessage({
-                id: 'Sender.IO.Error.Receiving', defaultMessage: 'Sender IO Error Receiving',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.sender.io.error.receiving',
+                defaultMessage: 'Sender IO Error Receiving',
             }),
         },
         {
             key: '101503',
             value: '101503 : ' + intl.formatMessage({
-                id: 'Connection Failed', defaultMessage: 'Connection Failed',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.connection.failed',
+                defaultMessage: 'Connection Failed',
             }),
         },
         {
             key: '101504',
             value: '101504 : ' + intl.formatMessage({
-                id: 'Connection.Timed.Out', defaultMessage: 'Connection Timed Out',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.connection.timed.out',
+                defaultMessage: 'Connection Timed Out',
             }),
         },
         {
             key: '101505',
             value: '101505 : ' + intl.formatMessage({
-                id: 'Connection.Closed', defaultMessage: 'Connection Closed',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.connection.closed',
+                defaultMessage: 'Connection Closed',
             }),
         },
         {
             key: '101506',
             value: '101506 : ' + intl.formatMessage({
-                id: 'TTP.Protocol.Violation', defaultMessage: 'TTP Protocol Violation',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.tpp.protocol.violation',
+                defaultMessage: 'TTP Protocol Violation',
             }),
         },
         {
             key: '101507',
             value: '101507 : ' + intl.formatMessage({
-                id: 'Connect.Cancel', defaultMessage: 'Connect Cancel',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.connect.cancel',
+                defaultMessage: 'Connect Cancel',
             }),
         },
         {
             key: '101508',
             value: '101508 : ' + intl.formatMessage({
-                id: 'Connect.Timeout', defaultMessage: 'Connect Timeout',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.connect.timeout',
+                defaultMessage: 'Connect Timeout',
             }),
         },
         {
             key: '101509',
             value: '101509 : ' + intl.formatMessage({
-                id: 'Send.Abort', defaultMessage: 'Send Abort',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.send.abort',
+                defaultMessage: 'Send Abort',
             }),
         },
         {
             key: '101510',
             value: '101510 : ' + intl.formatMessage({
-                id: 'Response.Processing.Failure', defaultMessage: 'Response Processing Failure',
+                id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.response.processing.failure',
+                defaultMessage: 'Response Processing Failure',
             }),
         }];
     const ACTIONITEMS = [
-        intl.formatMessage({ id: 'None', defaultMessage: 'None' }),
-        intl.formatMessage({ id: 'Execute.Fault.Sequence', defaultMessage: 'Execute Fault Sequence' }),
-        intl.formatMessage({ id: 'Discard.Message', defaultMessage: 'Discard Message' })];
+        intl.formatMessage({
+            id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.none',
+            defaultMessage: 'None',
+        }),
+        intl.formatMessage({
+            id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.execute.fault.sequence',
+            defaultMessage: 'Execute Fault Sequence',
+        }),
+        intl.formatMessage({
+            id: 'Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.discard.message',
+            defaultMessage: 'Discard Message',
+        })];
 
     const handleErrCodeSelect = (event) => {
         setSuspendErrCodes(event.target.value);
@@ -162,7 +188,10 @@ function SuspendTimeoutConfig(props) {
                 </Typography>
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
-                        <FormattedMessage id='Error.Code' defaultMessage='Error Code' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.error.code'
+                            defaultMessage='Error Code'
+                        />
                     </InputLabel>
                     <Select
                         multiple
@@ -171,6 +200,7 @@ function SuspendTimeoutConfig(props) {
                         onChange={handleErrCodeSelect}
                         input={<Input id='err-code-select' />}
                         MenuProps={MenuProps}
+                        variant='outlined'
                     >
                         {ERRCODES.map(code => (
                             <MenuItem key={code.key} value={code.key}>
@@ -183,7 +213,10 @@ function SuspendTimeoutConfig(props) {
                     className={classes.textField}
                     id='initial-duration-input'
                     label={
-                        <FormattedMessage id='Initial.Durtion.ms' defaultMessage='Initial Duration (ms)' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.initial.duration.ms'
+                            defaultMessage='Initial Duration (ms)'
+                        />
                     }
                     margin='normal'
                     type='number'
@@ -192,7 +225,10 @@ function SuspendTimeoutConfig(props) {
                     className={classes.textField}
                     id='max-duration-input'
                     label={
-                        <FormattedMessage id='Max.Duration.ms' defaultMessage='Max Duration (ms)' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.max.duration.ms'
+                            defaultMessage='Max Duration (ms)'
+                        />
                     }
                     margin='normal'
                     type='number'
@@ -201,19 +237,27 @@ function SuspendTimeoutConfig(props) {
                     className={classes.textField}
                     id='factor-input'
                     label={
-                        <FormattedMessage id='Factor' defaultMessage='Factor' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.factor'
+                            defaultMessage='Factor'
+                        />
                     }
                     margin='normal'
                 />
             </Grid>
-            <Divider />
-            <Grid>
+            <Grid item container className={classes.configSubContainer}>
                 <Typography className={classes.subTitle}>
-                    <FormattedMessage id='Endpoint.Timeout.State' defaultMessage='Endpoint Timeout State' />
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.endpoint.timeout.state'
+                        defaultMessage='Endpoint Timeout State'
+                    />
                 </Typography>
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
-                        <FormattedMessage id='Error.Code' defaultMessage='Error Code' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.error.code'
+                            defaultMessage='Error Code'
+                        />
                     </InputLabel>
                     <Select
                         multiple
@@ -234,7 +278,10 @@ function SuspendTimeoutConfig(props) {
                     className={classes.textField}
                     id='retries-input'
                     label={
-                        <FormattedMessage id='Retries.Before.Suspension' defaultMessage='Retries Before Suspension' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.retries.before.suspension'
+                            defaultMessage='Retries Before Suspension'
+                        />
                     }
                     type='number'
                     margin='normal'
@@ -242,19 +289,24 @@ function SuspendTimeoutConfig(props) {
                 <TextField
                     className={classes.textField}
                     id='retry-delay-input'
-                    label={<FormattedMessage id='Retry.Delay.ms' defaultMessage='Retry Delay (ms)' />}
+                    label={<FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.retry.delay.ms'
+                        defaultMessage='Retry Delay (ms)'
+                    />}
                     type='number'
                     margin='normal'
                 />
             </Grid>
-            <Divider />
-            <Grid>
+            <Grid item container className={classes.configSubContainer}>
                 <Typography className={classes.subTitle}>
                     <FormattedMessage id='Connection.Timeout' defaultMessage='Connection Timeout' />
                 </Typography>
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
-                        <FormattedMessage id='Action' defaultMessage='Action' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.action'
+                            defaultMessage='Action'
+                        />
                     </InputLabel>
                     <Select
                         autoWidth={false}
@@ -273,7 +325,10 @@ function SuspendTimeoutConfig(props) {
                 <TextField
                     className={classes.textField}
                     id='duration-input'
-                    label={<FormattedMessage id='Duration.ms' defaultMessage='Duration (ms)' />}
+                    label={<FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.duration.ms'
+                        defaultMessage='Duration (ms)'
+                    />}
                     type='number'
                     margin='normal'
                 />

@@ -74,6 +74,13 @@ const styles = theme => ({
         padding: theme.spacing.unit,
         fontSize: '100%',
     },
+    heading: {
+        flexBasis: '33.33%',
+        flexShrink: 0,
+    },
+    secondaryHeading: {
+        color: theme.palette.grey[500],
+    },
 });
 /**
  * The base component for advanced endpoint configurations.
@@ -135,30 +142,56 @@ function AdvancedEndpointConfig(props) {
                     id='panel1bh-header'
                 >
                     <Typography className={classes.heading}>
-                        <FormattedMessage id='Ádvanced.Configuration' defaultMessage='Advanced Configuration' />
-                    </Typography>
-                    <Typography className={classes.secondaryHeading}>
                         <FormattedMessage
-                            id='Security.Certificate.Suspend'
-                            defaultMessage='Security Certificates Suspend'
+                            id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.advanced.configuration'
+                            defaultMessage='Advanced Configuration'
                         />
-                    </Typography>
+                    </Typography> {' '}
+                    {/*<Typography className={classes.secondaryHeading}>*/}
+                    {/*    <FormattedMessage*/}
+                    {/*        id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.security.certificate.suspend'*/}
+                    {/*        defaultMessage='Security, Certificates, Suspend'*/}
+                    {/*    />*/}
+                    {/*</Typography>*/}
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>
-                    <List className={classes.advancedConfigList}>
-                        <ListItem button onClick={() => openAdvancedConfigDialog('security')}>
-                            <ListItemText primary='Security' secondary='None' />
-                        </ListItem>
-                        <Divider />
-                        <ListItem button onClick={() => openAdvancedConfigDialog('certificate')}>
-                            <ListItemText primary='Certificates' secondary='None' />
-                        </ListItem>
-                        <Divider />
-                        <ListItem button onClick={() => openAdvancedConfigDialog('suspend')}>
-                            <ListItemText primary='Suspends and Timeouts' secondary='None' />
-                        </ListItem>
-                        <Divider />
-                    </List>
+                    <SuspendTimeoutConfig />
+                    {/*<List className={classes.advancedConfigList}>*/}
+                    {/*    <ListItem button onClick={() => openAdvancedConfigDialog('security')}>*/}
+                    {/*        <ListItemText*/}
+                    {/*            primary={*/}
+                    {/*                <FormattedMessage*/}
+                    {/*                    id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.security'*/}
+                    {/*                    defaultMessage='Security'*/}
+                    {/*                />}*/}
+                    {/*            secondary='None'*/}
+                    {/*        />*/}
+                    {/*    </ListItem>*/}
+                    {/*    <Divider />*/}
+                    {/*    <ListItem button onClick={() => openAdvancedConfigDialog('certificate')}>*/}
+                    {/*        <ListItemText*/}
+                    {/*            primary={*/}
+                    {/*                <FormattedMessage*/}
+                    {/*                    id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.certificates'*/}
+                    {/*                    defaultMessage='Certificates'*/}
+                    {/*                />*/}
+                    {/*            }*/}
+                    {/*            secondary='None'*/}
+                    {/*        />*/}
+                    {/*    </ListItem>*/}
+                    {/*    <Divider />*/}
+                    {/*    <ListItem button onClick={() => openAdvancedConfigDialog('suspend')}>*/}
+                    {/*        <ListItemText*/}
+                    {/*            primary={*/}
+                    {/*                <FormattedMessage*/}
+                    {/*                    id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.suspends.and.timeouts'*/}
+                    {/*                    defaultMessage='Suspends and Timeouts'*/}
+                    {/*                />}*/}
+                    {/*            secondary='None'*/}
+                    {/*        />*/}
+                    {/*    </ListItem>*/}
+                    {/*    <Divider />*/}
+                    {/*</List>*/}
                 </ExpansionPanelDetails>
             </ExpansionPanel>
             <Dialog open={isOpenAdvanceConfigDialog}>
@@ -180,10 +213,16 @@ function AdvancedEndpointConfig(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color='primary'>
-                        <FormattedMessage id='Cancel' defaultMessage='Cancel' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.cancel'
+                            defaultMessage='Cancel'
+                        />
                     </Button>
                     <Button onClick={handleClose} color='primary'>
-                        <FormattedMessage id='Ok' defaultMessage='Ok' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.ok'
+                            defaultMessage='Ok'
+                        />
                     </Button>
                 </DialogActions>
             </Dialog>

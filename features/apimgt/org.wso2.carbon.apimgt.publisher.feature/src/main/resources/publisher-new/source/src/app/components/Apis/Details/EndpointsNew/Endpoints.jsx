@@ -42,7 +42,6 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        paddingBottom: theme.spacing.unit * 2,
     },
     endpointContent: {
         margin: theme.spacing.unit * 2,
@@ -68,7 +67,10 @@ function Endpoints(props) {
             <form>
                 <div>
                     <Typography variant='h4' align='left' className={classes.titleWrapper}>
-                        <FormattedMessage id='Endpoints' defaultMessage='Endpoints' />
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.Endpoints.endpoints.header'
+                            defaultMessage='Endpoints'
+                        />
                     </Typography>
                 </div>
                 <ApiContext.Consumer>
@@ -76,44 +78,45 @@ function Endpoints(props) {
                         <div>
                             <Grid container>
                                 <Grid item xs={12}>
-                                    <div className={classes.endpointTypesWrapper}>
-                                        <Typography variant='h4' align='left' className={classes.mainTitle}>
-                                            <FormattedMessage
-                                                id='Production.and.SandBox'
-                                                defaultMessage='Production and SandBox'
-                                            />
-                                        </Typography>
-                                        <Switch
-                                            checked={productionChecked}
-                                            onChange={() => setProductionChecked(!productionChecked)}
-                                            value='checkedProduction'
-                                            color='primary'
-                                        />
-                                    </div>
-                                    <Divider variant='middle' />
+                                    {/*<div className={classes.endpointTypesWrapper}>*/}
+                                    {/*    <Typography variant='h4' align='left' className={classes.mainTitle}>*/}
+                                    {/*        <FormattedMessage*/}
+                                    {/*            id='Production.and.SandBox'*/}
+                                    {/*            defaultMessage='Production and SandBox'*/}
+                                    {/*        />*/}
+                                    {/*    </Typography>*/}
+                                    {/*    <Switch*/}
+                                    {/*        checked={productionChecked}*/}
+                                    {/*        onChange={() => setProductionChecked(!productionChecked)}*/}
+                                    {/*        value='checkedProduction'*/}
+                                    {/*        color='primary'*/}
+                                    {/*    />*/}
+                                    {/*</div>*/}
                                     <Collapse in={productionChecked}>
                                         <EndpointOverview api={api} />
                                     </Collapse>
                                     {/* {(productionChecked === true) ?  : <div />} */}
                                 </Grid>
-                                <Grid item xs={12}>
-                                    <div className={classes.endpointTypesWrapper}>
-                                        <Typography variant='h4' align='left' className={classes.mainTitle}>
-                                            <FormattedMessage id='Prototype' defaultMessage='Prototype' />
-                                        </Typography>
-                                        <Switch
-                                            checked={!productionChecked}
-                                            onChange={() => setProductionChecked(!productionChecked)}
-                                            value='checkedSandbox'
-                                            color='primary'
-                                        />
-                                    </div>
-                                    <Divider variant='middle' />
-                                    <Collapse in={!productionChecked}>
-                                        <FormattedMessage id='Prototype' defaultMessage='Prototype' />
-                                    </Collapse>
-                                    {/* {(productionChecked === false) ? <EndpointOverview /> : <div />} */}
+                                <Grid>
+
                                 </Grid>
+                                {/*<Grid item xs={12}>*/}
+                                {/*    <div className={classes.endpointTypesWrapper}>*/}
+                                {/*        <Typography variant='h4' align='left' className={classes.mainTitle}>*/}
+                                {/*            <FormattedMessage id='Prototype' defaultMessage='Prototype' />*/}
+                                {/*        </Typography>*/}
+                                {/*        <Switch*/}
+                                {/*            checked={!productionChecked}*/}
+                                {/*            onChange={() => setProductionChecked(!productionChecked)}*/}
+                                {/*            value='checkedSandbox'*/}
+                                {/*            color='primary'*/}
+                                {/*        />*/}
+                                {/*    </div>*/}
+                                {/*    <Divider variant='middle' />*/}
+                                {/*    <Collapse in={!productionChecked}>*/}
+                                {/*        <FormattedMessage id='Prototype' defaultMessage='Prototype' />*/}
+                                {/*    </Collapse>*/}
+                                {/*</Grid>*/}
                             </Grid>
                             <Grid
                                 container
@@ -124,12 +127,18 @@ function Endpoints(props) {
                             >
                                 <Grid item>
                                     <Button type='submit' variant='contained' color='primary'>
-                                        <FormattedMessage id='save' defaultMessage='Save' />
+                                        <FormattedMessage
+                                            id='Apis.Details.EndpointsNew.Endpoints.save'
+                                            defaultMessage='Save'
+                                        />
                                     </Button>
                                 </Grid>
                                 <Grid item>
                                     <Button onClick={() => this.props.history.push('/apis')}>
-                                        <FormattedMessage id='cancel' defaultMessage='Cancel' />
+                                        <FormattedMessage
+                                            id='Apis.Details.EndpointsNew.Endpoints.cancel'
+                                            defaultMessage='Cancel'
+                                        />
                                     </Button>
                                 </Grid>
                             </Grid>

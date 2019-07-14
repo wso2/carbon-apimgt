@@ -30,12 +30,17 @@ const styles = theme => ({
     epConfigWrapper: {
         padding: theme.spacing.unit * 3,
         height: 'max-content',
-        width: '150%',
-        overflow: 'scroll',
+        marginLeft: theme.spacing.unit,
     },
     heading: {
         flexShrink: 0,
         flexBasis: '60%',
+    },
+    noEpSelectedText: {
+        padding: '24px',
+        fontSize: '30px',
+        color: theme.palette.grey[300],
+        fontStyle: 'strong',
     },
 });
 /**
@@ -44,48 +49,51 @@ const styles = theme => ({
  * @returns {any} The HTML view of the component.
  */
 function EndpointConfig(props) {
-    const { classes, epInfo } = props;
+    const { classes, epInfo, changeEndpointURL } = props;
     const [endpoint, setEndpoint] = useState('');
-    const [maxTps, setMaxTps] = useState(300);
 
     const handleEndpointInputChange = (event) => {
         setEndpoint(event.target.value);
-        props.editEndpoint(event.target.value);
     };
 
-    const onMaxTPSChange = (event) => {
-        setMaxTps(event.target.value);
+    const setOriginalEndpoint = () => {
+        changeEndpointURL(endpoint);
     };
 
     useEffect(() => {
         setEndpoint(epInfo.url);
     }, [props]);
     return (
-        <Paper className={classes.epConfigWrapper}>
-            <Typography>Endpoint Configuration</Typography>
-            <Grid container direction='column'>
-                <TextField
-                    id='serviceUrl'
-                    label={<FormattedMessage id='Service.URL' defaultMessage='Service URL' />}
-                    className={classes.textField}
-                    value={endpoint}
-                    placeholder='http(s)://appserver/service'
-                    onChange={handleEndpointInputChange}
-                    margin='normal'
-                    onBlur={() => { console.log('blur'); }}
-                />
-                <TextField
-                    id='maxTps'
-                    label={<FormattedMessage id='Max.TPS' defaultMessage='Max TPS' />}
-                    className={classes.textField}
-                    value={maxTps}
-                    type='number'
-                    onChange={onMaxTPSChange}
-                    margin='normal'
-                />
-            </Grid>
-            <AdvancedEndpointConfig />
-        </Paper>
+        <div>
+            {endpoint === undefined ? (
+                <Typography className={classes.noEpSelectedText}>
+                    Select an Endpoint to Configure
+                </Typography>
+            ) : (
+                <Paper className={classes.epConfigWrapper}>
+                    <Typography>Endpoint Configuration</Typography>
+                    <div>
+                        <Grid container direction='column'>
+                            <TextField
+                                id='serviceUrl'
+                                label={
+                                    <FormattedMessage
+                                        id='Apis.Details.EndpointsNew.EndpointConfig.service.url'
+                                        defaultMessage='Service URL'
+                                    />
+                                }
+                                className={classes.textField}
+                                value={endpoint}
+                                placeholder='http(s)://appserver/service'
+                                onChange={handleEndpointInputChange}
+                                margin='normal'
+                                onBlur={setOriginalEndpoint}
+                            />
+                        </Grid>
+                        <AdvancedEndpointConfig />
+                    </div>
+                </Paper>)}
+        </div>
     );
 }
 

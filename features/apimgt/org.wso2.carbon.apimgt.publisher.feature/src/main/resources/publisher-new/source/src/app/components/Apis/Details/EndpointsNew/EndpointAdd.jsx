@@ -57,11 +57,6 @@ function EndpointAdd(props) {
     }, [endpointType]);
     return (
         <Grid container direction='row' >
-            <div className={classes.addAnotherText}>
-                <Typography>
-                    <FormattedMessage id='Add.Another' defaultMessage='Add Another' />
-                </Typography>
-            </div>
             <Button
                 id='loadBalanceAdd'
                 disabled={type !== 'load_balance' && type !== 'http'}
@@ -69,9 +64,15 @@ function EndpointAdd(props) {
             >
                 <AddCircle />
                 <Typography>
-                    <FormattedMessage id='Load.Balance.Endpoint' defaultMessage='Load Balanced Endpoint' />
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.EndpointAdd.load.balance.endpoint'
+                        defaultMessage='Load Balanced'
+                    />
                 </Typography>
             </Button>
+            <Typography>
+                {' '}or{' '}
+            </Typography>
             <Button
                 id='failOverAdd'
                 disabled={type !== 'failover' && type !== 'http'}
@@ -79,7 +80,10 @@ function EndpointAdd(props) {
             >
                 <AddCircle />
                 <Typography>
-                    <FormattedMessage id='Fail.Over.Endpoint' defaultMessage='Fail Over Endpoint' />
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.EndpointAdd.fail.over.endpoint'
+                        defaultMessage='Fail Over'
+                    />
                 </Typography>
             </Button>
         </Grid>
