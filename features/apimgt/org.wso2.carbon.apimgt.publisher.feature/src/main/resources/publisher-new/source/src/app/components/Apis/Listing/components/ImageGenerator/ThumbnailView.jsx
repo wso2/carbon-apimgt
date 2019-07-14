@@ -278,7 +278,10 @@ class ThumbnailView extends Component {
                 fileObj = file[0];
             } else {
                 if (!selectedIcon && !color && !backgroundIndex) {
-                    Alert.error('The icon is not modified');
+                    Alert.error(intl.formatMessage({
+                        id: 'the.icon.is.not.modified',
+                        defaultMessage: 'The icon is not modified',
+                    }));
                     return;
                 }
                 const newIconJson = {
@@ -430,14 +433,22 @@ class ThumbnailView extends Component {
                             <Icon>close</Icon>
                         </IconButton>
                         <RadioGroup
-                            aria-label='Gender'
-                            name='gender1'
+                            aria-label='APIThumbnail'
+                            name='apiThumbnail'
                             className={classes.group}
                             value={this.state.selectedTab}
                             onChange={this.handleChange}
                         >
-                            <FormControlLabel value='design' control={<Radio />} label='Design' />
-                            <FormControlLabel value='upload' control={<Radio />} label='Upload' />
+                            <FormControlLabel
+                                value='design'
+                                control={<Radio />}
+                                label={<FormattedMessage defaultMessage='Design' />}
+                            />
+                            <FormControlLabel
+                                value='upload'
+                                control={<Radio />}
+                                label={<FormattedMessage defaultMessage='Upload' />}
+                            />
                         </RadioGroup>
                     </Paper>
 
@@ -494,7 +505,7 @@ class ThumbnailView extends Component {
                                 <Grid item xs={9}>
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            Select Category
+                                            <FormattedMessage defaultMessage='Select Category' />
                                         </Typography>
                                         <Select
                                             native
@@ -507,7 +518,9 @@ class ThumbnailView extends Component {
                                         </Select>
                                     </div>
                                     <Typography component='p' variant='body1' className={classes.body}>
-                                        Select an icon from the Material Icons for you api.
+                                        <FormattedMessage
+                                            defaultMessage='Select an icon from the Material Icons for you api.'
+                                        />
                                     </Typography>
                                     <div style={{ background: '#efefef', maxHeight: 180, overflow: 'scroll' }}>
                                         {FindCategoryKeys(category).map(icon => (
@@ -518,7 +531,7 @@ class ThumbnailView extends Component {
                                     </div>
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            Select a color for the icon
+                                            <FormattedMessage defaultMessage='Select a color for the icon' />
                                         </Typography>
                                     </div>
                                     <SketchPicker
@@ -527,7 +540,7 @@ class ThumbnailView extends Component {
                                     />
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            Select a background
+                                            <FormattedMessage defaultMessage='Select a Background' />
                                         </Typography>
                                     </div>
                                     {colorPairs.map((colorPair, index) => (
@@ -551,7 +564,10 @@ class ThumbnailView extends Component {
                             size='small'
                             onClick={this.handleClick('btnUploadAPIThumb')}
                         >
-                            <FormattedMessage id='upload.btn' defaultMessage='UPLOAD' />
+                            <FormattedMessage
+                                id='upload.btn'
+                                defaultMessage={<FormattedMessage defaultMessage='UPLOAD' />}
+                            />
                         </Button>
                         <Button variant='contained' size='small' onClick={this.handleClose}>
                             <FormattedMessage id='cancel.btn' defaultMessage='CANCEL' />
