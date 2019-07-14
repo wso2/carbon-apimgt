@@ -1,0 +1,184 @@
+import React, { Component } from 'react';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import PropTypes from 'prop-types';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { withStyles } from '@material-ui/core/styles';
+import { Grid, Paper, Typography, Divider } from '@material-ui/core';
+import { FormattedMessage } from 'react-intl';
+import { Progress } from 'AppComponents/Shared';
+import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api';
+import BusinessPlans from './BusinessPlans';
+
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+    },
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    margin: {
+        margin: theme.spacing.unit,
+    },
+    paper: {
+        padding: theme.spacing.unit * 2,
+        textAlign: 'left',
+        color: theme.palette.text.secondary,
+        paddingBottom: '10px',
+    },
+    grid: {
+        paddingLeft: '10px',
+        paddingRight: '10px',
+        paddingBottom: '10px',
+        minWidth: '50%',
+    },
+    button: {
+        margin: theme.spacing.unit,
+    },
+});
+
+class Monetization extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            properties: [],
+            monStatus: null,
+            property: {},
+        };
+        this.handleChange = this.handleChange.bind(this);
+        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    componentDidMount() {
+        const { api } = this.props;
+        api.getSettings().then((settings) => {
+            if (settings.MonetizationProperties != null) {
+                this.setState({ properties: settings.MonetizationProperties });
+            }
+        });
+        api.getMonetization(this.props.api.id).then((status) => {
+            this.setState({ monStatus: status.enabled });
+        });
+    }
+
+    /**
+     * Handles the submit action for configuring monetization
+     */
+    handleSubmit() {
+        const { api } = this.props;
+        const properties = this.state.property;
+        const enabled = this.state.monStatus;
+        const body = JSON.stringify({
+            enabled,
+            properties,
+        });
+        const promisedScopeAdd = api.configureMonetizationToApi(this.props.api.id, body);
+        promisedScopeAdd.then((response) => {
+            if (response.status !== 200) {
+                Alert.info('Something went wrong while configuring monetization');
+                return;
+            }
+            Alert.info('Monetization Configured Successfully');
+        }).catch((error) => {
+            console.error(error);
+            if (error.response) {
+                Alert.error(error.response.body.message);
+            } else {
+                Alert.error('Something went wrong while configuring moneization');
+            }
+        });
+    }
+
+    handleChange = (event) => {
+        this.setState({ monStatus: event.target.checked });
+    };
+
+    handleInputChange = (event) => {
+        const { name, value } = event.target;
+        this.setState((oldState) => {
+            const { property } = oldState;
+            property[name] = value;
+            return { property };
+        });
+    };
+
+    render() {
+        const { api, classes } = this.props;
+        const { properties, monStatus } = this.state;
+        if (!properties || monStatus === null) {
+            return <Progress />;
+        }
+        const propertiesList = properties.map((property, i) => (
+            <TextField
+                fullWidth
+                id={property + i}
+                label={<FormattedMessage id={property} defaultMessage={property} />}
+                name={property}
+                type='text'
+                margin='normal'
+                onChange={this.handleInputChange}
+                autoFocus
+            />));
+        return (
+            <Grid item xs={6}>
+                <Typography variant='title' gutterBottom>
+                    <FormattedMessage id='Monetization' defaultMessage='Monetization' />
+                </Typography>
+                <form method='post' onSubmit={this.handleSubmit}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                id='monStatus'
+                                name='monStatus'
+                                checked={monStatus}
+                                onChange={this.handleChange}
+                                value={monStatus}
+                            />
+                        }
+                        label='Enable Monetization'
+                    />
+                    <Grid>
+                        <Paper className={classes.paper}>
+                            <Grid item xs={5} className={classes.grid}>
+                                <Typography variant='subtitle' gutterBottom>
+                                    <FormattedMessage
+                                        id='monetization.properties'
+                                        defaultMessage='Monetization Properties'
+                                    />
+                                </Typography>
+                                {
+                                    (propertiesList !== null) ?
+                                        (propertiesList) :
+                                        (<p> There are no monetization properties configured</p>)
+                                }
+                            </Grid>
+                        </Paper>
+                    </Grid>
+                    <Divider className={classes.grid} />
+                    <Grid>
+                        <Paper className={classes.paper}>
+                            <Grid item xs={12} className={classes.grid}>
+                                {<BusinessPlans api={api} />}
+                            </Grid>
+                        </Paper>
+                    </Grid>
+                    <Divider className={classes.grid} />
+                    <Button onClick={this.handleSubmit} color='primary' variant='contained' className={classes.button} >
+                        <FormattedMessage id='save' defaultMessage='Save' />
+                    </Button>
+                </form>
+            </Grid>
+        );
+    }
+}
+
+Monetization.propTypes = {
+    api: PropTypes.instanceOf(API).isRequired,
+    classes: PropTypes.shape({}).isRequired,
+};
+
+export default withStyles(styles)(Monetization);

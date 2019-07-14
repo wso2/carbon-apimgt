@@ -31,6 +31,7 @@ import CodeIcon from '@material-ui/icons/Code';
 // import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
+import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
 import Utils from 'AppData/Utils';
@@ -57,6 +58,7 @@ import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import ApiContext from './components/ApiContext';
+import Monetization from './Monetization';
 import CreateNewVersion from './NewVersion/NewVersion';
 
 const styles = theme => ({
@@ -367,6 +369,12 @@ class Details extends Component {
                             active={active}
                             Icon={<PropertiesIcon />}
                         />
+                        <LeftMenuItem
+                            text='monetization'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<MonetizationIcon />}
+                        />
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} />
@@ -399,6 +407,10 @@ class Details extends Component {
                                 />
                                 <Route path={Details.subPaths.PROPERTIES} component={() => <Properties />} />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
+                                <Route
+                                    path={Details.subPaths.MONETIZATION}
+                                    component={() => <Monetization api={api} />}
+                                />
                             </Switch>
                         </div>
                     </div>
@@ -427,6 +439,7 @@ Details.subPaths = {
     BUSINESS_INFO: '/apis/:api_uuid/business info',
     PROPERTIES: '/apis/:api_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
+    MONETIZATION: '/apis/:api_uuid/monetization',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

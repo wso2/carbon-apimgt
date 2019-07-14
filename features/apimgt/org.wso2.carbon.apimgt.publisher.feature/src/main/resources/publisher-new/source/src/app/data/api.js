@@ -312,6 +312,86 @@ class API extends Resource {
         }
     }
 
+    settings(id, callback = null) {
+        const promise_subscription = this.client.then((client) => {
+            return client.apis[''].get_settings({
+            }, this._requestMetaData());
+        });
+        if (callback) {
+            return promise_subscription.then(callback);
+        } else {
+            return promise_subscription;
+        }
+    }
+
+    monetization(id, callback = null) {
+        const promise_monetization = this.client.then((client) => {
+            return client.apis['API (Individual)'].get_monetization({
+            }, this._requestMetaData());
+        });
+        if (callback) {
+            return promise_monetization.then(callback);
+        } else {
+            return promise_monetization;
+        }
+    }
+
+     /**
+     * Get settings of an API
+     */
+     getSettings(){
+         const promisedSettings = this.client.then((client) => {
+              return client.apis['default'].get_settings();
+         });
+         return promisedSettings.then(response => response.body);
+     }
+
+
+    /**
+     * Get Subscription Policies of an API
+     * @param id {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+    */
+    getSubscriptionPolicies(id, callback = null){
+        const promise_policies = this.client.then((client) => {
+            return client.apis['API (Individual)'].get_apis__apiId__subscription_policies ({
+                    apiId: id
+                }, this._requestMetaData());
+        });
+        return promise_policies.then(response => response.body);
+    }
+
+    /**
+     * Get monettization status of an API
+     * @param id {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getMonetization(id, callback = null) {
+        const promise_monetization = this.client.then((client) => {
+            return client.apis['API (Individual)'].get_apis__apiId__monetization({
+                apiId: id
+            }, this._requestMetaData());
+        });
+        return promise_monetization(response => response.body);
+    }
+
+    /**
+     * configure monetization to an API
+     * @param apiId APIID
+     * @param body details of tiers
+     */
+    configureMonetizationToApi(apiId, body) {
+        const promised_status = this.client.then((client) => {
+            return client.apis['API (Individual)'].post_apis__apiId__monetize({
+                apiId,
+                body
+            });
+        });
+        return promised_status;
+    }
+
     /**
      * Get the detail of scope of an API
      * @param {String} api_id - UUID of the API in which the scopes is needed
