@@ -446,7 +446,12 @@ Details.subPaths = {
 Object.freeze(Details.paths);
 
 Details.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        LeftMenu: PropTypes.string,
+        content: PropTypes.string,
+        leftLInkMain: PropTypes.string,
+        contentInside: PropTypes.string,
+    }).isRequired,
     match: PropTypes.shape({
         params: PropTypes.object,
     }).isRequired,
@@ -456,7 +461,11 @@ Details.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.object,
     }).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.shape({
+            leftMenuIconMainSize: PropTypes.number,
+        }),
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Details);

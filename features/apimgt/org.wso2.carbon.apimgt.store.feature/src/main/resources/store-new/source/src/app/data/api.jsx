@@ -252,7 +252,7 @@ export default class API extends Resource {
      */
     updateApplication(application, callback = null) {
         const promiseGet = this.client.then((client) => {
-            const payload = { applicationId: application.id, body: application };
+            const payload = { applicationId: application.applicationId, body: application };
             return client.apis.Applications.put_applications__applicationId_(payload, this._requestMetaData());
         });
         if (callback) {

@@ -242,7 +242,7 @@ class Credentials extends React.Component {
             if (updateSubscriptionData) updateSubscriptionData();
         });
     }
-    
+
     /**
      *
      *
@@ -355,6 +355,7 @@ class Credentials extends React.Component {
                                     <tr>
                                         <th className={classes.th}>Application Name</th>
                                         <th className={classes.th}>Throttling Tier</th>
+                                        <th className={classes.th}>Application Status</th>
                                         <th className={classes.th} />
                                     </tr>
                                     {subscribedApplications.map((app, index) => (
@@ -362,6 +363,7 @@ class Credentials extends React.Component {
                                             <tr style={{ backgroundColor: index % 2 ? '' : '#ffffff' }}>
                                                 <td className={classes.td}>{app.label}</td>
                                                 <td className={classes.td}>{app.policy}</td>
+                                                <td className={classes.td}>{app.status}</td>
                                                 <td className={classes.td}>
                                                     <div className={classes.actionColumn}>
                                                         <Link
@@ -486,14 +488,17 @@ class Credentials extends React.Component {
                                                                 {' '}
                                                                 to
                                                                 {' '}
-                                                                {applicationsAvailable.length === 1 ?
-                                                                    'an available application' :
-                                                                    'available applications'}.
-                                                            </Typography>
+                                                                {applicationsAvailable.length === 1
+                                                                    ? 'an available application'
+                                                                    : 'available applications'}
+.
+                                                                                                                                                                                    </Typography>
                                                             <Typography variant='caption'>
-                                                                ({applicationsAvailable.length}
-                                                                {' '}Applications )
-                                                            </Typography>
+                                                                (
+                                                                                                                                {applicationsAvailable.length}
+                                                                {' '}
+Applications )
+                                                                                                                                                                                    </Typography>
                                                         </div>
                                                         <Button
                                                             variant='contained'

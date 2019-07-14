@@ -37,6 +37,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Input from '@material-ui/core/Input';
 import { Link } from 'react-router-dom';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 
 /**
  * API Details Document page component
@@ -132,8 +133,7 @@ class Details extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
+                    doRedirectToLogin();
                 }
             });
     }

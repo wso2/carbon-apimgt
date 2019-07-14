@@ -17,11 +17,12 @@
  */
 
 import React from 'react';
-import qs from 'qs';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api.js';
 import { Progress } from 'AppComponents/Shared';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SampleAPI from './SampleAPI/SampleAPI';
 import CardView from './CardView/CardView';
@@ -76,8 +77,7 @@ class Listing extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
+                    doRedirectToLogin();
                 }
             });
     }
@@ -186,7 +186,10 @@ Listing.propTypes = {
     location: PropTypes.shape({
         pathname: PropTypes.string,
     }).isRequired,
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        content: PropTypes.string,
+        contentInside: PropTypes.string,
+    }).isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,

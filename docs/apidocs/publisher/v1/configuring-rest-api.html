@@ -1,0 +1,92 @@
+<!--
+  ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="main-content">
+    <h2>Configuring the REST API</h2>
+    
+    <p>This section explains how to configure the API Manager REST APIs: </p>
+    
+    <h3>Changing Default Roles</h3>
+
+    <p>Certain resources of the REST API are protected using OAuth 2.0 scopes. Each tenant has a tenant-conf.json
+        configuration file with a section for <b>RESTAPIScopes</b> that contains a mapping between all the scopes that are
+        available with API Manager REST APIs, and a set of roles. The tenant-conf.json file for each tenant can be
+        accessed by logging into the Management Console and browsing the registry, as shown below.</p>
+    <img src="assets/images/tenant-conf.jpg">
+
+    <p>When a user requires access to a resource protected by an OAuth 2.0 scope, an access token needs to be provided.
+        The access token must be associated with that particular scope as the Bearer token in the Authorization header.
+        In order to retrieve it, the user needs to invoke the Token API and request for that scope. For more
+        information, see the Getting Started section. When providing such an access token, the Token API validates the
+        eligibility of the user for that particular scope using the <b>RESTAPIScopes</b> configuration. An access token with
+        the particular scope is issued for the user only if that user has been assigned one or more of the roles
+        specified in the <b>RESTAPIScopes</b> configuration for that scope.</p>
+
+    <p>You can modify the default roles defined in <b>RESTAPIScopes</b> configuration according to your requirements.
+        However, make sure you do not modify any of the scope names.</p>
+
+    <p>Sample REST API Scopes configuration:</p>
+    <div class="pre"><code class="json">{
+   "RESTAPIScopes":{
+      "Scope":[
+         {
+            "Name":"apim:api_publish",
+            "Roles":"admin"
+         },
+         {
+            "Name":"apim:api_create",
+            "Roles":"admin"
+         },
+         {
+            "Name":"apim:api_view",
+            "Roles":"admin"
+         },
+         {
+            "Name":"apim:subscribe",
+            "Roles":"Internal/subscriber"
+         },
+         {
+            "Name":"apim:tier_view",
+            "Roles":"admin"
+         },
+         {
+            "Name":"apim:tier_manage",
+            "Roles":"admin"
+         },
+         {
+            "Name":"apim:subscription_view",
+            "Roles":"admin"
+         },
+         {
+            "Name":"apim:subscription_block",
+            "Roles":"admin"
+         }
+      ]
+   }
+}</code></div>
+<br>
+    <p>
+        <b>NOTE: </b>For the <b>RESTAPIScopes</b> configuration changes to take effect, restart the server.
+    </p>
+<p>
+    You can specify multiple roles for a scope by separating the roles using commas, as shown in the example below.
+</p>
+    <div class="pre"><code class="json">{
+    "Name": "apim:tier_view",
+    "Roles": "admin,portal-admin"
+}</code></div>
+<br>
+</div>

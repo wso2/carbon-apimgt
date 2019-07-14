@@ -19,38 +19,40 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import ArrowBack from '@material-ui/icons/ArrowBack';
 import TextField from '@material-ui/core/TextField';
-import Input, { InputLabel } from '@material-ui/core/Input';
+import Toolbar from '@material-ui/core/Toolbar';
+import IconButton from '@material-ui/core/IconButton';
+import Slide from '@material-ui/core/Slide';
+import Dialog from '@material-ui/core/Dialog';
+import AppBar from '@material-ui/core/AppBar';
+import CloseIcon from '@material-ui/icons/Close';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
-import { MenuItem } from '@material-ui/core/Menu';
-import Loading from '../../Base/Loading/Loading';
+import MenuItem from '@material-ui/core/MenuItem';
 import Application from '../../../data/Application';
 import API from '../../../data/api';
 import Alert from '../../Shared/Alert';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+
 /**
- *
- *
- * @param {*} theme
+ * @param {*} theme theme details
+ * @returns {Object}
  */
 const styles = theme => ({
-    titleBar: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        borderBottomWidth: '1px',
-        borderBottomStyle: 'solid',
-        borderColor: theme.palette.text.secondary,
-        marginBottom: 20,
+    root: {
+        padding: theme.spacing.unit * 3,
     },
-    buttonLeft: {
-        alignSelf: 'flex-start',
-        display: 'flex',
+    appBar: {
+        position: 'relative',
+        backgroundColor: theme.palette.background.appBar,
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
     },
     title: {
         display: 'inline-block',
@@ -62,68 +64,98 @@ const styles = theme => ({
     inputText: {
         marginTop: 20,
     },
-    buttonAlignment: {
-        marginLeft: 20,
-    },
     buttonRight: {
         textDecoration: 'none',
+        color: 'white',
+    },
+    button: {
+        marginRight: theme.spacing.unit * 2,
+    },
+    FormControl: {
+        width: '100%',
+    },
+    FormControlOdd: {
+        backgroundColor: theme.palette.background.paper,
+        width: '100%',
+    },
+    flex: {
+        flex: 1,
+    },
+    createFormWrapper: {
+        paddingLeft: theme.spacing.unit * 5,
+    },
+    quotaHelp: {
+        position: 'relative',
     },
 });
+
 /**
- *
- *
+ * @param {*} props props
+ * @returns {Slide}
+ */
+function Transition(props) {
+    return <Slide direction='up' {...props} />;
+}
+
+/**
  * @class ApplicationEdit
  * @extends {Component}
  */
 class ApplicationEdit extends Component {
+    /**
+     * @param {Object} props props passed from above
+     */
     constructor(props) {
         super(props);
         this.state = {
-            name: null,
+            appName: null,
+            open: true,
             quota: 'Unlimited',
-            description: null,
+            appDescription: null,
             id: null,
-            tiers: [],
+            appTiers: [],
             notFound: false,
-            lifeCycleStatus: null,
+            appLifeCycleStatus: null,
         };
+        this.handleChange = this.handleChange.bind(this);
     }
 
     /**
-     *
-     *
      * @memberof ApplicationEdit
      */
     componentDidMount() {
+        const { match } = this.props;
         const api = new API();
-        const promised_application = Application.get(this.props.match.params.application_id);
-        const promised_tiers = api.getAllTiers('application');
-        Promise.all([promised_application, promised_tiers])
+        const promisedApplication = Application.get(match.params.application_id);
+        const promisedTiers = api.getAllTiers('application');
+        Promise.all([promisedApplication, promisedTiers])
             .then((response) => {
                 const [application, tierResponse] = response;
                 this.setState({
-                    quota: application.throttlingTier,
-                    name: application.name,
-                    description: application.description,
-                    id: application.id,
-                    lifeCycleStatus: application.lifeCycleStatus,
+                    quota: application.throttlingPolicy,
+                    appName: application.name,
+                    appDescription: application.description,
+                    id: application.applicationId,
+                    appLifeCycleStatus: application.lifeCycleStatus,
                 });
-                const tiers = [];
-                tierResponse.body.list.map(item => tiers.push(item.name));
-                this.setState({ tiers });
+                const appTiers = [];
+                tierResponse.body.list.map(item => appTiers.push(item.name));
+                this.setState({ appTiers });
             })
             .catch((error) => {
-                const status = error.status;
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
-                console.error(error);
             });
     }
 
     /**
-     *
-     *
+     * @param {object} name state key
+     * @returns {void}
      * @memberof ApplicationEdit
      */
     handleChange = name => (event) => {
@@ -131,129 +163,224 @@ class ApplicationEdit extends Component {
     };
 
     /**
-     *
-     *
+     * @memberof ApplicationEdit
+     */
+    handleClose = () => {
+        this.setState({ open: false });
+    };
+
+    /**
+     * @param {Object} event the event object
      * @memberof ApplicationEdit
      */
     handleSubmit = (event) => {
+        const {
+            appName, id, quota, appDescription, appLifeCycleStatus,
+        } = this.state;
+        const {
+            history, intl,
+        } = this.props;
         event.preventDefault();
-        if (!this.state.name) {
-            Alert.error('Application name is required');
+        if (!appName) {
+            Alert.error(intl.formatMessage({
+                id: 'Applications.Edit.app.name.required',
+                defaultMessage: 'Application name is required',
+            }));
         } else {
-            const updated_application = {
-                id: this.state.id,
-                name: this.state.name,
-                throttlingTier: this.state.quota,
-                description: this.state.description,
-                lifeCycleStatus: this.state.lifeCycleStatus,
+            const updatedApplication = {
+                applicationId: id,
+                name: appName,
+                throttlingPolicy: quota,
+                description: appDescription,
+                lifeCycleStatus: appLifeCycleStatus,
             };
             const api = new API();
-            const promised_update = api.updateApplication(updated_application, null);
-            promised_update
+            const promisedUpdate = api.updateApplication(updatedApplication, null);
+            promisedUpdate
                 .then((response) => {
                     const appId = response.body.applicationId;
                     const redirectUrl = '/applications/' + appId;
-                    this.props.history.push(redirectUrl);
+                    history.push(redirectUrl);
+                    Alert.info(intl.formatMessage({
+                        id: 'Applications.Edit.app.updated.success',
+                        defaultMessage: 'Application updated successfully',
+                    }));
                     console.log('Application updated successfully.');
                 })
                 .catch((error) => {
-                    Alert.error('Error while updating application');
+                    Alert.error(intl.formatMessage({
+                        id: 'Applications.Edit.error.update.app',
+                        defaultMessage: 'Error while updating application',
+                    }));
                     console.log('Error while updating application ' + error);
                 });
         }
     };
 
     /**
-     *
-     *
-     * @returns
      * @memberof ApplicationEdit
+     * @returns {React.Fragment}
      */
     render() {
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
         const {
-            name, tiers, notFound, id, quota, description,
+            notFound, appDescription, open, appName, appTiers, quota,
         } = this.state;
         if (notFound) {
             return <ResourceNotFound />;
         }
         return (
-            <Grid container spacing={0} justify='flex-start'>
-                <Grid item xs={12} sm={12} md={12} lg={11} xl={10} className={classes.titleBar}>
-                    <div className={classes.buttonLeft}>
-                        <Link to={'/applications/' + id}>
-                            <Button variant='raised' size='small' className={classes.buttonBack} color='default'>
-                                <ArrowBack />
-                            </Button>
-                        </Link>
-                        <div className={classes.title}>
-                            <Typography variant='display1'>Go Back</Typography>
-                        </div>
-                    </div>
-                </Grid>
-                <Grid item xs={12} lg={6} xl={4}>
-                    <form className={classes.container} noValidate autoComplete='off'>
-                        <TextField
-                            required
-                            label='Application Name'
-                            value={name}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            helperText='Enter a name to identify the Application. You will be able to pick this application when subscribing to APIs '
-                            fullWidth
-                            name='name'
-                            onChange={this.handleChange('name')}
-                            placeholder='My Mobile Application'
-                            autoFocus
-                            className={classes.inputText}
-                        />
-                        {tiers && (
-                            <FormControl margin='normal'>
-                                <InputLabel htmlFor='quota-helper'>Per Token Quota</InputLabel>
-                                <Select value={quota} onChange={this.handleChange('quota')} input={<Input name='quota' id='quota-helper' />}>
-                                    {tiers.map(tier => (
-                                        <MenuItem key={tier} value={tier}>
-                                            {tier}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                <div>Assign API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.</div>
-                            </FormControl>
-                        )}
-                        <TextField
-                            label='Application Description'
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            value={description}
-                            helperText='Describe the application'
-                            fullWidth
-                            multiline
-                            rowsMax='4'
-                            name='description'
-                            onChange={this.handleChange('description')}
-                            placeholder='This application is grouping apis for my mobile application'
-                            className={classes.inputText}
-                        />
-                        <div className={classes.buttonsWrapper}>
-                            <Button variant='raised' color='primary' onClick={this.handleSubmit}>
-                                Update
-                            </Button>
+            <React.Fragment>
+                <Dialog fullScreen open={open} onClose={this.handleClose} TransitionComponent={Transition}>
+                    <AppBar className={classes.appBar}>
+                        <Toolbar>
                             <Link to='/applications' className={classes.buttonRight}>
-                                <Button variant='raised' className={classes.buttonAlignment}>
-                                    Cancel
-                                </Button>
+                                <IconButton color='inherit' onClick={this.handleClose} aria-label='Close'>
+                                    <CloseIcon />
+                                </IconButton>
                             </Link>
-                        </div>
-                    </form>
-                </Grid>
-            </Grid>
+                            <Typography variant='title' color='inherit' className={classes.flex}>
+                                <FormattedMessage id='Applications.Edit.edit.app' defaultMessage='Edit Application' />
+                            </Typography>
+                        </Toolbar>
+                    </AppBar>
+                    <div className={classes.createFormWrapper}>
+                        <form className={classes.container} noValidate autoComplete='off'>
+                            <Grid container spacing={24} className={classes.root}>
+                                <Grid item xs={12} md={6}>
+                                    <FormControl margin='normal' className={classes.FormControl}>
+                                        <TextField
+                                            required
+                                            label={(
+                                                <FormattedMessage
+                                                    id='Applications.Edit.app.name'
+                                                    defaultMessage='Application Name'
+                                                />
+                                            )}
+                                            value={appName || ''}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            helperText={(
+                                                <FormattedMessage
+                                                    id='Applications.Edit.app.name.helper'
+                                                    defaultMessage={'Enter a name to identify the'
+                                                    + ' Application. You will be able to pick this application when'
+                                                    + ' subscribing to APIs'}
+                                                />
+                                            )}
+                                            fullWidth
+                                            name='appName'
+                                            onChange={this.handleChange('appName')}
+                                            placeholder={
+                                                intl.formatMessage({
+                                                    id: 'Applications.Edit.app.name.placeholder',
+                                                    defaultMessage: 'My Mobile Application',
+                                                })
+                                            }
+                                            autoFocus
+                                            className={classes.inputText}
+                                        />
+                                    </FormControl>
+                                    {appTiers && (
+                                        <FormControl margin='normal' className={classes.FormControlOdd}>
+                                            <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
+                                                <FormattedMessage
+                                                    id='Applications.Edit.token.quota'
+                                                    defaultMessage='Per Token Quota'
+                                                />
+                                            </InputLabel>
+                                            <Select
+                                                value={quota}
+                                                onChange={this.handleChange('quota')}
+                                                input={<Input name='quota' id='quota-helper' />}
+                                            >
+                                                {appTiers.map(tier => (
+                                                    <MenuItem key={tier} value={tier}>
+                                                        {tier}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                            <Typography variant='caption'>
+                                                <FormattedMessage
+                                                    id='Applications.Edit.token.quota.caption'
+                                                    defaultMessage={'Assign API request quota per access token.'
+                                                    + ' Allocated quota will be shared among all the subscribed APIs'
+                                                    + ' of the application.'}
+                                                />
+                                            </Typography>
+                                        </FormControl>
+                                    )}
+                                    <FormControl margin='normal' className={classes.FormControl}>
+                                        <TextField
+                                            label={(
+                                                <FormattedMessage
+                                                    id='Applications.Edit.app.desc'
+                                                    defaultMessage='Application Description'
+                                                />
+                                            )}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            value={appDescription || ''}
+                                            helperText={(
+                                                <FormattedMessage
+                                                    id='Applications.Edit.app.desc.helper'
+                                                    defaultMessage='Describe the application'
+                                                />
+                                            )}
+                                            fullWidth
+                                            multiline
+                                            rowsMax='4'
+                                            name='appDescription'
+                                            onChange={this.handleChange('appDescription')}
+                                            placeholder={
+                                                intl.formatMessage({
+                                                    id: 'Applications.Edit.app.desc.placeholder',
+                                                    defaultMessage: 'This application is grouping'
+                                                        + ' apis for my mobile application',
+                                                })
+                                            }
+                                            className={classes.inputText}
+                                        />
+                                    </FormControl>
+                                    <div className={classes.buttonsWrapper}>
+                                        <Link to='/applications' className={classes.buttonRight}>
+                                            <Button
+                                                variant='outlined'
+                                                className={classes.button}
+                                            >
+                                                <FormattedMessage
+                                                    id='Applications.Edit.cancel'
+                                                    defaultMessage='CANCEL'
+                                                />
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            variant='contained'
+                                            className={classes.button}
+                                            color='primary'
+                                            onClick={this.handleSubmit}
+                                        >
+                                            <FormattedMessage
+                                                id='Applications.Edit.update.app'
+                                                defaultMessage='UPDATE APPLICATION'
+                                            />
+                                        </Button>
+                                    </div>
+                                </Grid>
+                            </Grid>
+                        </form>
+                    </div>
+                </Dialog>
+            </React.Fragment>
         );
     }
 }
+
 ApplicationEdit.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ApplicationEdit);
+export default injectIntl(withStyles(styles)(ApplicationEdit));

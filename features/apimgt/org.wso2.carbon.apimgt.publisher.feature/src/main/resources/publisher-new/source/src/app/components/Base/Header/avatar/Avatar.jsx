@@ -92,6 +92,7 @@ class Avatar extends Component {
         return (
             <React.Fragment>
                 <IconButton
+                    id='profile-menu-btn'
                     aria-owns='profile-menu-appbar'
                     aria-haspopup='true'
                     color='inherit'
@@ -110,7 +111,7 @@ class Avatar extends Component {
                                         {/* <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>
                                          <MenuItem onClick={this.toggleMenu}>My account</MenuItem> */}
                                         <Link to={{ pathname: '/services/logout' }}>
-                                            <MenuItem onClick={this.doOIDCLogout}>Logout</MenuItem>
+                                            <MenuItem onClick={this.doOIDCLogout} id='logout'>Logout</MenuItem>
                                         </Link>
                                         {/* TODO: uncomment when component run without errors */}
                                         {/* <Divider />
@@ -131,7 +132,11 @@ class Avatar extends Component {
     }
 }
 Avatar.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        userLink: PropTypes.string,
+        profileMenu: PropTypes.string,
+        accountIcon: PropTypes.string,
+    }).isRequired,
     user: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
     toggleTheme: PropTypes.func.isRequired,
 };

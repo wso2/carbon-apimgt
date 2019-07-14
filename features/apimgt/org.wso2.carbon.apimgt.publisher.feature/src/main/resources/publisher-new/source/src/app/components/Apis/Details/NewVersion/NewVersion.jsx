@@ -185,12 +185,12 @@ class CreateNewVersion extends React.Component {
                                     <FormControl margin='normal' className={classes.FormControlOdd}>
                                         <TextField
                                             fullWidth
-                                            id='name'
+                                            id='newVersion'
                                             error={valid.version.empty || valid.version.alreadyExists}
                                             label='New Version'
                                             helperText={helperText}
                                             type='text'
-                                            name='name'
+                                            name='newVersion'
                                             placeholder='Eg: 2.0.0'
                                             value={newVersion}
                                             onChange={this.handleVersionChange()}
@@ -230,12 +230,21 @@ class CreateNewVersion extends React.Component {
                                         </FormLabel>
                                         <RadioGroup
                                             name='isDefaultVersion'
+                                            id='isDefaultVersion'
                                             className={classes.group}
                                             value={isDefaultVersion}
                                             onChange={this.handleDefaultVersionChange()}
                                         >
-                                            <FormControlLabel value='yes' control={<Radio />} label='Yes' />
-                                            <FormControlLabel value='no' control={<Radio />} label='No' />
+                                            <FormControlLabel
+                                                value='yes'
+                                                control={<Radio />}
+                                                label='Yes'
+                                            />
+                                            <FormControlLabel
+                                                value='no'
+                                                control={<Radio />}
+                                                label='No'
+                                            />
                                         </RadioGroup>
                                         <FormHelperText>Indicate whether API should be the default version among the
                                             group of APIs with the same name
@@ -255,6 +264,7 @@ class CreateNewVersion extends React.Component {
                                                 <Button
                                                     variant='contained'
                                                     color='primary'
+                                                    id='createBtn'
                                                     onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
                                                 >
                                                     <FormattedMessage id='create' defaultMessage='Create' />
@@ -263,7 +273,9 @@ class CreateNewVersion extends React.Component {
                                         </Grid>
                                         <Grid item>
                                             <Link to={'/apis/' + api.id + '/overview'}>
-                                                <Button>
+                                                <Button
+                                                    id='cancelBtn'
+                                                >
                                                     <FormattedMessage id='cancel' defaultMessage='Cancel' />
                                                 </Button>
                                             </Link>
@@ -280,7 +292,6 @@ class CreateNewVersion extends React.Component {
 }
 
 CreateNewVersion.propTypes = {
-    state: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,

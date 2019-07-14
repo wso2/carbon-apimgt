@@ -42,6 +42,15 @@ public class Tier implements Serializable, Comparable<Tier>{
     // The default value would be "true" since the default behavior is to stop when the quota is reached
     private boolean stopOnQuotaReached = true;
     private TierPermission tierPermission;
+    private Map<String,String> monetizationAttributes;
+
+    public Map<String, String> getMonetizationAttributes() {
+        return monetizationAttributes;
+    }
+
+    public void setMonetizationAttributes(Map<String, String> monetizationAttributes) {
+        this.monetizationAttributes = monetizationAttributes;
+    }
 
     public Tier(String name) {
         this.name = name;
