@@ -238,7 +238,7 @@ export default class API extends Resource {
      */
     getAllApplicationAttributes() {
         return this.client.then((client) => {
-            return client.apis['Application Attributes'].get_settings_attributes(this._requestMetaData());
+            return client.apis['Application Attributes'].get_settings_application_attributes(this._requestMetaData());
         });
     }
 

@@ -2744,7 +2744,7 @@ paths:
 ######################################################
 # The "Application Attributes" resource APIs
 ######################################################
-  '/settings/attributes':
+  '/settings/application-attributes':
 #--------------------------------------------------------
 # Retrieve all application attributes from configuration
 #--------------------------------------------------------

@@ -147,7 +147,7 @@ class ApplicationEdit extends Component {
                 const appTiers = [];
                 tierResponse.body.list.map(item => appTiers.push(item.name));
                 const allAppAttributes = [];
-                allAttributes.body.map(item => allAppAttributes.push(item));
+                allAttributes.body.list.map(item => allAppAttributes.push(item));
                 this.setState({ appTiers, allAppAttributes });
             })
             .catch((error) => {
@@ -190,8 +190,8 @@ class ApplicationEdit extends Component {
         const { allAppAttributes } = this.state;
         if (allAppAttributes) {
             for (let i = 0; i < allAppAttributes.length; i++) {
-                if (allAppAttributes[i].Attribute === name.key) {
-                    return allAppAttributes[i].Required;
+                if (allAppAttributes[i].attribute === name.key) {
+                    return allAppAttributes[i].required;
                 }
             }
         }
@@ -393,8 +393,8 @@ class ApplicationEdit extends Component {
                                                     value={value}
                                                     helperText={allAppAttributes
                                                         && (Object.entries(allAppAttributes).map((item) => {
-                                                            if (item[1].Attribute === key) {
-                                                                return item[1].Description;
+                                                            if (item[1].attribute === key) {
+                                                                return item[1].description;
                                                             }
                                                             return '';
                                                         }))
