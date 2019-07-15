@@ -42,6 +42,7 @@ import classNames from 'classnames';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SelectContentType from './SelectContentType';
 import InlineEditableField from './InlineEditableField';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
     root: {
@@ -207,7 +208,7 @@ class Resource extends React.Component {
                 let method = JSON.parse(JSON.stringify(state.method))
                 method.parameters.splice(i, 1);
                 props.updatePath(props.path, props.method, method);
-                return {method: method};
+                return { method: method };
             });
         }
     }
@@ -240,17 +241,17 @@ class Resource extends React.Component {
         this.props.addRemoveToDeleteList(path, method);
     };
     changeContentTypes(contentTypes, fieldName) {
-        if(contentTypes && contentTypes.length > 0){
+        if (contentTypes && contentTypes.length > 0) {
             this.setState((state, props) => {
                 state.method[fieldName] = contentTypes;
                 props.updatePath(props.path, props.method, state.method);
-                return {method: state.method};
+                return { method: state.method };
             });
         }
     }
     render() {
         const {
-            classes, method, path, apiScopes, theme,
+            classes, method, path, apiScopes, theme, intl
         } = this.props;
         let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
         let chipTextColor = '#000000';
@@ -272,11 +273,14 @@ class Resource extends React.Component {
                             {path}
                         </Typography>
                     </a>
-                    <InlineEditableField saveFieldCallback={this.saveFieldCallback} 
-                                        initText="Click here to add summery"
-                                        fieldValue={this.state.method.summery}
-                                        type="textarea" 
-                                        fieldName='summery' /> 
+                    <InlineEditableField saveFieldCallback={this.saveFieldCallback}
+                        initText={intl.formatMessage({
+                            id: 'Apis.Details.Resources.Resource.click.here.to.add.summery',
+                            defaultMessage: 'Click here to add summery'
+                        })}
+                        fieldValue={this.state.method.summery}
+                        type="textarea"
+                        fieldName='summery' />
                     <a onClick={this.deleteResource} className={classes.deleteButton}>
                         <Delete className={classes.rightIcon} />
                     </a>
@@ -286,32 +290,35 @@ class Resource extends React.Component {
                         <Grid container spacing={24}>
                             <Grid item xs={12} className={classes.descriptionWrapperUp}>
                                 <Typography variant='caption' className={classes.descriptionWrapper}>
-                                    <InlineEditableField saveFieldCallback={this.saveFieldCallback} 
-                                        initText="Click here to add description"
+                                    <InlineEditableField saveFieldCallback={this.saveFieldCallback}
+                                        initText={intl.formatMessage({
+                                            id: 'Apis.Details.Resources.Resource.click.here.to.add.description',
+                                            defaultMessage: 'Click here to add description'
+                                        })}
                                         fieldValue={this.state.method.description}
-                                        type="textarea" 
-                                        fieldName='description' /> 
+                                        type="textarea"
+                                        fieldName='description' />
                                 </Typography>
                             </Grid>
                             <Grid item xs={12}>
-                                <Table>   
+                                <Table>
                                     <TableRow className={classes.row}>
                                         <TableCell>
-                                            <Typography variant='subtitle2'>Produces</Typography>
+                                            <Typography variant='subtitle2'><FormattedMessage id='Apis.Details.Resources.Resource.produces' defaultMessage='Produces' /></Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant='subtitle2'>Consumes</Typography>
+                                            <Typography variant='subtitle2'><FormattedMessage id='Apis.Details.Resources.Resource.consumes' defaultMessage='Consumes' /></Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant='subtitle2'>Scopes</Typography>
+                                            <Typography variant='subtitle2'><FormattedMessage id='Apis.Details.Resources.Resource.scopes' defaultMessage='Scopes' /></Typography>
                                         </TableCell>
                                     </TableRow>
                                     <TableRow className={classes.row}>
                                         <TableCell>
-                                            <SelectContentType value={this.state.method.produces} onChange={this.changeContentTypes} fieldName="produces"/>
+                                            <SelectContentType value={this.state.method.produces} onChange={this.changeContentTypes} fieldName="produces" />
                                         </TableCell>
                                         <TableCell>
-                                            <SelectContentType value={this.state.method.consumes} onChange={this.changeContentTypes} fieldName="consumes"/>
+                                            <SelectContentType value={this.state.method.consumes} onChange={this.changeContentTypes} fieldName="consumes" />
                                         </TableCell>
                                         <TableCell>
                                             {/* <Select
@@ -344,13 +351,13 @@ class Resource extends React.Component {
                                     </TableRow>
                                 </Table>
                             </Grid>
-                 
+
                             <Grid item xs={12} className={classes.addParamRow}>
-                                <Typography variant='subtitle2'>Parameters</Typography>
+                                <Typography variant='subtitle2'><FormattedMessage id='Apis.Details.Resources.Resource.parameters' defaultMessage='Parameters' /></Typography>
                                 <form onSubmit={this.propsSubmitHandler} className={classes.propsForm}>
                                     <TextField id='outlined-dense' label='Parameter Name' className={classNames(classes.textField, classes.dense)} margin='dense' variant='outlined' value={this.state.newPropName} onChange={this.onChangePropName} />
                                     <Button variant='contained' className={classes.button} onClick={this.propsSubmitHandler}>
-                                        Add
+                                        <FormattedMessage id='Apis.Details.Resources.Resource.add' defaultMessage='Add' />
                                     </Button>
                                 </form>
                                 {/* <WrappedPropertyAddForm propsSubmitHandler={this.propsSubmitHandler} /> */}
@@ -360,12 +367,12 @@ class Resource extends React.Component {
                                     <Table>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell>Parameter Name</TableCell>
-                                                <TableCell>Description</TableCell>
-                                                <TableCell>Parameter Type</TableCell>
-                                                <TableCell>Data Type</TableCell>
-                                                <TableCell>Required</TableCell>
-                                                <TableCell>Delete</TableCell>
+                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.parameter.name' defaultMessage='Parameter Name' /></TableCell>
+                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.description' defaultMessage='Description' /></TableCell>
+                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.parameter.type' defaultMessage='Parameter Type' /></TableCell>
+                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.data.type' defaultMessage='Data Type' /></TableCell>
+                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.required' defaultMessage='Required' /></TableCell>
+                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.delete' defaultMessage='Delete' /></TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -376,7 +383,7 @@ class Resource extends React.Component {
                                                             <InlineEditableField type="input" saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.name} fieldName='param.name' />
                                                         </TableCell>
                                                         <TableCell>
-                                                            <InlineEditableField type="input"  saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.description} fieldName='param.description' />
+                                                            <InlineEditableField type="input" saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.description} fieldName='param.description' />
                                                         </TableCell>
                                                         <TableCell>
                                                             <InlineEditableField type="select" saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.in} defaultValues={['body', 'query', 'header', 'formData']} fieldName='param.in' />
@@ -411,4 +418,4 @@ Resource.propTypes = {
     theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Resource);
+export default injectIntl(withStyles(styles, { withTheme: true })(Resource));
