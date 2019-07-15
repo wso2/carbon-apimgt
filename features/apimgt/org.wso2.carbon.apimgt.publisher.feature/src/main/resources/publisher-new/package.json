@@ -85,7 +85,7 @@
         "eslint-plugin-jest": "^22.6.4",
         "eslint-plugin-jsx-a11y": "^6.0.3",
         "eslint-plugin-react": "v7.13.0",
-        "extract-react-intl-messages": "^1.0.1",
+        "extract-react-intl-messages-compact": "^1.0.3",
         "jest": "^24.8.0",
         "less": "^2.7.2",
         "less-loader": "^4.0.4",
