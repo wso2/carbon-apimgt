@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -615,14 +616,11 @@ public class APIMappingUtil {
         //Get Swagger definition which has URL templates, scopes and resource details
         if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
-            List<APIOperationsDTO> operationsDTOs = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-            dto.setOperations(operationsDTOs);
+            List<APIOperationsDTO> apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+            dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(scopeDTOS);
         }
-        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
-        List<APIOperationsDTO> apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-        dto.setOperations(apiOperationsDTO);
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
