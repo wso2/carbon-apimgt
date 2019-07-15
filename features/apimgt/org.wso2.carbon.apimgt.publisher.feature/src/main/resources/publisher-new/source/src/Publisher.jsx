@@ -87,7 +87,7 @@ class Publisher extends React.Component {
      */
     componentDidMount() {
         const locale = languageWithoutRegionCode || language;
-        this.loadLocale('si');
+        this.loadLocale(locale);
         const user = AuthManager.getUser();
         if (user) {
             const hasViewScope = user.scopes.includes('apim:api_view');
