@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import APIsIcon from '@material-ui/icons/SettingsInputHdmi';
 import AlertsIcon from '@material-ui/icons/AddAlert';
 
@@ -24,5 +25,9 @@ const NavBar = (props) => {
     const section = <NavItem name='APIs' linkTo='/apis' NavIcon={<APIsIcon />} />;
     return <PageNav section={section} navItems={navItems} />;
 };
-
+NavBar.propTypes = {
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
+};
 export default NavBar;
