@@ -51,9 +51,6 @@ const styles = theme => ({
         marginTop: theme.spacing.unit * 2,
         marginBottom: theme.spacing.unit * 2,
     },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-    },
     addNewHeader: {
         padding: theme.spacing.unit * 2,
         backgroundColor: theme.palette.grey['300'],
@@ -119,7 +116,7 @@ class Listing extends React.Component {
                 'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
             console.error(messageTxt);
             Alert.error(intl.formatMessage({
-                id: 'documents.listing.error.in.fetching',
+                id: 'Apis.Details.Documents.Listing.documents.listing.fetching.error.message',
                 defaultMessage: 'Error in fetching documents list of the API',
             }));
         });
@@ -151,12 +148,32 @@ class Listing extends React.Component {
                         }
                     },
                     filter: false,
+                    label: <FormattedMessage
+                        id='Apis.Details.Documents.Listing.column.header.name'
+                        defaultMessage='name'
+                    />,
                 },
             },
-            'sourceType',
-            'type',
+            {
+                name: 'sourceType',
+                label: <FormattedMessage
+                    id='Apis.Details.Documents.Listing.column.header.source.type'
+                    defaultMessage='sourceType'
+                />
+            },
+            {
+                name: 'type',
+                label: <FormattedMessage
+                    id='Apis.Details.Documents.Listing.column.header.type'
+                    defaultMessage='type'
+                />
+            },
             {
                 name: 'action',
+                label: <FormattedMessage
+                    id='Apis.Details.Documents.Listing.column.header.action'
+                    defaultMessage='action'
+                />,
                 options: {
                     customBodyRender: (value, tableMeta, api) => {
                         if (tableMeta.rowData) {
@@ -201,7 +218,11 @@ class Listing extends React.Component {
                                         <tr>
                                             <td>
                                                 <Button>
-                                                    <Icon>open_in_new</Icon> <FormattedMessage id='documents.listing.open' defaultMessage='Open' />
+                                                    <Icon>open_in_new</Icon>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Documents.Listing.documents.open'
+                                                        defaultMessage='Open'
+                                                    />
                                                 </Button>   
                                             </td>
                                             <td>
@@ -242,11 +263,17 @@ class Listing extends React.Component {
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage id='documents.listing.documents' defaultMessage='Documents' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Listing.documents.listing.title'
+                            defaultMessage='Documents'
+                        />
                     </Typography>
                     <Button size='small' className={classes.button} onClick={this.toggleAddDocs}>
                         <AddCircle className={classes.buttonIcon} />
-                        <FormattedMessage id='documents.listing.add.new.document' defaultMessage='Add New Document' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Listing.add.new.document.button'
+                            defaultMessage='Add New Document'
+                        />
                     </Button>
                 </div>
                 <div className={classes.contentWrapper}>
