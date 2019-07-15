@@ -16,22 +16,30 @@
  * under the License.
  */
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 
 const ResourceNotFound = (props) => {
     return (
         <Paper elevation={4}>
-            <Typography type="headline" component="h3">
-                404 Resource Not Found!
+            <Typography type='headline' component='h3'>
+                <FormattedMessage id='Base.Errors.ResourceNotfound.title' defaultMessage='404 Resource Not Found!' />
             </Typography>
-            <Typography type="body1" component="p">
-                Can't find the resource you are looking for
-                <span style={{color: 'green'}}> {props.response ? props.response.statusText : ""} </span>
+            <Typography type='body1' component='p'>
+                <FormattedMessage
+                    id='Base.Errors.ResourceNotfound.message'
+                    defaultMessage="Can't find the resource you are looking for"
+                />
+                <span style={{ color: 'green' }}>
+                    {' '}
+                    {props.response ? props.response.statusText : ''}
+                    {' '}
+                </span>
             </Typography>
         </Paper>
     );
 };
 
-export default ResourceNotFound
+export default ResourceNotFound;

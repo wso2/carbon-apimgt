@@ -18,26 +18,21 @@
 
 import React from 'react';
 import qs from 'qs';
-
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-
 import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import List from '@material-ui/icons/List';
+import { FormattedMessage } from 'react-intl';
 import GridIcon from '@material-ui/icons/GridOn';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
 import API from '../../../data/api';
-import APiTableRow from './ApiTableRow';
 import ApiThumb from './ApiThumb';
 import CustomIcon from '../../Shared/CustomIcon';
 import ApiTableView from './ApiTableView';
@@ -93,7 +88,9 @@ const styles = theme => ({
  * @returns
  */
 function getSorting(order, orderBy) {
-    return order === 'desc' ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1) : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
+    return order === 'desc'
+        ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
+        : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
 }
 /**
  *
@@ -124,15 +121,32 @@ class EnhancedAPITableHead extends React.Component {
      * @memberof EnhancedAPITableHead
      */
     render() {
-        const columnData = [{
-            id: 'name', numeric: false, disablePadding: true, label: 'Name',
-        }, {
-            id: 'version', numeric: false, disablePadding: false, label: 'Version',
-        }, {
-            id: 'context', numeric: false, disablePadding: false, label: 'Context',
-        }, {
-            id: 'rating', numeric: false, disablePadding: false, label: 'Rating',
-        }];
+        const columnData = [
+            {
+                id: 'name',
+                numeric: false,
+                disablePadding: true,
+                label: 'Name',
+            },
+            {
+                id: 'version',
+                numeric: false,
+                disablePadding: false,
+                label: 'Version',
+            },
+            {
+                id: 'context',
+                numeric: false,
+                disablePadding: false,
+                label: 'Context',
+            },
+            {
+                id: 'rating',
+                numeric: false,
+                disablePadding: false,
+                label: 'Rating',
+            },
+        ];
         const { order, orderBy } = this.props;
 
         return (
@@ -140,8 +154,16 @@ class EnhancedAPITableHead extends React.Component {
                 <TableRow>
                     {columnData.map((column) => {
                         return (
-                            <TableCell key={column.id} numeric={column.numeric} sortDirection={orderBy === column.id ? order : false}>
-                                <TableSortLabel active={orderBy === column.id} direction={order} onClick={this.createSortHandler(column.id)}>
+                            <TableCell
+                                key={column.id}
+                                numeric={column.numeric}
+                                sortDirection={orderBy === column.id ? order : false}
+                            >
+                                <TableSortLabel
+                                    active={orderBy === column.id}
+                                    direction={order}
+                                    onClick={this.createSortHandler(column.id)}
+                                >
                                     {column.label}
                                 </TableSortLabel>
                             </TableCell>
@@ -242,15 +264,13 @@ class Listing extends React.Component {
                     </div>
                     <div className={classes.mainTitleWrapper}>
                         <Typography variant='display1' className={classes.mainTitle}>
-                            APIs
+                            <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                         </Typography>
                         {this.state.apis && (
                             <Typography variant='caption' gutterBottom align='left'>
-                                Displaying
-                                {' '}
+                                <FormattedMessage defaultMessage='Displaying' id='Apis.Listing.Listing.displaying' />
                                 {this.state.apis.count}
-                                {' '}
-API
+                                <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.count' />
                             </Typography>
                         )}
                     </div>

@@ -116,7 +116,18 @@ const styles = theme => ({
         padding: '5px 12px',
         width: 350,
         transition: theme.transitions.create(['border-color', 'box-shadow']),
-        fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
+        fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
         '&:focus': {
             borderColor: '#80bdff',
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
@@ -395,7 +406,11 @@ class StarRatingBar extends React.Component {
                         </div>
                     </React.Fragment>
                 ) : (
-                    <StarRate onClick={this.showRateBox} className={classes.starRate} style={{ color: theme.palette.grey.A200 }} />
+                    <StarRate
+                        onClick={this.showRateBox}
+                        className={classes.starRate}
+                        style={{ color: theme.palette.grey.A200 }}
+                    />
                 )}
                 <VerticalDivider height={32} />
                 <div className={classes.ratingBoxWrapper}>
@@ -404,7 +419,16 @@ class StarRatingBar extends React.Component {
                             <HighlightOff />
                             <VerticalDivider height={32} />
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-                                <StarRate color={i <= this.state.rating.userRating * 2 || i <= this.state.dummyRateValue ? 'primary' : ''} onMouseOver={() => this.highlightUs(i)} onMouseLeave={() => this.unhighlightUs()} onClick={() => this.doRate(i)} />
+                                <StarRate
+                                    color={
+                                        i <= this.state.rating.userRating * 2 || i <= this.state.dummyRateValue
+                                            ? 'primary'
+                                            : ''
+                                    }
+                                    onMouseOver={() => this.highlightUs(i)}
+                                    onMouseLeave={() => this.unhighlightUs()}
+                                    onClick={() => this.doRate(i)}
+                                />
                             ))}
                         </div>
                     )}
@@ -414,15 +438,22 @@ class StarRatingBar extends React.Component {
                             <div className={classes.ratingSummery} onClick={this.showRateBox}>
                                 <Typography variant='display1'>{this.state.rating.userRating * 2}</Typography>
                                 <Typography variant='caption' gutterBottom align='left'>
-                                    YOU
+                                    <FormattedMessage id='Apis.Details.InfoBar.you' defaultMessage='YOU' />
                                 </Typography>
                             </div>
                         </React.Fragment>
                     ) : (
                         <React.Fragment>
-                            <StarRate onClick={this.showRateBox} className={classes.starRate} style={{ color: theme.palette.grey.A200 }} />
+                            <StarRate
+                                onClick={this.showRateBox}
+                                className={classes.starRate}
+                                style={{ color: theme.palette.grey.A200 }}
+                            />
                             <Typography onClick={this.showRateBox} className={classes.rateLink}>
-                                Rate this API
+                                <FormattedMessage
+                                    id='Apis.Details.InfoBar.rate.this.api'
+                                    defaultMessage='Rate this API'
+                                />
                             </Typography>
                         </React.Fragment>
                     )}
@@ -566,7 +597,7 @@ class InfoBar extends React.Component {
      * @memberof InfoBar
      */
     render() {
-        const { classes, theme } = this.props;
+        const { classes, theme, intl } = this.props;
         const {
             api, notFound, showOverview, prodUrlCopied, sandboxUrlCopied,
         } = this.state;
@@ -585,10 +616,9 @@ class InfoBar extends React.Component {
                     <Link to='/apis' className={classes.backLink}>
                         <KeyboardArrowLeft className={classes.backIcon} />
                         <div className={classes.backText}>
-                            BACK TO
-                            {' '}
+                            <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
                             <br />
-                            LISTING
+                            <FormattedMessage id='Apis.Details.InfoBar.listing' defaultMessage='LISTING' />
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
@@ -597,7 +627,6 @@ class InfoBar extends React.Component {
                         <Typography variant='display1'>{api.name}</Typography>
                         <Typography variant='caption' gutterBottom align='left'>
                             {api.provider}
-                            {' '}
 | 21-May 2018
                         </Typography>
                     </div>
@@ -616,7 +645,12 @@ class InfoBar extends React.Component {
                                             <TableCell component='th' scope='row' className={classes.leftCol}>
                                                 <div className={classes.iconAligner}>
                                                     <CalendarViewDay className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>Version</span>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.list.version'
+                                                            defaultMessage='Version'
+                                                        />
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>{api.version}</TableCell>
@@ -625,7 +659,12 @@ class InfoBar extends React.Component {
                                             <TableCell component='th' scope='row'>
                                                 <div className={classes.iconAligner}>
                                                     <AccountBalanceWallet className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>Context</span>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.list.context'
+                                                            defaultMessage='Context'
+                                                        />
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>{api.context}</TableCell>
@@ -634,7 +673,12 @@ class InfoBar extends React.Component {
                                             <TableCell component='th' scope='row'>
                                                 <div className={classes.iconAligner}>
                                                     <AccountCircle className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>Provider</span>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.provider'
+                                                            defaultMessage='Provider'
+                                                        />
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>{api.provider}</TableCell>
@@ -643,7 +687,12 @@ class InfoBar extends React.Component {
                                             <TableCell component='th' scope='row'>
                                                 <div className={classes.iconAligner}>
                                                     <Update className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>Last updated</span>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.last.updated'
+                                                            defaultMessage='Last updated'
+                                                        />
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>21 May 2018</TableCell>
@@ -652,7 +701,12 @@ class InfoBar extends React.Component {
                                             <TableCell component='th' scope='row'>
                                                 <div className={classes.iconAligner}>
                                                     <LinkIcon className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>Production URL</span>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.production.url'
+                                                            defaultMessage='Production URL'
+                                                        />
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
@@ -685,7 +739,10 @@ class InfoBar extends React.Component {
                                                     color='primary'
                                                     className={classes.margin}
                                                 >
-                                                    Test Endpoint
+                                                    <FormattedMessage
+                                                        id='Apis.Details.InfoBar.test.endpoint'
+                                                        defaultMessage='Test Endpoint'
+                                                    />
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
@@ -693,7 +750,12 @@ class InfoBar extends React.Component {
                                             <TableCell component='th' scope='row'>
                                                 <div className={classes.iconAligner}>
                                                     <LinkIcon className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>Sandbox URL</span>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.sandbox.url'
+                                                            defaultMessage='Sandbox URL'
+                                                        />
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
@@ -714,7 +776,17 @@ class InfoBar extends React.Component {
                                                         }}
                                                     />
                                                     <Tooltip
-                                                        title={sandboxUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                        title={
+                                                            sandboxUrlCopied
+                                                                ? intl.formatMessage({
+                                                                    defaultMessage: 'Copied',
+                                                                    id: 'Apis.Details.InfoBar.copied',
+                                                                })
+                                                                : intl.formatMessage({
+                                                                    defaultMessage: 'Copy to clipboard',
+                                                                    id: 'Apis.Details.InfoBar.copy.to.clipboard',
+                                                                })
+                                                        }
                                                         placement='right'
                                                     >
                                                         <CopyToClipboard
@@ -730,7 +802,10 @@ class InfoBar extends React.Component {
                                                         color='primary'
                                                         className={classes.margin}
                                                     >
-                                                        Test Endpoint
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.test.endpoint'
+                                                            defaultMessage='Test Endpoint'
+                                                        />
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -744,8 +819,15 @@ class InfoBar extends React.Component {
                 <div className={classes.infoContentBottom}>
                     <div className={classes.contentWrapper} onClick={this.toggleOverview}>
                         <div className={classes.buttonView}>
-                            {showOverview ? <Typography className={classes.buttonOverviewText}>LESS</Typography>
-                                : <Typography className={classes.buttonOverviewText}>MORE</Typography>}
+                            {showOverview ? (
+                                <Typography className={classes.buttonOverviewText}>
+                                    <FormattedMessage id='Apis.Details.InfoBar.less' defaultMessage='LESS' />
+                                </Typography>
+                            ) : (
+                                <Typography className={classes.buttonOverviewText}>
+                                    <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' />
+                                </Typography>
+                            )}
                             {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
                         </div>
                     </div>
@@ -758,6 +840,9 @@ class InfoBar extends React.Component {
 InfoBar.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(InfoBar);

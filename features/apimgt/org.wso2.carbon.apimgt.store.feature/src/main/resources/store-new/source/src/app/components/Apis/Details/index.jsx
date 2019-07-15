@@ -23,6 +23,7 @@ import {
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
+import { FormattedMessage } from 'react-intl';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -34,37 +35,43 @@ import Progress from '../../Shared/Progress';
 
 const LoadableSwitch = Loadable.Map({
     loader: {
-        ApiConsole: () => import(// eslint-disable-line function-paren-newline
-        /* webpackChunkName: "ApiConsole" */
-        /* webpackPrefetch: true */
+        ApiConsole: () => import(
+            // eslint-disable-line function-paren-newline
+            /* webpackChunkName: "ApiConsole" */
+            /* webpackPrefetch: true */
             // eslint-disable-next-line comma-dangle
             './ApiConsole/ApiConsole'
         ),
-        Overview: () => import(// eslint-disable-line function-paren-newline
+        Overview: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Overview" */
             /* webpackPrefetch: true */
             // eslint-disable-next-line comma-dangle
             './Overview'
         ),
-        Documentation: () => import(// eslint-disable-line function-paren-newline
+        Documentation: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Documentation" */
             /* webpackPrefetch: true */
             // eslint-disable-next-line comma-dangle
             './Documents/Documentation'
         ),
-        Credentials: () => import(// eslint-disable-line function-paren-newline
+        Credentials: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Credentials" */
             /* webpackPrefetch: true */
             // eslint-disable-next-line comma-dangle
             './Credentials/Credentials'
         ),
-        Comments: () => import(// eslint-disable-line function-paren-newline
+        Comments: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Comments" */
             /* webpackPrefetch: true */
             // eslint-disable-next-line comma-dangle
             './Comments/Comments'
         ),
-        Sdk: () => import(// eslint-disable-line function-paren-newline
+        Sdk: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Sdk" */
             /* webpackPrefetch: true */
             // eslint-disable-next-line comma-dangle
@@ -316,7 +323,9 @@ class Details extends React.Component {
                     <Link to='/apis' className={classes.leftLInkMainWrapper}>
                         <div className={classes.leftLInkMain}>
                             <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
-                            <Typography className={classes.leftLInkMainText}>ALL APIs</Typography>
+                            <Typography className={classes.leftLInkMainText}>
+                                <FormattedMessage id='Apis.Details.index.all.apis' defaultMessage='ALL APIs' />
+                            </Typography>
                         </div>
                     </Link>
                     <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />

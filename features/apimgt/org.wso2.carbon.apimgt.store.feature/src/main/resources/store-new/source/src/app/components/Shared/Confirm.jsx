@@ -19,6 +19,7 @@ import React from 'react';
 import Dialog, {
     DialogActions, DialogContent, DialogContentText, DialogTitle,
 } from '@material-ui/core/Dialog';
+import { FormattedMessage } from 'react-intl';
 
 class Confirm extends React.Component {
     constructor(props) {
@@ -36,16 +37,36 @@ class Confirm extends React.Component {
     render(props) {
         return (
             <Dialog open={this.state.open} onClose={this.handleRequestClose}>
-                <DialogTitle>{props.title ? props.title : 'Please Confirm'}</DialogTitle>
+                <DialogTitle>
+                    {props.title ? (
+                        props.title
+                    ) : (
+                        <FormattedMessage id='Shared.Confirm.please.confirm' defaultMessage='Please Confirm' />
+                    )}
+                </DialogTitle>
                 <DialogContent>
-                    <DialogContentText>{props.message ? props.message : 'Are you sure?'}</DialogContentText>
+                    <DialogContentText>
+                        {props.message ? (
+                            props.message
+                        ) : (
+                            <FormattedMessage id='Shared.Confirm.are.you.sure' defaultMessage='Are you sure?' />
+                        )}
+                    </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => this.handleRequestClose('cancel')} color='primary'>
-                        {props.labelCancel ? props.labelCancel : 'Cancel'}
+                        {props.labelCancel ? (
+                            props.labelCancel
+                        ) : (
+                            <FormattedMessage id='Shared.Confirm.cancel.btn' defaultMessage='Cancel' />
+                        )}
                     </Button>
                     <Button onClick={() => this.handleRequestClose('ok')} color='primary'>
-                        {props.labelOk ? props.labelOk : 'OK'}
+                        {props.labelOk ? (
+                            props.labelOk
+                        ) : (
+                            <FormattedMessage id='Shared.Confirm.ok.btn' defaultMessage='OK' />
+                        )}
                     </Button>
                 </DialogActions>
             </Dialog>

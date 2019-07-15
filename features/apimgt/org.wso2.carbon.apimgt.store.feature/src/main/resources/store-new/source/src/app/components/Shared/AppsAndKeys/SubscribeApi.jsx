@@ -24,6 +24,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Slide from '@material-ui/core/Slide';
 import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 /**
@@ -251,8 +252,12 @@ class Subscribe extends Component {
      * @memberof Subscribe
      */
     addNotifications() {
+        const intl = this.props;
         this.refs.notificationSystem.addNotification({
-            message: 'Subscribe to API successfully',
+            message: intl.formatMessage({
+                defaultMessage: 'Subscribe to API successfully',
+                id: 'Shared.AppsAndKeys.SubscribeApi.subscribe.to.api',
+            }),
             position: 'tc',
             level: 'success',
         });
@@ -274,6 +279,7 @@ class Subscribe extends Component {
      */
     createSubscription = (e) => {
         e.preventDefault();
+        const { intl } = this.props;
         const apiId = this.api_uuid;
         const applicationId = this.state.applicationId;
         const policy = this.state.policyName;
@@ -281,14 +287,23 @@ class Subscribe extends Component {
         const promised_subscribe = api.subscribe(apiId, applicationId, policy);
         promised_subscribe
             .then((response) => {
-                console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-
+                console.log(
+                    intl.formatMessage({
+                        defaultMessage: 'Subscription created successfully with ID : ',
+                        id: 'Shared.AppsAndKeys.SubscribeApi.subscription.created',
+                    }) + response.body.subscriptionId,
+                );
                 // this.addNotifications();
                 this.updateSubscriptionData();
                 this.setState({ openSubsConfirm: true });
             })
             .catch((error) => {
-                console.log('Error while creating the subscription.');
+                console.log(
+                    intl.formatMessage({
+                        defaultMessage: 'Error while creating the subscription.',
+                        id: 'Shared.AppsAndKeys.SubscribeApi.error.while.creating',
+                    }),
+                );
                 console.error(error);
             });
     };
@@ -412,7 +427,10 @@ class Subscribe extends Component {
                     <Grid item xs={12} md={6}>
                         <FormControl className={classes.FormControl}>
                             <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
-                                Application
+                                <FormattedMessage
+                                    defaultMessage='Application'
+                                    id='Shared.AppsAndKeys.SubscribeApi.application'
+                                />
                             </InputLabel>
                             <Select value={this.state.applicationId} onChange={this.handleChange('applicationId')}>
                                 {this.state.applicationsAvailable.map(app => (
@@ -421,19 +439,30 @@ class Subscribe extends Component {
                                     </option>
                                 ))}
                             </Select>
-                            <FormHelperText>Label + placeholder</FormHelperText>
+                            <FormattedMessage
+                                defaultMessage='Label + placeholder'
+                                id='Shared.AppsAndKeys.SubscribeApi.label.placeholder'
+                            />
+                            <FormHelperText />
                         </FormControl>
                         {this.state.tiers && (
                             <FormControl className={classes.FormControlOdd}>
                                 <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
-                                    Throttling Tier
+                                    <FormattedMessage
+                                        defaultMessage='Throttling Tier'
+                                        id='Shared.AppsAndKeys.SubscribeApi.throttling.tier'
+                                    />
                                 </InputLabel>
                                 <Select value={this.state.policyName} onChange={this.handleChange('policyName')}>
                                     {this.state.tiers.map(tier => (
                                         <option value={tier.value}>{tier.label}</option>
                                     ))}
                                 </Select>
-                                <FormHelperText>Label + placeholder</FormHelperText>
+                                <FormattedMessage
+                                    defaultMessage='Label + placeholder'
+                                    id='Shared.AppsAndKeys.SubscribeApi.label.placeholder.other'
+                                />
+                                <FormHelperText />
                             </FormControl>
                         )}
                     </Grid>

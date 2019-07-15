@@ -24,6 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import { FileCopy } from '@material-ui/icons';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import { FormattedMessage } from 'react-intl';
 import InlineMessage from '../../Shared/InlineMessage';
 /**
  *
@@ -127,12 +128,25 @@ class ViewToken extends React.Component {
             <div className={classes.root}>
                 <InlineMessage type='warn'>
                     <Typography variant='headline' component='h3'>
-                        Please Copy the Access Token
+                    <FormattedMessage
+                        id='Shared.AppsAndKeys.ViewToken.please.copy'
+                        defaultMessage='Please Copy the Access Token'
+                    />
                     </Typography>
-                    <Typography component='p'>Please copy this generated token value as it will be displayed only for the current browser session. ( After a page refresh, the token is not visible in the UI )</Typography>
+                    <Typography component='p'>
+                    <FormattedMessage
+                        id='Shared.AppsAndKeys.ViewToken.please.copy.help'
+                        defaultMessage='Please copy this generated token value as it will be displayed only for the current browser session. ( After a page refresh, the token is not visible in the UI )'
+                    />
+                        </Typography>
                 </InlineMessage>
                 <div className={classes.epWrapper}>
-                    <Typography className={classes.prodLabel}>Access Token</Typography>
+                    <Typography className={classes.prodLabel}>
+                    <FormattedMessage
+                        id='Shared.AppsAndKeys.ViewToken.access.token'
+                        defaultMessage='Access Token'
+                    />
+                        </Typography>
                     <TextField
                         defaultValue={token.accessToken}
                         id='bootstrap-input'
@@ -155,15 +169,21 @@ class ViewToken extends React.Component {
                     </Tooltip>
                 </div>
                 <FormHelperText>
-                    Above token has a validity period of
-                    {' '}
+                <FormattedMessage
+                        id='Shared.AppsAndKeys.ViewToken.info.first'
+                        defaultMessage='Above token has a validity period of'
+                    />
                     {token.validityTime}
-                    {' '}
-seconds. And the token has (
-                    {' '}
+                    <FormattedMessage
+                        id='Shared.AppsAndKeys.ViewToken.info.second'
+                        defaultMessage='seconds. And the token has ('
+                    />
                     {this.getTokeScopesString(token.tokenScopes)}
-                    {' '}
-) scopes.
+                    <FormattedMessage
+                        id='Shared.AppsAndKeys.ViewToken.info.third'
+                        defaultMessage=') scopes.'
+                    />
+
                 </FormHelperText>
             </div>
         );

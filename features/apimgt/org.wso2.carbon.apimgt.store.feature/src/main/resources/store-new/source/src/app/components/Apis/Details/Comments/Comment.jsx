@@ -55,10 +55,10 @@ const styles = theme => ({
 });
 
 /**
-   * Display a particular comment and details
-   * @class Comment
-   * @extends {React.Component}
-   */
+ * Display a particular comment and details
+ * @class Comment
+ * @extends {React.Component}
+ */
 class Comment extends React.Component {
     /**
      * Creates an instance of Comment
@@ -185,7 +185,9 @@ class Comment extends React.Component {
     handleClickDeleteComment() {
         const Api = new API();
         const { deleteComment } = this.state;
-        const { apiId, allComments, commentsUpdate } = this.props;
+        const {
+            apiId, allComments, commentsUpdate, intl,
+        } = this.props;
         const commentIdOfCommentToDelete = deleteComment.commentId;
         const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
         this.handleClose();
@@ -207,7 +209,14 @@ class Comment extends React.Component {
                 if (error.response) {
                     Alert.error(error.response.body.message);
                 } else {
-                    Alert.error(`Something went wrong while deleting comment - ${commentIdOfCommentToDelete}`);
+                    Alert.error(
+                        intl.formatMessage({
+                            defaultMessage: 'Something went wrong while deleting comment',
+                            id: 'Apis.Details.Comments.Comment.something.went.wrong',
+                        })
+                            + ' - '
+                            + commentIdOfCommentToDelete,
+                    );
                 }
             });
     }
@@ -219,48 +228,85 @@ class Comment extends React.Component {
      */
     render() {
         const {
-            classes, comments, apiId, allComments, commentsUpdate,
+            classes, comments, apiId, allComments, commentsUpdate, intl,
         } = this.props;
         const { editIndex, replyIndex, openDialog } = this.state;
-        return (
-            [comments
-      && comments.slice(0).reverse().map((comment, index) => (
-          <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
-              <Grid container spacing={8} className={classes.root}>
-                  <Grid item>
-                      <AccountBox className={classes.commentIcon} />
-                  </Grid>
-                  <Grid item xs zeroMinWidth>
-                      <Typography noWrap className={classes.commentText} variant='body2'>
-                          {comment.createdBy}
-                      </Typography>
+        return [
+            comments
+                && comments
+                    .slice(0)
+                    .reverse()
+                    .map((comment, index) => (
+                        <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
+                            <Grid container spacing={8} className={classes.root}>
+                                <Grid item>
+                                    <AccountBox className={classes.commentIcon} />
+                                </Grid>
+                                <Grid item xs zeroMinWidth>
+                                    <Typography noWrap className={classes.commentText} variant='body2'>
+                                        {comment.createdBy}
+                                    </Typography>
 
-                      {index !== editIndex
-              &&
-                  <Typography className={classes.commentText}>
-                      {comment.commentText}
-                  </Typography>
-                      }
+                                    {index !== editIndex && (
+                                        <Typography className={classes.commentText}>{comment.commentText}</Typography>
+                                    )}
 
-                      {(index === editIndex)
-              && <CommentEdit apiId={apiId} allComments={allComments} commentsUpdate={commentsUpdate} comment={comment} toggleShowEdit={this.handleShowEdit} />
-                      }
+                                    {index === editIndex && (
+                                        <CommentEdit
+                                            apiId={apiId}
+                                            allComments={allComments}
+                                            commentsUpdate={commentsUpdate}
+                                            comment={comment}
+                                            toggleShowEdit={this.handleShowEdit}
+                                        />
+                                    )}
 
-                      <CommentOptions classes={classes} comment={comment} editIndex={editIndex} index={index} showAddComment={this.showAddComment} handleClickOpen={this.handleClickOpen} showEditComment={this.showEditComment} />
+                                    <CommentOptions
+                                        classes={classes}
+                                        comment={comment}
+                                        editIndex={editIndex}
+                                        index={index}
+                                        showAddComment={this.showAddComment}
+                                        handleClickOpen={this.handleClickOpen}
+                                        showEditComment={this.showEditComment}
+                                    />
 
-                      {(index === replyIndex)
-              && <CommentAdd apiId={apiId} parentCommentId={comment.commentId} allComments={allComments} commentsUpdate={commentsUpdate} toggleShowReply={this.handleShowReply} cancelButton />
-                      }
-                      {comment.replies.length !== 0
-              && <CommentReply classes={classes} apiId={apiId} comments={comment.replies} commentsUpdate={commentsUpdate} allComments={allComments} />}
-                  </Grid>
-              </Grid>
-          </div>
-
-      )),
-                <ConfirmDialog key='key-dialog' labelCancel='Cancel' title='Confirm Delete' message='Are you sure you want to delete this comment?' labelOk='Yes' callback={this.handleConfirmDialog} open={openDialog} />,
-            ]
-        );
+                                    {index === replyIndex && (
+                                        <CommentAdd
+                                            apiId={apiId}
+                                            parentCommentId={comment.commentId}
+                                            allComments={allComments}
+                                            commentsUpdate={commentsUpdate}
+                                            toggleShowReply={this.handleShowReply}
+                                            cancelButton
+                                        />
+                                    )}
+                                    {comment.replies.length !== 0 && (
+                                        <CommentReply
+                                            classes={classes}
+                                            apiId={apiId}
+                                            comments={comment.replies}
+                                            commentsUpdate={commentsUpdate}
+                                            allComments={allComments}
+                                        />
+                                    )}
+                                </Grid>
+                            </Grid>
+                        </div>
+                    )),
+            <ConfirmDialog
+                key='key-dialog'
+                labelCancel='Cancel'
+                title='Confirm Delete'
+                message={intl.formatMessage({
+                    defaultMessage: 'Are you sure you want to delete this comment?',
+                    id: 'Apis.Details.Comments.Comment.are.you.sure',
+                })}
+                labelOk='Yes'
+                callback={this.handleConfirmDialog}
+                open={openDialog}
+            />,
+        ];
     }
 }
 
@@ -270,6 +316,9 @@ Comment.propTypes = {
     allComments: PropTypes.instanceOf(Array).isRequired,
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
 export default withStyles(styles)(Comment);

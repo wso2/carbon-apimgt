@@ -23,6 +23,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { FormattedMessage } from 'react-intl';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import Api from '../../../data/api';
@@ -149,7 +150,7 @@ class ApiThumb extends React.Component {
                         </Typography>
                     </Link>
                     <Typography variant='caption' gutterBottom align='left'>
-                        By: 
+                        <FormattedMessage defaultMessage='By:' id='Apis.Listing.ApiThumb.by'  /> 
                         {provider}
 
                     </Typography>
@@ -157,7 +158,7 @@ class ApiThumb extends React.Component {
                         <div className={classes.thumbLeft}>
                             <Typography variant='subheading'>{version}</Typography>
                             <Typography variant='caption' gutterBottom align='left'>
-                                Version
+                                <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
@@ -165,7 +166,7 @@ class ApiThumb extends React.Component {
                                 {context}
                             </Typography>
                             <Typography variant='caption' gutterBottom align='right'>
-                                Context
+                                <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
                             </Typography>
                         </div>
                     </div>

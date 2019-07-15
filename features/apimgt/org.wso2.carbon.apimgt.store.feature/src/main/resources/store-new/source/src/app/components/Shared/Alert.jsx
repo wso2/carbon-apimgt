@@ -53,6 +53,7 @@ class Alert {
     show() {
         const promisedInstance = this._getMessageInstance();
         const { onClose } = this;
+        const { intl } = this.prop;
         promisedInstance
             .then((instance) => {
                 instance.notice({
@@ -67,7 +68,8 @@ class Alert {
                     ),
                 });
             })
-            .catch(error => console.error('Error while showing alert' + error));
+            .catch(error => console.error(intl.formatMessage({
+                defaultMessage: 'Error while showing alert'}) + error));
         /* TODO: Remove above console error with logging library error method */
     }
 

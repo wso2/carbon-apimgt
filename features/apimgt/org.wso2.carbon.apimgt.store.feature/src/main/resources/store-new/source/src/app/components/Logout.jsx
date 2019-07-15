@@ -44,7 +44,7 @@ class Logout extends Component {
      */
     componentDidMount() {
         const promisedLogout = this.authManager.logout();
-        const { location } = this.props;
+        const { location, intl } = this.props;
         promisedLogout
             .then(() => {
                 const newState = { logoutSuccess: true };
@@ -58,7 +58,9 @@ class Logout extends Component {
                 this.setState(newState);
             })
             .catch(() => {
-                console.log('Error while logging out');
+                console.log(intl.formatMessage({
+                    id: 'Logout.error',
+                    defaultMessage: 'Error while logging out'}));
             });
     }
 

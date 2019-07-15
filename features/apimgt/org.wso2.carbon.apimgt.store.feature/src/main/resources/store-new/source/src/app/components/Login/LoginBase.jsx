@@ -16,30 +16,29 @@
  * under the License.
  */
 
-import React from 'react'
-import Footer from '../Footer/Footer'
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
+import Footer from '../Footer/Footer';
 
 const LoginBase = (props) => {
     return (
         <div>
-            <header className="header header-default">
-                <div className="container-fluid">
-                    <div className="pull-left brand float-remove-xs text-center-xs">
-                        <a href="/store-new/">
-                            <img
-                                src="/store-new/site/public/images/logo.svg"
-
-                                className="logo"/>
-                              <h1>API Store</h1>
+            <header className='header header-default'>
+                <div className='container-fluid'>
+                    <div className='pull-left brand float-remove-xs text-center-xs'>
+                        <a href='/store-new/'>
+                            <img src='/store-new/site/public/images/logo.svg' className='logo' />
+                            <h1>
+                                <FormattedMessage defaultMessage='API Store' id='Login.LoginBase.api.store'  />
+                            </h1>
                         </a>
                     </div>
                 </div>
             </header>
             {props.children}
-            <Footer/>
+            <Footer />
         </div>
-
     );
 };
 
-export default LoginBase
+export default LoginBase;

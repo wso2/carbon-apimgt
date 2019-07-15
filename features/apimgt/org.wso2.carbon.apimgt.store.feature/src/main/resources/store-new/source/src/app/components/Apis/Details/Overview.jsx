@@ -27,6 +27,7 @@ import { Link } from 'react-router-dom';
 import Divider from '@material-ui/core/Divider';
 import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import Button from '@material-ui/core/Button';
+import { FormattedMessage } from 'react-intl';
 import CustomIcon from '../../Shared/CustomIcon';
 import { ApiContext } from './ApiContext';
 import Resources from './Resources';
@@ -125,10 +126,19 @@ class Overview extends React.Component {
                         <Grid item xs={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
-                                    <CustomIcon strokeColor={theme.palette.secondary.main} className={classes.iconClass} width={24} height={24} icon='credentials' />
+                                    <CustomIcon
+                                        strokeColor={theme.palette.secondary.main}
+                                        className={classes.iconClass}
+                                        width={24}
+                                        height={24}
+                                        icon='credentials'
+                                    />
 
                                     <Typography className={classes.heading} variant='h6'>
-                                        API Credentials
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.api.credentials'
+                                            defaultMessage='API Credentials'
+                                        />
                                     </Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
@@ -137,24 +147,48 @@ class Overview extends React.Component {
                                             <div className={classes.subscriptionTop}>
                                                 <div className={classes.boxBadge}>2</div>
                                                 <Link to='/' className={classes.linkStyle}>
-                                                    Subscriptions
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.subscriptions'
+                                                        defaultMessage='Subscriptions'
+                                                    />
                                                 </Link>
                                             </div>
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <Typography variant='subtitle2'>Subscribe to an Application</Typography>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.subscribe.to.application'
+                                                    defaultMessage='Subscribe to an Application'
+                                                />
+                                            </Typography>
                                             <div className={classes.subscriptionBox}>
                                                 <Link to='/' className={classes.linkStyle}>
-                                                    With an Existing Application
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.with.an.existing'
+                                                        defaultMessage='With an Existing Application'
+                                                    />
                                                 </Link>
-                                                <Typography variant='caption'>Subscribe to an Application</Typography>
+                                                <Typography variant='caption'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.subscribe.to.an.application'
+                                                        defaultMessage='Subscribe to an Application'
+                                                    />
+                                                </Typography>
                                                 <Link to='/' className={classes.linkStyle}>
-                                                    With a New Application
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.with.a.new.application'
+                                                        defaultMessage='With a New Application'
+                                                    />
                                                 </Link>
                                             </div>
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <Typography>API Credentials are grouped in to applications. An application is primarily used to decouple the consumer from the APIs. It allows you to Generate and use a single key for multiple APIs and subscribe multiple times to a single API with different SLA levels.</Typography>
+                                            <Typography>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.with.a.new.application.help'
+                                                    defaultMessage='API Credentials are grouped in to applications. An application is primarily used to decouple the consumer from the APIs. It allows you to Generate and use a single key for multiple APIs and subscribe multiple times to a single API with different SLA levels.'
+                                                />
+                                            </Typography>
                                         </Grid>
                                     </Grid>
                                 </ExpansionPanelDetails>
@@ -163,17 +197,31 @@ class Overview extends React.Component {
                         <Grid item xs={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
-                                    <CustomIcon strokeColor={theme.palette.secondary.main} className={classes.iconClass} width={24} height={24} icon='credentials' />
+                                    <CustomIcon
+                                        strokeColor={theme.palette.secondary.main}
+                                        className={classes.iconClass}
+                                        width={24}
+                                        height={24}
+                                        icon='credentials'
+                                    />
 
                                     <Typography className={classes.heading} variant='h6'>
-                                        Resources
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.resources.title'
+                                            defaultMessage='Resources'
+                                        />
                                     </Typography>
                                 </ExpansionPanelSummary>
-                                <ExpansionPanelDetails className={classes.resourceWrapper}>{api && <Resources api={api} />}</ExpansionPanelDetails>
+                                <ExpansionPanelDetails className={classes.resourceWrapper}>
+                                    {api && <Resources api={api} />}
+                                </ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
                                     <Button size='small' color='primary'>
-                                        Show More >>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.resources.show.more'
+                                            defaultMessage='Show More >>'
+                                        />
                                     </Button>
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
@@ -181,17 +229,31 @@ class Overview extends React.Component {
                         <Grid item xs={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
-                                    <CustomIcon strokeColor={theme.palette.secondary.main} className={classes.iconClass} width={24} height={24} icon='comments' />
+                                    <CustomIcon
+                                        strokeColor={theme.palette.secondary.main}
+                                        className={classes.iconClass}
+                                        width={24}
+                                        height={24}
+                                        icon='comments'
+                                    />
 
                                     <Typography className={classes.heading} variant='h6'>
-                                        Comments
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.comments.title'
+                                            defaultMessage='Comments'
+                                        />
                                     </Typography>
                                 </ExpansionPanelSummary>
-                                <ExpansionPanelDetails className={classes.resourceWrapper}>{api && <Comments apiId={api.id} showLatest />}</ExpansionPanelDetails>
+                                <ExpansionPanelDetails className={classes.resourceWrapper}>
+                                    {api && <Comments apiId={api.id} showLatest />}
+                                </ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
                                     <Button size='small' color='primary'>
-                                        Show More >>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.comments.show.more'
+                                            defaultMessage='Show More >>'
+                                        />
                                     </Button>
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
@@ -199,24 +261,41 @@ class Overview extends React.Component {
                         <Grid item xs={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
-                                    <CustomIcon strokeColor={theme.palette.secondary.main} className={classes.iconClass} width={24} height={24} icon='sdk' />
+                                    <CustomIcon
+                                        strokeColor={theme.palette.secondary.main}
+                                        className={classes.iconClass}
+                                        width={24}
+                                        height={24}
+                                        icon='sdk'
+                                    />
 
                                     <Typography className={classes.heading} variant='h6'>
-                                        SDK Generation
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.sdk.generation.title'
+                                            defaultMessage='SDK Generation'
+                                        />
                                     </Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails className={classes.resourceWrapper}>
                                     <Grid container className={classes.root} spacing={16}>
                                         {api && <Sdk apiId={api.id} onlyIcons />}
                                         <Grid item xs={12}>
-                                            <Typography>If you wants to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.</Typography>
+                                            <Typography>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.sdk.generation.description'
+                                                    defaultMessage='If you wants to create a software application to consume the subscribed APIs, you can generate client side SDK for a supported language/framework and use it as a start point to write the software application.'
+                                                />
+                                            </Typography>
                                         </Grid>
                                     </Grid>
                                 </ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
                                     <Button size='small' color='primary'>
-                                        Show More >>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.sdk.generation.show.more'
+                                            defaultMessage='Show More >>'
+                                        />
                                     </Button>
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
@@ -224,10 +303,19 @@ class Overview extends React.Component {
                         <Grid item xs={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
-                                    <CustomIcon strokeColor={theme.palette.secondary.main} className={classes.iconClass} width={24} height={24} icon='docs' />
+                                    <CustomIcon
+                                        strokeColor={theme.palette.secondary.main}
+                                        className={classes.iconClass}
+                                        width={24}
+                                        height={24}
+                                        icon='docs'
+                                    />
 
                                     <Typography className={classes.heading} variant='h6'>
-                                        Documents
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.documents.title'
+                                            defaultMessage='Documents'
+                                        />
                                     </Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
@@ -236,17 +324,31 @@ class Overview extends React.Component {
                                             <div className={classes.subscriptionTop}>
                                                 <div className={classes.boxBadge}>3</div>
                                                 <Link to='/' className={classes.linkStyle}>
-                                                    Documents
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.documents.count.sufix'
+                                                        defaultMessage='Documents'
+                                                    />
                                                 </Link>
                                             </div>
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <Typography variant='subtitle2'>Last Updated</Typography>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.documents.last.updated'
+                                                    defaultMessage='Last Updated'
+                                                />
+                                            </Typography>
                                             <div className={classes.subscriptionBox}>
                                                 <Link to='/' className={classes.linkStyle}>
                                                     AboutmyApi.pdf
                                                 </Link>
-                                                <Typography variant='caption'>Last updated 21 minutes ago</Typography>
+                                                <Typography variant='caption'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.documents.last.updated'
+                                                        defaultMessage='Last Updated'
+                                                    />
+                                                    21 minutes ago
+                                                </Typography>
                                             </div>
                                         </Grid>
                                     </Grid>
@@ -256,10 +358,19 @@ class Overview extends React.Component {
                         <Grid item xs={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
-                                    <CustomIcon strokeColor={theme.palette.secondary.main} className={classes.iconClass} width={24} height={24} icon='docs' />
+                                    <CustomIcon
+                                        strokeColor={theme.palette.secondary.main}
+                                        className={classes.iconClass}
+                                        width={24}
+                                        height={24}
+                                        icon='docs'
+                                    />
 
                                     <Typography className={classes.heading} variant='h6'>
-                                        Forum
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.forum.title'
+                                            defaultMessage='Forum'
+                                        />
                                     </Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
@@ -268,17 +379,31 @@ class Overview extends React.Component {
                                             <div className={classes.subscriptionTop}>
                                                 <div className={classes.boxBadge}>1</div>
                                                 <Link to='/' className={classes.linkStyle}>
-                                                    Topic
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.forum.number.count'
+                                                        defaultMessage='Topic'
+                                                    />
                                                 </Link>
                                             </div>
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <Typography variant='subtitle2'>Last Updated</Typography>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.forum.last.updated'
+                                                    defaultMessage='Last Updated'
+                                                />
+                                            </Typography>
                                             <div className={classes.subscriptionBox}>
                                                 <Link to='/' className={classes.linkStyle}>
                                                     Find pets fast
                                                 </Link>
-                                                <Typography variant='caption'>Last updated 2 days ago</Typography>
+                                                <Typography variant='caption'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.forum.last.updated'
+                                                        defaultMessage='Last Updated'
+                                                    />
+                                                    2 days ago
+                                                </Typography>
                                             </div>
                                         </Grid>
                                     </Grid>
