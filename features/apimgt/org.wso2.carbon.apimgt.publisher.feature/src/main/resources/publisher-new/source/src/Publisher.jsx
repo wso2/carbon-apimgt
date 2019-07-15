@@ -145,7 +145,7 @@ class Publisher extends React.Component {
             .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages: defineMessages(data) });
+                this.setState({ messages: defineMessages({ ...data }) });
             });
     }
 

@@ -10,7 +10,8 @@
         "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
-        "lint": "eslint source/**/*.js source/**/*.jsx source/src/app/**/*.jsx"
+        "lint": "eslint source/**/*.js source/**/*.jsx source/src/app/**/*.jsx",
+        "i18n": "extract-messages -l=en -d en -o site/public/locales --flat true 'source/src/app/components/**/*.jsx'"
     },
     "repository": {
         "type": "git",
@@ -63,6 +64,8 @@
         "babel-jest": "^24.8.0",
         "babel-loader": "^8.0.6",
         "babel-plugin-dynamic-import-node": "^2.2.0",
+        "babel-plugin-react-intl": "^4.0.1",
+        "babel-plugin-react-intl-auto": "^1.7.0",
         "chai": "^4.0.2",
         "css-loader": "^0.28.9",
         "enzyme": "^3.8.0",
@@ -74,6 +77,8 @@
         "eslint-plugin-jest": "^22.6.4",
         "eslint-plugin-jsx-a11y": "^6.0.3",
         "eslint-plugin-react": "^7.7.0",
+        "extract-react-intl": "^0.7.1",
+        "extract-react-intl-messages": "^1.0.1",
         "jest": "^24.8.0",
         "jest-puppeteer": "^4.2.0",
         "less": "^2.7.2",

@@ -6,7 +6,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import ListItem from '@material-ui/core/ListItem';
-
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
 import Utils from '../../data/Utils';
@@ -195,6 +194,7 @@ class Layout extends React.Component {
         document.body.style.height = null;
         document.body.style.margin = null;
     }
+
     render() {
         const { classes, theme } = this.props;
         const user = AuthManager.getUser();
