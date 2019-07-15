@@ -79,7 +79,7 @@ function Create(props) {
                             if (process.env.NODE_ENV !== 'production') {
                                 console.log(error);
                                 Alert.error(intl.formatMessage({
-                                    id: 'documents.markdown.editor.create.error',
+                                    id: 'documents.markdown.editor.create.error.file',
                                     defaultMessage: 'Error uploading the file',
                                 }));
                             }

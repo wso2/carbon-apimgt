@@ -141,8 +141,8 @@ class Publisher extends React.Component {
      */
     loadLocale(locale = 'en') {
         fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
-            .then((resp) => {
-                const data = resp.json();
+            .then(resp => resp.json())
+            .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
                 this.setState({ messages: defineMessages({ ...data }) });
