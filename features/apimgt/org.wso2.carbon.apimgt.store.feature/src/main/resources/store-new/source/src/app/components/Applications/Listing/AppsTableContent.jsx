@@ -27,6 +27,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
@@ -102,18 +103,34 @@ class AppsTableContent extends Component {
                                 <TableCell>{app.throttlingPolicy}</TableCell>
                                 <TableCell>
                                     {app.status === this.APPLICATION_STATES.APPROVED && (
-                                        <Typography variant='subheading' gutterBottom>ACTIVE</Typography>
+                                        <Typography variant='subheading' gutterBottom>
+                                            <FormattedMessage
+                                                id='Applications.Listing.AppsTableContent.active'
+                                                defaultMessage='ACTIVE'
+                                            />
+                                        </Typography>
                                     )}
                                     {app.status === this.APPLICATION_STATES.CREATED && (
                                         <Typography variant='subheading' gutterBottom>
-                                            INACTIVE
+                                            <FormattedMessage
+                                                id='Applications.Listing.AppsTableContent.inactive'
+                                                defaultMessage='INACTIVE'
+                                            />
                                             <Typography variant='caption'>
-                                            waiting for approval
+                                                <FormattedMessage
+                                                    id='Applications.Listing.AppsTableContent.wait.approval'
+                                                    defaultMessage='waiting for approval'
+                                                />
                                             </Typography>
                                         </Typography>
                                     )}
                                     {app.status === this.APPLICATION_STATES.REJECTED && (
-                                        <Typography variant='subheading' gutterBottom>REJECTED</Typography>
+                                        <Typography variant='subheading' gutterBottom>
+                                            <FormattedMessage
+                                                id='Applications.Listing.AppsTableContent.rejected'
+                                                defaultMessage='REJECTED'
+                                            />
+                                        </Typography>
                                     )}
                                 </TableCell>
                                 <TableCell>{app.subscriptionCount}</TableCell>
@@ -126,7 +143,13 @@ class AppsTableContent extends Component {
                                             <Tooltip title='Edit'>
                                                 <Link to={'application/edit/' + app.applicationId}>
                                                     <IconButton>
-                                                        <EditIcon aria-label='Edit' />
+                                                        <EditIcon aria-label={(
+                                                            <FormattedMessage
+                                                                id='Applications.Listing.AppsTableContent.edit.btn'
+                                                                defaultMessage='Edit'
+                                                            />
+                                                        )}
+                                                        />
                                                     </IconButton>
                                                 </Link>
                                             </Tooltip>
@@ -136,13 +159,24 @@ class AppsTableContent extends Component {
                                         resourcePath={resourcePaths.SINGLE_APPLICATION}
                                         resourceMethod={resourceMethods.DELETE}
                                     >
-                                        <Tooltip title='Delete'>
+                                        <Tooltip title={(
+                                            <FormattedMessage
+                                                id='Applications.Listing.AppsTableContent.delete.tooltip'
+                                                defaultMessage='Delete'
+                                            />
+                                        )}
+                                        >
                                             <IconButton
                                                 disabled={app.deleting}
                                                 data-appId={app.applicationId}
                                                 onClick={handleAppDelete}
                                                 color='default'
-                                                aria-label='Delete'
+                                                aria-label={(
+                                                    <FormattedMessage
+                                                        id='Applications.Listing.AppsTableContent.delete.label'
+                                                        defaultMessage='Delete'
+                                                    />
+                                                )}
                                             >
                                                 <DeleteIcon />
                                             </IconButton>
