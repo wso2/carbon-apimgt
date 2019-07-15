@@ -174,7 +174,10 @@ class APICreateForm extends Component {
                             )}
                         </Typography>
                         <Typography variant='h5' align='left' className={classes.subTitle}>
-                            GATEWAY-URL/
+                            <FormattedMessage
+                                id='Apis.Create.Default.APICreateDefault.gateway.url'
+                                defaultMessage='Gateway_URL/'
+                            />
                             {api.version ? api.version : '{apiVersion}'}/{api.context ? api.context : '{context}'}
                         </Typography>
                     </div>
