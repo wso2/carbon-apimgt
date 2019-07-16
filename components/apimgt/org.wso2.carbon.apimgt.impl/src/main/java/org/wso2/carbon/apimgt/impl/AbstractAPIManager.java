@@ -1096,6 +1096,9 @@ public abstract class AbstractAPIManager implements APIManager {
             resource.setContent(schemaDefinition);
             resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
             registry.put(resourcePath, resource);
+            if (log.isDebugEnabled()) {
+                log.debug("successfully imported the schema: " + schemaDefinition );
+            }
         } catch (RegistryException e) {
             String msg = "Error while uploading schema to from the registry ";
             log.error(msg, e);

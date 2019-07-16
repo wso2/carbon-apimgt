@@ -1742,25 +1742,16 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisImportGraphQLSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
                                                 String additionalProperties, String ifMatch, MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         InputStreamReader fileContent;
         BufferedReader contentBufferReader;
         StringBuilder contentBuilder = new StringBuilder();
         String content = "";
 
         try {
-            if (!StringUtils.isBlank(additionalProperties)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Deseriallizing additionalProperties: " + additionalProperties);
-                }
+            if (fileInputStream == null || StringUtils.isBlank(additionalProperties)) {
+                String errorMessage = "GraphQL schema and api details cannot be empty.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            API apiToAdd = createAPIByDTO(additionalPropertiesAPI);
-            APIIdentifier createdApiId = apiToAdd.getId();
-
-            //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
 
             fileContent = new InputStreamReader(fileInputStream);
             contentBufferReader = new BufferedReader(fileContent);
@@ -1770,10 +1761,27 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             String schema = contentBuilder.toString();
 
-            if (schema == null) {
-                String errorMessage = "GraphQLSchema cannot be empty.";
-                RestApiUtil.handleBadRequest(errorMessage, log);
+            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(schema)){
+                if (log.isDebugEnabled()) {
+                    log.debug("Deseriallizing additionalProperties: " + additionalProperties + "/n"
+                    + "importing schema: " + schema );
+                }
             }
+
+            additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API apiToAdd = createAPIByDTO(additionalPropertiesAPI);
+
+            //Save swagger definition of graphQL
+            APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
+            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
+            apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
+
+            APIIdentifier createdApiId = apiToAdd.getId();
+
+            //Retrieve the newly added API to send in the response payload
+            API createdApi = apiProvider.getAPI(createdApiId);
 
             String resourcePath = createdApiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
                     createdApiId.getApiName() + createdApiId.getVersion() +
@@ -1784,13 +1792,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleConflict("schema resource already exists for the API " +
                         additionalPropertiesAPI.getId(), log);
             }
-
             apiProvider.uploadGraphqlSchema(resourcePath, schema);
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
 
             //This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
-
             return Response.created(createdApiUri).entity(createdApiDTO).build();
 
         } catch (APIManagementException e) {

@@ -1799,16 +1799,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = null;
         APITemplateBuilder builder = null;
 
-        if (getGraphqlSchema(api.getId()) != null ) {
+        if (api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             api.setType(APIConstants.GRAPHQL_API);
-        } else {
-            api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         }
-
+        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
 
         try {
@@ -3377,6 +3377,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.delete(apiProviderPath);
                 }
             }
+
+            if(api.getType().equals(APIConstants.GRAPHQL_API)){
+                String resourcePath = identifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                        identifier.getApiName() + identifier.getVersion() +
+                        APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+                resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
+                registry.delete(resourcePath);
+            }
+
             cleanUpPendingAPIStateChangeTask(apiId);
             //Run cleanup task for workflow
             /*
@@ -5961,9 +5970,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while publishing to Gateway ", e);
         }
 
-        if (getGraphqlSchema(api.getId()) != null) {
+        if (api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             api.setType(APIConstants.GRAPHQL_API);
+            List<String> httpVerbList = new ArrayList();
+            httpVerbList.add("GET");
+            httpVerbList.add("POST");
+            Set<URITemplate> uriTemplates = new HashSet<>();
+            URITemplate template = new URITemplate();
+            for(String verb : httpVerbList) {
+                template.setHTTPVerb(verb);
+                template.setResourceURI("/*");
+                uriTemplates.add(template);
+            }
+            api.setUriTemplates(uriTemplates);
         } else {
             api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         }

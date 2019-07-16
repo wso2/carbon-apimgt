@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
+import graphql.schema.GraphQLType;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -36,9 +37,11 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
@@ -46,9 +49,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     public static final String QUERY_PATH_String = "/?query=";
     public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
+    public static final String GRAPHQL_SCOPE_ROLE_MAPPING = "GRAPHQL_SCOPE_ROLE_MAPPING";
+    public static final String scopeRoleMapping = "ScopeRoleMapping";
+    public static final String scopeOperationMapping = "ScopeOperationMapping";
+    public static final String GRAPHQL_SCOPE_OPERATION_MAPPING = "GRAPHQL_SCOPE_OPERATION_MAPPING";
     public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
     public static final String API_TYPE = "API_TYPE";
-    public static final String GRAPHQL_API = "GRAPHQL_API";
+    public static final String GRAPHQL_API = "GRAPHQL";
     public static final int UNAUTHORIZED_REQUESRT = 401;
     private String apiUUID;
 
@@ -66,13 +73,18 @@ public class GraphQLAPIHandler extends AbstractHandler {
             String payload;
             String operationList = "";
             String validationErrorMessage = "";
-            ArrayList<String> operationArray=new ArrayList<String>();
+            HashMap<String,String> rolelist = new HashMap<>();
+            HashMap<String,String> operationlist = new HashMap<>();
             List<ValidationError> validationErrors = null;
+
+            ArrayList<String> roleArray=new ArrayList<String>();
+            ArrayList<String> operationArray=new ArrayList<String>();
             ArrayList<String> validationErrorMessageList =new ArrayList<String>();
 
-            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
-                    messageContext).getAxis2MessageContext();
+            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                    getAxis2MessageContext();
             RelayUtils.buildMessage(axis2MC);
+
             if (axis2MC.getEnvelope().getBody().getFirstElement() != null) {
                 payload = axis2MC.getEnvelope().getBody().getFirstElement().getFirstElement().getText();
             } else {
@@ -84,11 +96,12 @@ public class GraphQLAPIHandler extends AbstractHandler {
             Parser parser = new Parser();
             Document document = parser.parseDocument(payload);
             SchemaParser schemaParser = new SchemaParser();
+            GraphQLSchema schema = null;
 
-            Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID);
+            Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID + "_graphQL");
             if (localEntryObj != null) {
                 TypeDefinitionRegistry registry = schemaParser.parse(localEntryObj.getValue().toString());
-                GraphQLSchema schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+                schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
                 Validator validator = new Validator();
                 validationErrors = validator.validateDocument(schema, document);
             }
@@ -100,6 +113,26 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 handleValidationFailure(messageContext, validationErrorMessage);
                 return false;
             }
+
+            Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
+            for (GraphQLType  additionalType : additionalTypes) {
+                if(additionalType.getName().contains(scopeRoleMapping)) {
+                    String scope = additionalType.getName().split("_")[1];
+                    additionalType.getChildren();
+                    for (GraphQLType a :  additionalType.getChildren()) {
+                        roleArray.add(a.getName());
+                    }
+                    rolelist.put(scope, String.join(",", roleArray));
+                    messageContext.setProperty(GRAPHQL_SCOPE_ROLE_MAPPING, rolelist);
+                } else if (additionalType.getName().contains(scopeOperationMapping)) {
+                    String operation = additionalType.getName().split("_")[1];
+                    for (GraphQLType a : additionalType.getChildren()) {
+                        operationlist.put(operation, a.getName());
+                    }
+                    messageContext.setProperty(GRAPHQL_SCOPE_OPERATION_MAPPING, operationlist);
+                }
+            }
+
             messageContext.setProperty(API_TYPE, GRAPHQL_API);
             for (Definition definition : new Parser().parseDocument(payload)
                     .getDefinitions()) {

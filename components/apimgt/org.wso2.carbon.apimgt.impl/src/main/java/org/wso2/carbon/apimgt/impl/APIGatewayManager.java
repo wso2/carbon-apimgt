@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -27,6 +29,8 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -47,7 +51,10 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -126,24 +133,98 @@ public class APIGatewayManager {
                 if (debugEnabled) {
                     log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
                 }
-                // If the API exists in the Gateway
-                if (apiData != null) {
-                    localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                if (api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
+                    Swagger swagger = null;
+                    String resourceRoles = null;
+                    String swaggerDef = api.getSwaggerDefinition();
+                    Map<String, String> scopeRoleMap = new HashMap<>();
+                    Map<String, String> scopeOperationMap = new HashMap<>();
+                    String roleDef = "";
+                    String OperationScopeMapping = "";
+                    String RoleScopeMapping = "";
+                    String apiScopes = "";
 
-                    if(api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
-                        definition = api.getGraphQLSchema();
-                        localEntryAdminClient.deleteEntry(api.getUUID());
-                        localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
-                                definition + "</localEntry>");
-                    } else {
-                        definition = api.getSwaggerDefinition();
-                        localEntryAdminClient.deleteEntry(api.getUUID());
+                    SwaggerParser parser = new SwaggerParser();
+                    if (swaggerDef != null) {
+                        swagger = parser.parse(swaggerDef);
+                    }
+                    definition = api.getGraphQLSchema();
+
+                    if (swagger != null) {
+                        Map<String, Object> vendorExtensions = swagger.getVendorExtensions();
+                        if (vendorExtensions != null) {
+                            LinkedHashMap swaggerWSO2Security = (LinkedHashMap) swagger.getVendorExtensions()
+                                    .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+                            if (swaggerWSO2Security != null) {
+                                LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
+                                        .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
+                                if (swaggerObjectAPIM != null) {
+                                    ArrayList<LinkedHashMap> scopes = (ArrayList<LinkedHashMap>) swaggerObjectAPIM
+                                            .get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                                    for (LinkedHashMap scope : scopes) {
+                                        for (URITemplate template : api.getUriTemplates()) {
+                                            String scopeInURITemplate = template.getScope() != null ? template.getScope().getName() : null;
+                                            if (scopeInURITemplate != null && scopeInURITemplate.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
+                                                scopeOperationMap.put(template.getUriTemplate(), scopeInURITemplate);
+                                                if (!scopeRoleMap.containsKey(scopeInURITemplate)) {
+                                                    scopeRoleMap.put(scopeInURITemplate,
+                                                            scope.get(APIConstants.SWAGGER_ROLES).toString());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (scopeOperationMap != null) {
+                            for (Map.Entry<String, String> entry : scopeOperationMap.entrySet()) {
+                                OperationScopeMapping = OperationScopeMapping + "type ScopeOperationMapping_" +
+                                        entry.getKey() + "{\n" + entry.getValue() + ": String\n}\n";
+                            }
+                        }
+
+                        if (scopeRoleMap != null) {
+                            List<String> scopeRoles = new ArrayList<>();
+                            for (Map.Entry<String, String> entry : scopeRoleMap.entrySet()) {
+                                String object = "type ScopeRoleMapping_" + entry.getKey() + "{\n";
+                                String roles = entry.getValue();
+                                String[] roleList = roles.split(",");
+                                for (String role : roleList) {
+                                    if(scopeRoles == null || !scopeRoles.contains(role)) {
+                                        roleDef = roleDef + role + ": String\n";
+                                    }
+                                    scopeRoles.add(role);
+                                }
+                                RoleScopeMapping = RoleScopeMapping + object + roleDef + "}\n";
+                            }
+                        }
+                    }
+
+                    Set<URITemplate> uriTemplates = new HashSet<>();
+                    URITemplate template = new URITemplate();
+                    template.setAuthType("Any");
+                    template.setHTTPVerb("POST");
+                    template.setHttpVerbs("POST");
+                    template.setHttpVerbs("GET");
+                    template.setUriTemplate("/*");
+                    uriTemplates.add(template);
+                    api.setUriTemplates(uriTemplates);
+
+                    localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() +
+                                "_graphQL" + "\">" + definition + RoleScopeMapping + OperationScopeMapping +
+                                "</localEntry>");
+
+                } else {
+                    definition = api.getSwaggerDefinition();
                         localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
                                 definition.replaceAll("&(?!amp;)", "&amp;").
                                         replaceAll("<", "&lt;").replaceAll(">", "&gt;")
                                 + "</localEntry>");
-                    }
-
+                }
+                // If the API exists in the Gateway
+                if (apiData != null) {
                     startTime = System.currentTimeMillis();
                     // If the Gateway type is 'production' and the production url
                     // has been removed
@@ -1131,6 +1212,7 @@ public class APIGatewayManager {
      * @param api
      * @param tenantDomain
      * @param environment
+     * @param operation -add,delete,update operations for an API
      * @throws APIManagementException
      */
 	private void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain, Environment

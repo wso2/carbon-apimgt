@@ -6332,6 +6332,9 @@ definitions:
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
         example: admin
+      type:
+        type: string
+        example: HTTP
       lifeCycleStatus:
         type: string
         example: CREATED

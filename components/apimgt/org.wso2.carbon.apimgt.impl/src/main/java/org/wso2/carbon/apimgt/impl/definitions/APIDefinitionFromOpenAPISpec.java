@@ -42,8 +42,10 @@ import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -336,10 +338,23 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
         JSONObject pathsObject = new JSONObject();
 
-        for (URITemplate uriTemplate : uriTemplates) {
-            addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
+        if(api.getType().equals(APIConstants.GRAPHQL_API)) {
+            List<String> verbList = new ArrayList<>();
+            verbList.add("GET");
+            verbList.add("POST");
+            URITemplate swaggerTemplate = new URITemplate();
+            for(String verb : verbList) {
+                swaggerTemplate.setAuthType("Any");
+                swaggerTemplate.setHTTPVerb(verb);
+                swaggerTemplate.setHttpVerbs(verb);
+                swaggerTemplate.setUriTemplate("/*");
+            }
+            addOrUpdatePathsFromURITemplate(pathsObject, swaggerTemplate);
+        } else {
+            for (URITemplate uriTemplate : uriTemplates) {
+                addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
+            }
         }
-
         swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
         swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
         populateSwaggerScopeInfo(swaggerObject, api.getScopes());

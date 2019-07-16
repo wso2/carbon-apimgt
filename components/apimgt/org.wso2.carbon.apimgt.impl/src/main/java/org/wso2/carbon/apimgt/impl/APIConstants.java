@@ -1520,8 +1520,8 @@ public final class APIConstants {
         public static final String DIGEST_AUTH = "DigestAuth";
     }
 
-    public enum APITransportType {
-        HTTP, WS,
+    public enum APIType {
+        HTTP, WS, GRAPHQL
     }
 
     public static final String JSON_GRANT_TYPES = "grant_types";
