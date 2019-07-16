@@ -314,7 +314,6 @@ class API extends Resource {
          return promisedSettings.then(response => response.body);
      }
 
-
    /**
     * Get Subscription Policies of an API
     * @param id {String} UUID of the API in which the swagger is needed
