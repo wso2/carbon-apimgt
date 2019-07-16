@@ -266,11 +266,26 @@ class ProvideWSDL extends Component {
                         <FormControlLabel
                             value='file'
                             control={<Radio />}
-                            label='File'
+                            label={
+                                <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.uploaded.file'
+                                    defaultMessage='File'
+                                />
+                            }
                             checked
                             className={classes.radioGroup}
                         />
-                        <FormControlLabel value='url' control={<Radio />} label='URL' className={classes.radioGroup} />
+                        <FormControlLabel
+                            value='url'
+                            control={<Radio />}
+                            label={
+                                <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.uploaded.url'
+                                    defaultMessage='URL'
+                                />
+                            }
+                            className={classes.radioGroup}
+                        />
                     </RadioGroup>
                 </FormControl>
                 {uploadMethod === 'file' ? (
@@ -328,13 +343,17 @@ class ProvideWSDL extends Component {
                                     fullWidth
                                     id='url'
                                     label='WSDL Url'
-                                    placeholder={'eg: ' +
-                                    'https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'}
+                                    placeholder={
+                                        'eg: ' +
+                                        'https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'
+                                    }
                                     helperText={
                                         <FormattedMessage
                                             id='create.new.wsdl.help'
-                                            defaultMessage={'Give a WSDL url such as' +
-                                            ' https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'}
+                                            defaultMessage={
+                                                'Give a WSDL url such as' +
+                                                ' https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'
+                                            }
                                         />
                                     }
                                     InputLabelProps={{

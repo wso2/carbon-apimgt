@@ -69,7 +69,7 @@ function Create(props) {
                     filePromise
                         .then((doc) => {
                             Alert.info(`${name} ${intl.formatMessage({
-                                id: 'documents.markdown.editor.create.create.file.successfully',
+                                id: 'Apis.Details.Documents.Create.successful.file.upload.message',
                                 defaultMessage: 'File uploaded successfully.',
                             })}`);
                             props.getDocumentsList();
@@ -79,14 +79,14 @@ function Create(props) {
                             if (process.env.NODE_ENV !== 'production') {
                                 console.log(error);
                                 Alert.error(intl.formatMessage({
-                                    id: 'documents.markdown.editor.create.error',
+                                    id: 'Apis.Details.Documents.Create.markdown.editor.upload.error',
                                     defaultMessage: 'Error uploading the file',
                                 }));
                             }
                         });
                 } else {
                     Alert.info(`${doc.name} ${intl.formatMessage({
-                        id: 'documents.markdown.editor.create.add.successfully',
+                        id: 'Apis.Details.Documents.Create.markdown.editor.success',
                         defaultMessage: ' added successfully.',
                     })}`);
                     props.getDocumentsList();
@@ -97,7 +97,7 @@ function Create(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                     Alert.error(intl.formatMessage({
-                        id: 'documents.markdown.editor.create.error',
+                        id: 'Apis.Details.Documents.Create.markdown.editor.add.error',
                         defaultMessage: 'Error adding the document',
                     }));
                 }
@@ -107,7 +107,10 @@ function Create(props) {
     return (
         <div className={classes.addNewWrapper}>
             <Typography className={classes.addNewHeader}>
-                <FormattedMessage id='documents.markdown.editor.create.title' defaultMessage='Add New Document' />
+                <FormattedMessage
+                    id='Apis.Details.Documents.Create.markdown.editor.create.title'
+                    defaultMessage='Add New Document'
+                />
             </Typography>
             <Divider />
             <CreateEditForm
@@ -121,12 +124,15 @@ function Create(props) {
                     <div className={classes.addNewOther}>
                         <Button variant='contained' color='primary' onClick={() => addDocument(api.id)}>
                             <FormattedMessage
-                                id='documents.markdown.editor.create.add.document'
+                                id='Apis.Details.Documents.Create.markdown.editor.add.document.button'
                                 defaultMessage='Add Document'
                             />
                         </Button>
                         <Button className={classes.button} onClick={toggleAddDocs}>
-                            <FormattedMessage id='documents.markdown.editor.create.cancel' defaultMessage='Cancel' />
+                            <FormattedMessage
+                                id='Apis.Details.Documents.Create.markdown.editor.add.document.cancel.button'
+                                defaultMessage='Cancel'
+                            />
                         </Button>
                     </div>
                 )}
