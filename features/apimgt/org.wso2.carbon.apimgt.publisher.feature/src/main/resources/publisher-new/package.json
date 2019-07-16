@@ -5,13 +5,12 @@
     "main": "app.jsx",
     "scripts": {
         "test": "jest",
-        "test:integration": "jest -c source/Tests/Integration/jest.config.js",
         "test:coverage": "jest --coverage",
-        "build:prod": "extract-messages -l=en,fr -o site/public/locales/ -d en --flat 'source/src/app/**/*.jsx';NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
+        "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
         "lint": "eslint source",
-        "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --flat 'source/src/app/**/*.jsx'"
+        "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'"
     },
     "repository": {
         "type": "git",
@@ -76,7 +75,6 @@
         "babel-jest": "^24.8.0",
         "babel-loader": "^8.0.6",
         "babel-plugin-dynamic-import-node": "^2.2.0",
-        "babel-plugin-react-intl-auto": "^1.7.0",
         "css-loader": "^0.28.2",
         "enzyme": "^3.8.0",
         "enzyme-adapter-react-16": "^1.7.1",
@@ -87,13 +85,11 @@
         "eslint-plugin-jest": "^22.6.4",
         "eslint-plugin-jsx-a11y": "^6.0.3",
         "eslint-plugin-react": "v7.13.0",
-        "extract-react-intl-messages": "^1.0.1",
+        "extract-react-intl-messages-compact": "^1.0.3",
         "jest": "^24.8.0",
-        "jest-puppeteer": "^4.2.0",
         "less": "^2.7.2",
         "less-loader": "^4.0.4",
         "mock-local-storage": "^1.0.2",
-        "puppeteer": "^1.17.0",
         "style-loader": "^0.18.1",
         "swagger-parser": "^7.0.0",
         "webpack": "v4.28.4",

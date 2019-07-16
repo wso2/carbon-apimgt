@@ -208,7 +208,6 @@ EditableRow.propTypes = {
     apiAdditionalProperties: PropTypes.shape({}).isRequired,
 };
 
-
 /**
  *
  *
@@ -344,7 +343,10 @@ class Properties extends React.Component {
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage defaultMessage='API Properties' />
+                        <FormattedMessage
+                            id='Apis.Details.Properties.Properties.api.properties'
+                            defaultMessage='API Properties'
+                        />
                     </Typography>
                     <Button size='small' className={classes.button} onClick={this.toggleAddProperty}>
                         <AddCircle className={classes.buttonIcon} />
