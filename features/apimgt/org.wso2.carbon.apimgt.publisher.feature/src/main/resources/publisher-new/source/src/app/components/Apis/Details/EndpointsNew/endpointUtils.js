@@ -47,4 +47,55 @@ function mergeEndpoints(endpointConfig) {
     return { production: [endpointConfig.production_endpoints], sandbox: [endpointConfig.sandbox_endpoints] };
 }
 
-export { getEndpointTypeProperty, mergeEndpoints };
+/**
+ * Method to get the endpoints templates based on the selected endpoint type (loadbalance/ failover) and whether is
+ * http or address endpoint.
+ *
+ * @param {string} endpointType The endpoint type
+ * @param {bool} isAddressEndpoint Whether the endpoint is soap or not.
+ * @param {object} currentEndpointConfig The existing endpoint information.
+ * */
+function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpointConfig) {
+    const tmpEndpointConfig = { ...currentEndpointConfig };
+    if (endpointType === 'failover') {
+        tmpEndpointConfig.endpoint_type = endpointType;
+        tmpEndpointConfig.production_failovers =
+            tmpEndpointConfig.production_failovers ? tmpEndpointConfig.production_failovers : [];
+        tmpEndpointConfig.sandbox_failovers =
+            tmpEndpointConfig.sandbox_failovers ? tmpEndpointConfig.sandbox_failovers : [];
+        tmpEndpointConfig.production_endpoints =
+            Array.isArray(tmpEndpointConfig.production_endpoints) ?
+                tmpEndpointConfig.production_endpoints[0] : tmpEndpointConfig.production_endpoints;
+        tmpEndpointConfig.sandbox_endpoints =
+            Array.isArray(tmpEndpointConfig.sandbox_endpoints) ?
+                tmpEndpointConfig.sandbox_endpoints[0] : tmpEndpointConfig.sandbox_endpoints;
+        tmpEndpointConfig.failOver = 'True';
+    } else if (endpointType === 'load_balance') {
+        tmpEndpointConfig.endpoint_type = endpointType;
+        tmpEndpointConfig.algoClassName = 'org.apache.synapse.endpoints.algorithms.RoundRobin';
+        tmpEndpointConfig.algoCombo = 'org.apache.synapse.endpoints.algorithms.RoundRobin';
+        tmpEndpointConfig.sessionManagement = '';
+        tmpEndpointConfig.sessionTimeOut = '';
+        tmpEndpointConfig.production_failovers = null;
+        tmpEndpointConfig.sandbox_failovers = null;
+        tmpEndpointConfig.production_endpoints = Array.isArray(tmpEndpointConfig.production_endpoints) ?
+            tmpEndpointConfig.production_endpoints : [tmpEndpointConfig.production_endpoints];
+        tmpEndpointConfig.sandbox_endpoints =
+            Array.isArray(tmpEndpointConfig.sandbox_endpoints) ?
+                tmpEndpointConfig.sandbox_endpoints : [tmpEndpointConfig.sandbox_endpoints];
+        tmpEndpointConfig.failOver = 'False';
+    } else {
+        tmpEndpointConfig.endpoint_type = isAddressEndpoint === true ? 'address' : endpointType;
+        tmpEndpointConfig.production_failovers = null;
+        tmpEndpointConfig.sandbox_failovers = null;
+        tmpEndpointConfig.production_endpoints = Array.isArray(tmpEndpointConfig.production_endpoints) ?
+            tmpEndpointConfig.production_endpoints[0] : tmpEndpointConfig.production_endpoints;
+        tmpEndpointConfig.sandbox_endpoints =
+            Array.isArray(tmpEndpointConfig.sandbox_endpoints) ?
+                tmpEndpointConfig.sandbox_endpoints[0] : tmpEndpointConfig.sandbox_endpoints;
+        tmpEndpointConfig.failOver = 'False';
+    }
+    return tmpEndpointConfig;
+}
+
+export { getEndpointTypeProperty, mergeEndpoints, getEndpointTemplateByType };

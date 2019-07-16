@@ -119,6 +119,7 @@ function EndpointListing(props) {
     };
 
     const getEndpointTypeSeparator = () => {
+        console.log(endpointType);
         if (endpointType === 'failover') {
             return (
                 <div className={classes.epTypeWrapper}>
@@ -147,13 +148,6 @@ function EndpointListing(props) {
                             defaultMessage='Loadbalance'
                         />
                     </Typography>
-                    <div className={classes.epConfig}>
-                        <Button onClick={() => setOpenLBConfigDialog(true)}>
-                            <Icon>
-                                settings
-                            </Icon>
-                        </Button>
-                    </div>
                     <Button onClick={() => addNewEndpoint(category, epType)} >
                         <Icon>
                             add
@@ -166,6 +160,7 @@ function EndpointListing(props) {
         );
     };
 
+    // TODO: Fix continuous rendering.
     useEffect(() => {
         setEndpointType(epType);
         setEndpoints(() => {

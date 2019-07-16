@@ -58,14 +58,14 @@ function EndpointSecurity(props) {
         {
             key: 'BASIC',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.basic',
+                id: 'Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.basic',
                 defaultMessage: 'Basic Auth',
             }),
         },
         {
             key: 'DIGEST',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.digest.auth',
+                id: 'Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.digest.auth',
                 defaultMessage: 'Digest Auth',
             }),
         }];
@@ -81,8 +81,8 @@ function EndpointSecurity(props) {
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='auth-type-select'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.EndpointOverview.endpointType'
-                            defaultMessage='Endpoint Type'
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.auth.type'
+                            defaultMessage='Auth Type'
                         />
                     </InputLabel>
                     <Select
@@ -105,10 +105,9 @@ function EndpointSecurity(props) {
                         required
                         id='auth-userName'
                         label={<FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.user.name.input'
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.user.name.input'
                             defaultMessage='User Name'
                         />}
-                        placeholder='User Name'
                         className={classes.textField}
                         margin='normal'
                         defaultValue={endpointSecurityInfo !== null ? endpointSecurityInfo.username : ''}
@@ -119,10 +118,9 @@ function EndpointSecurity(props) {
                         type='password'
                         id='auth-password'
                         label={<FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.EndpointSecurity.password.input'
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.password.input'
                             defaultMessage='Password'
                         />}
-                        placeholder='Password'
                         className={classes.textField}
                         margin='normal'
                         defaultValue={endpointSecurityInfo !== null ? endpointSecurityInfo.password : ''}

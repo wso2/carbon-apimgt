@@ -18,11 +18,9 @@ import React, { useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Switch from '@material-ui/core/Switch';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Collapse from '@material-ui/core/Collapse';
-import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 
 import EndpointOverview from './EndpointOverview';
@@ -37,6 +35,7 @@ const styles = theme => ({
     },
     root: {
         flexGrow: 1,
+        paddingRight: '10px',
     },
     titleWrapper: {
         display: 'flex',
@@ -64,87 +63,50 @@ function Endpoints(props) {
 
     return (
         <div className={classes.root}>
-            <form>
-                <div>
-                    <Typography variant='h4' align='left' className={classes.titleWrapper}>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.Endpoints.endpoints.header'
-                            defaultMessage='Endpoints'
-                        />
-                    </Typography>
-                </div>
-                <ApiContext.Consumer>
-                    {({ api }) => (
-                        <div>
-                            <Grid container>
-                                <Grid item xs={12}>
-                                    {/*<div className={classes.endpointTypesWrapper}>*/}
-                                    {/*    <Typography variant='h4' align='left' className={classes.mainTitle}>*/}
-                                    {/*        <FormattedMessage*/}
-                                    {/*            id='Production.and.SandBox'*/}
-                                    {/*            defaultMessage='Production and SandBox'*/}
-                                    {/*        />*/}
-                                    {/*    </Typography>*/}
-                                    {/*    <Switch*/}
-                                    {/*        checked={productionChecked}*/}
-                                    {/*        onChange={() => setProductionChecked(!productionChecked)}*/}
-                                    {/*        value='checkedProduction'*/}
-                                    {/*        color='primary'*/}
-                                    {/*    />*/}
-                                    {/*</div>*/}
-                                    <Collapse in={productionChecked}>
-                                        <EndpointOverview api={api} />
-                                    </Collapse>
-                                    {/* {(productionChecked === true) ?  : <div />} */}
-                                </Grid>
-                                <Grid>
-
-                                </Grid>
-                                {/*<Grid item xs={12}>*/}
-                                {/*    <div className={classes.endpointTypesWrapper}>*/}
-                                {/*        <Typography variant='h4' align='left' className={classes.mainTitle}>*/}
-                                {/*            <FormattedMessage id='Prototype' defaultMessage='Prototype' />*/}
-                                {/*        </Typography>*/}
-                                {/*        <Switch*/}
-                                {/*            checked={!productionChecked}*/}
-                                {/*            onChange={() => setProductionChecked(!productionChecked)}*/}
-                                {/*            value='checkedSandbox'*/}
-                                {/*            color='primary'*/}
-                                {/*        />*/}
-                                {/*    </div>*/}
-                                {/*    <Divider variant='middle' />*/}
-                                {/*    <Collapse in={!productionChecked}>*/}
-                                {/*        <FormattedMessage id='Prototype' defaultMessage='Prototype' />*/}
-                                {/*    </Collapse>*/}
-                                {/*</Grid>*/}
+            <div>
+                <Typography variant='h4' align='left' className={classes.titleWrapper}>
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.Endpoints.endpoints.header'
+                        defaultMessage='Endpoints'
+                    />
+                </Typography>
+            </div>
+            <ApiContext.Consumer>
+                {({ api }) => (
+                    <div>
+                        <Grid container>
+                            <Grid item xs={12}>
+                                <Collapse in={productionChecked}>
+                                    <EndpointOverview api={api} />
+                                </Collapse>
                             </Grid>
-                            <Grid
-                                container
-                                direction='row'
-                                alignItems='flex-start'
-                                spacing={16}
-                                className={classes.buttonSection}
-                            >
-                                <Grid item>
-                                    <Button type='submit' variant='contained' color='primary'>
-                                        <FormattedMessage
-                                            id='Apis.Details.EndpointsNew.Endpoints.save'
-                                            defaultMessage='Save'
-                                        />
-                                    </Button>
-                                </Grid>
-                                <Grid item>
-                                    <Button onClick={() => this.props.history.push('/apis')}>
-                                        <FormattedMessage
-                                            id='Apis.Details.EndpointsNew.Endpoints.cancel'
-                                            defaultMessage='Cancel'
-                                        />
-                                    </Button>
-                                </Grid>
+                        </Grid>
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='flex-start'
+                            spacing={16}
+                            className={classes.buttonSection}
+                        >
+                            <Grid item>
+                                <Button type='submit' variant='contained' color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.EndpointsNew.Endpoints.save'
+                                        defaultMessage='Save'
+                                    />
+                                </Button>
                             </Grid>
-                        </div>)}
-                </ApiContext.Consumer>
-            </form>
+                            <Grid item>
+                                <Button onClick={() => this.props.history.push('/apis')}>
+                                    <FormattedMessage
+                                        id='Apis.Details.EndpointsNew.Endpoints.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </div>)}
+            </ApiContext.Consumer>
         </div>
     );
 }

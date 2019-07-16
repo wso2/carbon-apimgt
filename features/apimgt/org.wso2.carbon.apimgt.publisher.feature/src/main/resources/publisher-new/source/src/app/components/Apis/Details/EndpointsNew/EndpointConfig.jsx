@@ -24,7 +24,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import AdvancedEndpointConfig from './AdvanceEndpointConfig';
+import AdvancedEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
 
 const styles = theme => ({
     epConfigWrapper: {
@@ -66,9 +66,7 @@ function EndpointConfig(props) {
     return (
         <div>
             {endpoint === undefined ? (
-                <Typography className={classes.noEpSelectedText}>
-                    Select an Endpoint to Configure
-                </Typography>
+                <div />
             ) : (
                 <Paper className={classes.epConfigWrapper}>
                     <Typography>Endpoint Configuration</Typography>
@@ -99,7 +97,7 @@ function EndpointConfig(props) {
 
 EndpointConfig.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    editEndpoint: PropTypes.func.isRequired,
+    changeEndpointURL: PropTypes.func.isRequired,
     epInfo: PropTypes.shape({}).isRequired,
 };
 

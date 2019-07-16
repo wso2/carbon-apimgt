@@ -83,7 +83,7 @@ function Certificates(props) {
                 <TextField
                     id='certificateAlias'
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.Certificates.alias'
+                        id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.alias'
                         defaultMessage='Alias'
                     />}
                     value={alias}

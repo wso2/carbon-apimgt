@@ -26,7 +26,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-import SuspendTimeoutConfig from './AdvancedConfig/SuspendTimeoutConfig';
+import SuspendTimeoutConfig from './SuspendTimeoutConfig';
 
 const styles = theme => ({
     advancedConfigDialog: {
@@ -71,12 +71,12 @@ function AdvancedEndpointConfig(props) {
                 >
                     <Typography className={classes.heading}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.advanced.configuration'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.advanced.configuration'
                             defaultMessage='Advanced Configuration'
                         />
                     </Typography>
                 </ExpansionPanelSummary>
-                <ExpansionPanelDetails className={classes.configWrapper}>
+                <ExpansionPanelDetails>
                     <SuspendTimeoutConfig />
                 </ExpansionPanelDetails>
             </ExpansionPanel>
