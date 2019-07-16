@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Grid, Typography, Divider } from '@material-ui/core';
+import { Grid, Typography } from '@material-ui/core';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { withStyles } from '@material-ui/core/styles';
@@ -107,20 +107,16 @@ class BusinessPlans extends Component {
         ));
         return (
             <Grid container className={classes.root}>
-                <Grid container className={classes.grid} spacing={2}>
-                    <Typography variant='subtitle' gutterBottom>
-                        <FormattedMessage id='commercial.policies' defaultMessage='Commercial Policies' />
-                    </Typography>
-                    <Grid container className={classes.root} spacing={2}>
-                        {policiesList}
+                <Grid className={classes.grid} spacing={2}>
+                    <Grid>
+                        <Typography variant='subtitle' gutterBottom>
+                            <FormattedMessage id='commercial.policies' defaultMessage='Commercial Policies' />
+                        </Typography>
                     </Grid>
-                </Grid>
-                <Grid container className={classes.grid} spacing={2}>
-                    <Divider className={classes.grid} />
                     {
                         (policies.length > 0) ? (
-                            <Grid className={classes.grid} spacing={2}>
-                                <Typography className={classes.grid} >
+                            <Grid>
+                                <Typography>
                                     <FormattedMessage
                                         id='unchecked.policies.are.not.monetized.click.save.to.monetize'
                                         defaultMessage='Unchecked polices are not monetized, click save to monetize'
@@ -128,7 +124,7 @@ class BusinessPlans extends Component {
                                 </Typography>
                             </Grid>
                         ) : (
-                            <Grid container className={classes.grid}>
+                            <Grid>
                                 <Typography>
                                     <FormattedMessage
                                         id='no.commercial.policies.to.monetize'
@@ -138,6 +134,9 @@ class BusinessPlans extends Component {
                             </Grid>
                         )
                     }
+                    <Grid container className={classes.root} spacing={2}>
+                        {policiesList}
+                    </Grid>
                 </Grid>
             </Grid>
         );
