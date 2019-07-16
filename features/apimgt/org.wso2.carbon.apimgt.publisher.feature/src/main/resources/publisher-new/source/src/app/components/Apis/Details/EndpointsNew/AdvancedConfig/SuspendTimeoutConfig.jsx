@@ -50,11 +50,7 @@ const styles = theme => ({
     },
     configSubContainer: {
         paddingBottom: '10px',
-        borderRadius: '5px',
         marginTop: '5px',
-        borderColor: theme.palette.grey[400],
-        borderWidth: 'thin',
-        borderStyle: 'solid',
         padding: '5px',
     },
     textField: {

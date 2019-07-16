@@ -18,7 +18,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
     Grid,
     Button,
-    Divider,
     Typography,
     Dialog,
     DialogTitle,
@@ -36,8 +35,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import KeyboardArrowRightRounded from '@material-ui/icons/KeyboardArrowRight';
 
-import RemoveCircle from '@material-ui/icons/RemoveCircle';
-import EndpointAdd from './EndpointAdd';
 import LoadBalanceConfig from './LoadBalanceConfig';
 
 const styles = theme => ({
@@ -55,10 +52,10 @@ const styles = theme => ({
     epTypeWrapper: {
         display: 'flex',
         padding: '5px',
-        // justifyContent: 'space-between',
+        justifyContent: 'space-between',
     },
     epTypeName: {
-        paddingTop: '5px',
+        paddingTop: '10px',
         fontWeight: 600,
     },
     epConfig: {
@@ -110,25 +107,12 @@ function EndpointListing(props) {
         getSelectedEndpoint,
         selectedEpIndex,
         addNewEndpoint,
+        removeEndpoint,
     } = props;
-    const [endpointType, setEndpointType] = useState('http');
+    const [endpointType, setEndpointType] = useState(epType);
     const [endpoints, setEndpoints] = useState([]);
     const [isLBConfigOpen, setOpenLBConfigDialog] = useState(false);
     const selectedRef = useRef(null);
-
-    const addEndpoint = (type) => {
-        setEndpointType(type);
-        // addNewEndpoint(category, type);
-        setEndpoints(endpoints.concat([{ url: 'http(s)://appserver/service' }]));
-    };
-
-    const removeEndpoint = (index) => {
-        const currentEndpoints = endpoints.filter((ep, id) => { return id !== index; });
-        setEndpoints(currentEndpoints);
-        if (currentEndpoints.length === 1) {
-            setEndpointType('http');
-        }
-    };
 
     const handleEpSelect = (event, index) => {
         console.log(event.currentTarget.offset);
@@ -145,20 +129,25 @@ function EndpointListing(props) {
                             defaultMessage='Failovers'
                         />
                     </Typography>
+                    <Button
+                        onClick={() => addNewEndpoint(category, epType)}
+                    >
+                        <Icon>
+                            add
+                        </Icon>
+                    </Button>
                 </div>
             );
         }
         if (endpointType === 'load_balance') {
             return (
                 <div className={classes.epTypeWrapper}>
-                    <div className={classes.epTypeName}>
-                        <Typography className={classes.epTypeName}>
-                            <FormattedMessage
-                                id='Apis.Details.EndpointsNew.EndpointListing.loadbalance'
-                                defaultMessage='Loadbalance'
-                            />
-                        </Typography>
-                    </div>
+                    <Typography className={classes.epTypeName}>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.EndpointListing.loadbalance'
+                            defaultMessage='Loadbalance'
+                        />
+                    </Typography>
                     <div className={classes.epConfig}>
                         <Button onClick={() => setOpenLBConfigDialog(true)}>
                             <Icon>
@@ -166,6 +155,11 @@ function EndpointListing(props) {
                             </Icon>
                         </Button>
                     </div>
+                    <Button onClick={() => addNewEndpoint(category, epType)} >
+                        <Icon>
+                            add
+                        </Icon>
+                    </Button>
                 </div>);
         }
         return (
@@ -188,11 +182,6 @@ function EndpointListing(props) {
             }
         });
     }, [apiEndpoints, epType, failOvers]);
-
-    console.log(
-        selectedEpIndex[0], selectedEpIndex[1],
-        (selectedEpIndex[0] === 0), (selectedEpIndex[1] === category), category,
-    );
 
     console.log('endpoints: ', endpoints);
 
@@ -217,7 +206,6 @@ function EndpointListing(props) {
                     </ListItem>
                 </List>
                 <Grid xs={12}>
-                    <EndpointAdd onAddEndpointClick={addEndpoint} endpointType={endpointType} />
                     {getEndpointTypeSeparator()}
                     <List>
                         {
@@ -231,8 +219,10 @@ function EndpointListing(props) {
                                             onClick={event => handleEpSelect(event, index)}
                                         >
                                             <ListItemAvatar>
-                                                <Button onClick={() => removeEndpoint(index)}>
-                                                    <RemoveCircle />
+                                                <Button onClick={() => removeEndpoint(index, epType, category)}>
+                                                    <Icon>
+                                                        remove
+                                                    </Icon>
                                                 </Button>
                                             </ListItemAvatar>
                                             <ListItemText primary={
@@ -299,6 +289,7 @@ EndpointListing.propTypes = {
     getSelectedEndpoint: PropTypes.func.isRequired,
     selectedEpIndex: PropTypes.number,
     addNewEndpoint: PropTypes.func.isRequired,
+    removeEndpoint: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointListing));
