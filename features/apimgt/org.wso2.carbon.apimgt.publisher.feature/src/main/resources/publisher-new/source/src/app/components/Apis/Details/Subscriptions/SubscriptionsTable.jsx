@@ -238,10 +238,13 @@ class SubscriptionsTable extends Component {
             .catch((errorResponse) => {
                 console.log(errorResponse);
                 const { message } = errorResponse.response.body;
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block',
-                    defaultMessage: 'Error: Unable to block subscription. (Reason: ' + message + ')',
-                }));
+                const messages = intl.defineMessages({
+                    errorMessage: {
+                        id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block',
+                        defaultMessage: 'Error: Unable to block subscription. (Reason: {message})',
+                    },
+                });
+                Alert.error(intl.formatMessage(messages.errorMessage, { message }));
             });
     }
 
@@ -266,10 +269,13 @@ class SubscriptionsTable extends Component {
             .catch((errorResponse) => {
                 console.log(errorResponse);
                 const { message } = errorResponse.response.body;
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block.prod.only',
-                    defaultMessage: 'Error: Unable to block subscription. (Reason: ' + message + ')',
-                }));
+                const messages = intl.defineMessages({
+                    errorMessage: {
+                        id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block.prod.only',
+                        defaultMessage: 'Error: Unable to block subscription. (Reason: {message})',
+                    },
+                });
+                Alert.error(intl.formatMessage(messages.errorMessage, { message }));
             });
     }
 
@@ -294,10 +300,13 @@ class SubscriptionsTable extends Component {
             .catch((errorResponse) => {
                 console.log(errorResponse);
                 const { message } = errorResponse.response.body;
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.unblock',
-                    defaultMessage: 'Error: Unable to unblock subscription. (Reason: ' + message + ')',
-                }));
+                const messages = intl.defineMessages({
+                    errorMessage: {
+                        id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.unblock',
+                        defaultMessage: 'Error: Unable to unblock subscription. (Reason: {message})',
+                    },
+                });
+                Alert.error(intl.formatMessage(messages.errorMessage, { message }));
             });
     }
 
@@ -307,7 +316,6 @@ class SubscriptionsTable extends Component {
      * @memberof SubscriptionsTable
      */
     fetchSubscriptionData() {
-        const { intl } = this.props;
         const api = new API();
         const promisedSubscriptions = api.subscriptions(this.api.id);
         promisedSubscriptions
@@ -316,10 +324,7 @@ class SubscriptionsTable extends Component {
             })
             .catch((errorMessage) => {
                 console.log(errorMessage);
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.fetch.subscription',
-                    defaultMessage: JSON.stringify(errorMessage),
-                }));
+                Alert.error(JSON.stringify(errorMessage));
             });
     }
 
