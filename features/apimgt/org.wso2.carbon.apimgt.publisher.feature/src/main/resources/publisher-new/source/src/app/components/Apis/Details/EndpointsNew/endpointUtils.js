@@ -22,12 +22,11 @@
  * @return {string} The property name of the endpoints.
  */
 function getEndpointTypeProperty(type, category) {
-    if (type === 'load_balance') {
+    if (type === 'load_balance' || type === 'http') {
         return category;
-    } else if (category === 'sandbox_endpoints') {
-        return 'sandbox_failovers';
+    } else {
+        return category === 'sandbox_endpoints' ? 'sandbox_failovers' : 'production_failovers';
     }
-    return 'production_failovers';
 }
 
 /**

@@ -115,7 +115,6 @@ function EndpointListing(props) {
     const selectedRef = useRef(null);
 
     const handleEpSelect = (event, index) => {
-        console.log(event.currentTarget.offset);
         getSelectedEndpoint(index, epType, category, event.currentTarget);
     };
 
@@ -168,8 +167,6 @@ function EndpointListing(props) {
     };
 
     useEffect(() => {
-        console.log('in use effect', apiEndpoints, category, epType);
-        console.log(epType);
         setEndpointType(epType);
         setEndpoints(() => {
             if (apiEndpoints !== null && epType === 'failover') {
@@ -181,9 +178,7 @@ function EndpointListing(props) {
                 return [{ url: 'http://myservice/' }];
             }
         });
-    }, [apiEndpoints, epType, failOvers]);
-
-    console.log('endpoints: ', endpoints);
+    });
 
     return (
         <div className={classes.listingWrapper} ref={selectedRef}>

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-    Paper,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    RadioGroup,
-    FormControlLabel,
-    Radio,
-    Grid,
-    Switch,
     Collapse,
+    FormControl,
+    FormControlLabel,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Radio,
+    RadioGroup,
+    Select,
+    Switch,
     Typography,
     withStyles,
 } from '@material-ui/core';
@@ -126,7 +126,6 @@ function EndpointOverview(props) {
                     selected = epConfig[category];
                     break;
             }
-            console.log('selected', selected);
             if (!selected) {
                 selected = { url: 'asddssfsd' };
             }
@@ -165,6 +164,7 @@ function EndpointOverview(props) {
     }, [endpointSecurityInfo]);
 
     useEffect(() => {
+        console.log('This is on ep config change', epConfig);
     }, [epConfig]);
 
     useEffect(() => {
@@ -184,7 +184,18 @@ function EndpointOverview(props) {
     }, [isSOAPEndpoint]);
 
     const editEndpoint = (url) => {
-        // console.log(selectedEpIndex, url, endpointType);
+        const endpointTypeProperty = getEndpointTypeProperty(epConfig.endpoint_type, selectedEpIndex[1]);
+        const modifiedEndpoint = epConfig[endpointTypeProperty];
+        if (selectedEpIndex[0] > 0) {
+            if (epConfig.endpoint_type === 'failover') {
+                modifiedEndpoint[selectedEpIndex[0] - 1].url = url;
+            } else {
+                modifiedEndpoint[selectedEpIndex[0]].url = url;
+            }
+        } else {
+            modifiedEndpoint.url = url;
+        }
+        setEpConfig({ ...epConfig, [endpointTypeProperty]: modifiedEndpoint });
     };
 
     const addEndpoint = (category, type) => {
@@ -221,7 +232,6 @@ function EndpointOverview(props) {
         const selectedOption = event.target.value;
         const tmpEndpointConfig = { ...epConfig };
         tmpEndpointConfig.endpoint_type = selectedOption;
-        console.log('Change ep :', tmpEndpointConfig);
         if (selectedOption === 'failover') {
             tmpEndpointConfig.production_failovers =
                 tmpEndpointConfig.production_failovers ? tmpEndpointConfig.production_failovers : [];
@@ -285,12 +295,13 @@ function EndpointOverview(props) {
     const removeEndpoint = (index, epType, category) => {
         const endpointConfigProperty = getEndpointTypeProperty(epType, category);
         // let existingEndpoints = epConfig[endpointConfigProperty];
+
         const indexToRemove = epType === 'failover' ? index - 1 : index;
-        const tmpEndpoints = { ...epConfig };
+        const tmpEndpoints = epConfig[endpointConfigProperty];
         console.log('BeforeREmove', tmpEndpoints);
-        tmpEndpoints[endpointConfigProperty].splice(indexToRemove, 1);
-        console.log(index, indexToRemove, endpointConfigProperty, epType, category, tmpEndpoints);
-        setEpConfig({ ...tmpEndpoints });
+        tmpEndpoints.splice(indexToRemove, 1);
+        console.log('after remove', index, indexToRemove, endpointConfigProperty, epType, category, tmpEndpoints);
+        setEpConfig({ ...epConfig, [endpointConfigProperty]: tmpEndpoints });
     };
 
     const handleEndpointSecurityChange = (event, field) => {

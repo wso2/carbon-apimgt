@@ -16,45 +16,17 @@
 
 import React, { useState } from 'react';
 import {
-    Dialog,
-    Button,
-    DialogContent,
-    DialogActions,
     Typography,
     withStyles,
-    IconButton,
-    Paper,
-    Icon,
     ExpansionPanel,
     ExpansionPanelSummary,
     ExpansionPanelDetails,
-    List,
-    ListItem,
-    ListItemText,
-    Divider,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import Certificates from './AdvancedConfig/Certificates';
-import EndpointSecurity from './AdvancedConfig/EndpointSecurity';
+
 import SuspendTimeoutConfig from './AdvancedConfig/SuspendTimeoutConfig';
-
-
-const configTitles = [
-    {
-        name: 'certificate',
-        title: 'Endpoint Certificates',
-    },
-    {
-        name: 'security',
-        title: 'Endpoint Security',
-    },
-    {
-        name: 'suspend',
-        title: 'Endpoint Suspension and Timeouts',
-    },
-];
 
 const styles = theme => ({
     advancedConfigDialog: {
@@ -67,19 +39,9 @@ const styles = theme => ({
         boxShadow: 'none',
         padding: '0px',
     },
-    popupHeader: {
-        display: 'flex',
-    },
-    dialogHeader: {
-        padding: theme.spacing.unit,
-        fontSize: '100%',
-    },
     heading: {
         flexBasis: '33.33%',
         flexShrink: 0,
-    },
-    secondaryHeading: {
-        color: theme.palette.grey[500],
     },
 });
 /**
@@ -89,44 +51,10 @@ const styles = theme => ({
  */
 function AdvancedEndpointConfig(props) {
     const { classes } = props;
-    const [option, setOption] = useState('');
     const [isAdvacedOpen, setAdvancedOpen] = useState(false);
-    const [isOpenAdvanceConfigDialog, setOpenAdvanceConfigDialog] = useState(false);
-    const [dialogTitle, setTitle] = useState('');
-
-    const getTitle = (configType) => {
-        return configTitles.filter((op) => { return (op.name === configType); });
-    };
-
-    const closeConfig = () => {
-        setOpenAdvanceConfigDialog(false);
-    };
 
     const openAdvancedConfig = () => {
         setAdvancedOpen(!isAdvacedOpen);
-    };
-
-    const openAdvancedConfigDialog = (configOption) => {
-        setOpenAdvanceConfigDialog(true);
-        setOption(configOption);
-        setTitle(getTitle(configOption)[0].title);
-    };
-
-    const handleClose = () => {
-        setOpenAdvanceConfigDialog(false);
-    };
-
-    const getConfigurationContent = (configType) => {
-        if (configType === 'security') {
-            return (<EndpointSecurity />);
-        }
-        if (configType === 'certificate') {
-            return (<Certificates />);
-        }
-        if (configType === 'suspend') {
-            return (<SuspendTimeoutConfig />);
-        }
-        return (<div />);
     };
 
     return (
@@ -146,86 +74,12 @@ function AdvancedEndpointConfig(props) {
                             id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.advanced.configuration'
                             defaultMessage='Advanced Configuration'
                         />
-                    </Typography> {' '}
-                    {/*<Typography className={classes.secondaryHeading}>*/}
-                    {/*    <FormattedMessage*/}
-                    {/*        id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.security.certificate.suspend'*/}
-                    {/*        defaultMessage='Security, Certificates, Suspend'*/}
-                    {/*    />*/}
-                    {/*</Typography>*/}
+                    </Typography>
                 </ExpansionPanelSummary>
-                <ExpansionPanelDetails>
+                <ExpansionPanelDetails className={classes.configWrapper}>
                     <SuspendTimeoutConfig />
-                    {/*<List className={classes.advancedConfigList}>*/}
-                    {/*    <ListItem button onClick={() => openAdvancedConfigDialog('security')}>*/}
-                    {/*        <ListItemText*/}
-                    {/*            primary={*/}
-                    {/*                <FormattedMessage*/}
-                    {/*                    id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.security'*/}
-                    {/*                    defaultMessage='Security'*/}
-                    {/*                />}*/}
-                    {/*            secondary='None'*/}
-                    {/*        />*/}
-                    {/*    </ListItem>*/}
-                    {/*    <Divider />*/}
-                    {/*    <ListItem button onClick={() => openAdvancedConfigDialog('certificate')}>*/}
-                    {/*        <ListItemText*/}
-                    {/*            primary={*/}
-                    {/*                <FormattedMessage*/}
-                    {/*                    id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.certificates'*/}
-                    {/*                    defaultMessage='Certificates'*/}
-                    {/*                />*/}
-                    {/*            }*/}
-                    {/*            secondary='None'*/}
-                    {/*        />*/}
-                    {/*    </ListItem>*/}
-                    {/*    <Divider />*/}
-                    {/*    <ListItem button onClick={() => openAdvancedConfigDialog('suspend')}>*/}
-                    {/*        <ListItemText*/}
-                    {/*            primary={*/}
-                    {/*                <FormattedMessage*/}
-                    {/*                    id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.suspends.and.timeouts'*/}
-                    {/*                    defaultMessage='Suspends and Timeouts'*/}
-                    {/*                />}*/}
-                    {/*            secondary='None'*/}
-                    {/*        />*/}
-                    {/*    </ListItem>*/}
-                    {/*    <Divider />*/}
-                    {/*</List>*/}
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-            <Dialog open={isOpenAdvanceConfigDialog}>
-                <Paper square className={classes.popupHeader}>
-                    <IconButton
-                        className={classes.button}
-                        color='inherit'
-                        onClick={closeConfig}
-                        aria-label='Close'
-                    >
-                        <Icon>close</Icon>
-                    </IconButton>
-                    <Typography className={classes.dialogHeader}>{dialogTitle}</Typography>
-                </Paper>
-                <DialogContent>
-                    <div>
-                        {getConfigurationContent(option)}
-                    </div>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color='primary'>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.cancel'
-                            defaultMessage='Cancel'
-                        />
-                    </Button>
-                    <Button onClick={handleClose} color='primary'>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvanceEndpointConfig.ok'
-                            defaultMessage='Ok'
-                        />
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </div>
     );
 }
