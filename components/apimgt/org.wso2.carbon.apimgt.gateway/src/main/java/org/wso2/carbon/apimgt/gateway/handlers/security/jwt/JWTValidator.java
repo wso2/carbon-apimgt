@@ -16,12 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jwt.SignedJWT;
 import io.swagger.models.Swagger;
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -51,9 +46,13 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.NoSuchAlgorithmException;
+import java.security.InvalidKeyException;
 import java.security.cert.Certificate;
-import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
+import java.util.Base64;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -121,13 +120,13 @@ public class JWTValidator {
         if (!isVerified) {
             log.debug("Token not found in the cache.");
             try {
-                payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
-            } catch (JSONException e) {
+                payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+            } catch (JSONException | IllegalArgumentException e) {
                 log.debug("Token decryption failure when retrieving payload.", e);
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
-            isVerified = verifyTokenSignature(jwtToken, payload.getString("sub"));
+            isVerified = verifyTokenSignature(splitToken, payload.getString("sub"));
             if (isGatewayTokenCacheEnabled) {
                 // Add token to tenant token cache
                 if (isVerified) {
@@ -168,8 +167,8 @@ public class JWTValidator {
                 log.debug("Token payload not found in the cache.");
                 if (payload == null) {
                     try {
-                        payload = new JSONObject(new String(Base64Utils.decode(splitToken[1])));
-                    } catch (JSONException e) {
+                        payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                    } catch (JSONException | IllegalArgumentException e) {
                         log.debug("Token decryption failure when retrieving payload.", e);
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 "Invalid JWT token");
@@ -358,12 +357,15 @@ public class JWTValidator {
     /**
      * Verify the JWT token signature.
      *
-     * @param jwtToken The JWT token sent with the API request
-     * @param username The username of the user to whom the token is issued
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @param username   The username of the user to whom the token is issued
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
-    private boolean verifyTokenSignature(String jwtToken, String username) throws APISecurityException {
+    private boolean verifyTokenSignature(String[] splitToken, String username) throws APISecurityException {
+        // Retrieve signature algorithm from token header
+        String signatureAlgorithm = getSignatureAlgorithm(splitToken);
+
         Certificate publicCert;
 
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
@@ -407,13 +409,17 @@ public class JWTValidator {
 
         if (publicCert != null) {
             // Retrieve public key from the certificate
-            RSAPublicKey publicKey = (RSAPublicKey) publicCert.getPublicKey();
+            PublicKey publicKey = publicCert.getPublicKey();
+
             try {
-                SignedJWT signedJWT = SignedJWT.parse(jwtToken);
-                JWSVerifier verifier = new RSASSAVerifier(publicKey);
-                // Verify the signature
-                return signedJWT.verify(verifier);
-            } catch (ParseException | JOSEException e) {
+                // Verify token signature
+                Signature signatureInstance = Signature.getInstance(signatureAlgorithm);
+                signatureInstance.initVerify(publicKey);
+                String assertion = splitToken[0] + "." + splitToken[1];
+                signatureInstance.update(assertion.getBytes());
+                byte[] decodedSignature = Base64.getUrlDecoder().decode(splitToken[2]);
+                return signatureInstance.verify(decodedSignature);
+            } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
                 log.debug("Signature verification failed.", e);
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token", e);
@@ -422,6 +428,34 @@ public class JWTValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Couldn't find a public certificate to verify signature");
         }
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APISecurityException in case of signature algorithm extraction failure
+     */
+    private String getSignatureAlgorithm(String[] splitToken) throws APISecurityException {
+        String signatureAlgorithm;
+        JSONObject header;
+        try {
+            header = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[0])));
+        } catch (JSONException | IllegalArgumentException e) {
+            log.debug("Token decryption failure when retrieving header.", e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    "Invalid JWT token");
+        }
+        signatureAlgorithm = header.getString("alg");
+        if (StringUtils.isBlank(signatureAlgorithm)) {
+            log.debug("Signature algorithm not found in the token.");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
+        }
+        if (signatureAlgorithm.equals("RS256")) {
+            signatureAlgorithm = "SHA256withRSA";
+        }
+        return signatureAlgorithm;
     }
 
     /**
