@@ -157,5 +157,12 @@
   "username": "Username",
   "version": "Version",
   "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
-  "you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints": "You can define endpoint inline or pick from a list of global endpoints"
+  "you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints": "You can define endpoint inline or pick from a list of global endpoints",
+  "property": "property",
+  "monetization": "monetization",
+  "monetization.properties": "Monetization Properties",
+  "there.are.no.monetization.properties.configured": "There are no monetization properties configured",
+  "unchecked.policies.are.not.monetized.click.save.to.monetize":"Unchecked polices are not monetized, click save to monetize",
+  "no.commercial.policies.to.monetize": "No commercial policies to monetize",
+  "commercial.policies": "Commercial Policies"
 }

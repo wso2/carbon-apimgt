@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography, Divider } from '@material-ui/core';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { withStyles } from '@material-ui/core/styles';
@@ -10,13 +10,22 @@ import API from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import { classes } from 'istanbul-lib-coverage';
 
-const styles = ({
+const styles = theme => ({
     root: {
         flexGrow: 1,
+        paddingBottom: '10px',
+    },
+    margin: {
+        margin: theme.spacing.unit,
     },
     rightDataColumn: {
         display: 'flex',
         flex: 1,
+    },
+    grid: {
+        marginTop: '10px',
+        paddingRight: '10px',
+        paddingBottom: '10px',
     },
 });
 
@@ -35,9 +44,8 @@ class BusinessPlans extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            policies: [],
+            policies: null,
             monetizedPolices: null,
-            isUnmonetizedPlan: false,
         };
         this.monetizationQuery = this.monetizationQuery.bind(this);
     }
@@ -60,9 +68,6 @@ class BusinessPlans extends Component {
 
     monetizationQuery(policyName) {
         const { monetizedPolices } = this.state;
-        if (!(policyName in monetizedPolices || monetizedPolices === null)) {
-            this.setState({ isUnmonetizedPlan: true });
-        }
         return policyName in monetizedPolices;
     }
 
@@ -101,13 +106,38 @@ class BusinessPlans extends Component {
             </Grid>
         ));
         return (
-            <Grid className={classes.root}>
-                <Typography variant='subtitle' gutterBottom>
-                    <FormattedMessage id='commercial.policies' defaultMessage='Commercial Policies' />
-                </Typography>
-                <Grid container className={classes.root} spacing={2}>
-                    {policiesList}
-                    {this.state.isUnmonetizedPlan}
+            <Grid container className={classes.root}>
+                <Grid container className={classes.grid} spacing={2}>
+                    <Typography variant='subtitle' gutterBottom>
+                        <FormattedMessage id='commercial.policies' defaultMessage='Commercial Policies' />
+                    </Typography>
+                    <Grid container className={classes.root} spacing={2}>
+                        {policiesList}
+                    </Grid>
+                </Grid>
+                <Grid container className={classes.grid} spacing={2}>
+                    <Divider className={classes.grid} />
+                    {
+                        (policies.length > 0) ? (
+                            <Grid className={classes.grid} spacing={2}>
+                                <Typography className={classes.grid} >
+                                    <FormattedMessage
+                                        id='unchecked.policies.are.not.monetized.click.save.to.monetize'
+                                        defaultMessage='Unchecked polices are not monetized, click save to monetize'
+                                    />
+                                </Typography>
+                            </Grid>
+                        ) : (
+                            <Grid container className={classes.grid}>
+                                <Typography>
+                                    <FormattedMessage
+                                        id='no.commercial.policies.to.monetize'
+                                        defaultMessage='No commercial policies to monetize'
+                                    />
+                                </Typography>
+                            </Grid>
+                        )
+                    }
                 </Grid>
             </Grid>
         );

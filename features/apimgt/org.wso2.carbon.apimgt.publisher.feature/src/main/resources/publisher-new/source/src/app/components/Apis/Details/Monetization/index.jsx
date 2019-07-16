@@ -126,7 +126,7 @@ class Monetization extends Component {
         return (
             <Grid item xs={6}>
                 <Typography variant='title' gutterBottom>
-                    <FormattedMessage id='Monetization' defaultMessage='Monetization' />
+                    <FormattedMessage id='monetization' defaultMessage='Monetization' />
                 </Typography>
                 <form method='post' onSubmit={this.handleSubmit}>
                     <FormControlLabel
@@ -151,9 +151,16 @@ class Monetization extends Component {
                                     />
                                 </Typography>
                                 {
-                                    (propertiesList !== null) ?
+                                    (properties.length > 0) ?
                                         (propertiesList) :
-                                        (<p> There are no monetization properties configured</p>)
+                                        (
+                                            <Typography gutterBottom>
+                                                <FormattedMessage
+                                                    id='there.are.no.monetization.properties.configured'
+                                                    defaultMessage='There are no monetization properties configured'
+                                                />
+                                            </Typography>
+                                        )
                                 }
                             </Grid>
                         </Paper>
