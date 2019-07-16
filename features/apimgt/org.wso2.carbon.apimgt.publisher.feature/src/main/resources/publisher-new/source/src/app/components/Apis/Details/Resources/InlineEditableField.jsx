@@ -112,8 +112,21 @@ class InlineEditableField extends React.Component {
                             ))}
                         </Select>
                     )}
-                    {this.props.type === 'input' && <input type='text' onChange={this.handleChange('newValue')} value={this.state.newValue} />}
-                    {this.props.type === 'textarea' && <TextField id='standard-textarea' placeholder={intl.formatMessage({ id: 'Apis.Details.Resources.InlineEditableField.placeholder', defaultMessage: 'Placeholder' })} multiline className={classes.textArea} margin='normal' onChange={this.handleChange('newValue')} value={this.state.newValue} />}
+                    {this.props.type === 'input' &&
+                    <input type='text' onChange={this.handleChange('newValue')} value={this.state.newValue} />}
+                    {this.props.type === 'textarea' &&
+                    <TextField
+                        id='standard-textarea'
+                        placeholder={intl.formatMessage({
+                            id: 'Apis.Details.Resources.InlineEditableField.placeholder',
+                            defaultMessage: 'Placeholder',
+                        })}
+                        multiline
+                        className={classes.textArea}
+                        margin='normal'
+                        onChange={this.handleChange('newValue')}
+                        value={this.state.newValue}
+                    />}
                     <Button className={classes.button} onClick={this.saveField}>
                         <DoneIcon />
                     </Button>
@@ -132,7 +145,12 @@ class InlineEditableField extends React.Component {
                         <span>{this.state.newValue}</span> :
                         this.props.initText ?
                             <span>{this.props.initText}</span>
-                            : <span><FormattedMessage id='Apis.Details.Resources.InlineEditableField.click.to.add' defaultMessage='Click to add' /></span>
+                            : (<span>
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.InlineEditableField.click.to.add'
+                                    defaultMessage='Click to add'
+                                />
+                            </span>)
                     }
                 </span>
             );

@@ -379,8 +379,18 @@ class Properties extends React.Component {
                                     <Table className={classes.table}>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell><FormattedMessage id='Apis.Details.Properties.Properties.add.new.property.table' defaultMessage='Add New Property' /></TableCell>
-                                                <TableCell><FormattedMessage id='Apis.Details.Properties.Properties.add.new.property.value' defaultMessage='Property Value' /></TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.add.new.property.table'
+                                                        defaultMessage='Add New Property'
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.add.new.property.value'
+                                                        defaultMessage='Property Value'
+                                                    />
+                                                </TableCell>
                                                 <TableCell />
                                             </TableRow>
                                         </TableHead>
@@ -392,7 +402,8 @@ class Properties extends React.Component {
                                                             required
                                                             id='outlined-required'
                                                             label={intl.formatMessage({
-                                                                id: 'Apis.Details.Properties.Properties.show.add.property.property.name',
+                                                                id: `Apis.Details.Properties.Properties.
+                                                                show.add.property.property.name`,
                                                                 defaultMessage: 'Property Name',
                                                             })}
                                                             margin='normal'
@@ -430,10 +441,16 @@ class Properties extends React.Component {
                                                                 this.handleAddToList(api.additionalProperties)
                                                             }
                                                         >
-                                                            <FormattedMessage id='Apis.Details.Properties.Properties.add' defaultMessage='Add' />
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Properties.Properties.add'
+                                                                defaultMessage='Add'
+                                                            />
                                                         </Button>
                                                         <Button onClick={this.toggleAddProperty}>
-                                                            <FormattedMessage id='Apis.Details.Properties.Properties.cancel' defaultMessage='Cancel' />
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Properties.Properties.cancel'
+                                                                defaultMessage='Cancel'
+                                                            />
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>
@@ -460,14 +477,20 @@ class Properties extends React.Component {
                                                     color='primary'
                                                     onClick={() => this.handleSubmit(api, updateAPI)}
                                                 >
-                                                    <FormattedMessage id='Apis.Details.Properties.Properties.save' defaultMessage='Save' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.save'
+                                                        defaultMessage='Save'
+                                                    />
                                                 </Button>
                                             </div>
                                         </Grid>
                                         <Grid item>
                                             <Link to={'/apis/' + api.id + '/overview'}>
                                                 <Button>
-                                                    <FormattedMessage id='Apis.Details.Properties.Properties.cancel' defaultMessage='Cancel' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.cancel'
+                                                        defaultMessage='Cancel'
+                                                    />
                                                 </Button>
                                             </Link>
                                         </Grid>

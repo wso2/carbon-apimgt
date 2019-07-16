@@ -453,13 +453,21 @@ class Permission extends Component {
 
                             <Card bodyStyle={{ padding: 5 }}>
                                 <Row style={{ marginBottom: '10px' }} type='flex' justify='center'>
-                                    <Col span={8}><FormattedMessage id='Apis.Details.Permissions.Permission.API.Permissions' defaultMessage='API Permissions' /></Col>
+                                    <Col span={8}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Permissions.Permission.API.Permissions'
+                                            defaultMessage='API Permissions'
+                                        />
+                                    </Col>
                                     <Col span={16}>
                                         <Row>
                                             <Col span={4} style={{ margin: '10px' }}>
                                                 <Input
                                                     name='roleField'
-                                                    placeholder={intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.role.input', defaultMessage: 'role' })}
+                                                    placeholder={intl.formatMessage({
+                                                        id: 'Apis.Details.Permissions.Permissions.role.input',
+                                                        defaultMessage: 'role',
+                                                    })}
                                                     value={this.state.roleField}
                                                     onChange={this.handleChangeRoleField}
                                                 />
@@ -471,7 +479,10 @@ class Permission extends Component {
                                                     checked={this.state.readField}
                                                     onChange={this.handleChangeReadField}
                                                 >
-                                                    <FormattedMessage id='Apis.Details.Permissions.Permission.Read' defaultMessage='Read' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Permissions.Permission.Read'
+                                                        defaultMessage='Read'
+                                                    />
                                                 </Checkbox>
                                             </Col>
                                             <Col span={2} style={{ margin: '10px' }}>
@@ -481,7 +492,10 @@ class Permission extends Component {
                                                     checked={this.state.updateField}
                                                     onChange={this.handleChangeUpdateField}
                                                 >
-                                                    <FormattedMessage id='Apis.Details.Permissions.Permission.Update' defaultMessage='Update' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Permissions.Permission.Update'
+                                                        defaultMessage='Update'
+                                                    />
                                                 </Checkbox>
                                             </Col>
                                             <Col span={2} style={{ margin: '10px' }}>
@@ -491,7 +505,10 @@ class Permission extends Component {
                                                     checked={this.state.deleteField}
                                                     onChange={this.handleChangeDeleteField}
                                                 >
-                                                    <FormattedMessage id='Apis.Details.Permissions.Permission.Delete' defaultMessage='Delete' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Permissions.Permission.Delete'
+                                                        defaultMessage='Delete'
+                                                    />
                                                 </Checkbox>
                                             </Col>
                                             <Col span={5} style={{ margin: '10px' }}>
@@ -501,7 +518,10 @@ class Permission extends Component {
                                                     checked={this.state.manageSubField}
                                                     onChange={this.handleChangeManageSubField}
                                                 >
-                                                    <FormattedMessage id='Apis.Details.Permissions.Permission.Manage.Subscriptions' defaultMessage='Manage Subscriptions' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Permissions.Permission.Manage.Subscriptions'
+                                                        defaultMessage='Manage Subscriptions'
+                                                    />
                                                 </Checkbox>
                                             </Col>
                                             <Col span={1} style={{ margin: '10px' }}>
@@ -509,7 +529,10 @@ class Permission extends Component {
                                                     name='add'
                                                     onClick={this.handleAddRole.bind(this, permissionData)}
                                                 >
-                                                    <FormattedMessage id='Apis.Details.Permissions.Permission.Add' defaultMessage='Add' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Permissions.Permission.Add'
+                                                        defaultMessage='Add'
+                                                    />
                                                 </Button>
                                             </Col>
                                         </Row>
@@ -524,7 +547,12 @@ class Permission extends Component {
                             </Card>
                             <Card bodyStyle={{ padding: 5 }}>
                                 <Row style={{ marginBottom: '10px' }} type='flex' justify='center'>
-                                    <Col span={8}><FormattedMessage id='Apis.Details.Permissions.Permission.API.Security.Schemes' defaultMessage='API Security Schemes' /></Col>
+                                    <Col span={8}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Permissions.Permission.API.Security.Schemes'
+                                            defaultMessage='API Security Schemes'
+                                        />
+                                    </Col>
                                     <Col span={16}>
                                         <Row>
                                             <Col span={8} style={{ margin: '10px' }}>
@@ -533,7 +561,10 @@ class Permission extends Component {
                                                     checked={this.state.oauthField}
                                                     onChange={this.toggleOauthSelect}
                                                 >
-                                                    <FormattedMessage id='Apis.Details.Permissions.Permission.Oauth' defaultMessage='Oauth' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Permissions.Permission.Oauth'
+                                                        defaultMessage='Oauth'
+                                                    />
                                                 </Checkbox>
                                             </Col>
                                             <Col span={8} style={{ margin: '10px' }}>
@@ -542,7 +573,10 @@ class Permission extends Component {
                                                     checked={this.state.apikeyField}
                                                     onChange={this.toggleApiKeySelect}
                                                 >
-                                                    <FormattedMessage id='Apis.Details.Permissions.Permission.API.Key' defaultMessage='API Key' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Permissions.Permission.API.Key'
+                                                        defaultMessage='API Key'
+                                                    />
                                                 </Checkbox>
                                             </Col>
                                         </Row>
@@ -553,7 +587,10 @@ class Permission extends Component {
                             <ScopeValidation resourcePath={resourcePath.SINGLE_API} resourceMethod={resourceMethod.PUT}>
                                 <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                                     <Button loading={this.state.creating} type='primary' onClick={this.handleSubmit}>
-                                        <FormattedMessage id='Apis.Details.Permissions.Permission.Update' defaultMessage='Update' />
+                                        <FormattedMessage
+                                            id='Apis.Details.Permissions.Permission.Update'
+                                            defaultMessage='Update'
+                                        />
                                     </Button>
                                 </ApiPermissionValidation>
                             </ScopeValidation>

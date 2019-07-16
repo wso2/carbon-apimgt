@@ -398,7 +398,7 @@ class Resources extends React.Component {
             .then(() => {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Resources.Resources.api.updated.successfully',
-                    defaultMessage: 'API updated successfully!'
+                    defaultMessage: 'API updated successfully!',
                 }));
             })
             .catch((error) => {
@@ -537,14 +537,20 @@ class Resources extends React.Component {
                         <React.Fragment>
                             <div className={classes.addNewWrapper}>
                                 <Typography className={classes.addNewHeader}>
-                                    <FormattedMessage id='Apis.Details.Resources.Resources.add.new.resource.title' defaultMessage='Add New Resource' />
+                                    <FormattedMessage
+                                        id='Apis.Details.Resources.Resources.add.new.resource.title'
+                                        defaultMessage='Add New Resource'
+                                    />
                                 </Typography>
                                 <Divider className={classes.divider} />
                                 <div className={classes.addNewOther}>
                                     <TextField
                                         required
                                         id='outlined-required'
-                                        label={intl.formatMessage({ id: 'Apis.Details.Resources.Resources.url.pattern', defaultMessage: 'URL Pattern' })}
+                                        label={intl.formatMessage({
+                                            id: 'Apis.Details.Resources.Resources.url.pattern',
+                                            defaultMessage: 'URL Pattern',
+                                        })}
                                         margin='normal'
                                         variant='outlined'
                                         id='tmpResourceName'
@@ -563,10 +569,16 @@ class Resources extends React.Component {
                                 <Divider className={classes.divider} />
                                 <div className={classes.addNewOther}>
                                     <Button variant='contained' color='primary' onClick={this.addResources}>
-                                        <FormattedMessage id='Apis.Details.Resources.Resources.add.resources.to.path' defaultMessage='Add Resources to Path' />
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.Resources.add.resources.to.path'
+                                            defaultMessage='Add Resources to Path'
+                                        />
                                     </Button>
                                     <Button className={classes.button} onClick={this.toggleAddResource}>
-                                        <FormattedMessage id='Apis.Details.Resources.Resources.cancel' defaultMessage='Cancel' />
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.Resources.cancel'
+                                            defaultMessage='Cancel'
+                                        />
                                     </Button>
                                 </div>
                             </div>
@@ -576,7 +588,10 @@ class Resources extends React.Component {
                         <React.Fragment>
                             <div className={classes.addNewWrapper}>
                                 <Typography className={classes.addNewHeader}>
-                                    <FormattedMessage id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.title' defaultMessage='Assign Global Scopes for API' />
+                                    <FormattedMessage
+                                        id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.title'
+                                        defaultMessage='Assign Global Scopes for API'
+                                    />
                                 </Typography>
                                 <Divider className={classes.divider} />
                                 <div className={classes.addNewOther}>
@@ -601,10 +616,16 @@ class Resources extends React.Component {
                                 <Divider className={classes.divider} />
                                 <div className={classes.addNewOther}>
                                     <Button variant='contained' color='primary' onClick={this.handleScopeChange}>
-                                        <FormattedMessage id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.button' defaultMessage='Assign global scopes for API' />
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.button'
+                                            defaultMessage='Assign global scopes for API'
+                                        />
                                     </Button>
                                     <Button className={classes.button} onClick={this.toggleAssignScopes}>
-                                        <FormattedMessage id='Apis.Details.Resources.Resources.cancel' defaultMessage='Cancel' />
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.Resources.cancel'
+                                            defaultMessage='Cancel'
+                                        />
                                     </Button>
                                 </div>
                             </div>
@@ -618,7 +639,10 @@ class Resources extends React.Component {
                                 {Object.keys(this.state.pathDeleteList).length !== 0 && (
                                     <ListItemSecondaryAction>
                                         <Button className={classes.button} color='secondary' onClick={this.deleteSelected}>
-                                            <FormattedMessage id='Apis.Details.Resources.Resources.delete.selected' defaultMessage='Delete Selected' />
+                                            <FormattedMessage
+                                                id='Apis.Details.Resources.Resources.delete.selected'
+                                                defaultMessage='Delete Selected'
+                                            />
                                         </Button>
                                     </ListItemSecondaryAction>
                                 )}
