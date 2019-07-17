@@ -151,7 +151,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve/Search API products ", notes = "This operation provides you a list of available API products qualifying under a given search condition.  Each retrieved API product is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API Product** operation.  This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header `X-WSO2-Tenant`. If not specified super tenant's APIs will be retrieved. If you used an Authorization header, the user's tenant  ", response = APIProductListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve/Search API products ", notes = "This operation provides you a list of available API products qualifying under a given search condition.  Each retrieved API product is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API Product** operation.  This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header `X-WSO2-Tenant`. If not specified super tenant's APIs will be retrieved. If you used an Authorization header, the user's tenant ", response = APIProductListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
