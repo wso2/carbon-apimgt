@@ -217,6 +217,7 @@ EditableRow.propTypes = {
     handleUpdateList: PropTypes.shape({}).isRequired,
     handleDelete: PropTypes.shape({}).isRequired,
     apiAdditionalProperties: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 /**
@@ -511,6 +512,7 @@ Properties.propTypes = {
     api: PropTypes.shape({
         id: PropTypes.string,
     }).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Properties));

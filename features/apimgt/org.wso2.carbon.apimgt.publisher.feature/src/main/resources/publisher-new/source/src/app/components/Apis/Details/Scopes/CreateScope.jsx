@@ -121,7 +121,7 @@ class CreateScope extends React.Component {
     }
 
     render() {
-        const { classes, intl } = this.props;
+        const { classes } = this.props;
         const url = `/apis/${this.props.api.id}/scopes`;
         return (
             <Grid container>
@@ -209,6 +209,7 @@ CreateScope.propTypes = {
         id: PropTypes.string,
     }).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 CreateScope.defaultProps = {

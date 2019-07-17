@@ -278,6 +278,7 @@ Scopes.propTypes = {
     }),
     api: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 Scopes.defaultProps = {
