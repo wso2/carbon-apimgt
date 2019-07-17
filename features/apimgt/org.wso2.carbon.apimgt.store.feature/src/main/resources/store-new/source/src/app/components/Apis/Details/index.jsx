@@ -176,7 +176,7 @@ class Details extends React.Component {
          *
          * @memberof Details
          */
-        this.updateSubscriptionData = () => {
+        this.updateSubscriptionData = (callback) => {
             const dataApi = new Api();
             const promisedApi = dataApi.getAPIById(this.api_uuid);
             const existingSubscriptions = dataApi.getSubscriptions(this.api_uuid, null);
@@ -212,7 +212,11 @@ class Details extends React.Component {
                                 label: filteredApp.name,
                             };
                         });
-                    this.setState({ api, subscribedApplications, applicationsAvailable });
+                    this.setState({ api, subscribedApplications, applicationsAvailable }, () => {
+                        if (callback) {
+                            callback();
+                        }
+                    });
                 })
                 .catch((error) => {
                     if (process.env.NODE_ENV !== 'production') {

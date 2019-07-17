@@ -19,7 +19,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import Slide from '@material-ui/core/Slide';
 import AppBar from '@material-ui/core/AppBar';
@@ -30,12 +29,12 @@ import Grid from '@material-ui/core/Grid';
 import Subscription from 'AppData/Subscription';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Api from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 import { ApiContext } from '../ApiContext';
 import Wizard from './Wizard';
-import Alert from '../../../Shared/Alert';
-import { ScopeValidation, resourceMethods, resourcePaths } from '../../../Shared/ScopeValidation';
 import SubscriptionTableRow from './SubscriptionTableRow';
 import SubscribeToApps from './SubscrbeToApps';
+import SubscibeButtonPanel from './subscibeButtonPanel';
 
 /**
  * @inheritdoc
@@ -50,34 +49,10 @@ const styles = theme => ({
     titleSub: {
         cursor: 'pointer',
     },
-    button: {
-        padding: theme.spacing.unit,
-        color: theme.palette.getContrastText(theme.palette.background.default),
-        display: 'flex',
-        alignItems: 'center',
-        fontSize: '11px',
-        cursor: 'pointer',
-        '& span': {
-            paddingLeft: 6,
-            display: 'inline-block',
-        },
-    },
     tableMain: {
         width: '100%',
         borderCollapse: 'collapse',
         marginTop: theme.spacing.unit * 3,
-    },
-    actionColumn: {
-        display: 'flex',
-        textAlign: 'right',
-        direction: 'rtl',
-    },
-    td: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
-        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        fontSize: '11px',
-        paddingLeft: theme.spacing.unit,
-        height: theme.spacing.unit * 4,
     },
     th: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -95,18 +70,6 @@ const styles = theme => ({
     },
     summary: {
         alignItems: 'center',
-    },
-    subscribeButtons: {
-        display: 'flex',
-        paddingTop: theme.spacing.unit * 2,
-    },
-    buttonElm: {
-        height: 28,
-        marginLeft: 20,
-    },
-    buttonElmText: {
-        marginLeft: 20,
-        paddingTop: 5,
     },
     appBar: {
         background: theme.palette.background.paper,
@@ -168,21 +131,26 @@ class Credentials extends React.Component {
      *  Set the initial values for subscription request
      */
     componentDidMount() {
-        const { api, applicationsAvailable, updateSubscriptionData } = this.context;
-        const { subscriptionRequest } = this.state;
+        const { api, updateSubscriptionData } = this.context;
         if (api) {
-            const newSubscriptionRequest = { ...subscriptionRequest, apiId: api.id };
-            const throttlingPolicyList = api.tiers;
-            if (throttlingPolicyList) {
-                [newSubscriptionRequest.throttlingPolicy] = throttlingPolicyList;
-            }
-            if (applicationsAvailable && applicationsAvailable[0]) {
-                newSubscriptionRequest.applicationId = applicationsAvailable[0].value;
-            }
-            this.setState({ subscriptionRequest: newSubscriptionRequest, throttlingPolicyList });
+            this.updateData();
         } else {
-            updateSubscriptionData();
+            updateSubscriptionData(this.updateData);
         }
+    }
+
+    updateData = () => {
+        const { api, applicationsAvailable } = this.context;
+        const { subscriptionRequest } = this.state;
+        const newSubscriptionRequest = { ...subscriptionRequest, apiId: api.id };
+        const throttlingPolicyList = api.tiers;
+        if (throttlingPolicyList) {
+            [newSubscriptionRequest.throttlingPolicy] = throttlingPolicyList;
+        }
+        if (applicationsAvailable && applicationsAvailable[0]) {
+            newSubscriptionRequest.applicationId = applicationsAvailable[0].value;
+        }
+        this.setState({ subscriptionRequest: newSubscriptionRequest, throttlingPolicyList });
     }
 
     /**
@@ -236,7 +204,7 @@ class Credentials extends React.Component {
      * key type is selected in the applicaiton list
      * @param {*} selectedKeyType key type
      * @param {*} selectedAppId  application id
-\    * @memberof Credentials
+     * @memberof Credentials
      */
     loadInfo = (selectedKeyType, selectedAppId) => {
         this.setState({ selectedKeyType, selectedAppId });
@@ -286,12 +254,12 @@ class Credentials extends React.Component {
         return (
             <div className={classes.contentWrapper}>
                 <Typography onClick={this.handleExpandClick} variant='display1' className={classes.titleSub}>
-                            API Credentials
+                    API Credentials
                 </Typography>
                 <Typography variant='body1' gutterBottom>
-                            API Credentials are grouped in to applications. An application is primarily used to decouple
-                            the consumer from the APIs. It allows you to Generate and use a single key for multiple APIs
-                            and subscribe multiple times to a single API with different SLA levels.
+                    API Credentials are grouped in to applications. An application is primarily used to decouple
+                    the consumer from the APIs. It allows you to Generate and use a single key for multiple APIs
+                    and subscribe multiple times to a single API with different SLA levels.
                 </Typography>
                 {applicationsAvailable.length === 0 && subscribedApplications.length === 0 ? (
                     !wizardOn && (
@@ -305,56 +273,11 @@ class Credentials extends React.Component {
                     )
                 ) : (
                     <React.Fragment>
-                        <div className={classes.subscribeButtons}>
-                            <div>
-                                <Typography variant='headline'>Subscribed Applications</Typography>
-                                <Typography variant='caption'>
-                                            (
-                                    {' '}
-                                    {subscribedApplications.length}
-                                    {' '}
-                                    {subscribedApplications.length === 1 ? 'subscription' : 'subscriptions'}
-                                    {' '}
-                                            )
-                                </Typography>
-                            </div>
-                            <ScopeValidation
-                                resourcePath={resourcePaths.SUBSCRIPTIONS}
-                                resourceMethod={resourceMethods.POST}
-                            >
-                                {applicationsAvailable.length > 0 && (
-                                    <div>
-                                        <Button
-                                            variant='outlined'
-                                            size='small'
-                                            color='primary'
-                                            className={classes.buttonElm}
-                                            onClick={() => this.handleClickToggle('openAvailable')}
-                                        >
-                                                Subscribe to Available App
-                                        </Button>
-                                        <Typography
-                                            variant='caption'
-                                            component='p'
-                                            className={classes.buttonElmText}
-                                        >
-                                            {applicationsAvailable.length}
-                                            {' '}
-                                                Available
-                                        </Typography>
-                                    </div>
-                                )}
-                                <Button
-                                    variant='outlined'
-                                    size='small'
-                                    color='primary'
-                                    className={classes.buttonElm}
-                                    onClick={() => this.handleClickToggle('openNew')}
-                                >
-                                        Subscribe to New App
-                                </Button>
-                            </ScopeValidation>
-                        </div>
+                        <SubscibeButtonPanel
+                            avalibleAppsLength={applicationsAvailable.length}
+                            subscribedAppsLength={subscribedApplications.length}
+                            handleClickToggle={this.handleClickToggle}
+                        />
                         {/*
                                 ****************************
                                 Subscription List
@@ -369,7 +292,6 @@ class Credentials extends React.Component {
                             </tr>
                             {subscribedApplications.map((app, index) => (
                                 <SubscriptionTableRow
-                                    classes={classes}
                                     loadInfo={this.loadInfo}
                                     handleSubscriptionDelete={this.handleSubscriptionDelete}
                                     theme={theme}
@@ -428,7 +350,7 @@ class Credentials extends React.Component {
                                             </IconButton>
                                             <div className={classes.subscribeTitle}>
                                                 <Typography variant='h6'>
-                                                            Subscribe to new Application
+                                                        Subscribe to new Application
                                                 </Typography>
                                             </div>
                                         </Toolbar>
@@ -453,6 +375,7 @@ class Credentials extends React.Component {
 
 Credentials.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Credentials);

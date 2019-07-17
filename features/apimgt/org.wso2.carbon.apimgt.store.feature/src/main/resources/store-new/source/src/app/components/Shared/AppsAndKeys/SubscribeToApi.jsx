@@ -95,7 +95,7 @@ const subscribeToApi = (props) => {
         if (applicationsAvailable && applicationsAvailable[0]) {
             setAppSelected(applicationsAvailable[0].value);
         }
-    });
+    }, []);
 
     /**
     * This method is used to handle the updating of subscription
