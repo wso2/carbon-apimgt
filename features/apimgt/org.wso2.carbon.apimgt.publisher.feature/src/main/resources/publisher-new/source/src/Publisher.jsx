@@ -162,7 +162,11 @@ class Publisher extends React.Component {
             return <Progress />;
         }
         if (!user) {
-            return <RedirectToLogin />;
+            return (
+                <IntlProvider locale={language} messages={this.state.messages}>
+                    <RedirectToLogin />
+                </IntlProvider>
+            );
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>
