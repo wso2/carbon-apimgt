@@ -83,7 +83,7 @@ function Edit(props) {
                         .then(doc => {
                             Alert.info(
                                 `${name} ${intl.formatMessage({
-                                    id: 'documents.markdown.editor.updated.file.successfully',
+                                    id: 'Apis.Details.Documents.Edit.markdown.editor.upload.success.message',
                                     defaultMessage: 'File uploaded successfully.',
                                 })}`,
                             );
@@ -94,7 +94,7 @@ function Edit(props) {
                             if (process.env.NODE_ENV !== 'production') {
                                 console.log(error);
                                 Alert.error(intl.formatMessage({
-                                    id: 'documents.markdown.editor.updated.file.error',
+                                    id: 'Apis.Details.Documents.Edit.markdown.editor.upload.error.message',
                                     defaultMessage: 'Error uploading the file.',
                                 }));
                             }
@@ -102,7 +102,7 @@ function Edit(props) {
                 } else {
                     Alert.info(
                         `${doc.name} ${intl.formatMessage({
-                            id: 'documents.markdown.editor.updated.successfully',
+                            id: 'Apis.Details.Documents.Edit.markdown.editor.update.success.message',
                             defaultMessage: 'Updated successfully.',
                         })}`,
                     );
@@ -114,7 +114,7 @@ function Edit(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                     Alert.error(intl.formatMessage({
-                        id: 'documents.markdown.editor.updated.error',
+                        id: 'Apis.Details.Documents.Edit.markdown.editor.update.error.message',
                         defaultMessage: 'Error adding the document',
                     }));
                 }
@@ -126,7 +126,11 @@ function Edit(props) {
     return (
         <div>
             <Button onClick={toggleOpen}>
-                <Icon>edit</Icon> <FormattedMessage id="documents.text.editor.editor" defaultMessage="Edit" />
+                <Icon>edit</Icon>
+                <FormattedMessage
+                    id='Apis.Details.Documents.Edit.documents.text.editor.edit'
+                    defaultMessage='Edit'
+                />
             </Button>
             <Dialog open={open} onClose={toggleOpen} TransitionComponent={Transition} fullScreen>
                 <Paper square className={classes.popupHeader}>
@@ -134,14 +138,23 @@ function Edit(props) {
                         <Icon>close</Icon>
                     </IconButton>
                     <Typography variant="h4" className={classes.docName}>
-                        <FormattedMessage id="documents.text.editor.edit.content" defaultMessage="Edit " />"
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Edit.documents.text.editor.edit.content'
+                            defaultMessage="Edit "
+                        />"
                         {props.docName}"
                     </Typography>
                     <Button className={classes.button} variant="contained" color="primary" onClick={updateDoc}>
-                        <FormattedMessage id="documents.text.editor.update.content" defaultMessage="Save" />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Edit.documents.text.editor.update.content'
+                            defaultMessage="Save"
+                        />
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
-                        <FormattedMessage id="documents.text.editor.cancel" defaultMessage="Cancel" />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Edit.documents.text.editor.cancel'
+                            defaultMessage="Cancel"
+                        />
                     </Button>
                 </Paper>
                 <div className={classes.splitWrapper}>

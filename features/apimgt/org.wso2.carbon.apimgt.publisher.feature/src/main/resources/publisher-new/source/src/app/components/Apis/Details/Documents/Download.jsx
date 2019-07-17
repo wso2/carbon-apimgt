@@ -81,7 +81,7 @@ function Download(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                     Alert.error(intl.formatMessage({
-                        id: 'documents.markdown.editor.download.error',
+                        id:'Apis.Details.Documents.Download.documents.markdown.editor.download.error',
                         defaultMessage: 'Error downloading the file',
                     }));
                 }
@@ -90,7 +90,11 @@ function Download(props) {
 
     return (
         <Button onClick={handleDownload}>
-            <Icon>arrow_downward</Icon> <FormattedMessage id='documents.listing.download' defaultMessage='Download' />
+            <Icon>arrow_downward</Icon>
+            <FormattedMessage
+                id='Apis.Details.Documents.Download.documents.listing.download'
+                defaultMessage='Download'
+            />
         </Button>
     );
 }

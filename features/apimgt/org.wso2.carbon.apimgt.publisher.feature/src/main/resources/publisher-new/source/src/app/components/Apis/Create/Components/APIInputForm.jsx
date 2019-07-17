@@ -22,7 +22,7 @@ import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import Policies from 'AppComponents/Apis/Details/LifeCycle/Policies';
 
@@ -78,7 +78,7 @@ class APIInputForm extends Component {
     render() {
         const { policies } = this.state;
         const {
-            api, handleInputChange, classes, valid,
+            api, handleInputChange, classes, valid, intl,
         } = this.props;
         const policiesProps = { handleInputChange, api, policies };
         const endpoint = api.getProductionEndpoint();
@@ -90,15 +90,20 @@ class APIInputForm extends Component {
                         fullWidth
                         id='name'
                         label={<FormattedMessage id='name' defaultMessage='Name' />}
-                        placeholder='myApiName'
+                        placeholder={intl.formatMessage({
+                            id: 'Apis.Create.Components.APIInputForm.name.placeholder',
+                            defaultMessage: 'eTicketing',
+                        })}
                         helperText={
                             valid.name.empty ? (
                                 <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
                             ) : (
                                 <FormattedMessage
                                     id='api.create.name.helper'
-                                    defaultMessage={'API Name is unique. Special' +
-                                    ' characters and empty space are not allowed'}
+                                    defaultMessage={
+                                        'API Name is unique. Special' +
+                                        ' characters and empty space are not allowed'
+                                    }
                                 />
                             )
                         }
@@ -149,18 +154,23 @@ class APIInputForm extends Component {
                         fullWidth
                         id='context'
                         label={<FormattedMessage id='context' defaultMessage='Context' />}
-                        placeholder='E.g: pet'
+                        placeholder={intl.formatMessage({
+                            id: 'Apis.Create.Components.APIInputForm.context.placeholder',
+                            defaultMessage: '/events/{id}/sales',
+                        })}
                         helperText={
                             valid.context.empty ? (
                                 <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
                             ) : (
                                 <FormattedMessage
                                     id='api.create.context.help'
-                                    defaultMessage={'The API context is used by the Gateway' +
-                                     ' to identify the API. Therefore, the API context must' +
-                                     ' be unique. You can define the APIs version as a parameter' +
-                                     ' of its context by adding the {version}' +
-                                     ' into the context. For example, {version}/phoneverify.'}
+                                    defaultMessage={
+                                        'The API context is used by the Gateway' +
+                                        ' to identify the API. Therefore, the API context must' +
+                                        ' be unique. You can define the APIs version as a parameter' +
+                                        ' of its context by adding the {version}' +
+                                        ' into the context. For example, {version}/phoneverify.'
+                                    }
                                 />
                             )
                         }
@@ -186,8 +196,10 @@ class APIInputForm extends Component {
                             ) : (
                                 <FormattedMessage
                                     id='api.create.endpoint.help'
-                                    defaultMessage={'This is the actual endpoint' +
-                                    ' where the API implementation can be found'}
+                                    defaultMessage={
+                                        'This is the actual endpoint' +
+                                        ' where the API implementation can be found'
+                                    }
                                 />
                             )
                         }
@@ -213,10 +225,13 @@ class APIInputForm extends Component {
 }
 
 APIInputForm.propTypes = {
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
     api: PropTypes.shape({}).isRequired,
     handleInputChange: PropTypes.func.isRequired,
     classes: PropTypes.shape({}).isRequired,
     valid: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(APIInputForm);
+export default injectIntl(withStyles(styles)(APIInputForm));
