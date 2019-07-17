@@ -430,7 +430,6 @@ public final class APIConstants {
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
     public static final String TENANT_PREFIX = "/t/";
     public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
-    public static final String GRANT_TYPE_PASSWORD = "password";
     public static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     public static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     public static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
@@ -1465,6 +1464,31 @@ public final class APIConstants {
         public static final String WORKFLOW_DCR_EP_PASSWORD = "DCREndPointPassword";
 
     }
+
+    public static class JwtTokenConstants {
+        public static final String APPLICATION = "application";
+        public static final String APPLICATION_ID = "id";
+        public static final String APPLICATION_NAME = "name";
+        public static final String APPLICATION_TIER = "tier";
+        public static final String APPLICATION_OWNER = "owner";
+        public static final String KEY_TYPE = "keytype";
+        public static final String CONSUMER_KEY = "consumerKey";
+        public static final String SUBJECT = "sub";
+        public static final String SUBSCRIPTION_TIER = "subscriptionTier";
+        public static final String SUBSCRIBER_TENANT_DOMAIN = "subscriberTenantDomain";
+        public static final String TIER_INFO = "tierInfo";
+        public static final String STOP_ON_QUOTA_REACH = "stopOnQuotaReach";
+        public static final String SPIKE_ARREST_LIMIT = "spikeArrestLimit";
+        public static final String SPIKE_ARREST_UNIT = "spikeArrestUnit";
+        public static final String SCOPE = "scope";
+        public static final String SCOPE_DELIMITER = " ";
+        public static final String ISSUED_TIME = "iat";
+        public static final String EXPIRED_TIME = "exp";
+        public static final String SIGNATURE_ALGORITHM = "alg";
+    }
+
+    public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
+    public static final String SIGNATURE_ALGORITHM_SHA256_WITH_RSA = "SHA256withRSA";
 
     public static class APIEndpointSecurityConstants {
         public static final String BASIC_AUTH = "BasicAuth";

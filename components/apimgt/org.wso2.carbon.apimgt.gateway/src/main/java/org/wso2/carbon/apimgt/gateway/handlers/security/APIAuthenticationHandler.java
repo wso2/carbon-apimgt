@@ -513,7 +513,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
         int status;
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR) {
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR ||
+                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_SWAGGER) {
             status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
         } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE ||
                 e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN ||

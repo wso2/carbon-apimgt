@@ -178,14 +178,14 @@ public class OAuthAuthenticator implements Authenticator {
         }
         String authenticationScheme;
         try {
-            if (StringUtils.countMatches(apiKey, ".") == 2) { // JWT token contains two dots
+            if (StringUtils.countMatches(apiKey, APIConstants.DOT) == 2) { // JWT token contains two dots
                 isJwtToken = true;
                 swagger = (Swagger) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
                 if (swagger == null) {
                     log.debug("Swagger is missing in the gateway. " +
                             "Therefore, JWT authentication cannot be performed.");
                     return new AuthenticationResponse(false, isMandatory, true,
-                            APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                            APISecurityConstants.API_AUTH_MISSING_SWAGGER,
                             "JWT authentication cannot be performed.");
                 }
                 authenticationScheme = SwaggerUtils.getResourceAuthenticationScheme(swagger, synCtx);

@@ -10324,16 +10324,11 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        StringBuilder placeHolderBuilder = new StringBuilder();
-        for (int i = 0; i < subscriptionTiers.length; i++) {
-            placeHolderBuilder.append("?");
-            if (i < subscriptionTiers.length - 1) {
-                placeHolderBuilder.append(", ");
-            }
-        }
+        List<String> questionMarks = new ArrayList<>(Collections.nCopies(subscriptionTiers.length, "?"));
+        String parameterString = String.join(",", questionMarks);
 
         String sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_PREFIX +
-                placeHolderBuilder.toString() + SQLConstants.GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX;
+                parameterString + SQLConstants.GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX;
 
         try {
             conn = APIMgtDBUtil.getConnection();

@@ -251,25 +251,34 @@ public class JWTValidatorTest {
                 Mockito.any(), Mockito.any(), Mockito.any()).thenCallRealMethod();
         PowerMockito.when(jwtValidator, "getApiLevelPolicy").thenReturn(APIConstants.UNLIMITED_TIER);
         PowerMockito.when(jwtValidator, "generateAuthenticationContext",
-                Mockito.any(), Mockito.any(), Mockito.any()).thenCallRealMethod();
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()).thenCallRealMethod();
+
+        String[] splitToken = validJwtToken.split("\\.");
 
         try {
             AuthenticationContext authenticationContext = jwtValidator.authenticate(validJwtToken, messageContext,
                     null, APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
 
-            Assert.assertEquals(true, authenticationContext.isAuthenticated());
-            Assert.assertEquals(payload.getString("jti"), authenticationContext.getApiKey());
-            Assert.assertEquals(payload.getString("keytype"), authenticationContext.getKeyType());
-            Assert.assertEquals(payload.getString("sub"), authenticationContext.getUsername());
+            Assert.assertTrue(authenticationContext.isAuthenticated());
+            Assert.assertEquals(splitToken[2], authenticationContext.getApiKey());
+            Assert.assertEquals(payload.getString(APIConstants.JwtTokenConstants.KEY_TYPE),
+                    authenticationContext.getKeyType());
+            Assert.assertEquals(payload.getString(APIConstants.JwtTokenConstants.SUBJECT),
+                    authenticationContext.getUsername());
             Assert.assertEquals(APIConstants.UNLIMITED_TIER, authenticationContext.getApiTier());
 
-            JSONObject applicationObj = (JSONObject) payload.get("application");
-            Assert.assertEquals(String.valueOf(applicationObj.getInt("id")), authenticationContext.getApplicationId());
-            Assert.assertEquals(applicationObj.getString("name"), authenticationContext.getApplicationName());
-            Assert.assertEquals(applicationObj.getString("tier"), authenticationContext.getApplicationTier());
+            JSONObject applicationObj = (JSONObject) payload.get(APIConstants.JwtTokenConstants.APPLICATION);
+            Assert.assertEquals(String.valueOf(applicationObj.getInt(APIConstants.JwtTokenConstants.APPLICATION_ID)),
+                    authenticationContext.getApplicationId());
+            Assert.assertEquals(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_NAME),
+                    authenticationContext.getApplicationName());
+            Assert.assertEquals(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_TIER),
+                    authenticationContext.getApplicationTier());
 
-            Assert.assertEquals(payload.getString("sub"), authenticationContext.getSubscriber());
-            Assert.assertEquals(payload.getString("consumerKey"), authenticationContext.getConsumerKey());
+            Assert.assertEquals(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_OWNER),
+                    authenticationContext.getSubscriber());
+            Assert.assertEquals(payload.getString(APIConstants.JwtTokenConstants.CONSUMER_KEY),
+                    authenticationContext.getConsumerKey());
 
             JSONObject api = new JSONObject("{\n" +
                     "              \"subscriberTenantDomain\": \"carbon.super\",\n" +
@@ -279,17 +288,21 @@ public class JWTValidatorTest {
                     "              \"version\": \"1.0.0\",\n" +
                     "              \"subscriptionTier\": \"Unlimited\"\n" +
                     "            }\n");
-            Assert.assertEquals(api.getString("subscriptionTier"), authenticationContext.getTier());
-            Assert.assertEquals(api.getString("subscriberTenantDomain"), authenticationContext.getSubscriberTenantDomain());
+            Assert.assertEquals(api.getString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER),
+                    authenticationContext.getTier());
+            Assert.assertEquals(api.getString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN),
+                    authenticationContext.getSubscriberTenantDomain());
 
             JSONObject tierInfo = new JSONObject("{\n" +
                     "              \"stopOnQuotaReach\": true,\n" +
                     "              \"spikeArrestLimit\": 0,\n" +
                     "              \"spikeArrestUnit\": null\n" +
                     "            }\n");
-            Assert.assertEquals(tierInfo.getBoolean("stopOnQuotaReach"), authenticationContext.isStopOnQuotaReach());
-            Assert.assertEquals(tierInfo.getInt("spikeArrestLimit"), authenticationContext.getSpikeArrestLimit());
-            Assert.assertEquals(null, authenticationContext.getSpikeArrestUnit());
+            Assert.assertEquals(tierInfo.getBoolean(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH),
+                    authenticationContext.isStopOnQuotaReach());
+            Assert.assertEquals(tierInfo.getInt(APIConstants.JwtTokenConstants.SPIKE_ARREST_LIMIT),
+                    authenticationContext.getSpikeArrestLimit());
+            Assert.assertNull(authenticationContext.getSpikeArrestUnit());
         } catch (APISecurityException e) {
             Assert.fail();
         }

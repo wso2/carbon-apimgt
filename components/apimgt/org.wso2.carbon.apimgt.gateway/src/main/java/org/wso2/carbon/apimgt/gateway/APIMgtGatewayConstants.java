@@ -32,7 +32,7 @@ public class APIMgtGatewayConstants {
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
     public static final String HOST_NAME = "api.ut.hostName";
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
-    public static final String API_SWAGGER = "api_swagger";
+    public static final String API_SWAGGER = "API_SWAGGER";
     public static final String APPLICATION_NAME = "api.ut.application.name";
     public static final String APPLICATION_ID = "api.ut.application.id";
     public static final String REQUEST_START_TIME = "api.ut.requestTime";
