@@ -214,10 +214,12 @@ class SampleAPI extends Component {
                     </Typography>
                     <Typography component='p' className={classes.content}>
                         <FormattedMessage
-                            id={
-                                'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' +
-                                'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' +
-                                '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'
+                            id='Apis.Listing.SampleAPI.SampleAPI.description'
+                            defaultMessage={
+                                'WSO2 API Publisher enables API providers to ' +
+                                ' publish APIs, share documentation, provision API keys and gather feedback' +
+                                ' on features, quality and usage. To get started, Create an API ' +
+                                'or Publish a sample API.'
                             }
                         />
                     </Typography>

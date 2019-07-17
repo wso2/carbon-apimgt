@@ -87,7 +87,7 @@ describe('APIs <Listing/> component tests', () => {
         expect(wrapper.contains(mockedModel.list[0].version)).toBeTruthy();
         expect(wrapper.contains(mockedModel.list[0].context)).toBeTruthy();
 
-        expect(wrapper.contains('Create an API')).toBeTruthy();
+        expect(wrapper.contains('Create API')).toBeTruthy();
     });
     */
 

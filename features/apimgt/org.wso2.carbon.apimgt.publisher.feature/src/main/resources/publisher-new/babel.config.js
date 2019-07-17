@@ -9,46 +9,31 @@ module.exports = {
                     '@babel/preset-env',
                     {
                         targets: {
-                            node: 'current',
-                        },
-                    },
+                            node: 'current'
+                        }
+                    }
                 ],
-                '@babel/preset-react',
+                '@babel/preset-react'
             ],
             plugins: [
                 '@babel/plugin-syntax-dynamic-import',
                 '@babel/plugin-proposal-class-properties',
-                'dynamic-import-node',
-            ],
+                'dynamic-import-node'
+            ]
         },
         production: {
             presets: ['@babel/preset-env', '@babel/preset-react'],
             plugins: [
                 '@babel/plugin-proposal-class-properties',
-                [
-                    'react-intl-auto',
-                    {
-                        removePrefix: 'app/',
-                    },
-                ],
-                '@babel/plugin-syntax-dynamic-import',
-
-            ],
+                '@babel/plugin-syntax-dynamic-import'
+            ]
         },
         development: {
             presets: ['@babel/preset-env', '@babel/preset-react'],
             plugins: [
                 '@babel/plugin-proposal-class-properties',
-                [
-                    'react-intl-auto',
-                    {
-                        removePrefix: 'app/',
-                    },
-                ],
                 '@babel/plugin-syntax-dynamic-import',
-
-            ],
-
-        },
-    },
+            ]
+        }
+    }
 };

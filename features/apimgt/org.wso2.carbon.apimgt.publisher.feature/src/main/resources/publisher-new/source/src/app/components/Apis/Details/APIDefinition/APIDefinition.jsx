@@ -158,7 +158,7 @@ class APIDefinition extends React.Component {
             reader.readAsText(file);
         } else {
             Alert.error(intl.formatMessage({
-                id: 'Unsupported.file.type',
+                id: 'Apis.Details.APIDefinition.APIDefinition.unsupported.file.type',
                 defaultMessage: 'Unsupported File Type.',
             }));
         }
@@ -208,7 +208,7 @@ class APIDefinition extends React.Component {
                 this.updateSwaggerDefinition(apiDefinition, specFormat, this.getConvertToFormat(specFormat));
             } else {
                 Alert.error(intl.formatMessage({
-                    id: 'API.Definition.file.validation.failed',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.file.validation.failed',
                     defaultMessage: 'API Definition file validation failed.',
                 }));
             }
@@ -296,7 +296,7 @@ class APIDefinition extends React.Component {
             } catch (err) {
                 console.log(err);
                 Alert.error(intl.formatMessage({
-                    id: 'Error.while.updating.the.API.Definition',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
                     defaultMessage: 'Error while updating the API Definition',
                 }));
                 return;
@@ -307,7 +307,7 @@ class APIDefinition extends React.Component {
             .then((response) => {
                 if (response) {
                     Alert.success(intl.formatMessage({
-                        id: 'API.Definition.Updated.Successfully',
+                        id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
                         defaultMessage: 'API Definition Updated Successfully',
                     }));
                     if (specFormat && toFormat) {
@@ -320,7 +320,7 @@ class APIDefinition extends React.Component {
             .catch((err) => {
                 console.log(err);
                 Alert.error(intl.formatMessage({
-                    id: 'Error.while.updating.the.API.Definition',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
                     defaultMessage: 'Error while updating the API Definition',
                 }));
             });
@@ -355,11 +355,17 @@ class APIDefinition extends React.Component {
                 <div className={classes.topBar}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            API Definition
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.api.definition'
+                                defaultMessage='API Definition'
+                            />
                         </Typography>
                         <Button size='small' className={classes.button} onClick={this.openEditor}>
                             <EditRounded className={classes.buttonIcon} />
-                            Edit
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.edit'
+                                defaultMessage='Edit'
+                            />
                         </Button>
                         <Dropzone
                             multiple={false}
@@ -371,19 +377,28 @@ class APIDefinition extends React.Component {
                         >
                             <Button size='small' className={classes.button}>
                                 <CloudUploadRounded className={classes.buttonIcon} />
-                                <FormattedMessage id='Import.definition' defaultMessage='Import Definition' />
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.import.definition'
+                                    defaultMessage='Import Definition'
+                                />
                             </Button>
                         </Dropzone>
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />
-                                <FormattedMessage id='Download.Definition' defaultMessage='Download Definition' />
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.download.definition'
+                                    defaultMessage='Download Definition'
+                                />
                             </Button>
                         </a>
                     </div>
                     <div className={classes.converterWrapper}>
                         <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
-                            <FormattedMessage id='Convert.to' defaultMessage='Convert to:' />
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.convert.to'
+                                defaultMessage='Convert to:'
+                            />
                             {convertTo}
                         </Button>
                     </div>
@@ -403,7 +418,10 @@ class APIDefinition extends React.Component {
                             className={classes.button}
                             color='inherit'
                             onClick={this.closeEditor}
-                            aria-label='Close'
+                            aria-label={<FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.btn.close'
+                                defaultMessage='Close'
+                            />}
                         >
                             <Icon>close</Icon>
                         </IconButton>
@@ -415,12 +433,20 @@ class APIDefinition extends React.Component {
                             onClick={this.openUpdateConfirmation}
                         >
                             <FormattedMessage
-                                id='documents.swagger.editor.update.content'
+                                id='Apis.Details.APIDefinition.APIDefinition.documents.swagger.editor.update.content'
                                 defaultMessage='Update Content'
                             />
                         </Button>
                     </Paper>
-                    <Suspense fallback={<div>Loading...</div>}>
+                    <Suspense fallback={
+                        <div>(
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.loading'
+                                defaultMessage='Loading...'
+                            />
+                        )
+                        </div>}
+                    >
                         <EditorDialog />
                     </Suspense>
                 </Dialog>
@@ -432,13 +458,16 @@ class APIDefinition extends React.Component {
                 >
                     <DialogTitle id='alert-dialog-title'>
                         <Typography align='left'>
-                            <FormattedMessage id='Save.API.Definition' defaultMessage='Save API Definition' />
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.save.api.definition'
+                                defaultMessage='Save API Definition'
+                            />
                         </Typography>
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText id='alert-dialog-description'>
                             <FormattedMessage
-                                id='Do.you.want.to.save.the.API.Definition.This.will.affect.the.existing.resources.'
+                                id='Apis.Details.APIDefinition.APIDefinition.api.definition.save.confirmation'
                                 defaultMessage='Do you want to save the API Definition?
                                 This will affect the existing resources.'
                             />
@@ -446,10 +475,16 @@ class APIDefinition extends React.Component {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleNo} color='secondary'>
-                            <FormattedMessage id='No' defaultMessage='No' />
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.btn.no'
+                                defaultMessage='No'
+                            />
                         </Button>
                         <Button onClick={this.handleOk} color='primary' autoFocus>
-                            <FormattedMessage id='Yes' defaultMessage='Yes' />
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.btn.yes'
+                                defaultMessage='Yes'
+                            />
                         </Button>
                     </DialogActions>
                 </Dialog>
