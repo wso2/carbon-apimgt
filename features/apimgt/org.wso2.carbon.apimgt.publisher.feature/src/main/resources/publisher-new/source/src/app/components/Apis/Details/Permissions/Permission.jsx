@@ -134,11 +134,11 @@ class Permission extends Component {
                 const { intl } = this.props;
                 promised_update
                     .then((response) => {
-                        message.success(intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.permissions.updated.successfully', defaultMessage: 'Permissions updated successfully' }));
+                        message.success(intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.permissions.updated.successfully', defaultMessage: 'Permissions updated successfully' }));
                     })
                     .catch((error) => {
                         console.error(error);
-                        message.error(intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.error.occurred.while.updating.permissions', defaultMessage: 'Error occurred while updating permissions!' }));
+                        message.error(intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.error.occurred.while.updating.permissions', defaultMessage: 'Error occurred while updating permissions!' }));
                         this.setState({ loading: false });
                     });
             })
@@ -338,13 +338,13 @@ class Permission extends Component {
         const { intl, resourceNotFountMessage } = this.props;
         const columns = [
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.role.col', defaultMessage: 'Role' }),
+                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.role.col', defaultMessage: 'Role' }),
                 dataIndex: 'key',
                 key: 'key',
                 render: text => <a href='#'>{text}</a>,
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.read', defaultMessage: 'Read' }),
+                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.read', defaultMessage: 'Read' }),
                 dataIndex: 'isRead',
                 key: 'isRead',
                 render: isChecked => (
@@ -352,7 +352,7 @@ class Permission extends Component {
                 ),
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.update', defaultMessage: 'Update' }),
+                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.update', defaultMessage: 'Update' }),
                 dataIndex: 'isUpdate',
                 key: 'isUpdate',
                 render: isChecked => (
@@ -360,7 +360,7 @@ class Permission extends Component {
                 ),
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.delete', defaultMessage: 'Delete' }),
+                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.delete', defaultMessage: 'Delete' }),
                 dataIndex: 'isDelete',
                 key: 'isDelete',
                 render: isChecked => (
@@ -368,7 +368,7 @@ class Permission extends Component {
                 ),
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.manages.subscriptions', defaultMessage: 'Manage Subscriptions' }),
+                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.manages.subscriptions', defaultMessage: 'Manage Subscriptions' }),
                 dataIndex: 'isManageSubscription',
                 key: 'isManageSubscription',
                 render: isChecked => (
@@ -380,7 +380,7 @@ class Permission extends Component {
                 ),
             },
             {
-                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.action', defaultMessage: 'Action' }),
+                title: intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.action', defaultMessage: 'Action' }),
                 key: 'action',
                 render: (text, record) => (
                     <span>
@@ -408,7 +408,7 @@ class Permission extends Component {
                         <Card bodyStyle={{ padding: 5 }}>
                             <div className='custom-image'>
                                 <img
-                                    alt={intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.api.thumb', defaultMessage: 'API thumb' })}
+                                    alt={intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.api.thumb', defaultMessage: 'API thumb' })}
                                     width='100%'
                                     src={app.context + '/site/public/images/api/api-default.png'}
                                 />
@@ -443,7 +443,7 @@ class Permission extends Component {
                                     <Col span={16}>
                                         <Input
                                             name='roles'
-                                            placeholder={intl.formatMessage({ id: 'Apis.Details.Permissions.Permissions.sales.group.engineering', defaultMessage: 'Sales-group,Engineering' })}
+                                            placeholder={intl.formatMessage({ id: 'Apis.Details.Permissions.Permission.sales.group.engineering', defaultMessage: 'Sales-group,Engineering' })}
                                             value={this.state.visibleRoles}
                                             onChange={this.handleChangeVisibilityRolesField}
                                         />
@@ -465,7 +465,7 @@ class Permission extends Component {
                                                 <Input
                                                     name='roleField'
                                                     placeholder={intl.formatMessage({
-                                                        id: 'Apis.Details.Permissions.Permissions.role.input',
+                                                        id: 'Apis.Details.Permissions.Permission.role.input',
                                                         defaultMessage: 'role',
                                                     })}
                                                     value={this.state.roleField}

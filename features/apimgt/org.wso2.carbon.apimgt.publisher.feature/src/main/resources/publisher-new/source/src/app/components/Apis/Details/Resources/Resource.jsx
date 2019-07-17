@@ -143,6 +143,10 @@ const styles = theme => ({
 });
 
 class Resource extends React.Component {
+    /**
+     *
+     * @param {any} props @inheritdoc
+     */
     constructor(props) {
         super(props);
         let tempScopes = [];
@@ -249,6 +253,9 @@ class Resource extends React.Component {
             });
         }
     }
+    /**
+     * @inheritdoc
+     */
     render() {
         const {
             classes, method, path, apiScopes, theme, intl,
@@ -334,10 +341,18 @@ class Resource extends React.Component {
                                     </TableRow>
                                     <TableRow className={classes.row}>
                                         <TableCell>
-                                            <SelectContentType value={this.state.method.produces} onChange={this.changeContentTypes} fieldName='produces' />
+                                            <SelectContentType
+                                                value={this.state.method.produces}
+                                                onChange={this.changeContentTypes}
+                                                fieldName='produces'
+                                            />
                                         </TableCell>
                                         <TableCell>
-                                            <SelectContentType value={this.state.method.consumes} onChange={this.changeContentTypes} fieldName='consumes' />
+                                            <SelectContentType
+                                                value={this.state.method.consumes}
+                                                onChange={this.changeContentTypes}
+                                                fieldName='consumes'
+                                            />
                                         </TableCell>
                                         <TableCell>
                                             {/* <Select
@@ -379,9 +394,24 @@ class Resource extends React.Component {
                                     />
                                 </Typography>
                                 <form onSubmit={this.propsSubmitHandler} className={classes.propsForm}>
-                                    <TextField id='outlined-dense' label='Parameter Name' className={classNames(classes.textField, classes.dense)} margin='dense' variant='outlined' value={this.state.newPropName} onChange={this.onChangePropName} />
-                                    <Button variant='contained' className={classes.button} onClick={this.propsSubmitHandler}>
-                                        <FormattedMessage id='Apis.Details.Resources.Resource.add' defaultMessage='Add' />
+                                    <TextField
+                                        id='outlined-dense'
+                                        label='Parameter Name'
+                                        className={classNames(classes.textField, classes.dense)}
+                                        margin='dense'
+                                        variant='outlined'
+                                        value={this.state.newPropName}
+                                        onChange={this.onChangePropName}
+                                    />
+                                    <Button
+                                        variant='contained'
+                                        className={classes.button}
+                                        onClick={this.propsSubmitHandler}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.Resource.add'
+                                            defaultMessage='Add'
+                                        />
                                     </Button>
                                 </form>
                                 {/* <WrappedPropertyAddForm propsSubmitHandler={this.propsSubmitHandler} /> */}
@@ -391,12 +421,42 @@ class Resource extends React.Component {
                                     <Table>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.parameter.name' defaultMessage='Parameter Name' /></TableCell>
-                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.description' defaultMessage='Description' /></TableCell>
-                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.parameter.type' defaultMessage='Parameter Type' /></TableCell>
-                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.data.type' defaultMessage='Data Type' /></TableCell>
-                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.required' defaultMessage='Required' /></TableCell>
-                                                <TableCell><FormattedMessage id='Apis.Details.Resources.Resource.delete' defaultMessage='Delete' /></TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.parameter.name'
+                                                        defaultMessage='Parameter Name'
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.description'
+                                                        defaultMessage='Description'
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.parameter.type'
+                                                        defaultMessage='Parameter Type'
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.data.type'
+                                                        defaultMessage='Data Type'
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.required'
+                                                        defaultMessage='Required'
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.delete'
+                                                        defaultMessage='Delete'
+                                                    />
+                                                </TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
