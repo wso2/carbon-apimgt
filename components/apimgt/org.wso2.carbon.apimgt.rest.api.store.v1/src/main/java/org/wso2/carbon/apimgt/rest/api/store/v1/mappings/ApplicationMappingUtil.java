@@ -20,12 +20,16 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
@@ -155,6 +159,8 @@ public class ApplicationMappingUtil {
         if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationInfoDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
         }
+        Map<String,String> applicationAttributes = application.getApplicationAttributes();
+        applicationInfoDTO.setAttributes(applicationAttributes);
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
         return applicationInfoDTO;
@@ -177,5 +183,34 @@ public class ApplicationMappingUtil {
         }
 
         return updatedSortBy;
+    }
+
+    /**
+     * Creates a DTO representation of an Application Attribute
+     *
+     * @param attribute Application Attribute JSON object
+     * @return an Application Attribute DTO
+     */
+    public static ApplicationAttributeDTO fromApplicationAttributeJsonToDTO(JSONObject attribute) {
+        ApplicationAttributeDTO applicationAttributeDTO = new ApplicationAttributeDTO();
+        applicationAttributeDTO.setAttribute((String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE));
+        applicationAttributeDTO.setDescription((String) attribute.get(APIConstants.ApplicationAttributes.DESCRIPTION));
+        applicationAttributeDTO.setRequired(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.REQUIRED)));
+        applicationAttributeDTO.setHidden(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.HIDDEN)));
+        return applicationAttributeDTO;
+    }
+
+    /**
+     * Converts an Application Attribute List object into corresponding REST API DTO
+     *
+     * @param attributeList List of attribute objects
+     * @return ApplicationAttributeListDTO object
+     */
+    public static ApplicationAttributeListDTO fromApplicationAttributeListToDTO(
+            List<ApplicationAttributeDTO> attributeList) {
+        ApplicationAttributeListDTO applicationAttributeListDTO = new ApplicationAttributeListDTO();
+        applicationAttributeListDTO.setList(attributeList);
+        applicationAttributeListDTO.setCount(attributeList.size());
+        return applicationAttributeListDTO;
     }
 }

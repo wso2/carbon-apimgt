@@ -232,6 +232,17 @@ export default class API extends Resource {
     }
 
     /**
+     * Get all application attributes
+     * @param {function} callback which needs to be called upon success
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getAllApplicationAttributes() {
+        return this.client.then((client) => {
+            return client.apis['Application Attributes'].get_settings_application_attributes(this._requestMetaData());
+        });
+    }
+
+    /**
      * Create application
      * @param {object} application content of the application
      * @returns {promise} With given callback attached to the success chain else API invoke promise.

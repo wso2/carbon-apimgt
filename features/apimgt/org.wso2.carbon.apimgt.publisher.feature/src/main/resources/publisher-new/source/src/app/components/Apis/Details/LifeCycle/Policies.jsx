@@ -97,7 +97,7 @@ class Policies extends Component {
             <React.Fragment>
                 <FormControl className={classes.FormControl}>
                     <InputLabel htmlFor='policy-selector'>
-                        <FormattedMessage id="business.plans" defaultMessage="Business Plans" />
+                        <FormattedMessage id="Apis.Details.LifeCycle.Policies.business.plans" defaultMessage="Business Plans" />
                     </InputLabel>
                     <Select
                         error={api.policies && api.policies.length === 0}
@@ -129,8 +129,14 @@ class Policies extends Component {
                         ))}
                     </Select>
                     <FormHelperText>
-                        <FormattedMessage id={isAPIProduct ? "select.a.plan.for.the.api.product":"select.a.plan.for.the.api.and.enable.api.level.throttling"}
-                            defaultMessage={isAPIProduct ? "Select a plan for the API product." : "Select a plan for the API and enable API level throttling."} />
+                        isAPIProduct ?
+                            <FormattedMessage id='Apis.Details.LifeCycle.Policies.select.plan.api.product'
+                                defaultMessage='Select a plan for the API product.'
+                             />
+                            :
+                            <FormattedMessage id='Apis.Details.LifeCycle.Policies.select.plan.api'
+                                defaultMessage='Select a plan for the API and enable API level throttling.'
+                            />;
                     </FormHelperText>
                 </FormControl>
             </React.Fragment>

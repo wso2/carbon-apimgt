@@ -877,11 +877,11 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns application attributes defined in configuration
      *
-     * @param userId           user name of the logged in user
+     * @param tenantDomain  tenant domain of the logged in user
      * @return Array of JSONObjects of key values from configuration
      * @throws APIManagementException
      */
-    JSONArray getAppAttributesFromConfig(String userId)  throws APIManagementException;
+    JSONArray getAppAttributesFromConfig(String tenantDomain) throws APIManagementException;
 
     Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 

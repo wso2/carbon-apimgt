@@ -5451,7 +5451,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
                 schemes.add(APIConstants.HTTP_PROTOCOL);
             }
-
+            
             JSONObject defaultImplicitSecurity = new JSONObject();
             defaultImplicitSecurity.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
             defaultImplicitSecurity
@@ -5459,11 +5459,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             defaultImplicitSecurity
                     .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_IMPLICIT);
             defaultImplicitSecurity.put(APIConstants.SWAGGER_SCOPES, new JSONArray());
-
-
+            
+            
             swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
             swaggerObj.put(APIConstants.SWAGGER_SCHEMES, schemes);
-
+            
             JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
             if (securityDefinitions == null) {
                 securityDefinitions = new JSONObject();
