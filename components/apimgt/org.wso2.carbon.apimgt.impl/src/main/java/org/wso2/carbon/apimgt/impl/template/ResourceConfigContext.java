@@ -21,12 +21,18 @@ package org.wso2.carbon.apimgt.impl.template;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Set the uri templates as the resources
@@ -35,6 +41,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
     //private static final Log log = LogFactory.getLog(ResourceConfigContext.class);
 
     private API api;
+    private APIProduct apiProduct;
     private String faultSeqExt;
 
     public ResourceConfigContext(ConfigContext context, API api) {
@@ -42,30 +49,37 @@ public class ResourceConfigContext extends ConfigContextDecorator {
         this.api = api;
     }
 
+    public ResourceConfigContext(ConfigContext context, APIProduct apiProduct) {
+        super(context);
+        this.apiProduct = apiProduct;
+    }
+
     public void validate() throws APIManagementException {
-        if (api.getUriTemplates() == null || api.getUriTemplates().isEmpty()) {
-            throw new APIManagementException("At least one resource is required");
-        }
-        if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
-            String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-            if (api.getId().getProviderName().contains("-AT-")) {
-                String provider = api.getId().getProviderName().replace("-AT-", "@");
-                tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        if (api != null) {
+            if (api.getUriTemplates() == null || api.getUriTemplates().isEmpty()) {
+                throw new APIManagementException("At least one resource is required");
             }
-            int tenantId;
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantManager().getTenantId(tenantDomain);
-                if (APIUtil.isPerAPISequence(api.getFaultSequence(), tenantId, api.getId(), 
-                                             APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
-                    this.faultSeqExt  = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
-                } 
-            } catch (UserStoreException e) {
-                throw new APIManagementException("Error while retrieving tenant Id from " + 
-                                                    api.getId().getProviderName(), e);
-            } catch (APIManagementException e) {
-                throw new APIManagementException("Error while checking whether sequence " + api.getFaultSequence() + 
-                                                 " is a per API sequence.", e);
+            if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                if (api.getId().getProviderName().contains("-AT-")) {
+                    String provider = api.getId().getProviderName().replace("-AT-", "@");
+                    tenantDomain = MultitenantUtils.getTenantDomain(provider);
+                }
+                int tenantId;
+                try {
+                    tenantId = ServiceReferenceHolder.getInstance().getRealmService().
+                            getTenantManager().getTenantId(tenantDomain);
+                    if (APIUtil.isPerAPISequence(api.getFaultSequence(), tenantId, api.getId(),
+                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
+                        this.faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                    }
+                } catch (UserStoreException e) {
+                    throw new APIManagementException("Error while retrieving tenant Id from " +
+                            api.getId().getProviderName(), e);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while checking whether sequence " + api.getFaultSequence() +
+                            " is a per API sequence.", e);
+                }
             }
         }
     }
@@ -73,10 +87,37 @@ public class ResourceConfigContext extends ConfigContextDecorator {
     public VelocityContext getContext() {
         VelocityContext context = super.getContext();
 
-        context.put("resources", api.getUriTemplates());
-        context.put("apiStatus", api.getStatus());
-        context.put("faultSequence", faultSeqExt != null ? faultSeqExt : api.getFaultSequence());
-        
+        if (api != null) {
+            context.put("resources", api.getUriTemplates());
+            context.put("apiStatus", api.getStatus());
+            context.put("faultSequence", faultSeqExt != null ? faultSeqExt : api.getFaultSequence());
+        } else if (apiProduct != null) {
+            //Here we aggregate duplicate resourceURIs of an API and populate httpVerbs set in the uri template
+            List<APIProductResource> productResources = apiProduct.getProductResources();
+            List<APIProductResource> aggregateResources = new ArrayList<APIProductResource>();
+            List<String> uriTemplateNames = new ArrayList<String>();
+
+            for (APIProductResource productResource : productResources) {
+                URITemplate uriTemplate = productResource.getUriTemplate();
+                String productResourceKey = productResource.getApiIdentifier() + ":" + uriTemplate.getUriTemplate();
+                if (uriTemplateNames.contains(productResourceKey)) {
+                    for (APIProductResource resource : aggregateResources) {
+                        String resourceKey = resource.getApiIdentifier() + ":" + resource.getUriTemplate().getUriTemplate();
+                        if (resourceKey.equals(productResourceKey)) {
+                            resource.getUriTemplate().setHttpVerbs(uriTemplate.getHTTPVerb());
+                        }
+                    }
+                } else {
+                    uriTemplate.setHttpVerbs(uriTemplate.getHTTPVerb());
+                    aggregateResources.add(productResource);
+                    uriTemplateNames.add(productResourceKey);
+                }
+            }
+
+            context.put("apiStatus", apiProduct.getState());
+            context.put("aggregates", aggregateResources);
+        }
+
         return context;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

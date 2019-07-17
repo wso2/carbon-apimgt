@@ -32,7 +32,7 @@ function Configuration(props) {
     const { parentClasses } = props;
     return (
         <ApiContext.Consumer>
-            {({ api }) => (
+            {({ api, isAPIProduct }) => (
                 <Paper className={parentClasses.root} elevation={1}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
@@ -41,7 +41,7 @@ function Configuration(props) {
                                 defaultMessage='Configuration'
                             />
                         </Typography>
-                        <Link to={'/apis/' + api.id + '/configuration'}>
+                        <Link to={(isAPIProduct ? '/api-products/' : '/apis/') + api.id + '/configuration'}>
                             <Button variant='contained' color='default'>
                                 <FormattedMessage
                                     id='Apis.Details.NewOverview.Configuration.edit'

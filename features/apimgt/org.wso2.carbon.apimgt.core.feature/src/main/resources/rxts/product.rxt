@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<artifactType type="application/vnd.wso2-product+xml" shortName="product" singularLabel="Product" pluralLabel="Products" hasNamespace="false" iconSet="7">
+	<storagePath>/apimgt/applicationdata/products/@{overview_provider}/@{overview_name}/@{overview_version}/product</storagePath>
+	<nameAttribute>overview_name</nameAttribute>
+	<ui>
+        <list>
+            <column name="Provider">
+                <data type="path" value="overview_provider" href="@{storagePath}"/>
+            </column>
+            <column name="Name">
+                <data type="path" value="overview_name" href="@{storagePath}"/>
+            </column>
+            <column name="Version">
+                <data type="path" value="overview_version" href="@{storagePath}"/>
+            </column>
+        </list>
+	</ui>
+	<content>
+        <table name="Overview">
+            <field type="text" required="true">
+                <name>Provider</name>
+            </field>
+            <field type="text" required="true">
+                <name>Name</name>
+            </field>
+            <field type="text" required="true">
+                <name>Context</name>
+            </field>
+            <field type="text">
+                <name>Version</name>
+            </field>
+            <field type="text-area">
+                <name>Description</name>
+            </field>
+            <field type="text">
+                <name>Thumbnail</name>
+            </field>
+            <field type="text">
+                <name>Visibility</name>
+            </field>
+            <field type="text">
+                <name>Visible Roles</name>
+            </field>
+            <field type="text">
+                <name>Visible Tenants</name>
+            </field>
+            <field type="options">
+                <name label="Tier Availability">Tier</name>
+                <values>
+                    <value>Gold</value>
+                    <value>Silver</value>
+                    <value>Other</value>
+                </values>
+            </field>
+            <field type="options">
+                <name label="Status">Status</name>
+                <values>
+                    <value>CREATED</value>
+                    <value>PUBLISHED</value>
+                </values>
+            </field>
+            <field type="text">
+                <name>Technical Owner</name>
+            </field>
+            <field type="text">
+                <name>Technical Owner Email</name>
+            </field>
+            <field type="text">
+                <name>Business Owner</name>
+            </field>
+            <field type="text">
+                <name>Business Owner Email</name>
+            </field>
+            <field type="text">
+                <name>Subscription Availability</name>
+            </field>
+            <field type="text">
+                <name>Tenants</name>
+            </field>
+            <field type="text">
+                <name>Environments</name>
+            </field>
+            <field type="text-area">
+                <name>Cors Configuration</name>
+            </field>
+            <field type="text">
+                <name>Transports</name>
+            </field>
+             <field type="text">
+                    <name>Authorization Header</name>
+             </field>
+    </table>
+</content>
+
+</artifactType>

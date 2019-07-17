@@ -29,35 +29,15 @@ public class RESTAPIAdminClientTestCase {
 
     @Test
     public void testUpdateApi() throws Exception {
-        RESTAPIAdminClient restapiAdminClient = new RESTAPIAdminClient("admin", "PhoneVerify",
-                "1.0");
+        RESTAPIAdminClient restapiAdminClient = new RESTAPIAdminClient();
+        String apiName = "admin--PhoneVerify:v1.0";
         try {
-            restapiAdminClient.updateApi("config", "abc.com");
+            restapiAdminClient.updateApi(apiName, "config", "abc.com");
         } catch (AxisFault axisFault) {
             // test for axisFault
         }
         try {
-            restapiAdminClient.updateApi("config");
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.updateApiForInlineScript("config", "abc.com");
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.updateApiForInlineScript("config");
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.updateDefaultApi("config", "abc.com");
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.updateDefaultApi("config");
+            restapiAdminClient.updateApi(apiName, "config");
         } catch (AxisFault axisFault) {
             // test for axisFault
         }
@@ -65,8 +45,8 @@ public class RESTAPIAdminClientTestCase {
 
     @Test
     public void testAddApi() throws Exception {
-        RESTAPIAdminClient restapiAdminClient = new RESTAPIAdminClient("admin", "PhoneVerify",
-                "1.0");
+        RESTAPIAdminClient restapiAdminClient = new RESTAPIAdminClient();
+        String apiName = "admin--PhoneVerify:v1.0";
         try {
             restapiAdminClient.addApi("config", "abc.com");
         } catch (AxisFault axisFault) {
@@ -77,49 +57,20 @@ public class RESTAPIAdminClientTestCase {
         } catch (AxisFault axisFault) {
             // test for axisFault
         }
-        try {
-            restapiAdminClient.addPrototypeApiScriptImpl("config", "abc.com");
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.addPrototypeApiScriptImpl("config");
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.addDefaultAPI("config", "abc.com");
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.addDefaultAPI("config");
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
     }
 
     @Test
     public void testGetApi() throws Exception {
-        RESTAPIAdminClient restapiAdminClient = new RESTAPIAdminClient("admin", "PhoneVerify",
-                "1.0");
+        RESTAPIAdminClient restapiAdminClient = new RESTAPIAdminClient();
+        String apiName = "admin--PhoneVerify:v1.0";
+
         try {
-            restapiAdminClient.getApi("abc.com");
+            restapiAdminClient.getApi(apiName, "abc.com");
         } catch (AxisFault axisFault) {
             // test for axisFault
         }
         try {
-            restapiAdminClient.getApi();
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.getDefaultApi();
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.getDefaultApi("config");
+            restapiAdminClient.getApi(apiName);
         } catch (AxisFault axisFault) {
             // test for axisFault
         }
@@ -127,25 +78,16 @@ public class RESTAPIAdminClientTestCase {
 
     @Test
     public void testDeleteApi() throws Exception {
-        RESTAPIAdminClient restapiAdminClient = new RESTAPIAdminClient("admin", "PhoneVerify",
-                "1.0");
+        RESTAPIAdminClient restapiAdminClient = new RESTAPIAdminClient();
+        String apiName = "admin--PhoneVerify:v1.0";
+
         try {
-            restapiAdminClient.deleteApi("abc.com");
+            restapiAdminClient.deleteApi(apiName, "abc.com");
         } catch (AxisFault axisFault) {
             // test for axisFault
         }
         try {
-            restapiAdminClient.deleteApi();
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.deleteDefaultApi();
-        } catch (AxisFault axisFault) {
-            // test for axisFault
-        }
-        try {
-            restapiAdminClient.deleteDefaultApi("config");
+            restapiAdminClient.deleteApi(apiName);
         } catch (AxisFault axisFault) {
             // test for axisFault
         }

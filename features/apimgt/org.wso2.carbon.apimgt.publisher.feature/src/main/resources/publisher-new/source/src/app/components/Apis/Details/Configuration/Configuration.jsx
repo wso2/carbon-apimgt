@@ -233,7 +233,7 @@ class Configuration extends React.Component {
             return { tags: [...tags] };
         });
     }
-    handleSubmit(oldAPI, updateAPI) {
+    handleSubmit(oldAPI, updateAPI, isAPIProduct) {
         const {
             description,
             accessControl,
@@ -281,7 +281,7 @@ class Configuration extends React.Component {
         if (cacheTimeout) {
             oldAPI.cacheTimeout = cacheTimeout;
         }
-        updateAPI(oldAPI);
+        updateAPI(oldAPI, isAPIProduct);
     }
     render() {
         const { classes } = this.props;
@@ -314,7 +314,7 @@ class Configuration extends React.Component {
                     </Typography>
                 </div>
                 <ApiContext.Consumer>
-                    {({ api, updateAPI }) => (
+                    {({ api, updateAPI, isAPIProduct }) => (
                         <Grid container spacing={24}>
                             <Grid item xs={12}>
                                 <Paper className={classes.root} elevation={1}>
@@ -913,7 +913,7 @@ class Configuration extends React.Component {
                                                 <Button
                                                     variant='contained'
                                                     color='primary'
-                                                    onClick={() => this.handleSubmit(api, updateAPI)}
+                                                    onClick={() => this.handleSubmit(api, updateAPI, isAPIProduct)}
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Configuration.Configuration.save'

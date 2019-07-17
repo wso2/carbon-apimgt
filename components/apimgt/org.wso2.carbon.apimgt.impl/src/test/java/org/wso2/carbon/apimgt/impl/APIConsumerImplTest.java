@@ -1377,7 +1377,7 @@ public class APIConsumerImplTest {
             apiConsumer.addSubscription(identifier, "sub1", 1);
             Assert.fail("Resource not found exception not thrown for worng api state");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs in the state"));
+            Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));
         }
 
     }

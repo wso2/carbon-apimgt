@@ -266,7 +266,7 @@ public class APIMappingUtil {
             dto.setType(APIDetailedDTO.TypeEnum.valueOf(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.equals(model.getType())) {
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
@@ -842,7 +842,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
-
+    
     private static APIDetailedDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY :
@@ -888,7 +888,7 @@ public class APIMappingUtil {
         }
 
     }
-
+    
     private static String updateContextWithVersion(String version, String contextVal, String context) {
         // This condition should not be true for any occasion but we keep it so that there are no loopholes in
         // the flow.
@@ -917,4 +917,5 @@ public class APIMappingUtil {
     private static String getThumbnailUri (String uuid) {
         return RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, uuid);
     }
+
 }

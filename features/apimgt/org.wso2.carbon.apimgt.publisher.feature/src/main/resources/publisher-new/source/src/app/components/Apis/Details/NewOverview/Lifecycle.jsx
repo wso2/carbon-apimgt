@@ -31,7 +31,7 @@ function Lifecycle(props) {
     const { parentClasses } = props;
     return (
         <ApiContext.Consumer>
-            {({ api }) => (
+            {({ api, isAPIProduct }) => (
                 <Paper className={classNames({ [parentClasses.root]: true })}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
@@ -59,7 +59,7 @@ function Lifecycle(props) {
                         })}
                     >
                         <PeopleOutlineIcon className={parentClasses.lifecycleIcon} />
-                        {api.lifeCycleStatus}
+                        {isAPIProduct ? api.state : api.lifeCycleStatus}
                     </Typography>
                 </Paper>
             )}

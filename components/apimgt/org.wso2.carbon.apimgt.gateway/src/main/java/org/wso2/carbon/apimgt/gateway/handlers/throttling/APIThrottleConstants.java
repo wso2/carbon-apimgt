@@ -63,4 +63,6 @@ public class APIThrottleConstants {
             "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
             "    <throttle:MediatorThrottleAssertion>\n";
     public static final String WS_THROTTLE_POLICY_BOTTOM = "</throttle:MediatorThrottleAssertion>\n" +"</wsp:Policy>";
+    public static final String SUBSCRIPTION_TYPE = "subscriptionType";
+    public static final String APPLICATION_NAME = "applicationName";
 }

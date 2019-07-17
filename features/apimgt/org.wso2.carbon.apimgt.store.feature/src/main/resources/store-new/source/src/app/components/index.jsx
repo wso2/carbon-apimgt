@@ -16,12 +16,11 @@
  * under the License.
  */
 
-import Base from './Base/index';
-import Apis from './Apis/Apis';
-import Login from './Login/Login';
-import Logout from './Logout';
-import Applications from './Applications/Applications';
+import React, {Component} from 'react'
+import Base from './Base/index'
+import Apis from './Apis/Apis'
+import Login from './Login/Login'
+import Logout from './Logout'
+import Applications from './Applications/Applications'
 
-export {
-    Base, Apis, Login, Logout, Applications,
-};
+export {Base, Apis, Login, Logout, Applications}
