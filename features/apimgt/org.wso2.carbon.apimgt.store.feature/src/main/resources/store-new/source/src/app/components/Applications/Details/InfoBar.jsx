@@ -299,6 +299,19 @@ class InfoBar extends React.Component {
                                             Throttling Tier
                                         </Typography>
                                     </div>
+                                    {Object.entries(application.attributes).map(([key, value]) => (
+                                        value !== '' ? (
+                                            <div className={classes.infoItem} key={key}>
+                                                <Typography variant='subheading' gutterBottom>
+                                                    { key }
+                                                    {' : '}
+                                                    <Typography variant='caption'>
+                                                        { value }
+                                                    </Typography>
+                                                </Typography>
+                                            </div>
+                                        ) : (null)
+                                    ))}
                                     <div className={classes.infoItem}>
                                         {application.status === 'APPROVED' ? (
                                             <CheckCircle />

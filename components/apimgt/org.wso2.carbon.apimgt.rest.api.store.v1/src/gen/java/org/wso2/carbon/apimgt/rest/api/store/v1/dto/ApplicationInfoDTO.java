@@ -24,6 +24,7 @@ public class ApplicationInfoDTO   {
     private String status = "";
     private List<String> groups = new ArrayList<>();
     private Integer subscriptionCount = null;
+    private Object attributes = null;
 
   /**
    **/
@@ -161,6 +162,23 @@ public class ApplicationInfoDTO   {
     this.subscriptionCount = subscriptionCount;
   }
 
+  /**
+   **/
+  public ApplicationInfoDTO attributes(Object attributes) {
+    this.attributes = attributes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "\"External Reference ID, Billing Tier\"", value = "")
+  @JsonProperty("attributes")
+  public Object getAttributes() {
+    return attributes;
+  }
+  public void setAttributes(Object attributes) {
+    this.attributes = attributes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -178,12 +196,13 @@ public class ApplicationInfoDTO   {
         Objects.equals(description, applicationInfo.description) &&
         Objects.equals(status, applicationInfo.status) &&
         Objects.equals(groups, applicationInfo.groups) &&
-        Objects.equals(subscriptionCount, applicationInfo.subscriptionCount);
+        Objects.equals(subscriptionCount, applicationInfo.subscriptionCount) &&
+        Objects.equals(attributes, applicationInfo.attributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, status, groups, subscriptionCount);
+    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, status, groups, subscriptionCount, attributes);
   }
 
   @Override
@@ -199,6 +218,7 @@ public class ApplicationInfoDTO   {
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    groups: ").append(toIndentedString(groups)).append("\n");
     sb.append("    subscriptionCount: ").append(toIndentedString(subscriptionCount)).append("\n");
+    sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

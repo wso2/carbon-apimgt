@@ -4010,8 +4010,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Application getApplicationsByName(String userId, String ApplicationName, String groupingId) throws
             APIManagementException {
 
-        Application application = apiMgtDAO.getApplicationByName(ApplicationName, userId,groupingId);
-        application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
+        Application application = apiMgtDAO.getApplicationWithOAuthApps(ApplicationName, userId, groupingId);
 
         if (application != null) {
             Set<APIKey> keys = getApplicationKeys(application.getId());

@@ -1924,7 +1924,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
 ######################################################
 # Export Application Resource API
 ######################################################
@@ -2743,6 +2742,55 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Application Attributes" resource APIs
+######################################################
+  '/settings/application-attributes':
+#--------------------------------------------------------
+# Retrieve all application attributes from configuration
+#--------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v1.0/applications/attributes\""
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/store/v1.0/settings/attributes
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n[\n {\n \"Description\": \"Sample description of the attribute\",\n \"Required\": true,\n \"Attribute\": \"External Reference Id\",\n \"Hidden\": false\n},\n {\n \"Description\": \"Sample description of the attribute\",\n \"Required\": true,\n \"Attribute\": \"Billing Id\",\n \"Hidden\": true,\n \"Default\": \"xxxx\"\n}\n]"
+      summary: |
+        Get all application attributes from configuration
+      description: |
+        This operation can be used to retrieve the application attributes from configuration. It will not return hidden attributes.
+      parameters:
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - Application Attributes
+      responses:
+        200:
+          description: |
+            OK.
+            Application attributes returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: '#/definitions/ApplicationAttributeList'
+        404:
+          description: |
+            Not Found.
+            Requested application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -3324,6 +3372,9 @@ definitions:
         example: ""
       subscriptionCount:
         type: integer
+      attributes:
+        type: object
+        example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
 # The Document List resource
@@ -4167,6 +4218,46 @@ definitions:
         type: array
         items:
           type: string
+
+#-----------------------------------------------------
+# The Application Attribute resource
+#-----------------------------------------------------
+  ApplicationAttribute :
+    title: Application attributes
+    properties:
+      description:
+        type: string
+        description: description of the application attribute
+        example: "Sample description of the attribute"
+      required:
+        type: string
+        description: whether this is a required attribute
+        example: "false"
+      attribute:
+        type: string
+        description: the name of the attribute
+        example: "External Reference Id"
+      hidden:
+        type: string
+        description: whether this is a hidden attribute
+        example: "false"
+
+#-----------------------------------------------------
+# The Application Attribute List resource
+#-----------------------------------------------------
+  ApplicationAttributeList :
+    title: Application Attributes List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of application attributes returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationAttribute'
+
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------
