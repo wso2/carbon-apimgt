@@ -8,6 +8,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
+import PropTypes from 'prop-types';
 
 const subscrbeToApps = (props) => {
     const {
@@ -58,7 +59,6 @@ const subscrbeToApps = (props) => {
             </AppBar>
             <div className={classes.plainContent}>
                 <SubscribeToApi
-                    api={api}
                     applicationsAvailable={applicationsAvailable}
                     rootClass={classes.subscribeRoot}
                     subscriptionRequest={subscriptionRequest}
@@ -69,5 +69,25 @@ const subscrbeToApps = (props) => {
         </Dialog>
     );
 };
-
+subscrbeToApps.propTypes = {
+    classes: PropTypes.shape({
+        appBar: PropTypes.shape({}),
+        toolbar: PropTypes.shape({}),
+        subscribeTitle: PropTypes.shape({}),
+        button: PropTypes.shape({}),
+        plainContent: PropTypes.shape({}),
+        subscribeRoot: PropTypes.shape({}),
+    }).isRequired,
+    handleClickToggle: PropTypes.func.isRequired,
+    openAvailable: PropTypes.func.isRequired,
+    handleSubscribe: PropTypes.func.isRequired,
+    updateSubscriptionRequest: PropTypes.func.isRequired,
+    subscriptionRequest: PropTypes.shape({}).isRequired,
+    applicationsAvailable: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+    throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
+    api: PropTypes.shape({
+        name: PropTypes.string,
+    }).isRequired,
+    Transition: PropTypes.shape({}).isRequired,
+};
 export default subscrbeToApps;

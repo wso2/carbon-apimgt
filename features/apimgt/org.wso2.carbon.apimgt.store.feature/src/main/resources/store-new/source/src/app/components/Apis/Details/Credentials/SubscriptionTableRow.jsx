@@ -5,6 +5,8 @@ import classNames from 'classnames';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
+import PropTypes from 'prop-types';
+
 /**
  * @inheritdoc
  * @param {*} theme theme object
@@ -138,5 +140,29 @@ const subscriptionTableRow = (props) => {
         </React.Fragment>
     );
 };
+subscriptionTableRow.propTypes = {
+    classes: PropTypes.shape({
+        td: PropTypes.shape({}),
+        actionColumn: PropTypes.shape({}),
+        button: PropTypes.shape({}),
+        activeLink: PropTypes.shape({}),
+        selectedWrapper: PropTypes.shape({}),
+    }).isRequired,
+    theme: PropTypes.shape({
 
+    }).isRequired,
+    handleSubscriptionDelete: PropTypes.func.isRequired,
+    loadInfo: PropTypes.func.isRequired,
+    selectedAppId: PropTypes.string.isRequired,
+    updateSubscriptionData: PropTypes.func.isRequired,
+    selectedKeyType: PropTypes.string.isRequired,
+    app: PropTypes.shape({
+        label: PropTypes.string,
+        policy: PropTypes.string,
+        status: PropTypes.string,
+        value: PropTypes.string,
+        subscriptionId: PropTypes.string,
+    }).isRequired,
+    index: PropTypes.number.isRequired,
+};
 export default withStyles(styles, { withTheme: true })(subscriptionTableRow);

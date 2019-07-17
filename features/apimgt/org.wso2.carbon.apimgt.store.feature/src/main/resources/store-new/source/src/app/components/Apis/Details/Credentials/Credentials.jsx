@@ -243,7 +243,7 @@ class Credentials extends React.Component {
      * @inheritdoc
      */
     render() {
-        const { classes, theme } = this.props;
+        const { classes } = this.props;
         const {
             api, updateSubscriptionData, applicationsAvailable, subscribedApplications,
         } = this.context;
@@ -294,7 +294,6 @@ class Credentials extends React.Component {
                                 <SubscriptionTableRow
                                     loadInfo={this.loadInfo}
                                     handleSubscriptionDelete={this.handleSubscriptionDelete}
-                                    theme={theme}
                                     selectedAppId={selectedAppId}
                                     updateSubscriptionData={updateSubscriptionData}
                                     selectedKeyType={selectedKeyType}
@@ -374,8 +373,16 @@ class Credentials extends React.Component {
 }
 
 Credentials.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        contentWrapper: PropTypes.shape({}),
+        titleSub: PropTypes.shape({}),
+        tableMain: PropTypes.shape({}),
+        th: PropTypes.shape({}),
+        appBar: PropTypes.shape({}),
+        toolbar: PropTypes.shape({}),
+        subscribeTitle: PropTypes.shape({}),
+        plainContent: PropTypes.shape({}),
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Credentials);

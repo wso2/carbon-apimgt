@@ -188,9 +188,21 @@ const subscribeToApi = (props) => {
         </Grid>
     );
 };
-
 subscribeToApi.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        FormControl: PropTypes.shape({}),
+        quotaHelp: PropTypes.shape({}),
+        selectEmpty: PropTypes.shape({}),
+        FormControlOdd: PropTypes.shape({}),
+    }).isRequired,
+    applicationsAvailable: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string,
+        label: PropTypes.string,
+    })).isRequired,
+    throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
+    subscriptionRequest: PropTypes.shape({}).isRequired,
+    updateSubscriptionRequest: PropTypes.func.isRequired,
+    rootClass: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(subscribeToApi);

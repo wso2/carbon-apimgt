@@ -77,7 +77,11 @@ const subscibeButtonPanel = (props) => {
     );
 };
 subscibeButtonPanel.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        subscribeButtons: PropTypes.shape({}),
+        buttonElm: PropTypes.shape({}),
+        buttonElmText: PropTypes.shape({}),
+    }).isRequired,
     handleClickToggle: PropTypes.func.isRequired,
     avalibleAppsLength: PropTypes.number.isRequired,
     subscribedAppsLength: PropTypes.number.isRequired,
