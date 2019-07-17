@@ -234,12 +234,17 @@ class CreateNewVersion extends React.Component {
                                                     <React.Fragment>
                                                         <FormattedMessage
                                                             id='Apis.Details.NewVersion.NewVersion.tooltip'
-                                                            defaultMessage={'Marks one API version in a group as the default so that it can be invoked' +
-                                                                'without specifying the version number in the URL. For example, if you mark' +
-                                                                'http://host:port/youtube/2.0 as the default API, requests made to' +
-                                                                'http://host:port/youtube/ are automatically routed to version 2.0. If you' +
-                                                                'mark an unpublished API as the default, the previous default published API' +
-                                                                'will still be used as the default until the new default API is published.'}
+                                                            defaultMessage={'Marks one API version in a group as ' +
+                                                                'the default so that it can be invoked without ' +
+                                                                'specifying the version number in the URL. ' +
+                                                                'For example, if you mark ' +
+                                                                'http://host:port/youtube/2.0 as the default API, ' +
+                                                                'requests made to http://host:port/youtube/ are ' +
+                                                                'automatically routed to version 2.0. If you mark ' +
+                                                                'an unpublished API as the default, ' +
+                                                                'the previous default published API ' +
+                                                                'will still be used as the default until ' +
+                                                                'the new default API is published.'}
                                                         />
                                                     </React.Fragment>
                                                 }
@@ -270,8 +275,8 @@ class CreateNewVersion extends React.Component {
                                         <FormHelperText>
                                             <FormattedMessage
                                                 id='Apis.Details.NewVersion.NewVersion.api.helper'
-                                                defaultMessage={'Indicate whether API should be the default version among the' +
-                                                'group of APIs with the same name'}
+                                                defaultMessage={'Indicate whether API should be the default version ' +
+                                                    'among the group of APIs with the same name'}
                                             />
                                         </FormHelperText>
                                     </FormControl>
@@ -304,7 +309,10 @@ class CreateNewVersion extends React.Component {
                                                 <Button
                                                     id='cancelBtn'
                                                 >
-                                                    <FormattedMessage id='Apis.Details.NewVersion.NewVersion.cancel' defaultMessage='Cancel' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewVersion.NewVersion.cancel'
+                                                        defaultMessage='Cancel'
+                                                    />
                                                 </Button>
                                             </Link>
                                         </Grid>

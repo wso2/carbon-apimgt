@@ -155,12 +155,16 @@ function Configuration(props) {
                                         <React.Fragment>
                                             <FormattedMessage
                                                 id='Apis.Details.NewOverview.Configuration.tooltip'
-                                                defaultMessage={'Marks one API version in a group as the default so that it can be invoked' +
-                                                'without specifying the version number in the URL. For example, if you mark' +
-                                                'http://host:port/youtube/2.0 as the default API, requests made to' +
-                                                'http://host:port/youtube/ are automatically routed to version 2.0. If you' +
-                                                'mark an unpublished API as the default, the previous default published API' +
-                                                'will still be used as the default until the new default API is published.'}
+                                                defaultMessage={'Marks one API version in a group as ' +
+                                                    'the default so that it can be invoked without specifying ' +
+                                                    'the version number in the URL. For example, if you mark ' +
+                                                    'http://host:port/youtube/2.0 as the default API, ' +
+                                                    'requests made to ' +
+                                                    'http://host:port/youtube/ are automatically ' +
+                                                    'routed to version 2.0.' +
+                                                    'If you mark an unpublished API as the default, ' +
+                                                    'the previous default published API will still be used' +
+                                                    ' as the default until the new default API is published.'}
                                             />
                                         </React.Fragment>
                                     }
@@ -190,8 +194,8 @@ function Configuration(props) {
                                         <React.Fragment>
                                             <FormattedMessage
                                                 id='Apis.Details.NewOverview.Configuration.transport.tooltip'
-                                                defaultMessage={'HTTP is less secure than HTTPS and makes your API vulnerable to security' +
-                                                'threats.'}
+                                                defaultMessage={'HTTP is less secure than HTTPS and ' +
+                                                    'makes your API vulnerable to security threats.'}
                                             />
                                         </React.Fragment>
                                     }
@@ -230,10 +234,11 @@ function Configuration(props) {
                                         <React.Fragment>
                                             <FormattedMessage
                                                 id='Apis.Details.NewOverview.Configuration.response.caching.tooltip'
-                                                defaultMessage={'This option determines whether to cache the response messages of the API.' +
-                                                'Caching improves performance because the backend server does not have to' +
-                                                'process the same data multiple times. To offset the risk of stale data in' +
-                                                'the cache, set an appropriate timeout period when prompted.'}
+                                                defaultMessage={'This option determines whether to cache the ' +
+                                                    'response messages of the API. Caching improves performance ' +
+                                                    'because the backend server does not have to process the same' +
+                                                    ' data multiple times. To offset the risk of stale data in' +
+                                                    'the cache, set an appropriate timeout period when prompted.'}
                                             />
                                         </React.Fragment>
                                     }
@@ -263,11 +268,11 @@ function Configuration(props) {
                                         <React.Fragment>
                                             <FormattedMessage
                                                 id='Apis.Details.NewOverview.Configuration.authorization.header.tooltip'
-                                                defaultMessage={'A custom authorization header can be defined as a replacement to the default' +
-                                                'Authorization' +
-                                                'header used to send a request. If a value is' +
-                                                'specified here, it will be used as the header field to send the access token' +
-                                                'in a request to consume the API'}
+                                                defaultMessage={'A custom authorization header can be defined ' +
+                                                    'as a replacement to the default Authorization header ' +
+                                                    'used to send a request. If a value is specified here, ' +
+                                                    'it will be used as the header field to send the access token' +
+                                                    'in a request to consume the API'}
                                             />
                                         </React.Fragment>
                                     }
@@ -297,15 +302,15 @@ function Configuration(props) {
                                         <React.Fragment>
                                             <FormattedMessage
                                                 id='Apis.Details.NewOverview.Configuration.access.control.all.tooltip'
-                                                defaultMessage={'All : The API is viewable, modifiable by all the publishers' +
-                                                'and creators.'}
+                                                defaultMessage={'All : The API is viewable, ' +
+                                                    'modifiable by all the publishers and creators.'}
                                             />
                                             <br />
                                             <FormattedMessage
-                                                id='Apis.Details.NewOverview.Configuration.access.control.restricted.tooltip'
+                                                id='Apis.Details.NewOverview.Configuration.access.control.tooltip'
                                                 defaultMessage={'Restricted by roles : The API can be viewable and' +
-                                                'modifiable by only specific publishers and creators with the roles that you' +
-                                                'specify'}
+                                                    'modifiable by only specific publishers and creators ' +
+                                                    'with the roles that you specify'}
                                             />
                                         </React.Fragment>
                                     }
@@ -336,15 +341,16 @@ function Configuration(props) {
                                     title={
                                         <React.Fragment>
                                             <FormattedMessage
-                                                id='Apis.Details.NewOverview.Configuration.visibility.store.public.tooltip'
-                                                defaultMessage={'Public : The API is accessible to everyone and can be' +
-                                                'advertised in multiple stores - a central store and/or non-WSO2 stores.'}
+                                                id='Apis.Details.NewOverview.Configuration.visibility.store.all.tooltip'
+                                                defaultMessage={'Public: The API is accessible to everyone and can be' +
+                                                    'advertised in multiple stores - a central store ' +
+                                                    'and/or non-WSO2 stores.'}
                                             />
                                             <br />
                                             <FormattedMessage
-                                                id='Apis.Details.NewOverview.Configuration.visibility.store.restricted.tooltip'
-                                                defaultMessage={'Restricted by roles : The API is visible only to specific' +
-                                                'user roles in the tenant store that you specify.'}
+                                                id='Apis.Details.NewOverview.Configuration.visibility.store.res.tooltip'
+                                                defaultMessage={'Restricted by roles: The API is visible only ' +
+                                                    'to specific user roles in the tenant store that you specify.'}
                                             />
                                         </React.Fragment>
                                     }

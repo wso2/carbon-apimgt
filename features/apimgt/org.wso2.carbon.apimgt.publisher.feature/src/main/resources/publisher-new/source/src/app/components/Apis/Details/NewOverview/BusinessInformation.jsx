@@ -82,10 +82,12 @@ function BusinessInformation(props) {
                         )}
                         {!api.businessInformation.businessOwnerEmail && (
                             <React.Fragment>
-                                &lt;<FormattedMessage
-                                    id='Apis.Details.NewOverview.BusinessInformation.business.owner.email.not.configured'
+                                &lt;
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.BusinessInformation.business.email.not.configured'
                                     defaultMessage='Not Configured'
-                                />&gt;
+                                />
+                                &gt;
                             </React.Fragment>
                         )}
                     </Typography>
@@ -122,10 +124,12 @@ function BusinessInformation(props) {
                         )}
                         {!api.businessInformation.technicalOwnerEmail && (
                             <React.Fragment>
-                                &lt;<FormattedMessage
-                                    id='Apis.Details.NewOverview.BusinessInformation.technical.owner.email.not.configured'
+                                &lt;
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.BusinessInformation.technical.email.not.configured'
                                     defaultMessage='Not Configured'
-                                />&gt;
+                                />
+                                &gt;
                             </React.Fragment>
                         )}
                     </Typography>
