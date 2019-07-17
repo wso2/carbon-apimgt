@@ -168,17 +168,21 @@ class Credentials extends React.Component {
      *  Set the initial values for subscription request
      */
     componentDidMount() {
-        const { api, applicationsAvailable } = this.context;
+        const { api, applicationsAvailable, updateSubscriptionData } = this.context;
         const { subscriptionRequest } = this.state;
-        const newSubscriptionRequest = { ...subscriptionRequest, apiId: api.id };
-        const throttlingPolicyList = api.tiers;
-        if (throttlingPolicyList) {
-            [newSubscriptionRequest.throttlingPolicy] = throttlingPolicyList;
+        if (api) {
+            const newSubscriptionRequest = { ...subscriptionRequest, apiId: api.id };
+            const throttlingPolicyList = api.tiers;
+            if (throttlingPolicyList) {
+                [newSubscriptionRequest.throttlingPolicy] = throttlingPolicyList;
+            }
+            if (applicationsAvailable && applicationsAvailable[0]) {
+                newSubscriptionRequest.applicationId = applicationsAvailable[0].value;
+            }
+            this.setState({ subscriptionRequest: newSubscriptionRequest, throttlingPolicyList });
+        } else {
+            updateSubscriptionData();
         }
-        if (applicationsAvailable && applicationsAvailable[0]) {
-            newSubscriptionRequest.applicationId = applicationsAvailable[0].value;
-        }
-        this.setState({ subscriptionRequest: newSubscriptionRequest, throttlingPolicyList });
     }
 
     /**

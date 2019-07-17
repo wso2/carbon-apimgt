@@ -88,9 +88,11 @@ class ScopeValidation extends React.Component {
     componentDidMount() {
         const { resourcePath, resourceMethod } = this.props;
         const hasScope = AuthManager.hasScopes(resourcePath, resourceMethod);
-        hasScope.then((haveScope) => {
-            this.setState({ haveScope });
-        });
+        if (hasScope) {
+            hasScope.then((haveScope) => {
+                this.setState({ haveScope });
+            });
+        }
     }
 
     /**
