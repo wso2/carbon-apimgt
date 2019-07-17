@@ -33,21 +33,37 @@ class ConfirmDialog extends React.Component {
         // TODO: Use defaultProps member to assign default values to properties instead
         // of using || (logical OR) comparison
         const {
-            title, message, labelCancel, labelOk, open,
+            title, message, labelCancel, labelOk, open, intl,
         } = this.props;
 
         return (
             <Dialog open={open} onClose={this.handleRequestClose}>
-                <DialogTitle>{title || 'Please Confirm'}</DialogTitle>
+                <DialogTitle>
+                    {title || intl.formatMessage({
+                        id: 'Apis.Shared.ConfirmDialog.please.confirm',
+                        defaultMessage: 'Please Confirm',
+                    })}
+                </DialogTitle>
                 <DialogContent>
-                    <DialogContentText>{message || 'Are you sure?'}</DialogContentText>
+                    <DialogContentText>
+                        {message || intl.formatMessage({
+                            id: 'Apis.Shared.ConfirmDialog.are.you.sure',
+                            defaultMessage: 'Are you sure?',
+                        })}
+                    </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>
-                        {labelCancel || 'Cancel'}
+                        {labelCancel || intl.formatMessage({
+                            id: 'Apis.Shared.ConfirmDialog.cancel',
+                            defaultMessage: 'Cancel',
+                        })}
                     </Button>
                     <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.OK)} color='primary'>
-                        {labelOk || 'OK'}
+                        {labelOk || intl.formatMessage({
+                            id: 'Apis.Shared.ConfirmDialog.ok',
+                            defaultMessage: 'OK',
+                        })}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -62,6 +78,9 @@ ConfirmDialog.propTypes = {
     labelOk: PropTypes.string.isRequired,
     callback: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 ConfirmDialog.Action = {
     OK: 'ok',
