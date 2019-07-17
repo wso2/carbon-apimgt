@@ -116,7 +116,7 @@ class ApplicationEdit extends Component {
             appTiers: [],
             notFound: false,
             appLifeCycleStatus: null,
-            appAttributes: null,
+            appAttributes: {},
             allAppAttributes: null,
         };
         this.handleChange = this.handleChange.bind(this);
@@ -191,7 +191,7 @@ class ApplicationEdit extends Component {
         if (allAppAttributes) {
             for (let i = 0; i < allAppAttributes.length; i++) {
                 if (allAppAttributes[i].attribute === name.key) {
-                    return allAppAttributes[i].required;
+                    return allAppAttributes[i].required === 'true';
                 }
             }
         }

@@ -73,6 +73,9 @@ const ApplicationCreate = (props) => {
             case 'tokenType':
                 newRequest.tokenType = currentTarget.value;
                 break;
+            case 'attributes':
+                newRequest.attributes = currentTarget.value;
+                break;
             default:
                 break;
         }
@@ -86,7 +89,14 @@ const ApplicationCreate = (props) => {
      * @memberof ApplicationCreate
      */
     const {
-        classes, throttlingPolicyList, applicationRequest, isNameValid, intl,
+        classes,
+        throttlingPolicyList,
+        applicationRequest,
+        isNameValid,
+        allAppAttributes,
+        handleAttributesChange,
+        isRequiredAttribute,
+        intl,
     } = props;
     return (
         <form className={classes.container} noValidate autoComplete='off'>
@@ -174,6 +184,30 @@ const ApplicationCreate = (props) => {
                             className={classes.inputText}
                         />
                     </FormControl>
+                    {allAppAttributes && (
+                        Object.entries(allAppAttributes).map(item => (
+                            item[1].hidden === 'false' ? (
+                                <FormControl
+                                    margin='normal'
+                                    className={classes.FormControl}
+                                    key={item[1].attribute}
+                                >
+                                    <TextField
+                                        required={isRequiredAttribute(item[1].attribute)}
+                                        label={item[1].attribute}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        helperText={item[1].description}
+                                        fullWidth
+                                        name={item[1].attribute}
+                                        onChange={handleAttributesChange(item[1].attribute)}
+                                        placeholder={'Enter ' + item[1].attribute}
+                                        className={classes.inputText}
+                                    />
+                                </FormControl>
+                            ) : (null)))
+                    )}
                 </Grid>
             </Grid>
         </form>

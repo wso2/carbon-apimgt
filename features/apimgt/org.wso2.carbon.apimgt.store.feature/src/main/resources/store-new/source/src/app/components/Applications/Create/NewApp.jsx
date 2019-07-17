@@ -27,6 +27,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
@@ -82,9 +83,11 @@ class NewApp extends React.Component {
                 throttlingPolicy: '',
                 description: '',
                 tokenType: null,
+                attributes: {},
             },
             isNameValid: true,
             throttlingPolicyList: [],
+            allAppAttributes: null,
         };
     }
 
@@ -97,15 +100,19 @@ class NewApp extends React.Component {
         // Get all the tires to populate the drop down.
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
-        promiseTiers
+        const promisedAttributes = api.getAllApplicationAttributes();
+        Promise.all([promiseTiers, promisedAttributes])
             .then((response) => {
+                const [tierResponse, allAttributes] = response;
                 const { applicationRequest } = this.state;
-                const throttlingPolicyList = response.body.list.map(item => item.name);
+                const throttlingPolicyList = tierResponse.body.list.map(item => item.name);
                 const newRequest = { ...applicationRequest };
                 if (throttlingPolicyList.length > 0) {
                     [newRequest.throttlingPolicy] = throttlingPolicyList;
                 }
-                this.setState({ applicationRequest: newRequest, throttlingPolicyList });
+                const allAppAttributes = [];
+                allAttributes.body.list.map(item => allAppAttributes.push(item));
+                this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -127,6 +134,34 @@ class NewApp extends React.Component {
     updateApplicationRequest = (applicationRequest) => {
         this.setState({ applicationRequest });
     }
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {void}
+     * @memberof NewApp
+     */
+    handleAttributesChange = name => (event) => {
+        const { applicationRequest } = this.state;
+        applicationRequest.attributes[name] = event.target.value;
+        this.setState({ applicationRequest });
+    };
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {void}
+     * @memberof NewApp
+     */
+    isRequiredAttribute = (name) => {
+        const { allAppAttributes } = this.state;
+        if (allAppAttributes) {
+            for (let i = 0; i < allAppAttributes.length; i++) {
+                if (allAppAttributes[i].attribute === name) {
+                    return allAppAttributes[i].required === 'true';
+                }
+            }
+        }
+        return false;
+    };
 
     /**
      * Validate and send the application create
@@ -185,7 +220,7 @@ class NewApp extends React.Component {
      */
     render() {
         const {
-            throttlingPolicyList, applicationRequest, isNameValid, open,
+            throttlingPolicyList, applicationRequest, isNameValid, open, allAppAttributes,
         } = this.state;
         const { classes } = this.props;
         return (
@@ -197,7 +232,10 @@ class NewApp extends React.Component {
                         className={classes.button}
                         onClick={this.handleClickOpen}
                     >
-                        ADD NEW APPLICATION
+                        <FormattedMessage
+                            defaultMessage='ADD NEW APPLICATION'
+                            id='Applications.Create.NewApp.add.new.application.button'
+                        />
                     </Button>
                 </ScopeValidation>
                 <Dialog fullScreen open={open} onClose={this.handleClose} TransitionComponent={Transition}>
@@ -207,10 +245,16 @@ class NewApp extends React.Component {
                                 <CloseIcon />
                             </IconButton>
                             <Typography variant='title' color='inherit' className={classes.flex}>
-                                Create New Application
+                                <FormattedMessage
+                                    defaultMessage='Create New Application'
+                                    id='Applications.Create.NewApp.create.new.application.title'
+                                />
                             </Typography>
                             <Button color='inherit' onClick={this.handleClose}>
-                                save
+                                <FormattedMessage
+                                    defaultMessage='Save'
+                                    id='Applications.Create.NewApp.save.application'
+                                />
                             </Button>
                         </Toolbar>
                     </AppBar>
@@ -221,11 +265,17 @@ class NewApp extends React.Component {
                             updateApplicationRequest={this.updateApplicationRequest}
                             validateName={this.validateName}
                             isNameValid={isNameValid}
+                            allAppAttributes={allAppAttributes}
+                            handleAttributesChange={this.handleAttributesChange}
+                            isRequiredAttribute={this.isRequiredAttribute}
                         />
                     </div>
                     <div className={classes.buttonWrapper}>
                         <Button variant='outlined' className={classes.button} onClick={this.handleClose}>
-                            Cancel
+                            <FormattedMessage
+                                defaultMessage='Cancel'
+                                id='Applications.Create.NewApp.cancel'
+                            />
                         </Button>
                         <Button
                             variant='contained'
@@ -233,7 +283,10 @@ class NewApp extends React.Component {
                             className={classes.button}
                             onClick={this.saveApplication}
                         >
-                            ADD NEW APPLICATION
+                            <FormattedMessage
+                                defaultMessage='ADD NEW APPLICATION'
+                                id='Applications.Create.NewApp.add.new.application.create'
+                            />
                         </Button>
                     </div>
                 </Dialog>
