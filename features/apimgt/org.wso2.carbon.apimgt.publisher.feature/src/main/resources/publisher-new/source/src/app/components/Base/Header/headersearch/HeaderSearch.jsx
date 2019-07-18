@@ -217,6 +217,7 @@ class HeaderSearch extends React.Component {
                     autoFocus,
                     classes,
                     placeholder: 'Search APIs',
+                    // placeholder: intl.formatMessage({defaultMessage: 'Search APIs'}),
                     value: searchText,
                     onChange: this.handleChange,
                     onBlur: this.clearOnBlur,
