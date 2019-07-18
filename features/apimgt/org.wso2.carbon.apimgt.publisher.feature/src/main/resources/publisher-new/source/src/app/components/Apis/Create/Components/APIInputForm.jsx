@@ -78,10 +78,37 @@ class APIInputForm extends Component {
     render() {
         const { policies } = this.state;
         const {
-            api, handleInputChange, classes, valid, intl,
+            api, handleInputChange, classes, valid, isAPIProduct, intl,
         } = this.props;
         const policiesProps = { handleInputChange, api, policies };
         const endpoint = api.getProductionEndpoint();
+        const nameHelperMsg = isAPIProduct ?
+            (<FormattedMessage
+                id='api.product.create.name.helper'
+                defaultMessage='API Product Name is unique. Special characters and empty space are not allowed'
+            />) :
+            (<FormattedMessage
+                id='api.create.name.helper'
+                defaultMessage='API Name is unique. Special characters and empty space are not allowed'
+            />);
+        const contextHelperMsg = isAPIProduct ?
+            (<FormattedMessage
+                id='api.product.create.context.help'
+                defaultMessage={'The API product context is used by the Gateway' +
+                    ' to identify the API product. Therefore, the API productcontext must be unique. ' +
+                    ' into the context. For example, {version}/phoneverify.'
+                }
+            />)
+            :
+            (<FormattedMessage
+                id='api.create.context.help'
+                defaultMessage={'The API context is used by the Gateway' +
+                    ' to identify the API. Therefore, the API context must' +
+                    ' be unique. You can define the APIs version as a parameter' +
+                    ' of its context by adding the {version}' +
+                    ' into the context. For example, {version}/phoneverify.'}
+            />);
+
         return (
             <React.Fragment>
                 <FormControl margin='normal' className={classes.FormControl}>
@@ -90,21 +117,19 @@ class APIInputForm extends Component {
                         fullWidth
                         id='name'
                         label={<FormattedMessage id='name' defaultMessage='Name' />}
-                        placeholder={intl.formatMessage({
-                            id: 'Apis.Create.Components.APIInputForm.name.placeholder',
+                        placeholder={isAPIProduct ? intl.formatMessage({
+                            id: 'Apis.Create.Components.APIInputForm.apiproduct.name.placeholder',
+                            defaultMessage: 'eTicketing',
+                        }) : intl.formatMessage({
+                            id: 'Apis.Create.Components.APIInputForm.api.name.placeholder',
                             defaultMessage: 'eTicketing',
                         })}
+
                         helperText={
                             valid.name.empty ? (
                                 <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
                             ) : (
-                                <FormattedMessage
-                                    id='api.create.name.helper'
-                                    defaultMessage={
-                                        'API Name is unique. Special' +
-                                        ' characters and empty space are not allowed'
-                                    }
-                                />
+                                nameHelperMsg
                             )
                         }
                         type='text'
@@ -118,37 +143,39 @@ class APIInputForm extends Component {
                         autoFocus
                     />
                 </FormControl>
-                <FormControl margin='normal' className={classes.FormControlOdd}>
-                    <TextField
+                {isAPIProduct ? null : (
+                    <FormControl margin='normal' className={classes.FormControlOdd}>
+                        <TextField
                         // TODO: These lines were commented because they need to be there but currently
                         // REST API doesn't support API versioning.So when we implement the versioning
                         // support we could simply uncomment those 2 lines and allow the user to
                         // provide version numbers. ~tmkb
                         // InputLabelProps={inputLabelClass}
                         // value={this.state.apiFields.apiVersion}
-                        error={valid.version.empty}
-                        fullWidth
-                        label={<FormattedMessage id='version' defaultMessage='Version' />}
-                        id='version'
-                        placeholder='E.g: 1.0.0'
-                        helperText={
-                            valid.version.empty ? (
-                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
-                            ) : (
-                                ''
-                            )
-                        }
-                        type='text'
-                        name='version'
-                        margin='normal'
-                        value={api.version || ''}
-                        onChange={handleInputChange}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                    />
-                </FormControl>
-                <FormControl margin='normal' className={classes.FormControl}>
+                            error={valid.version.empty}
+                            fullWidth
+                            label={<FormattedMessage id='version' defaultMessage='Version' />}
+                            id='version'
+                            placeholder='E.g: 1.0.0'
+                            helperText={
+                                valid.version.empty ? (
+                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                ) : (
+                                    ''
+                                )
+                            }
+                            type='text'
+                            name='version'
+                            margin='normal'
+                            value={api.version || ''}
+                            onChange={handleInputChange}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </FormControl>
+                )}
+                <FormControl margin='normal' className={isAPIProduct ? classes.FormControlOdd : classes.FormControl}>
                     <TextField
                         error={valid.context.empty}
                         fullWidth
@@ -160,18 +187,12 @@ class APIInputForm extends Component {
                         })}
                         helperText={
                             valid.context.empty ? (
-                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
-                            ) : (
                                 <FormattedMessage
-                                    id='api.create.context.help'
-                                    defaultMessage={
-                                        'The API context is used by the Gateway' +
-                                        ' to identify the API. Therefore, the API context must' +
-                                        ' be unique. You can define the APIs version as a parameter' +
-                                        ' of its context by adding the {version}' +
-                                        ' into the context. For example, {version}/phoneverify.'
-                                    }
+                                    id='error.empty'
+                                    defaultMessage='This field can not be empty.'
                                 />
+                            ) : (
+                                contextHelperMsg
                             )
                         }
                         InputLabelProps={{
@@ -184,39 +205,44 @@ class APIInputForm extends Component {
                         onChange={handleInputChange}
                     />
                 </FormControl>
-                <FormControl margin='normal' className={classes.FormControlOdd}>
-                    <TextField
-                        error={valid.version.empty}
-                        fullWidth
-                        id='endpoint'
-                        placeholder='E.g: http://appserver/resource'
-                        helperText={
-                            valid.context.empty ? (
-                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
-                            ) : (
-                                <FormattedMessage
-                                    id='api.create.endpoint.help'
-                                    defaultMessage={
-                                        'This is the actual endpoint' +
-                                        ' where the API implementation can be found'
-                                    }
-                                />
-                            )
-                        }
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        label={<FormattedMessage id='endpoint' defaultMessage='Endpoint' />}
-                        type='text'
-                        name='endpoint'
-                        margin='normal'
-                        value={endpoint}
-                        onChange={handleInputChange}
-                    />
-                </FormControl>
+                {isAPIProduct ? null : (
+                    <FormControl margin='normal' className={classes.FormControlOdd}>
+                        <TextField
+                            error={valid.version.empty}
+                            fullWidth
+                            id='endpoint'
+                            placeholder='E.g: http://appserver/resource'
+                            helperText={
+                                valid.context.empty ? (
+                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                                ) : (
+                                    <FormattedMessage
+                                        id='api.create.endpoint.help'
+                                        defaultMessage={
+                                            'This is the actual endpoint' +
+                                            ' where the API implementation can be found'
+                                        }
+                                    />
+                                )
+                            }
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            label={<FormattedMessage id='endpoint' defaultMessage='Endpoint' />}
+                            type='text'
+                            name='endpoint'
+                            margin='normal'
+                            value={endpoint}
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
+                )}
                 <FormControl margin='normal' className={classes.FormControl}>
-                    <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                        {policies && <Policies {...policiesProps} />}
+                    <ScopeValidation
+                        resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.API_CHANGE_LC}
+                        resourceMethod={resourceMethod.POST}
+                    >
+                        {policies && <Policies {...policiesProps} isAPIProduct={isAPIProduct} />}
                     </ScopeValidation>
                 </FormControl>
             </React.Fragment>
@@ -232,6 +258,7 @@ APIInputForm.propTypes = {
     handleInputChange: PropTypes.func.isRequired,
     classes: PropTypes.shape({}).isRequired,
     valid: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(APIInputForm));

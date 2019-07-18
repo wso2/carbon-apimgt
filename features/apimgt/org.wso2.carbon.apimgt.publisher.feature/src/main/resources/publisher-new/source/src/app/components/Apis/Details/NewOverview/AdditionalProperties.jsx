@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -48,11 +49,17 @@ function AdditionalProperties(props) {
                 <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Additional Properties
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.AdditionalProperties.additional.properties'
+                                defaultMessage='Additional Properties'
+                            />
                         </Typography>
                         <Link to={'/apis/' + api.id + '/properties'}>
                             <Button variant='contained' color='default'>
-                                Edit
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.AdditionalProperties.edit'
+                                    defaultMessage='Edit'
+                                />
                             </Button>
                         </Link>
                     </div>

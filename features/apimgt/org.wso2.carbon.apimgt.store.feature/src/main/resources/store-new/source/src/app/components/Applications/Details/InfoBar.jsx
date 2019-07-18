@@ -25,10 +25,10 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
 import CheckCircle from '@material-ui/icons/CheckCircle';
+import { FormattedMessage } from 'react-intl';
 import Loading from '../../Base/Loading/Loading';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import API from '../../../data/api';
-
 import VerticalDivider from '../../Shared/VerticalDivider';
 
 /**
@@ -264,17 +264,29 @@ class InfoBar extends React.Component {
                     <Link to='/applications' className={classes.backLink}>
                         <KeyboardArrowLeft className={classes.backIcon} />
                         <div className={classes.backText}>
-                            BACK TO
+                            <FormattedMessage
+                                id='Applications.Details.InfoBar.new.back.to'
+                                defaultMessage='BACK TO'
+                            />
                             {' '}
                             <br />
-                            LISTING
+                            <FormattedMessage
+                                id='Applications.Details.InfoBar.listing'
+                                defaultMessage='LISTING'
+                            />
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
                     <div style={{ marginLeft: theme.spacing.unit }}>
                         <Typography variant='display1'>{application.name}</Typography>
                         <Typography variant='caption' gutterBottom align='left'>
-                            { application.subscriptionCount } Subscriptions
+                            { application.subscriptionCount }
+                            {' '}
+
+                            <FormattedMessage
+                                id='Applications.Details.InfoBar.subscriptions'
+                                defaultMessage='Subscriptions'
+                            />
                         </Typography>
                     </div>
                 </div>
@@ -296,9 +308,25 @@ class InfoBar extends React.Component {
                                             </Typography>
                                         </Typography>
                                         <Typography variant='caption' gutterBottom align='left'>
-                                            Throttling Tier
+                                            <FormattedMessage
+                                                id='Applications.Details.InfoBar.throttling.tier'
+                                                defaultMessage='Throttling Tier'
+                                            />
                                         </Typography>
                                     </div>
+                                    {Object.entries(application.attributes).map(([key, value]) => (
+                                        value !== '' ? (
+                                            <div className={classes.infoItem} key={key}>
+                                                <Typography variant='subheading' gutterBottom>
+                                                    { key }
+                                                    {' : '}
+                                                    <Typography variant='caption'>
+                                                        { value }
+                                                    </Typography>
+                                                </Typography>
+                                            </div>
+                                        ) : (null)
+                                    ))}
                                     <div className={classes.infoItem}>
                                         {application.status === 'APPROVED' ? (
                                             <CheckCircle />
@@ -308,7 +336,10 @@ class InfoBar extends React.Component {
                                             </Typography>
                                         )}
                                         <Typography variant='caption' gutterBottom align='left'>
-                                            Lifecycle Status
+                                            <FormattedMessage
+                                                id='Applications.Details.InfoBar.lifecycle.status'
+                                                defaultMessage='Lifecycle Status '
+                                            />
                                         </Typography>
                                     </div>
                                     <div className={classes.infoItem}>
@@ -320,7 +351,10 @@ class InfoBar extends React.Component {
                                                 variant='contained'
                                                 color='default'
                                             >
-                                                Edit
+                                                <FormattedMessage
+                                                    id='Applications.Details.InfoBar.edit'
+                                                    defaultMessage='Edit'
+                                                />
                                             </Button>
                                         </Link>
                                     </div>
@@ -333,9 +367,25 @@ class InfoBar extends React.Component {
                 <div className={classes.infoContentBottom}>
                     <div className={classes.contentWrapper} onClick={() => this.toggleOverview()}>
                         <div className={classes.buttonView}>
-                            {showOverview ?
-                                <Typography className={classes.buttonOverviewText}>LESS</Typography> :
-                                <Typography className={classes.buttonOverviewText}>MORE</Typography>}
+                            {showOverview
+                                ? (
+                                    <Typography className={classes.buttonOverviewText}>
+
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.less'
+                                            defaultMessage='LESS'
+                                        />
+                                    </Typography>
+                                )
+                                : (
+                                    <Typography className={classes.buttonOverviewText}>
+
+                                        <FormattedMessage
+                                            id='Applications.Details.InfoBar.more'
+                                            defaultMessage='MORE'
+                                        />
+                                    </Typography>
+                                )}
                             {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
                         </div>
                     </div>

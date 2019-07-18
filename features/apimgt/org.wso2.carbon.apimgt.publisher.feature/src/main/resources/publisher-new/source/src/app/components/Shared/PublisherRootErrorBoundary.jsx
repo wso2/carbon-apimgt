@@ -18,6 +18,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 /**
  * Error boundary for the application.catch JavaScript errors anywhere in their child component tree,
@@ -67,7 +68,14 @@ class PublisherRootErrorBoundary extends Component {
         if (hasError) {
             return (
                 <div>
-                    <h2>Something went wrong while rendering the</h2> <b>{appName}</b>
+                    <h2>
+                        <FormattedMessage
+                            id='Apis.Shared.PublisherRootErrorBoundary.something.went.wrong.while.rendering.heading'
+                            defaultMessage='Something went wrong while rendering the'
+                        />
+                    </h2>
+                    {' '}
+                    <b>{appName}</b>
                     <hr />
                     <h3 style={{ color: 'red' }}>{error.message}</h3>
                     <pre style={errorStackStyle}>
@@ -76,14 +84,27 @@ class PublisherRootErrorBoundary extends Component {
                     <pre style={errorStackStyle}>
                         <u>{info.componentStack}</u>
                     </pre>
-                    <span>You may refresh the page now or try again later</span>
+                    <span>
+                        <FormattedMessage
+                            id='Apis.Shared.PublisherRootErrorBoundary.refresh.or.try.again.message'
+                            defaultMessage='You may refresh the page now or try again later'
+                        />
+                    </span>
                     <button
                         onClick={() => {
                             window.location.reload(true);
                         }}
-                        aria-label='Refresh'
+                        aria-label={(
+                            <FormattedMessage
+                                id='Apis.Shared.PublisherRootErrorBoundary.something.went.wrong.while.rendering.button'
+                                defaultMessage='Something went wrong while rendering the'
+                            />
+                        )}
                     >
-                        Refresh
+                        <FormattedMessage
+                            id='Apis.Shared.PublisherRootErrorBoundary.refresh'
+                            defaultMessage='Refresh'
+                        />
                     </button>
                 </div>
             );

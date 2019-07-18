@@ -89,7 +89,7 @@ function MarkdownEditor(props) {
         docPromise
             .then((doc) => {
                 Alert.info(`${doc.name} ${intl.formatMessage({
-                    id: 'documents.markdown.editor.updated.successfully',
+                    id: 'Apis.Details.Documents.MarkdownEditor.update.success.message',
                     defaultMessage: 'updated successfully.',
                 })}`);
                 toggleOpen();
@@ -131,7 +131,11 @@ function MarkdownEditor(props) {
     return (
         <div>
             <Button onClick={toggleOpen}>
-                <Icon>code</Icon> <FormattedMessage id='documents.markdown.editor.editor' defaultMessage='Edit Content' />
+                <Icon>code</Icon>
+                <FormattedMessage
+                    id='Apis.Details.Documents.MarkdownEditor.edit.content'
+                    defaultMessage='Edit Content'
+                />
             </Button>
             <Dialog fullScreen open={open} onClose={toggleOpen} TransitionComponent={Transition}>
                 <Paper square className={classes.popupHeader}>
@@ -140,19 +144,22 @@ function MarkdownEditor(props) {
                     </IconButton>
                     <Typography variant='h4' className={classes.docName}>
                         <FormattedMessage
-                            id='documents.markdown.editor.edit.content'
+                            id='Apis.Details.Documents.MarkdownEditor.edit.content.of'
                             defaultMessage='Edit Content of'
                         />{' '}
                         "{props.docName}"
                     </Typography>
                     <Button className={classes.button} variant='contained' color='primary' onClick={addContentToDoc}>
                         <FormattedMessage
-                            id='documents.markdown.editor.update.content'
+                            id='Apis.Details.Documents.MarkdownEditor.update.content.button'
                             defaultMessage='Update Content'
                         />
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
-                        <FormattedMessage id='documents.markdown.editor.cancel' defaultMessage='Cancel' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.MarkdownEditor.cancel.button'
+                            defaultMessage='Cancel'
+                        />
                     </Button>
                 </Paper>
                 <div className={classes.splitWrapper}>

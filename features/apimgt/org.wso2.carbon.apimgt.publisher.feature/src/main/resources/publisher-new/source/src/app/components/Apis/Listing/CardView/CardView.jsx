@@ -4,11 +4,11 @@ import { Grid } from '@material-ui/core/';
 
 import ApiThumb from '../components/ImageGenerator/ApiThumb';
 
-const CardView = ({ apis, updateAPIsList }) => {
+const CardView = ({ apis, updateAPIsList, isAPIProduct }) => {
     return (
         <Grid container justify='flex-start' spacing={8}>
             {apis.list.map((api) => {
-                return <ApiThumb key={api.id} updateAPIsList={updateAPIsList} api={api} />;
+                return <ApiThumb key={api.id} updateAPIsList={updateAPIsList} api={api} isAPIProduct={isAPIProduct} />;
             })}
         </Grid>
     );
@@ -17,6 +17,7 @@ const CardView = ({ apis, updateAPIsList }) => {
 CardView.propTypes = {
     apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
+    isAPIProduct: PropTypes.shape({}).isRequired,
 };
 
 export default CardView;

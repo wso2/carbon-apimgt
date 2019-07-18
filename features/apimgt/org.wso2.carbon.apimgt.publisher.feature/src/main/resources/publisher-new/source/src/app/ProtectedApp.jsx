@@ -31,10 +31,17 @@ import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
 import Configurations from 'Config';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
+import { IntlProvider } from 'react-intl';
 
 const themes = [];
 themes.push(createMuiTheme(Configurations.themes.light));
 themes.push(createMuiTheme(Configurations.themes.dark));
+
+/**
+ * Language.
+ * @type {string}
+ */
+const language = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage;
 
 /**
  * Render protected application paths, Implements container presenter pattern
@@ -92,7 +99,11 @@ export default class Protected extends Component {
         const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} user={user} />} user={user} />;
 
         if (!user) {
-            return <RedirectToLogin />;
+            return (
+                <IntlProvider locale={language} messages={this.state.messages}>
+                    <RedirectToLogin />
+                </IntlProvider>
+            );
         }
         return (
             <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
@@ -101,6 +112,7 @@ export default class Protected extends Component {
                         <Switch>
                             <Redirect exact from='/' to='/apis' />
                             <Route path='/apis' component={Apis} />
+                            <Route path='/api-products' component={Apis} />
                             <Route component={PageNotFound} />
                         </Switch>
                     </Base>

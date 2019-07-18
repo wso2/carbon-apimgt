@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -40,8 +41,8 @@ class Documents extends React.Component {
     }
     componentDidMount() {
         const API = new Api();
-
         const docs = API.getDocuments(this.props.api.id);
+        const { intl } = this.props;
         docs.then((response) => {
             this.setState({ documentsList: response.obj.list });
         }).catch((errorResponse) => {
@@ -49,7 +50,10 @@ class Documents extends React.Component {
             const messageTxt =
                 'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
             console.error(messageTxt);
-            Alert.error('Error in fetching documents list of the API');
+            Alert.error(intl.formatMessage({
+                id: 'Apis.Details.NewOverview.Documents.error',
+                defaultMessage: 'Error in fetching documents list of the API',
+            }));
         });
     }
     render() {
@@ -59,11 +63,17 @@ class Documents extends React.Component {
             <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                 <div className={parentClasses.titleWrapper}>
                     <Typography variant='h5' component='h3' className={parentClasses.title}>
-                        Documents
+                        <FormattedMessage
+                            id='Apis.Details.NewOverview.Documents.documents'
+                            defaultMessage='Documents'
+                        />
                     </Typography>
                     <Link to={'/apis/' + api.id + '/documents'}>
                         <Button variant='contained' color='default'>
-                            Edit
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Documents.edit'
+                                defaultMessage='Edit'
+                            />
                         </Button>
                     </Link>
                 </div>
@@ -82,7 +92,10 @@ class Documents extends React.Component {
                 )}
                 {documentsList && documentsList.length === 0 && (
                     <Typography component='p' variant='body1' className={parentClasses.subtitle}>
-                        &lt;Not Created&gt;
+                        &lt;<FormattedMessage
+                            id='Apis.Details.NewOverview.Documents.not.created'
+                            defaultMessage='Not Created'
+                        />&gt;
                     </Typography>
                 )}
             </Paper>
@@ -93,6 +106,9 @@ class Documents extends React.Component {
 Documents.propTypes = {
     parentClasses: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({ id: PropTypes.string }).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
 export default Documents;

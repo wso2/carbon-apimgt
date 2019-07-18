@@ -27,6 +27,7 @@ public class APIMgtGatewayConstants {
     public static final String API_VERSION = "api.ut.api_version";
     public static final String API = "api.ut.api";
     public static final String VERSION = "api.ut.version";
+    public static final String API_TYPE = "api.ut.api_type";
     public static final String RESOURCE = "api.ut.resource";
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
     public static final String HOST_NAME = "api.ut.hostName";

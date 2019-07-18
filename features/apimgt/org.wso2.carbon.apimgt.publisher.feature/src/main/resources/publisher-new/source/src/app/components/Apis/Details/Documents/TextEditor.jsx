@@ -83,7 +83,7 @@ function TextEditor(props) {
         docPromise
             .then((doc) => {
                 Alert.info(`${doc.name} ${intl.formatMessage({
-                    id: 'documents.text.editor.updated.successfully',
+                    id: 'Apis.Details.Documents.TextEditor.update.success.message',
                     defaultMessage: 'updated successfully.',
                 })}`);
                 toggleOpen();
@@ -93,7 +93,7 @@ function TextEditor(props) {
                     console.log(error);
                 }
                 Alert.info(`${error} ${intl.formatMessage({
-                    id: 'documents.text.editor.updated.failed',
+                    id: 'Apis.Details.Documents.TextEditor.update.error.message',
                     defaultMessage: 'updated failed.',
                 })}`);
             });
@@ -124,7 +124,11 @@ function TextEditor(props) {
     return (
         <div>
             <Button onClick={toggleOpen}>
-                <Icon>description</Icon> <FormattedMessage id='documents.text.editor.editor' defaultMessage='Edit Content' />
+                <Icon>description</Icon>
+                <FormattedMessage
+                    id='Apis.Details.Documents.TextEditor.edit.content'
+                    defaultMessage='Edit Content'
+                />
             </Button>
             <Dialog fullScreen open={open} onClose={toggleOpen} TransitionComponent={Transition}>
                 <Paper square className={classes.popupHeader}>
@@ -133,19 +137,22 @@ function TextEditor(props) {
                     </IconButton>
                     <Typography variant='h4' className={classes.docName}>
                         <FormattedMessage
-                            id='documents.text.editor.edit.content'
+                            id='Apis.Details.Documents.TextEditor.edit.content.of'
                             defaultMessage='Edit Content of'
                         />{' '}
                         "{props.docName}"
                     </Typography>
                     <Button className={classes.button} variant='contained' color='primary' onClick={addContentToDoc}>
                         <FormattedMessage
-                            id='documents.text.editor.update.content'
+                            id='Apis.Details.Documents.TextEditor.update.content.button'
                             defaultMessage='Update Content'
                         />
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
-                        <FormattedMessage id='documents.text.editor.cancel' defaultMessage='Cancel' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.TextEditor.cancel.button'
+                            defaultMessage='Cancel'
+                        />
                     </Button>
                 </Paper>
                 <div className={classes.splitWrapper}>

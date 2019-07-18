@@ -28,7 +28,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -131,6 +134,7 @@ public class RestAPIStoreUtils {
         String username = RestApiUtil.getLoggedInUsername();
         Application application = subscribedAPI.getApplication();
         APIIdentifier apiIdentifier = subscribedAPI.getApiId();
+        APIProductIdentifier productIdentifier = subscribedAPI.getProductId();
         if (apiIdentifier != null && application != null) {
             try {
                 if (!isUserAccessAllowedForAPI(apiIdentifier)) {
@@ -142,6 +146,18 @@ public class RestAPIStoreUtils {
                                 + " has access to the subscription " + subscribedAPI.getUUID();
                 throw new APIManagementException(message, e);
             }
+            if (isUserAccessAllowedForApplication(application)) {
+                return true;
+            }
+        }
+        
+        if (productIdentifier != null && application != null) {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIProduct product = apiConsumer.getAPIProduct(productIdentifier);
+            if(!isUserAllowedForSubscription(product, username) || !isUserAccessAllowedForAPIProduct(product)) {
+                return false;
+            }
+
             if (isUserAccessAllowedForApplication(application)) {
                 return true;
             }
@@ -216,41 +232,51 @@ public class RestAPIStoreUtils {
     /**
      * Check if the specified subscription is allowed for the logged in user
      *
-     * @param apiIdentifier API identifier
-     * @param tier          the subscribing tier of the API
+     * @param identifier identifier
+     * @param tier          the subscribing tier of the API/API Product
      * @throws APIManagementException if the subscription allow check was failed. If the user is not allowed to add the
      *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException with the reason as the message
      */
-    public static void checkSubscriptionAllowed(APIIdentifier apiIdentifier, String tier)
+    public static void checkSubscriptionAllowed(Identifier identifier, String tier)
             throws APIManagementException {
 
         String username = RestApiUtil.getLoggedInUsername();
         String userTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        String providerName = apiIdentifier.getProviderName();
+        String providerName = identifier.getProviderName();
         String apiTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
 
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-        API api = apiConsumer.getAPI(apiIdentifier);
+        Set<Tier> tiers = null;
+        String subscriptionAvailability = null;
+        String subscriptionAllowedTenants = null;
+        if(identifier instanceof APIIdentifier) {
+            API api = apiConsumer.getAPI((APIIdentifier)identifier);
 
-        String apiSecurity = api.getApiSecurity();
-        if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
-            String msg = "Subscription is not allowed for API " + apiIdentifier.toString() + ". To access the API, "
-                    + "please use the client certificate";
-            throw new APIMgtAuthorizationFailedException(msg);
+            String apiSecurity = api.getApiSecurity();
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                String msg = "Subscription is not allowed for API " + identifier.toString() + ". To access the API, "
+                        + "please use the client certificate";
+                throw new APIMgtAuthorizationFailedException(msg);
+            }
+            tiers = api.getAvailableTiers();
+            subscriptionAvailability = api.getSubscriptionAvailability();
+            subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
+        } 
+        if (identifier instanceof APIProductIdentifier) {
+            APIProduct product = apiConsumer.getAPIProduct((APIProductIdentifier) identifier);
+            tiers = product.getAvailableTiers();
+            subscriptionAvailability = product.getSubscriptionAvailability();
+            subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();    
         }
-        Set<Tier> tiers = api.getAvailableTiers();
 
         //Tenant based validation for subscription
         boolean subscriptionAllowed = false;
         if (!userTenantDomain.equals(apiTenantDomain)) {
-            String subscriptionAvailability = api.getSubscriptionAvailability();
             if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
                 subscriptionAllowed = true;
             } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
-                String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
-                String allowedTenants[];
                 if (subscriptionAllowedTenants != null) {
-                    allowedTenants = subscriptionAllowedTenants.split(",");
+                    String[] allowedTenants = subscriptionAllowedTenants.split(",");
                     for (String tenant : allowedTenants) {
                         if (tenant != null && userTenantDomain.equals(tenant.trim())) {
                             subscriptionAllowed = true;
@@ -278,8 +304,8 @@ public class RestAPIStoreUtils {
             allowedTierList.add(t.getName());
         }
         if (!isTierAllowed) {
-            String msg = "Tier " + tier + " is not allowed for API " + apiIdentifier.getApiName() + "-" + apiIdentifier
-                    .getVersion() + ". Only " + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
+            String msg = "Tier " + tier + " is not allowed for API/API Product " + identifier.toString() + ". Only "
+                    + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
             throw new APIMgtAuthorizationFailedException(msg);
         }
         if (apiConsumer.isTierDeneid(tier)) {
@@ -300,5 +326,136 @@ public class RestAPIStoreUtils {
         APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
         API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
         return  api.getId();
+    }
+
+    /**
+     * Validate application attributes with the provided keys. Removes any attribute from the map if it is not contained
+     * in the provided set of keys
+     *
+     * @param applicationAttributes Application attributes
+     * @param keys provided keys
+     * @return attributes after removing invalid items
+     */
+    public static Map<String, String> validateApplicationAttributes(Map<String, String> applicationAttributes, Set keys) {
+        Iterator iterator = applicationAttributes.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = (String) iterator.next();
+            if (!keys.contains(key)) {
+                iterator.remove();
+                applicationAttributes.remove(key);
+            }
+        }
+        return applicationAttributes;
+    }
+
+    /**
+     * Retrieves application attribute keys defined in APIM configuration
+     * 
+     * @return application attribute keys defined in APIM configuration
+     * @throws APIManagementException when error occurs
+     */
+    public static Set<String> getApplicationAttributeKeys() throws APIManagementException {
+        
+        Set<String> keySet = new HashSet<>();
+        String username = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+        for (Object object : attributeKeysFromConfig) {
+            JSONObject jsonObject = (JSONObject) object;
+            String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+            keySet.add(key);
+        }
+        return keySet;
+    }
+
+    /**
+     * Retrieves valid application attribute keys in the provided application attributes
+     *
+     * @param applicationAttributes application attributes
+     * @return valid application attribute keys
+     * @throws APIManagementException when error occurs
+     */
+    public static Set<String> getValidApplicationAttributeKeys(Map<String, String> applicationAttributes)
+            throws APIManagementException {
+        String username = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        JSONArray attributeKeysFromConfig = apiConsumer.getAppAttributesFromConfig(username);
+        Set<String> keySet = new HashSet<>();
+        Set attributeKeysFromUSer = applicationAttributes.keySet();
+
+        for (Object object : attributeKeysFromConfig) {
+            JSONObject jsonObject = (JSONObject) object;
+            Boolean isRequired = false;
+            if (jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED) != null) {
+                isRequired = (Boolean) jsonObject.get(APIConstants.ApplicationAttributes.REQUIRED);
+            }
+            String key = (String) jsonObject.get(APIConstants.ApplicationAttributes.ATTRIBUTE);
+
+            if (isRequired && !attributeKeysFromUSer.contains(key)) {
+                RestApiUtil.handleBadRequest(key + " should be specified", log);
+            }
+            keySet.add(key);
+        }
+        return keySet;
+    }
+
+    /**
+     * Check whether user is allowed to access api product
+     * @param product
+     * @return
+     * @throws APIManagementException
+     */
+    public static boolean isUserAccessAllowedForAPIProduct(APIProduct product) throws APIManagementException {
+        //TODO check whether the username has external domain info as well
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (log.isDebugEnabled()) {
+            log.debug("isUserAccessAllowedForAPIProduct():- productId: " + product.getUuid() + ", visibility: "
+                    + product.getVisibility() + " username:" + username + " tenantDomain:" + tenantDomain);
+        }
+        if (APIConstants.API_GLOBAL_VISIBILITY.equals(product.getVisibility())) {
+            return true;
+        } else if (APIConstants.API_RESTRICTED_VISIBILITY.equals(product.getVisibility())) {
+            if (APIUtil.isRoleExistForUser(username, product.getVisibleRoles())
+                    && tenantDomain.equals(product.getTenantDomain())) {
+                return true;
+            }
+        } else if (APIConstants.API_PRIVATE_VISIBILITY.equals(product.getVisibility())
+                && tenantDomain.equals(product.getTenantDomain())
+                && !APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isUserAllowedForSubscription(APIProduct product, String user) {
+        String subscriptionAvailability = product.getSubscriptionAvailability();
+        String subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (log.isDebugEnabled()) {
+            log.debug("isUserAllowedForSubscription():- productId: " + product.getUuid()
+                    + ", subscriptionAvailability: " + subscriptionAvailability + " subscriptionAllowedTenants: "
+                    + subscriptionAllowedTenants + " username:" + user + " tenantDomain:" + tenantDomain);
+        }
+        boolean subscriptionAllowed = false;
+        if (!tenantDomain.equals(product.getTenantDomain())) {
+            if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
+                subscriptionAllowed = true;
+            } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
+                if (subscriptionAllowedTenants != null) {
+                    String[] allowedTenants = subscriptionAllowedTenants.split(",");
+                    for (String tenant : allowedTenants) {
+                        if (tenant != null && tenantDomain.equals(tenant.trim())) {
+                            subscriptionAllowed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            subscriptionAllowed = true;
+        }
+        
+        return subscriptionAllowed;
     }
 }

@@ -22,9 +22,12 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
@@ -49,19 +52,27 @@ public class SubscriptionMappingUtil {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
-        API api = apiConsumer.getLightweightAPI(apiId);
+        APIProductIdentifier apiProdId = subscription.getProductId();
+        if (apiId != null) {
+            API api = apiConsumer.getLightweightAPI(apiId);
+            subscriptionDTO.setApiId(api.getUUID());
+            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
+            subscriptionDTO.setApiInfo(apiInfo);
+        }
+        if (apiProdId != null) {
+            APIProduct apiProduct = apiConsumer.getAPIProduct(apiProdId);
+            APIProductInfoDTO apiProdInfo = APIMappingUtil.fromAPIProductToInfoDTO(apiProduct);
+            subscriptionDTO.setApiProductId(apiProdId.getUUID());
+            subscriptionDTO.setApiProductInfo(apiProdInfo);
+        }
         Application application = subscription.getApplication();
         application = apiConsumer.getLightweightApplicationByUUID(application.getUUID());
-
-        subscriptionDTO.setApiId(api.getUUID());
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
         subscriptionDTO.setType(SubscriptionDTO.TypeEnum.API);
 
-        APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
         ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);
-        subscriptionDTO.setApiInfo(apiInfo);
         subscriptionDTO.setApplicationInfo(applicationInfoDTO);
 
         return subscriptionDTO;

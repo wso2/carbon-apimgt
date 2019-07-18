@@ -21,13 +21,17 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
 import APIs from './Apis';
 import ApiCreate from './Create/ApiCreate';
 
 
 import { PageNotFound } from '../Base/Errors';
 
-jest.mock('./Listing/Listing', () => () => {
+jest.mock('./Listing/APIProductListing', () => () => {
+    return <div>Testing Listing page</div>;
+});
+jest.mock('./Listing/APIListing', () => () => {
     return <div>Testing Listing page</div>;
 });
 
@@ -40,6 +44,17 @@ describe('Test APIs main routing component', () => {
 
     test('should return API Listing component when request path match with /apis', () => {
         const exactPath = '/apis';
+        const exactApisPath = (
+            <MemoryRouter initialEntries={[exactPath]}>
+                <APIs />
+            </MemoryRouter>
+        );
+        const wrapper = mount(exactApisPath);
+        expect(wrapper.find(Route).prop('path')).toEqual(exactPath);
+        expect(wrapper.contains('Testing Listing page')).toBeTruthy();
+    });
+    test('should return API product Listing component when request path match with /api-products', () => {
+        const exactPath = '/api-products';
         const exactApisPath = (
             <MemoryRouter initialEntries={[exactPath]}>
                 <APIs />
@@ -75,12 +90,10 @@ describe('Test APIs main routing component', () => {
                 </MuiThemeProvider>
             </MemoryRouter>
         );
-        const wrapper = mount(noneExistingPath);
+        const wrapper = mountWithIntl(noneExistingPath);
         const pageNotFoundWrapper = wrapper.find(PageNotFound);
         expect(pageNotFoundWrapper).toHaveLength(1);
         expect(pageNotFoundWrapper.contains('404 Page Not Found!')).toBeTruthy();
         expect(pageNotFoundWrapper.contains(url)).toBeTruthy();
     });
-
-
 });

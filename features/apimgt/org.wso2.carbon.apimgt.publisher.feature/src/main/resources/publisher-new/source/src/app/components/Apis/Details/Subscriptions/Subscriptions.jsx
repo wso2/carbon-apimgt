@@ -50,9 +50,8 @@ class Subscriptions extends Component {
     render() {
         const { api } = this.state;
         const { resourceNotFoundMessage } = this.props;
-
         if (this.state.notFound) {
-            return <ResourceNotFound message={resourceNotFoundMessage} />;
+            return (<ResourceNotFound message={resourceNotFoundMessage} />);
         }
 
         if (!api) {
@@ -76,6 +75,7 @@ Subscriptions.propTypes = {
         id: PropTypes.string,
     }).isRequired,
     resourceNotFoundMessage: PropTypes.string,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(Subscriptions);

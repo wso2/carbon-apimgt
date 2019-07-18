@@ -298,13 +298,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Add new Subscriber
      *
-     * @param identifier    APIIdentifier
+     * @param identifier    Identifier
      * @param userId        id of the user
      * @param applicationId Application Id
      * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    SubscriptionResponse addSubscription(Identifier identifier, String userId, int applicationId)
             throws APIManagementException;
 
     /**
@@ -331,12 +331,12 @@ public interface APIConsumer extends APIManager {
     /**
      * Unsubscribe the specified user from the specified API in the given application
      *
-     * @param identifier    APIIdentifier
+     * @param identifier    Identifier
      * @param userId        id of the user
      * @param applicationId Application Id
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(APIIdentifier identifier, String userId, int applicationId) throws APIManagementException;
+    void removeSubscription(Identifier identifier, String userId, int applicationId) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application with GroupId
@@ -877,14 +877,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns application attributes defined in configuration
      *
-     * @param userId           user name of the logged in user
+     * @param tenantDomain  tenant domain of the logged in user
      * @return Array of JSONObjects of key values from configuration
      * @throws APIManagementException
      */
-    JSONArray getAppAttributesFromConfig(String userId)  throws APIManagementException;
+    JSONArray getAppAttributesFromConfig(String tenantDomain) throws APIManagementException;
 
     Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
-
 }

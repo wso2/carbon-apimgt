@@ -24,6 +24,7 @@ import Button from '@material-ui/core/Button';
 import DoneIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Select from '@material-ui/core/Select';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
     container: {
@@ -86,7 +87,7 @@ class InlineEditableField extends React.Component {
         this.props.saveFieldCallback(this.props.fieldName, this.state.newValue, this.fieldIndex);
     }
     render() {
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
 
         if (this.state.editable) {
             if (typeof this.props.fieldIndex === 'number') {
@@ -111,8 +112,21 @@ class InlineEditableField extends React.Component {
                             ))}
                         </Select>
                     )}
-                    {this.props.type === 'input' && <input type='text' onChange={this.handleChange('newValue')} value={this.state.newValue} />}
-                    {this.props.type === 'textarea' && <TextField id='standard-textarea' placeholder='Placeholder' multiline className={classes.textArea} margin='normal' onChange={this.handleChange('newValue')} value={this.state.newValue} />}
+                    {this.props.type === 'input' &&
+                    <input type='text' onChange={this.handleChange('newValue')} value={this.state.newValue} />}
+                    {this.props.type === 'textarea' &&
+                    <TextField
+                        id='standard-textarea'
+                        placeholder={intl.formatMessage({
+                            id: 'Apis.Details.Resources.InlineEditableField.placeholder',
+                            defaultMessage: 'Placeholder',
+                        })}
+                        multiline
+                        className={classes.textArea}
+                        margin='normal'
+                        onChange={this.handleChange('newValue')}
+                        value={this.state.newValue}
+                    />}
                     <Button className={classes.button} onClick={this.saveField}>
                         <DoneIcon />
                     </Button>
@@ -127,11 +141,16 @@ class InlineEditableField extends React.Component {
         } else {
             return (
                 <span onClick={this.editInlineToggle} className='fieldView'>
-                    {this.state.newValue ? 
-                      <span>{this.state.newValue}</span> : 
-                      this.props.initText ? 
-                          <span>{this.props.initText}</span> 
-                          : <span>Click to add</span>
+                    {this.state.newValue ?
+                        <span>{this.state.newValue}</span> :
+                        this.props.initText ?
+                            <span>{this.props.initText}</span>
+                            : (<span>
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.InlineEditableField.click.to.add'
+                                    defaultMessage='Click to add'
+                                />
+                            </span>)
                     }
                 </span>
             );
@@ -143,4 +162,4 @@ InlineEditableField.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(InlineEditableField);
+export default injectIntl(withStyles(styles)(InlineEditableField));

@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/icons/List';
@@ -49,19 +51,41 @@ const styles = theme => ({
     content: {
         flexGrow: 1,
     },
+    createButton: {
+        color: '#000000',
+        background: '#15b8cf',
+    },
 });
 class TopMenu extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             listType: this.props.theme.custom.defaultApiView,
+            isAPIProduct: this.props.isAPIProduct,
         };
+        this.changeAPIProductProperty = this.changeAPIProductProperty.bind(this);
+    }
+    /**
+     * @inheritDoc
+     * @param {@} prevProps
+     */
+    componentDidUpdate(prevProps) {
+        if (this.props.isAPIProduct !== prevProps.isAPIProduct) {
+            this.changeAPIProductProperty(this.props.isAPIProduct);
+        }
+    }
+    /**
+     * Change state for product
+     * @param {*} isProduct
+     */
+    changeAPIProductProperty(isProduct) {
+        this.setState({ isAPIProduct: isProduct });
     }
     render() {
         const {
             classes, apis, setListType, theme,
         } = this.props;
-        const { listType } = this.state;
+        const { listType, isAPIProduct } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
         return (
             <div className={classes.root}>
@@ -70,19 +94,34 @@ class TopMenu extends React.Component {
                 </div>
                 <div className={classes.mainTitleWrapper}>
                     <Typography variant='display1' className={classes.mainTitle}>
-                        APIs
+                        {isAPIProduct ? 'API Products' : 'APIs'}
                     </Typography>
                     {apis && (
                         <Typography variant='caption' gutterBottom align='left'>
-                            Displaying {apis.count} API
+                            Displaying {apis.count} {isAPIProduct ? ' API Product(s)' : ' API(s)'}
                         </Typography>
                     )}
                 </div>
                 <VerticalDivider height={70} />
                 <div className={classes.APICreateMenu}>
-                    <APICreateMenu buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}>
-                        <FormattedMessage id='create.an.api' defaultMessage='Create API' />
-                    </APICreateMenu>
+                    {isAPIProduct ?
+                        (
+                            <Link to='/api-products/create'>
+                                <Button variant='contained' className={classes.createButton}>
+                                    <FormattedMessage
+                                        id='create.an.api.product'
+                                        defaultMessage='Create an API Product'
+                                    />
+                                </Button>
+                            </Link>
+                        ) : (
+                            <APICreateMenu
+                                buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}
+                            >
+                                <FormattedMessage id='create.an.api' defaultMessage='Create API' />
+                            </APICreateMenu>
+                        )
+                    }
                 </div>
                 <div className={classes.buttonRight}>
                     <IconButton className={classes.button} onClick={() => setListType('list')}>
@@ -104,6 +143,7 @@ TopMenu.propTypes = {
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,
+    isAPIProduct: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(TopMenu);

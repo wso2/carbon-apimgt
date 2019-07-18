@@ -113,7 +113,7 @@ public class APIGatewayManagerTest {
         PowerMockito.mockStatic(CertificateMgtDAO.class);
         CertificateMgtDAO certificateMgtDAO = Mockito.mock(CertificateMgtDAO.class);
         PowerMockito.when(CertificateMgtDAO.getInstance()).thenReturn(certificateMgtDAO);
-        PowerMockito.when(APIUtil.isSandboxEndpointsExists((API) Mockito.anyObject())).thenCallRealMethod();
+        PowerMockito.when(APIUtil.isSandboxEndpointsExists(Mockito.anyString())).thenCallRealMethod();
         PowerMockito.when(APIUtil.getSequenceExtensionName((API) Mockito.anyObject())).thenCallRealMethod();
         PowerMockito.when(APIUtil.extractEnvironmentsForAPI(Mockito.anyString())).thenCallRealMethod();
 
@@ -621,7 +621,7 @@ public class APIGatewayManagerTest {
                 .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(inSequence);
-        PowerMockito.when(APIUtil.isProductionEndpointsExists((API) Mockito.anyObject())).thenReturn(true);
+        PowerMockito.when(APIUtil.isProductionEndpointsExists(Mockito.anyString())).thenReturn(true);
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
 
         //Test failure to deploy API when custom in/out sequence deployment failed
@@ -682,7 +682,7 @@ public class APIGatewayManagerTest {
                 .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(inSequence);
-        PowerMockito.when(APIUtil.isProductionEndpointsExists((API) Mockito.anyObject())).thenReturn(true);
+        PowerMockito.when(APIUtil.isProductionEndpointsExists(Mockito.anyString())).thenReturn(true);
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
         //Test API deployment failure when custom sequence update failed
         Mockito.doThrow(new AxisFault("Error occurred while deploying sequence")).when(apiGatewayAdminClient)

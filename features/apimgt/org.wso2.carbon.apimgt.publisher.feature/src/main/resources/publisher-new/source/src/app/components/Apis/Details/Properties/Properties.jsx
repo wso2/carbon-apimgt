@@ -36,7 +36,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import ApiContext from '../components/ApiContext';
 
 const styles = theme => ({
@@ -101,9 +101,14 @@ const styles = theme => ({
         cursor: 'pointer',
     },
 });
+
+/**
+ *
+ * @param {*} props properties
+ */
 function EditableRow(props) {
     const {
-        oldKey, oldValue, classes, handleUpdateList, handleDelete, apiAdditionalProperties,
+        oldKey, oldValue, classes, handleUpdateList, handleDelete, apiAdditionalProperties, intl,
     } = props;
     const [newKey, setKey] = useState(null);
     const [newValue, setValue] = useState(null);
@@ -149,7 +154,10 @@ function EditableRow(props) {
                     <TextField
                         required
                         id='outlined-required'
-                        label='Property Name'
+                        label={intl.formatMessage({
+                            id: 'Apis.Details.Properties.Properties.editable.row.property.name',
+                            defaultMessage: 'Property Name',
+                        })}
                         margin='normal'
                         variant='outlined'
                         className={classes.addProperty}
@@ -167,7 +175,10 @@ function EditableRow(props) {
                     <TextField
                         required
                         id='outlined-required'
-                        label='Property Name'
+                        label={intl.formatMessage({
+                            id: 'Apis.Details.Properties.Properties.editable.row.edit.mode.property.name',
+                            defaultMessage: 'Property Name',
+                        })}
                         margin='normal'
                         variant='outlined'
                         className={classes.addProperty}
@@ -183,16 +194,16 @@ function EditableRow(props) {
             <TableCell align='right'>
                 {editMode ? (
                     <React.Fragment>
-                        <a className={classes.link} onClick={saveRow} onKeyDown={() => {}}>
+                        <a className={classes.link} onClick={saveRow} onKeyDown={() => { }}>
                             <SaveIcon className={classes.buttonIcon} />
                         </a>
                     </React.Fragment>
                 ) : (
-                    <a className={classes.link} onClick={updateEditMode} onKeyDown={() => {}}>
+                    <a className={classes.link} onClick={updateEditMode} onKeyDown={() => { }}>
                         <EditIcon className={classes.buttonIcon} />
                     </a>
                 )}
-                <a className={classes.link} onClick={deleteRow} onKeyDown={() => {}}>
+                <a className={classes.link} onClick={deleteRow} onKeyDown={() => { }}>
                     <DeleteForeverIcon className={classes.buttonIcon} />
                 </a>
             </TableCell>
@@ -206,6 +217,7 @@ EditableRow.propTypes = {
     handleUpdateList: PropTypes.shape({}).isRequired,
     handleDelete: PropTypes.shape({}).isRequired,
     apiAdditionalProperties: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 /**
@@ -215,6 +227,10 @@ EditableRow.propTypes = {
  * @extends {React.Component}
  */
 class Properties extends React.Component {
+    /**
+     * @inheritdoc
+     * @param {*} props properties
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -335,7 +351,7 @@ class Properties extends React.Component {
      * @memberof Properties
      */
     render() {
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
         const {
             additionalProperties, showAddProperty, propertyKey, propertyValue,
         } = this.state;
@@ -350,7 +366,10 @@ class Properties extends React.Component {
                     </Typography>
                     <Button size='small' className={classes.button} onClick={this.toggleAddProperty}>
                         <AddCircle className={classes.buttonIcon} />
-                        Add New Property
+                        <FormattedMessage
+                            id='Apis.Details.Properties.Properties.add.new.property'
+                            defaultMessage='Add New Property'
+                        />
                     </Button>
                 </div>
                 <ApiContext.Consumer>
@@ -361,8 +380,18 @@ class Properties extends React.Component {
                                     <Table className={classes.table}>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell>Property Name</TableCell>
-                                                <TableCell>Property Value</TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.add.new.property.table'
+                                                        defaultMessage='Add New Property'
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.add.new.property.value'
+                                                        defaultMessage='Property Value'
+                                                    />
+                                                </TableCell>
                                                 <TableCell />
                                             </TableRow>
                                         </TableHead>
@@ -373,7 +402,11 @@ class Properties extends React.Component {
                                                         <TextField
                                                             required
                                                             id='outlined-required'
-                                                            label='Property Name'
+                                                            label={intl.formatMessage({
+                                                                id: `Apis.Details.Properties.Properties.
+                                                                show.add.property.property.name`,
+                                                                defaultMessage: 'Property Name',
+                                                            })}
                                                             margin='normal'
                                                             variant='outlined'
                                                             className={classes.addProperty}
@@ -387,7 +420,10 @@ class Properties extends React.Component {
                                                         <TextField
                                                             required
                                                             id='outlined-required'
-                                                            label='Property Value'
+                                                            label={intl.formatMessage({
+                                                                id: 'Apis.Details.Properties.Properties.property.value',
+                                                                defaultMessage: 'Property Value',
+                                                            })}
                                                             margin='normal'
                                                             variant='outlined'
                                                             className={classes.addProperty}
@@ -406,10 +442,16 @@ class Properties extends React.Component {
                                                                 this.handleAddToList(api.additionalProperties)
                                                             }
                                                         >
-                                                            <FormattedMessage id='add' defaultMessage='Add' />
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Properties.Properties.add'
+                                                                defaultMessage='Add'
+                                                            />
                                                         </Button>
                                                         <Button onClick={this.toggleAddProperty}>
-                                                            <FormattedMessage id='cancel' defaultMessage='Cancel' />
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Properties.Properties.cancel'
+                                                                defaultMessage='Cancel'
+                                                            />
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>
@@ -436,14 +478,20 @@ class Properties extends React.Component {
                                                     color='primary'
                                                     onClick={() => this.handleSubmit(api, updateAPI)}
                                                 >
-                                                    <FormattedMessage id='save' defaultMessage='Save' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.save'
+                                                        defaultMessage='Save'
+                                                    />
                                                 </Button>
                                             </div>
                                         </Grid>
                                         <Grid item>
                                             <Link to={'/apis/' + api.id + '/overview'}>
                                                 <Button>
-                                                    <FormattedMessage id='cancel' defaultMessage='Cancel' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.cancel'
+                                                        defaultMessage='Cancel'
+                                                    />
                                                 </Button>
                                             </Link>
                                         </Grid>
@@ -464,6 +512,7 @@ Properties.propTypes = {
     api: PropTypes.shape({
         id: PropTypes.string,
     }).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
-export default withStyles(styles)(Properties);
+export default injectIntl(withStyles(styles)(Properties));

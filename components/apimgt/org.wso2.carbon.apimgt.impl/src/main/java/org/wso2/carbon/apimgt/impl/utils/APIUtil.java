@@ -79,6 +79,9 @@ import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -86,6 +89,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
@@ -1274,6 +1278,56 @@ public final class APIUtil {
     }
 
     /**
+     * Create Governance artifact from given attributes
+     *
+     * @param artifact initial governance artifact
+     * @param apiProduct     APIProduct object with the attributes value
+     * @return GenericArtifact
+     * @throws APIManagementException if failed to create API Product
+     */
+    public static GenericArtifact createAPIProductArtifactContent(GenericArtifact artifact, APIProduct apiProduct)
+            throws APIManagementException {
+        try {
+            //todo : review and add missing fields
+            artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, apiProduct.getId().getName());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, apiProduct.getId().getVersion());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, apiProduct.getId().getProviderName());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, apiProduct.getContext());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, apiProduct.getDescription());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiProduct.getState());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, apiProduct.getVisibility());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES, apiProduct.getVisibleRoles());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS, apiProduct.getVisibleTenants());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER, apiProduct.getBusinessOwner());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, apiProduct.getBusinessOwnerEmail());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, apiProduct.getSubscriptionAvailability());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, apiProduct.getSubscriptionAvailableTenants());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
+
+            StringBuilder policyBuilder = new StringBuilder();
+            for (Tier tier : apiProduct.getAvailableTiers()) {
+                policyBuilder.append(tier.getName());
+                policyBuilder.append("||");
+            }
+
+            String policies = policyBuilder.toString();
+
+            if (!"".equals(policies)) {
+                policies = policies.substring(0, policies.length() - 2);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, policies);
+            }
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(apiProduct));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TRANSPORTS, apiProduct.getTransports());
+        } catch (GovernanceException e) {
+            String msg = "Failed to create API for : " + apiProduct.getId().getName();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return artifact;
+    }
+
+    /**
      * This method is used to attach micro-gateway labels to the given API
      *
      * @param artifact genereic artifact
@@ -1548,9 +1602,14 @@ public final class APIUtil {
      * @return Generated path.
      * @fileName File name.
      */
-    public static String getDocumentationFilePath(APIIdentifier identifier, String fileName) {
-        return APIUtil.getAPIDocPath(identifier) + APIConstants.DOCUMENT_FILE_DIR +
-                RegistryConstants.PATH_SEPARATOR + fileName;
+    public static String getDocumentationFilePath(Identifier identifier, String fileName) {
+        if (identifier instanceof APIIdentifier) {
+            return APIUtil.getAPIDocPath((APIIdentifier) identifier) + APIConstants.DOCUMENT_FILE_DIR +
+                    RegistryConstants.PATH_SEPARATOR + fileName;
+        } else {
+            return APIUtil.getProductDocPath((APIProductIdentifier) identifier) + APIConstants.DOCUMENT_FILE_DIR +
+                    RegistryConstants.PATH_SEPARATOR + fileName;
+        }
     }
 
     public static String getOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
@@ -1560,6 +1619,19 @@ public final class APIUtil {
 
     public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
+    }
+    
+    /**
+     * Utility method to get OpenAPI registry path for API product
+     * @param identifier product identifier
+     * @return path path to the 
+     */
+    public static String getAPIProductOpenAPIDefinitionFilePath(APIProductIdentifier identifier) {
+        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR
+                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + RegistryConstants.PATH_SEPARATOR
+                + identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion()
+                + RegistryConstants.PATH_SEPARATOR;
     }
 
     /**
@@ -1573,6 +1645,34 @@ public final class APIUtil {
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
+    }
+
+    /**
+     * Utility method to get api product path from APIProductIdentifier
+     *
+     * @param identifier APIProductIdentifier
+     * @return APIProduct path
+     */
+    public static String getAPIProductPath(APIProductIdentifier identifier) {
+        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
+                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + APIConstants.API_PRODUCT_RESOURCE_NAME;
+    }
+
+    /**
+     * Utility method for creating storage path for an api product icon.
+     *
+     * @param identifier APIProductIdentifier
+     * @return Icon storage path.
+     */
+    public static String getProductIconPath(APIProductIdentifier identifier) {
+        String artifactPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
+                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_ICON_IMAGE;
+        return artifactPath;
     }
 
     /**
@@ -1608,6 +1708,17 @@ public final class APIUtil {
     }
 
     /**
+     * Utility method to get API Product provider path
+     *
+     * @param identifier APIProductIdentifier
+     * @return API Product provider path
+     */
+    public static String getAPIProductProviderPath(APIProductIdentifier identifier) {
+        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
+    }
+
+    /**
      * Utility method to get documentation path
      *
      * @param apiId APIIdentifier
@@ -1636,12 +1747,12 @@ public final class APIUtil {
      * This utility method used to create documentation artifact content
      *
      * @param artifact      GovernanceArtifact
-     * @param apiId         APIIdentifier
+     * @param id            Identifier
      * @param documentation Documentation
      * @return GenericArtifact
      * @throws APIManagementException if failed to get GovernanceArtifact from Documentation
      */
-    public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, APIIdentifier apiId,
+    public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, Identifier id,
                                                            Documentation documentation) throws APIManagementException {
         try {
             artifact.setAttribute(APIConstants.DOC_NAME, documentation.getName());
@@ -1677,9 +1788,14 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.DOC_SOURCE_URL, documentation.getSourceUrl());
             artifact.setAttribute(APIConstants.DOC_FILE_PATH, documentation.getFilePath());
             artifact.setAttribute(APIConstants.DOC_OTHER_TYPE_NAME, documentation.getOtherTypeName());
-            String basePath = apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                    apiId.getApiName() + RegistryConstants.PATH_SEPARATOR + apiId.getVersion();
-            artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
+            String basePath = id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                    id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion();
+            if (id instanceof APIIdentifier) {
+                artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
+            } else if (id instanceof APIProductIdentifier) {
+                artifact.setAttribute(APIConstants.DOC_PRODUCT_BASE_PATH, basePath);
+            }
+
         } catch (GovernanceException e) {
             String msg = "Failed to create doc artifact content from :" + documentation.getName();
             log.error(msg, e);
@@ -3335,9 +3451,9 @@ public final class APIUtil {
     /**
      * This function is to set resource permissions based on its visibility
      *
-     * @param visibility   API visibility
+     * @param visibility   API/Product visibility
      * @param roles        Authorized roles
-     * @param artifactPath API resource path
+     * @param artifactPath API/Product resource path
      * @param registry     Registry
      * @throws APIManagementException Throwing exception
      */
@@ -3478,17 +3594,17 @@ public final class APIUtil {
     /**
      * This function is to set resource permissions based on its visibility
      *
-     * @param artifactPath API resource path
+     * @param artifactPath API/Product resource path
      * @throws APIManagementException Throwing exception
      */
-    public static void clearResourcePermissions(String artifactPath, APIIdentifier apiId, int tenantId)
+    public static void clearResourcePermissions(String artifactPath, Identifier id, int tenantId)
             throws APIManagementException {
         try {
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + artifactPath);
             String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(id.getProviderName()));
             if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
                     .equals(tenantDomain)) {
                 org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
@@ -4547,6 +4663,33 @@ public final class APIUtil {
         }
         return true;
     }
+    
+    /**
+     * Check whether roles exist for the user.
+     * @param userName
+     * @param roleName
+     * @return
+     * @throws APIManagementException
+     */
+    public static boolean isRoleExistForUser(String userName, String roleName) throws APIManagementException {
+        boolean foundUserRole = false;
+        String[] userRoleList = APIUtil.getListOfRoles(userName);
+        String[] inputRoles = roleName.split(",");
+        if(log.isDebugEnabled()) {
+            log.debug("isRoleExistForUser(): User Roles " + Arrays.toString(userRoleList));
+            log.debug("isRoleExistForUser(): InputRoles Roles " + Arrays.toString(inputRoles));
+        }
+        if (inputRoles != null) {
+            for (String inputRole : inputRoles) {
+                if (APIUtil.compareRoleList(userRoleList, inputRole)) {
+                    foundUserRole = true;
+                    break;
+                }
+            }
+        }
+        return foundUserRole;
+    }
+ 
 
     /**
      * Create API Definition in JSON
@@ -5136,11 +5279,11 @@ public final class APIUtil {
     }
 
 
-    public static boolean isSandboxEndpointsExists(API api) {
+    public static boolean isSandboxEndpointsExists(String endpointConfig) {
         JSONParser parser = new JSONParser();
         JSONObject config = null;
         try {
-            config = (JSONObject) parser.parse(api.getEndpointConfig());
+            config = (JSONObject) parser.parse(endpointConfig);
 
             if (config.containsKey("sandbox_endpoints")) {
                 return true;
@@ -5153,11 +5296,11 @@ public final class APIUtil {
         return false;
     }
 
-    public static boolean isProductionEndpointsExists(API api) {
+    public static boolean isProductionEndpointsExists(String endpointConfig) {
         JSONParser parser = new JSONParser();
         JSONObject config = null;
         try {
-            config = (JSONObject) parser.parse(api.getEndpointConfig());
+            config = (JSONObject) parser.parse(endpointConfig);
 
             if (config.containsKey("production_endpoints")) {
                 return true;
@@ -5883,6 +6026,30 @@ public final class APIUtil {
     public static String writeEnvironmentsToArtifact(API api) {
         StringBuilder publishedEnvironments = new StringBuilder();
         Set<String> apiEnvironments = api.getEnvironments();
+        if (apiEnvironments != null) {
+            for (String environmentName : apiEnvironments) {
+                publishedEnvironments.append(environmentName).append(',');
+            }
+
+            if (apiEnvironments.isEmpty()) {
+                publishedEnvironments.append("none,");
+            }
+
+            if (!publishedEnvironments.toString().isEmpty()) {
+                publishedEnvironments.deleteCharAt(publishedEnvironments.length() - 1);
+            }
+        }
+        return publishedEnvironments.toString();
+    }
+
+    /**
+     * This method used to set environment values to governance artifact of APIProduct .
+     *
+     * @param apiProduct API object with the attributes value
+     */
+    public static String writeEnvironmentsToArtifact(APIProduct apiProduct) {
+        StringBuilder publishedEnvironments = new StringBuilder();
+        Set<String> apiEnvironments = apiProduct.getEnvironments();
         if (apiEnvironments != null) {
             for (String environmentName : apiEnvironments) {
                 publishedEnvironments.append(environmentName).append(',');
@@ -8247,12 +8414,107 @@ public final class APIUtil {
         return grantTypes;
     }
 
+    public static String getTokenUrl() throws APIManagementException {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.REVOKE_API_URL).
+                replace(REVOKE, TOKEN);
+    }
+
     public static Map<String, Environment> getEnvironments(){
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                         .getAPIManagerConfiguration().getApiGatewayEnvironments();
     }
     private static QName getQNameWithIdentityNS(String localPart) {
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
+    }
+
+    
+    /**
+     * Return autogenerated product scope when product ID is given
+     *
+     * @param productIdentifier product identifier
+     * @return product scope
+     */
+    public static String getProductScope(APIProductIdentifier productIdentifier) {
+        return APIConstants.PRODUCTSCOPE_PREFIX + "-" + productIdentifier.getName() + ":" + productIdentifier.getProviderName();
+    }
+
+    /**
+     * Retrieves api product artifact from registry
+     *
+     * @param artifact
+     * @param registry
+     * @return APIProduct
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static APIProduct getAPIProduct(GovernanceArtifact artifact, Registry registry)
+            throws APIManagementException {
+
+        APIProduct apiProduct;
+        try {
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName, productVersion);
+            int apiId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
+
+            if (apiId == -1) {
+                return null;
+            }
+
+            apiProduct = new APIProduct(apiProductIdentifier);
+            apiProduct.setProductId(apiId);
+            //set uuid
+            apiProduct.setUuid(artifact.getId());
+            apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+            apiProduct.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+            apiProduct.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
+            apiProduct.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            apiProduct.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            apiProduct.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+            apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+            String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            apiProduct.setEnvironments(extractEnvironmentsForAPI(environments));
+            apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            apiProduct.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+
+            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomainName);
+
+            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+            Map<String, Tier> definedTiers = getTiers(tenantId);
+            Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, productName);
+            apiProduct.setAvailableTiers(availableTier);
+
+            List<APIProductResource> resources = ApiMgtDAO.getInstance().
+                    getAPIProductResourceMappings(apiProductIdentifier);
+
+            for (APIProductResource resource : resources) {
+                String apiPath = APIUtil.getAPIPath(resource.getApiIdentifier());
+
+                Resource productResource = registry.get(apiPath);
+                String artifactId = productResource.getUUID();
+                resource.setApiId(artifactId);
+            }
+
+            apiProduct.setProductResources(resources);
+
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API Product for artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Failed to get User Realm of API Product Provider";
+            throw new APIManagementException(msg, e);
+        }
+        return apiProduct;
     }
 
     /**
@@ -8319,4 +8581,45 @@ public final class APIUtil {
                 credentials.getBytes(Charset.forName( "UTF-8")));
         return new String(encodedCredentials, Charset.forName("UTF-8"));
     }
+
+     /* Utility method to get api identifier from api path.
+     *
+     * @param productPath Path of the API Product in registry
+     * @return relevant API Product Identifier
+     */
+    public static APIProductIdentifier getProductIdentifier(String productPath) {
+        int length = (APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
+        String relativePath = productPath.substring(length);
+        String[] values = relativePath.split(RegistryConstants.PATH_SEPARATOR);
+        if (values.length > 3) {
+            return new APIProductIdentifier(values[0], values[1], values[2]);
+        }
+        return null;
+    }
+
+    /**
+     * Utility method to get product documentation content file path
+     *
+     * @param productId             APIProductIdentifier
+     * @param documentationName String
+     * @return Doc content path
+     */
+    public static String getProductDocContentPath(APIProductIdentifier productId, String documentationName) {
+        return getProductDocPath(productId) + documentationName;
+    }
+
+    /**
+     * Utility method to get product documentation path
+     *
+     * @param productId APIProductIdentifier
+     * @return Doc path
+     */
+    public static String getProductDocPath(APIProductIdentifier productId) {
+        return APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                productId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                productId.getName() + RegistryConstants.PATH_SEPARATOR +
+                productId.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+
 }

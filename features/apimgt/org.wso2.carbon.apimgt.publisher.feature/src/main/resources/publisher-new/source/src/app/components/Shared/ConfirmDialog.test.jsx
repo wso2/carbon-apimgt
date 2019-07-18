@@ -16,11 +16,13 @@
  * under the License.
  */
 import React from 'react';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+
 import ConfirmDialog from './ConfirmDialog';
 
 describe('<ConfirmDialog/> tests', () => {
     test('should render the ConfirmDialog component', () => {
-        const wrapper = mount(<ConfirmDialog />);
+        const wrapper = mountWithIntl(<ConfirmDialog />);
     });
 
     test.todo('should return default props when they are not provided ');

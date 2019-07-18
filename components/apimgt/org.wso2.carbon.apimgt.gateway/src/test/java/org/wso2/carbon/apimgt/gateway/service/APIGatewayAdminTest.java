@@ -37,6 +37,8 @@ public class APIGatewayAdminTest {
     String version = "1.0.0";
     String config = "abcdef";
     String tenantDomain = "carbon.super";
+    String apiName = provider + "--" + name + ":v" + version;
+    String apiDefaultName = provider + "--" + name;
 
     @Test
     public void addApiForTenant() throws Exception {
@@ -57,7 +59,7 @@ public class APIGatewayAdminTest {
     @Test
     public void addPrototypeApiScriptImplForTenant() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.addPrototypeApiScriptImpl(config, tenantDomain)).thenReturn(true);
+        Mockito.when(restapiAdminClient.addApi(config, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.addPrototypeApiScriptImplForTenant(provider, name, version, config,
                 tenantDomain));
@@ -66,7 +68,7 @@ public class APIGatewayAdminTest {
     @Test
     public void addPrototypeApiScriptImpl() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.addPrototypeApiScriptImpl(config)).thenReturn(true);
+        Mockito.when(restapiAdminClient.addApi(config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.addPrototypeApiScriptImpl(provider, name, version, config));
     }
@@ -74,7 +76,7 @@ public class APIGatewayAdminTest {
     @Test
     public void addDefaultAPIForTenant() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.addDefaultAPI(config, tenantDomain)).thenReturn(true);
+        Mockito.when(restapiAdminClient.addApi(config, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.addDefaultAPIForTenant(provider, name, version, config, tenantDomain));
     }
@@ -82,7 +84,7 @@ public class APIGatewayAdminTest {
     @Test
     public void addDefaultAPI() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.addDefaultAPI(config)).thenReturn(true);
+        Mockito.when(restapiAdminClient.addApi(config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.addDefaultAPI(provider, name, version, config));
     }
@@ -94,7 +96,7 @@ public class APIGatewayAdminTest {
         apiData.setName(name);
         apiData.setFileName(name);
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.getApi(tenantDomain)).thenReturn(apiData);
+        Mockito.when(restapiAdminClient.getApi(apiName, tenantDomain)).thenReturn(apiData);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertNotNull(apiGatewayAdmin.getApiForTenant(provider, name, version, tenantDomain));
     }
@@ -111,7 +113,7 @@ public class APIGatewayAdminTest {
         resourceData.setUriTemplate("/*");
         apiData.addResources(resourceData);
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.getApi()).thenReturn(apiData);
+        Mockito.when(restapiAdminClient.getApi(apiName)).thenReturn(apiData);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertNotNull(apiGatewayAdmin.getApi(provider, name, version));
     }
@@ -123,7 +125,7 @@ public class APIGatewayAdminTest {
         apiData.setName(name);
         apiData.setFileName(name);
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.getDefaultApi(tenantDomain)).thenReturn(apiData);
+        Mockito.when(restapiAdminClient.getApi(apiDefaultName, tenantDomain)).thenReturn(apiData);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertNotNull(apiGatewayAdmin.getDefaultApiForTenant(provider, name, version, tenantDomain));
     }
@@ -135,7 +137,7 @@ public class APIGatewayAdminTest {
         apiData.setName(name);
         apiData.setFileName(name);
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.getDefaultApi()).thenReturn(apiData);
+        Mockito.when(restapiAdminClient.getApi(apiDefaultName)).thenReturn(apiData);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertNotNull(apiGatewayAdmin.getDefaultApi(provider, name, version));
 
@@ -144,7 +146,7 @@ public class APIGatewayAdminTest {
     @Test
     public void updateApiForTenant() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.updateApi(config, tenantDomain)).thenReturn(true);
+        Mockito.when(restapiAdminClient.updateApi(apiName, config, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.updateApiForTenant(provider, name, version, config, tenantDomain));
     }
@@ -152,7 +154,7 @@ public class APIGatewayAdminTest {
     @Test
     public void updateApi() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.updateApi(config)).thenReturn(true);
+        Mockito.when(restapiAdminClient.updateApi(apiName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.updateApi(provider, name, version, config));
     }
@@ -160,7 +162,7 @@ public class APIGatewayAdminTest {
     @Test
     public void updateApiForInlineScriptForTenant() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.updateApiForInlineScript(config, tenantDomain)).thenReturn(true);
+        Mockito.when(restapiAdminClient.updateApi(apiName, config, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.updateApiForInlineScriptForTenant(provider, name, version, config,
                 tenantDomain));
@@ -169,7 +171,7 @@ public class APIGatewayAdminTest {
     @Test
     public void updateApiForInlineScript() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.updateApiForInlineScript(config)).thenReturn(true);
+        Mockito.when(restapiAdminClient.updateApi(apiName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.updateApiForInlineScript(provider, name, version, config));
 
@@ -178,7 +180,7 @@ public class APIGatewayAdminTest {
     @Test
     public void updateDefaultApiForTenant() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.updateDefaultApi(config, tenantDomain)).thenReturn(true);
+        Mockito.when(restapiAdminClient.updateApi(apiDefaultName, config, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.updateDefaultApiForTenant(provider, name, version, config, tenantDomain));
     }
@@ -186,7 +188,7 @@ public class APIGatewayAdminTest {
     @Test
     public void updateDefaultApi() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.updateDefaultApi(config)).thenReturn(true);
+        Mockito.when(restapiAdminClient.updateApi(apiDefaultName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.updateDefaultApi(provider, name, version, config));
     }
@@ -194,7 +196,7 @@ public class APIGatewayAdminTest {
     @Test
     public void deleteApiForTenant() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.deleteApi(tenantDomain)).thenReturn(true);
+        Mockito.when(restapiAdminClient.deleteApi(apiName, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.deleteApiForTenant(provider, name, version, tenantDomain));
     }
@@ -202,7 +204,7 @@ public class APIGatewayAdminTest {
     @Test
     public void deleteApi() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.deleteApi()).thenReturn(true);
+        Mockito.when(restapiAdminClient.deleteApi(apiName)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.deleteApi(provider, name, version));
     }
@@ -210,7 +212,7 @@ public class APIGatewayAdminTest {
     @Test
     public void deleteDefaultApiForTenant() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.deleteDefaultApi(tenantDomain)).thenReturn(true);
+        Mockito.when(restapiAdminClient.deleteApi(apiDefaultName, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.deleteDefaultApiForTenant(provider, name, version, tenantDomain));
     }
@@ -218,7 +220,7 @@ public class APIGatewayAdminTest {
     @Test
     public void deleteDefaultApi() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
-        Mockito.when(restapiAdminClient.deleteDefaultApi()).thenReturn(true);
+        Mockito.when(restapiAdminClient.deleteApi(apiDefaultName)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, null,null);
         Assert.assertTrue(apiGatewayAdmin.deleteDefaultApi(provider, name, version));
     }

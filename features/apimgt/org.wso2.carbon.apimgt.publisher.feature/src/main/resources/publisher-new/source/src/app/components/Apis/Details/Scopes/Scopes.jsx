@@ -24,7 +24,7 @@ import { Progress, Alert } from 'AppComponents/Shared';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
@@ -107,6 +107,7 @@ class Scopes extends React.Component {
      * @memberof Scopes
      */
     addScope() {
+        const { intl } = this.props;
         const api = new Api();
         const scope = this.state.apiScope;
         scope.bindings = {
@@ -117,10 +118,16 @@ class Scopes extends React.Component {
         promisedScopeAdd.then((response) => {
             if (response.status !== 201) {
                 console.log(response);
-                Alert.error('Something went wrong while updating the ' + scope.name + ' Scope!');
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Scopes.Scope.something.went.wrong.while.updating.the.scope',
+                    defaultMessage: 'Something went wrong while updating the {scopeName} Scope!',
+                }, { scopeName: scope.name }));
                 return;
             }
-            Alert.success(scope.name + ' Scope added successfully!');
+            Alert.success(intl.formatMessage({
+                id: 'Apis.Details.Scopes.Scope.scope.added.successfully',
+                defaultMessage: '{scopeName} Scope added successfully!',
+            }, { scopeName: scope.name }));
             const { apiScopes } = this.state;
             apiScopes[apiScopes.length] = this.state.apiScope;
             this.setState({
@@ -172,7 +179,7 @@ class Scopes extends React.Component {
                         <Card className={classes.card}>
                             <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
                                 <FormattedMessage
-                                    id='create.scopes'
+                                    id='Apis.Details.Scopes.Scopes.create.scopes.title'
                                     defaultMessage='Create Scopes'
                                 />
                             </Typography>
@@ -180,9 +187,9 @@ class Scopes extends React.Component {
                             <CardContent>
                                 <Typography align='justify' component='p'>
                                     <FormattedMessage
-                                        id='create.scope.description'
+                                        id='Apis.Details.Scopes.Scopes.scopes.enable.fine.gained.access.control'
                                         defaultMessage={'Scopes enable fine-grained access control to API resources'
-                                        + ' based on user roles.'}
+                                            + ' based on user roles.'}
                                     />
                                 </Typography>
                             </CardContent>
@@ -190,7 +197,7 @@ class Scopes extends React.Component {
                                 <Link to={url}>
                                     <Button variant='contained' color='primary' className={classes.button}>
                                         <FormattedMessage
-                                            id='create.scopes'
+                                            id='Apis.Details.Scopes.Scopes.create.scopes.button'
                                             defaultMessage='Create Scopes'
                                         />
                                     </Button>
@@ -271,10 +278,11 @@ Scopes.propTypes = {
     }),
     api: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 Scopes.defaultProps = {
     match: { params: {} },
 };
 
-export default withStyles(styles)(Scopes);
+export default injectIntl(withStyles(styles)(Scopes));

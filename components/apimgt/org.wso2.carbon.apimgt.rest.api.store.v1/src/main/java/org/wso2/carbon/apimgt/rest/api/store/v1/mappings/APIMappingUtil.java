@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -32,6 +33,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
@@ -55,6 +60,7 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model, String tenantDomain) throws APIManagementException {
 
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
@@ -80,6 +86,14 @@ public class APIMappingUtil {
             String dateFormatted = formatter.format(date);
             dto.setCreatedTime(dateFormatted);
         } */
+
+        //Get Swagger definition which has URL templates, scopes and resource details
+        String apiSwaggerDefinition = null;
+
+        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
+            apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+        }
+        dto.setApiDefinition(apiSwaggerDefinition);
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -119,6 +133,7 @@ public class APIMappingUtil {
         }
 
         dto.setWsdlUri(model.getWsdlUrl());
+
 
         if (model.getGatewayLabels() != null) {
             dto.setLabels(getLabelDetails(model.getGatewayLabels(), model.getContext()));
@@ -409,4 +424,103 @@ public class APIMappingUtil {
     //        return scopeDto;
     //    }
 
+    /**
+     * Converts a List object of API Products into a DTO
+     *
+     * @param productList List of APIs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList) {
+        APIProductListDTO listDto = new APIProductListDTO();
+        List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
+        for (APIProduct apiProduct : productList) {
+            APIProductInfoDTO productDto = new APIProductInfoDTO();
+            productDto.setName(apiProduct.getId().getName());
+            productDto.setProvider(apiProduct.getId().getProviderName());
+            productDto.setDescription(apiProduct.getDescription());
+            productDto.setId(apiProduct.getUuid());
+            productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                    .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+            list.add(productDto);
+        }
+
+        listDto.setList(list);
+        listDto.setCount(list.size());
+        return listDto;
+    }
+    
+    public static APIProductDTO fromAPIProductToDTO(APIProduct product) throws APIManagementException {
+        APIProductDTO dto = new APIProductDTO();
+        dto.setId(product.getUuid());
+        dto.setName(product.getId().getName());
+        dto.setDescription(product.getDescription());
+        dto.setProvider(product.getId().getProviderName());
+        dto.setApiDefinition(product.getDefinition());
+        dto.setThumbnailUrl(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
+        APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
+        businessInformation.setBusinessOwner(product.getBusinessOwner());
+        businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
+        dto.setBusinessInformation(businessInformation);
+        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = product.getAvailableTiers();
+        List<String> tiersToReturn = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
+            tiersToReturn.add(tier.getName());
+        }
+        dto.setTiers(tiersToReturn);
+
+        return dto;
+    }
+    
+    /**
+     * Creates a minimal DTO representation of an API Product object
+     *
+     * @param apiProduct API product object
+     * @return a minimal representation DTO
+     */
+    public static APIProductInfoDTO fromAPIProductToInfoDTO(APIProduct apiProduct) {
+        APIProductInfoDTO apiProductInfoDTO = new APIProductInfoDTO();
+        apiProductInfoDTO.setDescription(apiProduct.getDescription());
+        apiProductInfoDTO.setId(apiProduct.getUuid());
+        apiProductInfoDTO.setName(apiProduct.getId().getName());
+        String providerName = apiProduct.getId().getProviderName();
+        apiProductInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        apiProductInfoDTO.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+
+        return apiProductInfoDTO;
+    }
+
+    /**
+     * Sets pagination urls for a APIProductListDTO object given pagination parameters and url parameters
+     *
+     * @param apiProductListDTO a APIProductListDTO object
+     * @param query      search condition
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
+     */
+    public static void setPaginationParams(APIProductListDTO apiProductListDTO, String query, int offset, int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        apiProductListDTO.setPagination(paginationDTO);
+    }
 }

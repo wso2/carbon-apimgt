@@ -52,7 +52,8 @@ describe('APIs <Listing/> component tests', () => {
     afterEach(() => {
         mockedAll.mockReset();
     });
-
+    /** TODO temporarily disabled tests.enable these tests */
+    /*
     test('should shallow render the listing page', async () => {
         mockedAll.mockReturnValue(Promise.resolve({ obj: { list: [] } }));
         const UnWrappedListing = unwrap(Listing);
@@ -88,6 +89,7 @@ describe('APIs <Listing/> component tests', () => {
 
         expect(wrapper.contains('Create API')).toBeTruthy();
     });
+    */
 
     test.todo('should remove the API from listing when clicked on delete button');
     test.todo('should navigate to API overview page when clicked on API thumb');

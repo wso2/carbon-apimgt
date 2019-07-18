@@ -4,6 +4,8 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
+import { FormattedMessage } from 'react-intl';
+
 /**
  * @inheritdoc
  * @class ApplicationTableHead
@@ -18,35 +20,50 @@ const applicationTableHead = (props) => {
             id: 'name',
             numeric: false,
             disablePadding: true,
-            label: 'Name',
+            label: (<FormattedMessage
+                id='Applications.Listing.ApplicationTableHead.edit.app'
+                defaultMessage='Edit Application'
+            />),
             sorting: true,
         },
         {
             id: 'throttlingTier',
             numeric: false,
             disablePadding: false,
-            label: 'Policy',
+            label: (<FormattedMessage
+                id='Applications.Listing.ApplicationTableHead.policy'
+                defaultMessage='Policy'
+            />),
             sorting: true,
         },
         {
-            id: 'lifeCycleStatus',
+            id: 'workflowStatus',
             numeric: false,
             disablePadding: false,
-            label: 'Workflow Status',
+            label: (<FormattedMessage
+                id='Applications.Listing.ApplicationTableHead.workflow.status'
+                defaultMessage='Workflow Status'
+            />),
             sorting: true,
         },
         {
             id: 'subscriptions',
             numeric: false,
             disablePadding: false,
-            label: 'Subscriptions',
+            label: (<FormattedMessage
+                id='Applications.Listing.ApplicationTableHead.subscriptions'
+                defaultMessage='Subscriptions'
+            />),
             sorting: true,
         },
         {
             id: 'actions',
             numeric: false,
             disablePadding: false,
-            label: 'Actions',
+            label: (<FormattedMessage
+                id='Applications.Listing.ApplicationTableHead.actions'
+                defaultMessage='Actions'
+            />),
             sorting: false,
         },
     ];

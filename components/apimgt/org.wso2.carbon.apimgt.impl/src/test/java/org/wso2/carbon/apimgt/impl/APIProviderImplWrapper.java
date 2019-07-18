@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -77,7 +78,7 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(Identifier apiId) throws APIManagementException {
         return documentationList;
     }
 

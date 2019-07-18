@@ -117,7 +117,7 @@ public class ApplicationImportExportManager {
      * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      */
-    public List<APIIdentifier> importSubscriptions(Application appDetails, String userId, int appId)
+    public List<APIIdentifier> importSubscriptions(Application appDetails, String userId, int appId, Boolean update)
             throws APIManagementException, UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         Set<SubscribedAPI> subscribedAPIs = appDetails.getSubscribedAPIs();
@@ -153,7 +153,14 @@ public class ApplicationImportExportManager {
                     if (isTierAvailable(tier, api) && api.getStatus() != null &&
                             APIConstants.PUBLISHED.equals(api.getStatus())) {
                         apiId.setTier(tier.getName());
-                        apiConsumer.addSubscription(apiId, userId, appId);
+                        // add subscription if update flag is not specified
+                        // it will throw an error if subscriber already exists
+                        if (!update) {
+                            apiConsumer.addSubscription(apiId, userId, appId);
+                        } else if (!apiConsumer.isSubscribed(subscribedAPI.getApiId(), userId)) {
+                            // on update skip subscriptions that already exists
+                            apiConsumer.addSubscription(apiId, userId, appId);
+                        }
                     } else {
                         log.error("Failed to import Subscription as API " + name + "-" + version +
                                 " as one or more tiers may be unavailable or the API may not have been published ");

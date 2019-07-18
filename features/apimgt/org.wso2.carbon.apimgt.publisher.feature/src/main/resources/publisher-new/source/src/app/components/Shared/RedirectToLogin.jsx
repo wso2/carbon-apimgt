@@ -17,7 +17,9 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import Configurations from 'Config';
+import { injectIntl } from 'react-intl';
 
 
 const page = Configurations.app.context + '/services/auth/login';
@@ -45,7 +47,7 @@ export function doRedirectToLogin() {
  * all the login redirection done in other places of the code
  * @class RedirectToLogin
  */
-export default class RedirectToLogin extends React.Component {
+class RedirectToLogin extends React.Component {
     /**
      *
      * @inheritdoc
@@ -62,6 +64,18 @@ export default class RedirectToLogin extends React.Component {
      * @memberof RedirectToLogin
      */
     render() {
-        return `You will be redirected to ${page}`;
+        const { intl } = this.props;
+        return `${intl.formatMessage({
+            id: 'Apis.Shared.RedirectToLogin.you.will.be.redirected.to',
+            defaultMessage: 'You will be redirected to  AAA',
+        })} ${page}`;
     }
 }
+
+RedirectToLogin.propTypes = {
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
+};
+
+export default injectIntl(RedirectToLogin);

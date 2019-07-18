@@ -23,8 +23,6 @@ import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
-import Alert from 'AppComponents/Shared/Alert';
-import API from 'AppData/api.js';
 import { FormattedMessage } from 'react-intl';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
@@ -68,90 +66,8 @@ class APICreateForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            api: new API(),
             loading: false,
-            valid: {
-                name: { empty: false, alreadyExists: false },
-                context: { empty: false, alreadyExists: false },
-                version: { empty: false },
-                endpointConfig: { empty: false },
-            },
         };
-        this.inputChange = this.inputChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-
-    /**
-     * Change input
-     * @param {any} e Synthetic React Event
-     * @memberof APICreateForm
-     */
-    inputChange({ target }) {
-        const { name, value } = target;
-        this.setState(({ api, valid }) => {
-            const changes = api;
-            if (name === 'endpoint') {
-                changes.endpointConfig = {
-                    endpoint_type: 'http',
-                    sandbox_endpoints: {
-                        url: value,
-                    },
-                    production_endpoints: {
-                        url: value,
-                    },
-                };
-            } else {
-                changes[name] = value;
-            }
-            // Checking validity.
-            const validUpdated = valid;
-            validUpdated.name.empty = !api.name;
-            validUpdated.context.empty = !api.context;
-            validUpdated.version.empty = !api.version;
-            validUpdated.endpointConfig.empty = !api.endpointConfig;
-            // TODO we need to add the already existing error for (context)
-            // by doing an api call ( the swagger definition does not contain such api call)
-            return { api: changes, valid: validUpdated };
-        });
-    }
-
-    /**
-     * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make
-     * a blob
-     * and the send it over REST API.
-     * @param e {Event}
-     */
-    handleSubmit(e) {
-        e.preventDefault();
-        const { api: currentAPI } = this.state;
-        if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpointConfig) {
-            // Checking the api name,version,context undefined or empty states
-            this.setState((oldState) => {
-                const { valid, api } = oldState;
-                const validUpdated = valid;
-                validUpdated.name.empty = !api.name;
-                validUpdated.context.empty = !api.context;
-                validUpdated.version.empty = !api.version;
-                validUpdated.endpointConfig.empty = !api.endpointConfig;
-                return { valid: validUpdated };
-            });
-            return;
-        }
-        currentAPI
-            .save()
-            .then((newAPI) => {
-                const redirectURL = '/apis/' + newAPI.id + '/overview';
-                Alert.info(`${newAPI.name} created.`);
-                this.props.history.push(redirectURL);
-            })
-            .catch((error) => {
-                console.error(error);
-                if (error.response) {
-                    Alert.error(error.response.body.message);
-                } else {
-                    Alert.error(`Something went wrong while creating ${currentAPI.name}`);
-                }
-            });
     }
 
     /**
@@ -160,8 +76,18 @@ class APICreateForm extends Component {
      * @memberof APICreateForm
      */
     render() {
-        const { classes, type } = this.props;
-        const { api, loading, valid } = this.state;
+        const {
+            classes, type, handleSubmit, isAPIProduct, inputChange, api, valid,
+        } = this.props;
+        const {
+            loading,
+        } = this.state;
+        let id = 'create.new.rest.api';
+        let defaultMessage = 'New REST API';
+        if (isAPIProduct) {
+            id = 'create.new.api.product';
+            defaultMessage = 'New API Product';
+        }
         return (
             <Grid container spacing={24} className={classes.root}>
                 <Grid item xs={12} md={6}>
@@ -170,7 +96,7 @@ class APICreateForm extends Component {
                             {type === 'ws' ? (
                                 <FormattedMessage id='create.new.websocket.api' defaultMessage='New WebSocket API' />
                             ) : (
-                                <FormattedMessage id='create.new.rest.api' defaultMessage='New REST API' />
+                                <FormattedMessage id={id} defaultMessage={defaultMessage} />
                             )}
                         </Typography>
                         <Typography variant='h5' align='left' className={classes.subTitle}>
@@ -181,8 +107,13 @@ class APICreateForm extends Component {
                             {api.version ? api.version : '{apiVersion}'}/{api.context ? api.context : '{context}'}
                         </Typography>
                     </div>
-                    <form onSubmit={this.handleSubmit}>
-                        <APIInputForm api={api} handleInputChange={this.inputChange} valid={valid} />
+                    <form onSubmit={handleSubmit}>
+                        <APIInputForm
+                            api={api}
+                            handleInputChange={inputChange}
+                            valid={valid}
+                            isAPIProduct={isAPIProduct}
+                        />
                         <Grid
                             container
                             direction='row'
@@ -191,7 +122,10 @@ class APICreateForm extends Component {
                             className={classes.buttonSection}
                         >
                             <Grid item>
-                                <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST}>
+                                <ScopeValidation
+                                    resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.APIS}
+                                    resourceMethod={resourceMethod.POST}
+                                >
                                     <div>
                                         <Button type='submit' disabled={loading} variant='contained' color='primary'>
                                             <FormattedMessage id='create' defaultMessage='Create' />
@@ -201,7 +135,9 @@ class APICreateForm extends Component {
                                 </ScopeValidation>
                             </Grid>
                             <Grid item>
-                                <Button onClick={() => this.props.history.push('/apis')}>
+                                <Button onClick={() =>
+                                    this.props.history.push(isAPIProduct ? '/api-products' : '/apis')}
+                                >
                                     <FormattedMessage id='cancel' defaultMessage='Cancel' />
                                 </Button>
                             </Grid>
@@ -220,6 +156,13 @@ APICreateForm.propTypes = {
     }).isRequired,
     type: PropTypes.shape({}).isRequired,
     valid: PropTypes.shape({}).isRequired,
+    location: PropTypes.shape({
+        pathname: PropTypes.string,
+    }).isRequired,
+    handleSubmit: PropTypes.func.isRequired,
+    inputChange: PropTypes.func.isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
+    api: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(APICreateForm);
