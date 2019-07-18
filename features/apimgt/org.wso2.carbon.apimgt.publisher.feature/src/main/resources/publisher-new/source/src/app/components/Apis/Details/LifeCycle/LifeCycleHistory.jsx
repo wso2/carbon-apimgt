@@ -31,6 +31,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     firstCol: {
@@ -51,9 +52,15 @@ const LifeCycleHistory = props => {
             <Table className={classes.table}>
                 <TableHead>
                     <TableRow>
-                        <TableCell className={classes.firstCol}>User</TableCell>
-                        <TableCell>Action</TableCell>
-                        <TableCell>Time</TableCell>
+                        <TableCell className={classes.firstCol}>
+                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleHistory.user' defaultMessage='User' />
+                        </TableCell>
+                        <TableCell>
+                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleHistory.action' defaultMessage='Action' />
+                        </TableCell>
+                        <TableCell>
+                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleHistory.time' defaultMessage='Time' />
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -68,7 +75,11 @@ const LifeCycleHistory = props => {
                                         <div>{entry.user}</div>
                                     </TableCell>
                                     <TableCell>
-                                        {'LC has changed from ' + entry.previousState + ' to ' + entry.postState}
+                                        {<FormattedMessage
+                                            id='Apis.Details.LifeCycle.LifeCycleHistory.lifecycle.state.history'
+                                            defaultMessage='LC has changed from {previous} to {post}'
+                                            values={{ previous: entry.previousState, post: entry.postState }}
+                                        />}
                                     </TableCell>
                                     <TableCell>{moment(entry.updatedTime).fromNow()}</TableCell>
                                 </TableRow>

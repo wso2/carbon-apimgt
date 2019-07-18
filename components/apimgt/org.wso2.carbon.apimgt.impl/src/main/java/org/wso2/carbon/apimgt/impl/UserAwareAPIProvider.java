@@ -202,11 +202,14 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void addDocumentation(APIIdentifier apiId,
+    public void addDocumentation(Identifier id,
                                  Documentation documentation) throws APIManagementException {
         checkCreatePermission();
-        checkAccessControlPermission(apiId);
-        super.addDocumentation(apiId, documentation);
+        //todo : implement access control check for api products too
+        if (id instanceof APIIdentifier) {
+            checkAccessControlPermission((APIIdentifier) id);
+        }
+        super.addDocumentation(id, documentation);
     }
 
     @Override
@@ -238,9 +241,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void removeDocumentation(APIIdentifier apiId, String docId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        super.removeDocumentation(apiId, docId);
+    public void removeDocumentation(Identifier id, String docId) throws APIManagementException {
+        checkAccessControlPermission(id);
+        super.removeDocumentation(id, docId);
     }
 
     @Override
@@ -386,13 +389,13 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getAllDocumentation(apiId);
+    public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
+        checkAccessControlPermission(id);
+        return super.getAllDocumentation(id);
     }
 
     @Override
-    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
+    public String getDocumentationContent(Identifier identifier, String documentationName)
             throws APIManagementException {
         checkAccessControlPermission(identifier);
         return super.getDocumentationContent(identifier, documentationName);

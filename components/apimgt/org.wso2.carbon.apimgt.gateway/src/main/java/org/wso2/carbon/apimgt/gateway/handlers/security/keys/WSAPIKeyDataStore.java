@@ -92,6 +92,29 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
         }
     }
 
+    @MethodStats
+    public ArrayList<URITemplate> getAPIProductURITemplates(String context, String apiVersion)
+                                                                                throws APISecurityException {
+        APIKeyValidatorClient client = null;
+        try {
+            client = clientPool.get();
+            return client.getAPIProductURITemplates(context, apiVersion);
+        } catch (Exception e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API key validation", e);
+        } finally {
+            try {
+                if (client != null) {
+                    clientPool.release(client);
+                }
+            } catch (Exception exception) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Releasing client from client pool caused an exception = " + exception.getMessage());
+                }
+            }
+        }
+    }
+
 
     public void cleanup() {
 

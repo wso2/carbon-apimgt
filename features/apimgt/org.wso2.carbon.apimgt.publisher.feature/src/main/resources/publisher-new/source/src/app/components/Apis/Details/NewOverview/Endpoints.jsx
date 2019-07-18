@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -46,11 +47,17 @@ function Endpoints(props) {
                 <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Endpoints
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Endpoints.endpoints'
+                                defaultMessage='Endpoints'
+                            />
                         </Typography>
                         <Link to={'/apis/' + api.id + '/endpoints'}>
                             <Button variant='contained' color='default'>
-                                Edit
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Endpoints.edit'
+                                    defaultMessage='Edit'
+                                />
                             </Button>
                         </Link>
                     </div>
@@ -58,25 +65,46 @@ function Endpoints(props) {
                     {/* Production Endpoint (TODO) fix the endpoint
                                         info when it's available with the api object */}
                     <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        Production Endpoint
+                        <FormattedMessage
+                            id='Apis.Details.NewOverview.Endpoints.production.endpoint'
+                            defaultMessage='Production Endpoint'
+                        />
                     </Typography>
                     <Typography component='p' variant='body1'>
                         {showEndpoint(api, 'prod') && <React.Fragment>{showEndpoint(api, 'prod')}</React.Fragment>}
-                        {!showEndpoint(api, 'prod') && <React.Fragment>&lt;Not Configured&gt;</React.Fragment>}
+                        {!showEndpoint(api, 'prod') &&
+                            <React.Fragment>
+                                &lt;<FormattedMessage
+                                    id='Apis.Details.NewOverview.Endpoints.production.not.configured'
+                                    defaultMessage='Not Configured'
+                                />&gt;
+                            </React.Fragment>}
                     </Typography>
                     {/* Sandbox Endpoint (TODO) fix the endpoint info when
                                         it's available with the api object */}
                     <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        Sandbox Endpoint
+                        <FormattedMessage
+                            id='Apis.Details.NewOverview.Endpoints.sandbox.endpoint'
+                            defaultMessage='Sandbox Endpoint'
+                        />
                     </Typography>
                     <Typography component='p' variant='body1'>
                         {showEndpoint(api, 'sand') && <React.Fragment>{showEndpoint(api, 'sand')}</React.Fragment>}
-                        {!showEndpoint(api, 'sand') && <React.Fragment>&lt;Not Configured&gt;</React.Fragment>}
+                        {!showEndpoint(api, 'sand') &&
+                        <React.Fragment>&lt;
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Endpoints.sandbox.not.configured'
+                                defaultMessage='Not Configured'
+                            />&gt;
+                        </React.Fragment>}
                     </Typography>
                     {/* Sandbox Endpoint (TODO) fix the endpoint info when
                                         it's available with the api object */}
                     <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        Endpoint Security
+                        <FormattedMessage
+                            id='Apis.Details.NewOverview.Endpoints.endpoint.security'
+                            defaultMessage='Endpoint Security'
+                        />
                     </Typography>
                     <Typography component='p' variant='body1'>
                         {api.endpointSecurity && <React.Fragment>{api.endpoint}</React.Fragment>}

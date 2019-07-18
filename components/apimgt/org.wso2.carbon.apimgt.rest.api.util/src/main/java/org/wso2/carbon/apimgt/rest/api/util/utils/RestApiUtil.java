@@ -964,6 +964,48 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for tags
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getResourcePathPaginatedURL(Integer offset, Integer limit) {
+        String paginatedURL = RestApiConstants.RESOURCE_PATH_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for APIProducts API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param query search query value
+     * @return constructed paginated url
+     */
+    public static String getAPIProductPaginatedURL(Integer offset, Integer limit, String query) {
+        String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for product documentations
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getProductDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
+        String paginatedURL = RestApiConstants.PRODUCT_DOCUMENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        return paginatedURL;
+    }
+
     /**
      * Checks whether the list of tiers are valid given the all valid tiers
      * 

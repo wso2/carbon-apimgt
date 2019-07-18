@@ -48,7 +48,7 @@ public class APIGatewayAdminWrapper extends APIGatewayAdmin {
     }
 
     @Override
-    protected RESTAPIAdminClient getRestapiAdminClient(String apiProviderName, String apiName, String version) throws
+    protected RESTAPIAdminClient getRestapiAdminClient() throws
             AxisFault {
         return restapiAdminClient;
     }

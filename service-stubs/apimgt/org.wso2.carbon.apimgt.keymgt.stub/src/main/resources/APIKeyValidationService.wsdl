@@ -13,6 +13,7 @@
                <xs:element maxOccurs="unbounded" minOccurs="0" name="authTypes" nillable="true" type="xs:string"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="conditionGroups" nillable="true" type="ax2133:ConditionGroupDTO"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="httpVerbs" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="id" type="xs:int"/>
                <xs:element minOccurs="0" name="mediationScript" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="methodsAsString" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="resourceMap" nillable="true" type="xs:string"/>
@@ -94,6 +95,21 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
+         <xs:element name="getAPIProductURITemplates">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getAPIProductURITemplatesResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2134:URITemplate"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
          <xs:element name="validateKeyforHandshake">
             <xs:complexType>
                <xs:sequence>
@@ -148,6 +164,8 @@
                <xs:element minOccurs="0" name="endUserName" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="endUserToken" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="issuedTime" type="xs:long"/>
+               <xs:element minOccurs="0" name="productName" nillable="true" type="xs:string"/>
+               <xs:element minOccurs="0" name="productProvider" nillable="true" type="xs:string"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="scopes" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="spikeArrestLimit" type="xs:int"/>
                <xs:element minOccurs="0" name="spikeArrestUnit" nillable="true" type="xs:string"/>
@@ -175,6 +193,12 @@
    <wsdl:message name="getAllURITemplatesResponse">
       <wsdl:part name="parameters" element="ns1:getAllURITemplatesResponse"/>
    </wsdl:message>
+   <wsdl:message name="getAPIProductURITemplatesRequest">
+      <wsdl:part name="parameters" element="ns1:getAPIProductURITemplates"/>
+   </wsdl:message>
+   <wsdl:message name="getAPIProductURITemplatesResponse">
+      <wsdl:part name="parameters" element="ns1:getAPIProductURITemplatesResponse"/>
+   </wsdl:message>
    <wsdl:message name="APIKeyValidationServiceAPIKeyMgtException">
       <wsdl:part name="parameters" element="ns1:APIKeyValidationServiceAPIKeyMgtException"/>
    </wsdl:message>
@@ -200,6 +224,12 @@
          <wsdl:fault message="tns:APIKeyValidationServiceAPIKeyMgtException" name="APIKeyValidationServiceAPIKeyMgtException" wsaw:Action="urn:getAllURITemplatesAPIKeyValidationServiceAPIKeyMgtException"/>
          <wsdl:fault message="tns:APIKeyValidationServiceAPIManagementException" name="APIKeyValidationServiceAPIManagementException" wsaw:Action="urn:getAllURITemplatesAPIKeyValidationServiceAPIManagementException"/>
       </wsdl:operation>
+      <wsdl:operation name="getAPIProductURITemplates">
+         <wsdl:input message="tns:getAPIProductURITemplatesRequest" wsaw:Action="urn:getAPIProductURITemplates"/>
+         <wsdl:output message="tns:getAPIProductURITemplatesResponse" wsaw:Action="urn:getAPIProductURITemplatesResponse"/>
+         <wsdl:fault message="tns:APIKeyValidationServiceAPIKeyMgtException" name="APIKeyValidationServiceAPIKeyMgtException" wsaw:Action="urn:getAPIProductURITemplatesAPIKeyValidationServiceAPIKeyMgtException"/>
+         <wsdl:fault message="tns:APIKeyValidationServiceAPIManagementException" name="APIKeyValidationServiceAPIManagementException" wsaw:Action="urn:getAPIProductURITemplatesAPIKeyValidationServiceAPIManagementException"/>
+      </wsdl:operation>
       <wsdl:operation name="validateKey">
          <wsdl:input message="tns:validateKeyRequest" wsaw:Action="urn:validateKey"/>
          <wsdl:output message="tns:validateKeyResponse" wsaw:Action="urn:validateKeyResponse"/>
@@ -217,6 +247,21 @@
       <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
       <wsdl:operation name="getAllURITemplates">
          <soap:operation soapAction="urn:getAllURITemplates" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
+            <soap:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyValidationServiceAPIManagementException">
+            <soap:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
+         </wsdl:fault>
+      </wsdl:operation>
+      <wsdl:operation name="getAPIProductURITemplates">
+         <soap:operation soapAction="urn:getAPIProductURITemplates" style="document"/>
          <wsdl:input>
             <soap:body use="literal"/>
          </wsdl:input>
@@ -278,6 +323,21 @@
             <soap12:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
          </wsdl:fault>
       </wsdl:operation>
+      <wsdl:operation name="getAPIProductURITemplates">
+         <soap12:operation soapAction="urn:getAPIProductURITemplates" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"/>
+         </wsdl:output>
+         <wsdl:fault name="APIKeyValidationServiceAPIKeyMgtException">
+            <soap12:fault use="literal" name="APIKeyValidationServiceAPIKeyMgtException"/>
+         </wsdl:fault>
+         <wsdl:fault name="APIKeyValidationServiceAPIManagementException">
+            <soap12:fault use="literal" name="APIKeyValidationServiceAPIManagementException"/>
+         </wsdl:fault>
+      </wsdl:operation>
       <wsdl:operation name="validateKey">
          <soap12:operation soapAction="urn:validateKey" style="document"/>
          <wsdl:input>
@@ -313,6 +373,15 @@
       <http:binding verb="POST"/>
       <wsdl:operation name="getAllURITemplates">
          <http:operation location="getAllURITemplates"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="getAPIProductURITemplates">
+         <http:operation location="getAPIProductURITemplates"/>
          <wsdl:input>
             <mime:content type="text/xml" part="parameters"/>
          </wsdl:input>

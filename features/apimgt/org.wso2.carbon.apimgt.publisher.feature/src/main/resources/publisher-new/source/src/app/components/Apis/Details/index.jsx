@@ -139,7 +139,7 @@ class Details extends Component {
     constructor(props) {
         super(props);
         this.handleMenuSelect = this.handleMenuSelect.bind(this);
-        const { location } = this.props;
+        const { location, isAPIProduct } = this.props;
         const currentLink = location.pathname.match(/[^/]+(?=\/$|$)/g);
         let active = null;
         if (currentLink && currentLink.length > 0) {
@@ -150,8 +150,10 @@ class Details extends Component {
             apiNotFound: false,
             active: active || 'overview',
             updateAPI: this.updateAPI, // eslint-disable-line react/no-unused-state
+            isAPIProduct,
         };
         this.setAPI = this.setAPI.bind(this);
+        this.setAPIProduct = this.setAPIProduct.bind(this);
     }
 
     /**
@@ -160,11 +162,15 @@ class Details extends Component {
      */
     componentDidMount() {
         const {
-            location: { pathname },
+            location: { pathname }, isAPIProduct,
         } = this.props;
         // Load API data iff request page is valid
         if (Details.isValidURL(pathname)) {
-            this.setAPI();
+            if (isAPIProduct) {
+                this.setAPIProduct();
+            } else {
+                this.setAPI();
+            }
         }
     }
 
@@ -177,10 +183,15 @@ class Details extends Component {
     componentDidUpdate() {
         const { api } = this.state;
         const { apiUUID } = this.props.match.params;
+        const { isAPIProduct } = this.props.isAPIProduct;
         if (!api || api.id === apiUUID) {
             return;
         }
-        this.setAPI();
+        if (isAPIProduct) {
+            this.setAPIProduct();
+        } else {
+            this.setAPI();
+        }
     }
 
     /**
@@ -205,11 +216,9 @@ class Details extends Component {
                 }
             });
     }
-
     /**
      *
      *
-     * @param {*} newAPI
      * @memberof Details
      */
     updateAPI(newAPI) {
@@ -239,6 +248,72 @@ class Details extends Component {
                 }
             });
     }
+          
+          
+    setAPIProduct() {
+        const { apiProdUUID } = this.props.match.params;
+        const promisedApi = Api.getProduct(apiProdUUID);
+        promisedApi
+            .then((api) => {
+                this.setState({ api });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ apiNotFound: true });
+                }
+            });
+    }
+
+    /**
+     *
+     *
+     * @param {*} newAPI
+     * @memberof Details
+     */
+    updateAPI(newAPI, isAPIProduct) {
+        const restAPI = new Api();
+        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
+        /* eslint no-param-reassign: ["error", { "props": false }] */
+        if (newAPI._data) delete newAPI._data;
+        if (newAPI.client) delete newAPI.client;
+        if (isAPIProduct) {
+            const promisedApi = restAPI.updateProduct(JSON.parse(JSON.stringify(newAPI)));
+            promisedApi
+                .then((api) => {
+                    Alert.info(`${api.name} updated successfully.`);
+                    this.setState({ api });
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        this.setState({ apiNotFound: true });
+                    }
+                });
+        } else {
+            const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
+            promisedApi
+                .then((api) => {
+                    Alert.info(`${api.name} updated successfully.`);
+                    this.setState({ api });
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        this.setState({ apiNotFound: true });
+                    }
+                });
+        }
+    }
 
     /**
      *
@@ -247,8 +322,12 @@ class Details extends Component {
      * @memberof Details
      */
     handleMenuSelect(menuLink) {
+        const { isAPIProduct } = this.state;
+        const path = isAPIProduct ? '/api-products/'
+         + this.props.match.params.apiProdUUID + '/' + menuLink :
+            '/apis/' + this.props.match.params.apiUUID + '/' + menuLink;
         this.props.history.push({
-            pathname: '/apis/' + this.props.match.params.apiUUID + '/' + menuLink,
+            pathname: path,
         });
         this.setState({ active: menuLink });
     }
@@ -261,7 +340,9 @@ class Details extends Component {
      */
     render() {
         const { intl } = this.props;
-        const { api, apiNotFound, active } = this.state;
+        const {
+            api, apiNotFound, active, isAPIProduct,
+        } = this.state;
         const {
             classes,
             theme,
@@ -274,7 +355,7 @@ class Details extends Component {
             return <PageNotFound location={pageLocation} />;
         }
 
-        const redirectUrl = '/apis/' + match.params.api_uuid + '/' + active;
+        const redirectUrl = (isAPIProduct ? '/api-products/' : '/apis/') + match.params.api_uuid + '/' + active;
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFountMessage = {
@@ -302,7 +383,7 @@ class Details extends Component {
             <React.Fragment>
                 <ApiContext.Provider value={this.state}>
                     <div className={classes.LeftMenu}>
-                        <Link to='/apis'>
+                        <Link to={isAPIProduct ? '/api-products' : '/apis'}>
                             <div className={classes.leftLInkMain}>
                                 <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
                             </div>
@@ -333,6 +414,17 @@ class Details extends Component {
                             active={active}
                             Icon={<EndpointIcon />}
                         />
+                        {isAPIProduct ? null : (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                id: 'Apis.Details.index.endpoints',
+                                defaultMessage: 'endpoints',
+                                })}
+                                handleMenuSelect={this.handleMenuSelect}
+                                active={active}
+                                Icon={<EndpointIcon />}
+                            />
+                        )}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.api.definition',
@@ -419,14 +511,18 @@ class Details extends Component {
                         <div className={classes.contentInside}>
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
-                                <Route path={Details.subPaths.OVERVIEW} component={() => <Overview />} />
+                                <Route
+                                    path={isAPIProduct ? Details.subPaths.OVERVIEW_PRODUCT : Details.subPaths.OVERVIEW}
+                                    component={() => <Overview />}
+                                />
                                 <Route
                                     path={Details.subPaths.API_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
-                                    path={Details.subPaths.CONFIGURATION}
+                                    path={isAPIProduct ?
+                                        Details.subPaths.CONFIGURATION_PRODUCT : Details.subPaths.CONFIGURATION}
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
@@ -459,12 +555,16 @@ class Details extends Component {
 // key name doesn't matter here, Use an appropriate name as the key
 Details.subPaths = {
     BASE: '/apis/:api_uuid',
+    BASE_PRODUCT: '/api-products/:apiprod_uuid',
     OVERVIEW: '/apis/:api_uuid/overview',
+    OVERVIEW_PRODUCT: '/api-products/:apiprod_uuid/overview',
     API_DEFINITION: '/apis/:api_uuid/api definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
+    CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
     RESOURCES: '/apis/:api_uuid/resources',
+    RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',
     DOCUMENTS: '/apis/:api_uuid/documents',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
@@ -500,6 +600,7 @@ Details.propTypes = {
         }),
     }).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Details));
