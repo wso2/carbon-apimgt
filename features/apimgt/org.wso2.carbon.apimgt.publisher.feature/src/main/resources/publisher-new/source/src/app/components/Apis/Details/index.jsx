@@ -42,6 +42,8 @@ import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+// eslint-disable-next-line no-unused-vars
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
@@ -321,6 +323,7 @@ class Details extends Component {
             location: pageLocation,
             location: { pathname }, // nested destructuring
         } = this.props;
+        const { intl } = this.props;
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
             return <PageNotFound location={pageLocation} />;
@@ -383,9 +386,11 @@ class Details extends Component {
                             active={active}
                             Icon={<LifeCycleIcon />}
                         />
-                        {/* TODO: uncomment when component run without errors */}
                         <LeftMenuItem
-                            text='scopes'
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.left.menu.scope',
+                                defaultMessage: 'scopes',
+                            })}
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<ScopesIcon />}
@@ -522,6 +527,7 @@ Details.propTypes = {
         }),
     }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Details);
+export default injectIntl(withStyles(styles, { withTheme: true })(Details));

@@ -372,7 +372,6 @@ class Resource extends React.Component {
                                                             <MenuItem
                                                                 key={tempScope.name}
                                                                 value={tempScope.name}
-
                                                             >
                                                                 {tempScope.name}
                                                             </MenuItem>

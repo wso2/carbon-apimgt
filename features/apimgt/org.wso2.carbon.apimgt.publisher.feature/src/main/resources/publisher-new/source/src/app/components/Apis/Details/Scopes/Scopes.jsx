@@ -52,7 +52,7 @@ const styles = theme => ({
         maxWidth: 800,
         backgroundColor: theme.palette.background.paper,
     },
-    root2: {
+    heading: {
         flexGrow: 1,
         marginTop: 10,
     },
@@ -214,13 +214,17 @@ class Scopes extends React.Component {
      * @memberof Scopes
      */
     render() {
+        const { intl } = this.props;
         const { api } = this.props;
         const { scopes } = api;
         const { classes } = this.props;
         const url = `/apis/${api.id}/scopes/create`;
-        const columns = ['Name',
+        const columns = [
+            intl.formatMessage({
+                id: 'Apis.Details.Scopes.Scopes.table.header.name',
+                defaultMessage: 'Name',
+            }),
             {
-                name: 'Applying Roles',
                 options: {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData && tableMeta.rowData[1]) {
@@ -233,13 +237,12 @@ class Scopes extends React.Component {
                     },
                     filter: false,
                     label: <FormattedMessage
-                        id='Apis.Details.Documents.Listing.column.header.name'
+                        id='Apis.Details.Scopes.Scopes.table.header.roles'
                         defaultMessage='Applying Roles'
                     />,
                 },
             },
             {
-                name: 'Used In',
                 options: {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
@@ -257,13 +260,12 @@ class Scopes extends React.Component {
                     },
                     filter: false,
                     label: <FormattedMessage
-                        id='Apis.Details.Documents.Listing.column.header.name'
-                        defaultMessage='name'
+                        id='Apis.Details.Scopes.Scopes.table.header.usages'
+                        defaultMessage='Used In'
                     />,
                 },
             },
             {
-                name: 'Actions',
                 options: {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
@@ -285,8 +287,8 @@ class Scopes extends React.Component {
                     },
                     filter: false,
                     label: <FormattedMessage
-                        id='Apis.Details.Documents.Listing.column.header.name'
-                        defaultMessage='name'
+                        id='Apis.Details.Scopes.Scopes.table.header.actions'
+                        defaultMessage='Actions'
                     />,
                 },
             }];
@@ -337,21 +339,30 @@ class Scopes extends React.Component {
         }
 
         return (
-            <div className={classes.root2}>
+            <div className={classes.heading}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        Scopes
+                        <FormattedMessage
+                            id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                            defaultMessage='Scopes'
+                        />
                     </Typography>
                     <Link to={url}>
                         <Button size='small' className={classes.button}>
                             <AddCircle className={classes.buttonIcon} />
-                            Add New Scope
+                            <FormattedMessage
+                                id='Apis.Details.Scopes.Scopes.heading.scope.add_new'
+                                defaultMessage='Add New Scope'
+                            />
                         </Button>
                     </Link>
                 </div>
 
                 <MUIDataTable
-                    title='Scopes'
+                    title={intl.formatMessage({
+                        id: 'Apis.Details.Scopes.Scopes.table.scope.name',
+                        defaultMessage: 'Scopes',
+                    })}
                     data={this.state.scopesList}
                     columns={columns}
                     options={options}

@@ -80,8 +80,8 @@ class CreateScope extends React.Component {
         };
         const newApi = this.props.api;
         newApi.scopes.push(scope);
-        // const promisedApiUpdate = api.update(newApi._data);
-        const promisedApiUpdate = api.update(newApi);
+        // eslint-disable-next-line no-underscore-dangle
+        const promisedApiUpdate = api.update(newApi._data);
         promisedApiUpdate.then((response) => {
             if (response.status !== 200) {
                 Alert.info(intl.formatMessage({

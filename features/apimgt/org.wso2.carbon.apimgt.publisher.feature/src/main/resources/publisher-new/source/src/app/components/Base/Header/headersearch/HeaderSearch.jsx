@@ -23,6 +23,8 @@ import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
+// eslint-disable-next-line no-unused-vars
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue } from './SearchUtils';
 
@@ -189,6 +191,7 @@ class HeaderSearch extends React.Component {
      * @memberof HeaderSearch
      */
     render() {
+        const { intl } = this.props;
         const { classes, smSearch } = this.props;
         const { searchText, isLoading } = this.state;
         let autoFocus = false;
@@ -216,8 +219,10 @@ class HeaderSearch extends React.Component {
                 inputProps={{
                     autoFocus,
                     classes,
-                    placeholder: 'Search APIs',
-                    // placeholder: intl.formatMessage({defaultMessage: 'Search APIs'}),
+                    placeholder: intl.formatMessage({
+                        id: 'Base.Header.headersearch.HeaderSearch.search_api.tooltip',
+                        defaultMessage: 'Search APIs',
+                    }),
                     value: searchText,
                     onChange: this.handleChange,
                     onBlur: this.clearOnBlur,
@@ -239,6 +244,9 @@ HeaderSearch.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.func,
     }).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withRouter(withStyles(styles)(HeaderSearch));
+export default injectIntl(withRouter(withStyles(styles)(HeaderSearch)));
