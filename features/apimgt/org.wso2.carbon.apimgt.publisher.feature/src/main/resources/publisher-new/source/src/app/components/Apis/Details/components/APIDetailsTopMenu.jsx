@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
@@ -10,7 +11,6 @@ import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
-import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     root: {
