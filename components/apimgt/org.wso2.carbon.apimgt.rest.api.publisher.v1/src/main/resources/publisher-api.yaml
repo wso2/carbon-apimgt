@@ -134,20 +134,22 @@ paths:
             You can search in attributes by using an **"<attribute>:"** modifier.
 
             Eg.
-            "provider:wso2" will match an API if the provider of the API is exactly "wso2".
+            "provider:wso2" will match an API if the provider of the API contains "wso2".
+            "provider:"wso2"" will match an API if the provider of the API is exactly "wso2".
             "status:PUBLISHED" will match an API if the API is in PUBLISHED state.
             "label:external" will match an API if it contains a Microgateway label called "external".
 
-            Additionally you can use wildcards.
-
+            Also you can use combined modifiers
             Eg.
-            "provider:wso2*" will match an API if the provider of the API starts with "wso2".
+            name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
 
-            Supported attribute modifiers are [**version, context, status,
+            Supported attribute modifiers are [**version, context, name, status,
             description, subcontext, doc, provider, label**]
 
-            If no advanced attribute modifier has been specified, search will match the
-            given query string against API Name.
+            If no advanced attribute modifier has been specified,  the API names containing
+            the search term will be returned as a result.
+
+            Please note that you need to use encoded URL (URL encoding) if you are using a client which not support URL encoding (such as curl)
 
           type: string
         - $ref : "#/parameters/If-None-Match"
