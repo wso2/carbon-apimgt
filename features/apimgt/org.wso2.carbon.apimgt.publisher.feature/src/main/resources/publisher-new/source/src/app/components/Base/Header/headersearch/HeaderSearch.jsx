@@ -23,8 +23,7 @@ import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
-// eslint-disable-next-line no-unused-vars
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 
 import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue } from './SearchUtils';
 
