@@ -17,10 +17,8 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import Configurations from 'Config';
-import { injectIntl } from 'react-intl';
-
+import { FormattedMessage } from 'react-intl';
 
 const page = Configurations.app.context + '/services/auth/login';
 
@@ -64,18 +62,14 @@ class RedirectToLogin extends React.Component {
      * @memberof RedirectToLogin
      */
     render() {
-        const { intl } = this.props;
-        return `${intl.formatMessage({
-            id: 'Apis.Shared.RedirectToLogin.you.will.be.redirected.to',
-            defaultMessage: 'You will be redirected to  AAA',
-        })} ${page}`;
+        return (
+            <FormattedMessage
+                id='Apis.Shared.RedirectToLogin.you.will.be.redirected.to'
+                defaultMessage='You will be redirected to {page}'
+                values={{ page }}
+            />
+        );
     }
 }
 
-RedirectToLogin.propTypes = {
-    intl: PropTypes.shape({
-        formatMessage: PropTypes.func,
-    }).isRequired,
-};
-
-export default injectIntl(RedirectToLogin);
+export default RedirectToLogin;

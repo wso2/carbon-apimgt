@@ -22,8 +22,8 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { PageNotFound } from 'AppComponents/Base/Errors/index';
 
-import APICreateWrapper from './/Default/APICreateWrapper';
-import APIProductCreateWrapper from './/Default/APIProductCreateWrapper';
+import APICreateWrapper from './Default/APICreateWrapper';
+import APIProductCreateWrapper from './Default/APIProductCreateWrapper';
 import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 

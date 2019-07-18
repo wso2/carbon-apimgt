@@ -4558,7 +4558,8 @@ definitions:
         type: string
         description: Consumer secret of the application
       validityPeriod:
-        type: string
+        type: integer
+        format: int64
         description: Token validity period
       scopes:
         type: array

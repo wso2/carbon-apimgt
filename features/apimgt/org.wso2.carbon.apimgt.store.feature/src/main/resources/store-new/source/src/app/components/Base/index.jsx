@@ -1,14 +1,28 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import AuthManager from '../../data/AuthManager';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import ListItem from '@material-ui/core/ListItem';
-import ConfigManager from '../../data/ConfigManager';
-import EnvironmentMenu from './Header/EnvironmentMenu';
-import Utils from '../../data/Utils';
 import { Menu as MenuIcon } from '@material-ui/icons';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -28,15 +42,19 @@ import { findDOMNode } from 'react-dom';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
-
-import GlobalNavBar from './Generic/GlobalNavbar';
-import GenericSearch from './Generic/GenericSearch';
 import Person from '@material-ui/icons/Person';
 import Popper from '@material-ui/core/Popper';
 import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import HowToReg from '@material-ui/icons/HowToReg';
+import { FormattedMessage } from 'react-intl';
+import AuthManager from '../../data/AuthManager';
+import ConfigManager from '../../data/ConfigManager';
+import EnvironmentMenu from './Header/EnvironmentMenu';
+import GlobalNavBar from './Generic/GlobalNavbar';
+import GenericSearch from './Generic/GenericSearch';
+import Utils from '../../data/Utils';
 import VerticalDivider from '../Shared/VerticalDivider';
 
 const styles = theme => ({
@@ -62,9 +80,10 @@ const styles = theme => ({
         minHeight: '100%',
         marginBottom: -50,
         background:
-        theme.palette.background.default + ' url(' +
-        theme.custom.backgroundImage +
-        ') repeat left top',
+        theme.palette.background.default
+        + ' url('
+        + theme.custom.backgroundImage
+        + ') repeat left top',
     },
     contentWrapper: {
         display: 'flex',
@@ -272,9 +291,24 @@ class Layout extends React.Component {
                                                         }
                                                     >
                                                         <MenuList>
-                                                            <MenuItem onClick={this.handleCloseUserMenu}>Profile</MenuItem>
-                                                            <MenuItem onClick={this.handleCloseUserMenu}>My account</MenuItem>
-                                                            <MenuItem onClick={this.doOIDCLogout}>Logout</MenuItem>
+                                                            <MenuItem onClick={this.handleCloseUserMenu}>
+                                                                <FormattedMessage
+                                                                    id='Base.index.profile'
+                                                                    defaultMessage='Profile'
+                                                                />
+                                                            </MenuItem>
+                                                            <MenuItem onClick={this.handleCloseUserMenu}>
+                                                                <FormattedMessage
+                                                                    id='Base.index.my.account'
+                                                                    defaultMessage='My account'
+                                                                />
+                                                            </MenuItem>
+                                                            <MenuItem onClick={this.doOIDCLogout}>
+                                                                <FormattedMessage
+                                                                    id='Base.index.logout'
+                                                                    defaultMessage='Logout'
+                                                                />
+                                                            </MenuItem>
                                                             <Divider />
                                                             <MenuItem className={classes.menuItem} onClick={this.handleCloseUserMenu}>
                                                                 <ListItemText primary='Night Mode' />
@@ -300,7 +334,11 @@ class Layout extends React.Component {
                                      </Link> */}
                                     <a href='/store-new/services/configs'>
                                         <Button className={classes.userLink}>
-                                            <Person /> Sign-in
+                                            <Person />
+                                            <FormattedMessage
+                                                id='Base.index.sign.in'
+                                                defaultMessage=' Sign-in'
+                                            />
                                         </Button>
                                     </a>
                                 </React.Fragment>
@@ -319,7 +357,10 @@ class Layout extends React.Component {
                 </div>
                 <footer className={classes.footer}>
                     <Typography noWrap>
-                        {'WSO2 APIM v3.0.0 | © 2018 WSO2 Inc'}
+                        <FormattedMessage
+                            id='Base.index.copyright.text'
+                            defaultMessage='WSO2 APIM v3.0.0 | © 2019 WSO2 Inc'
+                        />
                     </Typography>
                 </footer>
             </React.Fragment>
@@ -328,8 +369,8 @@ class Layout extends React.Component {
 }
 
 Layout.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Layout);

@@ -24,42 +24,10 @@ import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
+import { injectIntl } from 'react-intl';
 
 const suggestions = [
-    { label: 'Afghanistan' },
-    { label: 'Aland Islands' },
-    { label: 'Albania' },
-    { label: 'Algeria' },
-    { label: 'American Samoa' },
-    { label: 'Andorra' },
-    { label: 'Angola' },
-    { label: 'Anguilla' },
-    { label: 'Antarctica' },
-    { label: 'Antigua and Barbuda' },
-    { label: 'Argentina' },
-    { label: 'Armenia' },
-    { label: 'Aruba' },
-    { label: 'Australia' },
-    { label: 'Austria' },
-    { label: 'Azerbaijan' },
-    { label: 'Bahamas' },
-    { label: 'Bahrain' },
-    { label: 'Bangladesh' },
-    { label: 'Barbados' },
-    { label: 'Belarus' },
-    { label: 'Belgium' },
-    { label: 'Belize' },
-    { label: 'Benin' },
-    { label: 'Bermuda' },
-    { label: 'Bhutan' },
-    { label: 'Bolivia, Plurinational State of' },
-    { label: 'Bonaire, Sint Eustatius and Saba' },
-    { label: 'Bosnia and Herzegovina' },
-    { label: 'Botswana' },
-    { label: 'Bouvet Island' },
-    { label: 'Brazil' },
-    { label: 'British Indian Ocean Territory' },
-    { label: 'Brunei Darussalam' },
+    { label: '' },
 ];
 /**
  *
@@ -237,7 +205,7 @@ class GenericSearch extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
         const { inputValue, selectedItem } = this.state;
 
         return (
@@ -251,7 +219,10 @@ class GenericSearch extends React.Component {
                                 fullWidth: true,
                                 classes,
                                 InputProps: getInputProps({
-                                    placeholder: 'Search APIs',
+                                    placeholder: intl.formatMessage({
+                                        id: 'Base.Generic.GenericSearch.search.apis',
+                                        defaultMessage: 'Search APIs',
+                                    }),
                                 }),
                             })}
                             {isOpen ? (
@@ -274,6 +245,7 @@ class GenericSearch extends React.Component {
 }
 
 GenericSearch.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
-export default withStyles(styles)(GenericSearch);
+export default injectIntl(withStyles(styles)(GenericSearch));

@@ -461,9 +461,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     if (appKey != null) {
                         String jsonInput = null;
                         try {
-//                          verify that the provided validity period is a long
-                            Long.parseLong(body.getValidityPeriod());
-//                          verify that the provided jsonInput is a valid json
+                            // verify that the provided jsonInput is a valid json
                             if (body.getAdditionalProperties() != null
                                     && !body.getAdditionalProperties().toString().isEmpty()) {
                                 ObjectMapper mapper = new ObjectMapper();
@@ -471,10 +469,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                 JSONParser parser = new JSONParser();
                                 JSONObject json = (JSONObject) parser.parse(jsonInput);
                             }
-                        } catch (NumberFormatException e) {
-                            RestApiUtil.handleBadRequest("Error while generating " + keyType + " token for " +
-                                    "application " + applicationId + ". Invalid validity period \'"
-                                    + body.getValidityPeriod() + "\' provided.", log);
                         } catch (JsonProcessingException | ParseException | ClassCastException e) {
                             RestApiUtil.handleBadRequest("Error while generating " + keyType + " token for " +
                                     "application " + applicationId + ". Invalid jsonInput \'"
@@ -484,7 +478,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         String[] scopes = body.getScopes().toArray(new String[0]);
                         AccessTokenInfo response = apiConsumer.renewAccessToken(body.getRevokeToken(),
                                 appKey.getConsumerKey(), appKey.getConsumerSecret(),
-                                body.getValidityPeriod(), scopes, jsonInput);
+                                body.getValidityPeriod().toString(), scopes, jsonInput);
 
                         ApplicationTokenDTO appToken = new ApplicationTokenDTO();
                         appToken.setAccessToken(response.getAccessToken());

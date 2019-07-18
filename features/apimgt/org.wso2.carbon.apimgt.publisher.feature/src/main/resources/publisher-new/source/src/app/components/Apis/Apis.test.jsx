@@ -21,6 +21,7 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
 import APIs from './Apis';
 import ApiCreate from './Create/ApiCreate';
 
@@ -89,7 +90,7 @@ describe('Test APIs main routing component', () => {
                 </MuiThemeProvider>
             </MemoryRouter>
         );
-        const wrapper = mount(noneExistingPath);
+        const wrapper = mountWithIntl(noneExistingPath);
         const pageNotFoundWrapper = wrapper.find(PageNotFound);
         expect(pageNotFoundWrapper).toHaveLength(1);
         expect(pageNotFoundWrapper.contains('404 Page Not Found!')).toBeTruthy();
