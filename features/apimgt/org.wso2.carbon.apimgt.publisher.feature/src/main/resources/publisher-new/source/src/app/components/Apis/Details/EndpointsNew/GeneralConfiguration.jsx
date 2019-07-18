@@ -17,7 +17,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Button,
-    Collapse, Dialog, DialogActions, DialogContent, DialogTitle, ExpansionPanel,
+    Collapse, Dialog, DialogActions, DialogContent, DialogTitle, Divider, ExpansionPanel,
     ExpansionPanelDetails,
     ExpansionPanelSummary,
     FormControl, FormControlLabel,
@@ -67,6 +67,7 @@ const styles = theme => ({
     },
     endpointTypesSelectWrapper: {
         display: 'flex',
+        padding: '10px',
     },
 });
 
@@ -132,44 +133,44 @@ function GeneralConfiguration(props) {
                                     })}
                                 </Select>
                             </FormControl>
-                            <div className={classes.endpointTypesSelectWrapper}>
-                                <FormControl component='fieldset' className={classes.formControl}>
-                                    <RadioGroup
-                                        aria-label='Gender'
-                                        name='gender1'
-                                        className={classes.radioGroup}
-                                        value={epConfig.endpoint_type}
-                                        onChange={onChangeEndpointCategory}
-                                    >
-                                        <FormControlLabel
-                                            value='http'
-                                            control={<Radio />}
-                                            label='Default'
-                                        />
-                                        <FormControlLabel
-                                            value='load_balance'
-                                            control={<Radio />}
-                                            label='Load balance'
-                                        />
-                                        <FormControlLabel
-                                            value='failover'
-                                            control={<Radio />}
-                                            label='Failover'
-                                        />
-                                    </RadioGroup>
-                                </FormControl>
-                                <div className={classes.loadbalanceBtnContainer}>
-                                    <Button
-                                        disabled={epConfig.endpoint_type !== 'load_balance'}
-                                        onClick={() => setLBConfigOpen(true)}
-                                        className={classes.loadBalanceConfigButton}
-                                    >
-                                        <Icon>
-                                            settings
-                                        </Icon>
-                                    </Button>
-                                </div>
-                            </div>
+                            {/*<div className={classes.endpointTypesSelectWrapper}>*/}
+                            {/*    <FormControl component='fieldset' className={classes.formControl}>*/}
+                            {/*        <RadioGroup*/}
+                            {/*            aria-label='Gender'*/}
+                            {/*            name='gender1'*/}
+                            {/*            className={classes.radioGroup}*/}
+                            {/*            value={epConfig.endpoint_type}*/}
+                            {/*            onChange={onChangeEndpointCategory}*/}
+                            {/*        >*/}
+                            {/*            <FormControlLabel*/}
+                            {/*                value='http'*/}
+                            {/*                control={<Radio />}*/}
+                            {/*                label='Default'*/}
+                            {/*            />*/}
+                            {/*            <FormControlLabel*/}
+                            {/*                value='load_balance'*/}
+                            {/*                control={<Radio />}*/}
+                            {/*                label='Load balance'*/}
+                            {/*            />*/}
+                            {/*            <FormControlLabel*/}
+                            {/*                value='failover'*/}
+                            {/*                control={<Radio />}*/}
+                            {/*                label='Failover'*/}
+                            {/*            />*/}
+                            {/*        </RadioGroup>*/}
+                            {/*    </FormControl>*/}
+                            {/*    <div className={classes.loadbalanceBtnContainer}>*/}
+                            {/*        <Button*/}
+                            {/*            disabled={epConfig.endpoint_type !== 'load_balance'}*/}
+                            {/*            onClick={() => setLBConfigOpen(true)}*/}
+                            {/*            className={classes.loadBalanceConfigButton}*/}
+                            {/*        >*/}
+                            {/*            <Icon>*/}
+                            {/*                settings*/}
+                            {/*            </Icon>*/}
+                            {/*        </Button>*/}
+                            {/*    </div>*/}
+                            {/*</div>*/}
                         </Grid>
                         <Grid item xs className={classes.endpointConfigSection}>
                             <FormControlLabel
@@ -191,7 +192,7 @@ function GeneralConfiguration(props) {
                             </Collapse>
                         </Grid>
                         <Grid item xs className={classes.endpointConfigSection}>
-                            <Certificates />
+                            {/*<Certificates />*/}
                         </Grid>
                     </Grid>
                 </ExpansionPanelDetails>

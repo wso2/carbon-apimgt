@@ -15,23 +15,24 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
 import {
+    FormControl,
     Grid,
     Paper,
-    Switch,
-    Collapse,
     Typography,
     withStyles,
+    Radio,
+    FormControlLabel,
+    RadioGroup,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
 import EndpointListing from './EndpointListing';
-import EndpointConfig from './EndpointConfig';
 import EndpointAdd from './EndpointAdd';
-import { getEndpointTypeProperty, getEndpointTemplateByType } from './endpointUtils';
+import { getEndpointTemplateByType, getEndpointTypeProperty } from './endpointUtils';
 import GeneralConfiguration from './GeneralConfiguration';
+import GenericEndpoint from './GenericEndpoint';
 
 
 const styles = theme => ({
@@ -43,20 +44,46 @@ const styles = theme => ({
         padding: theme.spacing.unit,
     },
     endpointContainer: {
-        padding: '10px',
+        paddingBottom: theme.spacing.unit,
+        width: '100%',
+        marginTop: theme.spacing.unit,
     },
     endpointName: {
+        paddingLeft: theme.spacing.unit,
         fontSize: '1rem',
-        paddingTop: '5px',
-        paddingBottom: '5px',
+        paddingTop: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit,
     },
     endpointTypesWrapper: {
         padding: theme.spacing.unit * 3,
-        marginTop: theme.spacing.unt * 2,
+        marginTop: theme.spacing.unit * 2,
     },
     sandboxHeading: {
         display: 'flex',
         alignItems: 'center',
+    },
+    radioGroup: {
+        display: 'flex',
+        flexDirection: 'row',
+    },
+    endpointsWrapper: {
+        padding: theme.spacing.unit,
+    },
+    endpointsTypeSelectWrapper: {
+        marginLeft: theme.spacing.unit * 2,
+        marginRight: theme.spacing.unit * 2,
+        padding: theme.spacing.unit,
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderStyle: 'solid',
+        borderWidth: '1px',
+        borderRadius: '5px',
+        borderColor: '#c4c4c4',
+    },
+    defaultEndpointWrapper: {
+        paddingLeft: theme.spacing.unit,
+        paddingRight: theme.spacing.unit,
+        marginRight: theme.spacing.unit,
     },
 });
 
@@ -66,57 +93,15 @@ const styles = theme => ({
  * @returns {any} HTML view of the endpoints overview.
  */
 function EndpointOverview(props) {
-    const { classes, api } = props;
+    const { classes, api, onChangeAPI } = props;
     const { endpointConfig, endpointSecurity } = api;
     const [isSOAPEndpoint, setSOAPEndpoint] = useState({ key: 'http', value: 'HTTP/REST Endpoint' });
     const [epConfig, setEpConfig] = useState(endpointConfig);
-    const [selectedEndpointInfo, setSelectedEndpointInfo] = useState({});
-    const [selectedEpIndex, setSelectedEpIndex] = useState([]);
-    const [selectedEp, setSelectedEPRef] = useState(0);
-    const [isSandboxChecked, setSandboxChecked] = useState(false);
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState({});
 
     console.log(api);
     const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
         { key: 'address', value: 'HTTP/SOAP Endpoint' }];
-
-    const getFailOverCategory = (category) => {
-        return (category === 'production_endpoints' ? 'production_failovers' : 'sandbox_failovers');
-    };
-    const configStyle = {
-        position: 'relative',
-        top: selectedEp,
-    };
-
-    const getSelectedEndpoint = (index, epType, category, ref) => {
-        setSelectedEpIndex([index, category]);
-        setSelectedEPRef(ref);
-        setSelectedEPRef(ReactDOM.findDOMNode(ref).getBoundingClientRect().top); // TODO Remove
-        setSelectedEndpointInfo(() => {
-            let selected = {};
-            switch (epType) {
-                case 'load_balance':
-                    selected = epConfig[category][index];
-                    break;
-                case 'failover':
-                    if (index === 0) {
-                        selected = (epConfig[category]);
-                        break;
-                    } else {
-                        const failOverCategory = getFailOverCategory(category);
-                        selected = epConfig[failOverCategory][index - 1];
-                    }
-                    break;
-                default:
-                    selected = epConfig[category];
-                    break;
-            }
-            if (!selected) {
-                selected = { url: 'asddssfsd' };
-            }
-            return selected;
-        });
-    };
     const getEndpointType = (type) => {
         if (type === 'http') {
             return endpointTypes[0];
@@ -143,10 +128,12 @@ function EndpointOverview(props) {
     }, []);
 
     useEffect(() => {
+        onChangeAPI({ ...api, endpointSecurity: endpointSecurityInfo });
     }, [endpointSecurityInfo]);
 
     useEffect(() => {
         console.log('newConfig', epConfig);
+        onChangeAPI({ ...api, endpointConfig: epConfig });
     }, [epConfig]);
 
     useEffect(() => {
@@ -159,7 +146,8 @@ function EndpointOverview(props) {
                     template_not_supported: false,
                     url: 'http://myservice/resource',
                 },
-                sandbox_endpoints: {endpoint_type: 'address',
+                sandbox_endpoints: {
+                    endpoint_type: 'address',
                     template_not_supported: false,
                     url: 'http://myservice/resource',
                 },
@@ -172,19 +160,19 @@ function EndpointOverview(props) {
         setEpConfig(endpointConfiguration);
     }, [isSOAPEndpoint]);
 
-    const editEndpoint = (url) => {
+    const editEndpoint = (index, category, url) => {
         let modifiedEndpoint = null;
         let endpointTypeProperty = null;
-        if (selectedEpIndex[0] > 0) {
-            endpointTypeProperty = getEndpointTypeProperty(epConfig.endpoint_type, selectedEpIndex[1]);
+        if (index > 0) {
+            endpointTypeProperty = getEndpointTypeProperty(epConfig.endpoint_type, category);
             modifiedEndpoint = epConfig[endpointTypeProperty];
             if (epConfig.endpoint_type === 'failover') {
-                modifiedEndpoint[selectedEpIndex[0] - 1].url = url;
+                modifiedEndpoint[index - 1].url = url;
             } else {
-                modifiedEndpoint[selectedEpIndex[0]].url = url;
+                modifiedEndpoint[index].url = url;
             }
         } else {
-            modifiedEndpoint = epConfig[selectedEpIndex[1]];
+            modifiedEndpoint = epConfig[category];
             if (Array.isArray(modifiedEndpoint)) {
                 modifiedEndpoint[0].url = url;
             } else {
@@ -194,17 +182,17 @@ function EndpointOverview(props) {
         setEpConfig({ ...epConfig, [endpointTypeProperty]: modifiedEndpoint });
     };
 
-    const addEndpoint = (category, type) => {
+    const addEndpoint = (category, type, newURL) => {
         let endpointTemplate = {};
         if (isSOAPEndpoint.key === 'address' || type === 'failover') {
             endpointTemplate = {
                 endpoint_type: isSOAPEndpoint.key,
                 template_not_supported: false,
-                url: 'http://appserver/resource',
+                url: newURL,
             };
         } else {
             endpointTemplate = {
-                url: 'http://appserver/resource',
+                url: newURL,
             };
         }
         const epConfigProperty = getEndpointTypeProperty(type, category);
@@ -273,26 +261,26 @@ function EndpointOverview(props) {
                 handleEndpointTypeSelect={handleEndpointTypeSelect}
                 isSOAPEndpoint={isSOAPEndpoint}
             />
-            <Grid container xs={12}>
-                <Grid item xs={6}>
-                    <Paper className={classes.endpointContainer}>
+            <Paper className={classes.endpointContainer}>
+                <Grid container xs spacing={2}>
+                    <Grid xs className={classes.endpointsWrapper}>
                         <Typography className={classes.endpointName}>
                             <FormattedMessage
                                 id='Apis.Details.EndpointsNew.EndpointOverview.production'
                                 defaultMessage='Production'
                             />
                         </Typography>
-                        <EndpointListing
-                            getSelectedEndpoint={getSelectedEndpoint}
-                            apiEndpoints={epConfig.production_endpoints}
-                            failOvers={epConfig.production_failovers}
-                            selectedEpIndex={selectedEpIndex}
-                            epType={epConfig.endpoint_type}
-                            endpointAddComponent={<EndpointAdd />}
-                            addNewEndpoint={addEndpoint}
-                            removeEndpoint={removeEndpoint}
+                        <GenericEndpoint
+                            className={classes.defaultEndpointWrapper}
+                            endpointURL={epConfig.production_endpoints.length > 0 ?
+                                epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
+                            type=''
+                            index={0}
                             category='production_endpoints'
+                            editEndpoint={editEndpoint}
                         />
+                    </Grid>
+                    <Grid xs className={classes.endpointsWrapper}>
                         <div className={classes.sandboxHeading}>
                             <Typography className={classes.endpointName}>
                                 <FormattedMessage
@@ -300,30 +288,87 @@ function EndpointOverview(props) {
                                     defaultMessage='Sandbox'
                                 />
                             </Typography>
-                            <Switch checked={isSandboxChecked} onChange={() => setSandboxChecked(!isSandboxChecked)} />
                         </div>
-                        <Collapse in={isSandboxChecked}>
-                            <EndpointListing
-                                getSelectedEndpoint={getSelectedEndpoint}
-                                apiEndpoints={epConfig.sandbox_endpoints}
-                                selectedEpIndex={selectedEpIndex}
-                                failOvers={epConfig.sandbox_failovers}
-                                epType={epConfig.endpoint_type}
-                                endpointAddComponent={<EndpointAdd />}
-                                addNewEndpoint={addEndpoint}
-                                removeEndpoint={removeEndpoint}
-                                category='sandbox_endpoints'
-                            />
-
-                        </Collapse>
-                    </Paper>
+                        <GenericEndpoint
+                            className={classes.defaultEndpointWrapper}
+                            endpointURL={epConfig.sandbox_endpoints.length > 0 ?
+                                epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
+                            type=''
+                            index={0}
+                            category='sandbox_endpoints'
+                            editEndpoint={editEndpoint}
+                        />
+                    </Grid>
                 </Grid>
-                <Grid item xs={6}>
-                    <div style={configStyle}>
-                        <EndpointConfig epInfo={selectedEndpointInfo} changeEndpointURL={editEndpoint} />
+                <Grid xs className={classes.endpointsTypeSelectWrapper}>
+                    <div />
+                    <div className={classes.endpointTypesSelectWrapper}>
+                        <FormControl component='fieldset' className={classes.formControl}>
+                            <RadioGroup
+                                aria-label='Gender'
+                                name='gender1'
+                                className={classes.radioGroup}
+                                value={epConfig.endpoint_type}
+                                onChange={onChangeEndpointCategory}
+                            >
+                                {/* <FormControlLabel */}
+                                {/*    value='http' */}
+                                {/*    control={<Radio />} */}
+                                {/*    label='Default' */}
+                                {/* /> */}
+                                <FormControlLabel
+                                    value='load_balance'
+                                    control={<Radio />}
+                                    label='Load balance'
+                                />
+                                <FormControlLabel
+                                    value='failover'
+                                    control={<Radio />}
+                                    label='Failover'
+                                />
+                            </RadioGroup>
+                        </FormControl>
+                        {/* <div className={classes.loadbalanceBtnContainer}> */}
+                        {/*    <Button */}
+                        {/*        disabled={epConfig.endpoint_type !== 'load_balance'} */}
+                        {/*        onClick={() => setLBConfigOpen(true)} */}
+                        {/*        className={classes.loadBalanceConfigButton} */}
+                        {/*    > */}
+                        {/*        <Icon> */}
+                        {/*            settings */}
+                        {/*        </Icon> */}
+                        {/*    </Button> */}
+                        {/* </div> */}
                     </div>
+                    <div />
                 </Grid>
-            </Grid>
+                <Grid xs container>
+                    <Grid xs={6} className={classes.endpointsWrapper}>
+                        <EndpointListing
+                            apiEndpoints={epConfig.production_endpoints}
+                            failOvers={epConfig.production_failovers}
+                            epType={epConfig.endpoint_type}
+                            endpointAddComponent={<EndpointAdd />}
+                            addNewEndpoint={addEndpoint}
+                            removeEndpoint={removeEndpoint}
+                            editEndpoint={editEndpoint}
+                            category='production_endpoints'
+                        />
+                    </Grid>
+                    <Grid xs className={classes.endpointsWrapper}>
+                        <EndpointListing
+                            apiEndpoints={epConfig.sandbox_endpoints}
+                            failOvers={epConfig.sandbox_failovers}
+                            epType={epConfig.endpoint_type}
+                            endpointAddComponent={<EndpointAdd />}
+                            addNewEndpoint={addEndpoint}
+                            removeEndpoint={removeEndpoint}
+                            editEndpoint={editEndpoint}
+                            category='sandbox_endpoints'
+                        />
+                    </Grid>
+                </Grid>
+            </Paper>
         </div>
     );
 }

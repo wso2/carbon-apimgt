@@ -27,6 +27,7 @@ import {
     ListItemText,
     ListItemAvatar,
     Icon,
+    TextField,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -36,6 +37,8 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import KeyboardArrowRightRounded from '@material-ui/icons/KeyboardArrowRight';
 
 import LoadBalanceConfig from './LoadBalanceConfig';
+import GenericEndpoint from './GenericEndpoint';
+import GenericEndpointAdd from "./GenericEndpointAdd";
 
 const styles = theme => ({
     endpointInputWrapper: {
@@ -52,7 +55,6 @@ const styles = theme => ({
     epTypeWrapper: {
         display: 'flex',
         padding: '5px',
-        justifyContent: 'space-between',
     },
     epTypeName: {
         paddingTop: '10px',
@@ -105,63 +107,26 @@ function EndpointListing(props) {
         epType,
         failOvers,
         getSelectedEndpoint,
+        editEndpoint,
         selectedEpIndex,
         addNewEndpoint,
         removeEndpoint,
     } = props;
     const [endpointType, setEndpointType] = useState(epType);
-    const [endpoints, setEndpoints] = useState([]);
-    const [isLBConfigOpen, setOpenLBConfigDialog] = useState(false);
+    const [endpoints, setEndpoints] = useState([{ url: 'http://myservice/' }]);
     const selectedRef = useRef(null);
 
-    const handleEpSelect = (event, index) => {
-        getSelectedEndpoint(index, epType, category, event.currentTarget);
+    const addEndpoint = (url) => {
+        console.log('Add endpoint url');
+        addNewEndpoint(category, epType, url);
     };
 
-    const getEndpointTypeSeparator = () => {
-        console.log(endpointType);
-        if (endpointType === 'failover') {
-            return (
-                <div className={classes.epTypeWrapper}>
-                    <Typography className={classes.epTypeName}>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.EndpointListing.failovers'
-                            defaultMessage='Failovers'
-                        />
-                    </Typography>
-                    <Button
-                        onClick={() => addNewEndpoint(category, epType)}
-                    >
-                        <Icon>
-                            add
-                        </Icon>
-                    </Button>
-                </div>
-            );
-        }
-        if (endpointType === 'load_balance') {
-            return (
-                <div className={classes.epTypeWrapper}>
-                    <Typography className={classes.epTypeName}>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.EndpointListing.loadbalance'
-                            defaultMessage='Loadbalance'
-                        />
-                    </Typography>
-                    <Button onClick={() => addNewEndpoint(category, epType)} >
-                        <Icon>
-                            add
-                        </Icon>
-                    </Button>
-                </div>);
-        }
-        return (
-            <div />
-        );
-    };
+    useEffect(() => {
 
+    }, [endpoints]);
     // TODO: Fix continuous rendering.
     useEffect(() => {
+        console.log('Endpoint Listing: ', apiEndpoints, failOvers);
         setEndpointType(epType);
         setEndpoints(() => {
             if (apiEndpoints !== null && epType === 'failover') {
@@ -173,90 +138,34 @@ function EndpointListing(props) {
                 return [{ url: 'http://myservice/' }];
             }
         });
-    });
+    }, [props]);
 
     return (
         <div className={classes.listingWrapper} ref={selectedRef}>
             <Grid container direction='column' xs={12}>
-                <List>
-                    <ListItem
-                        id={category + '_0'}
-                        button
-                        onClick={event => handleEpSelect(event, 0)}
-                        className={classes.listItem}
-                        ref={selectedRef}
-                    >
-                        <ListItemText primary={endpoints.length > 0 ? endpoints[0].url : 'http://service/resource'} />
-                        <ListItemSecondaryAction >
-                            <KeyboardArrowRightRounded
-                                className={(selectedEpIndex[0] === 0 && selectedEpIndex[1] === category) ?
-                                    classes.leftArrow : classes.leftArrowLight}
-                            />
-                        </ListItemSecondaryAction>
-                    </ListItem>
-                </List>
                 <Grid xs={12}>
-                    {getEndpointTypeSeparator()}
-                    <List>
-                        {
-                            (endpoints.map((ep, index) => {
-                                if (index > 0) {
-                                    return (
-                                        <ListItem
-                                            className={index % 2 === 1 ? classes.listItemOdd : classes.listItem}
-                                            button
-                                            id={category + '_' + index}
-                                            onClick={event => handleEpSelect(event, index)}
-                                        >
-                                            <ListItemAvatar>
-                                                <Button onClick={() => removeEndpoint(index, epType, category)}>
-                                                    <Icon>
-                                                        remove
-                                                    </Icon>
-                                                </Button>
-                                            </ListItemAvatar>
-                                            <ListItemText primary={
-                                                endpoints[index] ? endpoints[index].url : 'http://service/resource'}
-                                            />
-                                            <ListItemSecondaryAction >
-                                                <KeyboardArrowRightRounded
-                                                    className={
-                                                        (selectedEpIndex[0] === index &&
-                                                            selectedEpIndex[1] === category) ?
-                                                            classes.leftArrow : classes.leftArrowLight
-                                                    }
-                                                />
-                                            </ListItemSecondaryAction>
-                                        </ListItem>
-                                    );
-                                }
-                                return (<div />);
-                            }))
-                        }
-                    </List>
+                    {(endpointType === 'failover' || endpointType === 'load_balance') ?
+                        <GenericEndpointAdd addEndpoint={addEndpoint} /> : <div />}
+                </Grid>
+                <Grid xs={12}>
+                    {
+                        (endpoints.map((ep, index) => {
+                            if (index > 0) {
+                                return (
+                                    <GenericEndpoint
+                                        endpointURL={endpoints[index] ? endpoints[index].url : ''}
+                                        type={endpointType}
+                                        index={index}
+                                        category={category}
+                                        editEndpoint={editEndpoint}
+                                    />
+                                );
+                            }
+                            return (<div />);
+                        }))
+                    }
                 </Grid>
             </Grid>
-            <Dialog open={isLBConfigOpen}>
-                <DialogTitle>
-                    <Typography className={classes.dialogHeader}>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.EndpointListing.loadbalance.endpoint.configuration'
-                            defaultMessage='Load Balance Endpoint Configuration'
-                        />
-                    </Typography>
-                </DialogTitle>
-                <DialogContent>
-                    <LoadBalanceConfig />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenLBConfigDialog(false)} color='primary'>
-                        <FormattedMessage id='Apis.Details.EndpointsNew.EndpointListing.close' defaultMessage='Close' />
-                    </Button>
-                    <Button onClick={() => setOpenLBConfigDialog(false)} color='primary' autoFocus>
-                        <FormattedMessage id='Apis.Details.EndpointsNew.EndpointListing.save' defaultMessage='Save' />
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </div>
     );
 }

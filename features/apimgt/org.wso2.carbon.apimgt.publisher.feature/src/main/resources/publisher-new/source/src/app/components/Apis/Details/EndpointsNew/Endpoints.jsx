@@ -60,6 +60,9 @@ const styles = theme => ({
 function Endpoints(props) {
     const { classes } = props;
     const [productionChecked, setProductionChecked] = useState(true);
+    const [modifiedAPI, setModifiedAPI] = useState({});
+
+    console.log('ModifiedAPI: =========== ', modifiedAPI);
 
     return (
         <div className={classes.root}>
@@ -77,7 +80,7 @@ function Endpoints(props) {
                         <Grid container>
                             <Grid item xs={12}>
                                 <Collapse in={productionChecked}>
-                                    <EndpointOverview api={api} />
+                                    <EndpointOverview api={api} onChangeAPI={setModifiedAPI} />
                                 </Collapse>
                             </Grid>
                         </Grid>

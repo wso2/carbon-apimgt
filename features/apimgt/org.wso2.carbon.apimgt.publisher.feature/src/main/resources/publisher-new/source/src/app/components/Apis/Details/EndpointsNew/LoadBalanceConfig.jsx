@@ -17,12 +17,21 @@
 import React, { useState } from 'react';
 import { TextField, MenuItem, Grid } from '@material-ui/core';
 import PropTypes from 'prop-types';
-import {FormattedMessage} from "react-intl";
+import { FormattedMessage, injectIntl } from 'react-intl';
 
-
-const algorithms = [{ id: 0, value: 'Round-Robbin' }, { id: 1, value: 'other' }];
+const algorithms = [
+    {
+        key: 'org.apache.synapse.endpoints.algorithms.RoundRobin',
+        value: 'Round-Robbin',
+    },
+    { key: 'other', value: 'other' },
+];
 const sessionManagementOps = [
-    { id: 0, value: 'Transport' }, { id: 1, value: 'SOAP' }, { id: 2, value: 'Client Id' }, { id: 3, value: 'None' }];
+    { key: 'http', value: 'Transport' },
+    { key: 'soap', value: 'SOAP' },
+    { key: 'simpleClientSession', value: 'Client Id' },
+    { key: 'none', value: 'None' },
+];
 
 /**
  * The component for loadbalance endpoint configuration.
@@ -35,7 +44,7 @@ function LoadBalanceConfig(props) {
     const [epTimeout, setEpTimeout] = useState(300);
     const [customAlogrithm, setCustomAlgorithm] = useState('');
 
-    const handleAlogorithmChange = (event) => {
+    const handleAlgorithmChange = (event) => {
         const index = event.target.value;
         setAlgorithm(algorithms[index]);
     };
@@ -65,13 +74,13 @@ function LoadBalanceConfig(props) {
                         id='Apis.Details.EndpointsNew.LoadBalanceConfig.algorithm'
                         defaultMessage='Algorithm'
                     />}
-                    value={algorithm.id}
-                    onChange={handleAlogorithmChange}
+                    value={algorithm.key}
+                    onChange={handleAlgorithmChange}
                     helperText='Please select the Loadbalance Algorithm.'
                     margin='normal'
                 >
                     {algorithms.map(algo => (
-                        <MenuItem key={algo.id} value={algo.id} selected={algorithm}>
+                        <MenuItem key={algo.key} value={algo.key} selected={algorithm}>
                             {algo.value}
                         </MenuItem>
                     ))}
@@ -95,13 +104,13 @@ function LoadBalanceConfig(props) {
                         id='Apis.Details.EndpointsNew.LoadBalanceConfig.session.management'
                         defaultMessage='Session Management'
                     />}
-                    value={sessionMgtOp.id}
+                    value={sessionMgtOp.key}
                     onChange={handleSessionMgtChange}
                     helperText='Please select the Session Management mechanism.'
                     margin='normal'
                 >
                     {sessionManagementOps.map(option => (
-                        <MenuItem key={option.id} value={option.id}>
+                        <MenuItem key={option.key} value={option.key}>
                             {option.value}
                         </MenuItem>
                     ))}
@@ -127,4 +136,4 @@ LoadBalanceConfig.propTypes = {
     api: PropTypes.shape({}).isRequired,
 };
 
-export default LoadBalanceConfig;
+export default injectIntl(LoadBalanceConfig);
