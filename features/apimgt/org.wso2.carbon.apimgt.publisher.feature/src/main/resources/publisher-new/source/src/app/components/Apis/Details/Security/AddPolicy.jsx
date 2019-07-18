@@ -28,6 +28,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
@@ -87,9 +88,13 @@ class AddPolicy extends Component {
     }
 
     handlePolicyAdd() {
+        const { intl } = this.props;
         const policy = this.state.selectedPolicy;
         if (policy.uuid === '' || policy.name === '') {
-            Alert.error('Please select a policy');
+            Alert.error(intl.formatMessage({
+                id: 'Apis.Details.Security.AddPolicy.select.policy',
+                defaultMessage: 'Please select a policy',
+            }));
             return;
         }
 
@@ -99,10 +104,16 @@ class AddPolicy extends Component {
             const promisedPolicyAdd = api.addThreatProtectionPolicyToApi(currentApi.id, this.state.selectedPolicy.uuid);
             promisedPolicyAdd.then((response) => {
                 if (response.status === 200) {
-                    Alert.info('Threat protection policy added successfully.');
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.Security.AddPolicy.threat.protection.policy.add.success',
+                        defaultMessage: 'Threat protection policy added successfully.',
+                    }));
                     this.props.updateData();
                 } else {
-                    Alert.error('Failed to add threat protection policy.');
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Security.AddPolicy.threat.protection.policy.add.failure',
+                        defaultMessage: 'Failed to add threat protection policy.',
+                    }));
                 }
             });
         }
@@ -130,11 +141,19 @@ class AddPolicy extends Component {
             <div className={classes.contentWrapper}>
                 <div className={classes.addNewWrapper}>
                     <Typography className={classes.addNewHeader}>
-                        Add New Threat Protection Policy
+                        <FormattedMessage
+                            id='Apis.Details.Security.AddPolicy.add.threat.protection.policy'
+                            defaultMessage='Add New Threat Protection Policy'
+                        />
                     </Typography>
                     <Divider className={classes.divider} />
                     <div className={classes.addNewOther}>
-                        <InputLabel htmlFor='selectedPolicy'>Policy</InputLabel>
+                        <InputLabel htmlFor='selectedPolicy'>
+                            <FormattedMessage
+                                id='Apis.Details.Security.AddPolicy.policy'
+                                defaultMessage='Policy'
+                            />
+                        </InputLabel>
                         &nbsp;&nbsp;
                         <Select
                             value={this.state.selectedPolicy.uuid}
@@ -149,9 +168,20 @@ class AddPolicy extends Component {
                         </Select>
                         <br />
                         <br />
-                        <p>Policy Type: {this.state.selectedPolicy.type}</p>
+                        <p>
+                            <FormattedMessage
+                                id='Apis.Details.Security.AddPolicy.policy.type.label'
+                                defaultMessage='Policy Type: '
+                            />
+                            {this.state.selectedPolicy.type}
+                        </p>
                         <div>
-                            <p>Policy: </p>
+                            <p>
+                                <FormattedMessage
+                                    id='Apis.Details.Security.AddPolicy.policy.label'
+                                    defaultMessage='Policy: '
+                                />
+                            </p>
                             <div className={classes.addJsonContent}>
                                 {this.formatPolicy(this.state.selectedPolicy.policy)}
                             </div>
@@ -160,10 +190,16 @@ class AddPolicy extends Component {
                     <Divider className={classes.divider} />
                     <div className={classes.addNewOther}>
                         <Button variant='contained' color='primary' onClick={() => this.handlePolicyAdd()}>
-                            Add Policy to API
+                            <FormattedMessage
+                                id='Apis.Details.Security.AddPolicy.add.policy.to.api'
+                                defaultMessage='Add Policy to API'
+                            />
                         </Button>
                         <Button className={classes.button} onClick={this.props.toggleShowAddPolicy}>
-                            Cancel
+                            <FormattedMessage
+                                id='Apis.Details.Security.AddPolicy.cancel'
+                                defaultMessage='Cancel'
+                            />
                         </Button>
                     </div>
                 </div>
@@ -177,8 +213,9 @@ AddPolicy.propTypes = {
     toggleShowAddPolicy: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
     updateData: PropTypes.func.isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 
-export default withStyles(styles)(AddPolicy);
+export default injectIntl(withStyles(styles)(AddPolicy));
 

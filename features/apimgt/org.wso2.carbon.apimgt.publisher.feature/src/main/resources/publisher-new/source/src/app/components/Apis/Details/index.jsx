@@ -32,6 +32,7 @@ import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
+import { injectIntl } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -220,6 +221,35 @@ class Details extends Component {
      *
      * @memberof Details
      */
+    updateAPI(newAPI) {
+        const { intl } = this.props;
+        const restAPI = new Api();
+        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
+        /* eslint no-param-reassign: ["error", { "props": false }] */
+        if (newAPI._data) delete newAPI._data;
+        if (newAPI.client) delete newAPI.client;
+
+        const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
+        promisedApi
+            .then((api) => {
+                Alert.info(`${api.name}` + intl.formatMessage({
+                    id: 'Apis.Details.index.update.success',
+                    defaultMessage: ' updated successfully.',
+                }));
+                this.setState({ api });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ apiNotFound: true });
+                }
+            });
+    }
+          
+          
     setAPIProduct() {
         const { apiProdUUID } = this.props.match.params;
         const promisedApi = Api.getProduct(apiProdUUID);
@@ -309,6 +339,7 @@ class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
+        const { intl } = this.props;
         const {
             api, apiNotFound, active, isAPIProduct,
         } = this.state;
@@ -328,8 +359,17 @@ class Details extends Component {
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFountMessage = {
-                title: `API is Not Found in the "${Utils.getCurrentEnvironment().label}" Environment`,
-                body: `Can't find the API with the id "${apiUUID}"`,
+                title: intl.formatMessage({
+                    id: 'Apis.Details.index.api.not.found.in',
+                    defaultMessage: 'API is Not Found in the ',
+                }) + `${Utils.getCurrentEnvironment().label}` + intl.formatMessage({
+                    id: 'Apis.Details.index.environment',
+                    defaultMessage: ' Environment',
+                }),
+                body: intl.formatMessage({
+                    id: 'Apis.Details.index.cannot.find.api.with.id',
+                    defaultMessage: "Can't find the API with the id ",
+                }) + `${apiUUID}`,
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
@@ -348,35 +388,66 @@ class Details extends Component {
                                 <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
                             </div>
                         </Link>
-                        <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
                         <LeftMenuItem
-                            text='configuration'
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.overview',
+                                defaultMessage: 'overview',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.configuration',
+                                defaultMessage: 'configuration',
+                            })}
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<ConfigurationIcon />}
                         />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.endpoints',
+                                defaultMessage: 'endpoints',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<EndpointIcon />}
+                        />
                         {isAPIProduct ? null : (
                             <LeftMenuItem
-                                text='endpoints'
+                                text={intl.formatMessage({
+                                id: 'Apis.Details.index.endpoints',
+                                defaultMessage: 'endpoints',
+                                })}
                                 handleMenuSelect={this.handleMenuSelect}
                                 active={active}
                                 Icon={<EndpointIcon />}
                             />
                         )}
                         <LeftMenuItem
-                            text='api definition'
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.api.definition',
+                                defaultMessage: 'api definition',
+                            })}
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<CodeIcon />}
                         />
                         <LeftMenuItem
-                            text='resources'
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.resources',
+                                defaultMessage: 'resources',
+                            })}
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<ResourcesIcon />}
                         />
                         <LeftMenuItem
-                            text='lifecycle'
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.lifecycle',
+                                defaultMessage: 'lifecycle',
+                            })}
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<LifeCycleIcon />}
@@ -389,7 +460,10 @@ class Details extends Component {
                          Icon={<ScopesIcon />}
                          /> */}
                         <LeftMenuItem
-                            text='documents'
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.documents',
+                                defaultMessage: 'documents',
+                            })}
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<DocumentsIcon />}
@@ -414,13 +488,19 @@ class Details extends Component {
                          Icon={<CommentsIcon />}
                          /> */}
                         <LeftMenuItem
-                            text='business info'
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.business.info',
+                                defaultMessage: 'business info',
+                            })}
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<BusinessIcon />}
                         />
                         <LeftMenuItem
-                            text='properties'
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.properties',
+                                defaultMessage: 'properties',
+                            })}
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<PropertiesIcon />}
@@ -519,7 +599,8 @@ Details.propTypes = {
             leftMenuIconMainSize: PropTypes.number,
         }),
     }).isRequired,
+    intl: PropTypes.shape({}).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Details);
+export default injectIntl(withStyles(styles, { withTheme: true })(Details));
