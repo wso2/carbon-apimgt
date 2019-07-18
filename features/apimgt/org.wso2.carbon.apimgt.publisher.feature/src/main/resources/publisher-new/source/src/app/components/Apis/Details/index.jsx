@@ -216,40 +216,12 @@ class Details extends Component {
                 }
             });
     }
+
     /**
      *
      *
      * @memberof Details
      */
-    updateAPI(newAPI) {
-        const { intl } = this.props;
-        const restAPI = new Api();
-        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
-        /* eslint no-param-reassign: ["error", { "props": false }] */
-        if (newAPI._data) delete newAPI._data;
-        if (newAPI.client) delete newAPI.client;
-
-        const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
-        promisedApi
-            .then((api) => {
-                Alert.info(`${api.name}` + intl.formatMessage({
-                    id: 'Apis.Details.index.update.success',
-                    defaultMessage: ' updated successfully.',
-                }));
-                this.setState({ api });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ apiNotFound: true });
-                }
-            });
-    }
-          
-          
     setAPIProduct() {
         const { apiProdUUID } = this.props.match.params;
         const promisedApi = Api.getProduct(apiProdUUID);
@@ -272,6 +244,7 @@ class Details extends Component {
      *
      *
      * @param {*} newAPI
+     * @param {*} isAPIProduct
      * @memberof Details
      */
     updateAPI(newAPI, isAPIProduct) {
@@ -417,8 +390,8 @@ class Details extends Component {
                         {isAPIProduct ? null : (
                             <LeftMenuItem
                                 text={intl.formatMessage({
-                                id: 'Apis.Details.index.endpoints',
-                                defaultMessage: 'endpoints',
+                                    id: 'Apis.Details.index.endpoints',
+                                    defaultMessage: 'endpoints',
                                 })}
                                 handleMenuSelect={this.handleMenuSelect}
                                 active={active}
