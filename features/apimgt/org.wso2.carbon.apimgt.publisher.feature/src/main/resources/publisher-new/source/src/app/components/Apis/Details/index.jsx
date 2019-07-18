@@ -216,6 +216,7 @@ class Details extends Component {
                 }
             });
     }
+
     /**
      *
      *
@@ -243,6 +244,7 @@ class Details extends Component {
      *
      *
      * @param {*} newAPI
+     * @param {*} isAPIProduct
      * @memberof Details
      */
     updateAPI(newAPI, isAPIProduct) {
@@ -392,6 +394,15 @@ class Details extends Component {
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<ConfigurationIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.endpoints',
+                                defaultMessage: 'endpoints',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<EndpointIcon />}
                         />
                         {isAPIProduct ? null : (
                             <LeftMenuItem
@@ -578,6 +589,7 @@ Details.propTypes = {
             leftMenuIconMainSize: PropTypes.number,
         }),
     }).isRequired,
+    intl: PropTypes.shape({}).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     intl: PropTypes.shape({}).isRequired,
 };
