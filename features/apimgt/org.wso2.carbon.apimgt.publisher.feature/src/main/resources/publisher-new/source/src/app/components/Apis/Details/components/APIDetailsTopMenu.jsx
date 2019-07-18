@@ -10,6 +10,7 @@ import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
+import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     root: {
@@ -54,8 +55,11 @@ const DetailsTopMenu = ({ classes, theme }) => {
                     <Link to={isAPIProduct ? '/api-products' : '/apis'} className={classes.backLink}>
                         <KeyboardArrowLeft className={classes.backIcon} />
                         <div className={classes.backText}>
-                            BACK TO <br />
-                            LISTING
+                            <FormattedMessage
+                                id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
+                                defaultMessage='BACK TO {break} LISTING'
+                                values={{ break: <br /> }}
+                            />
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
@@ -92,8 +96,9 @@ const DetailsTopMenu = ({ classes, theme }) => {
                         <div className={classes.linkText}>View In store</div>
                     </a>
                     <VerticalDivider height={70} />
-                    {isAPIProduct ? null :
-                        (<CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />)}
+                    {isAPIProduct ? null : (
+                        <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />
+                    )}
                     <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
                 </div>
             )}
