@@ -591,7 +591,6 @@ Details.propTypes = {
     }).isRequired,
     intl: PropTypes.shape({}).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
-    intl: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Details));
