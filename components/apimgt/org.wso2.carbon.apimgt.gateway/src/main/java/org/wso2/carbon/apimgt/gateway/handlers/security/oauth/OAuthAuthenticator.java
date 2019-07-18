@@ -297,6 +297,10 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setStopOnQuotaReach(info.isStopOnQuotaReach());
             authContext.setIsContentAware(info.isContentAware());
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
+            if (info.getProductName() != null && info.getProductProvider() != null) {
+                authContext.setProductName(info.getProductName());
+                authContext.setProductProvider(info.getProductProvider());
+            }
 
             /* Synapse properties required for BAM Mediator*/
             //String tenantDomain = MultitenantUtils.getTenantDomain(info.getApiPublisher());

@@ -19,18 +19,27 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SettingsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
@@ -50,6 +59,30 @@ public class SettingsApiServiceImpl implements SettingsApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Store Settings";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response settingsApplicationAttributesGet(String ifNoneMatch, MessageContext messageContext) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            List<ApplicationAttributeDTO> applicationAttributeDTOList = new ArrayList<>();
+            JSONArray attributeArray = apiConsumer.getAppAttributesFromConfig(tenantDomain);
+            for (int i = 0; i < attributeArray.size(); i++) {
+                JSONObject obj = (JSONObject) attributeArray.get(i);
+                ApplicationAttributeDTO applicationAttributeDTO = ApplicationMappingUtil
+                        .fromApplicationAttributeJsonToDTO(obj);
+                applicationAttributeDTOList.add(applicationAttributeDTO);
+            }
+            ApplicationAttributeListDTO applicationAttributeListDTO = ApplicationMappingUtil
+                    .fromApplicationAttributeListToDTO(applicationAttributeDTOList);
+            return Response.ok().entity(applicationAttributeListDTO).build();
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error occurred in reading application attributes from config", e, log);
         }
         return null;
     }

@@ -92,7 +92,7 @@ public class APIGatewayAdminClientTest {
         PowerMockito.whenNew(APIGatewayAdminStub.class)
                 .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
                 .thenReturn(apiGatewayAdminStub);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         Assert.assertNotNull(client);
         Mockito.verify(apiGatewayAdminStub, times(2))._getServiceClient();
     }
@@ -101,7 +101,7 @@ public class APIGatewayAdminClientTest {
     public void testAPIGatewayAdminClientException() throws Exception {
         PowerMockito.whenNew(APIGatewayAdminStub.class)
                 .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString()).thenThrow(AxisFault.class);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
     }
 
     @Test(expected = APIManagementException.class)
@@ -111,7 +111,7 @@ public class APIGatewayAdminClientTest {
                 .thenReturn(apiGatewayAdminStub);
         Mockito.when(apiGatewayAdminStub.doEncryption(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).
                 thenThrow(RemoteException.class);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
         client.setSecureVaultProperty(api, null);
@@ -124,7 +124,7 @@ public class APIGatewayAdminClientTest {
                 .thenReturn(apiGatewayAdminStub);
         Mockito.when(apiGatewayAdminStub.doEncryption(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).
                 thenReturn("");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
         client.setSecureVaultProperty(api, null);
@@ -144,7 +144,7 @@ public class APIGatewayAdminClientTest {
                 .addApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenReturn(true);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForTemplate(environment)).thenReturn(Mockito.anyString());
         client.addApi(apiTemplateBuilder, "", identifier);
@@ -171,7 +171,7 @@ public class APIGatewayAdminClientTest {
                 .addApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenThrow(Exception.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForTemplate(environment)).thenReturn(Mockito.anyString());
         client.addApi(apiTemplateBuilder, "", identifier);
@@ -190,7 +190,7 @@ public class APIGatewayAdminClientTest {
                 .addApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenReturn(true);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForPrototypeScriptAPI(environment))
                 .thenReturn(Mockito.anyString());
@@ -218,7 +218,7 @@ public class APIGatewayAdminClientTest {
                 .addApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenThrow(Exception.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForPrototypeScriptAPI(environment))
                 .thenReturn(Mockito.anyString());
@@ -239,7 +239,7 @@ public class APIGatewayAdminClientTest {
                         Mockito.anyString())).thenReturn(true);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForTemplate(environment)).thenReturn(Mockito.anyString());
         client.updateApi(apiTemplateBuilder, "", identifier);
@@ -265,7 +265,7 @@ public class APIGatewayAdminClientTest {
                 .updateApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenThrow(Exception.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForTemplate(environment)).thenReturn(Mockito.anyString());
         client.updateApi(apiTemplateBuilder, "", identifier);
@@ -285,7 +285,7 @@ public class APIGatewayAdminClientTest {
                         Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForDefaultAPITemplate(Mockito.anyString()))
                 .thenReturn(Mockito.anyString());
@@ -313,7 +313,7 @@ public class APIGatewayAdminClientTest {
                 .addDefaultAPIForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenThrow(Exception.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForDefaultAPITemplate(Mockito.anyString()))
                 .thenReturn(Mockito.anyString());
@@ -334,7 +334,7 @@ public class APIGatewayAdminClientTest {
                         Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForDefaultAPITemplate(Mockito.anyString()))
                 .thenReturn(Mockito.anyString());
@@ -362,7 +362,7 @@ public class APIGatewayAdminClientTest {
                 .updateDefaultApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenThrow(Exception.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForDefaultAPITemplate(Mockito.anyString()))
                 .thenReturn(Mockito.anyString());
@@ -383,7 +383,7 @@ public class APIGatewayAdminClientTest {
                         Mockito.anyString())).thenReturn(true);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForPrototypeScriptAPI(environment))
                 .thenReturn(Mockito.anyString());
@@ -410,7 +410,7 @@ public class APIGatewayAdminClientTest {
                 .updateApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenThrow(Exception.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForPrototypeScriptAPI(environment))
                 .thenReturn(Mockito.anyString());
@@ -429,7 +429,7 @@ public class APIGatewayAdminClientTest {
                 .deleteApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deleteApi("", identifier);
         client.deleteApi(null, identifier);
         client.deleteApi(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, identifier);
@@ -451,7 +451,7 @@ public class APIGatewayAdminClientTest {
                 .deleteApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenThrow(Exception.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deleteApi("", identifier);
         client.deleteApi("tenant", identifier);
     }
@@ -468,7 +468,7 @@ public class APIGatewayAdminClientTest {
                 .deleteDefaultApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenReturn(true);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deleteDefaultApi("", identifier);
         client.deleteDefaultApi(null, identifier);
         client.deleteDefaultApi(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, identifier);
@@ -492,7 +492,7 @@ public class APIGatewayAdminClientTest {
                 .deleteDefaultApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString())).thenThrow(Exception.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deleteDefaultApi("", identifier);
         client.deleteDefaultApi("tenant", identifier);
     }
@@ -505,7 +505,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
@@ -529,7 +529,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
@@ -553,7 +553,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
@@ -580,7 +580,7 @@ public class APIGatewayAdminClientTest {
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
         api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         Mockito.when(apiTemplateBuilder.getConfigStringForEndpointTemplate(Mockito.anyString()))
                 .thenReturn(Mockito.anyString());
@@ -596,7 +596,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
         api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\"}");
@@ -617,7 +617,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
         api.setEndpointConfig("{\"sandbox_endpoints\":\"http://ep2.com\"}");
@@ -638,7 +638,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
         api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
@@ -660,7 +660,7 @@ public class APIGatewayAdminClientTest {
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
         api.setEndpointConfig("{\"production_endpoints\":\"http://ep1.com\",\"sandbox_endpoints\":\"http://ep2.com\"}");
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deleteEndpoint(api, "");
         client.deleteEndpoint(api, "tenant");
     }
@@ -676,7 +676,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
@@ -705,7 +705,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
@@ -734,7 +734,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
@@ -763,7 +763,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addEndpoint(Mockito.anyString())).thenThrow(EndpointAdminException.class);
         Mockito.when(apiGatewayAdminStub.addEndpointForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenThrow(EndpointAdminException.class);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         APITemplateBuilder apiTemplateBuilder = Mockito.mock(APITemplateBuilder.class);
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
@@ -784,7 +784,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.
                 addSequenceForTenant(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         Mockito.doNothing().when(sequence).serializeAndConsume(Mockito.any(StringWriter.class));
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.addSequence(sequence, "");
         client.addSequence(sequence, null);
         client.addSequence(sequence, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -803,7 +803,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.addSequenceForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenThrow(Exception.class);
         Mockito.doNothing().when(sequence).serializeAndConsume(Mockito.any(StringWriter.class));
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.addSequence(sequence, "");
         client.addSequence(sequence, "tenant");
     }
@@ -817,7 +817,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.deleteSequence(Mockito.anyString())).thenReturn(true);
         Mockito.when(apiGatewayAdminStub.
                 deleteSequenceForTenant(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deleteSequence(sequence.getLocalName(), "");
         client.deleteSequence(sequence.getLocalName(), null);
         client.deleteSequence(sequence.getLocalName(), MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -835,7 +835,7 @@ public class APIGatewayAdminClientTest {
         Mockito.when(apiGatewayAdminStub.deleteSequence(Mockito.anyString())).thenThrow(Exception.class);
         Mockito.when(apiGatewayAdminStub.deleteSequenceForTenant(Mockito.anyString(), Mockito.anyString()))
                 .thenThrow(Exception.class);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deleteSequence(sequence.getLocalName(), "");
         client.deleteSequence(sequence.getLocalName(), "tenant");
     }
@@ -846,7 +846,7 @@ public class APIGatewayAdminClientTest {
                 .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
                 .thenReturn(apiGatewayAdminStub);
         Mockito.when(apiGatewayAdminStub.deployPolicy(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deployPolicy("sample-policy", "sample-policy-file");
         Mockito.verify(apiGatewayAdminStub, times(1)).deployPolicy(Mockito.anyString(), Mockito.anyString());
 
@@ -859,7 +859,7 @@ public class APIGatewayAdminClientTest {
                 .thenReturn(apiGatewayAdminStub);
         Mockito.when(apiGatewayAdminStub.deployPolicy(Mockito.anyString(), Mockito.anyString()))
                 .thenThrow(RemoteException.class);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         client.deployPolicy("sample-policy", "sample-policy-file");
 
     }
@@ -870,7 +870,7 @@ public class APIGatewayAdminClientTest {
                 .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
                 .thenReturn(apiGatewayAdminStub);
         Mockito.when(apiGatewayAdminStub.undeployPolicy(Mockito.any(String[].class))).thenReturn(true);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         String fileNames[] = { "file1", "file2", "file3" };
         client.undeployPolicy(fileNames);
         Mockito.verify(apiGatewayAdminStub, times(1)).undeployPolicy(Mockito.any(String[].class));
@@ -882,7 +882,7 @@ public class APIGatewayAdminClientTest {
                 .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
                 .thenReturn(apiGatewayAdminStub);
         Mockito.when(apiGatewayAdminStub.undeployPolicy(Mockito.any(String[].class))).thenThrow(RemoteException.class);
-        APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
         String fileNames[] = {"file1","file2","file3"};
         client.undeployPolicy(fileNames);
     }

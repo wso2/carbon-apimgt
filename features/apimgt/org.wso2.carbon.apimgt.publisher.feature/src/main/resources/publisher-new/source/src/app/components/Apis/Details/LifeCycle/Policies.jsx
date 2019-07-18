@@ -91,13 +91,13 @@ class Policies extends Component {
      * @memberof Policies
      */
     render() {
-        const { handleInputChange, api, policies } = this.props;
+        const { handleInputChange, api, policies, isAPIProduct } = this.props;
         const { classes } = this.props;
         return (
             <React.Fragment>
                 <FormControl className={classes.FormControl}>
                     <InputLabel htmlFor='policy-selector'>
-                        <FormattedMessage id="business.plans" defaultMessage="Business Plans" />
+                        <FormattedMessage id="Apis.Details.LifeCycle.Policies.business.plans" defaultMessage="Business Plans" />
                     </InputLabel>
                     <Select
                         error={api.policies && api.policies.length === 0}
@@ -129,8 +129,14 @@ class Policies extends Component {
                         ))}
                     </Select>
                     <FormHelperText>
-                        <FormattedMessage id="select.a.plan.for.the.api.and.enable.api.level.throttling"
-                            defaultMessage="Select a plan for the API and enable API level throttling." />
+                        isAPIProduct ?
+                            <FormattedMessage id='Apis.Details.LifeCycle.Policies.select.plan.api.product'
+                                defaultMessage='Select a plan for the API product.'
+                             />
+                            :
+                            <FormattedMessage id='Apis.Details.LifeCycle.Policies.select.plan.api'
+                                defaultMessage='Select a plan for the API and enable API level throttling.'
+                            />;
                     </FormHelperText>
                 </FormControl>
             </React.Fragment>

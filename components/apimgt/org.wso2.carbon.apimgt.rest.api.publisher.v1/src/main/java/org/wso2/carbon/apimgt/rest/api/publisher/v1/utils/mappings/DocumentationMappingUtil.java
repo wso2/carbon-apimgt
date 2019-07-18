@@ -140,5 +140,39 @@ public class DocumentationMappingUtil {
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
         documentListDTO.setPagination(paginationDTO);
     }
+
+    /**
+     * Sets pagination urls for a DocumentListDTO object (associated to an api product) given pagination parameters and url parameters
+     *
+     * @param documentListDTO a DocumentListDTO object
+     * @param limit max number of objects returned
+     * @param offset starting index
+     * @param size max offset
+     *
+     */
+    public static void setProductDocListPaginationParams(DocumentListDTO documentListDTO, String productId, int offset, int limit,
+            int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getProductDocumentationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), productId);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getProductDocumentationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), productId);
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        documentListDTO.setPagination(paginationDTO);
+    }
 }
 

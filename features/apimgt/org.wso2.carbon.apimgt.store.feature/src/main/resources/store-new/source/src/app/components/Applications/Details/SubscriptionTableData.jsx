@@ -28,6 +28,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
+import { FormattedMessage } from 'react-intl';
 import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
 
 /**
@@ -55,6 +56,7 @@ class SubscriptionTableData extends React.Component {
     handleRequestClose() {
         this.setState({ openMenu: false });
     }
+
     /**
     *
     *
@@ -85,11 +87,11 @@ class SubscriptionTableData extends React.Component {
     */
     render() {
         const {
-            apiInfo, status, throttlingPolicy, subscriptionId, apiId
+            apiInfo, status, throttlingPolicy, subscriptionId, apiId,
         } = this.props.subscription;
         return (
             <TableRow hover>
-                <TableCell style={{paddingLeft: 0}}>
+                <TableCell style={{ paddingLeft: 0 }}>
                     <Link to={'/apis/' + apiId}>{apiInfo.name}</Link>
                 </TableCell>
                 <TableCell>{throttlingPolicy}</TableCell>
@@ -109,14 +111,25 @@ class SubscriptionTableData extends React.Component {
                         <Dialog open={this.state.openMenu} transition={Slide}>
                             <DialogTitle>Confirm</DialogTitle>
                             <DialogContent>
-                                <DialogContentText>Are you sure you want to delete the Subscription?</DialogContentText>
+                                <DialogContentText>
+                                    <FormattedMessage
+                                        id='Applications.Details.SubscriptionTableData.delete.subscription.confirmation'
+                                        defaultMessage='Are you sure you want to delete the Subscription?'
+                                    />
+                                </DialogContentText>
                             </DialogContent>
                             <DialogActions>
                                 <Button dense color='primary' onClick={this.handleRequestClose}>
-                                    Cancel
+                                    <FormattedMessage
+                                        id='Applications.Details.SubscriptionTableData.cancel'
+                                        defaultMessage='Cancel'
+                                    />
                                 </Button>
                                 <Button dense color='primary' onClick={() => this.handleRequestDelete(subscriptionId)}>
-                                    Delete
+                                    <FormattedMessage
+                                        id='Applications.Details.SubscriptionTableData.delete'
+                                        defaultMessage='Delete'
+                                    />
                                 </Button>
                             </DialogActions>
                         </Dialog>
@@ -128,4 +141,3 @@ class SubscriptionTableData extends React.Component {
 }
 
 export default SubscriptionTableData;
-

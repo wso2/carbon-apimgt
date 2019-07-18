@@ -31,6 +31,7 @@ import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeVali
 import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
+import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -77,8 +78,12 @@ class LifeCycleUpdate extends Component {
                 /* TODO: Handle IO erros ~tmkb */
                 this.props.handleUpdate(true);
                 let newState = response.body.lifecycleState.state;
-                this.setState({newState});
-                Alert.info('Lifecycle state updated successfully');
+                this.setState({ newState });
+
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
+                    defaultMessage: 'Lifecycle state updated successfully',
+                }));
                 /* TODO: add i18n ~tmkb */
             })
             .catch(error_response => {
@@ -109,18 +114,22 @@ class LifeCycleUpdate extends Component {
             <Grid container>
                 {is_workflow_pending ? (
                     <Grid item xs={12}>
-                        <Typography variant="h5">Pending lifecycle state change.</Typography>
-                        <Typography>adjective</Typography>
+                        <Typography variant="h5">
+                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleUpdate.pending' defaultMessage='Pending lifecycle state change.' />
+                        </Typography>
+                        <Typography>
+                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleUpdate.adjective' defaultMessage='adjective' />
+                        </Typography>
                     </Grid>
                 ) : (
-                    <Grid item xs={12}>
-                        {theme.custom.lifeCycleImage ? (
-                            <img src={theme.custom.lifeCycleImage} alt="Lifecycle image" />
-                        ) : (
-                            <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
-                        )}
-                    </Grid>
-                )}
+                        <Grid item xs={12}>
+                            {theme.custom.lifeCycleImage ? (
+                                <img src={theme.custom.lifeCycleImage} alt="Lifecycle image" />
+                            ) : (
+                                    <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
+                                )}
+                        </Grid>
+                    )}
                 <Grid item xs={12}>
                     {!is_workflow_pending && (
                         <FormGroup row>
@@ -140,16 +149,16 @@ class LifeCycleUpdate extends Component {
                         </FormGroup>
                     )}
                     <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                            <div className={classes.buttonsWrapper}>
-                                {is_workflow_pending ? (
-                                    <div className="btn-group" role="group">
-                                        <input
-                                            type="button"
-                                            className="btn btn-primary wf-cleanup-btn"
-                                            defaultValue="Delete pending lifecycle state change request"
-                                        />
-                                    </div>
-                                ) : (
+                        <div className={classes.buttonsWrapper}>
+                            {is_workflow_pending ? (
+                                <div className="btn-group" role="group">
+                                    <input
+                                        type="button"
+                                        className="btn btn-primary wf-cleanup-btn"
+                                        defaultValue="Delete pending lifecycle state change request"
+                                    />
+                                </div>
+                            ) : (
                                     lcState.availableTransitions.map(
                                         transition_state =>
                                             lcState.state !== transition_state.targetState && (
@@ -165,7 +174,7 @@ class LifeCycleUpdate extends Component {
                                             ),
                                     ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates */
                                 )}
-                            </div>
+                        </div>
                     </ScopeValidation>
                 </Grid>
             </Grid>
@@ -176,6 +185,9 @@ class LifeCycleUpdate extends Component {
 LifeCycleUpdate.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(LifeCycleUpdate);

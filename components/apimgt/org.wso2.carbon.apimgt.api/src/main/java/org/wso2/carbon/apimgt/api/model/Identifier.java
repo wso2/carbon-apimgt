@@ -34,6 +34,13 @@ public interface Identifier {
     String getTier();
     
     /**
+     * Set tier related to the identifier
+     * @param tier
+     * @return
+     */
+    void setTier(String tier);
+    
+    /**
      * Name of the identifier
      * @return name
      */

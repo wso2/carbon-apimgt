@@ -28,6 +28,7 @@ public class APIDTO   {
     private String context = null;
     private String version = null;
     private String provider = null;
+    private String apiDefinition = null;
     private String wsdlUri = null;
     private String lifeCycleStatus = null;
     private Boolean isDefaultVersion = null;
@@ -154,6 +155,24 @@ public class APIDTO   {
   }
   public void setProvider(String provider) {
     this.provider = provider;
+  }
+
+  /**
+   * Swagger definition of the API which contains details about URI templates and scopes 
+   **/
+  public APIDTO apiDefinition(String apiDefinition) {
+    this.apiDefinition = apiDefinition;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}", value = "Swagger definition of the API which contains details about URI templates and scopes ")
+  @JsonProperty("apiDefinition")
+  public String getApiDefinition() {
+    return apiDefinition;
+  }
+  public void setApiDefinition(String apiDefinition) {
+    this.apiDefinition = apiDefinition;
   }
 
   /**
@@ -437,6 +456,7 @@ public class APIDTO   {
         Objects.equals(context, API.context) &&
         Objects.equals(version, API.version) &&
         Objects.equals(provider, API.provider) &&
+        Objects.equals(apiDefinition, API.apiDefinition) &&
         Objects.equals(wsdlUri, API.wsdlUri) &&
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
@@ -456,7 +476,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, isDefaultVersion, transport, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, transport, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes);
   }
 
   @Override
@@ -470,6 +490,7 @@ public class APIDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
     sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");

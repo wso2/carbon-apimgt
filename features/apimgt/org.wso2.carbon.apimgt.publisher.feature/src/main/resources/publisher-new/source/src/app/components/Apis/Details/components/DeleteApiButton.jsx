@@ -98,17 +98,30 @@ class DeleteApiButton extends React.Component {
      * @memberof DeleteApiButton
      */
     handleApiDelete() {
-        const { api, history } = this.props;
-        api.delete().then((response) => {
-            if (response.status !== 200) {
-                console.log(response);
-                Alert.error('Something went wrong while deleting the API!');
-                return;
-            }
-            const redirectURL = '/apis';
-            Alert.success('API ' + api.name + ' was deleted successfully!');
-            history.push(redirectURL);
-        });
+        const { api, history, isAPIProduct } = this.props;
+        if (isAPIProduct) {
+            api.deleteProduct().then((response) => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    Alert.error('Something went wrong while deleting the API Product!');
+                    return;
+                }
+                const redirectURL = '/api-products';
+                Alert.success('API Product ' + api.name + ' was deleted successfully!');
+                history.push(redirectURL);
+            });
+        } else {
+            api.delete().then((response) => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    Alert.error('Something went wrong while deleting the API!');
+                    return;
+                }
+                const redirectURL = '/apis';
+                Alert.success('API ' + api.name + ' was deleted successfully!');
+                history.push(redirectURL);
+            });
+        }
     }
 
     /**
@@ -118,7 +131,9 @@ class DeleteApiButton extends React.Component {
      * @memberof DeleteApiButton
      */
     render() {
-        const { api, onClick, classes } = this.props;
+        const {
+            api, onClick, classes, isAPIProduct,
+        } = this.props;
         const deleteHandler = onClick || this.handleApiDelete;
         return (
             <React.Fragment>
@@ -142,7 +157,8 @@ class DeleteApiButton extends React.Component {
                     <DialogTitle>Confirm</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Are you sure you want to delete the API ({api.name} - {api.version}
+                            Are you sure you want to delete the {isAPIProduct ? 'API Product ' : 'API '}
+                            ({api.name} {isAPIProduct ? null : '-' + api.version}
                             )?
                         </DialogContentText>
                     </DialogContent>
@@ -171,6 +187,7 @@ DeleteApiButton.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     onClick: PropTypes.func,
     classes: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default withRouter(withStyles(styles, { withTheme: true })(DeleteApiButton));
