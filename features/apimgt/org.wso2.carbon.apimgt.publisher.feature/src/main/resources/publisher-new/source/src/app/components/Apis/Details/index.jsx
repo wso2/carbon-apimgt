@@ -149,7 +149,7 @@ class Details extends Component {
             api: null,
             apiNotFound: false,
             active: active || 'overview',
-            updateAPI: this.updateAPI, // eslint-disable-line react/no-unused-state
+            updateAPI: this.updateAPI.bind(this), // eslint-disable-line react/no-unused-state
             isAPIProduct,
         };
         this.setAPI = this.setAPI.bind(this);
@@ -256,10 +256,13 @@ class Details extends Component {
             const promisedApi = restAPI.updateProduct(JSON.parse(JSON.stringify(newAPI)));
             promisedApi
                 .then((api) => {
-                    Alert.info(`${api.name}` + intl.formatMessage({
-                        id: 'Apis.Details.index.update.success.product',
-                        defaultMessage: ' updated successfully.',
-                    }));
+                    const messages = intl.defineMessages({
+                        successMessage: {
+                            id: 'Apis.Details.index.update.success.product',
+                            defaultMessage: '{apiName} updated successfully.',
+                        },
+                    });
+                    Alert.info(intl.formatMessage(messages.successMessage, { apiName: `${api.name}` }));
                     this.setState({ api });
                 })
                 .catch((error) => {
@@ -275,10 +278,13 @@ class Details extends Component {
             const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
             promisedApi
                 .then((api) => {
-                    Alert.info(`${api.name}` + intl.formatMessage({
-                        id: 'Apis.Details.index.update.success',
-                        defaultMessage: ' updated successfully.',
-                    }));
+                    const messages = intl.defineMessages({
+                        successMessage: {
+                            id: 'Apis.Details.index.update.success',
+                            defaultMessage: '{apiName} updated successfully.',
+                        },
+                    });
+                    Alert.info(intl.formatMessage(messages.successMessage, { apiName: `${api.name}` }));
                     this.setState({ api });
                 })
                 .catch((error) => {
@@ -336,18 +342,22 @@ class Details extends Component {
         const redirectUrl = (isAPIProduct ? '/api-products/' : '/apis/') + match.params.api_uuid + '/' + active;
         if (apiNotFound) {
             const { apiUUID } = match.params;
+            const resourceNotFoundMessageText = intl.defineMessages({
+                titleMessage: {
+                    id: 'Apis.Details.index.api.not.found.title',
+                    defaultMessage: 'API is Not Found in the {environmentLabel} Environment',
+                },
+                bodyMessage: {
+                    id: 'Apis.Details.index.api.not.found.body',
+                    defaultMessage: "Can't find the API with the id {apiUUID}",
+                },
+            });
             const resourceNotFountMessage = {
-                title: intl.formatMessage({
-                    id: 'Apis.Details.index.api.not.found.in',
-                    defaultMessage: 'API is Not Found in the ',
-                }) + `${Utils.getCurrentEnvironment().label}` + intl.formatMessage({
-                    id: 'Apis.Details.index.environment',
-                    defaultMessage: ' Environment',
-                }),
-                body: intl.formatMessage({
-                    id: 'Apis.Details.index.cannot.find.api.with.id',
-                    defaultMessage: "Can't find the API with the id ",
-                }) + `${apiUUID}`,
+                title: (intl.formatMessage(
+                    resourceNotFoundMessageText.title,
+                    { environmentLabel: `${Utils.getCurrentEnvironment().label}` },
+                )),
+                body: intl.formatMessage(resourceNotFoundMessageText.body, { apiUUID: `${apiUUID}` }),
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
