@@ -33,11 +33,11 @@ const NotFound = (props) => {
                 </h4>
                 <p>
                     <FormattedMessage
-                        id='Base.Errors.PageNotfound.message'
+                        id='Base.Errors.PageNotfound.message.prefix'
                         defaultMessage='Sorry the page you are looking for'
                     />
                     <span style={{ color: 'green' }}> {props.location.pathname} </span>
-                    <FormattedMessage defaultMessage='is not available.' />
+                    <FormattedMessage id='Base.Errors.PageNotfound.message.suffix' defaultMessage='is not available.' />
                 </p>
             </div>
         </div>

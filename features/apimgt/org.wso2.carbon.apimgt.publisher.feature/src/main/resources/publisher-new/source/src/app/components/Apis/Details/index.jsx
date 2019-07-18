@@ -43,7 +43,6 @@ import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
-import { injectIntl } from 'react-intl';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
@@ -326,7 +325,6 @@ class Details extends Component {
             location: pageLocation,
             location: { pathname }, // nested destructuring
         } = this.props;
-        const { intl } = this.props;
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
             return <PageNotFound location={pageLocation} />;
@@ -578,7 +576,6 @@ Details.propTypes = {
             leftMenuIconMainSize: PropTypes.number,
         }),
     }).isRequired,
-    intl: PropTypes.shape({}).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
