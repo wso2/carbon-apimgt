@@ -1,5 +1,6 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import { injectIntl, } from 'react-intl';
 
 const styles = theme => ({
     root: {
@@ -24,4 +25,4 @@ const waitingForApproval = (props) => {
     return <div className={classes.root}>{message}</div>;
 };
 
-export default withStyles(styles)(waitingForApproval);
+export default injectIntl(withStyles(styles)(waitingForApproval));

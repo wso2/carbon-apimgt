@@ -22,7 +22,7 @@ import { Typography } from '@material-ui/core';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
 import FileCopy from '@material-ui/icons/FileCopy';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 
 const styles = theme => ({
     code: {
@@ -176,4 +176,4 @@ ViewCurl.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(ViewCurl);
+export default injectIntl(withStyles(styles)(ViewCurl));

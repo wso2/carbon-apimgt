@@ -23,7 +23,7 @@ import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Alert from '../../../Shared/Alert';
 import API from '../../../../data/api';
 
@@ -263,4 +263,4 @@ CommentAdd.propTypes = {
     }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(CommentAdd);
+export default injectIntl(withStyles(styles, { withTheme: true })(CommentAdd));

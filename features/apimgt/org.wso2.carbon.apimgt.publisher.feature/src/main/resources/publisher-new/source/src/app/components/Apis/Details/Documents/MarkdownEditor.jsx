@@ -124,6 +124,10 @@ function MarkdownEditor(props) {
     };
 
     const { classes } = props;
+    alert(intl.formatMessage({
+        id: 'documents.markdown.editor.updated.successfully',
+        defaultMessage: 'updated successfully.',
+    }));
     return (
         <div>
             <Button onClick={toggleOpen}>

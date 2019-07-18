@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { injectIntl, } from 'react-intl';
 import Utils from '../../data/Utils';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
@@ -71,4 +72,4 @@ class AnonymousView extends React.Component {
     }
 }
 
-export default AnonymousView;
+export default injectIntl(AnonymousView);

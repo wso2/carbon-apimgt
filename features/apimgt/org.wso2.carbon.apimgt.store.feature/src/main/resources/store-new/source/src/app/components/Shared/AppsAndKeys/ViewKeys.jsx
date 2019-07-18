@@ -37,7 +37,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
 import Application from '../../../data/Application';
@@ -438,4 +438,4 @@ ViewKeys.propTypes = {
     fullScreen: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles)(ViewKeys);
+export default injectIntl(withStyles(styles)(ViewKeys));

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
+import { injectIntl, } from 'react-intl';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import API from '../../../data/api';
@@ -149,4 +150,4 @@ class ApiTableView extends React.Component {
     }
 }
 
-export default ApiTableView;
+export default injectIntl(ApiTableView);

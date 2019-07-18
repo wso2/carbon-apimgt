@@ -22,7 +22,7 @@ import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleO
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Alert from '../../../Shared/Alert';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
@@ -281,4 +281,4 @@ Comments.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Comments);
+export default injectIntl(withStyles(styles, { withTheme: true })(Comments));

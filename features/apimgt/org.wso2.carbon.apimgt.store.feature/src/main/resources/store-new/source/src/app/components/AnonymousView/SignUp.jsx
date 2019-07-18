@@ -33,7 +33,7 @@ import Person from '@material-ui/icons/Person';
 import Mail from '@material-ui/icons/Mail';
 import { Link } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import AuthManager from '../../data/AuthManager';
 import Utils from '../../data/Utils';
 import ConfigManager from '../../data/ConfigManager';
@@ -581,4 +581,4 @@ SignUp.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SignUp);
+export default injectIntl(withStyles(styles)(SignUp));

@@ -23,7 +23,7 @@ import {
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -32,6 +32,7 @@ import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
 import Api from '../../../data/api';
 import Progress from '../../Shared/Progress';
+import AuthManager from '../../../data/AuthManager';
 
 const LoadableSwitch = Loadable.Map({
     loader: {
@@ -176,8 +177,24 @@ class Details extends React.Component {
          * @memberof Details
          */
         this.updateSubscriptionData = () => {
+            const user = AuthManager.getUser();
+
             const api = new Api();
             const promised_api = api.getAPIById(this.api_uuid);
+            if(!user){
+                promised_api.then((response) => {
+                    this.setState({ api: response.body });
+                }).catch( (error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const status = error.status;
+                    if (status === 404) {
+                        this.setState({ notFound: true });
+                    }
+                });
+                return;
+            }
             const existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
             const promised_applications = api.getAllApplications();
 
@@ -186,8 +203,8 @@ class Details extends React.Component {
                     const [api, subscriptions, applications] = response.map(data => data.obj);
                     // Getting the policies from api details
                     this.setState({ api });
-                    if (api && api.policies) {
-                        const apiTiers = api.policies;
+                    if (api && api.tiers) {
+                        const apiTiers = api.tiers;
                         const tiers = [];
                         for (let i = 0; i < apiTiers.length; i++) {
                             const tierName = apiTiers[i];
@@ -252,6 +269,7 @@ class Details extends React.Component {
             subscribedApplications: [],
             applicationsAvailable: [],
             item: 1,
+            xo: null,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
@@ -311,13 +329,12 @@ class Details extends React.Component {
     render() {
         this.updateActiveLink();
 
-        const { classes, theme } = this.props;
-        const { active } = this.state;
+        const { classes, theme, intl, } = this.props;
+        const { active, api } = this.state;
         const redirect_url = '/apis/' + this.props.match.params.api_uuid + '/overview';
         const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
-        return (
-            <ApiContext.Provider value={this.state}>
+        return ( api ? <ApiContext.Provider value={this.state}>
                 <style>{globalStyle}</style>
                 <div className={classes.LeftMenu}>
                     <Link to='/apis' className={classes.leftLInkMainWrapper}>
@@ -337,11 +354,11 @@ class Details extends React.Component {
                     <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>
-                    <InfoBar apiId={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
+                    <InfoBar apiId={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} intl={intl} />
                     <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
-            </ApiContext.Provider>
+            </ApiContext.Provider> : <div class="apim-dual-ring"></div>
         );
     }
 }
@@ -349,6 +366,9 @@ class Details extends React.Component {
 Details.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Details);
+export default injectIntl(withStyles(styles, { withTheme: true })(Details));

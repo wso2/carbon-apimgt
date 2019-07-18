@@ -26,7 +26,7 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
 /**
@@ -184,4 +184,4 @@ ApplicationCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ApplicationCreate);
+export default injectIntl(withStyles(styles)(ApplicationCreate));

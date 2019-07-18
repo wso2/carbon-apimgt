@@ -29,7 +29,7 @@ import ToolBar from '@material-ui/core/Toolbar';
 import Table, {
     TableBody, TableHead, TableRow, TableCell,
 } from '@material-ui/core/Table';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Footer from '../Base/Footer/Footer';
 
 const styles = {
@@ -544,4 +544,4 @@ CookiePolicy.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(CookiePolicy);
+export default injectIntl(withStyles(styles)(CookiePolicy));

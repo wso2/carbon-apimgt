@@ -19,7 +19,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import SubscriptionPolicySelect from './SubscriptionPolicySelect';
 
@@ -58,7 +58,7 @@ class APIList extends React.Component {
         }
 
         const {
-            theme, unsubscribedAPIList, handleSubscribe, applicationId,
+            theme, unsubscribedAPIList, handleSubscribe, applicationId, intl, 
         } = this.props;
         const columns = [
             {
@@ -122,4 +122,4 @@ APIList.propTypes = {
         formatMessage: PropTypes.func,
     }).isRequired,
 };
-export default withStyles(styles, { withTheme: true })(APIList);
+export default injectIntl(withStyles(styles, { withTheme: true })(APIList));

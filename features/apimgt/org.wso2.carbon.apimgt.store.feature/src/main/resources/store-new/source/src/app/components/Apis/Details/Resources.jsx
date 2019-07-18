@@ -22,6 +22,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
+import { injectIntl } from 'react-intl';
 import Api from '../../../data/api';
 
 /**
@@ -159,4 +160,4 @@ Resources.propTypes = {
     }).isRequired,
 };
 
-export default withStyles(styles)(Resources);
+export default injectIntl(withStyles(styles)(Resources));

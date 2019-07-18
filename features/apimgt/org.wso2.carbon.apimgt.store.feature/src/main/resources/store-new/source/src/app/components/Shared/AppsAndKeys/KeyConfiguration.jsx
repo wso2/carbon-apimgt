@@ -24,7 +24,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
 const styles = theme => ({
@@ -227,4 +227,4 @@ class KeyConfiguration extends React.Component {
     }
 }
 
-export default withStyles(styles)(KeyConfiguration);
+export default injectIntl(withStyles(styles)(KeyConfiguration));

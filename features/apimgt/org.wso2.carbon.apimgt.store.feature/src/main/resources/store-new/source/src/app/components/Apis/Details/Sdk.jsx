@@ -31,7 +31,7 @@ import JSFileDownload from 'js-file-download';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Api from '../../../data/api';
 /**
  *
@@ -253,4 +253,4 @@ class Sdk extends React.Component {
         );
     }
 }
-export default Sdk;
+export default injectIntl(Sdk);

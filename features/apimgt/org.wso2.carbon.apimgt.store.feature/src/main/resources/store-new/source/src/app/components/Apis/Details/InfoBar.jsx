@@ -38,11 +38,14 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import Update from '@material-ui/icons/Update';
 import LinkIcon from '@material-ui/icons/Link';
 import Button from '@material-ui/core/Button';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ImageGenerator from '../Listing/ImageGenerator';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
+import { ApiContext } from './ApiContext';
+
 /**
  *
  *
@@ -492,55 +495,8 @@ class InfoBar extends React.Component {
             sandboxUrlCopied: false,
             showOverview: false,
             checked: false,
+            epUrl: '',
         };
-    }
-
-    /**
-     *
-     *
-     * @memberof InfoBar
-     */
-    componentDidMount() {
-        const { apiId } = this.props;
-        const api = new Api();
-        api.getAPIById(apiId)
-            .then((response) => {
-                this.setState({ api: response.obj });
-                // this.props.setDetailsAPI(response.obj);
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-
-        api.getAllApplications()
-            .then((response) => {
-                this.setState({ applications: response.obj.list });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                if (error.status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-
-        api.getSubscriptions(apiId, null)
-            .then(() => {})
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                if (error.status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
     }
 
     /**
@@ -599,240 +555,244 @@ class InfoBar extends React.Component {
     render() {
         const { classes, theme, intl } = this.props;
         const {
-            api, notFound, showOverview, prodUrlCopied, sandboxUrlCopied,
+            notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl,
         } = this.state;
         const { resourceNotFountMessage } = this.props;
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
-        if (!api) {
-            return <Loading />;
-        }
-        const epUrl = this.getHttpsEP(api);
 
         return (
-            <div className={classes.infoBarMain}>
-                <div className={classes.root}>
-                    <Link to='/apis' className={classes.backLink}>
-                        <KeyboardArrowLeft className={classes.backIcon} />
-                        <div className={classes.backText}>
-                            <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
-                            <br />
-                            <FormattedMessage id='Apis.Details.InfoBar.listing' defaultMessage='LISTING' />
-                        </div>
-                    </Link>
-                    <VerticalDivider height={70} />
-                    <ImageGenerator api={api} width='70' height='50' />
-                    <div style={{ marginLeft: theme.spacing.unit }}>
-                        <Typography variant='display1'>{api.name}</Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            {api.provider}
+            <ApiContext.Consumer>
+                {({ api }) => (
+                    <div className={classes.infoBarMain}>
+                        <div className={classes.root}>
+                            <Link to='/apis' className={classes.backLink}>
+                                <KeyboardArrowLeft className={classes.backIcon} />
+                                <div className={classes.backText}>
+                                    <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
+                                    <br />
+                                    <FormattedMessage id='Apis.Details.InfoBar.listing' defaultMessage='LISTING' />
+                                </div>
+                            </Link>
+                            <VerticalDivider height={70} />
+                            <ImageGenerator api={api} width='70' height='50' />
+                            <div style={{ marginLeft: theme.spacing.unit }}>
+                                <Typography variant='display1'>{api.name}</Typography>
+                                <Typography variant='caption' gutterBottom align='left'>
+                                    {api.provider}
 | 21-May 2018
-                        </Typography>
-                    </div>
-                    <VerticalDivider height={70} />
-                    <StarRatingBar apiIdProp={api.id} />
-                </div>
+                                </Typography>
+                            </div>
+                            <VerticalDivider height={70} />
+                            <StarRatingBar apiIdProp={api.id} />
+                        </div>
 
-                {showOverview && (
-                    <Collapse in={showOverview}>
-                        <div className={classes.infoContent}>
-                            <div className={classes.contentWrapper}>
-                                <Typography>{api.description}</Typography>
-                                <Table className={classes.table}>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row' className={classes.leftCol}>
-                                                <div className={classes.iconAligner}>
-                                                    <CalendarViewDay className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.list.version'
-                                                            defaultMessage='Version'
+                        {showOverview && (
+                            <Collapse in={showOverview}>
+                                <div className={classes.infoContent}>
+                                    <div className={classes.contentWrapper}>
+                                        <Typography>{api.description}</Typography>
+                                        <Table className={classes.table}>
+                                            <TableBody>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row' className={classes.leftCol}>
+                                                        <div className={classes.iconAligner}>
+                                                            <CalendarViewDay className={classes.iconOdd} />
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.list.version'
+                                                                    defaultMessage='Version'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>{api.version}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <AccountBalanceWallet className={classes.iconEven} />
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.list.context'
+                                                                    defaultMessage='Context'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>{api.context}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <AccountCircle className={classes.iconOdd} />
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.provider'
+                                                                    defaultMessage='Provider'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>{api.provider}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <Update className={classes.iconEven} />
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.last.updated'
+                                                                    defaultMessage='Last updated'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>21 May 2018</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <LinkIcon className={classes.iconOdd} />
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.production.url'
+                                                                    defaultMessage='Production URL'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <TextField
+                                                            defaultValue={this.getHttpsEP(api)}
+                                                            id='bootstrap-input'
+                                                            InputProps={{
+                                                                disableUnderline: true,
+                                                                classes: {
+                                                                    root: classes.bootstrapRoot,
+                                                                    input: classes.bootstrapInput,
+                                                                },
+                                                            }}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                                className: classes.bootstrapFormLabel,
+                                                            }}
                                                         />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{api.version}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <AccountBalanceWallet className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.list.context'
-                                                            defaultMessage='Context'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{api.context}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <AccountCircle className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.provider'
-                                                            defaultMessage='Provider'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{api.provider}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <Update className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.last.updated'
-                                                            defaultMessage='Last updated'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>21 May 2018</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <LinkIcon className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.production.url'
-                                                            defaultMessage='Production URL'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    defaultValue={epUrl}
-                                                    id='bootstrap-input'
-                                                    InputProps={{
-                                                        disableUnderline: true,
-                                                        classes: {
-                                                            root: classes.bootstrapRoot,
-                                                            input: classes.bootstrapInput,
-                                                        },
-                                                    }}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                        className: classes.bootstrapFormLabel,
-                                                    }}
-                                                />
-                                                <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
-                                                    placement='right'
-                                                >
-                                                    <CopyToClipboard text={epUrl} onCopy={this.onCopy('prodUrlCopied')}>
-                                                        <FileCopy color='secondary' />
-                                                    </CopyToClipboard>
-                                                </Tooltip>
-                                                <Button
-                                                    variant='contained'
-                                                    size='small'
-                                                    color='primary'
-                                                    className={classes.margin}
-                                                >
-                                                    <FormattedMessage
-                                                        id='Apis.Details.InfoBar.test.endpoint'
-                                                        defaultMessage='Test Endpoint'
-                                                    />
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <LinkIcon className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.sandbox.url'
-                                                            defaultMessage='Sandbox URL'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className={classes.iconAligner}>
-                                                    <TextField
-                                                        defaultValue={epUrl}
-                                                        id='bootstrap-input'
-                                                        InputProps={{
-                                                            disableUnderline: true,
-                                                            classes: {
-                                                                root: classes.bootstrapRoot,
-                                                                input: classes.bootstrapInput,
-                                                            },
-                                                        }}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                            className: classes.bootstrapFormLabel,
-                                                        }}
-                                                    />
-                                                    <Tooltip
-                                                        title={
-                                                            sandboxUrlCopied
-                                                                ? intl.formatMessage({
-                                                                    defaultMessage: 'Copied',
-                                                                    id: 'Apis.Details.InfoBar.copied',
-                                                                })
-                                                                : intl.formatMessage({
-                                                                    defaultMessage: 'Copy to clipboard',
-                                                                    id: 'Apis.Details.InfoBar.copy.to.clipboard',
-                                                                })
-                                                        }
-                                                        placement='right'
-                                                    >
-                                                        <CopyToClipboard
-                                                            text={epUrl}
-                                                            onCopy={this.onCopy('sandboxUrlCopied')}
+                                                        <Tooltip
+                                                            title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                            placement='right'
                                                         >
-                                                            <FileCopy color='secondary' />
-                                                        </CopyToClipboard>
-                                                    </Tooltip>
-                                                    <Button
-                                                        variant='contained'
-                                                        size='small'
-                                                        color='primary'
-                                                        className={classes.margin}
-                                                    >
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.test.endpoint'
-                                                            defaultMessage='Test Endpoint'
-                                                        />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
+                                                            <CopyToClipboard
+                                                                text={epUrl}
+                                                                onCopy={this.onCopy('prodUrlCopied')}
+                                                            >
+                                                                <FileCopy color='secondary' />
+                                                            </CopyToClipboard>
+                                                        </Tooltip>
+                                                        <Button
+                                                            variant='contained'
+                                                            size='small'
+                                                            color='primary'
+                                                            className={classes.margin}
+                                                        >
+                                                            <FormattedMessage
+                                                                id='Apis.Details.InfoBar.test.endpoint'
+                                                                defaultMessage='Test Endpoint'
+                                                            />
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <LinkIcon className={classes.iconEven} />
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.sandbox.url'
+                                                                    defaultMessage='Sandbox URL'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className={classes.iconAligner}>
+                                                            <TextField
+                                                                defaultValue={epUrl}
+                                                                id='bootstrap-input'
+                                                                InputProps={{
+                                                                    disableUnderline: true,
+                                                                    classes: {
+                                                                        root: classes.bootstrapRoot,
+                                                                        input: classes.bootstrapInput,
+                                                                    },
+                                                                }}
+                                                                InputLabelProps={{
+                                                                    shrink: true,
+                                                                    className: classes.bootstrapFormLabel,
+                                                                }}
+                                                            />
+                                                            <Tooltip
+                                                                title={
+                                                                    sandboxUrlCopied
+                                                                        ? intl.formatMessage({
+                                                                            defaultMessage: 'Copied',
+                                                                            id: 'Apis.Details.InfoBar.copied',
+                                                                        })
+                                                                        : intl.formatMessage({
+                                                                            defaultMessage: 'Copy to clipboard',
+                                                                            id:
+                                                                                  'Apis.Details.InfoBar.copy.to.clipboard',
+                                                                        })
+                                                                }
+                                                                placement='right'
+                                                            >
+                                                                <CopyToClipboard
+                                                                    text={epUrl}
+                                                                    onCopy={this.onCopy('sandboxUrlCopied')}
+                                                                >
+                                                                    <FileCopy color='secondary' />
+                                                                </CopyToClipboard>
+                                                            </Tooltip>
+                                                            <Button
+                                                                variant='contained'
+                                                                size='small'
+                                                                color='primary'
+                                                                className={classes.margin}
+                                                            >
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.test.endpoint'
+                                                                    defaultMessage='Test Endpoint'
+                                                                />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </div>
+                            </Collapse>
+                        )}
+                        <div className={classes.infoContentBottom}>
+                            <div className={classes.contentWrapper} onClick={this.toggleOverview}>
+                                <div className={classes.buttonView}>
+                                    {showOverview ? (
+                                        <Typography className={classes.buttonOverviewText}>
+                                            <FormattedMessage id='Apis.Details.InfoBar.less' defaultMessage='LESS' />
+                                        </Typography>
+                                    ) : (
+                                        <Typography className={classes.buttonOverviewText}>
+                                            <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' />
+                                        </Typography>
+                                    )}
+                                    {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
+                                </div>
                             </div>
                         </div>
-                    </Collapse>
-                )}
-                <div className={classes.infoContentBottom}>
-                    <div className={classes.contentWrapper} onClick={this.toggleOverview}>
-                        <div className={classes.buttonView}>
-                            {showOverview ? (
-                                <Typography className={classes.buttonOverviewText}>
-                                    <FormattedMessage id='Apis.Details.InfoBar.less' defaultMessage='LESS' />
-                                </Typography>
-                            ) : (
-                                <Typography className={classes.buttonOverviewText}>
-                                    <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' />
-                                </Typography>
-                            )}
-                            {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
-                        </div>
                     </div>
-                </div>
-            </div>
+                )}
+            </ApiContext.Consumer>
         );
     }
 }
@@ -845,4 +805,4 @@ InfoBar.propTypes = {
     }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(InfoBar);
+export default injectIntl(withStyles(styles, { withTheme: true })(InfoBar));

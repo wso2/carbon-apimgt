@@ -20,6 +20,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'qs';
 import PropTypes from 'prop-types';
+import { injectIntl, } from 'react-intl';
 import AuthManager from '../data/AuthManager';
 /**
  * Logout component
@@ -79,4 +80,4 @@ Logout.propTypes = {
     location: PropTypes.instanceOf(Object).isRequired,
 };
 
-export default Logout;
+export default injectIntl(Logout);

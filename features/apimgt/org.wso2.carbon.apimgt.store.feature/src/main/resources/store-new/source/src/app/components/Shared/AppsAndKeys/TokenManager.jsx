@@ -24,6 +24,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Application from '../../../data/Application';
 import Loading from '../../Base/Loading/Loading';
 import KeyConfiguration from './KeyConfiguration';
@@ -275,4 +276,4 @@ TokenManager.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(TokenManager);
+export default injectIntl(withStyles(styles)(TokenManager));

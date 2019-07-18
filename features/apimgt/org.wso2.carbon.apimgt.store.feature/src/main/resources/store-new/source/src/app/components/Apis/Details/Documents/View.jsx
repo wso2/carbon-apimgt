@@ -24,7 +24,7 @@ import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
 import ReactMarkdown from 'react-markdown';
 import ReactSafeHtml from 'react-safe-html';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import API from '../../../../data/api';
 import Alert from '../../../Shared/Alert';
 
@@ -186,4 +186,4 @@ View.propTypes = {
     fullScreen: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(View);
+export default injectIntl(withStyles(styles)(View));

@@ -21,6 +21,7 @@ import { Typography } from '@material-ui/core/';
 import { withStyles } from '@material-ui/core/styles';
 import AccountBox from '@material-ui/icons/AccountBox';
 import Grid from '@material-ui/core/Grid';
+import { injectIntl, } from 'react-intl';
 import Alert from '../../../Shared/Alert';
 import ConfirmDialog from '../../../Shared/ConfirmDialog';
 import CommentAdd from './CommentAdd';
@@ -228,7 +229,7 @@ class Comment extends React.Component {
      */
     render() {
         const {
-            classes, comments, apiId, allComments, commentsUpdate, intl,
+            classes, comments, apiId, allComments, commentsUpdate,
         } = this.props;
         const { editIndex, replyIndex, openDialog } = this.state;
         return [
@@ -298,10 +299,7 @@ class Comment extends React.Component {
                 key='key-dialog'
                 labelCancel='Cancel'
                 title='Confirm Delete'
-                message={intl.formatMessage({
-                    defaultMessage: 'Are you sure you want to delete this comment?',
-                    id: 'Apis.Details.Comments.Comment.are.you.sure',
-                })}
+                message='Are you sure you want to delete this comment?'
                 labelOk='Yes'
                 callback={this.handleConfirmDialog}
                 open={openDialog}
@@ -309,16 +307,13 @@ class Comment extends React.Component {
         ];
     }
 }
-
+ 
 Comment.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     apiId: PropTypes.string.isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
-    intl: PropTypes.shape({
-        formatMessage: PropTypes.func,
-    }).isRequired,
 };
 
-export default withStyles(styles)(Comment);
+export default injectIntl(withStyles(styles)(Comment));

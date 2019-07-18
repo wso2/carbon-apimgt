@@ -32,7 +32,7 @@ import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
 import { MenuItem } from '@material-ui/core/Menu';
 import Grid from '@material-ui/core/Grid';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Utils from '../../data/Utils';
 import ConfigManager from '../../data/ConfigManager';
 import User from '../../data/User';
@@ -393,4 +393,4 @@ class Login extends Component {
     }
 }
 
-export default withRouter(Login);
+export default injectIntl(withRouter(Login));

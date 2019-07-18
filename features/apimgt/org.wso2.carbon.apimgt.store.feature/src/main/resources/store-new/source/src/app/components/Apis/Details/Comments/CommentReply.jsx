@@ -21,6 +21,7 @@ import { Typography } from '@material-ui/core/';
 import { withStyles } from '@material-ui/core/styles';
 import AccountBox from '@material-ui/icons/AccountBox';
 import Grid from '@material-ui/core/Grid';
+import { injectIntl, } from 'react-intl';
 import Alert from '../../../Shared/Alert';
 import ConfirmDialog from '../../../Shared/ConfirmDialog';
 import CommentEdit from './CommentEdit';
@@ -277,4 +278,4 @@ CommentReply.propTypes = {
     }).isRequired,
 };
 
-export default withStyles(styles)(CommentReply);
+export default injectIntl(withStyles(styles)(CommentReply));

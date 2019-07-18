@@ -38,7 +38,7 @@ import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
@@ -679,4 +679,4 @@ Subscribe.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Subscribe);
+export default injectIntl(withStyles(styles)(Subscribe));

@@ -18,6 +18,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import { TextField, Button, Typography } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -259,4 +260,4 @@ CommentEdit.propTypes = {
     }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(CommentEdit);
+export default injectIntl(withStyles(styles, { withTheme: true })(CommentEdit));
