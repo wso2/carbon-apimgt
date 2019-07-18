@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
@@ -54,8 +55,11 @@ const DetailsTopMenu = ({ classes, theme }) => {
                     <Link to={isAPIProduct ? '/api-products' : '/apis'} className={classes.backLink}>
                         <KeyboardArrowLeft className={classes.backIcon} />
                         <div className={classes.backText}>
-                            BACK TO <br />
-                            LISTING
+                            <FormattedMessage
+                                id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
+                                defaultMessage='BACK TO {break} LISTING'
+                                values={{ break: <br /> }}
+                            />
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
@@ -92,8 +96,9 @@ const DetailsTopMenu = ({ classes, theme }) => {
                         <div className={classes.linkText}>View In store</div>
                     </a>
                     <VerticalDivider height={70} />
-                    {isAPIProduct ? null :
-                        (<CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />)}
+                    {isAPIProduct ? null : (
+                        <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />
+                    )}
                     <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
                 </div>
             )}

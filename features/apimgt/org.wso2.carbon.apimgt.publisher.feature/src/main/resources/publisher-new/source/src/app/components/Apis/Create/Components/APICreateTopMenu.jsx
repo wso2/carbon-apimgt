@@ -92,8 +92,11 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
                 <Link to='/apis' className={classes.backLink}>
                     <KeyboardArrowLeft className={classes.backIcon} />
                     <div className={classes.backText}>
-                        BACK TO <br />
-                        LISTING
+                        <FormattedMessage
+                            id='Apis.Create.Components.APICreateTopMenu.back.to.listing'
+                            defaultMessage='BACK TO {break} LISTING'
+                            values={{ break: <br /> }}
+                        />
                     </div>
                 </Link>
                 <VerticalDivider height={70} />

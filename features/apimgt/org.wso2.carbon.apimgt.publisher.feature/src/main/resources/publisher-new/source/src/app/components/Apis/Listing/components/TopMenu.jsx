@@ -56,6 +56,13 @@ const styles = theme => ({
         background: '#15b8cf',
     },
 });
+
+/**
+ *
+ *
+ * @class TopMenu
+ * @extends {React.Component}
+ */
 class TopMenu extends React.Component {
     constructor(props) {
         super(props);
@@ -81,6 +88,14 @@ class TopMenu extends React.Component {
     changeAPIProductProperty(isProduct) {
         this.setState({ isAPIProduct: isProduct });
     }
+
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof TopMenu
+     */
     render() {
         const {
             classes, apis, setListType, theme,
@@ -98,30 +113,29 @@ class TopMenu extends React.Component {
                     </Typography>
                     {apis && (
                         <Typography variant='caption' gutterBottom align='left'>
-                            Displaying {apis.count} {isAPIProduct ? ' API Product(s)' : ' API(s)'}
+                            <FormattedMessage
+                                id='Apis.Listing.components.TopMenu.displaying'
+                                defaultMessage='Displaying'
+                            />{' '}
+                            {apis.count} {isAPIProduct ? ' API Product(s)' : ' API(s)'}
                         </Typography>
                     )}
                 </div>
                 <VerticalDivider height={70} />
                 <div className={classes.APICreateMenu}>
-                    {isAPIProduct ?
-                        (
-                            <Link to='/api-products/create'>
-                                <Button variant='contained' className={classes.createButton}>
-                                    <FormattedMessage
-                                        id='create.an.api.product'
-                                        defaultMessage='Create an API Product'
-                                    />
-                                </Button>
-                            </Link>
-                        ) : (
-                            <APICreateMenu
-                                buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}
-                            >
-                                <FormattedMessage id='create.an.api' defaultMessage='Create API' />
-                            </APICreateMenu>
-                        )
-                    }
+                    {isAPIProduct ? (
+                        <Link to='/api-products/create'>
+                            <Button variant='contained' className={classes.createButton}>
+                                <FormattedMessage id='create.an.api.product' defaultMessage='Create an API Product' />
+                            </Button>
+                        </Link>
+                    ) : (
+                        <APICreateMenu
+                            buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}
+                        >
+                            <FormattedMessage id='create.an.api' defaultMessage='Create API' />
+                        </APICreateMenu>
+                    )}
                 </div>
                 <div className={classes.buttonRight}>
                     <IconButton className={classes.button} onClick={() => setListType('list')}>

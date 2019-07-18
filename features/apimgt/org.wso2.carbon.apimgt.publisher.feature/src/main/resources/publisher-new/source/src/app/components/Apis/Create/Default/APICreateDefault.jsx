@@ -79,14 +79,11 @@ class APICreateForm extends Component {
         const {
             classes, type, handleSubmit, isAPIProduct, inputChange, api, valid,
         } = this.props;
-        const {
-            loading,
-        } = this.state;
-        let id = 'create.new.rest.api';
-        let defaultMessage = 'New REST API';
+        const { loading } = this.state;
+        let mainTitle = <FormattedMessage id='create.new.rest.api' defaultMessage='New REST API' />;
+
         if (isAPIProduct) {
-            id = 'create.new.api.product';
-            defaultMessage = 'New API Product';
+            mainTitle = <FormattedMessage id='create.new.api.product' defaultMessage='New API Product' />;
         }
         return (
             <Grid container spacing={24} className={classes.root}>
@@ -95,9 +92,7 @@ class APICreateForm extends Component {
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             {type === 'ws' ? (
                                 <FormattedMessage id='create.new.websocket.api' defaultMessage='New WebSocket API' />
-                            ) : (
-                                <FormattedMessage id={id} defaultMessage={defaultMessage} />
-                            )}
+                            ) : (mainTitle)}
                         </Typography>
                         <Typography variant='h5' align='left' className={classes.subTitle}>
                             <FormattedMessage
@@ -135,8 +130,8 @@ class APICreateForm extends Component {
                                 </ScopeValidation>
                             </Grid>
                             <Grid item>
-                                <Button onClick={() =>
-                                    this.props.history.push(isAPIProduct ? '/api-products' : '/apis')}
+                                <Button
+                                    onClick={() => this.props.history.push(isAPIProduct ? '/api-products' : '/apis')}
                                 >
                                     <FormattedMessage id='cancel' defaultMessage='Cancel' />
                                 </Button>

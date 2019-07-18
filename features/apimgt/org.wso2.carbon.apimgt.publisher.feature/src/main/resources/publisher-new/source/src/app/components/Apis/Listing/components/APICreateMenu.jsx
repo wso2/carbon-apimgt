@@ -5,6 +5,7 @@ import MenuList from '@material-ui/core/MenuList';
 import { Link } from 'react-router-dom';
 
 import MenuButton from 'AppComponents/Shared/MenuButton';
+import { FormattedMessage } from 'react-intl';
 
 const APICreateMenu = (props) => {
     const createTypes = (
@@ -12,15 +13,38 @@ const APICreateMenu = (props) => {
             <List>
                 <ListItem>
                     <Link to='/apis/create/rest'>
-                        <ListItemText primary='Design a New REST API' secondary='Design and prototype a new REST API' />
+                        <ListItemText
+                            primary={
+                                <FormattedMessage
+                                    id='Apis.Listing.components.APICreateMenu.primary.rest'
+                                    defaultMessage='Design a New REST API'
+                                />
+                            }
+                            secondary={
+                                <FormattedMessage
+                                    id='Apis.Listing.components.APICreateMenu.secondary.rest'
+                                    defaultMessage='Design and prototype a new REST API'
+                                />
+                            }
+                        />
                     </Link>
                 </ListItem>
                 <Divider />
                 <ListItem>
                     <Link to='/apis/create/swagger'>
                         <ListItemText
-                            primary='I Have an Existing REST API'
-                            secondary='Use an existing REST endpoint or Swagger definition'
+                            primary={
+                                <FormattedMessage
+                                    id='Apis.Listing.components.APICreateMenu.primary.swagger'
+                                    defaultMessage='I Have an Existing REST API'
+                                />
+                            }
+                            secondary={
+                                <FormattedMessage
+                                    id='Apis.Listing.components.APICreateMenu.secondary.swagger'
+                                    defaultMessage='Use an existing REST endpoint or Swagger definition'
+                                />
+                            }
                         />
                     </Link>
                 </ListItem>
@@ -28,8 +52,18 @@ const APICreateMenu = (props) => {
                 <ListItem>
                     <Link to='/apis/create/wsdl'>
                         <ListItemText
-                            primary='I Have a SOAP Endpoint'
-                            secondary='Use an existing SOAP or Import the WSDL'
+                            primary={
+                                <FormattedMessage
+                                    id='Apis.Listing.components.APICreateMenu.primary.soap'
+                                    defaultMessage='I Have a SOAP Endpoint'
+                                />
+                            }
+                            secondary={
+                                <FormattedMessage
+                                    id='Apis.Listing.components.APICreateMenu.secondary.soap'
+                                    defaultMessage='Use an existing SOAP or Import the WSDL'
+                                />
+                            }
                         />
                     </Link>
                 </ListItem>
@@ -37,8 +71,18 @@ const APICreateMenu = (props) => {
                 <ListItem>
                     <Link to='/apis/create/rest'>
                         <ListItemText
-                            primary='Design New Websocket API'
-                            secondary='Design and prototype a new WebSocket API'
+                            primary={
+                                <FormattedMessage
+                                    id='Apis.Listing.components.APICreateMenu.primary.ws'
+                                    defaultMessage='Design New Websocket API'
+                                />
+                            }
+                            secondary={
+                                <FormattedMessage
+                                    id='Apis.Listing.components.APICreateMenu.secondary.ws'
+                                    defaultMessage='Design and prototype a new WebSocket API'
+                                />
+                            }
                         />
                     </Link>
                 </ListItem>
