@@ -94,7 +94,7 @@ function GenericEndpoint(props) {
                             <IconButton
                                 className={classes.iconButton}
                                 aria-label='Search'
-                                onClick={setAdvancedConfigOpen}
+                                onClick={() => setAdvancedConfigOpen(index, type, category)}
                             >
                                 <Icon>
                                     settings

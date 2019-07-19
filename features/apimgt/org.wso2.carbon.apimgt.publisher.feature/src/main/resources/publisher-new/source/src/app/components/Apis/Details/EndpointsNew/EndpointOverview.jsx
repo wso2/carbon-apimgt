@@ -23,7 +23,7 @@ import {
     withStyles,
     Radio,
     FormControlLabel,
-    RadioGroup, Button, Icon, Dialog, DialogTitle, DialogContent, DialogActions,
+    RadioGroup, Button, Icon, Dialog, DialogTitle, DialogContent,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -34,7 +34,7 @@ import { getEndpointTemplateByType, getEndpointTypeProperty } from './endpointUt
 import GeneralConfiguration from './GeneralConfiguration';
 import GenericEndpoint from './GenericEndpoint';
 import LoadBalanceConfig from './LoadBalanceConfig';
-import SuspendTimeoutConfig from './AdvancedConfig/SuspendTimeoutConfig';
+import AdvanceEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
 
 
 const styles = theme => ({
@@ -100,7 +100,13 @@ function EndpointOverview(props) {
     const [epConfig, setEpConfig] = useState(endpointConfig);
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState({});
     const [isLBConfigOpen, setLBConfigOpen] = useState(false);
-    const [isAdvancedConfigOpen, setAdvancedConfigOpen] = useState(false);
+    const [advanceConfigOptions, setAdvancedConfigOptions] = useState({
+        open: false,
+        index: 0,
+        type: '',
+        category: '',
+        config: undefined,
+    });
 
     const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
         { key: 'address', value: 'HTTP/SOAP Endpoint' }];
@@ -252,9 +258,39 @@ function EndpointOverview(props) {
         });
     };
 
-    const toggleAdvanceConfig = () => {
+    const getAdvanceConfig = (index, epType, category) => {
+        const endpointTypeProperty = getEndpointTypeProperty(epType, category);
+        let advanceConfig = {};
+        if (index > 0) {
+            if (epConfig.endpoint_type === 'failover') {
+                advanceConfig = epConfig[endpointTypeProperty][index - 1].config;
+            } else {
+                advanceConfig = epConfig[endpointTypeProperty][index].config;
+            }
+        } else {
+            const endpointInfo = epConfig[endpointTypeProperty];
+            if (Array.isArray(endpointInfo)) {
+                advanceConfig = endpointInfo[0].config;
+            } else {
+                advanceConfig = endpointInfo.config;
+            }
+        }
+        return advanceConfig;
+    };
+
+    const toggleAdvanceConfig = (index, type, category) => {
         console.log('Advance Config open');
-        setAdvancedConfigOpen(!isAdvancedConfigOpen);
+        const advanceEPConfig = getAdvanceConfig(index, type, category);
+        console.log(advanceEPConfig);
+        setAdvancedConfigOptions(() => {
+            return ({
+                open: !advanceConfigOptions.open,
+                index,
+                type,
+                category,
+                config: advanceEPConfig === undefined ? {} : advanceEPConfig,
+            });
+        });
     };
 
     const handleLBConfigChange = (lbConfig) => {
@@ -412,7 +448,7 @@ function EndpointOverview(props) {
                     />
                 </DialogContent>
             </Dialog>
-            <Dialog open={isAdvancedConfigOpen}>
+            <Dialog open={advanceConfigOptions.open}>
                 <DialogTitle>
                     <Typography varient='h4'>
                         <FormattedMessage
@@ -422,7 +458,10 @@ function EndpointOverview(props) {
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
-                    <SuspendTimeoutConfig isSOAPEndpoint={isSOAPEndpoint} />
+                    <AdvanceEndpointConfig
+                        isSOAPEndpoint={isSOAPEndpoint.key === 'address'}
+                        advanceConfig={advanceConfigOptions.config}
+                    />
                 </DialogContent>
             </Dialog>
         </div>
