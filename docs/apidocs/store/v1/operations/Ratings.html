@@ -19,6 +19,55 @@
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdRatingsGet">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdRatingsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings HTTP 1/1
+X-WSO2-Tenant: test.com
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdRatingsGet">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdRatingsGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;avgRating&quot; : 3.5,
+  &quot;userRating&quot; : 3,
+  &quot;count&quot; : 2,
+  &quot;list&quot; : [ {
+    &quot;ratingId&quot; : &quot;2&quot;,
+    &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
+    &quot;username&quot; : &quot;admin&quot;,
+    &quot;rating&quot; : 3
+  }, {
+    &quot;ratingId&quot; : &quot;4&quot;,
+    &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
+    &quot;username&quot; : &quot;john&quot;,
+    &quot;rating&quot; : 4
+  } ],
+  &quot;pagination&quot; : {
+    &quot;offset&quot; : 0,
+    &quot;limit&quot; : 25,
+    &quot;total&quot; : 2,
+    &quot;next&quot; : &quot;&quot;,
+    &quot;previous&quot; : &quot;&quot;
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings&#39; -H &#39;X-WSO2-Tenant: test.com&#39; </code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -216,6 +265,38 @@
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdRatingsRatingIdGet">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdRatingsRatingIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings/25 HTTP 1/1
+X-WSO2-Tenant: test.com
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdRatingsRatingIdGet">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdRatingsRatingIdGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;ratingId&quot; : &quot;25&quot;,
+  &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
+  &quot;username&quot; : &quot;john&quot;,
+  &quot;rating&quot; : 3
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings/25&#39; -H &#39;X-WSO2-Tenant: test.com&#39; </code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -420,6 +501,32 @@ variant of the resourec.
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdUserRatingDelete">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdUserRatingDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating HTTP 1/1
+Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+X-WSO2-Tenant: test.com
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdUserRatingDelete">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdUserRatingDelete" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X DELETE &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; -H &#39;X-WSO2-Tenant: test.com&#39; </code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -577,6 +684,39 @@ variant of the resourec.
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdUserRatingGet">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdUserRatingGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+X-WSO2-Tenant: test.com
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdUserRatingGet">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdUserRatingGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;ratingId&quot; : &quot;6&quot;,
+  &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
+  &quot;username&quot; : &quot;peter&quot;,
+  &quot;rating&quot; : 5
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; -H &#39;X-WSO2-Tenant: test.com&#39; </code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -753,6 +893,43 @@ variant of the resourec.
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdUserRatingPut">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdUserRatingPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating HTTP 1/1
+Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+Content-Type: application/json
+X-WSO2-Tenant: test.com
+
+{
+  &quot;rating&quot; : 4
+}</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdUserRatingPut">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdUserRatingPut" class="pre collapse in"><code class="json">HTTP 1/1 201 Created
+Content-Type: application/json
+
+{
+  &quot;ratingId&quot; : &quot;7&quot;,
+  &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
+  &quot;username&quot; : &quot;john&quot;,
+  &quot;rating&quot; : 4
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X PUT &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; -H &#39;Content-Type: application/json&#39; -H &#39;X-WSO2-Tenant: test.com&#39; -d @payload.json</code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

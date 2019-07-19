@@ -686,11 +686,6 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"avgRating\":\"3.5\",\"userRating\":3,\"count\":2,\"list\":[{\"ratingId\":\"2\",\"apiId\":\"002d8d81-d306-45e9-949e-aeb82fdeae92\",\"username\":\"admin\",\"rating\":3},{\"ratingId\":\"4\",\"apiId\":\"002d8d81-d306-45e9-949e-aeb82fdeae92\",\"username\":\"user1\",\"rating\":4}], \"pagination\":{\"offset\":0,\"limit\":25,\"total\":2,\"next\":\"\",\"previous\":\"\"}}"
       summary: Get API ratings
       description: |
         This operation can be used to get the list of ratings of an API.
@@ -699,6 +694,8 @@ paths:
 
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's Ratings, you need to provide the Authorization header.
+      x-examples:
+        $ref: docs/examples/apis/apis_id_ratings_get.yaml
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
@@ -738,11 +735,6 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings/25
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings/25"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings/25"
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"ratingId\":\"25\",\"apiId\":\"e93fb282-b456-48fc-8981-003fb89086ae\",\"username\":\"admin\",\"rating\":3}"
       summary: Get a single API rating
       description: |
         This operation can be used to get a specific rating of an API.
@@ -751,6 +743,8 @@ paths:
 
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's Rating, you need to provide the Authorization header.
+      x-examples:
+        $ref: docs/examples/apis/apis_id_ratings_id_get.yaml
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/ratingId'
@@ -807,16 +801,13 @@ paths:
         - OAuth2Security:
           - apim:subscribe
       x-scope: apim:subscribe
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
-      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"ratingId\":\"25\",\"apiId\":\"e93fb282-b456-48fc-8981-003fb89086ae\",\"username\":\"admin\",\"rating\":3}"
       summary: Get user API rating
       description: |
         This operation can be used to get the user rating of an API.
 
         `X-WSO2-Tenant` header can be used to retrive the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+      x-examples:
+        $ref: docs/examples/apis/apis_id_user-rating.yaml#/get
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/requestedTenant'
@@ -866,20 +857,13 @@ paths:
         - OAuth2Security:
           - apim:subscribe
       x-scope: apim:subscribe
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating\""
-      x-wso2-request: |
-          PUT https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
-          Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-          {
-            "rating":3
-           }
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating\""
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"ratingId\":\"25\",\"apiId\":\"e93fb282-b456-48fc-8981-003fb89086ae\",\"username\":\"admin\",\"rating\":3}"
       summary: Add or update logged in user's rating for an API
       description: |
         This operation can be used to add or update an API rating.
 
         `X-WSO2-Tenant` header can be used to add or update the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+      x-examples:
+        $ref: docs/examples/apis/apis_id_user-rating.yaml#/put
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/requestedTenant'
@@ -931,16 +915,13 @@ paths:
         - OAuth2Security:
             - apim:subscribe
       x-scope: apim:subscribe
-      x-wso2-request: |
-        DELETE https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
-      x-wso2-curl: "curl -X DELETE https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
-      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" -X DELETE https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
-      x-wso2-response: "HTTP/1.1 200 OK"
       summary: Delete user API rating
       description: |
         This operation can be used to delete logged in user API rating.
 
         `X-WSO2-Tenant` header can be used to delete the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+      x-examples:
+        $ref: docs/examples/apis/apis_id_user-rating.yaml#/delete
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/requestedTenant'
