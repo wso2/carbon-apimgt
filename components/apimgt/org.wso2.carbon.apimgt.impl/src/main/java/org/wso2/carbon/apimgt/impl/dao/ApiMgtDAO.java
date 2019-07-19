@@ -3583,7 +3583,11 @@ public class ApiMgtDAO {
         return userRating;
     }
 
-
+    /**
+     * @param apiId API Identifier
+     * @param user        User name
+     * @throws APIManagementException if failed to get user API Ratings
+     */
     public JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException {
         Connection conn = null;
         JSONObject userRating = null;
@@ -3612,9 +3616,10 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId        User Id
+     * @param conn          Database connection
      * @throws APIManagementException if failed to get user API Ratings
      */
-    public JSONObject getUserRatingInfo(APIIdentifier apiIdentifier, String userId, Connection conn)
+    private JSONObject getUserRatingInfo(APIIdentifier apiIdentifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -3666,6 +3671,11 @@ public class ApiMgtDAO {
         return ratingObj;
     }
 
+     /**
+     * @param apiId           API Identifier
+     * @param ratingId        rating Id
+     * @throws APIManagementException if failed to get API Ratings by ID
+     */
     public JSONObject getApiRatingInfoById(APIIdentifier apiId, String ratingId) throws APIManagementException {
         Connection conn = null;
         JSONObject userRating = null;
@@ -3694,9 +3704,10 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param ratingId        rating Id
+     * @param conn          Database connection
      * @throws APIManagementException if failed to get API Ratings by ID
      */
-    public JSONObject getApiRatingInfoById(APIIdentifier apiIdentifier, String ratingId, Connection conn)
+    private JSONObject getApiRatingInfoById(APIIdentifier apiIdentifier, String ratingId, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
         PreparedStatement psSubscriber = null;
@@ -3754,6 +3765,10 @@ public class ApiMgtDAO {
         return ratingObj;
     }
 
+    /**
+     * @param apiId API Identifier
+     * @throws APIManagementException if failed to get API Ratings
+     */
     public JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException {
         Connection conn = null;
         JSONArray apiRatings = null;
@@ -3781,9 +3796,10 @@ public class ApiMgtDAO {
 
     /**
      * @param apiIdentifier API Identifier
+     * @param conn          Database connection
      * @throws APIManagementException if failed to get API Ratings
      */
-    public JSONArray getAPIRatings(APIIdentifier apiIdentifier, Connection conn)
+    private JSONArray getAPIRatings(APIIdentifier apiIdentifier, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
         PreparedStatement psSubscriber = null;
