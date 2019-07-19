@@ -22,7 +22,7 @@
  * @return {string} The property name of the endpoints.
  */
 function getEndpointTypeProperty(type, category) {
-    if (type === 'load_balance' || type === 'http') {
+    if (type !== 'failover') {
         return category;
     } else {
         return category === 'sandbox_endpoints' ? 'sandbox_failovers' : 'production_failovers';
@@ -54,6 +54,7 @@ function mergeEndpoints(endpointConfig) {
  * @param {string} endpointType The endpoint type
  * @param {bool} isAddressEndpoint Whether the endpoint is soap or not.
  * @param {object} currentEndpointConfig The existing endpoint information.
+ * @return {object} A endpoint template object.
  * */
 function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpointConfig) {
     const tmpEndpointConfig = {};

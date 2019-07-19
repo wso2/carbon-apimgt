@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
-import { TextField, MenuItem, Grid } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { TextField, MenuItem, Grid, Button, withStyles } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
@@ -33,35 +33,82 @@ const sessionManagementOps = [
     { key: 'none', value: 'None' },
 ];
 
+const defaultTemplateObj = {
+    algoClassName: algorithms[0].key,
+    algoCombo: algorithms[0].key,
+    sessionManagement: sessionManagementOps[0].key,
+    sessionTimeOut: 300,
+};
+
+const styles = theme => ({
+    confingButtonContainer: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+    },
+});
+
 /**
  * The component for loadbalance endpoint configuration.
  * @param {any} props The props that are being passed.
  * @returns {any} The HTML contents of the Configuration component.
  */
 function LoadBalanceConfig(props) {
-    const [algorithm, setAlgorithm] = useState(algorithms[0]); // TODO: GEt from the props
-    const [sessionMgtOp, setSessionManagement] = useState(sessionManagementOps[0]); // TODO: GEt from the props
-    const [epTimeout, setEpTimeout] = useState(300);
-    const [customAlogrithm, setCustomAlgorithm] = useState('');
+    const {
+        algoClassName,
+        algoCombo,
+        sessionManagement,
+        sessionTimeOut,
+        handleLBConfigChange,
+        closeLBConfigDialog,
+        classes,
+    } = props;
+    const [lbConfig, setLbConfigObject] = useState(defaultTemplateObj);
+    const [algoClassNameError, setAlgoClassNameError] = useState(false);
+
+    useEffect(() => {
+        console.log('Use effect lb config');
+        setLbConfigObject(() => {
+            const tmpLBConfig = { ...defaultTemplateObj };
+            if (algoCombo) {
+                tmpLBConfig.algoCombo = algoCombo;
+            }
+            if (sessionManagement) {
+                tmpLBConfig.sessionManagement = sessionManagement;
+            }
+            if (algoClassName) {
+                tmpLBConfig.algoClassName = algoClassName;
+            }
+            if (sessionTimeOut) {
+                tmpLBConfig.sessionTimeOut = sessionTimeOut;
+            }
+            return tmpLBConfig;
+        });
+    }, [props]);
 
     const handleAlgorithmChange = (event) => {
-        const index = event.target.value;
-        setAlgorithm(algorithms[index]);
+        const { value } = event.target;
+        setLbConfigObject({
+            ...lbConfig,
+            algoCombo: value,
+            algoClassName: value === 'other' ? '' : defaultTemplateObj.algoClassName,
+        });
     };
 
     const handleSessionMgtChange = (event) => {
-        const index = event.target.value;
-        setSessionManagement(sessionManagementOps[index]);
+        setLbConfigObject({ ...lbConfig, sessionManagement: event.target.value });
     };
 
     const handleTimeoutChange = (event) => {
-        const timeoutValue = event.target.value;
-        setEpTimeout(timeoutValue);
+        setLbConfigObject({ ...lbConfig, sessionTimeOut: event.target.value });
     };
 
     const customAlogrithmChange = (event) => {
-        const customAlogrithmVal = event.target.value;
-        setCustomAlgorithm(customAlogrithmVal);
+        setLbConfigObject({ ...lbConfig, algoClassName: event.target.value });
+    };
+
+    const submitConfiguration = () => {
+        console.log(lbConfig);
+        handleLBConfigChange(lbConfig);
     };
 
     return (
@@ -74,26 +121,29 @@ function LoadBalanceConfig(props) {
                         id='Apis.Details.EndpointsNew.LoadBalanceConfig.algorithm'
                         defaultMessage='Algorithm'
                     />}
-                    value={algorithm.key}
+                    value={lbConfig.algoCombo}
                     onChange={handleAlgorithmChange}
                     helperText='Please select the Loadbalance Algorithm.'
                     margin='normal'
                 >
                     {algorithms.map(algo => (
-                        <MenuItem key={algo.key} value={algo.key} selected={algorithm}>
+                        <MenuItem key={algo.key} value={algo.key} selected={lbConfig.algoCombo}>
                             {algo.value}
                         </MenuItem>
                     ))}
                 </TextField>
-                {(algorithm.id === 1) ?
+                {(lbConfig.algoCombo === 'other') ?
                     <TextField
                         id='customAlgoInput'
                         label={<FormattedMessage
                             id='Apis.Details.EndpointsNew.LoadBalanceConfig.class.name.for.algorithm'
                             defaultMessage='Class Name for Algorithm'
                         />}
-                        value={customAlogrithm}
+                        required
+                        error={algoClassNameError}
+                        value={lbConfig.algoClassName}
                         onChange={customAlogrithmChange}
+                        onBlur={() => setAlgoClassNameError(lbConfig.algoClassName === '')}
                         helperText='Enter the class name of the loadbalance algorithm'
                         margin='normal'
                     /> : <div /> }
@@ -104,7 +154,7 @@ function LoadBalanceConfig(props) {
                         id='Apis.Details.EndpointsNew.LoadBalanceConfig.session.management'
                         defaultMessage='Session Management'
                     />}
-                    value={sessionMgtOp.key}
+                    value={lbConfig.sessionManagement}
                     onChange={handleSessionMgtChange}
                     helperText='Please select the Session Management mechanism.'
                     margin='normal'
@@ -121,12 +171,31 @@ function LoadBalanceConfig(props) {
                         id='Apis.Details.EndpointsNew.LoadBalanceConfig.session.timeout'
                         defaultMessage='Session Timeout (Millis)'
                     />}
-                    value={epTimeout}
+                    value={lbConfig.sessionTimeOut}
                     onChange={handleTimeoutChange}
                     type='number'
                     placeholder='300'
                     margin='normal'
                 />
+            </Grid>
+            <Grid className={classes.confingButtonContainer}>
+                <Button color='primary' onClick={closeLBConfigDialog}>
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.cancel.button'
+                        defaultMessage='Close'
+                    />
+                </Button>
+                <Button
+                    color='primary'
+                    autoFocus
+                    onClick={submitConfiguration}
+                    disabled={lbConfig.algoClassName === ''}
+                >
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.save.button'
+                        defaultMessage='Save'
+                    />
+                </Button>
             </Grid>
         </div>
     );
@@ -134,6 +203,7 @@ function LoadBalanceConfig(props) {
 
 LoadBalanceConfig.propTypes = {
     api: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(LoadBalanceConfig);
+export default injectIntl(withStyles(styles)(LoadBalanceConfig));

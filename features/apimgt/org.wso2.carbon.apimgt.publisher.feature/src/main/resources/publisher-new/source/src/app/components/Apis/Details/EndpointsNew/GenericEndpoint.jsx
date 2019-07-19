@@ -15,7 +15,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { TextField, Button, FormControl, InputAdornment, Divider, InputLabel, withStyles, Input, Icon, InputBase, IconButton, Paper } from '@material-ui/core';
+import { Divider, Icon, IconButton, InputAdornment, TextField, withStyles } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 
@@ -55,7 +55,7 @@ function GenericEndpoint(props) {
         editEndpoint,
         classes,
         type,
-        openAdvanceConfig,
+        setAdvancedConfigOpen,
         deleteEndpoint,
         index,
     } = props;
@@ -94,18 +94,18 @@ function GenericEndpoint(props) {
                             <IconButton
                                 className={classes.iconButton}
                                 aria-label='Search'
-                                onClick={openAdvanceConfig}
+                                onClick={setAdvancedConfigOpen}
                             >
                                 <Icon>
                                     settings
                                 </Icon>
                             </IconButton>
-                            <Divider className={classes.divider} />
+                            {(index > 0) ? <Divider className={classes.divider} /> : <div />}
                             {(type === 'load_balance' || type === 'failover') ? (
                                 <IconButton
                                     className={classes.iconButton}
                                     aria-label='Directions'
-                                    onClick={deleteEndpoint}
+                                    onClick={() => deleteEndpoint(index, type, category)}
                                 >
                                     <Icon>
                                         delete
@@ -121,7 +121,7 @@ function GenericEndpoint(props) {
 
 GenericEndpoint.propTypes = {
     endpointURL: PropTypes.string.isRequired,
-    changeEndpoint: PropTypes.func.isRequired,
+    deleteEndpoint: PropTypes.func.isRequired,
     classes: PropTypes.shape({}).isRequired,
     type: PropTypes.string.isRequired,
 };

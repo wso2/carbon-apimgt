@@ -20,7 +20,6 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import Collapse from '@material-ui/core/Collapse';
 import Button from '@material-ui/core/Button';
 
 import EndpointOverview from './EndpointOverview';
@@ -59,10 +58,17 @@ const styles = theme => ({
  */
 function Endpoints(props) {
     const { classes } = props;
-    const [productionChecked, setProductionChecked] = useState(true);
     const [modifiedAPI, setModifiedAPI] = useState({});
 
     console.log('ModifiedAPI: =========== ', modifiedAPI);
+
+    const saveAPI = (oldAPI, updateFunc) => {
+        console.log('Save endpoint');
+        if (modifiedAPI !== {}) {
+            console.log(modifiedAPI !== {});
+            updateFunc(modifiedAPI);
+        }
+    };
 
     return (
         <div className={classes.root}>
@@ -75,13 +81,11 @@ function Endpoints(props) {
                 </Typography>
             </div>
             <ApiContext.Consumer>
-                {({ api }) => (
+                {({ api, updateAPI }) => (
                     <div>
                         <Grid container>
                             <Grid item xs={12}>
-                                <Collapse in={productionChecked}>
-                                    <EndpointOverview api={api} onChangeAPI={setModifiedAPI} />
-                                </Collapse>
+                                <EndpointOverview api={api} onChangeAPI={setModifiedAPI} />
                             </Grid>
                         </Grid>
                         <Grid
@@ -92,7 +96,12 @@ function Endpoints(props) {
                             className={classes.buttonSection}
                         >
                             <Grid item>
-                                <Button type='submit' variant='contained' color='primary'>
+                                <Button
+                                    type='submit'
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => saveAPI(modifiedAPI, updateAPI)}
+                                >
                                     <FormattedMessage
                                         id='Apis.Details.EndpointsNew.Endpoints.save'
                                         defaultMessage='Save'

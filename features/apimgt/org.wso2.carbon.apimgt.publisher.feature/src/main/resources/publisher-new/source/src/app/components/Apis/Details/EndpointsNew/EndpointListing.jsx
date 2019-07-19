@@ -14,31 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import {
-    Grid,
-    Button,
-    Typography,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    withStyles,
-    ListItemText,
-    ListItemAvatar,
-    Icon,
-    TextField,
-} from '@material-ui/core';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import React, { useEffect, useRef, useState } from 'react';
+import { Grid, withStyles } from '@material-ui/core';
+import { injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import KeyboardArrowRightRounded from '@material-ui/icons/KeyboardArrowRight';
-
-import LoadBalanceConfig from './LoadBalanceConfig';
 import GenericEndpoint from './GenericEndpoint';
-import GenericEndpointAdd from "./GenericEndpointAdd";
+import GenericEndpointAdd from './GenericEndpointAdd';
 
 const styles = theme => ({
     endpointInputWrapper: {
@@ -106,11 +87,10 @@ function EndpointListing(props) {
         apiEndpoints,
         epType,
         failOvers,
-        getSelectedEndpoint,
         editEndpoint,
-        selectedEpIndex,
         addNewEndpoint,
         removeEndpoint,
+        setAdvancedConfigOpen,
     } = props;
     const [endpointType, setEndpointType] = useState(epType);
     const [endpoints, setEndpoints] = useState([{ url: 'http://myservice/' }]);
@@ -124,7 +104,7 @@ function EndpointListing(props) {
     useEffect(() => {
 
     }, [endpoints]);
-    // TODO: Fix continuous rendering.
+
     useEffect(() => {
         console.log('Endpoint Listing: ', apiEndpoints, failOvers);
         setEndpointType(epType);
@@ -158,6 +138,8 @@ function EndpointListing(props) {
                                         index={index}
                                         category={category}
                                         editEndpoint={editEndpoint}
+                                        deleteEndpoint={removeEndpoint}
+                                        setAdvancedConfigOpen={setAdvancedConfigOpen}
                                     />
                                 );
                             }
@@ -170,10 +152,6 @@ function EndpointListing(props) {
     );
 }
 
-EndpointListing.defaultProps = {
-    selectedEpIndex: 0,
-};
-
 EndpointListing.propTypes = {
     classes: PropTypes.shape({
         epTypeWrapper: PropTypes.shape({}),
@@ -185,10 +163,9 @@ EndpointListing.propTypes = {
     category: PropTypes.string.isRequired,
     apiEndpoints: PropTypes.shape({}).isRequired,
     failOvers: PropTypes.shape({}).isRequired,
-    getSelectedEndpoint: PropTypes.func.isRequired,
-    selectedEpIndex: PropTypes.number,
     addNewEndpoint: PropTypes.func.isRequired,
     removeEndpoint: PropTypes.func.isRequired,
+    editEndpoint: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointListing));

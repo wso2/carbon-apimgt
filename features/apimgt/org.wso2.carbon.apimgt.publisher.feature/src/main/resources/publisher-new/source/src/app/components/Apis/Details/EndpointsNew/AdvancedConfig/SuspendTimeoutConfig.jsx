@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Grid,
     TextField,
@@ -24,7 +24,7 @@ import {
     FormControl,
     InputLabel,
     Select,
-    Input,
+    Input, Button, DialogActions,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -64,7 +64,8 @@ const styles = theme => ({
  * @returns {any} The HTML representation of the compoenent.
  */
 function SuspendTimeoutConfig(props) {
-    const { classes, intl } = props;
+    const { classes, intl, advanceConfig, isSOAPEndpoint } = props;
+    const [advanceConfiguration, setAdvanceConfiguration] = useState(advanceConfig);
     const [suspendErrCodes, setSuspendErrCodes] = useState([]);
     const [timeoutErrCodes, setTimeoutErrCodes] = useState([]);
     const [timeoutAction, setTimeoutAction] = useState('');
@@ -167,6 +168,27 @@ function SuspendTimeoutConfig(props) {
             defaultMessage: 'Discard Message',
         })];
 
+    const defaultAdvanceConfig = {
+        actionDuration: '',
+        actionSelect: 'fault',
+        factor: '1',
+        retryDelay: '23123',
+        retryErroCode: ['101500', '101503', '101505', '101506'],
+        retryTimeOut: '222',
+        suspendDuration: '2123',
+        suspendErrorCode: ['101001', '101501', '101504', '101508'],
+        suspendMaxDuration: '',
+    };
+
+    useEffect(() => {
+        setAdvanceConfiguration(() => {
+            if (!advanceConfig) {
+                return { ...defaultAdvanceConfig };
+            }
+            return
+        });
+    }, [props]);
+
     const handleErrCodeSelect = (event) => {
         setSuspendErrCodes(event.target.value);
     };
@@ -178,6 +200,62 @@ function SuspendTimeoutConfig(props) {
     };
     return (
         <Grid container direction='column' className={classes.configContainer}>
+            {(isSOAPEndpoint) ? (
+                <Grid item container className={classes.configSubContainer}>
+                    <Typography className={classes.subTitle}>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.message.content'
+                            defaultMessage='Message Content'
+                        />
+                    </Typography>
+                    <FormControl className={classes.formControl}>
+                        <InputLabel htmlFor='err-code-select'>
+                            <FormattedMessage
+                                id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.format.select'
+                                defaultMessage='Format'
+                            />
+                        </InputLabel>
+                        <Select
+                            multiple
+                            autoWidth={false}
+                            value={suspendErrCodes}
+                            onChange={handleErrCodeSelect}
+                            input={<Input id='err-code-select' />}
+                            MenuProps={MenuProps}
+                            variant='outlined'
+                        >
+                            {ERRCODES.map(code => (
+                                <MenuItem key={code.key} value={code.key}>
+                                    {code.value}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl className={classes.formControl}>
+                        <InputLabel htmlFor='err-code-select'>
+                            <FormattedMessage
+                                id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.optimize.select'
+                                defaultMessage='Optimize'
+                            />
+                        </InputLabel>
+                        <Select
+                            multiple
+                            autoWidth={false}
+                            value={suspendErrCodes}
+                            onChange={handleErrCodeSelect}
+                            input={<Input id='err-code-select' />}
+                            MenuProps={MenuProps}
+                            variant='outlined'
+                        >
+                            {ERRCODES.map(code => (
+                                <MenuItem key={code.key} value={code.key}>
+                                    {code.value}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Grid>
+            ) : (<div />)}
             <Grid item container className={classes.configSubContainer}>
                 <Typography className={classes.subTitle}>
                     <FormattedMessage id='Endpoint.Suspension.State' defaultMessage='Endpoint Suspension State' />
@@ -328,6 +406,20 @@ function SuspendTimeoutConfig(props) {
                     type='number'
                     margin='normal'
                 />
+            </Grid>
+            <Grid>
+                <Button onClick={() => setAdvanceConfigOpen(false)} color='primary'>
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.cancel.button'
+                        defaultMessage='Close'
+                    />
+                </Button>
+                <Button onClick={() => saveAdvanceConfiguration(false)} color='primary' autoFocus>
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.save.button'
+                        defaultMessage='Save'
+                    />
+                </Button>
             </Grid>
         </Grid>
     );

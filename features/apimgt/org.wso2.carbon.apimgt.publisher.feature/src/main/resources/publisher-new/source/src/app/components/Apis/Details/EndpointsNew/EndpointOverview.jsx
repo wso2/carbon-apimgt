@@ -23,7 +23,7 @@ import {
     withStyles,
     Radio,
     FormControlLabel,
-    RadioGroup,
+    RadioGroup, Button, Icon, Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -33,6 +33,8 @@ import EndpointAdd from './EndpointAdd';
 import { getEndpointTemplateByType, getEndpointTypeProperty } from './endpointUtils';
 import GeneralConfiguration from './GeneralConfiguration';
 import GenericEndpoint from './GenericEndpoint';
+import LoadBalanceConfig from './LoadBalanceConfig';
+import SuspendTimeoutConfig from './AdvancedConfig/SuspendTimeoutConfig';
 
 
 const styles = theme => ({
@@ -75,10 +77,9 @@ const styles = theme => ({
         padding: theme.spacing.unit,
         display: 'flex',
         justifyContent: 'space-between',
-        borderStyle: 'solid',
-        borderWidth: '1px',
-        borderRadius: '5px',
-        borderColor: '#c4c4c4',
+    },
+    endpointTypesSelectWrapper: {
+        display: 'flex',
     },
     defaultEndpointWrapper: {
         paddingLeft: theme.spacing.unit,
@@ -98,8 +99,9 @@ function EndpointOverview(props) {
     const [isSOAPEndpoint, setSOAPEndpoint] = useState({ key: 'http', value: 'HTTP/REST Endpoint' });
     const [epConfig, setEpConfig] = useState(endpointConfig);
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState({});
+    const [isLBConfigOpen, setLBConfigOpen] = useState(false);
+    const [isAdvancedConfigOpen, setAdvancedConfigOpen] = useState(false);
 
-    console.log(api);
     const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
         { key: 'address', value: 'HTTP/SOAP Endpoint' }];
     const getEndpointType = (type) => {
@@ -119,10 +121,8 @@ function EndpointOverview(props) {
         setEpConfig(endpointConfig);
     }, []);
     useEffect(() => {
-        const type = endpointConfig.endpoint_type;
-        setSOAPEndpoint(getEndpointType(type));
+        setSOAPEndpoint(getEndpointType(endpointConfig.endpoint_type));
     }, []);
-
     useEffect(() => {
         setEndpointSecurityInfo(endpointSecurity);
     }, []);
@@ -137,34 +137,13 @@ function EndpointOverview(props) {
     }, [epConfig]);
 
     useEffect(() => {
-        let endpointConfiguration = {};
-        if (isSOAPEndpoint.key === 'address') {
-            endpointConfiguration = {
-                ...epConfig,
-                production_endpoints: {
-                    endpoint_type: 'address',
-                    template_not_supported: false,
-                    url: 'http://myservice/resource',
-                },
-                sandbox_endpoints: {
-                    endpoint_type: 'address',
-                    template_not_supported: false,
-                    url: 'http://myservice/resource',
-                },
-                production_failovers: [],
-                sandbox_failovers: [],
-            };
-        } else {
-            endpointConfiguration = { ...epConfig };
-        }
-        setEpConfig(endpointConfiguration);
+
     }, [isSOAPEndpoint]);
 
     const editEndpoint = (index, category, url) => {
         let modifiedEndpoint = null;
-        let endpointTypeProperty = null;
+        const endpointTypeProperty = getEndpointTypeProperty(epConfig.endpoint_type, category);
         if (index > 0) {
-            endpointTypeProperty = getEndpointTypeProperty(epConfig.endpoint_type, category);
             modifiedEndpoint = epConfig[endpointTypeProperty];
             if (epConfig.endpoint_type === 'failover') {
                 modifiedEndpoint[index - 1].url = url;
@@ -212,6 +191,9 @@ function EndpointOverview(props) {
         setEpConfig({ ...epConfig, [epConfigProperty]: endpointList });
     };
 
+    /**
+     * Loadbalance/ failover
+     * */
     const onChangeEndpointCategory = (event) => {
         const tmpEndpointConfig = getEndpointTemplateByType(
             event.target.value,
@@ -221,11 +203,43 @@ function EndpointOverview(props) {
         setEpConfig({ ...tmpEndpointConfig });
     };
 
+    /**
+     * http / address
+     * */
     const handleEndpointTypeSelect = (event) => {
         const selectedKey = event.target.value;
         const selectedType = endpointTypes.filter((type) => {
             return type.key === selectedKey;
         })[0];
+        let endpointConfiguration = {};
+        if (selectedKey === 'address') {
+            endpointConfiguration = {
+                ...epConfig,
+                endpoint_type: 'address',
+                production_endpoints: {
+                    endpoint_type: 'address',
+                    template_not_supported: false,
+                    url: 'http://myservice/resource',
+                },
+                sandbox_endpoints: {
+                    endpoint_type: 'address',
+                    template_not_supported: false,
+                    url: 'http://myservice/resource',
+                },
+            };
+        } else {
+            endpointConfiguration = {
+                ...epConfig,
+                production_endpoints: {
+                    url: 'http://myservice/resource',
+                },
+                sandbox_endpoints: {
+                    url: 'http://myservice/resource',
+                },
+                endpoint_type: 'http',
+            };
+        }
+        setEpConfig(endpointConfiguration);
         setSOAPEndpoint(selectedType);
     };
 
@@ -238,6 +252,16 @@ function EndpointOverview(props) {
         });
     };
 
+    const toggleAdvanceConfig = () => {
+        console.log('Advance Config open');
+        setAdvancedConfigOpen(!isAdvancedConfigOpen);
+    };
+
+    const handleLBConfigChange = (lbConfig) => {
+        console.log({ ...epConfig, ...lbConfig });
+        setEpConfig({ ...epConfig, ...lbConfig });
+        setLBConfigOpen(false);
+    };
     const removeEndpoint = (index, epType, category) => {
         const endpointConfigProperty = getEndpointTypeProperty(epType, category);
         const indexToRemove = epType === 'failover' ? index - 1 : index;
@@ -278,6 +302,7 @@ function EndpointOverview(props) {
                             index={0}
                             category='production_endpoints'
                             editEndpoint={editEndpoint}
+                            setAdvancedConfigOpen={toggleAdvanceConfig}
                         />
                     </Grid>
                     <Grid xs className={classes.endpointsWrapper}>
@@ -297,6 +322,7 @@ function EndpointOverview(props) {
                             index={0}
                             category='sandbox_endpoints'
                             editEndpoint={editEndpoint}
+                            setAdvancedConfigOpen={toggleAdvanceConfig}
                         />
                     </Grid>
                 </Grid>
@@ -311,34 +337,29 @@ function EndpointOverview(props) {
                                 value={epConfig.endpoint_type}
                                 onChange={onChangeEndpointCategory}
                             >
-                                {/* <FormControlLabel */}
-                                {/*    value='http' */}
-                                {/*    control={<Radio />} */}
-                                {/*    label='Default' */}
-                                {/* /> */}
-                                <FormControlLabel
-                                    value='load_balance'
-                                    control={<Radio />}
-                                    label='Load balance'
-                                />
                                 <FormControlLabel
                                     value='failover'
                                     control={<Radio />}
                                     label='Failover'
                                 />
+                                <FormControlLabel
+                                    value='load_balance'
+                                    control={<Radio />}
+                                    label='Load balance'
+                                />
                             </RadioGroup>
                         </FormControl>
-                        {/* <div className={classes.loadbalanceBtnContainer}> */}
-                        {/*    <Button */}
-                        {/*        disabled={epConfig.endpoint_type !== 'load_balance'} */}
-                        {/*        onClick={() => setLBConfigOpen(true)} */}
-                        {/*        className={classes.loadBalanceConfigButton} */}
-                        {/*    > */}
-                        {/*        <Icon> */}
-                        {/*            settings */}
-                        {/*        </Icon> */}
-                        {/*    </Button> */}
-                        {/* </div> */}
+                        <div className={classes.loadbalanceBtnContainer}>
+                            <Button
+                                disabled={epConfig.endpoint_type !== 'load_balance'}
+                                onClick={() => setLBConfigOpen(true)}
+                                className={classes.loadBalanceConfigButton}
+                            >
+                                <Icon>
+                                    settings
+                                </Icon>
+                            </Button>
+                        </div>
                     </div>
                     <div />
                 </Grid>
@@ -352,6 +373,7 @@ function EndpointOverview(props) {
                             addNewEndpoint={addEndpoint}
                             removeEndpoint={removeEndpoint}
                             editEndpoint={editEndpoint}
+                            setAdvancedConfigOpen={toggleAdvanceConfig}
                             category='production_endpoints'
                         />
                     </Grid>
@@ -364,11 +386,45 @@ function EndpointOverview(props) {
                             addNewEndpoint={addEndpoint}
                             removeEndpoint={removeEndpoint}
                             editEndpoint={editEndpoint}
+                            setAdvancedConfigOpen={toggleAdvanceConfig}
                             category='sandbox_endpoints'
                         />
                     </Grid>
                 </Grid>
             </Paper>
+            <Dialog open={isLBConfigOpen}>
+                <DialogTitle>
+                    <Typography varient='h4'>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.EndpointOverview.load.balance.configuration.title'
+                            defaultMessage='Load Balance Configuration'
+                        />
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <LoadBalanceConfig
+                        handleLBConfigChange={handleLBConfigChange}
+                        closeLBConfigDialog={() => setLBConfigOpen(false)}
+                        algoCombo={epConfig.algoCombo}
+                        algoClassName={epConfig.algoClassName}
+                        sessionTimeOut={epConfig.sessionTimeOut}
+                        sessionManagement={epConfig.sessionManagement}
+                    />
+                </DialogContent>
+            </Dialog>
+            <Dialog open={isAdvancedConfigOpen}>
+                <DialogTitle>
+                    <Typography varient='h4'>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.EndpointOverview.advance.endpoint.configuration'
+                            defaultMessage='Advance Configuration'
+                        />
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <SuspendTimeoutConfig isSOAPEndpoint={isSOAPEndpoint} />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
@@ -380,6 +436,7 @@ EndpointOverview.propTypes = {
         endpointName: PropTypes.shape({}),
     }).isRequired,
     api: PropTypes.shape({}).isRequired,
+    onChangeAPI: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointOverview));
