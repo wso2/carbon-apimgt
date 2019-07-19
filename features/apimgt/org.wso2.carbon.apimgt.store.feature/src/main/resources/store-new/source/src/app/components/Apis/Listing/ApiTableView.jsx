@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
+import { injectIntl, } from 'react-intl';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import API from '../../../data/api';
@@ -71,6 +72,7 @@ class ApiTableView extends React.Component {
     });
 
     render() {
+        const { intl } = this.props;
         const columns = [
             {
                 name: 'id',
@@ -81,6 +83,9 @@ class ApiTableView extends React.Component {
             },
             {
                 name: 'image',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.image',
+                    defaultMessage: 'image'}),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
@@ -94,6 +99,9 @@ class ApiTableView extends React.Component {
             },
             {
                 name: 'name',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.name',
+                    defaultMessage: 'name'}),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
@@ -106,10 +114,23 @@ class ApiTableView extends React.Component {
                     filter: false,
                 },
             },
-            'version',
-            'context',
+            {
+                name: 'version',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.version',
+                    defaultMessage: 'version'}),
+            },
+            {
+                name: 'context',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.context',
+                    defaultMessage: 'context'}),
+            },
             {
                 name: 'rating',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.rating',
+                    defaultMessage: 'rating'}),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
@@ -129,4 +150,4 @@ class ApiTableView extends React.Component {
     }
 }
 
-export default ApiTableView;
+export default injectIntl(ApiTableView);

@@ -27,6 +27,7 @@ import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import { injectIntl, } from 'react-intl';
 import Application from 'AppData/Application';
 import Loading from '../../Base/Loading/Loading';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
@@ -120,12 +121,13 @@ class Tokens extends React.Component {
      * @memberof Tokens
      */
     generateToken() {
-        const { keyType } = this.props;
+        const { keyType, intl} = this.props;
         const { application, scopesSelected } = this.state;
         let { timeout } = this.state;
 
         if (!application) {
-            console.warn('No Application found!');
+            console.warn(intl.formatMessage({
+                defaultMessage: 'No Application found!', id:'Shared.AppsAndKeys.Tokens.no.application.found'}));
             return false;
         }
         if (!timeout || timeout.length === 0) {
@@ -146,32 +148,29 @@ class Tokens extends React.Component {
             return <Loading />;
         }
 
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
 
         return (
             <React.Fragment>
                 <FormControl margin='normal' className={classes.FormControl}>
                     <TextField
                         required
-                        label={<FormattedMessage
-                            id='access.token.validity.period'
-                            defaultMessage='Access token validity period'
-                        />}
+                        label={intl.formatMessage({
+                                defaultMessage: 'Access token validity period', id:'Shared.AppsAndKeys.Tokens.access.token'})}
                         InputLabelProps={{
                             shrink: true,
                         }}
-                        helperText={<FormattedMessage
-                            id='token.expiration.description'
-                            defaultMessage={'You can set an expiration period to determine the validity period of ' +
-                            'the token after generation. Set this to a negative value to ensure that the token never' +
-                            ' expires.'}
-                        />}
+                        helperText={intl.formatMessage({
+                                defaultMessage: 'You can set an expiration period to determine the validity period of ' +
+                                'the token after generation. Set this to a negative value to ensure that the token never' +
+                                ' expires.', id:'Shared.AppsAndKeys.Tokens.you.can.set'})}
                         fullWidth
                         name='timeout'
                         onChange={e => this.handleOnChange(e)}
                         placeholder={this.context.intl.formatMessage({
                             id: 'access.token.validity.period.placeholder',
-                            defaultMessage: 'Enter time in milliseconds',
+                            defaultMessage: intl.formatMessage({
+                                defaultMessage: 'Enter time in milliseconds', id:'Shared.AppsAndKeys.Tokens.enter.time'}),
                         })}
                         value={timeout}
                         autoFocus
@@ -183,7 +182,10 @@ class Tokens extends React.Component {
                     className={classes.FormControlOdd}
                     disabled={subscriptionScopes.length === 0}
                 >
-                    <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>Scopes</InputLabel>
+                    <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}><FormattedMessage
+                            id='Shared.AppsAndKeys.Tokens.when.you.generate'
+                            defaultMessage='Scopes'
+                        /></InputLabel>
                     <Select
                         name='scopesSelected'
                         multiple
@@ -210,15 +212,13 @@ class Tokens extends React.Component {
                     </Select>
                     <Typography variant='caption'>
                         <FormattedMessage
-                            id='subscription.scopes.description'
+                            id='Shared.AppsAndKeys.Tokens.when.you.generate'
                             defaultMessage={'When you generate access tokens to APIs protected by scope/s,' +
                             ' you can select the scope/s and then generate the token for it. Scopes enable ' +
                             'fine-grained access control to API resources based on user roles. You define scopes to ' +
                             'an API resource. When a user invokes the API, his/her OAuth 2 bearer token cannot grant ' +
                             'access to any API resource beyond its associated scopes.'}
                         />
-
-
                     </Typography>
                 </FormControl>
             </React.Fragment>
@@ -228,4 +228,4 @@ class Tokens extends React.Component {
 Tokens.contextTypes = {
     intl: PropTypes.shape({}).isRequired,
 };
-export default withStyles(styles)(Tokens);
+export default injectIntl(withStyles(styles)(Tokens));

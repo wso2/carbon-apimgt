@@ -28,6 +28,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
+import { FormattedMessage } from 'react-intl';
 import Alert from '../../../Shared/Alert';
 import API from '../../../../data/api';
 import CustomIcon from '../../../Shared/CustomIcon';
@@ -229,7 +230,9 @@ function FullWidthGrid(props) {
     };
     return (
         <div className={classes.contentWrapper}>
-            <Typography variant='h4'>Documentation</Typography>
+            <Typography variant='h4'>
+                <FormattedMessage id='Apis.Details.Documents.Documentation.title' defaultMessage='Documentation' />
+            </Typography>
             {documentList && (
                 <Grid container spacing={24} className={classes.docContent}>
                     <Grid item xs={12} sm={3}>

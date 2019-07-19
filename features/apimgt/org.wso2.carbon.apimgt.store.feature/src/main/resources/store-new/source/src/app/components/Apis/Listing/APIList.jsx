@@ -19,6 +19,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import SubscriptionPolicySelect from './SubscriptionPolicySelect';
 
@@ -57,17 +58,25 @@ class APIList extends React.Component {
         }
 
         const {
-            theme, unsubscribedAPIList, handleSubscribe, applicationId,
+            theme, unsubscribedAPIList, handleSubscribe, applicationId, intl, 
         } = this.props;
         const columns = [
             {
                 name: 'Id',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.APIList.id',
+                    defaultMessage: 'Id',
+                }),
                 options: {
                     display: 'excluded',
                 },
             },
             {
                 name: 'Policy',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.APIList.policy',
+                    defaultMessage: 'Policy',
+                }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
@@ -86,12 +95,18 @@ class APIList extends React.Component {
                     },
                 },
             },
-            'Name',
+            {
+                name: 'Name',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.APIList.name',
+                    defaultMessage: 'Name',
+                }),
+            },
         ];
 
         return (
             <MUIDataTable
-                title='APIs'
+                title={<FormattedMessage defaultMessage='APIs' id='Apis.Listing.APIList.apis' />}
                 data={unsubscribedAPIList}
                 columns={columns}
                 options={{ selectableRows: false }}
@@ -103,5 +118,8 @@ class APIList extends React.Component {
 APIList.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
-export default withStyles(styles, { withTheme: true })(APIList);
+export default injectIntl(withStyles(styles, { withTheme: true })(APIList));

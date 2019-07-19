@@ -157,7 +157,6 @@ class Publisher extends React.Component {
      */
     render() {
         const { user, userResolved } = this.state;
-
         if (!userResolved) {
             return <Progress />;
         }

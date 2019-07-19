@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
@@ -6,7 +6,7 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -14,14 +14,20 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
+/* eslint-disable func-names */
+const fs = require('fs');
+const path = require('path');
 
-import React from 'react';
-import APIsNavigation from './APIsNavigation';
-
-describe('APIs', () => {
-    test('should ', () => {
-        const a = shallow(<APIsNavigation intl={{formatMessage: jest.fn()}} />);
-        // expect(a).type.to.be('WithStyles(PageNav)');
-    });
-});
+module.exports = function (source, map) {
+    const headerPath = path.resolve(this.rootContext + '/override' + this.resourcePath.split('/source')[1]);
+    let newSource = source;
+    if (fs.existsSync(headerPath)) {
+        newSource = fs.readFileSync(headerPath, 'utf8');
+        newSource = newSource.replace('AppOverride', this.rootContext + '/override/');
+        
+        this.addDependency(headerPath);
+    }
+    this.callback(null, newSource, map);
+};

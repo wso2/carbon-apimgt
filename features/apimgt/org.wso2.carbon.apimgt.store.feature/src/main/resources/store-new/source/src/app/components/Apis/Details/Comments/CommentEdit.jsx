@@ -18,7 +18,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import {TextField, Button, Typography} from '@material-ui/core';
+import { FormattedMessage, injectIntl, } from 'react-intl';
+import { TextField, Button, Typography } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
@@ -44,10 +45,10 @@ const styles = theme => ({
 });
 
 /**
-   * Display a component to edit a comment
-   * @class CommmentEdit
-   * @extends {React.Component}
-   */
+ * Display a component to edit a comment
+ * @class CommmentEdit
+ * @extends {React.Component}
+ */
 class CommentEdit extends React.Component {
     /**
      * Creates an instance of CommentEdit
@@ -74,7 +75,11 @@ class CommentEdit extends React.Component {
      */
     componentDidMount() {
         const { comment } = this.props;
-        this.setState({ commentText: comment.commentText, category: comment.category, currentLength: comment.commentText.length });
+        this.setState({
+            commentText: comment.commentText,
+            category: comment.category,
+            currentLength: comment.commentText.length,
+        });
     }
 
     /**
@@ -128,7 +133,9 @@ class CommentEdit extends React.Component {
      * @memberof CommentEdit
      */
     handleClickUpdateComment() {
-        const { apiId, comment, allComments, toggleShowEdit, commentsUpdate } = this.props;
+        const {
+            apiId, comment, allComments, toggleShowEdit, commentsUpdate, intl,
+        } = this.props;
         const { category, commentText } = this.state;
         const Api = new API();
         const commentToEdit = comment;
@@ -157,11 +164,21 @@ class CommentEdit extends React.Component {
                     if (error.response) {
                         Alert.error(error.response.body.message);
                     } else {
-                        Alert.error('Something went wrong while adding the comment');
+                        Alert.error(
+                            intl.formatMessage({
+                                defaultMessage: 'Something went wrong while adding the comment',
+                                id: 'Apis.Details.Comments.CommentEdit.something.went.wrong',
+                            }),
+                        );
                     }
                 });
         } else {
-            Alert.error('You cannot enter a blank comment');
+            Alert.error(
+                intl.formatMessage({
+                    defaultMessage: 'You cannot enter a blank comment',
+                    id: 'Apis.Details.Comments.CommentEdit.blank.comment.error',
+                }),
+            );
         }
     }
 
@@ -171,18 +188,27 @@ class CommentEdit extends React.Component {
      * @memberof CommentEdit
      */
     render() {
-        const { classes, theme } = this.props;
+        const { classes, theme, intl } = this.props;
         const { category, commentText, currentLength } = this.state;
         return (
             <div>
                 <FormControl className={classes.category}>
-                    <Select
-                        value={category}
-                        onChange={this.handleCategoryChange}
-                    >
-                        <MenuItem value='General'>General</MenuItem>
-                        <MenuItem value='Feature Request'>Feature Request</MenuItem>
-                        <MenuItem value='Bug Report'>Bug Report</MenuItem>
+                    <Select value={category} onChange={this.handleCategoryChange}>
+                        <MenuItem value='General'>
+                            <FormattedMessage id='Apis.Details.Comments.CommentEdit.general' defaultMessage='General' />
+                        </MenuItem>
+                        <MenuItem value='Feature Request'>
+                            <FormattedMessage
+                                id='Apis.Details.Comments.CommentEdit.feature.request'
+                                defaultMessage='Feature Request'
+                            />
+                        </MenuItem>
+                        <MenuItem value='Bug Report'>
+                            <FormattedMessage
+                                id='Apis.Details.Comments.CommentEdit.bug.report'
+                                defaultMessage='Bug Report'
+                            />
+                        </MenuItem>
                     </Select>
                 </FormControl>
                 <TextField
@@ -191,22 +217,30 @@ class CommentEdit extends React.Component {
                     multiline
                     className={classes.textField}
                     margin='normal'
-                    placeholder='Write a comment'
+                    placeholder={intl.formatMessage({
+                        defaultMessage: 'Write a comment',
+                        id: 'Apis.Details.Comments.CommentEdit.write.a.comment',
+                    })}
                     inputProps={{ maxLength: theme.custom.maxCommentLength }}
                     value={commentText}
                     onChange={this.inputChange}
                 />
                 <Typography className={classes.commentText} align='right'>
-                    {currentLength + '/' + theme.custom.maxCommentLength }
+                    {currentLength + '/' + theme.custom.maxCommentLength}
                 </Typography>
                 <Grid container spacing={8}>
                     <Grid item>
                         <Button variant='contained' color='primary' onClick={() => this.handleClickUpdateComment()}>
-              Save
+                            <FormattedMessage id='Apis.Details.Comments.CommentEdit.btn.save' defaultMessage='Save' />
                         </Button>
                     </Grid>
                     <Grid item>
-                        <Button onClick={() => this.handleClickCancel()} className={classes.button}>Cancel</Button>
+                        <Button onClick={() => this.handleClickCancel()} className={classes.button}>
+                            <FormattedMessage
+                                id='Apis.Details.Comments.CommentEdit.btn.cancel'
+                                defaultMessage='Cancel'
+                            />
+                        </Button>
                     </Grid>
                 </Grid>
             </div>
@@ -221,6 +255,9 @@ CommentEdit.propTypes = {
     commentsUpdate: PropTypes.func.isRequired,
     toggleShowEdit: PropTypes.func.isRequired,
     comment: PropTypes.instanceOf(Object).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(CommentEdit);
+export default injectIntl(withStyles(styles, { withTheme: true })(CommentEdit));

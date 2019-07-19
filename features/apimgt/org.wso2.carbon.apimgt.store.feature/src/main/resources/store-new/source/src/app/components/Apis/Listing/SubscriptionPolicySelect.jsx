@@ -21,6 +21,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
+import { FormattedMessage } from 'react-intl';
 import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
 
 /**
@@ -91,7 +92,7 @@ class SubscriptionPolicySelect extends React.Component {
                             handleSubscribe(applicationId, apiId, selectedPolicy);
                         }}
                     >
-                    Subscribe
+                        <FormattedMessage defaultMessage='Subscribe' id='Apis.Listing.SubscriptionPolicySelect.subscribe' />
                     </Button>
                 </ScopeValidation>
                 <Select
