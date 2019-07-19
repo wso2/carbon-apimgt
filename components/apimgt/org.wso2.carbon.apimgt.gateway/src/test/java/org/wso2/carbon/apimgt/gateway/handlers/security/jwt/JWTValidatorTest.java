@@ -122,8 +122,8 @@ public class JWTValidatorTest {
     public void testAuthenticationWithInvalidJwtToken1() throws Exception {
         // Invalid token format
         String invalidJwtToken = "aasdasd.bada";
-        PowerMockito.when(jwtValidator, "verifyTokenSignature",
-                Mockito.eq(invalidJwtToken), Mockito.anyString()).thenReturn(false);
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.eq(invalidJwtToken))
+                .thenReturn(false);
 
         try {
             jwtValidator.authenticate(invalidJwtToken, messageContext, null,
@@ -138,8 +138,8 @@ public class JWTValidatorTest {
     public void testAuthenticationWithInvalidJwtToken2() throws Exception {
         // Invalid token payload
         String invalidJwtToken = "aasdasd.xxx#.sad";
-        PowerMockito.when(jwtValidator, "verifyTokenSignature",
-                Mockito.eq(invalidJwtToken), Mockito.anyString()).thenReturn(false);
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.eq(invalidJwtToken))
+                .thenReturn(false);
 
         try {
             jwtValidator.authenticate(invalidJwtToken, messageContext, null,
@@ -153,8 +153,8 @@ public class JWTValidatorTest {
     @Test
     public void testAuthenticationSignatureVerificationFailure() throws Exception {
         // Token signature verification failure
-        PowerMockito.when(jwtValidator, "verifyTokenSignature",
-                Mockito.eq(validJwtToken), Mockito.anyString()).thenReturn(false);
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.eq(validJwtToken))
+                .thenReturn(false);
 
         try {
             jwtValidator.authenticate(validJwtToken, messageContext, null,
@@ -168,8 +168,7 @@ public class JWTValidatorTest {
     @Test
     public void testAuthenticationWithExpiredJwtToken() throws Exception {
         // Expired token
-        PowerMockito.when(jwtValidator, "verifyTokenSignature",
-                Mockito.any(), Mockito.anyString()).thenReturn(true);
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.any()).thenReturn(true);
         PowerMockito.when(jwtValidator, "checkTokenExpiration",
                 Mockito.any(), Mockito.any(), Mockito.any()).thenThrow(
                 new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED, "JWT token is expired"));
@@ -186,8 +185,7 @@ public class JWTValidatorTest {
     @Test
     public void testAuthenticationWithIncorrectTypeToken() throws Exception {
         // Grant type of the token is not eligible to access the API resource
-        PowerMockito.when(jwtValidator, "verifyTokenSignature",
-                Mockito.any(), Mockito.anyString()).thenReturn(true);
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.any()).thenReturn(true);
         PowerMockito.when(jwtValidator, "validateTokenGrantType",
                 Mockito.any(), Mockito.any()).thenCallRealMethod();
 
@@ -203,8 +201,7 @@ public class JWTValidatorTest {
     @Test
     public void testAuthenticationWithScopeFailure() throws Exception {
         // Token does not have the scopes required to access the resource
-        PowerMockito.when(jwtValidator, "verifyTokenSignature",
-                Mockito.any(), Mockito.anyString()).thenReturn(true);
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.any()).thenReturn(true);
         PowerMockito.when(jwtValidator, "validateTokenGrantType",
                 Mockito.any(), Mockito.any()).thenCallRealMethod();
         PowerMockito.when(jwtValidator, "validateScopes",
@@ -224,8 +221,7 @@ public class JWTValidatorTest {
     public void testAuthenticationWithAPISubscriptionFailure() throws Exception {
         // Owner of the token is not subscribed to access the resource
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/pizzashackNew/1.0.0");
-        PowerMockito.when(jwtValidator, "verifyTokenSignature",
-                Mockito.any(), Mockito.anyString()).thenReturn(true);
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.any()).thenReturn(true);
         PowerMockito.when(jwtValidator, "validateTokenGrantType",
                 Mockito.any(), Mockito.any()).thenCallRealMethod();
         PowerMockito.when(jwtValidator, "validateAPISubscription",
@@ -243,8 +239,7 @@ public class JWTValidatorTest {
     @Test
     public void testAuthenticationWithValidJwtToken() throws Exception {
         // Valid token. Authentication passed
-        PowerMockito.when(jwtValidator, "verifyTokenSignature",
-                Mockito.any(), Mockito.anyString()).thenReturn(true);
+        PowerMockito.when(jwtValidator, "verifyTokenSignature", Mockito.any()).thenReturn(true);
         PowerMockito.when(jwtValidator, "validateTokenGrantType",
                 Mockito.any(), Mockito.any()).thenCallRealMethod();
         PowerMockito.when(jwtValidator, "validateAPISubscription",

@@ -35,16 +35,17 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.SwaggerUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
@@ -53,6 +54,7 @@ import java.security.SignatureException;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.Base64;
 
 /**
@@ -128,7 +130,7 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token. Failed to decode the token.", e);
             }
-            isVerified = verifyTokenSignature(splitToken, payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
+            isVerified = verifyTokenSignature(splitToken);
             if (isGatewayTokenCacheEnabled) {
                 // Add token to tenant token cache
                 if (isVerified) {
@@ -388,53 +390,30 @@ public class JWTValidator {
      * Verify the JWT token signature.
      *
      * @param splitToken The JWT token which is split into [header, payload, signature]
-     * @param username   The username of the user to whom the token is issued
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
-    private boolean verifyTokenSignature(String[] splitToken, String username) throws APISecurityException {
+    private boolean verifyTokenSignature(String[] splitToken) throws APISecurityException {
         // Retrieve signature algorithm from token header
         String signatureAlgorithm = getSignatureAlgorithm(splitToken);
 
         Certificate publicCert;
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        int tenantId = APIUtil.getTenantId(username);
-
-        //get tenant's key store manager
+        //Read the client-truststore.jks into a KeyStore
         try {
-            APIUtil.loadTenantRegistry(tenantId);
-        } catch (RegistryException e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error in loading tenant registry", e);
-        }
-        KeyStoreManager tenantKSM = KeyStoreManager.getInstance(tenantId);
+            ServerConfiguration config = CarbonUtils.getServerConfiguration();
 
-        KeyStore keyStore;
-        // Retrieve the public certificate from the key store
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            //derive key store name
-            String ksName = tenantDomain.trim().replace('.', '-');
-            String jksName = ksName + ".jks";
-            try {
-                keyStore = tenantKSM.getKeyStore(jksName);
-            } catch (Exception e) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                        "Error in retrieving key store", e);
-            }
-            try {
-                publicCert = keyStore.getCertificate(tenantDomain);
-            } catch (KeyStoreException e) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                        "Error in retrieving public certificate from key store", e);
-            }
-        } else {
-            try {
-                publicCert = tenantKSM.getDefaultPrimaryCertificate();
-            } catch (Exception e) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                        "Error in retrieving public certificate from key store", e);
-            }
+            char[] trustStorePassword = config.getFirstProperty("Security.TrustStore.Password").toCharArray();
+            String trustStoreLocation = config.getFirstProperty("Security.TrustStore.Location");
+            String alias = config.getFirstProperty("Security.KeyStore.KeyAlias");
+
+            FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation));
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(trustStoreStream, trustStorePassword);
+            // Read public certificate from trust store
+            publicCert = trustStore.getCertificate(alias);
+        } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error in retrieving public certificate from trust store", e);
         }
 
         if (publicCert != null) {
