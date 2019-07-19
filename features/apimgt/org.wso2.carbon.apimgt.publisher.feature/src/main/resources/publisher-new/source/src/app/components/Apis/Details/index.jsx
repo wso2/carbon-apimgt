@@ -32,7 +32,7 @@ import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
-import { injectIntl } from 'react-intl';
+import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -258,7 +258,7 @@ class Details extends Component {
             const promisedApi = restAPI.updateProduct(JSON.parse(JSON.stringify(newAPI)));
             promisedApi
                 .then((api) => {
-                    const messages = intl.defineMessages({
+                    const messages = defineMessages({
                         successMessage: {
                             id: 'Apis.Details.index.update.success.product',
                             defaultMessage: '{apiName} updated successfully.',
@@ -280,7 +280,7 @@ class Details extends Component {
             const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
             promisedApi
                 .then((api) => {
-                    const messages = intl.defineMessages({
+                    const messages = defineMessages({
                         successMessage: {
                             id: 'Apis.Details.index.update.success',
                             defaultMessage: '{apiName} updated successfully.',
@@ -344,7 +344,7 @@ class Details extends Component {
         const redirectUrl = (isAPIProduct ? '/api-products/' : '/apis/') + match.params.api_uuid + '/' + active;
         if (apiNotFound) {
             const { apiUUID } = match.params;
-            const resourceNotFoundMessageText = intl.defineMessages({
+            const resourceNotFoundMessageText = defineMessages({
                 titleMessage: {
                     id: 'Apis.Details.index.api.not.found.title',
                     defaultMessage: 'API is Not Found in the {environmentLabel} Environment',
@@ -394,15 +394,6 @@ class Details extends Component {
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<ConfigurationIcon />}
-                        />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.endpoints',
-                                defaultMessage: 'endpoints',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<EndpointIcon />}
                         />
                         {isAPIProduct ? null : (
                             <LeftMenuItem
