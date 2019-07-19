@@ -149,7 +149,7 @@ paths:
             If no advanced attribute modifier has been specified,  the API names containing
             the search term will be returned as a result.
 
-            Please note that you need to use encoded URL (URL encoding) if you are using a client which not support URL encoding (such as curl)
+            Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
 
           type: string
         - $ref : "#/parameters/If-None-Match"
