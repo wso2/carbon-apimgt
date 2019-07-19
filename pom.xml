@@ -1684,7 +1684,7 @@
         <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
         <velocity.version>1.7</velocity.version>
         <fasterxml.jackson.version>2.9.9</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.9.9.1</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.databind.version>2.10.0.pr1</fasterxml.jackson.databind.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.3.0</carbon.broker.version>
         <waffle-jna.version>1.6.wso2v6</waffle-jna.version>
