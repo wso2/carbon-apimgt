@@ -20,6 +20,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
+
 /**
  *
  *
@@ -46,12 +48,17 @@ const Footer = (props) => {
     const { classes } = props;
     return (
         <footer className={classes.footer}>
-            <Typography noWrap>WSO2 APIM v3.0.0 | © 2019 WSO2 Inc</Typography>
+            <Typography noWrap>
+                <FormattedMessage
+                    id='Base.Footer.Footer.copyright.text'
+                    defaultMessage='WSO2 APIM v3.0.0 | © 2019 WSO2 Inc'
+                />
+            </Typography>
         </footer>
     );
 };
 Footer.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(Footer);

@@ -43,6 +43,8 @@ public class AuthenticationContext {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
+    private String productName;
+    private String productProvider;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -189,5 +191,21 @@ public class AuthenticationContext {
 
     public void setStopOnQuotaReach(boolean stopOnQuotaReach) {
         this.stopOnQuotaReach = stopOnQuotaReach;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductProvider(String productProvider) {
+        this.productProvider = productProvider;
+    }
+
+    public String getProductProvider() {
+        return productProvider;
     }
 }

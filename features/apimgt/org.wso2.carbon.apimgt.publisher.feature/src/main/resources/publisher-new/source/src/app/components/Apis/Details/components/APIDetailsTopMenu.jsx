@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
@@ -49,20 +50,23 @@ const DetailsTopMenu = ({ classes, theme }) => {
     // todo: need to support rev proxy ~tmkb
     return (
         <ApiContext.Consumer>
-            {({ api }) => (
+            {({ api, isAPIProduct }) => (
                 <div className={classes.root}>
-                    <Link to='/apis' className={classes.backLink}>
+                    <Link to={isAPIProduct ? '/api-products' : '/apis'} className={classes.backLink}>
                         <KeyboardArrowLeft className={classes.backIcon} />
                         <div className={classes.backText}>
-                            BACK TO <br />
-                            LISTING
+                            <FormattedMessage
+                                id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
+                                defaultMessage='BACK TO {break} LISTING'
+                                values={{ break: <br /> }}
+                            />
                         </div>
                     </Link>
                     <VerticalDivider height={70} />
                     <ThumbnailView api={api} width={70} height={50} />
                     <div style={{ marginLeft: theme.spacing.unit }}>
                         <Typography variant='display1'>
-                            {api.name} : {api.version}
+                            {api.name} {isAPIProduct ? '' : ':' + api.version}
                         </Typography>
                         <Typography variant='caption' gutterBottom align='left'>
                             Created by: {api.provider}
@@ -71,7 +75,7 @@ const DetailsTopMenu = ({ classes, theme }) => {
                     <VerticalDivider height={70} />
                     <div className={classes.infoItem}>
                         <Typography variant='subheading' gutterBottom>
-                            {api.lifeCycleStatus}
+                            {isAPIProduct ? api.state : api.lifeCycleStatus}
                         </Typography>
                         <Typography variant='caption' gutterBottom align='left'>
                             State
@@ -92,8 +96,10 @@ const DetailsTopMenu = ({ classes, theme }) => {
                         <div className={classes.linkText}>View In store</div>
                     </a>
                     <VerticalDivider height={70} />
-                    <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />
-                    <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} />
+                    {isAPIProduct ? null : (
+                        <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />
+                    )}
+                    <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
                 </div>
             )}
         </ApiContext.Consumer>

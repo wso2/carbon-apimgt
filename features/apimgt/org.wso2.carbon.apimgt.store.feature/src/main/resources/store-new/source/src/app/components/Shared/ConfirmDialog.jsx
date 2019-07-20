@@ -21,6 +21,7 @@ import {
 } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 /**
  * React component for handling confirmation dialog box
@@ -54,16 +55,16 @@ class ConfirmDialog extends React.Component {
 
         return (
             <Dialog open={open} onClose={this.handleRequestClose}>
-                <DialogTitle>{title || 'Please Confirm'}</DialogTitle>
+                <DialogTitle>{title || <FormattedMessage id='Shared.ConfirmDialog.please.confirm' defaultMessage='Please Confirm' />}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>{message || 'Are you sure?'}</DialogContentText>
+                    <DialogContentText>{message || <FormattedMessage id='Shared.ConfirmDialog.please.confirm' defaultMessage='Are you sure?' />}</DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>
-                        {labelCancel || 'Cancel'}
+                        {labelCancel || <FormattedMessage id='Shared.ConfirmDialog.cancel' defaultMessage='Cancel' />}
                     </Button>
                     <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.OK)} color='primary'>
-                        {labelOk || 'OK'}
+                        {labelOk || <FormattedMessage id='Shared.ConfirmDialog.ok' defaultMessage='OK' />}
                     </Button>
                 </DialogActions>
             </Dialog>

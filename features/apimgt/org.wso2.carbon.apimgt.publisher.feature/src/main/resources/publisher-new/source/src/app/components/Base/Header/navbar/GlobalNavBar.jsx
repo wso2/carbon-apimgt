@@ -69,6 +69,20 @@ const GlobalNavBar = (props) => {
                                     <ListItemText classes={{ primary: classes.listText }} primary='APIs' />
                                 </ListItem>
                             </Link>
+                            <Link to='/api-products'>
+                                <ListItem button>
+                                    <ListItemIcon>
+                                        <CustomIcon
+                                            width={32}
+                                            height={32}
+                                            icon='api'
+                                            className={classes.listText}
+                                            strokeColor={strokeColor}
+                                        />
+                                    </ListItemIcon>
+                                    <ListItemText classes={{ primary: classes.listText }} primary='API Products' />
+                                </ListItem>
+                            </Link>
                         </List>
                     </div>
                 </div>

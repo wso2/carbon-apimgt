@@ -19,10 +19,9 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 
 /**
  * This class represent the API key validation Info DTO.
@@ -60,6 +59,9 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private String subscriberTenantDomain;
     private String spikeArrestUnit;
     private boolean stopOnQuotaReach;
+    //keeps productId of product for which the key was validated, if key was validated for an api this will be null
+    private String productName;
+    private String productProvider;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -259,6 +261,8 @@ public class APIKeyValidationInfoDTO implements Serializable {
                 append(" , spikeArrestUnit:").append(spikeArrestUnit).
                 append(" , subscriberTenantDomain:").append(subscriberTenantDomain).
                 append(" , stopOnQuotaReach:").append(stopOnQuotaReach).
+                append(" , productName:").append(productName).
+                append(" , productProvider:").append(productProvider).
                 append(" , apiPublisher:").append(apiPublisher);
 
         if (authorizedDomains != null && !authorizedDomains.isEmpty()) {
@@ -316,5 +320,20 @@ public class APIKeyValidationInfoDTO implements Serializable {
         this.subscriberTenantDomain = subscriberTenantDomain;
     }
 
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductProvider(String productProvider) {
+        this.productProvider = productProvider;
+    }
+
+    public String getProductProvider() {
+        return productProvider;
+    }
 }
 

@@ -21,6 +21,7 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -94,10 +95,22 @@ class Resources extends React.Component {
     render() {
         const { paths } = this.state;
         if (this.state.notFound) {
-            return <div>resource not found...</div>;
+            return (
+                <div>
+                    <FormattedMessage
+                        id='Apis.Details.NewOverview.Resources.resource.not.found'
+                        defaultMessage='resource not found...'
+                    />
+                </div>);
         }
         if (!paths) {
-            return <div>loading...</div>;
+            return (
+                <div>
+                    <FormattedMessage
+                        id='Apis.Details.NewOverview.Resources.loading'
+                        defaultMessage='loading...'
+                    />
+                </div>);
         }
         const { classes, parentClasses, api } = this.props;
 
@@ -106,11 +119,17 @@ class Resources extends React.Component {
                 {console.info('api....', api)}
                 <div className={parentClasses.titleWrapper}>
                     <Typography variant='h5' component='h3' className={parentClasses.title}>
-                        Resources
+                        <FormattedMessage
+                            id='Apis.Details.NewOverview.Resources.resources'
+                            defaultMessage='Resources'
+                        />
                     </Typography>
                     <Link to={'/apis/' + api.id + '/resources'}>
                         <Button variant='contained' color='default'>
-                            Edit
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Resources.edit'
+                                defaultMessage='Edit'
+                            />
                         </Button>
                     </Link>
                 </div>

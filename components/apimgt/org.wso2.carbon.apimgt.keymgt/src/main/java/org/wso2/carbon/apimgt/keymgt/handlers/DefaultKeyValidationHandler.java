@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -166,6 +167,16 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         AccessTokenDO accessTokenDO = new AccessTokenDO(clientId, user, scopes, null,
                 null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
+
+        if (apiKeyValidationInfoDTO.getProductName() == null && apiKeyValidationInfoDTO.getProductProvider() == null) {
+            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":" + APIConstants.API_SUBSCRIPTION_TYPE);
+        } else {
+            String productName = apiKeyValidationInfoDTO.getProductName();
+            String productProvider = apiKeyValidationInfoDTO.getProductProvider();
+            accessTokenDO.setTokenType(
+                    accessTokenDO.getTokenType() + ":" + APIConstants.API_PRODUCT_SUBSCRIPTION_TYPE + ":" + productName
+                            + ":" + productProvider);
+        }
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());
 

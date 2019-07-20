@@ -38,6 +38,7 @@ import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
@@ -262,8 +263,12 @@ class Subscribe extends Component {
      * @memberof Subscribe
      */
     addNotifications() {
+        const { intl } = this.props;
         this.refs.notificationSystem.addNotification({
-            message: 'Subscribe to API successfully',
+            message: intl.formatMessage({
+                defaultMessage: 'Subscribe to API successfully',
+                id: 'Apis.Details.Subscribe.subscribe.successfull',
+            }),
             position: 'tc',
             level: 'success',
         });
@@ -292,14 +297,24 @@ class Subscribe extends Component {
         const promised_subscribe = api.subscribe(apiId, applicationId, policy);
         promised_subscribe
             .then((response) => {
-                console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
+                console.log(
+                    intl.formatMessage({
+                        defaultMessage: 'Subscription created successfully with ID : ',
+                        id: 'Apis.Details.Subscribe.created.successfully.with.id',
+                    }) + response.body.subscriptionId,
+                );
 
                 // this.addNotifications();
                 this.updateSubscriptionData();
                 this.setState({ openSubsConfirm: true });
             })
             .catch((error) => {
-                console.log('Error while creating the subscription.');
+                console.log(
+                    intl.formatMessage({
+                        defaultMessage: 'Error while creating the subscription.',
+                        id: 'Apis.Details.Subscribe.error',
+                    }),
+                );
                 console.error(error);
             });
     };
@@ -424,7 +439,10 @@ class Subscribe extends Component {
                     })}
                     onClick={this.handleExpandClick}
                     aria-expanded={this.state.expanded}
-                    aria-label='Show more'
+                    aria-label={intl.formatMessage({
+                        defaultMessage: 'Show more',
+                        id: 'Apis.Details.Subscribe.show.more',
+                    })}
                 >
                     <ExpandMoreIcon />
                 </IconButton>
@@ -435,35 +453,58 @@ class Subscribe extends Component {
                 {this.state.applications && this.state.applications.length > 0 ? (
                     <div>
                         <Typography variant='headline' className={classes.headline}>
-                            Test this API?
+                            <FormattedMessage
+                                id='Apis.Details.Subscribe.test.this.api'
+                                defaultMessage='Test this API?'
+                            />
                         </Typography>
 
                         <Typography gutterBottom>
-                            {`
-                            Create an Application and subscribe this API to that Application.
-                            An application is a logical collection of APIs. 
-                            Applications allow you to use a single access token to invoke a collection 
-                            of APIs and to subscribe to one API multiple times with different SLA levels. 
-                            The DefaultApplication is pre-created and allows unlimited access by default.
-                            `}
+                            <FormattedMessage
+                                id='Apis.Details.Subscribe.test.description'
+                                defaultMessage='Create an Application and subscribe this API to that Application.
+                                                                        An application is a logical collection of APIs.
+                                                                        Applications allow you to use a single access token to invoke a collection
+                                                                        of APIs and to subscribe to one API multiple times with different SLA levels.
+                                                                        The DefaultApplication is pre-created and allows unlimited access by default.'
+                            />
                         </Typography>
 
-                        <Button onClick={this.handleAppDialogOpen} color='primary' variant='raised' className='form-buttons full-width'>
+                        <Button
+                            onClick={this.handleAppDialogOpen}
+                            color='primary'
+                            variant='raised'
+                            className='form-buttons full-width'
+                        >
                             {' '}
-                            Create New Application
+                            <FormattedMessage
+                                id='Apis.Details.Subscribe.create.new.application'
+                                defaultMessage='Create New Application'
+                            />
                         </Button>
                     </div>
                 ) : (
                     <div>
                         <Typography variant='headline' className={classes.headline}>
-                            Subscriptions
+                            <FormattedMessage
+                                id='Apis.Details.Subscribe.subscriptions.title'
+                                defaultMessage='Subscriptions'
+                            />
                         </Typography>
 
                         {this.state.applicationsAvailable && this.state.applicationsAvailable.length > 0 ? (
                             <div>
                                 <FormControl className={classes.formControl}>
-                                    <InputLabel>Applications</InputLabel>
-                                    <Select value={this.state.applicationId} onChange={this.handleChange('applicationId')}>
+                                    <InputLabel>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscribe.applications.title'
+                                            defaultMessage='Applications'
+                                        />
+                                    </InputLabel>
+                                    <Select
+                                        value={this.state.applicationId}
+                                        onChange={this.handleChange('applicationId')}
+                                    >
                                         {this.state.applicationsAvailable.map(app => (
                                             <option value={app.value} key={app.value}>
                                                 {app.label}
@@ -473,29 +514,48 @@ class Subscribe extends Component {
                                 </FormControl>
                                 {this.state.tiers && (
                                     <FormControl className={classes.formControl}>
-                                        <Select value={this.state.policyName} onChange={this.handleChange('policyName')}>
+                                        <Select
+                                            value={this.state.policyName}
+                                            onChange={this.handleChange('policyName')}
+                                        >
                                             {this.state.tiers.map(tier => (
                                                 <option value={tier.value}>{tier.label}</option>
                                             ))}
                                         </Select>
                                     </FormControl>
                                 )}
-                                <Button onClick={this.createSubscription} color='primary' variant='raised' className='form-buttons full-width'>
+                                <Button
+                                    onClick={this.createSubscription}
+                                    color='primary'
+                                    variant='raised'
+                                    className='form-buttons full-width'
+                                >
                                     {' '}
-                                    Subscribed to this API
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscribe.subscribe.to.this'
+                                        defaultMessage='Subscribed to this API'
+                                    />
                                 </Button>
                             </div>
                         ) : (
                             <div>
                                 <Typography gutterBottom>
-                                    {`
-                                    You have subscribed to all the available applications. You need to create a 
-                                    new application to subscribe again to this API.
-                                    `}
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscribe.subscribed.to.all'
+                                        defaultMessage='You have subscribed to all the available applications. You need to create a
+                                                                        new application to subscribe again to this API.'
+                                    />
                                 </Typography>
-                                <Button onClick={this.handleAppDialogOpen} color='primary' variant='raised' className='form-buttons full-width'>
-                                    {' '}
-                                    Create New Application
+                                <Button
+                                    onClick={this.handleAppDialogOpen}
+                                    color='primary'
+                                    variant='raised'
+                                    className='form-buttons full-width'
+                                >
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscribe.create.new'
+                                        defaultMessage='Create New Application'
+                                    />
                                 </Button>
                             </div>
                         )}
@@ -503,17 +563,24 @@ class Subscribe extends Component {
                         {this.state.subscribedApplications && this.state.subscribedApplications.length > 0 && (
                             <div>
                                 <Typography variant='caption' className={classes.subtitle}>
-                                    subscribed Applications
+                                <FormattedMessage
+                                                id='Apis.Details.Subscribe.showing.two'
+                                                defaultMessage='subscribed Applications'
+                                            />
                                     {this.state.subscribedApplications && this.state.subscribedApplications.length > 2 && (
                                         <span>
-                                            - showing 2 out of
-                                            {' '}
+                                            -
+                                            <FormattedMessage
+                                                id='Apis.Details.Subscribe.showing.two'
+                                                defaultMessage='showing 2 out of'
+                                            />
                                             {this.state.subscribedApplications.length}
-                                            {' '}
 -
                                             <Link to='/applications' className={classes.viewAllLink}>
-                                                {' '}
-                                                View All
+                                                <FormattedMessage
+                                                    id='Apis.Details.Subscribe.view.all.link'
+                                                    defaultMessage='View All'
+                                                />
                                             </Link>
                                         </span>
                                     )}
@@ -524,13 +591,16 @@ class Subscribe extends Component {
                                     .map(
                                         (app, index) => index < 2 && (
                                             <div className={classes.appListWrapper} key={index}>
-                                                <Link to={'/applications/' + app.value} key={app.value} className={classes.appLink}>
+                                                <Link
+                                                    to={'/applications/' + app.value}
+                                                    key={app.value}
+                                                    className={classes.appLink}
+                                                >
                                                     <span className={classes.applicationName}>{app.label}</span>
                                                     <span className={classes.caption}>
-- (
+                                                        - (
                                                         {app.policy}
-                                                        {' '}
-)
+                                                        )
                                                     </span>
                                                 </Link>
                                             </div>
@@ -545,7 +615,14 @@ class Subscribe extends Component {
                 <Dialog fullScreen open={this.state.createAppOpen} onClose={this.handleClose} transition={Transition}>
                     <Grid container>
                         <Grid item xs={1} className={classes.closeButton}>
-                            <IconButton color='inherit' onClick={this.handleAppDialogClose} aria-label='Close'>
+                            <IconButton
+                                color='inherit'
+                                onClick={this.handleAppDialogClose}
+                                aria-label={intl.formatMessage({
+                                    defaultMessage: 'Close',
+                                    id: 'Apis.Details.Subscribe.close.label',
+                                })}
+                            >
                                 <CloseIcon />
                             </IconButton>
                         </Grid>
@@ -554,17 +631,40 @@ class Subscribe extends Component {
                 </Dialog>
 
                 {/* Dialog to show once user have subscribed. */}
-                <Dialog open={this.state.openSubsConfirm} onClose={this.handleCloseSubsConfirm} aria-labelledby='alert-dialog-title' aria-describedby='alert-dialog-description'>
-                    <DialogTitle id='alert-dialog-title'>Use Google's location service?</DialogTitle>
+                <Dialog
+                    open={this.state.openSubsConfirm}
+                    onClose={this.handleCloseSubsConfirm}
+                    aria-labelledby='alert-dialog-title'
+                    aria-describedby='alert-dialog-description'
+                >
+                    <DialogTitle id='alert-dialog-title'>
+                        <FormattedMessage
+                            id='Apis.Details.Subscribe.created.success'
+                            defaultMessage="Use Google's location service?"
+                        />
+                    </DialogTitle>
                     <DialogContent>
-                        <DialogContentText id='alert-dialog-description'>successfully created application.</DialogContentText>
+                        <DialogContentText id='alert-dialog-description'>
+                            <FormattedMessage
+                                id='Apis.Details.Subscribe.created.success'
+                                defaultMessage='Successfully created application.'
+                            />
+                        </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Link to={'/applications/' + this.state.applicationId}>
-                            <Button color='primary'>Go to application page.</Button>
+                            <Button color='primary'>
+                                <FormattedMessage
+                                    id='Apis.Details.Subscribe.go.application'
+                                    defaultMessage='Go to application page.'
+                                />
+                            </Button>
                         </Link>
                         <Button onClick={this.handleCloseSubsConfirm} color='primary' autoFocus>
-                            Stay on the API detials page.
+                            <FormattedMessage
+                                id='Apis.Details.Subscribe.stay.on.the.api.details.page'
+                                defaultMessage='Stay on the API detials page.'
+                            />
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -579,4 +679,4 @@ Subscribe.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Subscribe);
+export default injectIntl(withStyles(styles)(Subscribe));

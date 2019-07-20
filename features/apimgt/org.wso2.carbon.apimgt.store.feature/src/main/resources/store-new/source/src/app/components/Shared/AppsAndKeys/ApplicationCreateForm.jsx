@@ -26,6 +26,7 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
 /**
@@ -49,11 +50,11 @@ const styles = theme => ({
 
 const ApplicationCreate = (props) => {
     /**
-    * This method is used to handle the updating of create application
-    * request object.
-    * @param {*} field field that should be updated in appliction request
-    * @param {*} event event fired
-    */
+     * This method is used to handle the updating of create application
+     * request object.
+     * @param {*} field field that should be updated in appliction request
+     * @param {*} event event fired
+     */
     const handleChange = (field, event) => {
         const { applicationRequest, updateApplicationRequest } = props;
         const newRequest = { ...applicationRequest };
@@ -85,7 +86,7 @@ const ApplicationCreate = (props) => {
      * @memberof ApplicationCreate
      */
     const {
-        classes, throttlingPolicyList, applicationRequest, isNameValid,
+        classes, throttlingPolicyList, applicationRequest, isNameValid, intl,
     } = props;
     return (
         <form className={classes.container} noValidate autoComplete='off'>
@@ -94,16 +95,26 @@ const ApplicationCreate = (props) => {
                     <FormControl margin='normal' className={classes.FormControl}>
                         <TextField
                             required
-                            label='Application Name'
+                            label={intl.formatMessage({
+                                defaultMessage: 'Application Name',
+                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.name',
+                            })}
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            helperText={`Enter a name to identify the Application. You will be able to pick this
-                                application when subscribing to APIs`}
+                            helperText={intl.formatMessage({
+                                defaultMessage:
+                                    'Enter a name to identify the Application. You will be able to pick this application when subscribing to APIs',
+                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name',
+                            })}
                             fullWidth
                             name='name'
                             onChange={e => handleChange('name', e)}
-                            placeholder='My Mobile Application'
+                            placeholder={intl.formatMessage({
+                                defaultMessage:
+                                    'My Mobile Application',
+                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application',
+                            })}
                             autoFocus
                             className={classes.inputText}
                             onBlur={e => props.validateName(e.target.value)}
@@ -114,7 +125,10 @@ const ApplicationCreate = (props) => {
                     {throttlingPolicyList && (
                         <FormControl margin='normal' className={classes.FormControlOdd}>
                             <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
-                                    Per Token Quota
+                                <FormattedMessage
+                                    defaultMessage='Per Token Quota'
+                                    id='Shared.AppsAndKeys.ApplicationCreateForm.per.token.quota'
+                                />
                             </InputLabel>
                             <Select
                                 value={applicationRequest.throttlingPolicy}
@@ -128,8 +142,11 @@ const ApplicationCreate = (props) => {
                                 ))}
                             </Select>
                             <Typography variant='caption'>
-                                    Assign API request quota per access token. Allocated quota will be shared among all
-                                    the subscribed APIs of the application.
+                                <FormattedMessage
+                                    defaultMessage='Assign API request quota per access token. Allocated quota will be shared among all
+                                    the subscribed APIs of the application.'
+                                    id='Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request'
+                                />
                             </Typography>
                         </FormControl>
                     )}
@@ -139,13 +156,21 @@ const ApplicationCreate = (props) => {
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            helperText='Describe the application'
+                            helperText={intl.formatMessage({
+                                defaultMessage:
+                                    'Describe the application',
+                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.describe.the.application',
+                            })}
                             fullWidth
                             multiline
                             rowsMax='4'
                             name='description'
                             onChange={e => handleChange('description', e)}
-                            placeholder='This application is grouping apis for my mobile application'
+                            placeholder={intl.formatMessage({
+                                defaultMessage:
+                                    'This application is grouping apis for my mobile application',
+                                id: 'Shared.AppsAndKeys.ApplicationCreateForm.this.application',
+                            })}
                             className={classes.inputText}
                         />
                     </FormControl>
@@ -159,4 +184,4 @@ ApplicationCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ApplicationCreate);
+export default injectIntl(withStyles(styles)(ApplicationCreate));

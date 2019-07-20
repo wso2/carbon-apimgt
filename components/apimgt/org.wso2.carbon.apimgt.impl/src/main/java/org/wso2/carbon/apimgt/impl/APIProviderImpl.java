@@ -41,6 +41,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
@@ -53,6 +54,9 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -60,10 +64,12 @@ import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -1073,7 +1079,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
             }
             validateResourceThrottlingTiers(api, tenantDomain);
+
+            //get product resource mappings on API before updating the API. Update uri templates on api will remove all
+            //product mappings as well.
+            List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
             apiMgtDAO.updateAPI(api, tenantId, userNameWithoutChange);
+            updateProductResourceMappings(api, productResources);
+
             if (log.isDebugEnabled()) {
                 log.debug("Successfully updated the API: " + api.getId() + " in the database");
             }
@@ -1294,7 +1306,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // wsdls for each update.
                 //check for wsdl endpoint
                 org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
-                boolean isWSAPI = APIConstants.APIType.WS.toString().equals(api.getType());
+                boolean isWSAPI = APIConstants.APITransportType.WS.toString().equals(api.getType());
                 String wsdlURL;
                 if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
                         ("production_endpoints")) {
@@ -1807,6 +1819,37 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedEnvironment;
     }
 
+    private Map<String, String> publishToGateway(APIProduct apiProduct) throws APIManagementException {
+        Map<String, String> failedEnvironment;
+        String tenantDomain = null;
+        APITemplateBuilder builder = null;
+        APIProductIdentifier apiProductId = apiProduct.getId();
+
+        String provider = apiProductId.getProviderName();
+        if (provider.contains("AT")) {
+            provider = provider.replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        }
+
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        gatewayManager.setProductResourceSequences(this, apiProduct, tenantDomain);
+
+        try {
+            builder = getAPITemplateBuilder(apiProduct);
+        } catch (Exception e) {
+            handleException("Error while publishing to Gateway ", e);
+        }
+
+        failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain);
+        if (log.isDebugEnabled()) {
+            String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
+                    + " published to gateway";
+            log.debug(logMessage);
+        }
+        return failedEnvironment;
+    }
+
     /**
      * This method returns a list of previous versions of a given API
      *
@@ -2163,6 +2206,125 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         }
+
+        return vtb;
+    }
+
+
+    private APITemplateBuilder getAPITemplateBuilder(APIProduct apiProduct) throws APIManagementException {
+        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct);
+        vtb.addHandler(
+                "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler", Collections
+                        .<String, String>emptyMap());
+
+        Map<String, String> corsProperties = new HashMap<>();
+        corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE,
+                APIConstants.IMPLEMENTATION_TYPE_ENDPOINT);
+
+        //Get authorization header from the API object or from the tenant registry
+        String authorizationHeader;
+        if (!StringUtils.isBlank(apiProduct.getAuthorizationHeader())) {
+            authorizationHeader = apiProduct.getAuthorizationHeader();
+        } else {
+            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
+            // in tenant registry
+            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
+        }
+        if (!StringUtils.isBlank(authorizationHeader)) {
+            corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+
+        if (apiProduct.getCorsConfiguration() != null &&
+                apiProduct.getCorsConfiguration().isCorsConfigurationEnabled()) {
+            CORSConfiguration corsConfiguration = apiProduct.getCorsConfiguration();
+            if (corsConfiguration.getAccessControlAllowHeaders() != null) {
+                StringBuilder allowHeaders = new StringBuilder();
+                for (String header : corsConfiguration.getAccessControlAllowHeaders()) {
+                    allowHeaders.append(header).append(',');
+                }
+                if (allowHeaders.length() != 0) {
+                    allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_HEADERS_HANDLER_VALUE, allowHeaders.toString());
+                }
+            }
+            if (corsConfiguration.getAccessControlAllowOrigins() != null) {
+                StringBuilder allowOrigins = new StringBuilder();
+                for (String origin : corsConfiguration.getAccessControlAllowOrigins()) {
+                    allowOrigins.append(origin).append(',');
+                }
+                if (allowOrigins.length() != 0) {
+                    allowOrigins.deleteCharAt(allowOrigins.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_ORIGIN_HANDLER_VALUE, allowOrigins.toString());
+                }
+            }
+            if (corsConfiguration.getAccessControlAllowMethods() != null) {
+                StringBuilder allowedMethods = new StringBuilder();
+                for (String methods : corsConfiguration.getAccessControlAllowMethods()) {
+                    allowedMethods.append(methods).append(',');
+                }
+                if (allowedMethods.length() != 0) {
+                    allowedMethods.deleteCharAt(allowedMethods.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_METHODS_HANDLER_VALUE, allowedMethods.toString());
+                }
+            }
+            if (corsConfiguration.isAccessControlAllowCredentials()) {
+                corsProperties.put(APIConstants.CORSHeaders.ALLOW_CREDENTIALS_HANDLER_VALUE,
+                        String.valueOf(corsConfiguration.isAccessControlAllowCredentials()));
+            }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
+                    , corsProperties);
+        } else if (APIUtil.isCORSEnabled()) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
+                    , corsProperties);
+        }
+
+        Map<String, String> authProperties = new HashMap<String, String>();
+
+        //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
+        String removeHeaderFromOutMessage = APIUtil
+                .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+        if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
+            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
+        } else {
+            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
+                    APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
+        }
+
+        authProperties.put("apiType", APIConstants.ApiTypes.PRODUCT_API.name());
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
+                authProperties);
+        Map<String, String> properties = new HashMap<String, String>();
+
+        boolean isGlobalThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
+        if (apiProduct.getProductionMaxTps() != null) {
+            properties.put("productionMaxCount", apiProduct.getProductionMaxTps());
+        }
+
+        if (apiProduct.getSandboxMaxTps() != null) {
+            properties.put("sandboxMaxCount", apiProduct.getSandboxMaxTps());
+        }
+
+        if (isGlobalThrottlingEnabled) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
+                    , properties);
+        } else {
+            properties.put("id", "A");
+            properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
+            properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
+            properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler"
+                    , properties);
+        }
+
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
+                , Collections.<String, String>emptyMap());
+
+        properties = new HashMap<String, String>();
+        properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
+        vtb.addHandler(
+                "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
+                , properties);
 
         return vtb;
     }
@@ -2600,20 +2762,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * @param apiId APIIdentifier
+     * @param id Identifier
      * @param docId UUID of the doc
      * @throws APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docId)
+    public void removeDocumentation(Identifier id, String docId)
             throws APIManagementException {
         String docPath;
+        String identifierType = StringUtils.EMPTY;
+        String artifactKey = StringUtils.EMPTY;
+
+        if (id instanceof APIIdentifier) {
+            identifierType = APIConstants.API_IDENTIFIER_TYPE;
+            artifactKey = APIConstants.DOCUMENTATION_KEY;
+        } else if (id instanceof APIProductIdentifier) {
+            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
+            artifactKey = APIConstants.PRODUCT_DOCUMENTATION_KEY;
+        }
 
         try {
             GenericArtifactManager artifactManager = APIUtil
-                    .getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
+                    .getArtifactManager(registry, artifactKey);
             if (artifactManager == null) {
-                String errorMessage = "Failed to retrieve artifact manager when removing documentation of API " + apiId
-                        + " Document ID " + docId;
+                String errorMessage =
+                        "Failed to retrieve artifact manager when removing documentation of " + identifierType + " "
+                                + id + " Document ID " + docId;
                 log.error(errorMessage);
                 throw new APIManagementException(errorMessage);
             }
@@ -2624,14 +2797,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (docFilePath != null) {
                 File tempFile = new File(docFilePath);
                 String fileName = tempFile.getName();
-                docFilePath = APIUtil.getDocumentationFilePath(apiId, fileName);
+                docFilePath = APIUtil.getDocumentationFilePath(id, fileName);
                 if (registry.resourceExists(docFilePath)) {
                     registry.delete(docFilePath);
                 }
             }
 
             Association[] associations = registry.getAssociations(docPath,
-                    APIConstants.DOCUMENTATION_KEY);
+                    APIConstants.DOCUMENTATION_ASSOCIATION);
 
             for (Association association : associations) {
                 registry.delete(association.getDestinationPath());
@@ -2643,15 +2816,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     /**
-     * Adds Documentation to an API
+     * Adds Documentation to an API/Product
      *
-     * @param apiId         APIIdentifier
+     * @param id         API/Product Identifier
      * @param documentation Documentation
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add documentation
      */
-    public void addDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException {
-        API api = getAPI(apiId);
-        createDocumentation(api, documentation);
+    public void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException {
+        if (id instanceof APIIdentifier) {
+            API api = getAPI((APIIdentifier) id);
+            createDocumentation(api, documentation);
+        } else if (id instanceof APIProductIdentifier) {
+            APIProduct product = getAPIProduct((APIProductIdentifier) id);
+            createDocumentation(product, documentation);
+        }
+
     }
 
     /**
@@ -5794,12 +5973,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * To add API roles restrictions and add additional properties.
+     * To add API/Product roles restrictions and add additional properties.
      *
-     * @param artifactPath                Path of the API artifact.
+     * @param artifactPath                Path of the API/Product artifact.
      * @param publisherAccessControlRoles Role specified for the publisher access control.
      * @param publisherAccessControl      Publisher Access Control restriction.
-     * @param additionalProperties        Additional properties that is related with an API.
+     * @param additionalProperties        Additional properties that is related with an API/Product.
      * @throws RegistryException Registry Exception.
      */
     private void updateRegistryResources(String artifactPath, String publisherAccessControlRoles,
@@ -6145,7 +6324,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param identifier API identifier
      * @throws APIManagementException APIManagementException
      */
-    protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
+    protected void checkAccessControlPermission(Identifier identifier) throws APIManagementException {
         if (identifier == null || !isAccessControlRestrictionEnabled) {
             if (!isAccessControlRestrictionEnabled && log.isDebugEnabled()) {
                 log.debug("Publisher access control restriction is not enabled. Hence the API " + identifier
@@ -6153,38 +6332,47 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             return;
         }
-        String apiPath = APIUtil.getAPIPath(identifier);
+        String resourcePath = StringUtils.EMPTY;
+        String identifierType = StringUtils.EMPTY;
+        if (identifier instanceof APIIdentifier) {
+            resourcePath = APIUtil.getAPIPath((APIIdentifier) identifier);
+            identifierType = APIConstants.API_IDENTIFIER_TYPE;
+        } else if (identifier instanceof APIProductIdentifier) {
+            resourcePath = APIUtil.getAPIProductPath((APIProductIdentifier) identifier);
+            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
+        }
+
         try {
             // Need user name with tenant domain to get correct domain name from
             // MultitenantUtils.getTenantDomain(username)
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            if (!registry.resourceExists(apiPath)) {
+            if (!registry.resourceExists(resourcePath)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Resource does not exist in the path : " + apiPath + " this can happen if this in the "
-                            + "middle of the new API creation, hence not checking the access control");
+                    log.debug("Resource does not exist in the path : " + resourcePath + " this can happen if this is in the "
+                            + "middle of the new " + identifierType + " creation, hence not checking the access control");
                 }
                 return;
             }
-            Resource apiResource = registry.get(apiPath);
-            if (apiResource == null) {
+            Resource resource = registry.get(resourcePath);
+            if (resource == null) {
                 return;
             }
-            String accessControlProperty = apiResource.getProperty(APIConstants.ACCESS_CONTROL);
+            String accessControlProperty = resource.getProperty(APIConstants.ACCESS_CONTROL);
             if (accessControlProperty == null || accessControlProperty.trim().isEmpty() || accessControlProperty
                     .equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("API in the path  " + apiPath + " does not have any access control restriction");
+                    log.debug(identifierType + " in the path  " + resourcePath + " does not have any access control restriction");
                 }
                 return;
             }
             if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
                 return;
             }
-            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+            String publisherAccessControlRoles = resource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
             if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
                 String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
                 if (log.isDebugEnabled()) {
-                    log.debug("API has restricted access to creators and publishers with the roles : " + Arrays
+                    log.debug(identifierType + " has restricted access to creators and publishers with the roles : " + Arrays
                             .toString(accessControlRoleList));
                 }
                 String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
@@ -6198,16 +6386,695 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug("API " + identifier + " cannot be accessed by user '" + username + "'. It "
+                    log.debug(identifierType + " " + identifier + " cannot be accessed by user '" + username + "'. It "
                             + "has a publisher access control restriction");
                 }
                 throw new APIManagementException(
-                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the API " + identifier);
+                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the " + identifierType + " " + identifier);
             }
         } catch (RegistryException e) {
             throw new APIManagementException(
-                    "Registry Exception while trying to check the access control restriction of API " + identifier
-                            .getApiName(), e);
+                    "Registry Exception while trying to check the access control restriction of " + identifierType + " " + identifier
+                            .getName(), e);
+        }
+    }
+
+    @Override
+    public void addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+        validateApiProductInfo(product);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
+        createAPIProduct(product);
+
+        if (log.isDebugEnabled()) {
+            log.debug("API Product details successfully added to the registry. API Product Name: " + product.getId().getName()
+                    + ", API Product Version : " + product.getId().getVersion() + ", API Product context : " + "change"); //todo: log context
+        }
+
+        List<APIProductResource> resources = product.getProductResources();
+        
+        // list to hold resouces which are actually in an existing api. If user has created an API product with invalid
+        // API or invalid resource of a valid API, that content will be removed .validResources array will have only
+        // legitimate apis
+        List<APIProductResource> validResources = new ArrayList<APIProductResource>();
+        for (APIProductResource apiProductResource : resources) {
+            API api = null;
+            try {
+                api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
+                // if API does not exist, getLightweightAPIByUUID() method throws exception. 
+            } catch (APIMgtResourceNotFoundException e) {
+                //If there is no API , this exception is thrown. We create the product without this invalid api.
+                log.warn("API does not exist for the given apiId: " + apiProductResource.getApiId());
+                continue;
+            }
+            if (api != null) {
+                apiProductResource.setApiIdentifier(api.getId());
+                apiProductResource.setProductIdentifier(product.getId());
+		apiProductResource.setEndpointConfig(api.getEndpointConfig());
+                URITemplate uriTemplate = apiProductResource.getUriTemplate();
+
+                Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
+                if (uriTemplate == null) {
+                    //if no resources are define for the API, we ingore that api for the product
+                } else {
+                    String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+                    if (templateMap.containsKey(key)) {
+
+                        //Since the template ID is not set from the request, we manually set it.
+                        uriTemplate.setId(templateMap.get(key).getId());
+                        //request has a valid API id and a valid resource. we add it to valid resource map
+                        validResources.add(apiProductResource);
+
+                    } else {
+                        //ignore
+                        log.warn("API with id " + apiProductResource.getApiId()
+                                + " does not have a resource " + uriTemplate.getResourceURI()
+                                + " with http method " + uriTemplate.getHTTPVerb());
+
+                    }
+                }
+            }
+        }
+        //set the valid resources only
+        product.setProductResources(validResources);
+        //now we have validated APIs and it's resources inside the API product. Add it to database
+
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+
+        //Only publish to gateways if the state is in Published state and has atleast one resource
+        if("PUBLISHED".equals(product.getState()) && !validResources.isEmpty()) {
+            Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+            if (!failedToPublishEnvironments.isEmpty()) {
+                Set<String> publishedEnvironments =
+                        new HashSet<String>(product.getEnvironments());
+                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+                product.setEnvironments(publishedEnvironments);
+                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+            }
+        }
+
+        apiMgtDAO.addAPIProduct(product, tenantDomain);
+
+        if (!failedGateways.isEmpty() &&
+                (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
+        }
+    }
+
+    @Override
+    public void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
+        //this is the product resource collection path
+        String productResourcePath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
+                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+
+        //this is the product rxt instance path
+        String apiProductArtifactPath = APIUtil.getAPIProductPath(identifier);
+
+        //todo : check whether there are any subscriptions for this api
+
+        try {
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Failed to retrieve artifact manager when deleting API Product" + identifier;
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+
+            Resource apiProductResource = registry.get(productResourcePath);
+            String productResourceUUID = apiProductResource.getUUID();
+
+            if (productResourceUUID == null) {
+                throw new APIManagementException("artifact id is null for : " + productResourcePath);
+            }
+
+            Resource apiArtifactResource = registry.get(apiProductArtifactPath);
+            String apiArtifactResourceUUID = apiArtifactResource.getUUID();
+
+            if (apiArtifactResourceUUID == null) {
+                throw new APIManagementException("artifact id is null for : " + apiProductArtifactPath);
+            }
+
+            GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiArtifactResourceUUID);
+            //Delete the dependencies associated  with the api product artifact
+            GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
+            if (dependenciesArray.length > 0) {
+                for (GovernanceArtifact artifact : dependenciesArray) {
+                    registry.delete(artifact.getPath());
+                }
+            }
+
+            //delete registry resources
+            artifactManager.removeGenericArtifact(productResourceUUID);
+
+            //todo : remove from gateways
+
+            apiMgtDAO.deleteAPIProduct(identifier);
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Product Name: " + identifier.getName() + ", API Product Version " + identifier.getVersion()
+                                + " successfully removed from the database.";
+                log.debug(logMessage);
+            }
+
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, identifier.getName());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, identifier.getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
+             /*remove empty directories*/
+            String apiProductCollectionPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                    .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
+            if (registry.resourceExists(apiProductCollectionPath)) {
+                //at the moment product versioning is not supported so we are directly deleting this collection as
+                // this is known to be empty
+                registry.delete(apiProductCollectionPath);
+            }
+
+            String productProviderPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
+                    .getProviderName();
+
+            if (registry.resourceExists(productProviderPath)) {
+                Resource providerCollection = registry.get(productProviderPath);
+                CollectionImpl collection = (CollectionImpl) providerCollection;
+                //if there is no api product for given provider delete the provider directory
+                if (collection.getChildCount() == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No more API Products from the provider " + identifier.getProviderName() + " found. " +
+                                "Removing provider collection from registry");
+                    }
+                    registry.delete(productProviderPath);
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to remove the API from : " + productResourcePath, e);
+        }
+    }
+
+    @Override
+    public void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+        //validate resources and set api identifiers and resource ids to product
+        List<APIProductResource> resources = product.getProductResources();
+        for (APIProductResource apiProductResource : resources) {
+            API api;
+            APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
+            if (productIdentifier != null) {
+                APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
+                String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
+                APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
+                        productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
+                api = super.getAPI(emailReplacedAPIIdentifier);
+            } else {
+                api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
+            }
+            // if API does not exist, getLightweightAPIByUUID() method throws exception. so no need to handle NULL
+            apiProductResource.setApiIdentifier(api.getId());
+            apiProductResource.setProductIdentifier(product.getId());
+            apiProductResource.setEndpointConfig(api.getEndpointConfig());
+            URITemplate uriTemplate = apiProductResource.getUriTemplate();
+
+            Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
+            if (uriTemplate == null) {
+                // TODO handle if no resource is defined. either throw an error or add all the resources of that API
+                // to the product
+            } else {
+                String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+                if (templateMap.containsKey(key)) {
+
+                    //Since the template ID is not set from the request, we manually set it.
+                    uriTemplate.setId(templateMap.get(key).getId());
+
+                } else {
+                    throw new APIManagementException("API with id " + apiProductResource.getApiId()
+                            + " does not have a resource " + uriTemplate.getResourceURI()
+                            + " with http method " + uriTemplate.getHTTPVerb());
+                }
+            }
+        }
+
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+
+        Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+        if (!failedToPublishEnvironments.isEmpty()) {
+            Set<String> publishedEnvironments =
+                    new HashSet<String>(product.getEnvironments());
+            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+            product.setEnvironments(publishedEnvironments);
+            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+            failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+        }
+
+        //todo : check whether permissions need to be updated and pass it along
+        updateApiProductArtifact(product, true, true);
+        apiMgtDAO.updateAPIProduct(product, userNameWithoutChange);
+
+        if (!failedGateways.isEmpty() &&
+                (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+            throw new FaultGatewaysException(failedGateways);
+        }
+
+    }
+
+    @Override
+    public boolean isProductExist(String productName, String provider, String tenantDomain)
+            throws APIManagementException {
+        return apiMgtDAO.isProductExist(productName, provider, tenantDomain);
+    }
+
+    @Override
+    public void updateAPIDefinitionOfAPIProduct(String definition, APIProduct product)
+            throws APIManagementException {
+        try {
+            String resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
+            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+            resource.setContent(definition);
+            resource.setMediaType("application/json");
+            registry.put(resourcePath, resource);
+
+            String[] visibleRoles = null;
+            if (product.getVisibleRoles() != null) {
+                visibleRoles = product.getVisibleRoles().split(",");
+            }
+
+            // Need to set anonymous if the visibility is public
+            APIUtil.clearResourcePermissions(resourcePath, product.getId(), ((UserRegistry) registry).getTenantId());
+            APIUtil.setResourcePermissions(product.getId().getProviderName(), product.getVisibility(), visibleRoles,
+                    resourcePath);
+
+        } catch (RegistryException e) {
+            handleException("Error while adding Swagger Definition for " + product.getId().getName() + '-'
+                    + product.getId().getProviderName(), e);
+        }
+
+    }
+
+    @Override
+    public void removeAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException {
+        String apiDefinitionFilePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(product.getId());
+        try {
+            if (registry.resourceExists(apiDefinitionFilePath)) {
+                registry.delete(apiDefinitionFilePath);
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to remove the Definition from : " + apiDefinitionFilePath, e);
+        }
+    }
+
+    @Override
+    public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
+        return apiMgtDAO.getResourcePathsOfAPI(apiId);
+    }
+
+    /**
+     * Validates the name of api product against illegal characters.
+     *
+     * @param product APIProduct info object
+     * @throws APIManagementException
+     */
+    private void validateApiProductInfo(APIProduct product) throws APIManagementException {
+        String apiName = product.getId().getName();
+        if (apiName == null) {
+            handleException("API Name is required.");
+        } else if (containsIllegals(apiName)) {
+            handleException("API Name contains one or more illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
+        }
+        //version is not a mandatory field for now
+    }
+
+    /**
+     * Create an Api Product
+     *
+     * @param apiProduct API Product
+     * @throws APIManagementException if failed to create APIProduct
+     */
+    protected void createAPIProduct(APIProduct apiProduct) throws APIManagementException {
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+
+        if (artifactManager == null) {
+            String errorMessage = "Failed to retrieve artifact manager when creating API Product" + apiProduct.getId().getName();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            GenericArtifact genericArtifact =
+                    artifactManager.newGovernanceArtifact(new QName(apiProduct.getId().getName()));
+            if (genericArtifact == null) {
+                String errorMessage = "Generic artifact is null when creating API Product" + apiProduct.getId().getName();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+            GenericArtifact artifact = APIUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
+            artifactManager.addGenericArtifact(artifact);
+
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
+            //provider ------provides----> APIProduct
+            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+
+            String visibleRolesList = apiProduct.getVisibleRoles();
+            String[] visibleRoles = new String[0];
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+
+            String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
+                    apiProduct.getAdditionalProperties());
+            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
+                    artifactPath, registry);
+
+            registry.commitTransaction();
+            transactionCommitted = true;
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Product Name: " + apiProduct.getId().getName() + ", API Product Version " + apiProduct.getId().getVersion()
+                                + " created";
+                log.debug(logMessage);
+            }
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } catch (APIManagementException e) {
+            handleException("Error while creating API Product", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), ex);
+            }
+        }
+    }
+
+    /**
+     * Update API Product Artifact in Registry
+     *
+     * @param apiProduct
+     * @param updateMetadata
+     * @param updatePermissions
+     * @throws APIManagementException
+     */
+    private void updateApiProductArtifact(APIProduct apiProduct, boolean updateMetadata, boolean updatePermissions)
+            throws APIManagementException {
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            String productArtifactId = registry.get(APIUtil.getAPIProductPath(apiProduct.getId())).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(productArtifactId);
+            if (artifactManager == null) {
+                String errorMessage =
+                        "Artifact manager is null when updating API Product with artifact ID " + apiProduct.getId();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+
+            Resource apiResource = registry.get(artifact.getPath());
+            GenericArtifact updateApiProductArtifact = APIUtil.createAPIProductArtifactContent(artifact, apiProduct);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiProductArtifact.getId());
+
+            artifactManager.updateGenericArtifact(updateApiProductArtifact);
+
+            //todo: implement visibility and access control and set permissions accordingly
+            registry.commitTransaction();
+            transactionCommitted = true;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error from this level will mask the original exception
+                log.error("Error while rolling back the transaction for API Product: " + apiProduct.getId().getName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error occurred while rolling back the transaction.", ex);
+            }
+        }
+    }
+
+    public void updateProductResourceMappings(API api, List<APIProductResource> productResources) throws APIManagementException {
+        //get uri templates of API again
+        Map<String, URITemplate> apiResources = apiMgtDAO.getURITemplatesForAPI(api);
+
+        for (APIProductResource productResource : productResources) {
+            URITemplate uriTemplate = productResource.getUriTemplate();
+            String productResourceKey = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getResourceURI();
+
+            //set new uri template ID to the product resource
+            int updatedURITemplateId = apiResources.get(productResourceKey).getId();
+            uriTemplate.setId(updatedURITemplateId);
+        }
+
+        apiMgtDAO.addAPIProductResourceMappings(productResources, null);
+    }
+
+    /**
+     * Create a product documentation
+     *
+     * @param product           APIProduct
+     * @param documentation Documentation
+     * @throws APIManagementException if failed to add documentation
+     */
+    private void createDocumentation(APIProduct product, Documentation documentation) throws APIManagementException {
+        try {
+            APIProductIdentifier productId = product.getId();
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry, APIConstants.PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifact artifact = artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
+            artifactManager.addGenericArtifact(APIUtil.createDocArtifactContent(artifact, productId, documentation));
+            String productPath = APIUtil.getAPIProductPath(productId);
+
+            //Adding association from api to documentation . (API Product -----> doc)
+            registry.addAssociation(productPath, artifact.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
+            String docVisibility = documentation.getVisibility().name();
+            String[] authorizedRoles = getAuthorizedRoles(productPath);
+            String visibility = product.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
+            }
+            APIUtil.setResourcePermissions(product.getId().getProviderName(),visibility, authorizedRoles, artifact
+                    .getPath(), registry);
+            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+            if (docFilePath != null && !StringUtils.EMPTY.equals(docFilePath)) {
+                //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
+                //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
+                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                APIUtil.setResourcePermissions(product.getId().getProviderName(),visibility, authorizedRoles, filePath, registry);
+                registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
+            }
+            documentation.setId(artifact.getId());
+        } catch (RegistryException e) {
+            handleException("Failed to add documentation", e);
+        } catch (UserStoreException e) {
+            handleException("Failed to add documentation", e);
+        }
+    }
+
+    /**
+     * Updates a given api product documentation
+     *
+     * @param productId         APIProductIdentifier
+     * @param documentation Documentation
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update docs
+     */
+    public void updateDocumentation(APIProductIdentifier productId, Documentation documentation) throws APIManagementException {
+
+        String productPath = APIUtil.getAPIProductPath(productId);
+        APIProduct product = getAPIProduct(productPath);
+        String docPath = APIUtil.getProductDocPath(productId) + documentation.getName();
+        try {
+            String docArtifactId = registry.get(docPath).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docArtifactId);
+            String docVisibility = documentation.getVisibility().name();
+            String[] authorizedRoles = new String[0];
+            String visibleRolesList = product.getVisibleRoles();
+            if (visibleRolesList != null) {
+                authorizedRoles = visibleRolesList.split(",");
+            }
+            String visibility = product.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
+            }
+
+            GenericArtifact updateDocArtifact = APIUtil.createDocArtifactContent(artifact, productId, documentation);
+            artifactManager.updateGenericArtifact(updateDocArtifact);
+            APIUtil.clearResourcePermissions(docPath, productId, ((UserRegistry) registry).getTenantId());
+
+            APIUtil.setResourcePermissions(product.getId().getProviderName(), visibility, authorizedRoles,
+                    artifact.getPath(), registry);
+
+            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+            if (docFilePath != null && !"".equals(docFilePath)) {
+                // The docFilePatch comes as
+                // /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
+                // We need to remove the
+                // /t/tenanatdoman/registry/resource/_system/governance section
+                // to set permissions.
+                int startIndex = docFilePath.indexOf("governance") + "governance".length();
+                String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                APIUtil.setResourcePermissions(product.getId().getProviderName(), visibility, authorizedRoles, filePath,
+                        registry);
+            }
+
+        } catch (RegistryException e) {
+            handleException("Failed to update documentation", e);
+        }
+    }
+
+    /**
+     * Add a file to a product document of source type FILE
+     *
+     * @param productId         APIProduct identifier the document belongs to
+     * @param documentation document
+     * @param filename      name of the file
+     * @param content       content of the file as an Input Stream
+     * @param contentType   content type of the file
+     * @throws APIManagementException if failed to add the file
+     */
+    public void addFileToProductDocumentation(APIProductIdentifier productId, Documentation documentation, String filename,
+            InputStream content, String contentType) throws APIManagementException {
+        if (Documentation.DocumentSourceType.FILE.equals(documentation.getSourceType())) {
+            contentType = "application/force-download";
+            ResourceFile icon = new ResourceFile(content, contentType);
+            String filePath = APIUtil.getDocumentationFilePath(productId, filename);
+            APIProduct apiProduct;
+            try {
+                apiProduct = getAPIProduct(productId);
+                String visibleRolesList = apiProduct.getVisibleRoles();
+                String[] visibleRoles = new String[0];
+                if (visibleRolesList != null) {
+                    visibleRoles = visibleRolesList.split(",");
+                }
+                APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
+                        filePath, registry);
+                documentation.setFilePath(addResourceFile(filePath, icon));
+                APIUtil.setFilePermission(filePath);
+            } catch (APIManagementException e) {
+                handleException("Failed to add file to product document " + documentation.getName(), e);
+            }
+        } else {
+            String errorMsg = "Cannot add file to the Product Document. Document " + documentation.getName()
+                    + "'s Source type is not FILE.";
+            handleException(errorMsg);
+        }
+    }
+
+    /**
+     * This method used to save the product documentation content
+     *
+     * @param apiProduct,               API Product
+     * @param documentationName, name of the inline documentation
+     * @param text,              content of the inline documentation
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add the document as a resource to registry
+     */
+    public void addProductDocumentationContent(APIProduct apiProduct, String documentationName, String text) throws APIManagementException {
+
+        APIProductIdentifier identifier = apiProduct.getId();
+        String documentationPath = APIUtil.getProductDocPath(identifier) + documentationName;
+        String contentPath = APIUtil.getProductDocContentPath(identifier, documentationName) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
+                RegistryConstants.PATH_SEPARATOR + documentationName;
+        boolean isTenantFlowStarted = false;
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            Resource docResource = registry.get(documentationPath);
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
+                    APIConstants.PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
+            Documentation doc = APIUtil.getDocumentation(docArtifact);
+
+            Resource docContent;
+
+            if (!registry.resourceExists(contentPath)) {
+                docContent = registry.newResource();
+            } else {
+                docContent = registry.get(contentPath);
+            }
+
+            /* This is a temporary fix for doc content replace issue. We need to add
+             * separate methods to add inline content resource in document update */
+            if (!APIConstants.NO_CONTENT_UPDATE.equals(text)) {
+                docContent.setContent(text);
+            }
+            docContent.setMediaType(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE);
+            registry.put(contentPath, docContent);
+            registry.addAssociation(documentationPath, contentPath, APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
+            String productPath = APIUtil.getAPIProductPath(identifier);
+            String[] authorizedRoles = getAuthorizedRoles(productPath);
+            String docVisibility = doc.getVisibility().name();
+            String visibility = apiProduct.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
+            }
+
+            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(),visibility, authorizedRoles,contentPath, registry);
+        } catch (RegistryException e) {
+            String msg = "Failed to add the documentation content of : "
+                    + documentationName + " of API Product :" + identifier.getName();
+            handleException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Failed to add the documentation content of : "
+                    + documentationName + " of API Product :" + identifier.getName();
+            handleException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 

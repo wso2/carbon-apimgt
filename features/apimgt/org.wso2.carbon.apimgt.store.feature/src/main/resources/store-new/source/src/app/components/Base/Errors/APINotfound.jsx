@@ -16,21 +16,29 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React, { Component } from 'react';
+import { FormattedMessage } from 'react-intl';
 
 const APINotFound = (props) => {
     return (
         <div>
-            <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 API Not Found!</h4>
+            <div className='message message-danger'>
+                <h4>
+                    <i className='icon fw fw-error' />
+                    <FormattedMessage id='Base.Errors.APINotfound.api.not.found' defaultMessage='404 API Not Found!' />
+                </h4>
                 <p>
-                    Can't find an API associate with the given API ID <span
-                    style={{color: 'green'}}> {props.match.params.api_uuid} </span>
+                    <FormattedMessage
+                        id='Base.Errors.APINotfound.no.api'
+                        defaultMessage="Can't find an API associate with the given API ID"
+                    />
+                    <span style={{ color: 'green' }}>
+                        {props.match.params.api_uuid}
+                    </span>
                 </p>
             </div>
-
         </div>
     );
 };
 
-export default APINotFound
+export default APINotFound;

@@ -31,6 +31,7 @@ public class SubscribedAPI {
     private Tier tier;
     private Subscriber subscriber;
     private APIIdentifier apiId;
+    private APIProductIdentifier productId;
     private Date lastAccessed;
     private Application application;
     private String subStatus;
@@ -46,6 +47,10 @@ public class SubscribedAPI {
     public SubscribedAPI(Subscriber subscriber, APIIdentifier apiId) {
         this.subscriber = subscriber;
         this.apiId = apiId;
+    }
+    public SubscribedAPI(Subscriber subscriber, APIProductIdentifier productId) {
+        this.subscriber = subscriber;
+        this.productId = productId;
     }
 
     public SubscribedAPI(String uuid) {
@@ -132,6 +137,14 @@ public class SubscribedAPI {
 
     public String getUUID() {
         return uuid;
+    }
+    
+    public APIProductIdentifier getProductId() {
+        return productId;
+    }
+
+    public void setProductId(APIProductIdentifier productId) {
+        this.productId = productId;
     }
 
     @Override

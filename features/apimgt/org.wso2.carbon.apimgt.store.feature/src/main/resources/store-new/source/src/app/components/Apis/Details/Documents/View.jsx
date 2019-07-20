@@ -24,6 +24,7 @@ import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
 import ReactMarkdown from 'react-markdown';
 import ReactSafeHtml from 'react-safe-html';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import API from '../../../../data/api';
 import Alert from '../../../Shared/Alert';
 
@@ -142,7 +143,7 @@ function View(props) {
                     console.log(error);
                     Alert.error(
                         intl.formatMessage({
-                            id: 'documents.markdown.editor.download.error',
+                            id: 'Apis.Details.Documents.View.error.downloading',
                             defaultMessage: 'Error downloading the file',
                         }),
                     );
@@ -166,7 +167,8 @@ function View(props) {
             )}
             {doc.sourceType === 'FILE' && (
                 <Button variant='contained' color='default' className={classes.button} onClick={handleDownload}>
-                    Download
+                    <FormattedMessage id='Apis.Details.Documents.View.btn.download' defaultMessage='Download' />
+
                     <Icon>arrow_downward</Icon>
                 </Button>
             )}
@@ -178,8 +180,10 @@ View.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     doc: PropTypes.shape({}).isRequired,
     apiId: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
     fullScreen: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(View);
+export default injectIntl(withStyles(styles)(View));

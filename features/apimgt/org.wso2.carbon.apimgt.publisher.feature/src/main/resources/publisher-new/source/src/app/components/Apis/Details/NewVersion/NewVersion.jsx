@@ -130,19 +130,26 @@ class CreateNewVersion extends React.Component {
             return;
         }
         const isDefaultVersionBool = isDefaultVersion === 'yes';
+        const { intl } = this.props;
         api.createNewAPIVersion(newVersion, isDefaultVersionBool)
             .then((response) => {
                 this.setState({
                     redirectToReferrer: true,
                     apiId: response.obj.id,
                 });
-                Alert.info('Successfully created new version "' + newVersion + '"');
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.NewVersion.NewVersion.success',
+                    defaultMessage: 'Successfully created new version',
+                }) + newVersion);
             })
             .catch((error) => {
                 if (error.status === 409) {
                     this.setState({ valid: { version: { alreadyExists: true } } });
                 } else {
-                    Alert.error('Something went wrong while creating a new version!. Error: ' + error.status);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.NewVersion.NewVersion.error',
+                        defaultMessage: 'Something went wrong while creating a new version!. Error: ',
+                    }) + error.status);
                 }
             });
     }
@@ -174,7 +181,10 @@ class CreateNewVersion extends React.Component {
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        Create New Version
+                        <FormattedMessage
+                            id='Apis.Details.NewVersion.NewVersion.create.new.version'
+                            defaultMessage='Create New Version'
+                        />
                     </Typography>
                 </div>
                 <ApiContext.Consumer>
@@ -187,8 +197,15 @@ class CreateNewVersion extends React.Component {
                                             fullWidth
                                             id='newVersion'
                                             error={valid.version.empty || valid.version.alreadyExists}
-                                            label='New Version'
-                                            helperText={helperText}
+                                            label={<FormattedMessage
+                                                id='Apis.Details.NewVersion.NewVersion.new.version'
+                                                defaultMessage='New Version'
+                                            />}
+                                            helperText={<FormattedMessage
+                                                id='Apis.Details.NewVersion.NewVersion.helper.text'
+                                                defaultMessage='{helper}'
+                                                values={{ helper: helperText }}
+                                            />}
                                             type='text'
                                             name='newVersion'
                                             placeholder='Eg: 2.0.0'
@@ -203,7 +220,10 @@ class CreateNewVersion extends React.Component {
                                     </FormControl>
                                     <FormControl margin='normal' className={classes.FormControl}>
                                         <FormLabel className={classes.FormLabel} component='legend'>
-                                            Make this the default version
+                                            <FormattedMessage
+                                                id='Apis.Details.NewVersion.NewVersion.default'
+                                                defaultMessage='Make this the default version'
+                                            />
                                             <Tooltip
                                                 placement='top'
                                                 classes={{
@@ -212,14 +232,20 @@ class CreateNewVersion extends React.Component {
                                                 disableHoverListener
                                                 title={
                                                     <React.Fragment>
-                                                        Marks one API version in a group as the default so that it
-                                                        can be invoked without specifying the version number in the
-                                                        URL. For example, if you mark http://host:port/youtube/2.0
-                                                        as the default API, requests made to
-                                                        http://host:port/youtube/ are automatically routed to
-                                                        version 2.0. If you mark an unpublished API as the default,
-                                                        the previous default published API will still be used as the
-                                                        default until the new default API is published.
+                                                        <FormattedMessage
+                                                            id='Apis.Details.NewVersion.NewVersion.tooltip'
+                                                            defaultMessage={'Marks one API version in a group as ' +
+                                                                'the default so that it can be invoked without ' +
+                                                                'specifying the version number in the URL. ' +
+                                                                'For example, if you mark ' +
+                                                                'http://host:port/youtube/2.0 as the default API, ' +
+                                                                'requests made to http://host:port/youtube/ are ' +
+                                                                'automatically routed to version 2.0. If you mark ' +
+                                                                'an unpublished API as the default, ' +
+                                                                'the previous default published API ' +
+                                                                'will still be used as the default until ' +
+                                                                'the new default API is published.'}
+                                                        />
                                                     </React.Fragment>
                                                 }
                                             >
@@ -246,8 +272,12 @@ class CreateNewVersion extends React.Component {
                                                 label='No'
                                             />
                                         </RadioGroup>
-                                        <FormHelperText>Indicate whether API should be the default version among the
-                                            group of APIs with the same name
+                                        <FormHelperText>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewVersion.NewVersion.api.helper'
+                                                defaultMessage={'Indicate whether API should be the default version ' +
+                                                    'among the group of APIs with the same name'}
+                                            />
                                         </FormHelperText>
                                     </FormControl>
                                 </Paper>
@@ -267,7 +297,10 @@ class CreateNewVersion extends React.Component {
                                                     id='createBtn'
                                                     onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
                                                 >
-                                                    <FormattedMessage id='create' defaultMessage='Create' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewVersion.NewVersion.create'
+                                                        defaultMessage='Create'
+                                                    />
                                                 </Button>
                                             </div>
                                         </Grid>
@@ -276,7 +309,10 @@ class CreateNewVersion extends React.Component {
                                                 <Button
                                                     id='cancelBtn'
                                                 >
-                                                    <FormattedMessage id='cancel' defaultMessage='Cancel' />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewVersion.NewVersion.cancel'
+                                                        defaultMessage='Cancel'
+                                                    />
                                                 </Button>
                                             </Link>
                                         </Grid>
@@ -295,6 +331,9 @@ CreateNewVersion.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
+    }).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
     }).isRequired,
 };
 

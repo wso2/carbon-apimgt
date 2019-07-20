@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
@@ -331,7 +330,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = originalAPI.getId();
-            boolean isWSAPI = originalAPI.getType() != null && APIConstants.APIType.WS == APIConstants.APIType
+            boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS == APIConstants.APITransportType
                     .valueOf(originalAPI.getType());
 
             //Overriding some properties:
@@ -1334,6 +1333,31 @@ public class ApisApiServiceImpl implements ApisApiService {
             log.error("Failed to update API after adding icon. ", e);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
+        }
+        return null;
+    }
+
+    @Override public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
+            MessageContext messageContext) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            List<ResourcePath> apiResourcePaths = apiProvider.getResourcePathsOfAPI(apiIdentifier);
+
+            ResourcePathListDTO dto = APIMappingUtil.fromResourcePathListToDTO(apiResourcePaths, limit, offset);
+            APIMappingUtil.setPaginationParamsForAPIResourcePathList(dto, offset, limit, apiResourcePaths.size());
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving resource paths of API : " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving resource paths of API : " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return null;
     }

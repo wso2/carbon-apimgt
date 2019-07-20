@@ -9,11 +9,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class BAMMediatorConfigContext extends ConfigContextDecorator {
 
-    private API api;
-
-    public BAMMediatorConfigContext(ConfigContext context, API api) {
+    public BAMMediatorConfigContext(ConfigContext context) {
         super(context);
-        this.api = api;
     }
 
     public VelocityContext getContext() {

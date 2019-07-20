@@ -187,6 +187,28 @@ class API extends Resource {
         });
 
     }
+
+    saveProduct() {
+        const promisedAPIResponse = this.client.then((client) => {
+            const properties = client.spec.definitions.APIProduct.properties;
+            const data = {};
+            
+            Object.keys(this).forEach(apiAttribute => {
+                if (apiAttribute in properties) {
+                    data[apiAttribute] = this[apiAttribute];
+                }
+            });
+            const payload = {
+                body: data,
+                'Content-Type': 'application/json'
+            };
+            return client.apis['API Product (Individual)'].post_api_products(payload, this._requestMetaData());
+        });
+        return promisedAPIResponse.then(response => {
+            return new API(response.body);
+        });
+
+    }
     /**
      * Create an API from WSDL with the given parameters and call the callback method given optional.
      * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
@@ -233,6 +255,26 @@ class API extends Resource {
         const promise_get = this.client.then((client) => {
             return client.apis['API (Individual)'].get_apis__apiId_({
                 apiId: id
+            }, this._requestMetaData());
+        });
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
+    }
+
+    /**
+     * Get details of a given API
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * @deprecated use static API.get() method instead
+     */
+    getProduct(id, callback = null) {
+        const promise_get = this.client.then((client) => {
+            return client.apis['API Product (Individual)'].get_api_products__apiProductId_({
+                apiProductId: id
             }, this._requestMetaData());
         });
         if (callback) {
@@ -484,6 +526,20 @@ class API extends Resource {
             }, this._requestMetaData());
         });
     }
+    
+    /**
+     * Delete the current api product instance
+     * @param id {String} UUID of the API which want to delete
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    deleteProduct() {
+        return this.client.then((client) => {
+            return client.apis['API Product (Individual)'].delete_api_products__apiProductId_({
+                apiProductId: this.id
+            }, this._requestMetaData());
+        });
+    }
 
     /**
      * Get the life cycle state of an API given its id (UUID)
@@ -598,6 +654,20 @@ class API extends Resource {
         return promised_update;
     }
 
+        /**
+     * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     */
+    updateProduct(api) {
+        const promised_update = this.client.then((client) => {
+            const payload = {
+                apiProductId: api.id,
+                body: api
+            };
+            return client.apis['API Product (Individual)'].put_api_products__apiProductId_(payload);
+        });
+        return promised_update;
+    }
     /**
      * Get the available subscriptions for a given API
      * @param {String} apiId API UUID
@@ -1115,6 +1185,28 @@ class API extends Resource {
 
     /**
      *
+     * Static method for get all API products for current environment user.
+     * @static
+     * @param {Object} params APIs filtering parameters i:e { "name": "MyBank API"}
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    static allProducts(params) {
+        let query = "";
+        if (params && 'query' in params) {
+            for (const [key, value] of Object.entries(params.query)) {
+                query += `${key}:${value},`;
+            }
+            params.query = query;
+        }
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['API Product (Collection)'].get_api_products(params, Resource._requestMetaData());
+        });
+    }
+
+    /**
+     *
      * Static method to search apis and documents based on content
      * @static
      * @param {Object} params APIs, Documents filtering parameters i:e { "name": "MyBank API"}
@@ -1146,6 +1238,24 @@ class API extends Resource {
         });
     }
 
+     /**
+     * Get details of a given API Product
+     * @param id {string} UUID of the api product.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static getProduct(id) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promisedAPI = apiClient.then((client) => {
+            return client.apis['API Product (Individual)'].get_api_products__apiProductId_({
+                apiProductId: id
+            }, this._requestMetaData());
+        });
+        return promisedAPI.then(response => {
+            return new API(response.body);
+        });
+    }
+
     /**
      *
      * Delete an API given its UUID
@@ -1159,6 +1269,23 @@ class API extends Resource {
         return apiClient.then((client) => {
             return client.apis['API (Individual)'].delete_apis__apiId_({
                 apiId: id
+            }, this._requestMetaData());
+        });
+    }
+
+    /**
+     *
+     * Delete an API Product given its UUID
+     * @static
+     * @param {String} id API Product UUID
+     * @returns {Promise} Swagger-Js promise object resolve to NT response object
+     * @memberof API
+     */
+    static deleteProduct(id) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['API Product (Individual)'].delete_api_products__apiProductId_({
+                apiProductId: id 
             }, this._requestMetaData());
         });
     }

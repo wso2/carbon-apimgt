@@ -37,6 +37,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
 import Application from '../../../data/Application';
@@ -151,9 +152,16 @@ class ViewKeys extends React.Component {
     generateAccessToken = () => {
         const that = this;
         const promiseTokens = this.tokens.generateToken();
+        const { intl } = this.props;
         promiseTokens
             .then((response) => {
-                console.log('token generated successfully : ', response);
+                console.log(
+                    intl.formatMessage({
+                        defaultMessage: 'token generated successfully : ',
+                        id: 'Shared.AppsAndKeys.ViewKeys.success',
+                    }),
+                    response,
+                );
                 that.token = response;
                 that.setState({
                     showToken: true,
@@ -178,9 +186,19 @@ class ViewKeys extends React.Component {
      */
     render() {
         const {
-            notFound, showCS, showToken, showCurl, secretCopied, tokenCopied, keyCopied, open,
-            token, tokenScopes, tokenValidityTime,
+            notFound,
+            showCS,
+            showToken,
+            showCurl,
+            secretCopied,
+            tokenCopied,
+            keyCopied,
+            open,
+            token,
+            tokenScopes,
+            tokenValidityTime,
         } = this.state;
+        const { intl } = this.props;
         const {
             keyType, classes, fullScreen, selectedApp, keys,
         } = this.props;
@@ -214,7 +232,12 @@ class ViewKeys extends React.Component {
                 <div className={classes.inputWrapper}>
                     <Grid container spacing={24} className={classes.gridWrapper}>
                         <Grid item xs={6}>
-                            <InputLabel htmlFor='adornment-amount'>Consumer Key</InputLabel>
+                            <InputLabel htmlFor='adornment-amount'>
+                                <FormattedMessage
+                                    id='Shared.AppsAndKeys.ViewKeys.consumer.key'
+                                    defaultMessage='Consumer Key'
+                                />
+                            </InputLabel>
                             <div className={classes.copyWrapper}>
                                 <Input
                                     inputProps={{ readOnly: true }}
@@ -224,20 +247,30 @@ class ViewKeys extends React.Component {
                                     fullWidth
                                 />
                                 <Tooltip
-                                    title={keyCopied ? 'Copied' : 'Copy to clipboard'}
+                                    title={
+                                        keyCopied
+                                            ? intl.formatMessage({
+                                                defaultMessage: 'Copied',
+                                                id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                            })
+                                            : intl.formatMessage({
+                                                defaultMessage: 'Copy to clipboard',
+                                                id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                            })
+                                    }
                                     placement='right'
                                 >
-                                    <CopyToClipboard
-                                        text={consumerKey}
-                                        onCopy={() => this.onCopy('keyCopied')}
-                                    >
+                                    <CopyToClipboard text={consumerKey} onCopy={() => this.onCopy('keyCopied')}>
                                         <FileCopy color='secondary' />
                                     </CopyToClipboard>
                                 </Tooltip>
                             </div>
                             <FormControl>
                                 <FormHelperText id='consumer-key-helper-text'>
-                                    Consumer Key of the application
+                                    <FormattedMessage
+                                        id='Shared.AppsAndKeys.ViewKeys.consumer.key.title'
+                                        defaultMessage='Consumer Key of the application'
+                                    />
                                 </FormHelperText>
                             </FormControl>
                         </Grid>
@@ -263,27 +296,29 @@ class ViewKeys extends React.Component {
                                         </InputAdornment>
                                     )}
                                 />
-                                <Tooltip
-                                    title={secretCopied ? 'Copied' : 'Copy to clipboard'}
-                                    placement='right'
-                                >
-                                    <CopyToClipboard
-                                        text={consumerSecret}
-                                        onCopy={() => this.onCopy('secretCopied')}
-                                    >
+                                <Tooltip title={secretCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
+                                    <CopyToClipboard text={consumerSecret} onCopy={() => this.onCopy('secretCopied')}>
                                         <FileCopy color='secondary' />
                                     </CopyToClipboard>
                                 </Tooltip>
                             </div>
                             <FormControl>
                                 <FormHelperText id='consumer-secret-helper-text'>
-                                    Consumer Secret of the application
+                                    <FormattedMessage
+                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.title'
+                                        defaultMessage='Consumer Secret of the application'
+                                    />
                                 </FormHelperText>
                             </FormControl>
                         </Grid>
                         {accessToken && (
                             <Grid item xs={6}>
-                                <InputLabel htmlFor='adornment-amount'>Access Token</InputLabel>
+                                <InputLabel htmlFor='adornment-amount'>
+                                    <FormattedMessage
+                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.title'
+                                        defaultMessage='Access Token'
+                                    />
+                                </InputLabel>
                                 <div className={classes.copyWrapper}>
                                     <Input
                                         inputProps={{ readOnly: true }}
@@ -292,14 +327,8 @@ class ViewKeys extends React.Component {
                                         margin='normal'
                                         fullWidth
                                     />
-                                    <Tooltip
-                                        title={tokenCopied ? 'Copied' : 'Copy to clipboard'}
-                                        placement='right'
-                                    >
-                                        <CopyToClipboard
-                                            text={accessToken}
-                                            onCopy={() => this.onCopy('tokenCopied')}
-                                        >
+                                    <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
+                                        <CopyToClipboard text={accessToken} onCopy={() => this.onCopy('tokenCopied')}>
                                             <FileCopy color='secondary' />
                                         </CopyToClipboard>
                                     </Tooltip>
@@ -319,18 +348,17 @@ class ViewKeys extends React.Component {
                                 onClose={this.handleClose}
                                 aria-labelledby='responsive-dialog-title'
                             >
-                                <DialogTitle
-                                    id='responsive-dialog-title'
-                                >
+                                <DialogTitle id='responsive-dialog-title'>
                                     {showCurl ? 'Get CURL to Generate Access Token' : 'Generate Access Token'}
                                 </DialogTitle>
                                 <DialogContent>
                                     {!showCurl && (
                                         <DialogContentText>
-                                            {!showToken
-                                            && (
+                                            {!showToken && (
                                                 <Tokens
-                                                    innerRef={(node) => { this.tokens = node; }}
+                                                    innerRef={(node) => {
+                                                        this.tokens = node;
+                                                    }}
                                                     selectedApp={selectedApp}
                                                     keyType={keyType}
                                                 />
@@ -347,11 +375,17 @@ class ViewKeys extends React.Component {
                                 <DialogActions>
                                     {!showToken && !showCurl && (
                                         <Button onClick={this.generateAccessToken} color='primary'>
-                                            Generate
+                                            <FormattedMessage
+                                                id='Shared.AppsAndKeys.ViewKeys.consumer.generate.btn'
+                                                defaultMessage='Generate'
+                                            />
                                         </Button>
                                     )}
                                     <Button onClick={this.handleClose} color='primary' autoFocus>
-                                        Close
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.consumer.close.btn'
+                                            defaultMessage='Close'
+                                        />
                                     </Button>
                                 </DialogActions>
                             </Dialog>
@@ -363,7 +397,10 @@ class ViewKeys extends React.Component {
                                     className={classes.margin}
                                     onClick={this.handleClickOpen}
                                 >
-                                    Generate Access Token
+                                    <FormattedMessage
+                                        id='Shared.AppsAndKeys.ViewKeys.generate.access.token'
+                                        defaultMessage='Generate Access Token'
+                                    />
                                 </Button>
                                 <Button
                                     variant='outlined'
@@ -372,7 +409,10 @@ class ViewKeys extends React.Component {
                                     className={classes.margin}
                                     onClick={this.handleClickOpenCurl}
                                 >
-                                    CURL to Generate Access Token
+                                    <FormattedMessage
+                                        id='Shared.AppsAndKeys.ViewKeys.curl.to.generate'
+                                        defaultMessage='CURL to Generate Access Token'
+                                    />
                                 </Button>
                             </div>
                         </Grid>
@@ -383,8 +423,10 @@ class ViewKeys extends React.Component {
             <React.Fragment>
                 <Typography variant='caption' gutterBottom className={classes.noKeyMessageBox}>
                     {keyType}
-                    {' '}
-                    Key and Secret is not generated for this application
+                    <FormattedMessage
+                        id='Shared.AppsAndKeys.ViewKeys.key.secret.title'
+                        defaultMessage='Key and Secret is not generated for this application'
+                    />
                 </Typography>
             </React.Fragment>
         );
@@ -396,4 +438,4 @@ ViewKeys.propTypes = {
     fullScreen: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles)(ViewKeys);
+export default injectIntl(withStyles(styles)(ViewKeys));

@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -30,15 +31,21 @@ function Lifecycle(props) {
     const { parentClasses } = props;
     return (
         <ApiContext.Consumer>
-            {({ api }) => (
+            {({ api, isAPIProduct }) => (
                 <Paper className={classNames({ [parentClasses.root]: true })}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Lifecycle Status
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Lifecycle.lifecycle.status'
+                                defaultMessage='Lifecycle Status'
+                            />
                         </Typography>
                         <Link to={'/apis/' + api.id + '/lifecycle'}>
                             <Button variant='contained' color='default'>
-                                Edit
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Lifecycle.edit'
+                                    defaultMessage='Edit'
+                                />
                             </Button>
                         </Link>
                     </div>
@@ -52,7 +59,7 @@ function Lifecycle(props) {
                         })}
                     >
                         <PeopleOutlineIcon className={parentClasses.lifecycleIcon} />
-                        {api.lifeCycleStatus}
+                        {isAPIProduct ? api.state : api.lifeCycleStatus}
                     </Typography>
                 </Paper>
             )}

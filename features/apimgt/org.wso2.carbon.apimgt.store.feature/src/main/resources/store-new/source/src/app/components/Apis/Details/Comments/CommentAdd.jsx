@@ -18,11 +18,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import {TextField, Button, Typography} from '@material-ui/core';
+import { TextField, Button, Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Alert from '../../../Shared/Alert';
 import API from '../../../../data/api';
 
@@ -31,7 +32,7 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
     commentText: {
-        color: theme.palette.getContrastText(theme.palette.background.default)
+        color: theme.palette.getContrastText(theme.palette.background.default),
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
@@ -49,10 +50,10 @@ const styles = theme => ({
 });
 
 /**
-   * Display a component to add a new comment
-   * @class CommmentAdd
-   * @extends {React.Component}
-   */
+ * Display a component to add a new comment
+ * @class CommmentAdd
+ * @extends {React.Component}
+ */
 class CommentAdd extends React.Component {
     /**
      * Creates an instance of CommentAdd
@@ -115,7 +116,7 @@ class CommentAdd extends React.Component {
      */
     handleClickAddComment() {
         const {
-            apiId, parentCommentId, allComments, toggleShowReply, commentsUpdate,
+            apiId, parentCommentId, allComments, toggleShowReply, commentsUpdate, intl,
         } = this.props;
         const { category, commentText } = this.state;
         const Api = new API();
@@ -146,11 +147,21 @@ class CommentAdd extends React.Component {
                     if (error.response) {
                         Alert.error(error.response.body.message);
                     } else {
-                        Alert.error('Something went wrong while adding the comment');
+                        Alert.error(
+                            intl.formatMessage({
+                                defaultMessage: 'Something went wrong while adding the comment',
+                                id: 'Apis.Details.Comments.CommentAdd.something.went.wrong',
+                            }),
+                        );
                     }
                 });
         } else {
-            Alert.error('You cannot enter a blank comment');
+            Alert.error(
+                intl.formatMessage({
+                    defaultMessage: 'You cannot enter a blank comment',
+                    id: 'Apis.Details.Comments.CommentAdd.error.blank.comment',
+                }),
+            );
         }
         this.setState({ currentLength: 0 });
     }
@@ -161,20 +172,33 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     render() {
-        const { classes, cancelButton, theme } = this.props;
+        const {
+            classes, cancelButton, theme, intl,
+        } = this.props;
         const { category, commentText, currentLength } = this.state;
         return (
             <Grid container spacing={24} className={classes.contentWrapper}>
-
                 <Grid item xs zeroMinWidth>
                     <FormControl className={classes.category}>
-                        <Select
-                            value={category}
-                            onChange={this.handleCategoryChange}
-                        >
-                            <MenuItem value='General'>General</MenuItem>
-                            <MenuItem value='Feature Request'>Feature Request</MenuItem>
-                            <MenuItem value='Bug Report'>Bug Report</MenuItem>
+                        <Select value={category} onChange={this.handleCategoryChange}>
+                            <MenuItem value='General'>
+                                <FormattedMessage
+                                    id='Apis.Details.Comments.CommentAdd.menu.general'
+                                    defaultMessage='General'
+                                />
+                            </MenuItem>
+                            <MenuItem value='Feature Request'>
+                                <FormattedMessage
+                                    id='Apis.Details.Comments.CommentAdd.feature.request'
+                                    defaultMessage='Feature Request'
+                                />
+                            </MenuItem>
+                            <MenuItem value='Bug Report'>
+                                <FormattedMessage
+                                    id='Apis.Details.Comments.CommentAdd.bug.report'
+                                    defaultMessage='Bug Report'
+                                />
+                            </MenuItem>
                         </Select>
                     </FormControl>
                     <TextField
@@ -183,27 +207,36 @@ class CommentAdd extends React.Component {
                         multiline
                         className={classes.textField}
                         margin='normal'
-                        placeholder='Write a comment'
+                        placeholder={intl.formatMessage({
+                            defaultMessage: 'Write a comment',
+                            id: 'Apis.Details.Comments.CommentAdd.write.comment.help',
+                        })}
                         inputProps={{ maxLength: theme.custom.maxCommentLength }}
                         value={commentText}
                         onChange={this.inputChange}
                     />
                     <Typography className={classes.commentText} align='right'>
-                        {currentLength + '/' + theme.custom.maxCommentLength }
+                        {currentLength + '/' + theme.custom.maxCommentLength}
                     </Typography>
                     <Grid container spacing={8}>
                         <Grid item>
                             <Button variant='contained' color='primary' onClick={() => this.handleClickAddComment()}>
-                  Add Comment
+                                <FormattedMessage
+                                    id='Apis.Details.Comments.CommentAdd.btn.add.comment'
+                                    defaultMessage='Add Comment'
+                                />
                             </Button>
                         </Grid>
-                        {cancelButton
-                && (
-                    <Grid item>
-                        <Button onClick={() => this.handleClickCancel()} className={classes.button}>Cancel</Button>
-                    </Grid>
-                )
-                        }
+                        {cancelButton && (
+                            <Grid item>
+                                <Button onClick={() => this.handleClickCancel()} className={classes.button}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Comments.CommentAdd.btn.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>
+                            </Grid>
+                        )}
                     </Grid>
                 </Grid>
             </Grid>
@@ -225,6 +258,9 @@ CommentAdd.propTypes = {
     toggleShowReply: PropTypes.func,
     commentsUpdate: PropTypes.func,
     allComments: PropTypes.instanceOf(Array).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(CommentAdd);
+export default injectIntl(withStyles(styles, { withTheme: true })(CommentAdd));
