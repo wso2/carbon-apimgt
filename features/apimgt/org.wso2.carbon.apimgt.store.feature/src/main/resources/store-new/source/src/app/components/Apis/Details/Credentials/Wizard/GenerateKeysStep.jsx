@@ -23,7 +23,7 @@ const generateKeysStep = (props) => {
     const { currentStep } = props;
 
     if (currentStep === 3) {
-        console.log('application created');
+        console.log('keys generated');
     } else if (currentStep === 2) {
         return (
             <React.Fragment>

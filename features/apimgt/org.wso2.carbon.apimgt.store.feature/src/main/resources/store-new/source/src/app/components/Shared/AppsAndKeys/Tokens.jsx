@@ -27,9 +27,6 @@ import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import Application from 'AppData/Application';
-import Loading from '../../Base/Loading/Loading';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
 // Styles for Grid and Paper elements
 const styles = theme => ({
@@ -63,173 +60,122 @@ const MenuProps = {
     },
 };
 
-class Tokens extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            application: null,
-            scopesSelected: [],
-            timeout: 3600, // Timeout for token in milliseconds
-            subscriptionScopes: [],
-        };
-        this.handleOnChange = this.handleOnChange.bind(this);
-    }
-
+/**
+ * Used to display generate acctoken UI
+ */
+const tokens = (props) => {
     /**
-     * Fetch Application object by ID coming from URL path params and fetch related keys to display
-     */
-    componentDidMount() {
-        const { selectedApp } = this.props;
-        let appId;
+    * This method is used to handle the updating of create application
+    * request object.
+    * @param {*} field field that should be updated in appliction request
+    * @param {*} event event fired
+    */
+    const handleChange = (field, event) => {
+        const { accessTokenRequest, updateAccessTokenRequest } = props;
+        const newRequest = { ...accessTokenRequest };
 
-        if (selectedApp) {
-            appId = selectedApp.appId || selectedApp.value;
+        const { target: currentTarget } = event;
+
+        switch (field) {
+            case 'timeout':
+                newRequest.timeout = currentTarget.value;
+                break;
+            case 'scopesSelected':
+                newRequest.scopesSelected = currentTarget.value;
+                break;
+            case 'keyType':
+                newRequest.keyType = currentTarget.value;
+                break;
+            default:
+                break;
         }
+        updateAccessTokenRequest(newRequest);
+    };
+    const {
+        classes, intl, accessTokenRequest, subscriptionScopes,
+    } = props;
 
-        const promiseApp = Application.get(appId);
-
-        promiseApp.then((application) => {
-            application.getKeys().then(() => {
-                const subscriptionScopes = application.subscriptionScopes.map((scope) => { return scope.scopeKey; });
-                this.setState({ application, subscriptionScopes });
-            });
-        }).catch((error) => {
-            if (process.env.NODE_ENV !== 'production') {
-                console.error(error);
-            }
-            const { status } = error;
-            if (status === 404) {
-                this.setState({ notFound: true });
-            }
-        });
-    }
-
-    /**
-     * Handle onChange of validity time and scopes
-     * @memberof Tokens
-     */
-    handleOnChange(event) {
-        const { target } = event;
-        this.setState({ [target.name]: target.value });
-    }
-
-    /**
-     * Generate an access token for the application instance
-     * @returns {promise} Set the generated token into current
-     * instance and return tokenObject received as Promise object
-     * @memberof Tokens
-     */
-    generateToken() {
-        const { keyType, intl} = this.props;
-        const { application, scopesSelected } = this.state;
-        let { timeout } = this.state;
-
-        if (!application) {
-            console.warn(intl.formatMessage({
-                defaultMessage: 'No Application found!', id: 'Shared.AppsAndKeys.Tokens.no.application.found' }));
-            return false;
-        }
-        if (!timeout || timeout.length === 0) {
-            timeout = 3600;
-        }
-        return application.generateToken(keyType, timeout, scopesSelected);
-    }
-
-    render() {
-        const {
-            notFound, application, timeout, scopesSelected, subscriptionScopes,
-        } = this.state;
-
-        if (notFound) {
-            return <ResourceNotFound />;
-        }
-        if (!application) {
-            return <Loading />;
-        }
-
-        const { classes, intl } = this.props;
-
-        return (
-            <React.Fragment>
-                <FormControl margin='normal' className={classes.FormControl}>
-                    <TextField
-                        required
-                        label={intl.formatMessage({
-                            defaultMessage: 'Access token validity period',
-                            id: 'Shared.AppsAndKeys.Tokens.access.token',
-                        })}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        helperText={intl.formatMessage({
-                            defaultMessage: 'You can set an expiration period to determine the validity period of '
-                            + 'the token after generation. Set this to a negative value to ensure that the token never'
-                            + ' expires.',
-                            id: 'Shared.AppsAndKeys.Tokens.you.can.set',
-                        })}
-                        fullWidth
-                        name='timeout'
-                        onChange={e => this.handleOnChange(e)}
-                        placeholder={this.context.intl.formatMessage({
-                            id: 'Shared.AppsAndKeys.Tokens.enter.time',
-                            defaultMessage: 'Enter time in milliseconds',
-                        })}
-                        value={timeout}
-                        autoFocus
-                        className={classes.inputText}
+    return (
+        <React.Fragment>
+            <FormControl margin='normal' className={classes.FormControl}>
+                <TextField
+                    required
+                    label={intl.formatMessage({
+                        defaultMessage: 'Access token validity period',
+                        id: 'Shared.AppsAndKeys.Tokens.access.token',
+                    })}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    helperText={intl.formatMessage({
+                        defaultMessage: 'You can set an expiration period to determine the validity period of '
+                                + 'the token after generation. Set this to a negative value to ensure that the'
+                                + 'token never expires.',
+                        id: 'Shared.AppsAndKeys.Tokens.you.can.set',
+                    })}
+                    fullWidth
+                    name='timeout'
+                    onChange={e => handleChange('timeout', e)}
+                    placeholder={intl.formatMessage({
+                        defaultMessage: 'Enter time in milliseconds',
+                        id: 'Shared.AppsAndKeys.Tokens.enter.time',
+                    })}
+                    value={accessTokenRequest.timeout}
+                    autoFocus
+                    className={classes.inputText}
+                />
+            </FormControl>
+            <FormControl
+                margin='normal'
+                className={classes.FormControlOdd}
+                disabled={subscriptionScopes.length === 0}
+            >
+                <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
+                    <FormattedMessage
+                        id='Shared.AppsAndKeys.Tokens.when.you.generate'
+                        defaultMessage='Scopes'
                     />
-                </FormControl>
-                <FormControl
-                    margin='normal'
-                    className={classes.FormControlOdd}
-                    disabled={subscriptionScopes.length === 0}
+
+                </InputLabel>
+                <Select
+                    name='scopesSelected'
+                    multiple
+                    value={accessTokenRequest.scopesSelected}
+                    onChange={e => handleChange('scopesSelected', e)}
+                    input={<Input id='select-multiple-chip' />}
+                    renderValue={selected => (
+                        <div className={classes.chips}>
+                            {selected.map(value => (
+                                <Chip key={value} label={value} className={classes.chip} />
+                            ))}
+                        </div>
+                    )}
+                    MenuProps={MenuProps}
                 >
-                    <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
-                        <FormattedMessage
-                            id='Shared.AppsAndKeys.Tokens.when.you.generate.scopes'
-                            defaultMessage='Scopes'
-                        />
-                    </InputLabel>
-                    <Select
-                        name='scopesSelected'
-                        multiple
-                        value={scopesSelected}
-                        onChange={e => this.handleOnChange(e)}
-                        input={<Input id='select-multiple-chip' />}
-                        renderValue={selected => (
-                            <div className={classes.chips}>
-                                {selected.map(value => (
-                                    <Chip key={value} label={value} className={classes.chip} />
-                                ))}
-                            </div>
-                        )}
-                        MenuProps={MenuProps}
-                    >
-                        {subscriptionScopes.map(scope => (
-                            <MenuItem
-                                key={scope}
-                                value={scope}
-                            >
-                                {scope}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                    <Typography variant='caption'>
-                        <FormattedMessage
-                            id='Shared.AppsAndKeys.Tokens.when.you.generate'
-                            defaultMessage={'When you generate access tokens to APIs protected by scope/s,' +
-                            ' you can select the scope/s and then generate the token for it. Scopes enable ' +
-                            'fine-grained access control to API resources based on user roles. You define scopes to ' +
-                            'an API resource. When a user invokes the API, his/her OAuth 2 bearer token cannot grant ' +
-                            'access to any API resource beyond its associated scopes.'}
-                        />
-                    </Typography>
-                </FormControl>
-            </React.Fragment>
-        );
-    }
-}
-Tokens.contextTypes = {
+                    {subscriptionScopes.map(scope => (
+                        <MenuItem
+                            key={scope}
+                            value={scope}
+                        >
+                            {scope}
+                        </MenuItem>
+                    ))}
+                </Select>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Shared.AppsAndKeys.Tokens.when.you.generate'
+                        defaultMessage={'When you generate access tokens to APIs protected by scope/s,'
+                            + ' you can select the scope/s and then generate the token for it. Scopes enable '
+                            + 'fine-grained access control to API resources based on user roles. You define scopes to '
+                            + 'an API resource. When a user invokes the API, his/her OAuth 2 bearer token cannot grant '
+                            + 'access to any API resource beyond its associated scopes.'}
+                    />
+                </Typography>
+            </FormControl>
+        </React.Fragment>
+    );
+};
+tokens.contextTypes = {
     intl: PropTypes.shape({}).isRequired,
 };
-export default injectIntl(withStyles(styles)(Tokens));
+export default injectIntl(withStyles(styles)(tokens));

@@ -18,7 +18,7 @@ const generateAccessTokenStep = (props) => {
     const { currentStep, createdApp } = props;
 
     if (currentStep === 4) {
-        console.log('keys generated');
+        console.log('acctoken generated');
     } else if (currentStep === 3) {
         return (
             <React.Fragment>
