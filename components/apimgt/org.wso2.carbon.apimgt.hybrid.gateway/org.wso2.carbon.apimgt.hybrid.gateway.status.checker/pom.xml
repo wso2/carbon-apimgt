@@ -37,13 +37,8 @@
             <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
-            <version>${carbon.kernel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -122,7 +117,7 @@
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.core; version="${carbon.kernel.package.import.version.range}",
-                            org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
+                            org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.apache.commons.lang3; version="${org.apache.commons.lang3.version}",
                             org.osgi.service.component; version="${org.osgi.service.version}",
                             org.osgi.framework; version="${org.osgi.framework.version}",

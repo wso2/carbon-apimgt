@@ -99,8 +99,8 @@
             <artifactId>json-simple</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
+   <groupId>org.ops4j.pax.logging</groupId>
+   <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -163,7 +163,7 @@
                             org.osgi.service.component.*,
                             org.apache.commons.codec.binary.*,
                             org.apache.commons.io.*; version="${commons-io.version}",
-                            org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
+                            org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.apache.http.*,
                             org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",

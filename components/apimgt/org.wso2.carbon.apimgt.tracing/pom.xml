@@ -159,7 +159,7 @@
 							com.fasterxml.jackson.core.*
 						</Private-Package>
 						<Import-Package>
-							org.apache.commons.logging,
+							org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
 							org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
 							org.osgi.framework,
 							org.osgi.service.component,
