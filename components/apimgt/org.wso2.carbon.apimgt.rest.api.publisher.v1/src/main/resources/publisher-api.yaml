@@ -5235,6 +5235,13 @@ definitions:
               "url": "https://localhost:9443/am/sample/pizzashack/v1/api/"
             }
           }
+      endpointImplementationType:
+        type: string
+        example: INLINE
+        enum:
+          - INLINE
+          - ENDPOINT
+        default: ENDPOINT
       scopes:
         type: array
         items:

@@ -124,6 +124,7 @@ public class APIMappingUtil {
             handleException("Error while converting endpointConfig to json", e);
         }
 
+        model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
 
