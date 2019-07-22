@@ -2414,6 +2414,9 @@ public abstract class AbstractAPIManager implements APIManager {
                             log.debug("Mediation policy deleted successfully");
                         }
                         return true;
+                    } else {
+                        String msg = "Specific mediation policy has not been deleted in " + mediationPath;
+                        log.warn(msg);
                     }
                 }
             } catch (RegistryException e) {
