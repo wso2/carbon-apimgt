@@ -310,6 +310,29 @@ function EndpointOverview(props) {
         setEndpointSecurityInfo({ ...endpointSecurityInfo, [field]: event.target.value });
     };
 
+    const saveAdvanceConfig = (advanceConfig) => {
+        console.log(advanceConfigOptions);
+        console.log(advanceConfig);
+        const endpointConfigProperty =
+            getEndpointTypeProperty(advanceConfigOptions.type, advanceConfigOptions.category);
+        const endpoints = epConfig[endpointConfigProperty];
+        if (Array.isArray(endpoints)) {
+            if (advanceConfigOptions.type === 'failover') {
+                endpoints[advanceConfigOptions.index - 1].config = advanceConfig;
+            } else {
+                endpoints[advanceConfigOptions.index].config = advanceConfig;
+            }
+        } else {
+            endpoints.config = advanceConfig;
+        }
+        console.log(endpoints);
+        setEpConfig({ ...epConfig, [endpointConfigProperty]: endpoints });
+    };
+
+    const closeAdvanceConfig = () => {
+        setAdvancedConfigOptions({ open: false });
+    };
+
     return (
         <div className={classes.overviewWrapper}>
             <GeneralConfiguration
@@ -461,6 +484,8 @@ function EndpointOverview(props) {
                     <AdvanceEndpointConfig
                         isSOAPEndpoint={isSOAPEndpoint.key === 'address'}
                         advanceConfig={advanceConfigOptions.config}
+                        onSaveAdvanceConfig={saveAdvanceConfig}
+                        onCancel={closeAdvanceConfig}
                     />
                 </DialogContent>
             </Dialog>

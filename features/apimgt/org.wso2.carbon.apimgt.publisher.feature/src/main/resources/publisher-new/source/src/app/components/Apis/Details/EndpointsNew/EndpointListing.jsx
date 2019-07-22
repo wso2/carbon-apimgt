@@ -166,6 +166,7 @@ EndpointListing.propTypes = {
     addNewEndpoint: PropTypes.func.isRequired,
     removeEndpoint: PropTypes.func.isRequired,
     editEndpoint: PropTypes.func.isRequired,
+    setAdvancedConfigOpen: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EndpointListing));

@@ -36,11 +36,11 @@ const styles = theme => ({
         margin: '2px 0 2px 0',
     },
     input: {
-        marginLeft: 8,
+        marginLeft: theme.spacing.unit,
         flex: 1,
     },
     iconButton: {
-        padding: 10,
+        padding: theme.spacing.unit,
     },
     divider: {
         width: 1,
@@ -60,10 +60,8 @@ function GenericEndpoint(props) {
         index,
     } = props;
     const [serviceUrl, setServiceUrl] = useState(endpointURL);
-    // const [isError, setError] = useState(false);
 
     useEffect(() => {
-        console.log('on props change....', type);
         setServiceUrl(endpointURL);
     }, [props]);
     return (
@@ -124,6 +122,10 @@ GenericEndpoint.propTypes = {
     deleteEndpoint: PropTypes.func.isRequired,
     classes: PropTypes.shape({}).isRequired,
     type: PropTypes.string.isRequired,
+    setAdvancedConfigOpen: PropTypes.func.isRequired,
+    index: PropTypes.number.isRequired,
+    editEndpoint: PropTypes.func.isRequired,
+    category: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(GenericEndpoint);

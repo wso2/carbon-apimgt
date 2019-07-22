@@ -52,7 +52,11 @@ function EndpointSecurity(props) {
         securityInfo,
         onChangeEndpointAuth,
     } = props;
-    const [endpointSecurityInfo, setEndpointSecurityInfo] = useState(securityInfo);
+    const [endpointSecurityInfo, setEndpointSecurityInfo] = useState({
+        type: 'BASIC',
+        username: '',
+        password: '',
+    });
 
     const authTypes = [
         {
@@ -72,8 +76,8 @@ function EndpointSecurity(props) {
 
     useEffect(() => {
         console.log('Use Effect security info', securityInfo);
-        setEndpointSecurityInfo(securityInfo);
-    }, [securityInfo]);
+        setEndpointSecurityInfo(securityInfo !== null ? securityInfo : endpointSecurityInfo);
+    }, [props]);
 
     return (
         <form className={classes.advancedConfigWrapper}>
@@ -86,7 +90,7 @@ function EndpointSecurity(props) {
                         />
                     </InputLabel>
                     <Select
-                        value={endpointSecurityInfo !== null ? endpointSecurityInfo.type : ''}
+                        value={endpointSecurityInfo.type}
                         onChange={(event) => { onChangeEndpointAuth(event, 'type'); }}
                         inputProps={{
                             name: 'key',
@@ -110,7 +114,9 @@ function EndpointSecurity(props) {
                         />}
                         className={classes.textField}
                         margin='normal'
-                        defaultValue={endpointSecurityInfo !== null ? endpointSecurityInfo.username : ''}
+                        onChange={
+                            event => setEndpointSecurityInfo({ ...endpointSecurityInfo, username: event.target.value })}
+                        value={endpointSecurityInfo.username}
                         onBlur={(event) => { onChangeEndpointAuth(event, 'username'); }}
                     />
                     <TextField
@@ -123,7 +129,9 @@ function EndpointSecurity(props) {
                         />}
                         className={classes.textField}
                         margin='normal'
-                        defaultValue={endpointSecurityInfo !== null ? endpointSecurityInfo.password : ''}
+                        value={endpointSecurityInfo.password}
+                        onChange={
+                            event => setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value })}
                         onBlur={(event) => { onChangeEndpointAuth(event, 'password'); }}
                     />
                 </div>

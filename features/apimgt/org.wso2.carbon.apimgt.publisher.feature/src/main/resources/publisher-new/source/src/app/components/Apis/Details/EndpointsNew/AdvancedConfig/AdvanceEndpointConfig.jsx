@@ -25,6 +25,7 @@ import {
     Select,
     TextField,
     Typography,
+    Button,
     withStyles,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -62,6 +63,7 @@ const styles = theme => ({
         width: '45%',
     },
 });
+
 /**
  * The component for advanced endpoint configurations.
  * @param {any} props The input props
@@ -73,6 +75,8 @@ function AdvanceEndpointConfig(props) {
         intl,
         advanceConfig,
         isSOAPEndpoint,
+        onSaveAdvanceConfig,
+        onCancel,
     } = props;
     const [advanceConfigObj, setAdvanceConfig] =
         useState(() => {
@@ -82,7 +86,7 @@ function AdvanceEndpointConfig(props) {
                 config.optimize = 'SWA';
             }
             config.actionDuration = '300';
-            config.actionSelect = 'none';
+            config.actionSelect = 'fault';
             config.factor = '';
             config.retryDelay = '';
             config.retryErroCode = [];
@@ -470,18 +474,18 @@ function AdvanceEndpointConfig(props) {
                 />
             </Grid>
             <Grid>
-                {/* <Button onClick={() => setAdvanceConfigOpen(false)} color='primary'> */}
-                {/*    <FormattedMessage */}
-                {/*        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.cancel.button' */}
-                {/*        defaultMessage='Close' */}
-                {/*    /> */}
-                {/* </Button> */}
-                {/* <Button onClick={() => saveAdvanceConfiguration(false)} color='primary' autoFocus> */}
-                {/*    <FormattedMessage */}
-                {/*        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.save.button' */}
-                {/*        defaultMessage='Save' */}
-                {/*    /> */}
-                {/* </Button> */}
+                <Button onClick={onCancel} color='primary'>
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.cancel.button'
+                        defaultMessage='Close'
+                    />
+                </Button>
+                <Button onClick={() => onSaveAdvanceConfig(advanceConfigObj)} color='primary' autoFocus>
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.config.save.button'
+                        defaultMessage='Save'
+                    />
+                </Button>
             </Grid>
         </Grid>
     );
@@ -500,6 +504,8 @@ AdvanceEndpointConfig.propTypes = {
     }).isRequired,
     advanceConfig: PropTypes.shape({}).isRequired,
     isSOAPEndpoint: PropTypes.bool.isRequired,
+    onSaveAdvanceConfig: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(AdvanceEndpointConfig));

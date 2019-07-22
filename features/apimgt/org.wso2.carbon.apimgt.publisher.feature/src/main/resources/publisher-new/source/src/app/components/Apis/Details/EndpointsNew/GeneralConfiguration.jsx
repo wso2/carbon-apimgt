@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Button,
-    Collapse, Dialog, DialogActions, DialogContent, DialogTitle, Divider, ExpansionPanel,
+    Collapse,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    ExpansionPanel,
     ExpansionPanelDetails,
     ExpansionPanelSummary,
-    FormControl, FormControlLabel,
-    Grid, Icon,
-    InputLabel, MenuItem, Radio, RadioGroup, Select, Switch,
+    FormControl,
+    FormControlLabel,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Select,
+    Switch,
     Typography,
     withStyles,
 } from '@material-ui/core';
@@ -78,7 +87,6 @@ function GeneralConfiguration(props) {
     const {
         epConfig,
         endpointSecurityInfo,
-        onChangeEndpointCategory,
         handleToggleEndpointSecurity,
         handleEndpointSecurityChange,
         handleEndpointTypeSelect,
@@ -154,7 +162,7 @@ function GeneralConfiguration(props) {
                             </Collapse>
                         </Grid>
                         <Grid item xs className={classes.endpointConfigSection}>
-                            {/*<Certificates />*/}
+                            <Certificates />
                         </Grid>
                     </Grid>
                 </ExpansionPanelDetails>
@@ -187,7 +195,6 @@ function GeneralConfiguration(props) {
 GeneralConfiguration.propTypes = {
     epConfig: PropTypes.shape({}).isRequired,
     endpointSecurityInfo: PropTypes.shape({}).isRequired,
-    onChangeEndpointCategory: PropTypes.func.isRequired,
     handleToggleEndpointSecurity: PropTypes.func.isRequired,
     handleEndpointSecurityChange: PropTypes.func.isRequired,
     handleEndpointTypeSelect: PropTypes.func.isRequired,
