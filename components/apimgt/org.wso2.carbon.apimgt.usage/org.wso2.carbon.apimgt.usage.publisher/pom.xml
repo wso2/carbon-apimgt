@@ -94,11 +94,6 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                
-            </plugin>
-        </plugins>
+</plugins>
     </build>
 </project>
