@@ -21,17 +21,12 @@ import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import Slide from '@material-ui/core/Slide';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-import Grid from '@material-ui/core/Grid';
 import Subscription from 'AppData/Subscription';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import { ApiContext } from '../ApiContext';
-import Wizard from './Wizard';
+import Wizard from './Wizard/Wizard';
 import SubscriptionTableRow from './SubscriptionTableRow';
 import SubscribeToApps from './SubscrbeToApps';
 import SubscibeButtonPanel from './subscibeButtonPanel';
@@ -71,29 +66,11 @@ const styles = theme => ({
     summary: {
         alignItems: 'center',
     },
-    appBar: {
-        background: theme.palette.background.paper,
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-    },
-    subscribeTitle: {
-        flex: 1,
-    },
-    plainContent: {
-        paddingTop: 80,
-        paddingLeft: theme.spacing.unit * 2,
-    },
-    toolbar: {
-        marginLeft: theme.spacing.unit * 2,
-    },
     subscribeRoot: {
         paddingLeft: theme.spacing.unit * 2,
     },
     activeLink: {
         background: theme.palette.grey.A100,
-    },
-    selectedWrapper: {
-        background: theme.palette.grey.A100,
-        borderLeft: 'solid 2px ' + theme.palette.primary.main,
     },
 });
 
@@ -332,41 +309,15 @@ class Credentials extends React.Component {
                             onClose={() => this.handleClickToggle('openNew', updateSubscriptionData)}
                             TransitionComponent={Transition}
                         >
-                            {' '}
-                            <AppBar className={classes.appBar}>
-                                <Grid container spacing={0}>
-                                    <Grid item xs={6}>
-                                        <Toolbar className={classes.toolbar}>
-                                            <IconButton
-                                                color='inherit'
-                                                onClick={() => this.handleClickToggle(
-                                                    'openNew',
-                                                    updateSubscriptionData,
-                                                )}
-                                                aria-label='Close'
-                                            >
-                                                <CloseIcon />
-                                            </IconButton>
-                                            <div className={classes.subscribeTitle}>
-                                                <Typography variant='h6'>
-                                                        Subscribe to new Application
-                                                </Typography>
-                                            </div>
-                                        </Toolbar>
-                                    </Grid>
-                                </Grid>
-                            </AppBar>
-                            <div className={classes.plainContent}>
-                                <Wizard
-                                    apiId={api.id}
-                                    onClickFunction={(a, b) => this.handleClickToggle(a, b)}
-                                    updateSubscriptionData={updateSubscriptionData}
-                                />
-                            </div>
+                            <Wizard
+                                updateSubscriptionData={updateSubscriptionData}
+                                apiId={api.id}
+                                handleClickToggle={this.handleClickToggle}
+                            />
                         </Dialog>
                     </React.Fragment>
                 )}
-                {wizardOn && <Wizard />}
+                {/* {wizardOn && <Wizard />} */}
             </div>
         );
     }
@@ -378,10 +329,6 @@ Credentials.propTypes = {
         titleSub: PropTypes.shape({}),
         tableMain: PropTypes.shape({}),
         th: PropTypes.shape({}),
-        appBar: PropTypes.shape({}),
-        toolbar: PropTypes.shape({}),
-        subscribeTitle: PropTypes.shape({}),
-        plainContent: PropTypes.shape({}),
     }).isRequired,
 };
 

@@ -36,6 +36,10 @@ const styles = theme => ({
         paddingLeft: theme.spacing.unit,
         height: 35,
     },
+    selectedWrapper: {
+        background: theme.palette.grey.A100,
+        borderLeft: 'solid 2px ' + theme.palette.primary.main,
+    },
 });
 
 const subscriptionTableRow = (props) => {

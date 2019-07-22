@@ -28,9 +28,8 @@ import PropTypes from 'prop-types';
 import FormHelperText from '@material-ui/core/FormHelperText';
 
 /**
- *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme object
  */
 const styles = theme => ({
     titleBar: {

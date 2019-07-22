@@ -416,6 +416,9 @@ class Wizard extends React.Component {
      * @memberof Wizard
      */
     render() {
+        // return (
+        //     <div />
+        // );
         const { redirect } = this.state;
         if (redirect) {
             const { apiId } = this.props;
