@@ -12,6 +12,10 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import CreateAppStep from './CreateAppStep';
+import SubscribeToAppStep from './SubscribeToAppStep';
+import GenerateKeysStep from './GenerateKeysStep';
+import GenerateAccessTokenStep from './GenerateAccessTokenStep';
+import CopyAccessTokenStep from './CopyAccessTokenStep';
 
 const styles = theme => ({
     appBar: {
@@ -64,7 +68,17 @@ class Wizard extends Component {
             'Generate Keys', 'Generate Access Token', 'Copy Access Token'];
         this.state = {
             currentStep: 0,
+            createdApp: null,
+            createdToken: null,
         };
+    }
+
+    setCreatedApp = (createdApp) => {
+        this.setState({ createdApp });
+    }
+
+    setCreatedToken = (createdToken) => {
+        this.setState({ createdToken });
     }
 
     handleNext = () => {
@@ -91,8 +105,9 @@ class Wizard extends Component {
     render() {
         const {
             classes, updateSubscriptionData, apiId, handleClickToggle,
+            throttlingPolicyList, applicationsAvailable,
         } = this.props;
-        const { currentStep } = this.state;
+        const { currentStep, createdApp, createdToken } = this.state;
         return (
             <React.Fragment>
                 <AppBar className={classes.appBar}>
@@ -127,11 +142,6 @@ class Wizard extends Component {
                             })}
                         </Stepper>
                     </div>
-                    {/* <Wizard
-                        apiId={apiId}
-                        onClickFunction={(a, b) => this.handleClickToggle(a, b)}
-                        updateSubscriptionData={updateSubscriptionData}
-                    /> */}
                     <div>
                         {currentStep === this.steps.length ? (
                             <div>
@@ -147,7 +157,26 @@ class Wizard extends Component {
                             </div>
                         ) : (
                             <div className={classes.wizardContent}>
-                                <CreateAppStep currentStep={currentStep} />
+                                <CreateAppStep
+                                    throttlingPolicyList={throttlingPolicyList}
+                                    currentStep={currentStep}
+                                    setCreatedApp={this.setCreatedApp}
+                                />
+                                <SubscribeToAppStep
+                                    throttlingPolicyList={throttlingPolicyList}
+                                    currentStep={currentStep}
+                                    createdApp={createdApp}
+                                />
+                                <GenerateKeysStep currentStep={currentStep} />
+                                <GenerateAccessTokenStep
+                                    currentStep={currentStep}
+                                    createdApp={createdApp}
+                                    setCreatedToke={this.setCreatedToken}
+                                />
+                                <CopyAccessTokenStep
+                                    currentStep={currentStep}
+                                    createdToken={createdToken}
+                                />
                                 <div className={classes.wizardButtons}>
                                     <Button
                                         disabled={currentStep === 0}
@@ -193,6 +222,7 @@ Wizard.propTypes = {
     updateSubscriptionData: PropTypes.func.isRequired,
     handleClickToggle: PropTypes.func.isRequired,
     apiId: PropTypes.string.isRequired,
+    throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default withStyles(styles)(Wizard);

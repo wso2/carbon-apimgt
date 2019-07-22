@@ -9,6 +9,32 @@ import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+
+/**
+ * @inheritdoc
+ * @param {*} theme theme object
+ */
+const styles = theme => ({
+    appBar: {
+        background: theme.palette.background.paper,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
+    toolbar: {
+        marginLeft: theme.spacing.unit * 2,
+    },
+    subscribeTitle: {
+        flex: 1,
+    },
+    plainContent: {
+        paddingTop: 80,
+        paddingLeft: theme.spacing.unit * 2,
+    },
+    button: {
+        marginTop: theme.spacing.unit * 2,
+        marginRight: theme.spacing.unit,
+    },
+});
 
 const subscrbeToApps = (props) => {
     const {
@@ -60,7 +86,6 @@ const subscrbeToApps = (props) => {
             <div className={classes.plainContent}>
                 <SubscribeToApi
                     applicationsAvailable={applicationsAvailable}
-                    rootClass={classes.subscribeRoot}
                     subscriptionRequest={subscriptionRequest}
                     throttlingPolicyList={throttlingPolicyList}
                     updateSubscriptionRequest={updateSubscriptionRequest}
@@ -71,15 +96,14 @@ const subscrbeToApps = (props) => {
 };
 subscrbeToApps.propTypes = {
     classes: PropTypes.shape({
-        appBar: PropTypes.shape({}),
-        toolbar: PropTypes.shape({}),
-        subscribeTitle: PropTypes.shape({}),
-        button: PropTypes.shape({}),
-        plainContent: PropTypes.shape({}),
-        subscribeRoot: PropTypes.shape({}),
+        appBar: PropTypes.string,
+        toolbar: PropTypes.string,
+        subscribeTitle: PropTypes.string,
+        button: PropTypes.string,
+        plainContent: PropTypes.string,
     }).isRequired,
     handleClickToggle: PropTypes.func.isRequired,
-    openAvailable: PropTypes.func.isRequired,
+    openAvailable: PropTypes.bool.isRequired,
     handleSubscribe: PropTypes.func.isRequired,
     updateSubscriptionRequest: PropTypes.func.isRequired,
     subscriptionRequest: PropTypes.shape({}).isRequired,
@@ -88,6 +112,7 @@ subscrbeToApps.propTypes = {
     api: PropTypes.shape({
         name: PropTypes.string,
     }).isRequired,
-    Transition: PropTypes.shape({}).isRequired,
+    Transition: PropTypes.func.isRequired,
 };
-export default subscrbeToApps;
+
+export default withStyles(styles, { withTheme: true })(subscrbeToApps);

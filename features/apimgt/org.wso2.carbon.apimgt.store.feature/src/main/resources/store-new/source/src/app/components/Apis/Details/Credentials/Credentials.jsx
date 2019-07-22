@@ -28,7 +28,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import { ApiContext } from '../ApiContext';
 import Wizard from './Wizard/Wizard';
 import SubscriptionTableRow from './SubscriptionTableRow';
-import SubscribeToApps from './SubscrbeToApps';
+import SubscribeToApps from './SubscribeToApps';
 import SubscibeButtonPanel from './subscibeButtonPanel';
 
 /**
@@ -71,6 +71,16 @@ const styles = theme => ({
     },
     activeLink: {
         background: theme.palette.grey.A100,
+    },
+    appBar: {
+        background: theme.palette.background.paper,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
+    toolbar: {
+        marginLeft: theme.spacing.unit * 2,
+    },
+    subscribeTitle: {
+        flex: 1,
     },
 });
 
@@ -286,7 +296,6 @@ class Credentials extends React.Component {
                                 */}
                         {applicationsAvailable.length > 0 && (
                             <SubscribeToApps
-                                classes={classes}
                                 api={api}
                                 openAvailable={openAvailable}
                                 handleClickToggle={this.handleClickToggle}
@@ -313,6 +322,7 @@ class Credentials extends React.Component {
                                 updateSubscriptionData={updateSubscriptionData}
                                 apiId={api.id}
                                 handleClickToggle={this.handleClickToggle}
+                                throttlingPolicyList={throttlingPolicyList}
                             />
                         </Dialog>
                     </React.Fragment>

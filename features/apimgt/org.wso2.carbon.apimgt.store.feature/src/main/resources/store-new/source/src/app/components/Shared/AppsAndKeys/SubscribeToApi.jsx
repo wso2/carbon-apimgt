@@ -80,6 +80,9 @@ const styles = theme => ({
     quotaHelp: {
         position: 'relative',
     },
+    subscribeRoot: {
+        paddingLeft: theme.spacing.unit * 2,
+    },
 });
 
 const subscribeToApi = (props) => {
@@ -123,11 +126,11 @@ const subscribeToApi = (props) => {
     };
 
     const {
-        classes, applicationsAvailable, rootClass, throttlingPolicyList,
+        classes, applicationsAvailable, throttlingPolicyList,
     } = props;
 
     return (
-        <Grid container spacing={24} className={rootClass}>
+        <Grid container spacing={24} className={classes.subscribeRoot}>
             <Grid item xs={12} md={6}>
                 {appSelected && (
                     <FormControl className={classes.FormControl}>
@@ -193,6 +196,7 @@ subscribeToApi.propTypes = {
         quotaHelp: PropTypes.shape({}),
         selectEmpty: PropTypes.shape({}),
         FormControlOdd: PropTypes.shape({}),
+        subscribeRoot: PropTypes.shape({}),
     }).isRequired,
     applicationsAvailable: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string,
