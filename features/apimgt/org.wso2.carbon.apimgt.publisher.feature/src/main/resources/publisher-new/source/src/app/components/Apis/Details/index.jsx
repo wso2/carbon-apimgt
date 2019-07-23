@@ -55,7 +55,7 @@ import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
-import ApiContext from './components/ApiContext';
+import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
 
 const styles = theme => ({
@@ -147,11 +147,12 @@ class Details extends Component {
             api: null,
             apiNotFound: false,
             active: active || 'overview',
-            updateAPI: this.updateAPI, // eslint-disable-line react/no-unused-state
+            // updateAPI: this.updateAPI,
             isAPIProduct,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
+        this.updateAPI = this.updateAPI.bind(this);
     }
 
     /**
@@ -359,7 +360,7 @@ class Details extends Component {
 
         return (
             <React.Fragment>
-                <ApiContext.Provider value={this.state}>
+                <APIProvider value={{ api, updateAPI: this.updateAPI, isAPIProduct }}>
                     <div className={classes.LeftMenu}>
                         <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
                             <div className={classes.leftLInkMain}>
@@ -531,7 +532,7 @@ class Details extends Component {
                             </Switch>
                         </div>
                     </div>
-                </ApiContext.Provider>
+                </APIProvider>
             </React.Fragment>
         );
     }

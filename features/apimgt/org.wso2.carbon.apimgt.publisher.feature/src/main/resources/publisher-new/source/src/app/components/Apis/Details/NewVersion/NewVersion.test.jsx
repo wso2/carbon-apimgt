@@ -23,7 +23,7 @@ import Configurations from 'Config';
 import { MemoryRouter, Redirect } from 'react-router-dom';
 import { resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
-import ApiContext from '../components/ApiContext';
+import { APIProvider } from 'AppComponents/Apis/Details/components/ApiContext';
 import NewVersion from './NewVersion';
 
 const FIELD_EMPTY = 'This field cannot be empty';
@@ -39,11 +39,11 @@ describe('Unit test for CreateNewVersion component', () => {
         const { light } = Configurations.themes;
         const api = await getExampleBodyById(resourcePath.SINGLE_API, resourceMethod.GET, 'getAPI');
         const newVersion = (
-            <ApiContext.Provider value={{ api }}>
+            <APIProvider value={{ api }}>
                 <MemoryRouter>
                     <NewVersion classes={{}} theme={createMuiTheme(light)} />
                 </MemoryRouter>
-            </ApiContext.Provider>
+            </APIProvider>
         );
         const mountedNewVersion = await mountWithIntl(newVersion);
         return { api, mountedNewVersion };

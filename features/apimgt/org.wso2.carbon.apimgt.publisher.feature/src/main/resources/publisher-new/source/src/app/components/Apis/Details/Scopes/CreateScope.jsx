@@ -123,6 +123,13 @@ class CreateScope extends React.Component {
         }
     }
 
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof CreateScope
+     */
     render() {
         const { classes } = this.props;
         const url = `/apis/${this.props.api.id}/scopes`;

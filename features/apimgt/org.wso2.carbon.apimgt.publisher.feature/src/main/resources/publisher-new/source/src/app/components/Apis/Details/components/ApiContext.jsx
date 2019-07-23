@@ -18,10 +18,41 @@
 
 import React from 'react';
 
-const ApiContext = React.createContext({
-    active: 'overview',
-    updateAPI: () => {},
+const APIContext = React.createContext({
     api: null,
 });
 
-export default ApiContext;
+const { Provider: APIProvider } = APIContext;
+
+
+/**
+ *
+ *
+ * @param {*} WrappedComponent
+ * @returns
+ */
+function withAPI(WrappedComponent) {
+    /**
+     *
+     *
+     * @param {*} props
+     * @returns
+     */
+    function HOCWithAPI(props) {
+        return (
+            <APIContext.Consumer>
+                {
+                    context => <WrappedComponent {...context} {...props} />
+                }
+            </APIContext.Consumer>
+        );
+    }
+    HOCWithAPI.displayName = `withAPI(${WrappedComponent.displayName})`;
+    return HOCWithAPI;
+}
+
+
+export {
+    withAPI,
+    APIProvider,
+};
