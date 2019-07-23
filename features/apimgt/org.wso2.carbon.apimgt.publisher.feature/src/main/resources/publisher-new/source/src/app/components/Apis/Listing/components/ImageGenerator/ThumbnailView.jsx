@@ -269,7 +269,7 @@ class ThumbnailView extends Component {
             if (selectedTab === 'upload') {
                 if (!api.id && !file) {
                     Alert.error(intl.formatMessage({
-                        id: 'thumbnail.validation.error',
+                        id: 'Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.validation.error',
                         defaultMessage: 'Invalid file or API information is not set correctly.',
                     }));
                     return;
@@ -311,7 +311,7 @@ class ThumbnailView extends Component {
         thumbnailPromise
             .then(() => {
                 Alert.info(intl.formatMessage({
-                    id: 'thumbnail.upload.success',
+                    id: 'Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.success',
                     defaultMessage: 'Thumbnail uploaded successfully',
                 }));
                 this.setState({ open: false, thumbnail: file.preview });
@@ -321,7 +321,7 @@ class ThumbnailView extends Component {
                     console.log(error);
                 }
                 Alert.error(intl.formatMessage({
-                    id: 'thumbnail.upload.error',
+                    id: 'Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.error',
                     defaultMessage: 'Error occurred while uploading new thumbnail. Please try again.',
                 }));
             });
@@ -442,12 +442,18 @@ class ThumbnailView extends Component {
                             <FormControlLabel
                                 value='design'
                                 control={<Radio />}
-                                label={<FormattedMessage defaultMessage='Design' />}
+                                label={<FormattedMessage
+                                    id='Apis.Listing.components.ImageGenerator.ThumbnailView.design'
+                                    defaultMessage='Design'
+                                />}
                             />
                             <FormControlLabel
                                 value='upload'
                                 control={<Radio />}
-                                label={<FormattedMessage defaultMessage='Upload' />}
+                                label={<FormattedMessage
+                                    id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload'
+                                    defaultMessage='Upload'
+                                />}
                             />
                         </RadioGroup>
                     </Paper>
@@ -505,7 +511,11 @@ class ThumbnailView extends Component {
                                 <Grid item xs={9}>
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            <FormattedMessage defaultMessage='Select Category' />
+                                            <FormattedMessage
+                                                id={'Apis.Listing.components' +
+                                                '.ImageGenerator.ThumbnailView.select.category'}
+                                                defaultMessage='Select Category'
+                                            />
                                         </Typography>
                                         <Select
                                             native
@@ -519,6 +529,7 @@ class ThumbnailView extends Component {
                                     </div>
                                     <Typography component='p' variant='body1' className={classes.body}>
                                         <FormattedMessage
+                                            id='Apis.Listing.components.ImageGenerator.ThumbnailView.select.an.icon'
                                             defaultMessage='Select an icon from the Material Icons for you api.'
                                         />
                                     </Typography>
@@ -531,7 +542,11 @@ class ThumbnailView extends Component {
                                     </div>
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            <FormattedMessage defaultMessage='Select a color for the icon' />
+                                            <FormattedMessage
+                                                id={'Apis.Listing.components.ImageGenerator.ThumbnailView.select.' +
+                                                'color.for.the.icon'}
+                                                defaultMessage='Select a color for the icon'
+                                            />
                                         </Typography>
                                     </div>
                                     <SketchPicker
@@ -540,7 +555,11 @@ class ThumbnailView extends Component {
                                     />
                                     <div className={classes.subtitleWrapper}>
                                         <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            <FormattedMessage defaultMessage='Select a Background' />
+                                            <FormattedMessage
+                                                id={'Apis.Listing.components.ImageGenerator.' +
+                                                'ThumbnailView.select.background'}
+                                                defaultMessage='Select a Background'
+                                            />
                                         </Typography>
                                     </div>
                                     {colorPairs.map((colorPair, index) => (
@@ -565,12 +584,15 @@ class ThumbnailView extends Component {
                             onClick={this.handleClick('btnUploadAPIThumb')}
                         >
                             <FormattedMessage
-                                id='upload.btn'
-                                defaultMessage={<FormattedMessage defaultMessage='UPLOAD' />}
+                                id='Apis.Listing.components.ImageGenerator.ThumbnailView.upload.btn'
+                                defaultMessage='Upload'
                             />
                         </Button>
                         <Button variant='contained' size='small' onClick={this.handleClose}>
-                            <FormattedMessage id='cancel.btn' defaultMessage='CANCEL' />
+                            <FormattedMessage
+                                id='Apis.Listing.components.ImageGenerator.ThumbnailView.cancel.btn'
+                                defaultMessage='CANCEL'
+                            />
                         </Button>
                     </DialogActions>
                 </Dialog>

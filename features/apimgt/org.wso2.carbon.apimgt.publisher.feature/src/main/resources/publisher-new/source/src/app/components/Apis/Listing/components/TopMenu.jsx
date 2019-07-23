@@ -135,7 +135,10 @@ class TopMenu extends React.Component {
                     {isAPIProduct ? (
                         <Link to='/api-products/create'>
                             <Button variant='contained' className={classes.createButton}>
-                                <FormattedMessage id='create.an.api.product' defaultMessage='Create an API Product' />
+                                <FormattedMessage
+                                    id='Apis.Listing.components.TopMenu.create.an.api.product'
+                                    defaultMessage='Create an API Product'
+                                />
                             </Button>
                         </Link>
                     ) : (
