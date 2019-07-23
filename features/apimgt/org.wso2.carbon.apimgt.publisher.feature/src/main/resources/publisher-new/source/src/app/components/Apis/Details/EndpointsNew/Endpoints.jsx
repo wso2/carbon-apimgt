@@ -21,6 +21,7 @@ import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
+import { Link } from 'react-router-dom';
 
 import EndpointOverview from './EndpointOverview';
 import ApiContext from '../components/ApiContext';
@@ -100,12 +101,14 @@ function Endpoints(props) {
                                 </Button>
                             </Grid>
                             <Grid item>
-                                <Button onClick={() => this.props.history.push('/apis')}>
-                                    <FormattedMessage
-                                        id='Apis.Details.EndpointsNew.Endpoints.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </Button>
+                                <Link to={'/apis/' + api.id + '/overview'}>
+                                    <Button>
+                                        <FormattedMessage
+                                            id='Apis.Details.EndpointsNew.Endpoints.cancel'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </Link>
                             </Grid>
                         </Grid>
                     </div>)}

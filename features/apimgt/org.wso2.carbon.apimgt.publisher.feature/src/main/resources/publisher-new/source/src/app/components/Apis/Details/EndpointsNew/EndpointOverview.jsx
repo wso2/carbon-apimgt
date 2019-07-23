@@ -143,13 +143,13 @@ function EndpointOverview(props) {
     };
     useEffect(() => {
         setEpConfig(endpointConfig);
-    }, [props]);
+    }, []);
     useEffect(() => {
         setEndpointType(getEndpointType(endpointConfig.endpoint_type));
-    }, [props]);
+    }, []);
     useEffect(() => {
         setEndpointSecurityInfo(endpointSecurity);
-    }, [props]);
+    }, []);
 
     useEffect(() => {
         onChangeAPI({ ...api, endpointSecurity: endpointSecurityInfo });
@@ -198,6 +198,7 @@ function EndpointOverview(props) {
      * @param {string} newURL The url of the new endpoint.
      * */
     const addEndpoint = (category, type, newURL) => {
+        console.log(category, type, newURL);
         let endpointTemplate = {};
         if (endpointType.key === 'address' || type === 'failover') {
             endpointTemplate = {
@@ -295,6 +296,7 @@ function EndpointOverview(props) {
 
     /**
      * Method to get the advance configuration from the selected endpoint.
+     *
      * @param {number} index The selected endpoint index
      * @param {string} epType The type of the endpoint. (loadbalance/ failover)
      * @param {string} category The endpoint category (Production/ sandbox)

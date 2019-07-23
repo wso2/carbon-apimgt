@@ -74,8 +74,9 @@ const styles = theme => ({
         borderStyle: 'dashed',
         borderWidth: 'thin',
     },
-    certificateListing: {
-
+    certificateList: {
+        maxHeight: '250px',
+        overflow: 'scroll',
     },
 });
 /**
@@ -107,29 +108,39 @@ function Certificates(props) {
         },
     ]);
     const [alias, setAlias] = useState('');
+    const [endpoint, setEndpoint] = useState('');
     const [uploadCertificateOpen, setUploadCertificateOpen] = useState(false);
 
-
-    const handleAliasChange = (event) => {
-        setAlias(event.target.value);
+    const closeCertificateUpload = () => {
+        setUploadCertificateOpen(false);
+        setCertificate({ name: '', content: '' });
+        setAlias('');
+        setEndpoint('');
     };
 
     const saveCertificate = () => {
         // TODO: Call backend api and upload certificate.
         // TODO: Based on the response, display message.
-        setCertificateList([]);
+        certificateList.push({
+            alias,
+            endpoint,
+            cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
+            color: '#dca80a',
+        });
+        console.log(certificateList);
+        setCertificateList(certificateList);
+        closeCertificateUpload();
     };
 
     /**
      * Delete endpoint certificate represented by the alias.
      * */
-    const deleteCertificate = (alias) => {
-        setCertificateList([]);
-    };
-
-    const closeCertificateUplod = () => {
-        setUploadCertificateOpen(false);
-        setCertificate({ name: '', content: '' });
+    const deleteCertificate = (certificateAlias) => {
+        setCertificateList(() => {
+            return certificateList.filter((cert) => {
+                return cert.alias !== certificateAlias;
+            });
+        });
     };
 
     const onDrop = (file) => {
@@ -155,8 +166,8 @@ function Certificates(props) {
                     />
                 </Typography>
             </Grid>
-            <Grid item className={classes.certificateListing}>
-                <List>
+            <Grid item>
+                <List className={classes.certificateList}>
                     {(certificateList.length > 0 ? (
                         certificateList.map((cert) => {
                             return (
@@ -189,6 +200,8 @@ function Certificates(props) {
                                 </ListItemText>
                             </ListItem>
                         ))}
+                </List>
+                <List>
                     <ListItem
                         button
                         className={classes.addCertificateBtn}
@@ -225,7 +238,7 @@ function Certificates(props) {
                                 />}
                                 value={alias}
                                 placeholder='Endpoint'
-                                onChange={handleAliasChange}
+                                onChange={event => setAlias(event.target.value)}
                                 margin='normal'
                                 fullWidth
                             />
@@ -235,9 +248,9 @@ function Certificates(props) {
                                     id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.alias'
                                     defaultMessage='Alias'
                                 />}
-                                value={alias}
+                                value={endpoint}
                                 placeholder='My Alias'
-                                onChange={handleAliasChange}
+                                onChange={event => setEndpoint(event.target.value)}
                                 margin='normal'
                                 fullWidth
                             />
@@ -263,21 +276,24 @@ function Certificates(props) {
                                 }}
                             >
                                 <div className={classes.dropZoneWrapper}>
-                                    <Icon style={{ fontSize: 56 }}>
-                                        cloud_upload
-                                    </Icon>
-                                    {certificate.name && (
+                                    {certificate.name === '' ?
+                                        <Icon style={{ fontSize: 56 }}>
+                                            cloud_upload
+                                        </Icon> :
                                         <div className={classes.uploadedFile}>
-                                            <Icon>file</Icon> {certificate.name}
+                                            <Icon style={{ fontSize: 56 }}>
+                                                insert_drive_file
+                                            </Icon>
+                                            {certificate.name}
                                         </div>
-                                    )}
+                                    }
                                 </div>
                             </Dropzone>
                         </div>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={closeCertificateUplod} color='primary'>
+                    <Button onClick={closeCertificateUpload} color='primary'>
                         <FormattedMessage
                             id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.cancel.button'
                             defaultMessage='Close'
