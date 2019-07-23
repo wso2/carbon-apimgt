@@ -121,8 +121,7 @@ const ApplicationCreate = (props) => {
                             name='name'
                             onChange={e => handleChange('name', e)}
                             placeholder={intl.formatMessage({
-                                defaultMessage:
-                                    'My Mobile Application',
+                                defaultMessage: 'My Mobile Application',
                                 id: 'Shared.AppsAndKeys.ApplicationCreateForm.my.mobile.application',
                             })}
                             autoFocus

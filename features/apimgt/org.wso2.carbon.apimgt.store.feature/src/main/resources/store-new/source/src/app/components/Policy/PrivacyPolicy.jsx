@@ -161,216 +161,216 @@ class PrivacyPolicy extends React.Component {
                         <p>
                             <FormattedMessage
                                 defaultMessage='WSO2 API Manager (referred hereafter as “API-M ”) is an open source enterprise-class solution that supports API publishing, lifecycle management, application development, access control, rate limiting, and analytics in one cleanly integrated system.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description3'
                             />
                         </p>
                         <h2 id='privacyPolicy'>
                             <strong>
                                 <FormattedMessage
                                     defaultMessage='Privacy Policy'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description4'
                                 />
                             </strong>
                         </h2>
                         <p>
                             <FormattedMessage
                                 defaultMessage='This section explains how API-M captures your personal information, purpose of capturing, and the retention of your personal information. Please note that this policy is for reference only, and is applicable for the software as a product. WSO2 Inc., or its developers have no access to the information held within API-M. Please refer “Disclaimer” for more information.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description5'
                             />
                         </p>
                         <h2 id='personalInfo'>
                             <FormattedMessage
                                 defaultMessage='What are the personal information?'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description6'
                             />
                         </h2>
                         <ul>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='Your user name (except in the case where your user name is created by your employer under contract)'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description7'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='The IP address you use to login'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description8'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='Your device ID, if you choose to login with a device (Phone, Tablet)'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description9'
                                 />
                             </li>
                         </ul>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M considers anything related to you as your personal information. This includes, but is not limited to, However API-M does not consider the following as your personal information, and uses this only for analytical purposes, since this information cannot be used to track you.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description10'
                             />
                         </p>
                         <ul>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='City/Country from which your TCP/IP connection originates'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description11'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='Time of the day you login.(Year, Month, Week, Hour or Minute)'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description12'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='Type of the device you use to login (Phone, Tablet, etc.)'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description13'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='Operating system and Generic browser information'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description14'
                                 />
                             </li>
                         </ul>
                         <h2 id='infoCollection'>
                             <FormattedMessage
                                 defaultMessage='Collection of your information'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description15'
                             />
                         </h2>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M collects your information to only serve your access requirements. For example,'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description16'
                             />
                         </p>
                         <ul>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='API-M uses your IP address to detect any suspicious login attempt to your account.'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description17'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='API-M uses your First Name, Last Name, etc to provide rich and personalized information.'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description18'
                                 />
                             </li>
                         </ul>
                         <h3>
                             <FormattedMessage
                                 defaultMessage='Tracking Technologies'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description19'
                             />
                         </h3>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M collects your information through the following,'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description20'
                             />
                         </p>
                         <ul>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='The user sign up page where you enter your personal data'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description21'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='Tracking your IP address with HTTP request, HTTP headers, and TCP/IP'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description22'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='Tracking your geographic information with the IP address'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description23'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='Your login history with browser cookies. Please refer our cookie policy for more information'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description24'
                                 />
                             </li>
                         </ul>
                         <h2 id='useOfInfo'>
                             <FormattedMessage
                                 defaultMessage='Use of your personal information'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description25'
                             />
                         </h2>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M will use your personal information only for the purposes for which it was collected (or for a use identified as consistent with that purpose).'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description26'
                             />
                         </p>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M uses your personal information only for the following purposes.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description27'
                             />
                         </p>
                         <ul>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='To provide you with a personalized user experience. API-M uses attributes such as your name for this purpose'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description28'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='To protect your account from unauthorized access or a potential hacking attempt. API-M use HTTP or TCP/IP Headers for this purpose which includes'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description29'
                                 />
                             </li>
                             <ul>
                                 <li>
                                     <FormattedMessage
                                         defaultMessage='IP address,'
-                                        id='Policy.PrivacyPolicy.description2'
+                                        id='Policy.PrivacyPolicy.description30'
                                     />
                                 </li>
                                 <li>
                                     <FormattedMessage
                                         defaultMessage='Browser fingerprinting,'
-                                        id='Policy.PrivacyPolicy.description2'
+                                        id='Policy.PrivacyPolicy.description31'
                                     />
                                 </li>
                                 <li>
-                                    <FormattedMessage defaultMessage='Cookies' id='Policy.PrivacyPolicy.description2' />
+                                    <FormattedMessage defaultMessage='Cookies' id='Policy.PrivacyPolicy.description32' />
                                 </li>
                             </ul>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='To derive statistical data for analytical purposes on system performance improvements. API-M will not keep any personal information after statistical calculations. Thus a statistical report has no means to identify an individual person'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description33'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='API-M may use'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description34'
                                 />
                             </li>
                             <ul>
                                 <li>
                                     <FormattedMessage
                                         defaultMessage='The IP Address to derive geographic information'
-                                        id='Policy.PrivacyPolicy.description2'
+                                        id='Policy.PrivacyPolicy.description35'
                                     />
                                 </li>
                                 <li>
                                     <FormattedMessage
                                         defaultMessage='Browser fingerprinting to determine the browser technology and version'
-                                        id='Policy.PrivacyPolicy.description2'
+                                        id='Policy.PrivacyPolicy.description36'
                                     />
                                 </li>
                             </ul>
@@ -378,115 +378,115 @@ class PrivacyPolicy extends React.Component {
                         <h2 id='disclosureOfInfo'>
                             <FormattedMessage
                                 defaultMessage='Disclosure of your personal information'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description37'
                             />
                         </h2>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M will disclose personal information only for the purposes for which it was collected (or for a use identified as consistent with that purpose), unless you have consented otherwise or where it is required by law.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description38'
                             />
                         </p>
                         <h3>
-                            <FormattedMessage defaultMessage='Legal process' id='Policy.PrivacyPolicy.description2' />
+                            <FormattedMessage defaultMessage='Legal process' id='Policy.PrivacyPolicy.description39' />
                         </h3>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M may disclose your personal information with or without your consent where it is required by law following the due and lawful process.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description40'
                             />
                         </p>
                         <h2 id='storageOfInfo'>
                             <FormattedMessage
                                 defaultMessage='How API-M keeps your personal information'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description41'
                             />
                         </h2>
                         <h3>
                             <FormattedMessage
                                 defaultMessage='Where your personal information is stored'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description42'
                             />
                         </h3>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M stores your personal information in secured databases. API-M exercises proper industry accepted security measures to protect the database where your personal information is held'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description43'
                             />
                         </p>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M may use encryption to keep your personal data with added level of security.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description44'
                             />
                         </p>
                         <h3>
                             <FormattedMessage
                                 defaultMessage='How long does API-M keep your personal information?'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description45'
                             />
                         </h3>
                         <p>
                             <FormattedMessage
                                 defaultMessage='API-M keep your personal data as long as you are an active user of our system. You can update your personal data at any time with the given self-care user portals.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description46'
                             />
                         </p>
                         <h3>
                             <FormattedMessage
                                 defaultMessage='How can you request a removal of your personal information?'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description47'
                             />
                         </h3>
                         <p>
                             <FormattedMessage
                                 defaultMessage='You can request the administrator to delete your account The administrator will be the administrator of the tenant you are registered or the super-administrator if you do not use the tenant feature.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description48'
                             />
                         </p>
                         <p>
                             <FormattedMessage
                                 defaultMessage='You can additionally request to anonymize all traces of your activities that may have been retained by API-M in Logs, Databases or Analytical storage.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description49'
                             />
                         </p>
                         <h2 id='about'>
-                            <FormattedMessage defaultMessage='About' id='Policy.PrivacyPolicy.description2' />
+                            <FormattedMessage defaultMessage='About' id='Policy.PrivacyPolicy.description50' />
                         </h2>
                         <h3>
                             <FormattedMessage
                                 defaultMessage='Changes to this policy'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description51'
                             />
                         </h3>
                         <p>
                             <FormattedMessage
                                 defaultMessage='The organization running API-M may revise the Privacy Policy from time to time. You can find the most recent governing policy with the respective link provided by the organization running API-M. The organization will notify any changes to the privacy policy over our official public channels.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description52'
                             />
                         </p>
                         <h3>
-                            <FormattedMessage defaultMessage='Your choices' id='Policy.PrivacyPolicy.description2' />
+                            <FormattedMessage defaultMessage='Your choices' id='Policy.PrivacyPolicy.description53' />
                         </h3>
                         <p>
                             <FormattedMessage
                                 defaultMessage='If you already have an account with API Manager; you have the right to deactivate your account if you find that this privacy policy is unacceptable for you.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description54'
                             />
                         </p>
                         <p>
                             <FormattedMessage
                                 defaultMessage='If you do not have an account, you can choose not to subscribe if you do not agree with our privacy policy.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description55'
                             />
                         </p>
                         <h3>
-                            <FormattedMessage defaultMessage='Contact Us' id='Policy.PrivacyPolicy.description2' />
+                            <FormattedMessage defaultMessage='Contact Us' id='Policy.PrivacyPolicy.description56' />
                         </h3>
                         <p>
                             <FormattedMessage
                                 defaultMessage='Please contact us if you have any question or concerns of this privacy policy.'
-                                id='Policy.PrivacyPolicy.description2'
+                                id='Policy.PrivacyPolicy.description57'
                             />
                         </p>
                         <p>
@@ -495,25 +495,25 @@ class PrivacyPolicy extends React.Component {
                             </a>
                         </p>
                         <h2 id='disclaimer'>
-                            <FormattedMessage defaultMessage='Disclaimer' id='Policy.PrivacyPolicy.description2' />
+                            <FormattedMessage defaultMessage='Disclaimer' id='Policy.PrivacyPolicy.description58' />
                         </h2>
                         <ol>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='This privacy policy statement serves as a template for the organization running WSO2 API-M. The organizational policies will govern the real privacy policy applicable for its business purposes.'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description59'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='WSO2 or its employees, partners, affiliates do not have access to any data, including privacy-related data held at the organization running API-M.'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description60'
                                 />
                             </li>
                             <li>
                                 <FormattedMessage
                                     defaultMessage='This policy should be modified according to the organizational requirements.'
-                                    id='Policy.PrivacyPolicy.description2'
+                                    id='Policy.PrivacyPolicy.description61'
                                 />
                             </li>
                         </ol>
