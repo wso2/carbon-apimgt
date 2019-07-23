@@ -92,7 +92,7 @@ const styles = theme => ({
         paddingRight: theme.spacing.unit,
         marginRight: theme.spacing.unit,
     },
-    loadbalanceHeader: {
+    configDialogHeader: {
         fontWeight: '600',
     },
 });
@@ -105,7 +105,7 @@ const styles = theme => ({
 function EndpointOverview(props) {
     const { classes, api, onChangeAPI } = props;
     const { endpointConfig, endpointSecurity } = api;
-    const [isSOAPEndpoint, setSOAPEndpoint] = useState({ key: 'http', value: 'HTTP/REST Endpoint' });
+    const [endpointType, setEndpointType] = useState({ key: 'http', value: 'HTTP/REST Endpoint' });
     const [epConfig, setEpConfig] = useState(endpointConfig);
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState({});
     const [isLBConfigOpen, setLBConfigOpen] = useState(false);
@@ -143,13 +143,13 @@ function EndpointOverview(props) {
     };
     useEffect(() => {
         setEpConfig(endpointConfig);
-    }, []);
+    }, [props]);
     useEffect(() => {
-        setSOAPEndpoint(getEndpointType(endpointConfig.endpoint_type));
-    }, []);
+        setEndpointType(getEndpointType(endpointConfig.endpoint_type));
+    }, [props]);
     useEffect(() => {
         setEndpointSecurityInfo(endpointSecurity);
-    }, []);
+    }, [props]);
 
     useEffect(() => {
         onChangeAPI({ ...api, endpointSecurity: endpointSecurityInfo });
@@ -160,7 +160,7 @@ function EndpointOverview(props) {
     }, [epConfig]);
 
     useEffect(() => {
-    }, [isSOAPEndpoint]);
+    }, [endpointType]);
 
     /**
      * Method to modify the endpoint represented by the given parameters.
@@ -199,9 +199,9 @@ function EndpointOverview(props) {
      * */
     const addEndpoint = (category, type, newURL) => {
         let endpointTemplate = {};
-        if (isSOAPEndpoint.key === 'address' || type === 'failover') {
+        if (endpointType.key === 'address' || type === 'failover') {
             endpointTemplate = {
-                endpoint_type: isSOAPEndpoint.key,
+                endpoint_type: endpointType.key,
                 template_not_supported: false,
                 url: newURL,
             };
@@ -234,7 +234,7 @@ function EndpointOverview(props) {
     const onChangeEndpointCategory = (event) => {
         const tmpEndpointConfig = getEndpointTemplateByType(
             event.target.value,
-            isSOAPEndpoint.key === 'address',
+            endpointType.key === 'address',
             epConfig,
         );
         setEpConfig({ ...tmpEndpointConfig });
@@ -278,7 +278,7 @@ function EndpointOverview(props) {
             };
         }
         setEpConfig(endpointConfiguration);
-        setSOAPEndpoint(selectedType);
+        setEndpointType(selectedType);
     };
 
     /**
@@ -393,6 +393,7 @@ function EndpointOverview(props) {
         } else {
             endpoints.config = advanceConfig;
         }
+        setAdvancedConfigOptions({ open: false });
         setEpConfig({ ...epConfig, [endpointConfigProperty]: endpoints });
     };
 
@@ -412,7 +413,7 @@ function EndpointOverview(props) {
                 handleToggleEndpointSecurity={handleToggleEndpointSecurity}
                 handleEndpointSecurityChange={handleEndpointSecurityChange}
                 handleEndpointTypeSelect={handleEndpointTypeSelect}
-                isSOAPEndpoint={isSOAPEndpoint}
+                endpointType={endpointType}
             />
             <Paper className={classes.endpointContainer}>
                 <Grid container xs spacing={2}>
@@ -460,8 +461,8 @@ function EndpointOverview(props) {
                     <div className={classes.endpointTypesSelectWrapper}>
                         <FormControl component='fieldset' className={classes.formControl}>
                             <RadioGroup
-                                aria-label='Gender'
-                                name='gender1'
+                                aria-label='EndpointType'
+                                name='endpointType'
                                 className={classes.radioGroup}
                                 value={epConfig.endpoint_type}
                                 onChange={onChangeEndpointCategory}
@@ -521,7 +522,7 @@ function EndpointOverview(props) {
             </Paper>
             <Dialog open={isLBConfigOpen}>
                 <DialogTitle>
-                    <Typography className={classes.loadbalanceHeader}>
+                    <Typography className={classes.configDialogHeader}>
                         <FormattedMessage
                             id='Apis.Details.EndpointsNew.EndpointOverview.load.balance.configuration.title'
                             defaultMessage='Load Balance Configuration'
@@ -541,7 +542,7 @@ function EndpointOverview(props) {
             </Dialog>
             <Dialog open={advanceConfigOptions.open}>
                 <DialogTitle>
-                    <Typography varient='h4'>
+                    <Typography className={classes.configDialogHeader}>
                         <FormattedMessage
                             id='Apis.Details.EndpointsNew.EndpointOverview.advance.endpoint.configuration'
                             defaultMessage='Advance Configuration'
@@ -550,7 +551,7 @@ function EndpointOverview(props) {
                 </DialogTitle>
                 <DialogContent>
                     <AdvanceEndpointConfig
-                        isSOAPEndpoint={isSOAPEndpoint.key === 'address'}
+                        isSOAPEndpoint={endpointType.key === 'address'}
                         advanceConfig={advanceConfigOptions.config}
                         onSaveAdvanceConfig={saveAdvanceConfig}
                         onCancel={closeAdvanceConfig}

@@ -75,7 +75,7 @@ function GeneralConfiguration(props) {
         handleToggleEndpointSecurity,
         handleEndpointSecurityChange,
         handleEndpointTypeSelect,
-        isSOAPEndpoint,
+        endpointType,
         classes,
     } = props;
     const [isConfigExpanded, setConfigExpand] = useState(true);
@@ -114,7 +114,7 @@ function GeneralConfiguration(props) {
                                     />
                                 </InputLabel>
                                 <Select
-                                    value={isSOAPEndpoint.key}
+                                    value={endpointType.key}
                                     onChange={handleEndpointTypeSelect}
                                     inputProps={{
                                         name: 'key',
@@ -183,7 +183,7 @@ GeneralConfiguration.propTypes = {
     handleToggleEndpointSecurity: PropTypes.func.isRequired,
     handleEndpointSecurityChange: PropTypes.func.isRequired,
     handleEndpointTypeSelect: PropTypes.func.isRequired,
-    isSOAPEndpoint: PropTypes.shape({}).isRequired,
+    endpointType: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
 };
 

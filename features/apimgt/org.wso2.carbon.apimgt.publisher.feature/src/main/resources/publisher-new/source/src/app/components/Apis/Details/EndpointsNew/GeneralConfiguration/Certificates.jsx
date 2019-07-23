@@ -17,15 +17,22 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-    TextField,
-    Icon,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     Grid,
-    withStyles,
+    Icon,
+    IconButton,
     List,
     ListItem,
     ListItemAvatar,
+    ListItemSecondaryAction,
     ListItemText,
-    ListItemSecondaryAction, IconButton, Typography, Divider, Dialog, DialogTitle, DialogContent, Avatar,
+    TextField,
+    Typography,
+    withStyles,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Dropzone from 'react-dropzone';
@@ -78,16 +85,51 @@ const styles = theme => ({
  */
 function Certificates(props) {
     const { classes } = props;
-    const [certificate, setCertificate] = useState({ alias: 'myalias', endpoint: 'http://localhost/service' });
+    const [certificate, setCertificate] = useState({ name: '', content: '' });
     const [certificateList, setCertificateList] = useState([
-        { alias: 'myalias', endpoint: 'http://localhost/service'},
+        {
+            alias: 'Active',
+            endpoint: 'http://localhost/service',
+            cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
+            color: '#0fc520',
+        },
+        {
+            alias: 'About to expire (1 week)',
+            endpoint: 'http://localhost/service',
+            cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
+            color: '#dca80a',
+        },
+        {
+            alias: 'Expired',
+            endpoint: 'http://localhost/service',
+            cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
+            color: '#c50f0f',
+        },
     ]);
     const [alias, setAlias] = useState('');
-    const [uploadCertificateOpen, setUploadCertificareOpen] = useState(false);
+    const [uploadCertificateOpen, setUploadCertificateOpen] = useState(false);
 
 
     const handleAliasChange = (event) => {
         setAlias(event.target.value);
+    };
+
+    const saveCertificate = () => {
+        // TODO: Call backend api and upload certificate.
+        // TODO: Based on the response, display message.
+        setCertificateList([]);
+    };
+
+    /**
+     * Delete endpoint certificate represented by the alias.
+     * */
+    const deleteCertificate = (alias) => {
+        setCertificateList([]);
+    };
+
+    const closeCertificateUplod = () => {
+        setUploadCertificateOpen(false);
+        setCertificate({ name: '', content: '' });
     };
 
     const onDrop = (file) => {
@@ -120,13 +162,13 @@ function Certificates(props) {
                             return (
                                 <ListItem>
                                     <ListItemAvatar>
-                                        <Icon>
+                                        <Icon style={{ color: cert.color }}>
                                             security
                                         </Icon>
                                     </ListItemAvatar>
-                                    <ListItemText primary={cert.alias} secondary={cert.endpoint} />
+                                    <ListItemText primary={cert.alias + ' | ' + cert.endpoint} secondary={cert.cn} />
                                     <ListItemSecondaryAction>
-                                        <IconButton>
+                                        <IconButton onClick={() => deleteCertificate(cert.alias)}>
                                             <Icon>
                                                 delete
                                             </Icon>
@@ -147,7 +189,11 @@ function Certificates(props) {
                                 </ListItemText>
                             </ListItem>
                         ))}
-                    <ListItem button className={classes.addCertificateBtn}>
+                    <ListItem
+                        button
+                        className={classes.addCertificateBtn}
+                        onClick={() => setUploadCertificateOpen(true)}
+                    >
                         <ListItemAvatar>
                             <IconButton>
                                 <Icon>
@@ -178,7 +224,7 @@ function Certificates(props) {
                                     defaultMessage='Endpoint'
                                 />}
                                 value={alias}
-                                placeholder='My Alias'
+                                placeholder='Endpoint'
                                 onChange={handleAliasChange}
                                 margin='normal'
                                 fullWidth
@@ -197,14 +243,17 @@ function Certificates(props) {
                             />
                             <Dropzone
                                 multiple={false}
-                                accept={'application/pkcs8, application/pkcs10, application/pkix-crl, application/pkcs7-mime,' +
-                                'application/x-x509-ca-cert,' +
-                                'application/x-x509-user-cert,' +
-                                'application/x-pkcs7-crl,' +
-                                'application/x-pkcs12,' +
-                                'application/x-pkcs7-certificates,' +
-                                'application/x-pkcs7-certreqresp,' +
-                                '.p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
+                                accept={
+                                    'application/pkcs8,' +
+                                    'application/pkcs10, application/pkix-crl,' +
+                                    'application/pkcs7-mime,' +
+                                    'application/x-x509-ca-cert,' +
+                                    'application/x-x509-user-cert,' +
+                                    'application/x-pkcs7-crl,' +
+                                    'application/x-pkcs12,' +
+                                    'application/x-pkcs7-certificates,' +
+                                    'application/x-pkcs7-certreqresp,' +
+                                    '.p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
                                 }
                                 className={classes.dropzone}
                                 activeClassName={classes.acceptDrop}
@@ -214,7 +263,7 @@ function Certificates(props) {
                                 }}
                             >
                                 <div className={classes.dropZoneWrapper}>
-                                    <Icon className={classes.dropIcon} style={{ fontSize: 56 }}>
+                                    <Icon style={{ fontSize: 56 }}>
                                         cloud_upload
                                     </Icon>
                                     {certificate.name && (
@@ -227,6 +276,20 @@ function Certificates(props) {
                         </div>
                     </Grid>
                 </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeCertificateUplod} color='primary'>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.cancel.button'
+                            defaultMessage='Close'
+                        />
+                    </Button>
+                    <Button onClick={saveCertificate} color='primary' autoFocus>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.config.save.button'
+                            defaultMessage='Save'
+                        />
+                    </Button>
+                </DialogActions>
             </Dialog>
 
         </Grid>

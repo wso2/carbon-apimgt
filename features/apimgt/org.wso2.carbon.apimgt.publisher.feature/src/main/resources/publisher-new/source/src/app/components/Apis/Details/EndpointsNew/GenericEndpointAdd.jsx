@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { TextField, Button, FormControl, InputAdornment, Divider, InputLabel, withStyles, Input, Icon, InputBase, IconButton, Paper } from '@material-ui/core';
+import React, { useState } from 'react';
+import {
+    Icon,
+    IconButton,
+    InputAdornment,
+    TextField,
+    withStyles,
+} from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 

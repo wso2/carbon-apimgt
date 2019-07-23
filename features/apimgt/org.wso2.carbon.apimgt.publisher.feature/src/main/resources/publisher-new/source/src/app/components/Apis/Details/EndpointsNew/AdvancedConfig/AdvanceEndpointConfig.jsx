@@ -62,6 +62,10 @@ const styles = theme => ({
         marginRight: theme.spacing.unit,
         width: '45%',
     },
+    advanceDialogActions: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+    },
 });
 
 /**
@@ -339,6 +343,7 @@ function AdvanceEndpointConfig(props) {
                 <TextField
                     className={classes.textField}
                     id='initial-duration-input'
+                    value={advanceConfigObj.suspendDuration}
                     onChange={event => handleConfigFieldChange(event, 'suspendDuration')}
                     label={
                         <FormattedMessage
@@ -472,7 +477,7 @@ function AdvanceEndpointConfig(props) {
                     margin='normal'
                 />
             </Grid>
-            <Grid>
+            <Grid className={classes.advanceDialogActions}>
                 <Button onClick={onCancel} color='primary'>
                     <FormattedMessage
                         id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.cancel.button'
