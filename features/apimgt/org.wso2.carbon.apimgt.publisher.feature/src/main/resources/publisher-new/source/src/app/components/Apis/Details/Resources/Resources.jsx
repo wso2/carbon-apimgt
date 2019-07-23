@@ -193,7 +193,7 @@ class Resources extends React.Component {
         const promised_api_object = Api.get(this.api_uuid);
         promised_api_object
             .then((api) => {
-                this.setState({ api });
+                this.setState({ api, scopes: api.scopes });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -202,20 +202,8 @@ class Resources extends React.Component {
                 const status = error.status;
                 if (status === 404) {
                     this.setState({ notFound: true });
-                }
-            });
-        const promised_scopes_object = api.getScopes(this.api_uuid);
-        promised_scopes_object
-            .then((response) => {
-                this.setState({ apiScopes: response.obj });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.error(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
                 }
             });
 
@@ -501,12 +489,9 @@ class Resources extends React.Component {
     }
     render() {
         const {
-            api, showAddResource, apiScopes, showScopes, isAuthorize,
+            api, showAddResource, scopes, showScopes, isAuthorize,
         } = this.state;
 
-        // if (!isAuthorize) {
-        //     doRedirectToLogin();
-        // }
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
@@ -584,7 +569,7 @@ class Resources extends React.Component {
                             </div>
                         </React.Fragment>}
 
-                    {(apiScopes && showScopes) &&
+                    {(api.scopes && showScopes) &&
                         <React.Fragment>
                             <div className={classes.addNewWrapper}>
                                 <Typography className={classes.addNewHeader}>
@@ -598,7 +583,7 @@ class Resources extends React.Component {
                                     <FormControl className={classes.formControl}>
                                         <InputLabel htmlFor='select-multiple'><FormattedMessage id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.input' defaultMessage='Assign Global Scopes for API' /></InputLabel>
                                         <Select multiple value={this.state.scopes} onChange={this.handleScopeChange} className={classes.scopes}>
-                                            {apiScopes.list.map(tempScope => (
+                                            {scopes.list.map(tempScope => (
                                                 <MenuItem
                                                     key={tempScope.name}
                                                     value={tempScope.name}
@@ -658,7 +643,11 @@ class Resources extends React.Component {
                                     </ExpansionPanelSummary>
                                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
                                         {Object.keys(path).map((innerKey) => {
-                                            return <Resource path={key} method={innerKey} methodData={path[innerKey]} updatePath={that.updatePath} apiScopes={apiScopes} addRemoveToDeleteList={that.addRemoveToDeleteList} onRef={ref => this.childResources.push(ref)} />;
+                                            return <Resource path={key} method={innerKey} methodData={path[innerKey]}
+                                                             updatePath={that.updatePath} scopes={api.scopes}
+                                                             addRemoveToDeleteList={that.addRemoveToDeleteList}
+                                                             onRef={ref => this.childResources.push(ref)}
+                                            />;
                                         })}
                                     </ExpansionPanelDetails>
                                 </ExpansionPanel>

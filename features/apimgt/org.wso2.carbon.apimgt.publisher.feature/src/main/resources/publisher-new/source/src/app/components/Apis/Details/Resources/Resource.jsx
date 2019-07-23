@@ -160,7 +160,7 @@ class Resource extends React.Component {
         this.state = {
             visible: false,
             method: this.props.methodData,
-            scopes: tempScopes,
+            scopes: null,
             deleteChecked: false,
             newPropName: '',
         };
@@ -183,6 +183,7 @@ class Resource extends React.Component {
     }
     handleScopeChangeInSwaggerRoot(scopes) {
         const tempMethod = this.props.methodData;
+        tempMethod['x-scope'] = scopes;
         tempMethod.security.map((object, i) => {
             if (object.OAuth2Security) {
                 object.OAuth2Security = scopes;
@@ -200,6 +201,9 @@ class Resource extends React.Component {
             in: 'query',
             type: 'string',
         };
+        if(!this.state.method.parameters) {
+            this.state.method.parameters = [];
+        }
         this.state.method.parameters.push(defaultParams);
         this.props.updatePath(this.props.path, this.props.method, this.state.method);
     }
@@ -258,8 +262,9 @@ class Resource extends React.Component {
      */
     render() {
         const {
-            classes, method, path, apiScopes, theme, intl,
+            classes, method, path, scopes, theme, intl,
         } = this.props;
+        const initScope = this.props.methodData['x-scope'];
         let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
         let chipTextColor = '#000000';
         if (!chipColor) {
@@ -355,32 +360,23 @@ class Resource extends React.Component {
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            {/* <Select
-                                                className={classes.scopeSelect}
-                                                margin='none'
-                                                multiple
-                                                value={this.state.scopes}
-                                                onChange={this.handleScopeChange}
-                                                MenuProps={{
-                                                    PaperProps: {
-                                                        style: {
-                                                            width: 200,
-                                                        },
-                                                    },
-                                                }}
-                                            >
-                                                {apiScopes.list.map(tempScope => (
-                                                    <MenuItem
-                                                        key={tempScope.name}
-                                                        value={tempScope.name}
-                                                        style={{
-                                                            fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
-                                                        }}
-                                                    >
-                                                        {tempScope.name}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select> */}
+                                                <Select
+                                                    value={this.state.scopes || initScope}
+                                                    onChange={this.handleScopeChange}
+                                                    inputProps={{
+                                                        name: 'scopes',
+                                                        id: 'age-simple',
+                                                    }}
+                                                >
+                                                    {scopes.map((tempScope) => (
+                                                            <MenuItem
+                                                                key={tempScope.name}
+                                                                value={tempScope.name}
+                                                            >
+                                                                {tempScope.name}
+                                                            </MenuItem>
+                                                        ))}
+                                                </Select>
                                         </TableCell>
                                     </TableRow>
                                 </Table>
@@ -417,7 +413,7 @@ class Resource extends React.Component {
                                 {/* <WrappedPropertyAddForm propsSubmitHandler={this.propsSubmitHandler} /> */}
                             </Grid>
                             <Grid item xs={12}>
-                                {this.state.method.parameters.length > 0 && (
+                                {this.state.method.parameters && this.state.method.parameters.length > 0 && (
                                     <Table>
                                         <TableHead>
                                             <TableRow>

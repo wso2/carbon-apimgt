@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
-// import ScopesIcon from '@material-ui/icons/VpnKey';
+import ScopesIcon from '@material-ui/icons/VpnKey';
 // import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 // import CommentsIcon from '@material-ui/icons/CommentRounded';
@@ -42,7 +42,7 @@ import { PageNotFound } from 'AppComponents/Base/Errors';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
-
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
@@ -213,6 +213,8 @@ class Details extends Component {
                 const { status } = error;
                 if (status === 404) {
                     this.setState({ apiNotFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
                 }
             });
     }
@@ -425,13 +427,15 @@ class Details extends Component {
                             active={active}
                             Icon={<LifeCycleIcon />}
                         />
-                        {/* TODO: uncomment when component run without errors */}
-                        {/* <LeftMenuItem
-                         text='scopes'
-                         handleMenuSelect={this.handleMenuSelect}
-                         active={active}
-                         Icon={<ScopesIcon />}
-                         /> */}
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.left.menu.scope',
+                                defaultMessage: 'scopes',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ScopesIcon />}
+                        />
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.documents',
@@ -572,8 +576,8 @@ Details.propTypes = {
             leftMenuIconMainSize: PropTypes.number,
         }),
     }).isRequired,
-    intl: PropTypes.shape({}).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Details));
