@@ -149,7 +149,7 @@ class Details extends Component {
             api: null,
             apiNotFound: false,
             active: active || 'overview',
-            updateAPI: this.updateAPI.bind(this), // eslint-disable-line react/no-unused-state
+            updateAPI: this.updateAPI, // eslint-disable-line react/no-unused-state
             isAPIProduct,
         };
         this.setAPI = this.setAPI.bind(this);
@@ -248,7 +248,6 @@ class Details extends Component {
      * @memberof Details
      */
     updateAPI(newAPI, isAPIProduct) {
-        const { intl } = this.props;
         const restAPI = new Api();
         /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
         /* eslint no-param-reassign: ["error", { "props": false }] */
@@ -258,13 +257,7 @@ class Details extends Component {
             const promisedApi = restAPI.updateProduct(JSON.parse(JSON.stringify(newAPI)));
             promisedApi
                 .then((api) => {
-                    const messages = defineMessages({
-                        successMessage: {
-                            id: 'Apis.Details.index.update.success.product',
-                            defaultMessage: '{apiName} updated successfully.',
-                        },
-                    });
-                    Alert.info(intl.formatMessage(messages.successMessage, { apiName: `${api.name}` }));    
+                    Alert.info(`${api.name} updated successfully.`);
                     this.setState({ api });
                 })
                 .catch((error) => {
@@ -280,13 +273,7 @@ class Details extends Component {
             const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
             promisedApi
                 .then((api) => {
-                    const messages = defineMessages({
-                        successMessage: {
-                            id: 'Apis.Details.index.update.success',
-                            defaultMessage: '{apiName} updated successfully.',
-                        },
-                    });
-                    Alert.info(intl.formatMessage(messages.successMessage, { apiName: `${api.name}` }));
+                    Alert.info(`${api.name} updated successfully.`);
                     this.setState({ api });
                 })
                 .catch((error) => {
@@ -356,10 +343,10 @@ class Details extends Component {
             });
             const resourceNotFountMessage = {
                 title: (intl.formatMessage(
-                    resourceNotFoundMessageText.title,
+                    resourceNotFoundMessageText.titleMessage,
                     { environmentLabel: `${Utils.getCurrentEnvironment().label}` },
                 )),
-                body: intl.formatMessage(resourceNotFoundMessageText.body, { apiUUID: `${apiUUID}` }),
+                body: intl.formatMessage(resourceNotFoundMessageText.bodyMessage, { apiUUID: `${apiUUID}` }),
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
