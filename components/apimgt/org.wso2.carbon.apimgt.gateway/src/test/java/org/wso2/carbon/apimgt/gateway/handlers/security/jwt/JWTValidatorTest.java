@@ -79,7 +79,6 @@ public class JWTValidatorTest {
                         "          \"scope\": \"am_application_scope default\",\n" +
                         "          \"consumerKey\": \"U6Sjm1pawuc6K0mx5Hc9je5PTN8a\",\n" +
                         "          \"exp\": 1563032691,\n" +
-                        "          \"grantType\": \"client_credentials\",\n" +
                         "          \"iat\": 1563029091,\n" +
                         "          \"jti\": \"3f31a2db-39f9-4a00-a314-f548c8e657e2\"\n" +
                         "        }"

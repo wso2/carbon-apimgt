@@ -1485,6 +1485,7 @@ public final class APIConstants {
         public static final String ISSUED_TIME = "iat";
         public static final String EXPIRED_TIME = "exp";
         public static final String SIGNATURE_ALGORITHM = "alg";
+        public static final String AM_APPLICATION_SCOPE = "am_application_scope";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

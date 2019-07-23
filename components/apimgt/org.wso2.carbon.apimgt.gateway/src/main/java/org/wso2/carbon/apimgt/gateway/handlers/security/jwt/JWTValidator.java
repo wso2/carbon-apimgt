@@ -179,7 +179,7 @@ public class JWTValidator {
                     }
                 }
                 checkTokenExpiration(tokenSignature, payload, tenantDomain);
-                validateTokenGrantType(payload.getString("grantType"), authenticationScheme);
+                validateTokenGrantType(payload, authenticationScheme);
                 validateScopes(synCtx, swagger, payload);
 
                 if (isGatewayTokenCacheEnabled) {
@@ -364,26 +364,43 @@ public class JWTValidator {
     /**
      * Validate the JWT token grant type against the resource authentication scheme.
      *
-     * @param grantType            The JWT token grant type
+     * @param payload              The payload of the JWT token
      * @param authenticationScheme The resource authentication scheme of the invoked API resource
      * @throws APISecurityException in case of token grant type validation failure
      */
-    private void validateTokenGrantType(String grantType, String authenticationScheme) throws APISecurityException {
-        if ((APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS.equals(grantType) &&
-                APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authenticationScheme)) ||
-                (!APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS.equals(grantType) &&
-                        APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authenticationScheme))) {
-            // 1) tokens of client credentials grant type are not allowed to access when
-            // the resource authentication is set to Application User only
-            // 2) tokens of grant types other than client credentials are not allowed to access when
-            // the resource authentication is set to Application only
-            if (log.isDebugEnabled()) {
-                log.debug("Token grant type(" + grantType + ") does not allow to access the resource.");
+    private void validateTokenGrantType(JSONObject payload, String authenticationScheme) throws APISecurityException {
+        if (payload.getString(APIConstants.JwtTokenConstants.SCOPE) != null) {
+            String[] tokenScopes = payload.getString(APIConstants.JwtTokenConstants.SCOPE)
+                    .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
+            boolean isClientGrantType = false;
+
+            for (String scope : tokenScopes) {
+                // If "am_application_scope" scope contains, the token is of client_credentials grant type
+                if (APIConstants.JwtTokenConstants.AM_APPLICATION_SCOPE.equals(scope)) {
+                    isClientGrantType = true;
+                    log.debug("Client_credentials grant type token.");
+                    break;
+                }
             }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE,
-                    APISecurityConstants.getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE));
+
+            if ((isClientGrantType && APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authenticationScheme)) ||
+                    (!isClientGrantType && APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authenticationScheme))) {
+                // 1) tokens of client credentials grant type are not allowed to access when
+                // the resource authentication is set to Application User only
+                // 2) tokens of grant types other than client credentials are not allowed to access when
+                // the resource authentication is set to Application only
+                if (log.isDebugEnabled()) {
+                    log.debug("Token grant type does not allow to access the resource, " +
+                            "User: " + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
+                }
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE,
+                        APISecurityConstants.getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE));
+            }
+            log.debug("Token grant type validation passed, " +
+                    "User:" + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
         }
-        log.debug("Token grant type validation passed.");
+        log.debug("No scopes found in the token. Grant type validation cannot be performed, " +
+                "User: " + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
     }
 
     /**
