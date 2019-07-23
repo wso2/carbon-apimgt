@@ -23,13 +23,12 @@ import {
     withStyles,
     Radio,
     FormControlLabel,
-    RadioGroup, Button, Icon, Dialog, DialogTitle, DialogContent,
+    RadioGroup, Icon, Dialog, DialogTitle, DialogContent, IconButton,
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
 import EndpointListing from './EndpointListing';
-import EndpointAdd from './EndpointAdd';
 import { getEndpointTemplateByType, getEndpointTypeProperty } from './endpointUtils';
 import GeneralConfiguration from './GeneralConfiguration';
 import GenericEndpoint from './GenericEndpoint';
@@ -47,6 +46,7 @@ const styles = theme => ({
     },
     endpointContainer: {
         paddingBottom: theme.spacing.unit,
+        paddingTop: theme.spacing.unit,
         width: '100%',
         marginTop: theme.spacing.unit,
     },
@@ -68,7 +68,13 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
     },
-    endpointsWrapper: {
+    endpointsWrapperLeft: {
+        padding: theme.spacing.unit,
+        borderRight: '#c4c4c4',
+        borderRightStyle: 'solid',
+        borderRightWidth: 'thin',
+    },
+    endpointsWrapperRight: {
         padding: theme.spacing.unit,
     },
     endpointsTypeSelectWrapper: {
@@ -85,6 +91,9 @@ const styles = theme => ({
         paddingLeft: theme.spacing.unit,
         paddingRight: theme.spacing.unit,
         marginRight: theme.spacing.unit,
+    },
+    loadbalanceHeader: {
+        fontWeight: '600',
     },
 });
 
@@ -110,6 +119,15 @@ function EndpointOverview(props) {
 
     const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
         { key: 'address', value: 'HTTP/SOAP Endpoint' }];
+
+    /**
+     * Method to get the type of the endpoint. (HTTP/REST or HTTP/SOAP)
+     * In failover/ loadbalance cases, the endpoint type is presented in the endpoints list. Therefore that property
+     * needs to be extracted separately.
+     *
+     * @param {string} type  The representative type of the endpoint.
+     * @return {string} The type of the endpoint.
+     * */
     const getEndpointType = (type) => {
         if (type === 'http') {
             return endpointTypes[0];
@@ -138,14 +156,19 @@ function EndpointOverview(props) {
     }, [endpointSecurityInfo]);
 
     useEffect(() => {
-        console.log('newConfig', epConfig);
         onChangeAPI({ ...api, endpointConfig: epConfig });
     }, [epConfig]);
 
     useEffect(() => {
-
     }, [isSOAPEndpoint]);
 
+    /**
+     * Method to modify the endpoint represented by the given parameters.
+     *
+     * @param {number} index The index of the endpoint in the listing.
+     * @param {string} category The endpoint category. (production/ sand box)
+     * @param {string} url The new endpoint url.
+     * */
     const editEndpoint = (index, category, url) => {
         let modifiedEndpoint = null;
         const endpointTypeProperty = getEndpointTypeProperty(epConfig.endpoint_type, category);
@@ -167,6 +190,13 @@ function EndpointOverview(props) {
         setEpConfig({ ...epConfig, [endpointTypeProperty]: modifiedEndpoint });
     };
 
+    /**
+     * Method to add new loadbalance/ failover endpoint to the existing endpoints.
+     *
+     * @param {string} category The endpoint category (production/ sandbox)
+     * @param {string} type The endpoint type. (load_balance/ failover)
+     * @param {string} newURL The url of the new endpoint.
+     * */
     const addEndpoint = (category, type, newURL) => {
         let endpointTemplate = {};
         if (isSOAPEndpoint.key === 'address' || type === 'failover') {
@@ -198,7 +228,8 @@ function EndpointOverview(props) {
     };
 
     /**
-     * Loadbalance/ failover
+     * Method to capture the endpoint category change.
+     * @param {any} event The html element change event.
      * */
     const onChangeEndpointCategory = (event) => {
         const tmpEndpointConfig = getEndpointTemplateByType(
@@ -210,7 +241,8 @@ function EndpointOverview(props) {
     };
 
     /**
-     * http / address
+     * Handles the endpoint type select event.
+     * @param {any} event The select event.
      * */
     const handleEndpointTypeSelect = (event) => {
         const selectedKey = event.target.value;
@@ -249,6 +281,9 @@ function EndpointOverview(props) {
         setSOAPEndpoint(selectedType);
     };
 
+    /**
+     * Handles the endpoint security toggle action.
+     * */
     const handleToggleEndpointSecurity = () => {
         setEndpointSecurityInfo(() => {
             if (endpointSecurityInfo === null) {
@@ -258,6 +293,13 @@ function EndpointOverview(props) {
         });
     };
 
+    /**
+     * Method to get the advance configuration from the selected endpoint.
+     * @param {number} index The selected endpoint index
+     * @param {string} epType The type of the endpoint. (loadbalance/ failover)
+     * @param {string} category The endpoint category (Production/ sandbox)
+     * @return {object} The advance config object of the endpoint.
+     * */
     const getAdvanceConfig = (index, epType, category) => {
         const endpointTypeProperty = getEndpointTypeProperty(epType, category);
         let advanceConfig = {};
@@ -278,10 +320,16 @@ function EndpointOverview(props) {
         return advanceConfig;
     };
 
+    /**
+     * Method to open/ close the advance configuration dialog. This method also sets some information about the
+     * seleted endpoint type/ category and index.
+     *
+     * @param {number} index The index of the selected endpoint.
+     * @param {string} type The endpoint type
+     * @param {string} category The endpoint category.
+     * */
     const toggleAdvanceConfig = (index, type, category) => {
-        console.log('Advance Config open');
         const advanceEPConfig = getAdvanceConfig(index, type, category);
-        console.log(advanceEPConfig);
         setAdvancedConfigOptions(() => {
             return ({
                 open: !advanceConfigOptions.open,
@@ -293,11 +341,23 @@ function EndpointOverview(props) {
         });
     };
 
+    /**
+     * Method to handle the loadbalance configuration changes.
+     *
+     * @param {object} lbConfig The modified loadbalance configuration.
+     * */
     const handleLBConfigChange = (lbConfig) => {
-        console.log({ ...epConfig, ...lbConfig });
         setEpConfig({ ...epConfig, ...lbConfig });
         setLBConfigOpen(false);
     };
+
+    /**
+     * Method to remove the selected endpoint from the endpoints list.
+     *
+     * @param {number} index The selected endpoint index
+     * @param {string} epType The type of the endpoint. (loadbalance/ failover)
+     * @param {string} category The endpoint category (production/ sandbox)
+     * */
     const removeEndpoint = (index, epType, category) => {
         const endpointConfigProperty = getEndpointTypeProperty(epType, category);
         const indexToRemove = epType === 'failover' ? index - 1 : index;
@@ -306,13 +366,21 @@ function EndpointOverview(props) {
         setEpConfig({ ...epConfig, [endpointConfigProperty]: tmpEndpoints });
     };
 
+    /**
+     * Method to handle the endpoint security changes.
+     * @param {any} event The html event
+     * @param {string} field The security propety that is being modified.
+     * */
     const handleEndpointSecurityChange = (event, field) => {
         setEndpointSecurityInfo({ ...endpointSecurityInfo, [field]: event.target.value });
     };
 
+    /**
+     * Method to save the advance configurations.
+     *
+     * @param {object} advanceConfig The advance configuration object.
+     * */
     const saveAdvanceConfig = (advanceConfig) => {
-        console.log(advanceConfigOptions);
-        console.log(advanceConfig);
         const endpointConfigProperty =
             getEndpointTypeProperty(advanceConfigOptions.type, advanceConfigOptions.category);
         const endpoints = epConfig[endpointConfigProperty];
@@ -325,10 +393,12 @@ function EndpointOverview(props) {
         } else {
             endpoints.config = advanceConfig;
         }
-        console.log(endpoints);
         setEpConfig({ ...epConfig, [endpointConfigProperty]: endpoints });
     };
 
+    /**
+     * Method to close the advance configuration dialog box.
+     * */
     const closeAdvanceConfig = () => {
         setAdvancedConfigOptions({ open: false });
     };
@@ -346,7 +416,7 @@ function EndpointOverview(props) {
             />
             <Paper className={classes.endpointContainer}>
                 <Grid container xs spacing={2}>
-                    <Grid xs className={classes.endpointsWrapper}>
+                    <Grid xs className={classes.endpointsWrapperLeft}>
                         <Typography className={classes.endpointName}>
                             <FormattedMessage
                                 id='Apis.Details.EndpointsNew.EndpointOverview.production'
@@ -364,7 +434,7 @@ function EndpointOverview(props) {
                             setAdvancedConfigOpen={toggleAdvanceConfig}
                         />
                     </Grid>
-                    <Grid xs className={classes.endpointsWrapper}>
+                    <Grid xs className={classes.endpointsWrapperRight}>
                         <div className={classes.sandboxHeading}>
                             <Typography className={classes.endpointName}>
                                 <FormattedMessage
@@ -408,27 +478,26 @@ function EndpointOverview(props) {
                                 />
                             </RadioGroup>
                         </FormControl>
-                        <div className={classes.loadbalanceBtnContainer}>
-                            <Button
+                        <div>
+                            <IconButton
                                 disabled={epConfig.endpoint_type !== 'load_balance'}
+                                aria-label='Delete'
                                 onClick={() => setLBConfigOpen(true)}
-                                className={classes.loadBalanceConfigButton}
                             >
                                 <Icon>
                                     settings
                                 </Icon>
-                            </Button>
+                            </IconButton>
                         </div>
                     </div>
                     <div />
                 </Grid>
                 <Grid xs container>
-                    <Grid xs={6} className={classes.endpointsWrapper}>
+                    <Grid xs className={classes.endpointsWrapperLeft}>
                         <EndpointListing
                             apiEndpoints={epConfig.production_endpoints}
                             failOvers={epConfig.production_failovers}
                             epType={epConfig.endpoint_type}
-                            endpointAddComponent={<EndpointAdd />}
                             addNewEndpoint={addEndpoint}
                             removeEndpoint={removeEndpoint}
                             editEndpoint={editEndpoint}
@@ -436,12 +505,11 @@ function EndpointOverview(props) {
                             category='production_endpoints'
                         />
                     </Grid>
-                    <Grid xs className={classes.endpointsWrapper}>
+                    <Grid xs className={classes.endpointsWrapperRight}>
                         <EndpointListing
                             apiEndpoints={epConfig.sandbox_endpoints}
                             failOvers={epConfig.sandbox_failovers}
                             epType={epConfig.endpoint_type}
-                            endpointAddComponent={<EndpointAdd />}
                             addNewEndpoint={addEndpoint}
                             removeEndpoint={removeEndpoint}
                             editEndpoint={editEndpoint}
@@ -453,7 +521,7 @@ function EndpointOverview(props) {
             </Paper>
             <Dialog open={isLBConfigOpen}>
                 <DialogTitle>
-                    <Typography varient='h4'>
+                    <Typography className={classes.loadbalanceHeader}>
                         <FormattedMessage
                             id='Apis.Details.EndpointsNew.EndpointOverview.load.balance.configuration.title'
                             defaultMessage='Load Balance Configuration'

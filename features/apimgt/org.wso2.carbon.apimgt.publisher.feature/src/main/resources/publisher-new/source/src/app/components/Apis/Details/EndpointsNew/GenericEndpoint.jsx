@@ -28,13 +28,6 @@ const styles = theme => ({
     textField: {
         width: '100%',
     },
-    endpointEditBtnWrapper: {
-        display: 'flex',
-    },
-    root: {
-        width: '80%',
-        margin: '2px 0 2px 0',
-    },
     input: {
         marginLeft: theme.spacing.unit,
         flex: 1,
@@ -83,15 +76,9 @@ function GenericEndpoint(props) {
                 InputProps={{
                     endAdornment: (
                         <InputAdornment position='end'>
-                            <IconButton color='green' className={classes.iconButton} aria-label='Search'>
-                                <Icon>
-                                    check_circle
-                                </Icon>
-                            </IconButton>
-                            <Divider className={classes.divider} />
                             <IconButton
                                 className={classes.iconButton}
-                                aria-label='Search'
+                                aria-label='Settings'
                                 onClick={() => setAdvancedConfigOpen(index, type, category)}
                             >
                                 <Icon>
@@ -102,7 +89,7 @@ function GenericEndpoint(props) {
                             {(type === 'load_balance' || type === 'failover') ? (
                                 <IconButton
                                     className={classes.iconButton}
-                                    aria-label='Directions'
+                                    aria-label='Delete'
                                     onClick={() => deleteEndpoint(index, type, category)}
                                 >
                                     <Icon>

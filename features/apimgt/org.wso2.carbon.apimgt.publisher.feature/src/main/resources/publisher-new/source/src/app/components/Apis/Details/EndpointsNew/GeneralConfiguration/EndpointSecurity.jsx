@@ -31,12 +31,13 @@ const styles = theme => ({
     credentialsContainer: {
         display: 'flex',
         justifyContent: 'space-between',
+        marginTop: theme.spacing.unit * 2,
     },
     textField: {
         marginLeft: theme.spacing.unit,
     },
     advancedConfigWrapper: {
-        width: '50%',
+        width: '75%',
     },
 });
 
@@ -75,7 +76,6 @@ function EndpointSecurity(props) {
         }];
 
     useEffect(() => {
-        console.log('Use Effect security info', securityInfo);
         setEndpointSecurityInfo(securityInfo !== null ? securityInfo : endpointSecurityInfo);
     }, [props]);
 
@@ -112,8 +112,6 @@ function EndpointSecurity(props) {
                             id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.user.name.input'
                             defaultMessage='User Name'
                         />}
-                        className={classes.textField}
-                        margin='normal'
                         onChange={
                             event => setEndpointSecurityInfo({ ...endpointSecurityInfo, username: event.target.value })}
                         value={endpointSecurityInfo.username}
@@ -127,8 +125,6 @@ function EndpointSecurity(props) {
                             id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.password.input'
                             defaultMessage='Password'
                         />}
-                        className={classes.textField}
-                        margin='normal'
                         value={endpointSecurityInfo.password}
                         onChange={
                             event => setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value })}

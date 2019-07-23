@@ -28,24 +28,12 @@ const styles = theme => ({
     textField: {
         width: '100%',
     },
-    endpointEditBtnWrapper: {
-        display: 'flex',
-    },
-    root: {
-        width: '80%',
-        margin: '2px 0 2px 0',
-    },
     input: {
-        marginLeft: 8,
+        marginLeft: theme.spacing.unit,
         flex: 1,
     },
     iconButton: {
-        padding: 10,
-    },
-    divider: {
-        width: 1,
-        height: 28,
-        margin: 4,
+        padding: theme.spacing.unit,
     },
 });
 function GenericEndpointAdd(props) {
@@ -100,6 +88,7 @@ function GenericEndpointAdd(props) {
 
 GenericEndpointAdd.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    addEndpoint: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(GenericEndpointAdd);

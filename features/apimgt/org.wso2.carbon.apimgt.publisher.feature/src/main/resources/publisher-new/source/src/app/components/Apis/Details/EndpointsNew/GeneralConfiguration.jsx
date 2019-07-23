@@ -43,10 +43,6 @@ import Certificates from './GeneralConfiguration/Certificates';
 import LoadBalanceConfig from './LoadBalanceConfig';
 
 const styles = theme => ({
-    radioGroup: {
-        display: 'flex',
-        flexDirection: 'column',
-    },
     endpointTypeSelect: {
         width: '50%',
     },
@@ -62,20 +58,9 @@ const styles = theme => ({
         fontSize: theme.typography.pxToRem(15),
         flexBasis: '33.33%',
         flexShrink: 0,
+        fontWeight: '900',
     },
     endpointConfigSection: {
-        padding: '10px',
-    },
-    loadBalanceConfigButton: {
-        position: 'absolute',
-        top: '40%',
-    },
-    loadbalanceBtnContainer: {
-        position: 'relative',
-        height: '100%',
-    },
-    endpointTypesSelectWrapper: {
-        display: 'flex',
         padding: '10px',
     },
 });

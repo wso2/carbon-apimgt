@@ -41,7 +41,7 @@ const defaultTemplateObj = {
 };
 
 const styles = theme => ({
-    confingButtonContainer: {
+    configButtonContainer: {
         display: 'flex',
         justifyContent: 'flex-end',
     },
@@ -66,7 +66,6 @@ function LoadBalanceConfig(props) {
     const [algoClassNameError, setAlgoClassNameError] = useState(false);
 
     useEffect(() => {
-        console.log('Use effect lb config');
         setLbConfigObject(() => {
             const tmpLBConfig = { ...defaultTemplateObj };
             if (algoCombo) {
@@ -107,7 +106,6 @@ function LoadBalanceConfig(props) {
     };
 
     const submitConfiguration = () => {
-        console.log(lbConfig);
         handleLBConfigChange(lbConfig);
     };
 
@@ -178,7 +176,7 @@ function LoadBalanceConfig(props) {
                     margin='normal'
                 />
             </Grid>
-            <Grid className={classes.confingButtonContainer}>
+            <Grid className={classes.configButtonContainer}>
                 <Button color='primary' onClick={closeLBConfigDialog}>
                     <FormattedMessage
                         id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.cancel.button'
@@ -204,6 +202,12 @@ function LoadBalanceConfig(props) {
 LoadBalanceConfig.propTypes = {
     api: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    algoClassName: PropTypes.string.isRequired,
+    algoCombo: PropTypes.string.isRequired,
+    sessionManagement: PropTypes.string.isRequired,
+    sessionTimeOut: PropTypes.string.isRequired,
+    handleLBConfigChange: PropTypes.func.isRequired,
+    closeLBConfigDialog: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(LoadBalanceConfig));

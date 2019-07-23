@@ -31,12 +31,12 @@ import {
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
+const itemHeight = 48;
+const itemPaddingTop = 8;
 const MenuProps = {
     PaperProps: {
         style: {
-            maxHeight: (ITEM_HEIGHT * 4.5) + ITEM_PADDING_TOP, width: 250,
+            maxHeight: (itemHeight * 4.5) + itemPaddingTop, width: 250,
         },
     },
 };
@@ -260,14 +260,14 @@ function AdvanceEndpointConfig(props) {
                 <Grid item container className={classes.configSubContainer}>
                     <Typography className={classes.subTitle}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.message.content'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.message.content'
                             defaultMessage='Message Content'
                         />
                     </Typography>
                     <FormControl className={classes.formControl}>
                         <InputLabel htmlFor='err-code-select'>
                             <FormattedMessage
-                                id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.format.select'
+                                id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.format.select'
                                 defaultMessage='Format'
                             />
                         </InputLabel>
@@ -288,7 +288,7 @@ function AdvanceEndpointConfig(props) {
                     <FormControl className={classes.formControl}>
                         <InputLabel htmlFor='err-code-select'>
                             <FormattedMessage
-                                id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.optimize.select'
+                                id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.optimize.select'
                                 defaultMessage='Optimize'
                             />
                         </InputLabel>
@@ -316,7 +316,7 @@ function AdvanceEndpointConfig(props) {
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.error.code'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.error.code'
                             defaultMessage='Error Code'
                         />
                     </InputLabel>
@@ -342,7 +342,7 @@ function AdvanceEndpointConfig(props) {
                     onChange={event => handleConfigFieldChange(event, 'suspendDuration')}
                     label={
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.initial.duration.ms'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.initial.duration.ms'
                             defaultMessage='Initial Duration (ms)'
                         />
                     }
@@ -356,7 +356,7 @@ function AdvanceEndpointConfig(props) {
                     onChange={event => handleConfigFieldChange(event, 'suspendMaxDuration')}
                     label={
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.max.duration.ms'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.max.duration.ms'
                             defaultMessage='Max Duration (ms)'
                         />
                     }
@@ -370,7 +370,7 @@ function AdvanceEndpointConfig(props) {
                     id='factor-input'
                     label={
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.factor'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.factor'
                             defaultMessage='Factor'
                         />
                     }
@@ -381,14 +381,14 @@ function AdvanceEndpointConfig(props) {
             <Grid item container className={classes.configSubContainer}>
                 <Typography className={classes.subTitle}>
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.endpoint.timeout.state'
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.endpoint.timeout.state'
                         defaultMessage='Endpoint Timeout State'
                     />
                 </Typography>
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.error.code'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.error.code'
                             defaultMessage='Error Code'
                         />
                     </InputLabel>
@@ -412,11 +412,10 @@ function AdvanceEndpointConfig(props) {
                     id='retries-input'
                     value={advanceConfigObj.retryTimeOut}
                     onChange={event => handleConfigFieldChange(event, 'retryTimeOut')}
-                    label={
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.retries.before.suspension'
-                            defaultMessage='Retries Before Suspension'
-                        />
+                    label={<FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.retries.before.suspension'
+                        defaultMessage='Retries Before Suspension'
+                    />
                     }
                     type='number'
                     margin='normal'
@@ -427,7 +426,7 @@ function AdvanceEndpointConfig(props) {
                     value={advanceConfigObj.retryDelay}
                     onChange={event => handleConfigFieldChange(event, 'retryDelay')}
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.retry.delay.ms'
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.retry.delay.ms'
                         defaultMessage='Retry Delay (ms)'
                     />}
                     type='number'
@@ -442,7 +441,7 @@ function AdvanceEndpointConfig(props) {
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.action'
+                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.action'
                             defaultMessage='Action'
                         />
                     </InputLabel>
@@ -466,7 +465,7 @@ function AdvanceEndpointConfig(props) {
                     value={advanceConfigObj.actionDuration}
                     onChange={event => handleConfigFieldChange(event, 'actionDuration')}
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.duration.ms'
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.duration.ms'
                         defaultMessage='Duration (ms)'
                     />}
                     type='number'
@@ -476,13 +475,13 @@ function AdvanceEndpointConfig(props) {
             <Grid>
                 <Button onClick={onCancel} color='primary'>
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.cancel.button'
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.cancel.button'
                         defaultMessage='Close'
                     />
                 </Button>
                 <Button onClick={() => onSaveAdvanceConfig(advanceConfigObj)} color='primary' autoFocus>
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.SuspendTimeoutConfig.config.save.button'
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.config.save.button'
                         defaultMessage='Save'
                     />
                 </Button>

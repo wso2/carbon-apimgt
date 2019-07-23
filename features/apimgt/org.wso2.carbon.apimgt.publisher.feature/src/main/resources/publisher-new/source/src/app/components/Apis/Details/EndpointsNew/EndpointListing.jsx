@@ -28,11 +28,6 @@ const styles = theme => ({
     epInput: {
         width: '100%',
     },
-    listingWrapper: {
-        paddingLeft: theme.spacing.unit,
-        paddingRight: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
-    },
     epTypeWrapper: {
         display: 'flex',
         padding: '5px',
@@ -93,20 +88,17 @@ function EndpointListing(props) {
         setAdvancedConfigOpen,
     } = props;
     const [endpointType, setEndpointType] = useState(epType);
-    const [endpoints, setEndpoints] = useState([{ url: 'http://myservice/' }]);
+    const [endpoints, setEndpoints] = useState([{ url: 'http://myservice/endpoint' }]);
     const selectedRef = useRef(null);
 
     const addEndpoint = (url) => {
-        console.log('Add endpoint url');
         addNewEndpoint(category, epType, url);
     };
 
     useEffect(() => {
-
     }, [endpoints]);
 
     useEffect(() => {
-        console.log('Endpoint Listing: ', apiEndpoints, failOvers);
         setEndpointType(epType);
         setEndpoints(() => {
             if (apiEndpoints !== null && epType === 'failover') {

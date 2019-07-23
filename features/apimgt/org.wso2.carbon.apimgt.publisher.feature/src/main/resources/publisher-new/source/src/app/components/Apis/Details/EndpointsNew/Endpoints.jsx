@@ -41,11 +41,6 @@ const styles = theme => ({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    endpointContent: {
-        margin: theme.spacing.unit * 2,
-        display: 'flex',
-        flexDirection: 'row',
-    },
     buttonSection: {
         marginTop: theme.spacing.unit * 2,
     },
@@ -60,12 +55,8 @@ function Endpoints(props) {
     const { classes } = props;
     const [modifiedAPI, setModifiedAPI] = useState({});
 
-    console.log('ModifiedAPI: =========== ', modifiedAPI);
-
     const saveAPI = (oldAPI, updateFunc) => {
-        console.log('Save endpoint');
         if (modifiedAPI !== {}) {
-            console.log(modifiedAPI !== {});
             updateFunc(modifiedAPI);
         }
     };
