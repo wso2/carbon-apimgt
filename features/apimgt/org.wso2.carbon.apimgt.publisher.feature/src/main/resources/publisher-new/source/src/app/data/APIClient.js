@@ -134,6 +134,7 @@ class APIClient {
 
     _getRequestInterceptor() {
         return (request) => {
+            // todo: sync token checking logic
             const existingUser = AuthManager.getUser(this.environment.label);
             if (!existingUser) {
                 console.log('User not found. Token refreshing failed.');

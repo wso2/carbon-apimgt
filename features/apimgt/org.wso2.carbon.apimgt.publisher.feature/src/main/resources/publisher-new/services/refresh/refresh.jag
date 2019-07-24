@@ -44,9 +44,6 @@
     var tokenEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
 
-    new Log().info(tokenRequestData);
-    new Log().info(result.xhr.status);
-    new Log().info(result);
     if (result.xhr.status === 200) {
         response.contentType = "application/json";
         var tokenResponse = JSON.parse(result.data);
