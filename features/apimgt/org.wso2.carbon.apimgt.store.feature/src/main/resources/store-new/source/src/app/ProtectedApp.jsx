@@ -26,7 +26,7 @@ import { Apis, Applications, Base } from './components';
 import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreateForm';
 import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
 import AuthManager from './data/AuthManager';
-import ApplicationEdit from './components/Applications/Edit/ApplicationEdit';
+import EditApp from './components/Applications/Edit/EditApp';
 import Loading from './components/Base/Loading/Loading';
 // import 'typeface-roboto'
 import Utils from './data/Utils';
@@ -244,7 +244,7 @@ export default class ProtectedApp extends Component {
                                     />
                                     <Route
                                         path='/application/edit/:application_id'
-                                        component={ApplicationEdit}
+                                        component={EditApp}
                                     />
                                 </React.Fragment>
                             ) : [isUserFound ? (

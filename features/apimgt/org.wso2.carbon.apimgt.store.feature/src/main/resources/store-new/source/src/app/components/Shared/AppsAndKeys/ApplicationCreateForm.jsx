@@ -96,6 +96,7 @@ const ApplicationCreate = (props) => {
         allAppAttributes,
         handleAttributesChange,
         isRequiredAttribute,
+        getAttributeValue,
         intl,
     } = props;
     return (
@@ -105,6 +106,7 @@ const ApplicationCreate = (props) => {
                     <FormControl margin='normal' className={classes.FormControl}>
                         <TextField
                             required
+                            value={applicationRequest.name}
                             label={intl.formatMessage({
                                 defaultMessage: 'Application Name',
                                 id: 'Shared.AppsAndKeys.ApplicationCreateForm.application.name',
@@ -162,6 +164,7 @@ const ApplicationCreate = (props) => {
                     <FormControl margin='normal' className={classes.FormControl}>
                         <TextField
                             label='Application Description'
+                            value={applicationRequest.description}
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -194,6 +197,7 @@ const ApplicationCreate = (props) => {
                                     <TextField
                                         required={isRequiredAttribute(item[1].attribute)}
                                         label={item[1].attribute}
+                                        value={getAttributeValue(item[1].attribute)}
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
