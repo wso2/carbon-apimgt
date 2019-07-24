@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
     Button,
     Collapse,
@@ -68,6 +68,12 @@ const styles = theme => ({
 const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
     { key: 'address', value: 'HTTP/SOAP Endpoint' }];
 
+/**
+ * The component which holds the general configurations of the endpoints.
+ *
+ * @param {any} props The input properties to the component
+ * @returns {any} The HTML representation of the component.
+ * */
 function GeneralConfiguration(props) {
     const {
         epConfig,
@@ -80,9 +86,6 @@ function GeneralConfiguration(props) {
     } = props;
     const [isConfigExpanded, setConfigExpand] = useState(true);
     const [isLBConfigOpen, setLBConfigOpen] = useState(false);
-
-    useEffect(() => {
-    });
 
     return (
         <div>

@@ -41,6 +41,13 @@ const styles = theme => ({
         margin: 4,
     },
 });
+/**
+ * This component represents a single endpoint view of the endpoints listing. This component holds the actions that
+ * affect the endpont. Eg: Delete, advance configuration.
+ *
+ * @param {any} props The input props
+ * @returns {any} The HTML representation of the component.
+ * */
 function GenericEndpoint(props) {
     const {
         category,
@@ -56,7 +63,7 @@ function GenericEndpoint(props) {
 
     useEffect(() => {
         setServiceUrl(endpointURL);
-    }, [props]);
+    }, [endpointURL]);
     return (
         <div className={classes.endpointInputWrapper}>
             <TextField

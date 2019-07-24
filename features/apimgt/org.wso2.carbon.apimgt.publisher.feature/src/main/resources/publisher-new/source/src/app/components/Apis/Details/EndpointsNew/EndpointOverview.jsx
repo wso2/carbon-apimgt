@@ -143,11 +143,7 @@ function EndpointOverview(props) {
     };
     useEffect(() => {
         setEpConfig(endpointConfig);
-    }, []);
-    useEffect(() => {
         setEndpointType(getEndpointType(endpointConfig.endpoint_type));
-    }, []);
-    useEffect(() => {
         setEndpointSecurityInfo(endpointSecurity);
     }, []);
 
@@ -198,7 +194,6 @@ function EndpointOverview(props) {
      * @param {string} newURL The url of the new endpoint.
      * */
     const addEndpoint = (category, type, newURL) => {
-        console.log(category, type, newURL);
         let endpointTemplate = {};
         if (endpointType.key === 'address' || type === 'failover') {
             endpointTemplate = {

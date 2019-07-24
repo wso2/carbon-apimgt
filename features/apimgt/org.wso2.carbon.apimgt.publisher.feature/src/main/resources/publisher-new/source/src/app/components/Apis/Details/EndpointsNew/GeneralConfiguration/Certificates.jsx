@@ -118,6 +118,9 @@ function Certificates(props) {
         setEndpoint('');
     };
 
+    /**
+     * Method to upload the certificate content by calling the rest api.
+     * */
     const saveCertificate = () => {
         // TODO: Call backend api and upload certificate.
         // TODO: Based on the response, display message.
@@ -127,13 +130,14 @@ function Certificates(props) {
             cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
             color: '#dca80a',
         });
-        console.log(certificateList);
         setCertificateList(certificateList);
         closeCertificateUpload();
     };
 
     /**
      * Delete endpoint certificate represented by the alias.
+     *
+     * @param {string} certificateAlias The alias of the certificate that is needed to be deleted.
      * */
     const deleteCertificate = (certificateAlias) => {
         setCertificateList(() => {
@@ -143,6 +147,11 @@ function Certificates(props) {
         });
     };
 
+    /**
+     * Handled the file upload action of the dropzone.
+     *
+     * @param {array} file The accepted file list by the dropzone.
+     * */
     const onDrop = (file) => {
         const certificateFile = file[0];
         let encodedContent = '';
@@ -155,6 +164,7 @@ function Certificates(props) {
             reader.readAsBinaryString(certificateFile);
         }
     };
+
     return (
         <Grid container direction='column'>
             {/* TODO: Add list of existing certificates */}

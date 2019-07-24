@@ -85,6 +85,11 @@ function LoadBalanceConfig(props) {
         });
     }, [props]);
 
+    /**
+     * Method to capture the alogrithm select changes.
+     *
+     * @param {any} event The event triggered by the element.
+     * */
     const handleAlgorithmChange = (event) => {
         const { value } = event.target;
         setLbConfigObject({
@@ -94,18 +99,19 @@ function LoadBalanceConfig(props) {
         });
     };
 
-    const handleSessionMgtChange = (event) => {
-        setLbConfigObject({ ...lbConfig, sessionManagement: event.target.value });
+    /**
+     * Method to capture the onChange event of the elements.
+     *
+     * @param {any} event The event triggered by the element.
+     * @param {string} field The respective field which is being changed.
+     * */
+    const handleFieldChange = (event, field) => {
+        setLbConfigObject({ ...lbConfig, [field]: event.target.value });
     };
 
-    const handleTimeoutChange = (event) => {
-        setLbConfigObject({ ...lbConfig, sessionTimeOut: event.target.value });
-    };
-
-    const customAlogrithmChange = (event) => {
-        setLbConfigObject({ ...lbConfig, algoClassName: event.target.value });
-    };
-
+    /**
+     * Method to set the configuration changes to the original endpoints config object.
+     * */
     const submitConfiguration = () => {
         handleLBConfigChange(lbConfig);
     };
@@ -141,7 +147,7 @@ function LoadBalanceConfig(props) {
                         required
                         error={algoClassNameError}
                         value={lbConfig.algoClassName}
-                        onChange={customAlogrithmChange}
+                        onChange={event => handleFieldChange(event, 'algoClassName')}
                         onBlur={() => setAlgoClassNameError(lbConfig.algoClassName === '')}
                         helperText='Enter the class name of the loadbalance algorithm'
                         margin='normal'
@@ -154,7 +160,7 @@ function LoadBalanceConfig(props) {
                         defaultMessage='Session Management'
                     />}
                     value={lbConfig.sessionManagement}
-                    onChange={handleSessionMgtChange}
+                    onChange={event => handleFieldChange(event, 'sessionManagement')}
                     helperText='Please select the Session Management mechanism.'
                     margin='normal'
                 >
@@ -171,7 +177,7 @@ function LoadBalanceConfig(props) {
                         defaultMessage='Session Timeout (Millis)'
                     />}
                     value={lbConfig.sessionTimeOut}
-                    onChange={handleTimeoutChange}
+                    onChange={event => handleFieldChange(event, 'sessionTimeOut')}
                     type='number'
                     placeholder='300'
                     margin='normal'

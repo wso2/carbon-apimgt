@@ -42,6 +42,13 @@ const styles = theme => ({
         padding: theme.spacing.unit,
     },
 });
+
+/**
+ * This component represents the view and functions of endpoint add.
+ *
+ * @param {any} props The input props.
+ * @returns {any} HTML representation of the component.
+ * */
 function GenericEndpointAdd(props) {
     const {
         classes,
@@ -50,6 +57,9 @@ function GenericEndpointAdd(props) {
     const [serviceUrl, setServiceUrl] = useState('');
     const [isError, setError] = useState(false);
 
+    /**
+     * The method to handle endpoint add button click action.
+     * */
     const onAddEndpoint = () => {
         setServiceUrl('');
         addEndpoint(serviceUrl);

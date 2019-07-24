@@ -48,7 +48,7 @@ const styles = theme => ({
 });
 
 /**
- * The base layout of the endpoits view.
+ * The base component of the endpoints view.
  * @param {any} props The props passed to the layout
  * @returns {any} HTML representation.
  */

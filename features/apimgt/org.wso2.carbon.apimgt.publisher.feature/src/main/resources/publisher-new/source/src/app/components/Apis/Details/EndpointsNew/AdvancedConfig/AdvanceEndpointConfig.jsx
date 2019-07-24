@@ -100,6 +100,10 @@ function AdvanceEndpointConfig(props) {
             config.suspendMaxDuration = '';
             return config;
         });
+
+    /**
+     * The error codes definition.
+     * */
     const errorCodes = [
         {
             key: '101001',
@@ -185,6 +189,10 @@ function AdvanceEndpointConfig(props) {
                 defaultMessage: 'Response Processing Failure',
             }),
         }];
+
+    /**
+     * Supported action items.
+     * */
     const actionItems = [
         {
             key: 'fault',
@@ -202,6 +210,9 @@ function AdvanceEndpointConfig(props) {
         },
     ];
 
+    /**
+     * Message types for the address endpoint type.
+     * */
     const messageTypes = [
         { key: 'soap11', value: 'SOAP 1.1' },
         { key: 'soap12', value: 'SOAP 1.2' },
@@ -232,6 +243,9 @@ function AdvanceEndpointConfig(props) {
         },
     ];
 
+    /**
+     * Address endpoint message optimizations.
+     * */
     const optimizeOptions = [
         { key: 'SWA', value: 'SWA' },
         { key: 'MTOM', value: 'MTOM' },
@@ -253,6 +267,12 @@ function AdvanceEndpointConfig(props) {
         });
     }, [props]);
 
+    /**
+     * Method to handle the advance endpoint field change. In each change, the advance config object is getting updated.
+     *
+     * @param {any} event The HTML event triggered by the element.
+     * @param {string} field The HTML element that is being changed.
+     * */
     const handleConfigFieldChange = (event, field) => {
         const di = { ...advanceConfigObj, [field]: event.target.value };
         setAdvanceConfig(di);

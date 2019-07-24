@@ -91,12 +91,14 @@ function EndpointListing(props) {
     const [endpoints, setEndpoints] = useState([{ url: 'http://myservice/endpoint' }]);
     const selectedRef = useRef(null);
 
+    /**
+     * Method to add a new endpoint.
+     *
+     * @param {string} url The url of the endpoint that needs to be added.
+     * */
     const addEndpoint = (url) => {
         addNewEndpoint(category, epType, url);
     };
-
-    useEffect(() => {
-    }, [endpoints]);
 
     useEffect(() => {
         setEndpointType(epType);
