@@ -127,13 +127,15 @@ class ApiThumb extends React.Component {
         const details_link = '/apis/' + this.props.api.id;
         const { api, classes, theme } = this.props;
         const { imageThumbnail } = theme.custom;
-        const { name, version, context, provider } = this.props.api;
+        const {
+            name, version, context, provider,
+        } = this.props.api;
         const { rating } = this.state;
         const starColor = theme.palette.getContrastText(theme.custom.imageThumbnail.contentBackgroundColor);
         const imageWidth = theme.custom.imageThumbnail.width;
         const defaultImage = theme.custom.imageThumbnail.defaultApiImage;
         return (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.thumbWrapper}>
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={3} className={classes.thumbWrapper}>
                 <Link to={details_link} className={classes.imageWrapper}>
                     {!defaultImage && <ImageGenerator api={api} width={imageWidth} />}
                     {defaultImage && <img src={defaultImage} />}
@@ -150,7 +152,7 @@ class ApiThumb extends React.Component {
                         </Typography>
                     </Link>
                     <Typography variant='caption' gutterBottom align='left'>
-                        <FormattedMessage defaultMessage='By:' id='Apis.Listing.ApiThumb.by'  /> 
+                        <FormattedMessage defaultMessage='By:' id='Apis.Listing.ApiThumb.by' />
                         {provider}
 
                     </Typography>
