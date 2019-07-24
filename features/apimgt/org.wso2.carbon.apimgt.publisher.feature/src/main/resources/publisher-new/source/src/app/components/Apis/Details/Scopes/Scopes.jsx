@@ -93,27 +93,11 @@ class Scopes extends React.Component {
             apiScopes: null,
             apiScope: {},
             roles: [],
-            scopesList: [],
         };
         this.deleteScope = this.deleteScope.bind(this);
         this.updateScope = this.updateScope.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
         this.addScope = this.addScope.bind(this);
-        props.api.scopes.map((scope) => {
-            const aScope = [];
-            const resources = [];
-            aScope.push(scope.name);
-            aScope.push(scope.bindings.values);
-            props.api.operations.map((op) => {
-                if (op.scopes.includes(scope.name)) {
-                    resources.push(op.uritemplate + ' ' + op.httpVerb);
-                }
-                return false;
-            });
-            aScope.push(resources);
-            this.state.scopesList.push(aScope);
-            return false;
-        });
     }
 
     /**
@@ -296,6 +280,18 @@ class Scopes extends React.Component {
             filterType: 'multiselect',
             selectableRows: false,
         };
+        const scopesList = api.scopes.map((scope) => {
+            const aScope = [];
+            aScope.push(scope.name);
+            aScope.push(scope.bindings.values);
+            const resources = api.operations.filter((op) => {
+                return op.scopes.includes(scope.name);
+            }).map((op) => {
+                return op.uritemplate + ' ' + op.httpVerb;
+            });
+            aScope.push(resources);
+            return aScope;
+        });
 
         if (!scopes) {
             return <Progress />;
@@ -363,7 +359,7 @@ class Scopes extends React.Component {
                         id: 'Apis.Details.Scopes.Scopes.table.scope.name',
                         defaultMessage: 'Scopes',
                     })}
-                    data={this.state.scopesList}
+                    data={scopesList}
                     columns={columns}
                     options={options}
                 />

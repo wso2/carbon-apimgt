@@ -237,6 +237,7 @@ class Utils {
             label: 'Default',
             host: window.location.host,
             loginTokenPath: '/login/token',
+            refreshTokenPath: '/services/refresh/refresh.jag',
         };
     }
 }

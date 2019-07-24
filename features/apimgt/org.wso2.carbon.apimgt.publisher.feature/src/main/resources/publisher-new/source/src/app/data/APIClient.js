@@ -134,14 +134,43 @@ class APIClient {
 
     _getRequestInterceptor() {
         return (request) => {
-            AuthManager.refreshTokenOnExpire(request, this.environment);
+            const existingUser = AuthManager.getUser(this.environment.label);
+            if (!existingUser) {
+                console.log('User not found. Token refreshing failed.');
+                return request;
+            }
+            const existingToken = AuthManager.getUser(this.environment.label).getPartialToken();
+            const refToken = AuthManager.getUser(this.environment.label).getRefreshPartialToken();
+            if (existingToken && (existingToken !== 'undefined')) {
+                request.headers.authorization = 'Bearer ' + existingToken;
+                return request;
+            } else {
+                console.log('Access token is expired. Trying to refresh.');
+                if (!refToken) {
+                    console.log('Refresh token not found. Token refreshing failed.');
+                    return request;
+                }
+            }
+            const promise = new Promise((resolve, reject) => {
+                AuthManager.refresh(this.environment)
+                    .then(res => res.json())
+                    .then(() => {
+                        request.headers.authorization = 'Bearer '
+                            + AuthManager.getUser(this.environment.label).getPartialToken();
+                        resolve(request);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        reject(request);
+                    });
+            });
             if (
                 APIClient.getETag(request.url) &&
                 (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')
             ) {
                 request.headers['If-Match'] = APIClient.getETag(request.url);
             }
-            return request;
+            return promise;
         };
     }
 }

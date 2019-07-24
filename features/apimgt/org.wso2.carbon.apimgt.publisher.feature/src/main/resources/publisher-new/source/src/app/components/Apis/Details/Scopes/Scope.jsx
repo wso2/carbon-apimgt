@@ -186,7 +186,7 @@ class Scope extends React.Component {
                                         })}
                                         type='text'
                                         onChange={this.handleChangeDescription}
-                                        defaultValue={this.state.apiScope.description}
+                                        defaultValue={this.state.apiScope.description} // use {api.state.apiscope}
                                     />
                                 </Col>
                                 <Col span={20}>
