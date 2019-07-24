@@ -180,10 +180,13 @@ class Credentials extends React.Component {
      * @inheritdoc
      * @memberof Credentials
      */
-    handleClickToggle = (name) => {
+    handleClickToggle = (name, updateSubscriptionData) => {
         this.setState((prevState) => {
             return { [name]: !prevState[name] };
         });
+        if (updateSubscriptionData) {
+            updateSubscriptionData();
+        }
     };
 
     /**

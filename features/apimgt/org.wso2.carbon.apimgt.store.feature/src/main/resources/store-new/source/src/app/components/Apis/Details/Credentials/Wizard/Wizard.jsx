@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -11,6 +29,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
+import { Redirect } from 'react-router-dom';
 import CreateAppStep from './CreateAppStep';
 import SubscribeToAppStep from './SubscribeToAppStep';
 import GenerateKeysStep from './GenerateKeysStep';
@@ -68,9 +87,17 @@ class Wizard extends Component {
             'Generate Keys', 'Generate Access Token', 'Copy Access Token'];
         this.state = {
             currentStep: 0,
+            nextStep: 0,
             createdApp: null,
             createdToken: null,
+            redirect: false,
         };
+    }
+
+    setCompletedStep = (completedStep) => {
+        this.setState((prevState) => {
+            return { [completedStep]: !prevState[completedStep] };
+        });
     }
 
     setCreatedApp = (createdApp) => {
@@ -81,23 +108,43 @@ class Wizard extends Component {
         this.setState({ createdToken });
     }
 
-    handleNext = () => {
-        this.setState(({ currentStep }) => {
-            return { currentStep: currentStep + 1 };
-        });
+    handleNext = (type) => {
+        switch (type) {
+            case 'current':
+                this.setState(({ currentStep }) => {
+                    return { currentStep: currentStep + 1 };
+                });
+                break;
+            case 'next':
+                this.setState(({ nextStep }) => {
+                    return { nextStep: nextStep + 1 };
+                });
+                break;
+            default:
+                break;
+        }
     }
 
     handleBack = () => {
-        this.setState(({ currentStep }) => {
-            return { currentStep: currentStep - 1 };
+        this.setState(({ nextStep }) => {
+            return { nextStep: nextStep - 1 };
         });
     }
 
     handleReset = () => {
         this.setState({
             currentStep: 0,
+            nextStep: 1,
         });
     };
+
+    /**
+     * Set state.redirect to true to redirect to the API console page
+     * @memberof Wizard
+     */
+    handleRedirectTest = () => {
+        this.setState({ redirect: true });
+    }
 
     /**
      * @inheritdoc
@@ -105,9 +152,15 @@ class Wizard extends Component {
     render() {
         const {
             classes, updateSubscriptionData, apiId, handleClickToggle,
-            throttlingPolicyList, applicationsAvailable,
+            throttlingPolicyList,
         } = this.props;
-        const { currentStep, createdApp, createdToken } = this.state;
+        const {
+            currentStep, createdApp, createdToken, redirect, nextStep,
+        } = this.state;
+
+        if (redirect) {
+            return <Redirect push to={'/apis/' + apiId + '/test'} />;
+        }
         return (
             <React.Fragment>
                 <AppBar className={classes.appBar}>
@@ -143,10 +196,10 @@ class Wizard extends Component {
                         </Stepper>
                     </div>
                     <div>
-                        {currentStep === this.steps.length ? (
+                        {nextStep === this.steps.length ? (
                             <div>
                                 <Typography className={classes.instructions}>
-                                    All steps completed - you&quot;re finished
+                                    All steps completed!
                                 </Typography>
                                 <Button
                                     onClick={this.handleReset}
@@ -158,34 +211,46 @@ class Wizard extends Component {
                         ) : (
                             <div className={classes.wizardContent}>
                                 <CreateAppStep
-                                    throttlingPolicyList={throttlingPolicyList}
                                     currentStep={currentStep}
                                     setCreatedApp={this.setCreatedApp}
+                                    nextStep={nextStep}
+                                    incrementStep={this.handleNext}
+                                    decrementStep={this.handleBack}
                                 />
                                 <SubscribeToAppStep
                                     throttlingPolicyList={throttlingPolicyList}
                                     currentStep={currentStep}
                                     createdApp={createdApp}
+                                    apiId={apiId}
+                                    nextStep={nextStep}
+                                    incrementStep={this.handleNext}
+                                    decrementStep={this.handleBack}
                                 />
-                                <GenerateKeysStep currentStep={currentStep} />
+                                <GenerateKeysStep
+                                    currentStep={currentStep}
+                                    createdApp={createdApp}
+                                    nextStep={nextStep}
+                                    incrementStep={this.handleNext}
+                                    decrementStep={this.handleBack}
+                                />
                                 <GenerateAccessTokenStep
                                     currentStep={currentStep}
                                     createdApp={createdApp}
                                     setCreatedToke={this.setCreatedToken}
+                                    nextStep={nextStep}
+                                    incrementStep={this.handleNext}
+                                    decrementStep={this.handleBack}
                                 />
                                 <CopyAccessTokenStep
                                     currentStep={currentStep}
                                     createdToken={createdToken}
+                                    handleClickToggle={handleClickToggle}
+                                    updateSubscriptionData={updateSubscriptionData}
+                                    nextStep={nextStep}
+                                    incrementStep={this.handleNext}
                                 />
+
                                 <div className={classes.wizardButtons}>
-                                    <Button
-                                        disabled={currentStep === 0}
-                                        onClick={this.handleBack}
-                                        className={classes.button}
-                                        variant='outlined'
-                                    >
-                                                    Back
-                                    </Button>
                                     <Button
                                         disabled={currentStep < this.steps.length - 1}
                                         onClick={this.handleRedirectTest}
@@ -197,7 +262,7 @@ class Wizard extends Component {
                                     <Button
                                         variant='contained'
                                         color='primary'
-                                        onClick={this.handleNext}
+                                        onClick={() => this.handleNext('next')}
                                         className={classes.button}
                                     >
                                         {currentStep === this.steps.length - 1 ? 'Finish' : 'Next'}

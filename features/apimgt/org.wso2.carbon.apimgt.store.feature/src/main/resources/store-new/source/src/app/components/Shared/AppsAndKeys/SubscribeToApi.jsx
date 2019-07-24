@@ -88,16 +88,21 @@ const styles = theme => ({
 const subscribeToApi = (props) => {
     const [appSelected, setAppSelected] = useState('');
     const [policySelected, setPolicySelected] = useState('');
+    const [applicationsList, seAapplicationsList] = useState([]);
+    const { classes, throttlingPolicyList, applicationsAvailable } = props;
 
     useEffect(() => {
-        const { throttlingPolicyList, applicationsAvailable } = props;
         if (throttlingPolicyList) {
             setPolicySelected(throttlingPolicyList[0]);
         }
+    }, [throttlingPolicyList]);
+
+    useEffect(() => {
         if (applicationsAvailable && applicationsAvailable[0]) {
+            seAapplicationsList(applicationsAvailable);
             setAppSelected(applicationsAvailable[0].value);
         }
-    }, []);
+    }, [applicationsAvailable]);
 
     /**
     * This method is used to handle the updating of subscription
@@ -109,7 +114,6 @@ const subscribeToApi = (props) => {
         const { subscriptionRequest, updateSubscriptionRequest } = props;
         const newRequest = { ...subscriptionRequest };
         const { target } = event;
-
         switch (field) {
             case 'application':
                 newRequest.applicationId = target.value;
@@ -124,10 +128,6 @@ const subscribeToApi = (props) => {
         }
         updateSubscriptionRequest(newRequest);
     };
-
-    const {
-        classes, applicationsAvailable, throttlingPolicyList,
-    } = props;
 
     return (
         <Grid container spacing={24} className={classes.subscribeRoot}>
@@ -146,7 +146,7 @@ const subscribeToApi = (props) => {
                             name='appSelected'
                             className={classes.selectEmpty}
                         >
-                            {applicationsAvailable.map(app => (
+                            {applicationsList.map(app => (
                                 <MenuItem value={app.value} key={app.value}>
                                     {app.label}
                                 </MenuItem>

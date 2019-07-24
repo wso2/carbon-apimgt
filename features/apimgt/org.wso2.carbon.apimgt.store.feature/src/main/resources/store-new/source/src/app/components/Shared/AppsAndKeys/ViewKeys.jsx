@@ -110,10 +110,6 @@ class ViewKeys extends React.Component {
         };
     }
 
-    state = {
-
-    };
-
     /**
      * Fetch Application object by ID coming from URL path params and fetch related keys to display
      */
@@ -123,10 +119,10 @@ class ViewKeys extends React.Component {
         this.applicationPromise
             .then((application) => {
                 application.getKeys().then(() => {
-                    const newSccessTokenRequest = { ...accessTokenRequest, keyType };
+                    const newRequest = { ...accessTokenRequest, keyType };
                     const subscriptionScopes = application.subscriptionScopes
                         .map((scope) => { return scope.scopeKey; });
-                    this.setState({ accessTokenRequest: newSccessTokenRequest, subscriptionScopes });
+                    this.setState({ accessTokenRequest: newRequest, subscriptionScopes });
                 });
             })
             .catch((error) => {
@@ -209,13 +205,7 @@ class ViewKeys extends React.Component {
                 accessTokenRequest.timeout,
                 accessTokenRequest.scopesSelected))
             .then((response) => {
-                console.log(
-                    intl.formatMessage({
-                        defaultMessage: 'token generated successfully : ',
-                        id: 'Shared.AppsAndKeys.ViewKeys.success',
-                    }),
-                    response,
-                );
+                console.log('token generated successfully ' + response);
                 this.token = response;
                 this.setState({
                     showToken: true,
@@ -244,7 +234,7 @@ class ViewKeys extends React.Component {
             token, tokenScopes, tokenValidityTime, accessTokenRequest, subscriptionScopes,
         } = this.state;
         const {
-            intl, keyType, classes, fullScreen, selectedApp, keys,
+            intl, keyType, classes, fullScreen, keys,
         } = this.props;
 
         if (notFound) {
@@ -400,11 +390,6 @@ class ViewKeys extends React.Component {
                                         <DialogContentText>
                                             {!showToken && (
                                                 <Tokens
-                                                    innerRef={(node) => {
-                                                        this.tokens = node;
-                                                    }}
-                                                    selectedApp={selectedApp}
-                                                    keyType={keyType}
                                                     updateAccessTokenRequest={this.updateAccessTokenRequest}
                                                     accessTokenRequest={accessTokenRequest}
                                                     subscriptionScopes={subscriptionScopes}
