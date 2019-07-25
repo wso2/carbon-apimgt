@@ -40,7 +40,6 @@ class API extends Resource {
                 "https"
             ];
             this.visibility = "PUBLIC";
-            this.context = context;
             this.endpointConfig = {
                 endpoint_type: 'http',
                 sandbox_endpoints: {
