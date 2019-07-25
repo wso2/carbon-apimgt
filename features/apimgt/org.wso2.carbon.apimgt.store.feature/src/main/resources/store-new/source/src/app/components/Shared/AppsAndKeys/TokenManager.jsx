@@ -24,7 +24,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Application from '../../../data/Application';
 import Loading from '../../Base/Loading/Loading';
 import KeyConfiguration from './KeyConfiguration';
@@ -139,18 +139,13 @@ class TokenManager extends React.Component {
      */
     generateKeys() {
         const { keyRequest, keys } = this.state;
-        const { keyType, updateSubscriptionData, intl } = this.props;
+        const { keyType, updateSubscriptionData } = this.props;
         this.application
             .then((application) => {
                 return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
             })
             .then((response) => {
-                console.log(
-                    intl.formatMessage({
-                        defaultMessage: 'Keys generated successfully with ID : ',
-                        id: 'Shared.AppsAndKeys.TokenManager.keys.generated.success',
-                    }) + response,
-                );
+                console.log('Keys generated successfully with ID :' + response);
                 if (updateSubscriptionData) {
                     updateSubscriptionData();
                 }
@@ -175,7 +170,7 @@ class TokenManager extends React.Component {
      */
     updateKeys() {
         const { keys, keyRequest } = this.state;
-        const { keyType } = this.props;
+        const { keyType, intl } = this.props;
         const applicationKey = keys.get(keyType);
         this.application
             .then((application) => {
@@ -212,7 +207,9 @@ class TokenManager extends React.Component {
      * @memberof Tokenemanager
      */
     render() {
-        const { classes, selectedApp, keyType } = this.props;
+        const {
+            classes, selectedApp, keyType,
+        } = this.props;
         const { keys, keyRequest, notFound } = this.state;
         if (!keys) {
             return <Loading />;

@@ -26,6 +26,7 @@ import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import { FormattedMessage } from 'react-intl';
 
 /**
  * @inheritdoc
@@ -135,9 +136,11 @@ const subscribeToApi = (props) => {
                 {appSelected && (
                     <FormControl className={classes.FormControl}>
                         <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
-                                Application
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.SubscribeToApi.application'
+                                defaultMessage='Application'
+                            />
                         </InputLabel>
-
                         <Select
                             value={appSelected}
                             onChange={e => handleChange('application', e)}
@@ -152,13 +155,21 @@ const subscribeToApi = (props) => {
                                 </MenuItem>
                             ))}
                         </Select>
-                        <FormHelperText>Select an Application to subscribe</FormHelperText>
+                        <FormHelperText>
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.SubscribeToApi.select.an.application.to.subscribe'
+                                defaultMessage='Select an Application to subscribe'
+                            />
+                        </FormHelperText>
                     </FormControl>
                 )}
                 {throttlingPolicyList && (
                     <FormControl className={classes.FormControlOdd}>
                         <InputLabel shrink htmlFor='policy-label-placeholder' className={classes.quotaHelp}>
-                                Throttling Policy
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.SubscribeToApi.throttling.policy'
+                                defaultMessage='Throttling Policy'
+                            />
                         </InputLabel>
                         <Select
                             value={policySelected}
@@ -175,7 +186,10 @@ const subscribeToApi = (props) => {
                             ))}
                         </Select>
                         <FormHelperText>
-                                Available Policies -
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.SubscribeToApi.available.policies'
+                                defaultMessage='Available Policies -'
+                            />
                             {' '}
                             {throttlingPolicyList.map((policy, index) => (
                                 <span key={policy}>

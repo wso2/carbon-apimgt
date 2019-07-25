@@ -132,7 +132,7 @@ const tokens = (props) => {
             >
                 <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
                     <FormattedMessage
-                        id='Shared.AppsAndKeys.Tokens.when.you.generate'
+                        id='Shared.AppsAndKeys.Tokens.when.you.generate.scopes'
                         defaultMessage='Scopes'
                     />
 

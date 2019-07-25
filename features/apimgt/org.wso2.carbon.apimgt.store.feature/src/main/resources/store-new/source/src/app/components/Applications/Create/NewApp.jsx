@@ -219,7 +219,7 @@ class NewApp extends React.Component {
      */
     saveApplication = () => {
         const { applicationRequest } = this.state;
-        const { updateApps, handleClose } = this.props;
+        const { updateApps, handleClose, intl } = this.props;
         const api = new API();
         this.validateName(applicationRequest.name)
             .then(() => this.validateAttributes(applicationRequest.attributes))
@@ -232,7 +232,10 @@ class NewApp extends React.Component {
             .catch((error) => {
                 const { response } = error;
                 if (response && response.body) {
-                    const message = response.body.description || 'Error while creating the application';
+                    const message = response.body.description || intl.formatMessage({
+                        defaultMessage: 'Error while creating the application',
+                        id: 'Applications.Create.NewApp.error.while.creating.the.application',
+                    });
                     Alert.error(message);
                 } else {
                     Alert.error(error.message);
@@ -276,8 +279,8 @@ class NewApp extends React.Component {
                         onClick={handleClickOpen}
                     >
                         <FormattedMessage
+                            id='Applications.Create.NewApp.add.new.application'
                             defaultMessage='ADD NEW APPLICATION'
-                            id='Applications.Create.NewApp.add.new.application.button'
                         />
                     </Button>
                 </ScopeValidation>
@@ -289,14 +292,14 @@ class NewApp extends React.Component {
                             </IconButton>
                             <Typography variant='title' color='inherit' className={classes.flex}>
                                 <FormattedMessage
+                                    id='Applications.Create.NewApp.create.new.application'
                                     defaultMessage='Create New Application'
-                                    id='Applications.Create.NewApp.create.new.application.title'
                                 />
                             </Typography>
                             <Button color='inherit' onClick={handleClose}>
                                 <FormattedMessage
-                                    defaultMessage='Save'
-                                    id='Applications.Create.NewApp.save.application'
+                                    id='Applications.Create.NewApp.save'
+                                    defaultMessage='save'
                                 />
                             </Button>
                         </Toolbar>
@@ -317,8 +320,8 @@ class NewApp extends React.Component {
                     <div className={classes.buttonWrapper}>
                         <Button variant='outlined' className={classes.button} onClick={handleClose}>
                             <FormattedMessage
-                                defaultMessage='Cancel'
                                 id='Applications.Create.NewApp.cancel'
+                                defaultMessage='Cancel'
                             />
                         </Button>
                         <Button
@@ -328,8 +331,8 @@ class NewApp extends React.Component {
                             onClick={this.saveApplication}
                         >
                             <FormattedMessage
+                                id='Applications.Create.NewApp.add.new.application.button'
                                 defaultMessage='ADD NEW APPLICATION'
-                                id='Applications.Create.NewApp.add.new.application.create'
                             />
                         </Button>
                     </div>
@@ -340,8 +343,18 @@ class NewApp extends React.Component {
 }
 
 NewApp.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        appBar: PropTypes.string,
+        flex: PropTypes.string,
+        createFormWrapper: PropTypes.string,
+        buttonWrapper: PropTypes.string,
+        button: PropTypes.string,
+    }).isRequired,
+    updateApps: PropTypes.func.isRequired,
+    handleClose: PropTypes.func.isRequired,
+    intl: PropTypes.func.isRequired,
+    handleClickOpen: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(NewApp));

@@ -339,7 +339,7 @@ class ViewKeys extends React.Component {
                             <FormControl>
                                 <FormHelperText id='consumer-secret-helper-text'>
                                     <FormattedMessage
-                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.title'
+                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.of.application'
                                         defaultMessage='Consumer Secret of the application'
                                     />
                                 </FormHelperText>
