@@ -870,7 +870,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves API Lifecycle state information
-     * 
+     *
      * @param apiId API Id
      * @param ifNoneMatch If-None-Match header value
      * @return API Lifecycle state information
@@ -918,7 +918,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query,
             String ifNoneMatch, MessageContext messageContext) {
         //pre-processing
@@ -955,7 +955,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override 
+    @Override
     public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId,
             String ifMatch, MessageContext messageContext) {
         APIIdentifier apiIdentifier;
@@ -1014,7 +1014,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param ifNoneMatch       If-None-Match header value
      * @return returns the matched mediation
      */
-    @Override 
+    @Override
     public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId,
             String ifNoneMatch, MessageContext messageContext) {
         APIIdentifier apiIdentifier;
@@ -1063,7 +1063,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param ifMatch           If-match header value
      * @return updated mediation DTO as response
      */
-    @Override 
+    @Override
     public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId,
             MediationDTO body, String ifMatch, MessageContext messageContext) {
 
@@ -1166,7 +1166,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) {
 
-//        String mediationPolicyName = "";
         String fileName = "";
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -1177,24 +1176,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (fileInputStream != null && inlineContent != null) {
                 RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
             }
-            Mediation createdMediation;
-            //Get policy name from the mediation config
-         /*   String contentString = null;
-            OMElement omElement = null;
-            try {
-                contentString = IOUtils.toString(fileInputStream,
-                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
-                omElement = AXIOMUtil.stringToOM(contentString);
-            } catch (IOException e) {
-                RestApiUtil.handleInternalServerError("Unable to read the mediation policy file ", e, log);
-            } catch (XMLStreamException e) {
-                RestApiUtil.handleInternalServerError("Unable to read the mediation policy file ", e, log);
-            }
-            if (omElement != null) {
-                OMAttribute attribute = omElement.getAttribute(new QName
-                        (PolicyConstants.MEDIATION_NAME_ATTRIBUTE));
-                mediationPolicyName = attribute.getAttributeValue();
-            }*/
 
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting registry Api base path out of apiResourcePath
@@ -1224,7 +1205,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Getting the uuid of created mediation policy
                 String uuid = apiProvider.getCreatedResourceUuid(mediationResourcePath);
                 //Getting created Api specific mediation policy
-                createdMediation = apiProvider.getApiSpecificMediationPolicy
+                Mediation createdMediation = apiProvider.getApiSpecificMediationPolicy
                         (apiResourcePath, uuid);
                 MediationDTO createdPolicy =
                         MediationMappingUtil.fromMediationToDTO(createdMediation);
@@ -1254,70 +1235,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
-
-   /*
-    public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch,
-            MessageContext messageContext) {
-        APIIdentifier apiIdentifier;
-        InputStream contentStream = null;
-        Mediation createdMediation;
-        try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
-                    tenantDomain);
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String content = body.getConfig();
-            //Getting the mediation policy config from body to create resource file
-            contentStream = new ByteArrayInputStream(content.getBytes
-                    (StandardCharsets.UTF_8));
-            ResourceFile contentFile = new ResourceFile(contentStream, "application/xml");// todo check content type
-            //Extracting the file name specified in the config
-            String fileName = this.getMediationNameFromConfig(content);
-            String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
-            //Getting registry Api base path out of apiResourcePath
-            apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-            //Constructing mediation resource path
-            String mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
-                    body.getType() + RegistryConstants.PATH_SEPARATOR + fileName;
-            if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
-                RestApiUtil.handleConflict("Mediation policy already " +
-                        "exists in the given resource path, cannot a create new.", log);
-            }
-            //Adding api specific mediation policy
-            String mediationPolicyUrl = apiProvider.addResourceFile(mediationResourcePath, contentFile);
-            if (StringUtils.isNotBlank(mediationPolicyUrl)) {
-                //Getting the uuid of created mediation policy
-                String uuid = apiProvider.getCreatedResourceUuid(mediationResourcePath);
-                //Getting created Api specific mediation policy
-                createdMediation = apiProvider.getApiSpecificMediationPolicy
-                        (apiResourcePath, uuid);
-                MediationDTO createdPolicy =
-                        MediationMappingUtil.fromMediationToDTO(createdMediation);
-                URI uploadedMediationUri = new URI(mediationPolicyUrl);
-                return Response.created(uploadedMediationUri).entity(createdPolicy).build();
-            }
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
-            // to expose the existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) { //this is due to access control restriction.
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while adding mediation policay for the API " + apiId, e, log);
-            } else {
-                String errorMessage = "Error while adding the mediation policy : " + body.getName() +
-                        "of API " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        } catch (URISyntaxException e) {
-            String errorMessage = "Error while getting location header for created " +
-                    "mediation policy " + body.getName();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } finally {
-            IOUtils.closeQuietly(contentStream);
-        }
-        return null;
-    }*/
 
     /**
      * Get API monetization status and monetized tier to billing plan mapping
