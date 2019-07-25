@@ -116,8 +116,8 @@ const styles = theme => ({
 
 function Overview(props) {
     const { classes, api: newApi } = props;
-    let loadResources,
-        loadScopes;
+    let loadResources;
+    let loadScopes;
     if (newApi.type !== 'WS') {
         loadResources = <Resources parentClasses={classes} api={newApi} />;
         loadScopes = <Scopes parentClasses={classes} />;
