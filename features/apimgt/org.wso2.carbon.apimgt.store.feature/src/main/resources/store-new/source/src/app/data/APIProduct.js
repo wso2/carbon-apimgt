@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+"use strict";
+import APIClientFactory from "./APIClientFactory";
+import Resource from "./Resource";
+import Utils from "./Utils";
 
-import APIClientFactory from './APIClientFactory';
-import Resource from './Resource';
-import Utils from './Utils';
-
-/** *
+/***
  * Class to expose API Product {Resource} related operations
  */
 
@@ -110,4 +110,6 @@ export default class APIProduct extends Resource {
             return promiseGet;
         }
     }
+
 }
+
