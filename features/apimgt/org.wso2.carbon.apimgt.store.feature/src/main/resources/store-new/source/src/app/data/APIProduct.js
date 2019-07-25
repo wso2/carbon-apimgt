@@ -24,7 +24,6 @@ import Utils from "./Utils";
  */
 
 export default class APIProduct extends Resource {
-
     constructor() {
         super();
         this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
@@ -36,77 +35,79 @@ export default class APIProduct extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API Product invoke promise.
      */
-    getAllAPIPProducts(callback = null) {
-        debugger;
-        let promise_get_all = this.client.then(
+    getAllAPIProducts(callback = null) {
+        const promiseGetAll = this.client.then(
             (client) => {
-                return client.apis["API Products (Collection)"].get_api_products({}, this._requestMetaData());
-            }
+                return client.apis['API Products (Collection)'].get_api_products({}, this._requestMetaData());
+            },
         );
         if (callback) {
-            return promise_get_all.then(callback);
+            return promiseGetAll.then(callback);
         } else {
-            return promise_get_all;
+            return promiseGetAll;
         }
     }
 
-        /**
+    /**
      * Get details of a given API product
      * @param id {string} UUID of the api product.
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API product invoke promise.
      */
     getAPIProductById(id, callback = null) {
-        var promise_get = this.client.then(
+        const promiseGet = this.client.then(
             (client) => {
-                return client.apis["API Product (Individual)"].get_api_products__apiProductId__(
-                    {apiProductId: id}, this._requestMetaData());
-            }
+                return client.apis['API Product (Individual)'].get_api_products__apiProductId__(
+                    { apiProductId: id }, this._requestMetaData(),
+                );
+            },
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promiseGet.then(callback);
         } else {
-            return promise_get;
+            return promiseGet;
         }
     }
 
-     /**
+    /**
      * Get application by id
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      * @deprecated Use Application.all method instead
      */
     getAllApplications(callback = null) {
-        let promise_get = this.client.then(
+        const promiseGet = this.client.then(
             (client) => {
-                return client.apis["Application (Collection)"].get_applications(
-                    {}, this._requestMetaData());
-            }
+                return client.apis['Application (Collection)'].get_applications(
+                    {}, this._requestMetaData(),
+                );
+            },
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promiseGet.then(callback);
         } else {
-            return promise_get;
+            return promiseGet;
         }
     }
 
-     /**
+    /**
      * Get keys of an application
      * @param applicationId id of the application that needs to get the keys
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSubscriptions(apiId, applicationId, callback = null) {
-        var promise_get = this.client.then(
+        const promiseGet = this.client.then(
             (client) => {
-                return client.apis["Subscription (Collection)"].get_subscriptions(
-                    {apiId: apiId, applicationId: applicationId}, this._requestMetaData());
-            }
+                return client.apis['Subscription (Collection)'].get_subscriptions(
+                    { apiId, applicationId }, this._requestMetaData(),
+                );
+            },
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promiseGet.then(callback);
         } else {
-            return promise_get;
+            return promiseGet;
         }
     }
 
