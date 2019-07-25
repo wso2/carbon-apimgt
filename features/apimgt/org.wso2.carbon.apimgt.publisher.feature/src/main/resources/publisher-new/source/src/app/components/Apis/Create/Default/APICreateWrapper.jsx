@@ -121,7 +121,6 @@ class APICreateWrapper extends Component {
      */
     render() {
         const { type } = this.props;
-
         return (
             <React.Fragment>
                 <APICreateTopMenu />

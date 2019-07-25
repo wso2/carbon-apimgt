@@ -65,7 +65,6 @@ public class RestApiPublisherUtils {
         boolean isValid = false;
 
         if (api.getEndpointConfig() != null) {
-
             LinkedHashMap endpointConfig = (LinkedHashMap) api.getEndpointConfig();
             String prodEndpointUrl = String
                     .valueOf(((LinkedHashMap) endpointConfig.get("production_endpoints")).get("url"));
