@@ -54,7 +54,7 @@ public class MediationMappingUtil {
         MediationInfoDTO mediationInfoDTO = new MediationInfoDTO();
         mediationInfoDTO.setId(mediation.getUuid());
         mediationInfoDTO.setName(mediation.getName());
-        mediationInfoDTO.setType(MediationInfoDTO.TypeEnum.valueOf(mediation.getType().toString()));
+        mediationInfoDTO.setType(MediationInfoDTO.TypeEnum.valueOf(mediation.getType().toUpperCase()));
         return mediationInfoDTO;
     }
 
@@ -69,7 +69,7 @@ public class MediationMappingUtil {
         MediationDTO mediationDTO = new MediationDTO();
         mediationDTO.setId(mediation.getUuid());
         mediationDTO.setName(mediation.getName());
-        mediationDTO.setType(MediationDTO.TypeEnum.valueOf(mediation.getType().toString()));
+        mediationDTO.setType(MediationDTO.TypeEnum.valueOf(mediation.getType().toUpperCase()));
         mediationDTO.setConfig(mediation.getConfig());
         return mediationDTO;
     }

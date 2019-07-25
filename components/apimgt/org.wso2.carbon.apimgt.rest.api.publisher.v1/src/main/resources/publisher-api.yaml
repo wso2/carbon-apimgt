@@ -2342,6 +2342,8 @@ paths:
     # Upload an API specific mediation policy
     #----------------------------------------------------------------------------
     post:
+      consumes:
+      - multipart/form-data
       security:
         - OAuth2Security:
           - apim:mediation_policy_create
@@ -2352,12 +2354,21 @@ paths:
       description: |
         This operation can be used to add an API specifc mediation policy.
       parameters:
-        - in: body
-          name: body
-          description: mediation policy to upload
+        - in: formData
+          name: file
+          description: Mediation Policy to upload
+          type: file
+          required: false
+        - in: formData
+          name: inlineContent
+          description: Inline content of the Mediation Policy
+          type: string
+          required: false
+        - in: formData
+          name: type
+          description: Type of the mediation sequence
           required: true
-          schema:
-            $ref: '#/definitions/Mediation'
+          type: string
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
       tags:
@@ -2372,7 +2383,7 @@ paths:
           headers:
             Location:
               description: |
-                The URL of the uploaded thumbnail image of the API.
+                The URL of the uploaded mediation policy of the API.
               type: string
             Content-Type:
               description: |
@@ -2517,6 +2528,8 @@ paths:
     # Update the a mediation policy
     #-----------------------------------------------------
     put:
+      consumes:
+      - multipart/form-data
       security:
         - OAuth2Security:
           - apim:mediation_policy_manage
