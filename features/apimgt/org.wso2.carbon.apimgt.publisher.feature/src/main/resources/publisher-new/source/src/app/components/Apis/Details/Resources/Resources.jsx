@@ -136,6 +136,7 @@ class Resources extends React.Component {
             notFound: false,
             showAddResource: false,
             showScopes: false,
+            apiPolicies: [],
         };
         this.api = new Api();
         this.api_uuid = props.api.id;
@@ -194,6 +195,23 @@ class Resources extends React.Component {
         promised_api_object
             .then((api) => {
                 this.setState({ api, scopes: api.scopes });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const status = error.status;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
+                }
+            });
+
+        const promisedResPolicies = Api.policies('api');
+        promisedResPolicies
+            .then((policies) => {
+                this.setState({ apiPolicies: policies.obj.list });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -644,7 +662,7 @@ class Resources extends React.Component {
                                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
                                         {Object.keys(path).map((innerKey) => {
                                             return <Resource path={key} method={innerKey} methodData={path[innerKey]}
-                                                             updatePath={that.updatePath} scopes={api.scopes}
+                                                             updatePath={that.updatePath} scopes={api.scopes} apiPolicies={this.state.apiPolicies}
                                                              addRemoveToDeleteList={that.addRemoveToDeleteList}
                                                              onRef={ref => this.childResources.push(ref)}
                                             />;
