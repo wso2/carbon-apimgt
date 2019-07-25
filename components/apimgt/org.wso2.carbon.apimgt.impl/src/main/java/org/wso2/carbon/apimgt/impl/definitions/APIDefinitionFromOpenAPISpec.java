@@ -41,6 +41,8 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
@@ -348,8 +350,9 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                 swaggerTemplate.setHTTPVerb(verb);
                 swaggerTemplate.setHttpVerbs(verb);
                 swaggerTemplate.setUriTemplate("/*");
+                addOrUpdatePathsFromURITemplate(pathsObject, swaggerTemplate);
             }
-            addOrUpdatePathsFromURITemplate(pathsObject, swaggerTemplate);
+            addQueryParams(pathsObject);
         } else {
             for (URITemplate uriTemplate : uriTemplates) {
                 addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
@@ -359,6 +362,63 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
         populateSwaggerScopeInfo(swaggerObject, api.getScopes());
         return swaggerObject.toJSONString();
+    }
+
+    /** This method add paths from URI Template For GraphQLAPI
+     *
+     * @param pathsObject
+     */
+    private void addQueryParams(JSONObject pathsObject) {
+        String parameter = "";
+        String type = "";
+        String inValue = "";
+        String description = "";
+        Map.Entry resourceObject;
+        JSONObject pathsObjectValues;
+        JSONObject pathItemObject = new JSONObject();
+
+        for (Object pathObject : pathsObject.entrySet()) {
+            Map.Entry resourcePath = (Map.Entry)pathObject;
+            pathsObjectValues = (JSONObject)resourcePath.getValue();
+            for (Object resource : pathsObjectValues.entrySet()) {
+                JSONArray parametersObj = new JSONArray();
+                JSONObject queryParamObj = new JSONObject();
+                resourceObject = (Map.Entry)resource;
+                JSONObject resourceParams = (JSONObject)resourceObject.getValue();
+
+                if(resourceObject.getKey()!= null) {
+                    if (resourceObject.getKey().toString().equals("get")) {
+                        parameter = "query";
+                        inValue = "query";
+                        type = "string";
+                        description = "query to be passed to graphQL API";
+                    } else if (resourceObject.getKey().toString().equals("post")) {
+                        JSONObject schema = new JSONObject();
+                        JSONObject payload = new JSONObject();
+                        JSONObject typeOfPayload = new JSONObject();
+                        schema.put("type" , "object");
+                        typeOfPayload.put("type", "string");
+                        payload.put("payload",typeOfPayload);
+                        schema.put("properties" , payload);
+                        queryParamObj.put("schema",schema);
+                        parameter = "payload";
+                        inValue = "body";
+                        description = "query or mutation to be passed to graphQL API";
+                    }
+                }
+
+                queryParamObj.put("name", parameter);
+                queryParamObj.put("in", inValue);
+                queryParamObj.put("required", true);
+                queryParamObj.put("type", type);
+                queryParamObj.put("description", description);
+
+                parametersObj.add(queryParamObj);
+                resourceParams.put("parameters", parametersObj);
+                pathItemObject.put(resourceObject.getKey().toString(), resourceParams);
+                pathsObject.put(resourcePath.getKey().toString(), pathItemObject);
+            }
+        }
     }
 
     @Override

@@ -112,7 +112,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,6 +128,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import java.net.URLDecoder;
 
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
@@ -1092,7 +1095,12 @@ public abstract class AbstractAPIManager implements APIManager {
     public void uploadGraphqlSchema(String resourcePath, String schemaDefinition)
             throws APIManagementException {
         try {
-            Resource resource = registry.newResource();
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
             resource.setContent(schemaDefinition);
             resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
             registry.put(resourcePath, resource);

@@ -549,6 +549,7 @@
   "swagger.file.upload": "OpenAPI file upload",
   "the.icon.is.not.modified": "The icon is not modified",
   "try.dropping.some.files.here.or.click.to.select.files.to.upload": "Try dropping some files here, or click to selectfiles to upload.",
+  "try.dropping.schema.file.here.or.click.to.select.schema.to.upload": "Try dropping schema file here, or click to select schema to upload.",
   "type": "Type",
   "uploaded.file": "Uploaded file",
   "uploaded.files": "Uploaded files",

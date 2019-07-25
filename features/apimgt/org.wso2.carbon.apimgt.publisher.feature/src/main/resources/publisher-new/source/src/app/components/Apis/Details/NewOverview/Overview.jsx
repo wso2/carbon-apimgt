@@ -26,6 +26,7 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import CheckItem from './CheckItem';
 import Resources from './Resources';
+import Operations from './Operations';
 import ProductResources from './ProductResources';
 import Policies from './Policies';
 import Configuration from './Configuration';
@@ -146,36 +147,50 @@ function Overview(props) {
         loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
     }
     return (
-        <Grid container spacing={7}>
-            <Grid item xs={12}>
-                <Grid container>
-                    {endpointsCheckItem}
-                    <CheckItem itemSuccess={false} itemLabel='Policies' />
-                    <CheckItem itemSuccess itemLabel='Resources' />
-                    {scopesCheckItem}
-                    <CheckItem itemSuccess={false} itemLabel='Documents' />
-                    <CheckItem itemSuccess={false} itemLabel='Business Information' />
-                    <CheckItem itemSuccess={false} itemLabel='Description' />
-                </Grid>
-            </Grid>
-            <Grid item xs={12}>
-                <Grid container spacing={7}>
-                    <Grid item xs={12} md={6} lg={6}>
-                        <Configuration parentClasses={classes} />
-                        {loadResources}
-                        <AdditionalProperties parentClasses={classes} />
+        <ApiContext.Consumer>
+            {({ api }) => (
+                <Grid container spacing={24}>
+                    {console.info(api)}
+                    <Grid item xs={12}>
+                        <Grid container>
+                            {endpointsCheckItem}
+                            <CheckItem itemSuccess={false} itemLabel='Policies' />
+                            {api.type === "GRAPHQL" ? (
+                             <CheckItem itemSuccess itemLabel='Operations' />
+                            ) : (<CheckItem itemSuccess itemLabel='Resources' />)}
+                            <CheckItem itemSuccess={false} itemLabel='Scopes' />
+                            <CheckItem itemSuccess itemLabel='Resources' />
+                            {scopesCheckItem}
+                            <CheckItem itemSuccess={false} itemLabel='Documents' />
+                            <CheckItem itemSuccess={false} itemLabel='Business Information' />
+                            <CheckItem itemSuccess={false} itemLabel='Description' />
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6} lg={6}>
-                        <Lifecycle parentClasses={classes} />
-                        {loadEndpoints}
-                        <BusinessInformation parentClasses={classes} />
-                        {loadScopes}
-                        <Documents parentClasses={classes} api={api} />
-                        <Policies parentClasses={classes} />
+                    <Grid item xs={12}>
+                        <Grid container spacing={24}>
+                            <Grid item xs={12} md={6} lg={6}>
+                                <Configuration parentClasses={classes} />
+                                {loadResources}
+                                {api.type === "GRAPHQL" ? (
+                             <Operations parentClasses={classes} api={api} />)
+                              : (<Resources parentClasses={classes} api={api} />)}
+                                {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
+                                    (loadResources)}
+                                <AdditionalProperties parentClasses={classes} />
+                            </Grid>
+                            <Grid item xs={12} md={6} lg={6}>
+                                <Lifecycle parentClasses={classes} />
+                                {loadEndpoints}
+                                <BusinessInformation parentClasses={classes} />
+                                {loadScopes}
+                                <Documents parentClasses={classes} api={api} />
+                                <Policies parentClasses={classes} />
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-        </Grid>
+            )}
+        </ApiContext.Consumer>
     );
 }
 

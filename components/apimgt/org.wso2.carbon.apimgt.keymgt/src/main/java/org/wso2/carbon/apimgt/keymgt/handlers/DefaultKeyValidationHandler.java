@@ -200,8 +200,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         boolean isOperationValid = true;
 
-        if((validationContext.getHttpVerb().equals(GRAPHQL_QUERY))|| (validationContext.getHttpVerb().equals(GRAPHQL_MUTATION))
-                || (validationContext.getHttpVerb().equals(GRAPHQL_SUBSCRIPTION))){
+        if((validationContext.getHttpVerb().equals(GRAPHQL_QUERY))|| (validationContext.getHttpVerb().
+                equals(GRAPHQL_MUTATION)) || (validationContext.getHttpVerb().equals(GRAPHQL_SUBSCRIPTION))){
             String operationList = validationContext.getMatchingResource();
             List<String> operationResourceArray = new ArrayList<String>(Arrays.asList(operationList.split(",")));
 

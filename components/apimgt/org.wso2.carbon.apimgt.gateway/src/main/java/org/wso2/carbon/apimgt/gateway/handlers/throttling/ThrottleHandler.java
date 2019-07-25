@@ -71,6 +71,7 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -198,11 +199,16 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
         String subscriberTenantDomain = "";
         String apiTenantDomain = getTenantDomain();
-        List<String> resourceLevelThrottleConditions;
         ConditionGroupDTO[] conditionGroupDTOs;
         String applicationId = authContext.getApplicationId();
-        List<VerbInfoDTO> operationLevelVerbInfoDTOList;
+        List<VerbInfoDTO> operationLevelVerbInfoDTOList = new ArrayList<>();
 
+        if (synCtx.getProperty(APIConstants.API_TYPE) != null && synCtx.getProperty(APIConstants.API_TYPE)
+                .equals(APIConstants.GRAPHQL_API )) {
+            isGraphQLAPI = true;
+            operationLevelVerbInfoDTOList = (List<VerbInfoDTO>) synCtx.getProperty
+                    (APIConstants.GRAPHQL_API_OPERATION_VERB_INFO_DTO);
+        }
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
             authorizedUser = authContext.getUsername();
@@ -237,25 +243,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 stopOnQuotaReach = authContext.isStopOnQuotaReach();
                 //If request is not blocked then only we perform throttling.
                 VerbInfoDTO verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
-                operationLevelVerbInfoDTOList =  (List<VerbInfoDTO>) synCtx.getProperty
-                        (APIConstants.GRAPHQL_API_OPERATION_VERB_INFO_DTO);
-
                         //If API level tier is not present only we should move to resource level tiers.
-                if (synCtx.getProperty(APIConstants.API_TYPE) != null && synCtx.getProperty(APIConstants.API_TYPE)
-                        .equals(APIConstants.GRAPHQL_API )) {
-                    isGraphQLAPI = true;
-                    if (operationLevelVerbInfoDTOList == null &&
-                            operationLevelVerbInfoDTOList.toArray().length == 0) {
-                        log.warn("Error while getting throttling information for operations and operation type");
-                        return false;
-                    }
-
-                    for (VerbInfoDTO operationLevelVerbInfoDTO : operationLevelVerbInfoDTOList) {
-                        if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(operationLevelVerbInfoDTO.getThrottling())){
-                            isUnlimittedTier = true;
-                        }
-                    }
-                } else {
                     if (verbInfoDTO == null) {
                         log.warn("Error while getting throttling information for resource and http verb");
                         return false;
@@ -265,58 +253,68 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                     if(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(resourceLevelTier)){
                         isUnlimittedTier = true;
                     }
-
-                }
-
                 applicationLevelTier = authContext.getApplicationTier();
                 subscriptionLevelTier = authContext.getTier();
                 apiLevelTier = authContext.getApiTier();
-
                 //If API level throttle policy is present then it will apply and no resource level policy will apply for it
                 if (!StringUtils.isEmpty(apiLevelTier) && !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiLevelTier)) {
                     resourceLevelThrottleKey = apiLevelThrottleKey;
                     apiLevelThrottledTriggered = true;
                 }
 
-                //If verbInfo is present then only we will do resource level throttling
-                if (isUnlimittedTier && !apiLevelThrottledTriggered) {
-                    //If unlimited tier throttling will not apply at resource level and pass it
-                    if (log.isDebugEnabled()) {
-                        log.debug("Resource level throttling set as unlimited and request will pass " +
-                                "resource level");
+                if (isGraphQLAPI) {
+                    if (operationLevelVerbInfoDTOList == null &&
+                            operationLevelVerbInfoDTOList.toArray().length == 0) {
+                        log.warn("Error while getting throttling information for operations and operation type");
+                        return false;
                     }
-                } else {
-                    if (isGraphQLAPI) {
-                        for (VerbInfoDTO operationLevelVerbInfoDTO : operationLevelVerbInfoDTOList) {
-                            String operationLevelThrottleKey = operationLevelVerbInfoDTO.getRequestKey();
-                            ConditionGroupDTO[] conditionGroupOperationDTOs = operationLevelVerbInfoDTO.getConditionGroups();
+                    for (VerbInfoDTO operationLevelVerbInfoDTO : operationLevelVerbInfoDTOList) {
+                        if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(operationLevelVerbInfoDTO.getThrottling())) {
+                            isUnlimittedTier = true;
+                        }
+                        String operationLevelThrottleKey = operationLevelVerbInfoDTO.getRequestKey();
+                        ConditionGroupDTO[] conditionGroupOperationDTOs = operationLevelVerbInfoDTO.getConditionGroups();
 
-                            if (APIConstants.API_POLICY_USER_LEVEL.equalsIgnoreCase(operationLevelVerbInfoDTO.getApplicableLevel())) {
-                                operationLevelThrottleKey = operationLevelThrottleKey + "_" + authorizedUser;
-                                policyLevelUserTriggered = true;
-                            }
-
-                            GraphQLUtils graphQLObject = new GraphQLUtils();
-                            isThrottled = graphQLObject.getThrottlingForGraphQLOperations(operationLevelThrottleKey
-                                        ,conditionGroupOperationDTOs, synCtx, authContext);
-                            if (isThrottled) {
-                                break;
-                            }
+                        if (APIConstants.API_POLICY_USER_LEVEL.equalsIgnoreCase(operationLevelVerbInfoDTO.
+                                getApplicableLevel())) {
+                            operationLevelThrottleKey = operationLevelThrottleKey + "_" + authorizedUser;
+                            policyLevelUserTriggered = true;
                         }
 
-                        if (!apiLevelThrottledTriggered) {
-                            isOperationLevelThrottled = isThrottled;
+                        if (isUnlimittedTier && !apiLevelThrottledTriggered) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(operationLevelVerbInfoDTO + "Operation level throttling set as unlimited " +
+                                        "and request will pass " + "resource level");
+                            }
                         } else {
-                            isApiLevelThrottled = isThrottled;
+                            GraphQLUtils graphQLObject = new GraphQLUtils();
+                            isThrottled = graphQLObject.getThrottlingForGraphQLOperations(operationLevelThrottleKey
+                                    , conditionGroupOperationDTOs, synCtx, authContext);
+                        }
+                        if (isThrottled) {
+                            break;
+                        }
+                    }
+                    if (!apiLevelThrottledTriggered) {
+                        isOperationLevelThrottled = isThrottled;
+                    } else {
+                        isApiLevelThrottled = isThrottled;
+                    }
+                } else {
+                    //If verbInfo is present then only we will do resource level throttling
+                    if (isUnlimittedTier && !apiLevelThrottledTriggered) {
+                        //If unlimited tier throttling will not apply at resource level and pass it
+                        if (log.isDebugEnabled()) {
+                            log.debug("Resource level throttling set as unlimited and request will pass " +
+                                    "resource level");
                         }
                     } else {
                         if (APIConstants.API_POLICY_USER_LEVEL.equalsIgnoreCase(verbInfoDTO.getApplicableLevel())) {
-
                             resourceLevelThrottleKey = resourceLevelThrottleKey + "_" + authorizedUser;
                             policyLevelUserTriggered = true;
                         }
                         //If tier is not unlimited only throttling will apply.
-
+                        List<String> resourceLevelThrottleConditions = new ArrayList<>();;
                         resourceLevelThrottleConditions = verbInfoDTO.getThrottlingConditions();
                         conditionGroupDTOs = verbInfoDTO.getConditionGroups();
 

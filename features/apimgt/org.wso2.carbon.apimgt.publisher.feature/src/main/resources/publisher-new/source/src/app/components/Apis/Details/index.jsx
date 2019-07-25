@@ -46,6 +46,7 @@ import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Resources from './Resources/Resources';
+import Operations from './Operations/Operations';
 import Endpoints from './Endpoints/Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
@@ -137,7 +138,7 @@ class Details extends Component {
     constructor(props) {
         super(props);
         this.handleMenuSelect = this.handleMenuSelect.bind(this);
-        const { location, isAPIProduct } = this.props;
+        const { location } = this.props;
         const currentLink = location.pathname.match(/[^/]+(?=\/$|$)/g);
         let active = null;
         if (currentLink && currentLink.length > 0) {
@@ -404,7 +405,20 @@ class Details extends Component {
                             active={active}
                             Icon={<CodeIcon />}
                         />
+                        {api.type === "GRAPHQL" ? (
                         <LeftMenuItem
+                            text='operations'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ResourcesIcon />}
+                        />) :
+                        (<LeftMenuItem
+                        text='resources'
+                        handleMenuSelect={this.handleMenuSelect}
+                        active={active}
+                        Icon={<ResourcesIcon />}
+                        />)
+                        }
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.resources',
                                 defaultMessage: 'resources',
@@ -505,7 +519,9 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
-                                <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
+                                {api.type === "GRAPHQL" ? (
+                                <Route path={Details.subPaths.RESOURCES} component={() => <Operations api={api} />} />):
+                                <Route path={Details.subPaths.OPERATIONS} component={() => <Resources api={api} />} />}
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
@@ -551,6 +567,7 @@ Details.subPaths = {
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
+    OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',

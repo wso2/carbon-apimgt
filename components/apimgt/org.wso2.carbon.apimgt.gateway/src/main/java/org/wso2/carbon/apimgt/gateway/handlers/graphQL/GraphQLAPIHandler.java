@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
 import graphql.schema.GraphQLType;
@@ -7,7 +24,10 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.Entry;
@@ -31,8 +51,8 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.validation.ValidationError;
 import graphql.validation.Validator;
 
-
 import java.io.IOException;
+import java.util.Base64;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,63 +61,76 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 
 public class GraphQLAPIHandler extends AbstractHandler {
 
-    public static final String QUERY_PATH_String = "/?query=";
-    public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
-    public static final String GRAPHQL_SCOPE_ROLE_MAPPING = "GRAPHQL_SCOPE_ROLE_MAPPING";
-    public static final String scopeRoleMapping = "ScopeRoleMapping";
-    public static final String scopeOperationMapping = "ScopeOperationMapping";
-    public static final String GRAPHQL_SCOPE_OPERATION_MAPPING = "GRAPHQL_SCOPE_OPERATION_MAPPING";
-    public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
-    public static final String API_TYPE = "API_TYPE";
-    public static final String GRAPHQL_API = "GRAPHQL";
-    public static final int UNAUTHORIZED_REQUESRT = 401;
+    private static final String QUERY_PATH_String = "/?query=";
+    private static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
+    private static final String GRAPHQL_SCOPE_ROLE_MAPPING = "GRAPHQL_SCOPE_ROLE_MAPPING";
+    private static final String GRAPHQL_SCOPE_OPERATION_MAPPING = "GRAPHQL_SCOPE_OPERATION_MAPPING";
+    private static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
+    private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
+    private static final String API_TYPE = "API_TYPE";
+    private static final String GRAPHQL_API = "GRAPHQL";
+    private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
+    private static final String INVALID_QUERY = "INVALID QUERY";
+
+    private static final String scopeRoleMapping = "ScopeRoleMapping";
+    private static final String scopeOperationMapping = "ScopeOperationMapping";
+    private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
+
     private String apiUUID;
 
     public String getApiUUID() {
+
         return apiUUID;
     }
 
     public void setApiUUID(String apiUUID) {
+
         this.apiUUID = apiUUID;
     }
 
     public boolean handleRequest(MessageContext messageContext) {
-        try {
-            OMElement omElement;
-            String payload;
-            String operationList = "";
-            String validationErrorMessage = "";
-            HashMap<String,String> rolelist = new HashMap<>();
-            HashMap<String,String> operationlist = new HashMap<>();
-            List<ValidationError> validationErrors = null;
 
-            ArrayList<String> roleArray=new ArrayList<String>();
-            ArrayList<String> operationArray=new ArrayList<String>();
-            ArrayList<String> validationErrorMessageList =new ArrayList<String>();
+        try {
+            String payload;
+            String validationErrorMessage;
+            String operationList = "";
+            GraphQLSchema schema = null;
+            Parser parser = new Parser();
+            SchemaParser schemaParser = new SchemaParser();
+
+            ArrayList<String> roleArrayList = new ArrayList<>();
+            ArrayList<String> operationArray = new ArrayList<>();
+            ArrayList<String> validationErrorMessageList = new ArrayList<>();
+            HashMap<String,  ArrayList<String>> scopeRoleMappingList = new HashMap<>();
+            HashMap<String, String> operationScopeMappingList = new HashMap<>();
+            List<ValidationError> validationErrors = null;
 
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
             RelayUtils.buildMessage(axis2MC);
 
+            // Extract payload from  messageContext
             if (axis2MC.getEnvelope().getBody().getFirstElement() != null) {
                 payload = axis2MC.getEnvelope().getBody().getFirstElement().getFirstElement().getText();
             } else {
-                String queryURLValue = ((Axis2MessageContext)messageContext).getProperties().
-                        get("REST_SUB_REQUEST_PATH").toString().split(QUERY_PATH_String)[1];
-                payload = URLDecoder.decode(queryURLValue, "UTF-8");
+                String[] queryParams = ((Axis2MessageContext) messageContext).getProperties().
+                        get(REST_SUB_REQUEST_PATH).toString().split(QUERY_PATH_String);
+                if (queryParams.length > 0) {
+                    String queryURLValue = queryParams[1];
+                    payload = URLDecoder.decode(queryURLValue, UNICODE_TRANSFORMATION_FORMAT);
+                } else {
+                    handleFailure(messageContext, "payload cannot be empty");
+                    return false;
+                }
             }
 
-            Parser parser = new Parser();
+            // Validate payload with graphQLSchema
             Document document = parser.parseDocument(payload);
-            SchemaParser schemaParser = new SchemaParser();
-            GraphQLSchema schema = null;
-
             Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID + "_graphQL");
             if (localEntryObj != null) {
                 TypeDefinitionRegistry registry = schemaParser.parse(localEntryObj.getValue().toString());
@@ -105,36 +138,41 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 Validator validator = new Validator();
                 validationErrors = validator.validateDocument(schema, document);
             }
-            if (validationErrors.size() > 0) {
-                for(ValidationError error : validationErrors) {
+            if (validationErrors != null && validationErrors.size() > 0) {
+                for (ValidationError error : validationErrors) {
                     validationErrorMessageList.add(error.getDescription());
                 }
                 validationErrorMessage = String.join(",", validationErrorMessageList);
-                handleValidationFailure(messageContext, validationErrorMessage);
+                handleFailure(messageContext, validationErrorMessage);
                 return false;
             }
 
-            Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
-            for (GraphQLType  additionalType : additionalTypes) {
-                if(additionalType.getName().contains(scopeRoleMapping)) {
-                    String scope = additionalType.getName().split("_")[1];
-                    additionalType.getChildren();
-                    for (GraphQLType a :  additionalType.getChildren()) {
-                        roleArray.add(a.getName());
+            // Extract the scopes and operations from local Entry and set them to Properties
+            if (schema != null) {
+                Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
+                for (GraphQLType additionalType : additionalTypes) {
+                    String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalType.getName().
+                            split("_", 2)[1]));
+                    for (GraphQLType type : additionalType.getChildren()) {
+                        if (additionalType.getName().contains(scopeRoleMapping)) {
+                            String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
+                            roleArrayList = new ArrayList<>();
+                            roleArrayList.add(base64DecodedURLRole);
+                        } else if (additionalType.getName().contains(scopeOperationMapping)) {
+                            String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
+                            operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
+                        }
                     }
-                    rolelist.put(scope, String.join(",", roleArray));
-                    messageContext.setProperty(GRAPHQL_SCOPE_ROLE_MAPPING, rolelist);
-                } else if (additionalType.getName().contains(scopeOperationMapping)) {
-                    String operation = additionalType.getName().split("_")[1];
-                    for (GraphQLType a : additionalType.getChildren()) {
-                        operationlist.put(operation, a.getName());
-                    }
-                    messageContext.setProperty(GRAPHQL_SCOPE_OPERATION_MAPPING, operationlist);
+                    scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
                 }
             }
 
+            messageContext.setProperty(GRAPHQL_SCOPE_ROLE_MAPPING, scopeRoleMappingList);
+            messageContext.setProperty(GRAPHQL_SCOPE_OPERATION_MAPPING, operationScopeMappingList);
             messageContext.setProperty(API_TYPE, GRAPHQL_API);
-            for (Definition definition : new Parser().parseDocument(payload)
+
+            // Extract operationType and operations from the payload
+            for (Definition definition : parser.parseDocument(payload)
                     .getDefinitions()) {
                 if (definition instanceof OperationDefinition) {
                     OperationDefinition operation = (OperationDefinition) definition;
@@ -145,17 +183,17 @@ public class GraphQLAPIHandler extends AbstractHandler {
                                 if (selection instanceof Field) {
                                     Field field = (Field) selection;
                                     operationArray.add(field.getName());
-                                    System.out.print("operation - Query " + field.getName());
+                                    log.info("operation - Query " + field.getName());
                                 }
                             }
                             Collections.sort(operationArray);
                             operationList = String.join(",", operationArray);
                         } else if (operation.getOperation().equals(Operation.MUTATION)) {
                             operationList = operation.getName();
-                            System.out.print("operation - Mutation " + operation.getName());
+                            log.info("operation - Mutation " + operation.getName());
                         } else if (operation.getOperation().equals(Operation.SUBSCRIPTION)) {
                             operationList = operation.getName();
-                            System.out.print("operation - Subscription " + operation.getName());
+                            log.info("operation - Subscription " + operation.getName());
                         }
                         messageContext.setProperty(GRAPHQL_API_OPERATION_RESOURCE, operationList);
                         return true;
@@ -165,25 +203,28 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 }
             }
         } catch (IOException | XMLStreamException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            handleFailure(messageContext, e.getMessage());
         }
         return false;
     }
 
-    private void handleValidationFailure(MessageContext messageContext, String validationErrorList) {
-        OMElement payload = getFaultPayload(validationErrorList);
+    private void handleFailure(MessageContext messageContext, String errorMessage) {
+
+        OMElement payload = getFaultPayload(errorMessage);
         setFaultPayload(messageContext, payload);
-        sendFault(messageContext, UNAUTHORIZED_REQUESRT);
+        sendFault(messageContext);
     }
 
-    public static void setFaultPayload(MessageContext messageContext, OMElement payload) {
+    private static void setFaultPayload(MessageContext messageContext, OMElement payload) {
+
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         JsonUtil.removeJsonPayload(axis2MC);
         messageContext.getEnvelope().getBody().addChild(payload);
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
-        Set<String> supportedMimes = new HashSet<String>(Arrays.asList("application/x-www-form-urlencoded",
+        Set<String> supportedMimes = new HashSet<>(Arrays.asList("application/x-www-form-urlencoded",
                 "multipart/form-data",
                 "text/html",
                 "application/xml",
@@ -195,7 +236,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 "text/javascript"));
 
         // If an Accept header has been provided and is supported by the Gateway
-        if(!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)){
+        if (!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)) {
             axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
         } else {
             // If there isn't Accept Header in the request, will use error_message_type property
@@ -207,11 +248,12 @@ public class GraphQLAPIHandler extends AbstractHandler {
         }
     }
 
-    public static void sendFault(MessageContext messageContext, int status) {
+    private static void sendFault(MessageContext messageContext) {
+
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
 
-        axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
+        axis2MC.setProperty(NhttpConstants.HTTP_SC, HttpStatus.SC_UNPROCESSABLE_ENTITY);
         messageContext.setResponse(true);
         messageContext.setProperty("RESPONSE", "true");
         messageContext.setTo(null);
@@ -223,24 +265,24 @@ public class GraphQLAPIHandler extends AbstractHandler {
         if (headers != null) {
             headers.remove(HttpHeaders.AUTHORIZATION);
             headers.remove(HttpHeaders.AUTHORIZATION);
-
             headers.remove(HttpHeaders.HOST);
         }
         Axis2Sender.sendBack(messageContext);
     }
 
-    protected OMElement getFaultPayload(String list) {
+    private OMElement getFaultPayload(String message) {
+
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
                 APISecurityConstants.API_SECURITY_NS_PREFIX);
         OMElement payload = fac.createOMElement("fault", ns);
 
         OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText("401");
+        errorCode.setText(HttpStatus.SC_UNPROCESSABLE_ENTITY + "");
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(list);
+        errorMessage.setText(INVALID_QUERY);
         OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(list);
+        errorDetail.setText(message);
 
         payload.addChild(errorCode);
         payload.addChild(errorMessage);
@@ -250,6 +292,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     @Override
     public boolean handleResponse(MessageContext messageContext) {
+
         return true;
     }
 }

@@ -359,7 +359,7 @@ public class APIKeyValidator {
     public String getResourceAuthenticationScheme(MessageContext synCtx) throws APISecurityException {
 
         VerbInfoDTO verb = null;
-        List<VerbInfoDTO> verbInfoList = null;
+        List<VerbInfoDTO> verbInfoList;
         TracingSpan span = null;
         try {
             if (Util.tracingEnabled()) {
@@ -367,7 +367,6 @@ public class APIKeyValidator {
                 TracingTracer tracer = Util.getGlobalTracer();
                 span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
             }
-
             verbInfoList = findMatchingVerb(synCtx);
 
             if (verbInfoList != null && verbInfoList.toArray().length > 0){
@@ -490,7 +489,6 @@ public class APIKeyValidator {
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String) synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         String apiName = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API);
-        List<VerbInfoDTO> operationListVerbInfoDTO = new ArrayList();
 
         //This function is used by more than one handler. If on one execution of this function, it has found and placed
         //the matching verb in the cache, the same can be re-used from all handlers since all handlers share the same
@@ -509,10 +507,9 @@ public class APIKeyValidator {
 
         if (isGatewayAPIResourceValidationEnabled) {
             resourceCacheKey = (String) synCtx.getProperty(APIConstants.API_RESOURCE_CACHE_KEY);
-            List<VerbInfoDTO> verbInfoList = new ArrayList<VerbInfoDTO>();
+            List<VerbInfoDTO> verbInfoList;
             if (resourceCacheKey != null) {
                 verbInfoList = (List<VerbInfoDTO>) getResourceCache().get(resourceCacheKey);
-
                 //Cache hit
                 if (verbInfoList != null && verbInfoList.toArray().length > 0) {
                     if (log.isDebugEnabled()) {
@@ -637,7 +634,7 @@ public class APIKeyValidator {
             }
         }
 
-        boolean IsResourceMatched = false;
+        boolean isResourceMatched = false;
 
         if (apiInfoDTO.getResources() != null) {
             for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
@@ -646,33 +643,32 @@ public class APIKeyValidator {
                     final String[] operationResources = operationString.split(",");
                     for (String resource : operationResources) {
                         if (isResourcePathMatching(resource, resourceInfoDTO)) {
-                            IsResourceMatched = true;
-
+                            isResourceMatched = true;
                         } else{
-                            IsResourceMatched = false;
+                            isResourceMatched = false;
                             break;
                         }
                     }
                 } else {
                     if (isResourcePathMatching(resourceString, resourceInfoDTO)) {
-                        IsResourceMatched = true;
+                        isResourceMatched = true;
                     }
                 }
 
-                List<VerbInfoDTO> verbInfoList = new ArrayList<VerbInfoDTO>();
-
-                if (IsResourceMatched) {
+                List<VerbInfoDTO> verbInfoList = new ArrayList<>();
+                if (isResourceMatched) {
                     for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
                         if (verbDTO.getHttpVerb().equals(httpMethod)) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Putting resource object in cache with key: " + resourceCacheKey);
                             }
                             if (isGraphQLAPI) {
-                                String operationCacheKey = "";
-                                List<String> operationCacheKeyArray = new ArrayList<String>();
+
+                                String operationCacheKey;
+                                List<VerbInfoDTO> operationListVerbInfoDTO = new ArrayList<>();
                                 VerbInfoDTO operationVerbInfoDTO =  new VerbInfoDTO();
                                 String operationList = (String) synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_RESOURCE);
-                                List<String> operationResourceArray = new ArrayList<String>(Arrays.asList(operationList.split(",")));
+                                List<String> operationResourceArray = new ArrayList<>(Arrays.asList(operationList.split(",")));
 
                                 for (String operationResource : operationResourceArray) {
                                     operationCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, operationResource, httpVerb);
@@ -685,7 +681,6 @@ public class APIKeyValidator {
                                     operationVerbInfoDTO.setApplicableLevel(verbDTO.getApplicableLevel());
                                     operationVerbInfoDTO.setRequestKey(operationCacheKey);
                                     operationListVerbInfoDTO.add(operationVerbInfoDTO);
-                                    operationCacheKeyArray.add(operationCacheKey);
                                 }
                                 verbInfoList = operationListVerbInfoDTO;
                             } else {

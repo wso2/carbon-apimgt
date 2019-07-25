@@ -23,9 +23,7 @@ import com.google.gson.Gson;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.TypeDefinition;
-import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.UnExecutableSchemaGenerator;
@@ -75,14 +73,16 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -420,20 +420,30 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdGraphqlSchemaPost(String apiId, GraphQLSchemaDTO body, MessageContext messageContext) {
+    public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
                     tenantDomain);
-            String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
-            GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
-            dto.setSchemaDefinition(schemaContent);
-            dto.setName(apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    apiIdentifier.getApiName() + apiIdentifier.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
-            return Response.ok().entity(dto).build();
-        } catch (APIManagementException e) {
+
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            schemaDefinition = URLDecoder.decode(schemaDefinition.split
+                            (APIConstants.GRAPHQL_SCHEMA_DEFINITION_SEPARATOR)[1], StandardCharsets.UTF_8.name());
+            List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schemaDefinition);
+            Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI,operationArray);
+            originalAPI.setUriTemplates(uriTemplates);
+
+            String resourcePath = apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
+                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
+            apiProvider.uploadGraphqlSchema(resourcePath, schemaDefinition);
+            apiProvider.updateAPI(originalAPI);
+
+            String schema = apiProvider.getGraphqlSchema(apiIdentifier);
+            return Response.ok().entity(schema).build();
+        } catch (APIManagementException | UnsupportedEncodingException | FaultGatewaysException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -443,7 +453,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
                                 log);
             } else {
-                String errorMessage = "Error while retrieving schema of API: " + apiId;
+                String errorMessage = "Error while uploading schema of the API: " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -1740,31 +1750,23 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisImportGraphQLSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
-                                                String additionalProperties, String ifMatch, MessageContext messageContext) {
+                                                String additionalProperties, String ifMatch,
+                                                MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;
-        InputStreamReader fileContent;
-        BufferedReader contentBufferReader;
-        StringBuilder contentBuilder = new StringBuilder();
-        String content = "";
+        String schema = "";
 
         try {
             if (fileInputStream == null || StringUtils.isBlank(additionalProperties)) {
                 String errorMessage = "GraphQL schema and api details cannot be empty.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
+            } else {
+                schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
             }
 
-            fileContent = new InputStreamReader(fileInputStream);
-            contentBufferReader = new BufferedReader(fileContent);
-            while ((content = contentBufferReader.readLine()) != null) {
-                contentBuilder.append(content);
-            }
-
-            String schema = contentBuilder.toString();
-
-            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(schema)){
+            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(schema)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Deseriallizing additionalProperties: " + additionalProperties + "/n"
-                    + "importing schema: " + schema );
+                            + "importing schema: " + schema);
                 }
             }
 
@@ -1808,9 +1810,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
     } catch (IOException e) {
-        String errorMessage = "Error while retrieving content from file : " + additionalPropertiesAPI.getProvider() + "-" +
-                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + "-" /*+ body.getEndpointConfig()*/;
-        RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            String errorMessage = "Error while retrieving content from file : " + additionalPropertiesAPI.getProvider()
+                    + "-" + additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion()
+                    + "-" /*+ body.getEndpointConfig()*/;
+                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
     }
         return null;
     }
@@ -1825,28 +1828,18 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
 
-        InputStreamReader fileContent = null;
-        BufferedReader contentBufferReader = null;
-        boolean isvalid = true;
         String errorMessage = "";
-        String content = "";
-        StringBuilder contentBuilder = new StringBuilder();
-        Parser parser = new Parser();
+        String schema;
+        TypeDefinitionRegistry typeRegistry;
+        Set<SchemaValidationError> validationErrors;
+        boolean isValid = false;
         SchemaParser schemaParser = new SchemaParser();
-        SchemaGenerator schemaGenerator = new SchemaGenerator();
-        TypeDefinitionRegistry typeRegistry = null;
-        Set<SchemaValidationError> validationErrors = null;
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
 
         try {
-            fileContent = new InputStreamReader(fileInputStream);
-            contentBufferReader = new BufferedReader(fileContent);
-            while ((content = contentBufferReader.readLine()) != null) {
-                contentBuilder.append(content);
-            }
-            String schema = contentBuilder.toString();
+            schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
 
-            if (schema == null) {
+            if (schema.isEmpty()) {
                 errorMessage = "GraphQL Schema cannot be empty or null to validate it";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
@@ -1857,44 +1850,52 @@ public class ApisApiServiceImpl implements ApisApiService {
             validationErrors = schemaValidation.validateSchema(graphQLSchema);
 
             if (validationErrors.toArray().length > 0) {
-                isvalid = false;
                 errorMessage = "InValid Schema";
             } else {
-                validationResponse.setIsValid(isvalid);
+                isValid = true;
+                validationResponse.setIsValid(isValid);
                 GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
-                List<APIOperationsDTO> operationlist = new ArrayList();
-                // graphQLInfo.setGraphQLSchema(schema);
-
-                Map<java.lang.String, graphql.language.TypeDefinition> operationList = typeRegistry.types();
-                for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
-                    ArrayList<String> types = new ArrayList<>();
-                    int index = 0;
-                    if (entry.getValue().getName().equals("Query") || entry.getValue().getName().equals("Mutation")
-                            || entry.getValue().getName().equals("Subscription")) {
-                        for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
-                            APIOperationsDTO operation = new APIOperationsDTO();
-                            operation.setVerb(entry.getKey());
-                            operation.setTarget(fieldDef.getName());
-                            operationlist.add(operation);
-                        }
-                    }
-                }
-                graphQLInfo.setOperations(operationlist);
+                List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schema);
+                graphQLInfo.setOperations(operationArray);
+                GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
+                schemaObj.setSchemaDefinition(schema);
+                graphQLInfo.setGraphQLSchema(schemaObj);
                 validationResponse.setGraphQLInfo(graphQLInfo);
             }
-        } catch (SchemaProblem e) {
-            isvalid = false;
-            errorMessage = e.getMessage();
-        } catch (IOException e) {
-            isvalid = false;
+        } catch (SchemaProblem | IOException e) {
             errorMessage = e.getMessage();
         }
 
-        if(isvalid == false) {
-            validationResponse.setIsValid(isvalid);
+        if(!isValid) {
+            validationResponse.setIsValid(isValid);
             validationResponse.setErrorMessage(errorMessage);
         }
         return Response.ok().entity(validationResponse).build();
+    }
+
+    /**
+     *
+     * @param schema
+     * @return the arrayList of APIOperationsDTO
+     */
+    private List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
+        List<APIOperationsDTO> operationArray = new ArrayList<>();
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+        Map<java.lang.String, graphql.language.TypeDefinition> operationList = typeRegistry.types();
+        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
+            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_QUERY) ||
+                    entry.getValue().getName().equals(APIConstants.GRAPHQL_MUTATION)
+                    || entry.getValue().getName().equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
+                for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
+                    APIOperationsDTO operation = new APIOperationsDTO();
+                    operation.setVerb(entry.getKey());
+                    operation.setTarget(fieldDef.getName());
+                    operationArray.add(operation);
+                }
+            }
+        }
+        return operationArray;
     }
 
     @Override

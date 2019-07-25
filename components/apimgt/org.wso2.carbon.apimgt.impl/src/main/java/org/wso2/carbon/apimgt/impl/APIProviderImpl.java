@@ -5973,21 +5973,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             api.setType(APIConstants.GRAPHQL_API);
-            List<String> httpVerbList = new ArrayList();
-            httpVerbList.add("GET");
-            httpVerbList.add("POST");
-            Set<URITemplate> uriTemplates = new HashSet<>();
-            URITemplate template = new URITemplate();
-            for(String verb : httpVerbList) {
-                template.setHTTPVerb(verb);
-                template.setResourceURI("/*");
-                uriTemplates.add(template);
-            }
-            api.setUriTemplates(uriTemplates);
-        } else {
-            api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         }
-
+        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.publishToGateway(api, builder, tenantDomain);
     }
