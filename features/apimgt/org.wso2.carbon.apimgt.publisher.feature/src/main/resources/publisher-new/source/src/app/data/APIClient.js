@@ -17,6 +17,7 @@
  */
 
 import SwaggerClient from 'swagger-client';
+import { Mutex } from 'async-mutex';
 import AuthManager from './AuthManager';
 import Utils from './Utils';
 
@@ -35,13 +36,6 @@ class APIClient {
      */
     constructor(environment, args = {}) {
         this.environment = environment || Utils.getCurrentEnvironment();
-
-        const authorizations = {
-            OAuth2Security: {
-                token: { access_token: AuthManager.getUser(environment.label).getPartialToken() },
-            },
-        };
-
         SwaggerClient.http.withCredentials = true;
         const promisedResolve = SwaggerClient.resolve({
             url: Utils.getSwaggerURL(),
@@ -53,7 +47,6 @@ class APIClient {
         this._client = promisedResolve.then((resolved) => {
             const argsv = Object.assign(args, {
                 spec: this._fixSpec(resolved.spec),
-                authorizations,
                 requestInterceptor: this._getRequestInterceptor(),
                 responseInterceptor: this._getResponseInterceptor(),
             });
@@ -140,9 +133,9 @@ class APIClient {
                 console.log('User not found. Token refreshing failed.');
                 return request;
             }
-            const existingToken = AuthManager.getUser(this.environment.label).getPartialToken();
+            let existingToken = AuthManager.getUser(this.environment.label).getPartialToken();
             const refToken = AuthManager.getUser(this.environment.label).getRefreshPartialToken();
-            if (existingToken && (existingToken !== 'undefined')) {
+            if (existingToken) {
                 request.headers.authorization = 'Bearer ' + existingToken;
                 return request;
             } else {
@@ -152,19 +145,33 @@ class APIClient {
                     return request;
                 }
             }
+
+            const mutex = new Mutex();
+            const env = this.environment;
             const promise = new Promise((resolve, reject) => {
-                AuthManager.refresh(this.environment)
-                    .then(res => res.json())
-                    .then(() => {
-                        request.headers.authorization = 'Bearer '
-                            + AuthManager.getUser(this.environment.label).getPartialToken();
+                mutex.acquire().then((release) => {
+                    existingToken = AuthManager.getUser(env.label).getPartialToken();
+                    if (existingToken) {
+                        request.headers.authorization = 'Bearer ' + existingToken;
+                        release();
                         resolve(request);
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        reject(request);
-                    });
+                    } else {
+                        AuthManager.refresh(env).then(res => res.json())
+                            .then(() => {
+                                request.headers.authorization = 'Bearer '
+                                + AuthManager.getUser(env.label).getPartialToken();
+                                resolve(request);
+                            }).catch((error) => {
+                                console.error('Error:', error);
+                                reject(request);
+                            })
+                            .finally(() => {
+                                release();
+                            });
+                    }
+                });
             });
+
             if (
                 APIClient.getETag(request.url) &&
                 (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')

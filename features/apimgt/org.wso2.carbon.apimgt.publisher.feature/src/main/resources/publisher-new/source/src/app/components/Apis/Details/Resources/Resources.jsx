@@ -208,8 +208,8 @@ class Resources extends React.Component {
                 }
             });
 
-        const promised_resPolicies = Api.policies('api');
-        promised_resPolicies
+        const promisedResPolicies = Api.policies('api');
+        promisedResPolicies
             .then((policies) => {
                 this.setState({ apiPolicies: policies.obj.list });
             })
