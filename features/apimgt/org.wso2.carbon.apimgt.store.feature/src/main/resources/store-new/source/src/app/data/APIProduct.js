@@ -36,15 +36,15 @@ export default class APIProduct extends Resource {
      * @returns {promise} With given callback attached to the success chain else API Product invoke promise.
      */
     getAllAPIProducts(callback = null) {
-        const promise_get_all = this.client.then(
+        const promiseGetAll = this.client.then(
             (client) => {
                 return client.apis['API Products (Collection)'].get_api_products({}, this._requestMetaData());
             },
         );
         if (callback) {
-            return promise_get_all.then(callback);
+            return promiseGetAll.then(callback);
         } else {
-            return promise_get_all;
+            return promiseGetAll;
         }
     }
 
@@ -55,7 +55,7 @@ export default class APIProduct extends Resource {
      * @returns {promise} With given callback attached to the success chain else API product invoke promise.
      */
     getAPIProductById(id, callback = null) {
-        const promise_get = this.client.then(
+        const promiseGet = this.client.then(
             (client) => {
                 return client.apis['API Product (Individual)'].get_api_products__apiProductId__(
                     { apiProductId: id }, this._requestMetaData(),
@@ -63,9 +63,9 @@ export default class APIProduct extends Resource {
             },
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promiseGet.then(callback);
         } else {
-            return promise_get;
+            return promiseGet;
         }
     }
 
@@ -76,7 +76,7 @@ export default class APIProduct extends Resource {
      * @deprecated Use Application.all method instead
      */
     getAllApplications(callback = null) {
-        const promise_get = this.client.then(
+        const promiseGet = this.client.then(
             (client) => {
                 return client.apis['Application (Collection)'].get_applications(
                     {}, this._requestMetaData(),
@@ -84,9 +84,9 @@ export default class APIProduct extends Resource {
             },
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promiseGet.then(callback);
         } else {
-            return promise_get;
+            return promiseGet;
         }
     }
 
@@ -97,7 +97,7 @@ export default class APIProduct extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSubscriptions(apiId, applicationId, callback = null) {
-        const promise_get = this.client.then(
+        const promiseGet = this.client.then(
             (client) => {
                 return client.apis['Subscription (Collection)'].get_subscriptions(
                     { apiId, applicationId }, this._requestMetaData(),
@@ -105,9 +105,9 @@ export default class APIProduct extends Resource {
             },
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promiseGet.then(callback);
         } else {
-            return promise_get;
+            return promiseGet;
         }
     }
 }
