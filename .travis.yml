@@ -4,7 +4,7 @@ sudo: true
 dist: trusty
 
 # Using -q Quiet output which only show errors, to overcome TravisCI log limit issue
-script: mvn clean install -Dmaven.test.skip -q -B -V | grep -v DEBUG; exit "${PIPESTATUS[0]}";
+script: mvn clean install -Dmaven.test.skip -q -B -V
 
 cache:
   directories:
