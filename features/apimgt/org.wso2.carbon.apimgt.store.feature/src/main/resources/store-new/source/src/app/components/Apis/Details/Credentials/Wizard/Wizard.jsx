@@ -94,20 +94,26 @@ class Wizard extends Component {
         };
     }
 
-    setCompletedStep = (completedStep) => {
-        this.setState((prevState) => {
-            return { [completedStep]: !prevState[completedStep] };
-        });
-    }
-
+    /**
+     * Set the created app from step 1
+     * @param {*} createdApp app created
+     */
     setCreatedApp = (createdApp) => {
         this.setState({ createdApp });
     }
 
+    /**
+     * Set the created app from step 3
+     * @param {*} createdToken token created
+     */
     setCreatedToken = (createdToken) => {
         this.setState({ createdToken });
     }
 
+    /**
+     * Increment the current step or next step by 1
+     * @param {*} type step type
+     */
     handleNext = (type) => {
         switch (type) {
             case 'current':
@@ -125,6 +131,9 @@ class Wizard extends Component {
         }
     }
 
+    /**
+     * Decrement the next step by 1
+     */
     handleBack = () => {
         this.setState(({ nextStep }) => {
             return { nextStep: nextStep - 1 };
@@ -134,7 +143,7 @@ class Wizard extends Component {
     handleReset = () => {
         this.setState({
             currentStep: 0,
-            nextStep: 1,
+            nextStep: 0,
         });
     };
 
@@ -278,12 +287,17 @@ class Wizard extends Component {
 }
 
 Wizard.propTypes = {
-    // classes: PropTypes.shpae({
-    //     appBar: PropTypes.shape({}),
-    //     toolbar: PropTypes.shape({}),
-    //     subscribeTitle: PropTypes.shape({}),
-    //     plainContent: PropTypes.shape({}),
-    // }).isRequired,
+    classes: PropTypes.shape({
+        appBar: PropTypes.string,
+        toolbar: PropTypes.string,
+        subscribeTitle: PropTypes.string,
+        plainContent: PropTypes.string,
+        root: PropTypes.string,
+        instructions: PropTypes.string,
+        button: PropTypes.string,
+        wizardContent: PropTypes.string,
+        wizardButtons: PropTypes.string,
+    }).isRequired,
     updateSubscriptionData: PropTypes.func.isRequired,
     handleClickToggle: PropTypes.func.isRequired,
     apiId: PropTypes.string.isRequired,

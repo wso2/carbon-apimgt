@@ -26,7 +26,6 @@ const generateAccessTokenStep = (props) => {
     const [tab, setTab] = useState(0);
     const [subscriptionScopes, setSubscriptionScopes] = useState([]);
     const [notFound, setNotFound] = useState(false);
-    const [notFound, setNotFound] = useState(false);
 
     const [accessTokenRequest, setAccessTokenRequest] = useState({
         timeout: 3600,

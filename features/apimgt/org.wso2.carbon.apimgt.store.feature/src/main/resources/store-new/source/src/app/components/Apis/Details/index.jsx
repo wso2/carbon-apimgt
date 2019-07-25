@@ -23,7 +23,7 @@ import {
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -298,12 +298,13 @@ class Details extends React.Component {
     render() {
         this.updateActiveLink();
 
-        const { classes, theme, intl, } = this.props;
+        const { classes, theme, intl } = this.props;
         const { active, api } = this.state;
         const redirect_url = '/apis/' + this.props.match.params.api_uuid + '/overview';
         const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
-        return ( api ? <ApiContext.Provider value={this.state}>
+        return (api ? (
+            <ApiContext.Provider value={this.state}>
                 <style>{globalStyle}</style>
                 <div className={classes.LeftMenu}>
                     <Link to='/apis' className={classes.leftLInkMainWrapper}>
@@ -327,7 +328,8 @@ class Details extends React.Component {
                     <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
-            </ApiContext.Provider> : <div class="apim-dual-ring"></div>
+            </ApiContext.Provider>
+        ) : <div className='apim-dual-ring' />
         );
     }
 }
