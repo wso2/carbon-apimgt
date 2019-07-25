@@ -27,7 +27,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
@@ -112,6 +112,13 @@ class NewApp extends React.Component {
                 }
                 const allAppAttributes = [];
                 allAttributes.body.list.map(item => allAppAttributes.push(item));
+                if (allAppAttributes.length > 0) {
+                    for (let i = 0; i < allAppAttributes.length; i++) {
+                        if (allAppAttributes[i].hidden !== 'true') {
+                            newRequest.attributes
+                        }
+                    }
+                }
                 this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
             })
             .catch((error) => {
@@ -174,6 +181,39 @@ class NewApp extends React.Component {
     };
 
     /**
+     * @param {object} attributes application attributes list
+     * @returns {object}
+     * @memberof EditApp
+     */
+    validateAttributes = (attributes) => {
+        const { intl } = this.props;
+        const { allAppAttributes } = this.state;
+        let isValidAttribute = true;
+        const attributeNameList = Object.keys(attributes);
+        if (allAppAttributes.length > 0) {
+            for (let i = 0; i < allAppAttributes.length; i++) {
+                if (allAppAttributes[i].required === 'true') {
+                    if (attributeNameList.indexOf(allAppAttributes[i].attribute) === -1) {
+                        isValidAttribute = false;
+                    } else if (attributeNameList.indexOf(allAppAttributes[i].attribute) > -1
+                    && (!attributes[allAppAttributes[i].attribute]
+                        || attributes[allAppAttributes[i].attribute].trim() === '')) {
+                        isValidAttribute = false;
+                    }
+                }
+            }
+        }
+        if (!isValidAttribute) {
+            return Promise.reject(new Error(intl.formatMessage({
+                id: 'Applications.Edit.app.update.error.no.required.attribute',
+                defaultMessage: 'Please fill all required application attributes',
+            })));
+        } else {
+            return Promise.resolve(true);
+        }
+    };
+
+    /**
      * Validate and send the application create
      * request to the backend
      * @memberof NewApp
@@ -183,6 +223,7 @@ class NewApp extends React.Component {
         const { updateApps } = this.props;
         const api = new API();
         this.validateName(applicationRequest.name)
+            .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.createApplication(applicationRequest))
             .then(() => {
                 console.log('Application created successfully.');
@@ -216,9 +257,13 @@ class NewApp extends React.Component {
     };
 
     validateName = (value) => {
+        const { intl } = this.props;
         if (!value || value.trim() === '') {
             this.setState({ isNameValid: false });
-            return Promise.reject(new Error('Application name is required'));
+            return Promise.reject(new Error(intl.formatMessage({
+                id: 'Applications.Create.NewApp.app.name.required',
+                defaultMessage: 'Application name is required',
+            })));
         }
         this.setState({ isNameValid: true });
         return Promise.resolve(true);
@@ -308,6 +353,7 @@ class NewApp extends React.Component {
 
 NewApp.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(NewApp);
+export default injectIntl(withStyles(styles)(NewApp));

@@ -96,7 +96,7 @@ class EditApp extends React.Component {
             },
             isNameValid: true,
             throttlingPolicyList: [],
-            allAppAttributes: null,
+            allAppAttributes: [],
         };
     }
 
@@ -189,6 +189,39 @@ class EditApp extends React.Component {
     };
 
     /**
+     * @param {object} attributes application attributes list
+     * @returns {object}
+     * @memberof EditApp
+     */
+    validateAttributes = (attributes) => {
+        const { intl } = this.props;
+        const { allAppAttributes } = this.state;
+        let isValidAttribute = true;
+        const attributeNameList = Object.keys(attributes);
+        if (allAppAttributes.length > 0) {
+            for (let i = 0; i < allAppAttributes.length; i++) {
+                if (allAppAttributes[i].required === 'true') {
+                    if (attributeNameList.indexOf(allAppAttributes[i].attribute) === -1) {
+                        isValidAttribute = false;
+                    } else if (attributeNameList.indexOf(allAppAttributes[i].attribute) > -1
+                    && (!attributes[allAppAttributes[i].attribute]
+                        || attributes[allAppAttributes[i].attribute].trim() === '')) {
+                        isValidAttribute = false;
+                    }
+                }
+            }
+        }
+        if (!isValidAttribute) {
+            return Promise.reject(new Error(intl.formatMessage({
+                id: 'Applications.Edit.app.update.error.no.required.attribute',
+                defaultMessage: 'Please fill all required application attributes',
+            })));
+        } else {
+            return Promise.resolve(true);
+        }
+    };
+
+    /**
      * @param {Object} event the event object
      * @memberof EditApp
      */
@@ -197,10 +230,10 @@ class EditApp extends React.Component {
         const {
             history, intl,
         } = this.props;
-        this.validateName(applicationRequest.name);
         const api = new API();
-        const promisedUpdate = api.updateApplication(applicationRequest, null);
-        promisedUpdate
+        this.validateName(applicationRequest.name)
+            .then(() => this.validateAttributes(applicationRequest.attributes))
+            .then(() => api.updateApplication(applicationRequest, null))
             .then((response) => {
                 const appId = response.body.applicationId;
                 const redirectUrl = '/applications/' + appId;
@@ -212,11 +245,14 @@ class EditApp extends React.Component {
                 console.log('Application updated successfully.');
             })
             .catch((error) => {
-                Alert.error(intl.formatMessage({
-                    id: 'Applications.Edit.error.update.app',
-                    defaultMessage: 'Error while updating application',
-                }));
-                console.log('Error while updating application ' + error);
+                const { response } = error;
+                if (response && response.body) {
+                    const message = response.body.description || 'Error while updating the application';
+                    Alert.error(message);
+                } else {
+                    Alert.error(error.message);
+                }
+                console.error('Error while updating the application');
             });
     };
 
@@ -235,9 +271,13 @@ class EditApp extends React.Component {
     };
 
     validateName = (value) => {
+        const { intl } = this.props;
         if (!value || value.trim() === '') {
             this.setState({ isNameValid: false });
-            return Promise.reject(new Error('Application name is required'));
+            return Promise.reject(new Error(intl.formatMessage({
+                id: 'Applications.Edit.app.name.required',
+                defaultMessage: 'Application name is required',
+            })));
         }
         this.setState({ isNameValid: true });
         return Promise.resolve(true);

@@ -219,6 +219,7 @@ const ApplicationCreate = (props) => {
 
 ApplicationCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(ApplicationCreate));
