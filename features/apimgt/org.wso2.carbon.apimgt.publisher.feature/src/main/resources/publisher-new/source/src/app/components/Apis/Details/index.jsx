@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
-// import ScopesIcon from '@material-ui/icons/VpnKey';
+import ScopesIcon from '@material-ui/icons/VpnKey';
 // import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 // import CommentsIcon from '@material-ui/icons/CommentRounded';
@@ -32,7 +32,7 @@ import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
-import { injectIntl } from 'react-intl';
+import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -42,7 +42,7 @@ import { PageNotFound } from 'AppComponents/Base/Errors';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
-
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
@@ -213,6 +213,8 @@ class Details extends Component {
                 const { status } = error;
                 if (status === 404) {
                     this.setState({ apiNotFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
                 }
             });
     }
@@ -312,7 +314,6 @@ class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
-        const { intl } = this.props;
         const {
             api, apiNotFound, active, isAPIProduct,
         } = this.state;
@@ -320,6 +321,7 @@ class Details extends Component {
             classes,
             theme,
             match,
+            intl,
             location: pageLocation,
             location: { pathname }, // nested destructuring
         } = this.props;
@@ -331,18 +333,22 @@ class Details extends Component {
         const redirectUrl = (isAPIProduct ? '/api-products/' : '/apis/') + match.params.api_uuid + '/' + active;
         if (apiNotFound) {
             const { apiUUID } = match.params;
+            const resourceNotFoundMessageText = defineMessages({
+                titleMessage: {
+                    id: 'Apis.Details.index.api.not.found.title',
+                    defaultMessage: 'API is Not Found in the {environmentLabel} Environment',
+                },
+                bodyMessage: {
+                    id: 'Apis.Details.index.api.not.found.body',
+                    defaultMessage: "Can't find the API with the id {apiUUID}",
+                },
+            });
             const resourceNotFountMessage = {
-                title: intl.formatMessage({
-                    id: 'Apis.Details.index.api.not.found.in',
-                    defaultMessage: 'API is Not Found in the ',
-                }) + `${Utils.getCurrentEnvironment().label}` + intl.formatMessage({
-                    id: 'Apis.Details.index.environment',
-                    defaultMessage: ' Environment',
-                }),
-                body: intl.formatMessage({
-                    id: 'Apis.Details.index.cannot.find.api.with.id',
-                    defaultMessage: "Can't find the API with the id ",
-                }) + `${apiUUID}`,
+                title: (intl.formatMessage(
+                    resourceNotFoundMessageText.titleMessage,
+                    { environmentLabel: `${Utils.getCurrentEnvironment().label}` },
+                )),
+                body: intl.formatMessage(resourceNotFoundMessageText.bodyMessage, { apiUUID: `${apiUUID}` }),
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
@@ -377,15 +383,6 @@ class Details extends Component {
                             handleMenuSelect={this.handleMenuSelect}
                             active={active}
                             Icon={<ConfigurationIcon />}
-                        />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.endpoints',
-                                defaultMessage: 'endpoints',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<EndpointIcon />}
                         />
                         {isAPIProduct ? null : (
                             <LeftMenuItem
@@ -425,13 +422,15 @@ class Details extends Component {
                             active={active}
                             Icon={<LifeCycleIcon />}
                         />
-                        {/* TODO: uncomment when component run without errors */}
-                        {/* <LeftMenuItem
-                         text='scopes'
-                         handleMenuSelect={this.handleMenuSelect}
-                         active={active}
-                         Icon={<ScopesIcon />}
-                         /> */}
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.left.menu.scope',
+                                defaultMessage: 'scopes',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ScopesIcon />}
+                        />
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.documents',
@@ -572,8 +571,8 @@ Details.propTypes = {
             leftMenuIconMainSize: PropTypes.number,
         }),
     }).isRequired,
-    intl: PropTypes.shape({}).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Details));

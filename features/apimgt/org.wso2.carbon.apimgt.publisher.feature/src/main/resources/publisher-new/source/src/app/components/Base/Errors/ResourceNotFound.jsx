@@ -19,6 +19,7 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 const ResourceNotFound = (props) => {
     const { response } = props;
@@ -28,10 +29,18 @@ const ResourceNotFound = (props) => {
         <div>
             <div className='message message-danger'>
                 <Typography variant='title' gutterBottom>
-                    {message.title || '404 Resource Not Found!'}
+                    { message.title ||
+                    <FormattedMessage
+                        id='Base.Errors.ResourceNotfound.header'
+                        defaultMessage='404 Resource Not Found!'
+                    /> }
                 </Typography>
                 <Typography variant='subheading' gutterBottom>
-                    {message.body || "Can't find the resource you are looking for"}
+                    { message.body ||
+                    <FormattedMessage
+                        id='Base.Errors.ResourceNotfound.message'
+                        defaultMessage='Can&apos;t find the resource you are looking for'
+                    /> }
                     <span style={{ color: 'green' }}> {response ? response.statusText : ''} </span>
                 </Typography>
                 {message.more}

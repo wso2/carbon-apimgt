@@ -18,18 +18,26 @@
 
 import React from 'react';
 import PropType from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 const NotFound = (props) => {
     return (
         <div>
             <div className='message message-danger'>
                 <h4>
-                    <i className='icon fw fw-error' />404 Page Not Found!
+                    <i className='icon fw fw-error' />
+                    <FormattedMessage
+                        id='Base.Errors.PageNotfound.header'
+                        defaultMessage='404 Page Not Found!'
+                    />
                 </h4>
                 <p>
-                    Sorry the page you are looking for
+                    <FormattedMessage
+                        id='Base.Errors.PageNotfound.message.prefix'
+                        defaultMessage='Sorry the page you are looking for'
+                    />
                     <span style={{ color: 'green' }}> {props.location.pathname} </span>
-                    is not available.
+                    <FormattedMessage id='Base.Errors.PageNotfound.message.suffix' defaultMessage='is not available.' />
                 </p>
             </div>
         </div>

@@ -17,6 +17,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 // import qs from 'qs';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     profileMenu: {
@@ -111,7 +112,12 @@ class Avatar extends Component {
                                         {/* <MenuItem onClick={this.toggleMenu}>Profile</MenuItem>
                                          <MenuItem onClick={this.toggleMenu}>My account</MenuItem> */}
                                         <Link to={{ pathname: '/services/logout' }}>
-                                            <MenuItem onClick={this.doOIDCLogout} id='logout'>Logout</MenuItem>
+                                            <MenuItem onClick={this.doOIDCLogout} id='logout'>
+                                                <FormattedMessage
+                                                    id='Base.Header.avatar.Avatar.logout'
+                                                    defaultMessage='Logout'
+                                                />
+                                            </MenuItem>
                                         </Link>
                                         {/* TODO: uncomment when component run without errors */}
                                         {/* <Divider />
