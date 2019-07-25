@@ -115,7 +115,13 @@ const styles = theme => ({
 });
 
 function Overview(props) {
-    const { classes } = props;
+    const { classes, api: newApi } = props;
+    let loadResources,
+        loadScopes;
+    if (newApi.type !== 'WS') {
+        loadResources = <Resources parentClasses={classes} api={newApi} />;
+        loadScopes = <Scopes parentClasses={classes} />;
+    }
     return (
         <ApiContext.Consumer>
             {({ api, isAPIProduct }) => (
@@ -137,14 +143,14 @@ function Overview(props) {
                             <Grid item xs={12} md={6} lg={6}>
                                 <Configuration parentClasses={classes} />
                                 {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
-                                    (<Resources parentClasses={classes} api={api} />)}
+                                    (loadResources)}
                                 <AdditionalProperties parentClasses={classes} />
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Lifecycle parentClasses={classes} />
                                 {isAPIProduct ? null : (<Endpoints parentClasses={classes} api={api} />)}
                                 <BusinessInformation parentClasses={classes} />
-                                {isAPIProduct ? null : (<Scopes parentClasses={classes} />)}
+                                {isAPIProduct ? null : (loadScopes)}
                                 <Documents parentClasses={classes} api={api} />
                                 <Policies parentClasses={classes} />
                             </Grid>
