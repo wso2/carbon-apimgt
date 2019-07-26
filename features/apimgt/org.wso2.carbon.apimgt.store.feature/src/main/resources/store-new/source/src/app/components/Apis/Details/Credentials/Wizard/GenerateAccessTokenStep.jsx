@@ -23,7 +23,7 @@ import Tokens from 'AppComponents/Shared/AppsAndKeys/Tokens';
 import Application from 'AppData/Application';
 
 const generateAccessTokenStep = (props) => {
-    const [tab, setTab] = useState(0);
+    const [keyType, setKeyType] = useState('PRODUCTION');
     const [subscriptionScopes, setSubscriptionScopes] = useState([]);
     const [notFound, setNotFound] = useState(false);
 
@@ -33,19 +33,22 @@ const generateAccessTokenStep = (props) => {
         keyType: '',
     });
     const {
-        currentStep, createdApp, setCreatedToke, decrementStep, nextStep, incrementStep,
+        currentStep, createdApp, setCreatedToke, decrementStep, nextStep, incrementStep, createdKeyType,
     } = props;
+
+    useEffect(() => {
+        const newRequest = { ...accessTokenRequest, keyType: createdKeyType };
+        setKeyType(createdKeyType);
+        setAccessTokenRequest(newRequest);
+    }, [createdKeyType]);
 
     useEffect(() => {
         if (currentStep === 3) {
             Application.get(createdApp.value)
                 .then((application) => {
                     application.getKeys().then(() => {
-                        const keyType = tab === 0 ? 'PRODUCTION' : 'SANDBOX';
-                        const newRequest = { ...accessTokenRequest, keyType };
                         const subscriptionScopesList = application.subscriptionScopes
                             .map((scope) => { return scope.scopeKey; });
-                        setAccessTokenRequest(newRequest);
                         setSubscriptionScopes(subscriptionScopesList);
                     });
                 }).catch((error) => {
@@ -86,49 +89,25 @@ const generateAccessTokenStep = (props) => {
         }
     }, [nextStep]);
 
-    /**
-    * @param {*} event event
-    * @param {*} currentTab current tab
-    * @memberof Wizard
-    */
-    const handleTabChange = (event, currentTab) => {
-        const keyType = currentTab === 0 ? 'PRODUCTION' : 'SANDBOX';
-        const newRequest = { ...accessTokenRequest, keyType };
-        setTab(currentTab);
-        setAccessTokenRequest(newRequest);
-    };
-
     if (currentStep === 3) {
         return (
             <React.Fragment>
                 <Tabs
-                    value={tab}
-                    onChange={handleTabChange}
+                    value={0}
                     fullWidth
                     indicatorColor='secondary'
                     textColor='secondary'
                 >
-                    <Tab label='PRODUCTION' />
-                    <Tab label='SANDBOX' />
+                    <Tab label={keyType} />
                 </Tabs>
-                {tab === 0 && (
-                    <div>
-                        <Tokens
-                            updateAccessTokenRequest={setAccessTokenRequest}
-                            accessTokenRequest={accessTokenRequest}
-                            subscriptionScopes={subscriptionScopes}
-                        />
-                    </div>
-                )}
-                {tab === 1 && (
-                    <div>
-                        <Tokens
-                            updateAccessTokenRequest={setAccessTokenRequest}
-                            accessTokenRequest={accessTokenRequest}
-                            subscriptionScopes={subscriptionScopes}
-                        />
-                    </div>
-                )}
+                <div>
+                    <Tokens
+                        updateAccessTokenRequest={setAccessTokenRequest}
+                        accessTokenRequest={accessTokenRequest}
+                        subscriptionScopes={subscriptionScopes}
+                    />
+                </div>
+
             </React.Fragment>
         );
     }

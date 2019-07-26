@@ -33,7 +33,7 @@ const generateKeysStep = (props) => {
     });
 
     const {
-        currentStep, createdApp, decrementStep, incrementStep, nextStep,
+        currentStep, createdApp, decrementStep, incrementStep, nextStep, setCreatedKeyType,
     } = props;
 
     /**
@@ -55,6 +55,7 @@ const generateKeysStep = (props) => {
                     keyRequest.callbackUrl);
             }).then((response) => {
                 incrementStep('current');
+                setCreatedKeyType(keyRequest.keyType);
                 console.log('Keys generated successfully with ID : ' + response);
             }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {

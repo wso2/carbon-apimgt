@@ -62,6 +62,7 @@ const styles = theme => ({
     instructions: {
         marginTop: theme.spacing.unit,
         marginBottom: theme.spacing.unit,
+        'font-size': theme.spacing.unit * 2,
     },
     root: {
         paddingLeft: theme.spacing.unit,
@@ -91,6 +92,7 @@ class Wizard extends Component {
             createdApp: null,
             createdToken: null,
             redirect: false,
+            createdKeyType: '',
         };
     }
 
@@ -103,11 +105,19 @@ class Wizard extends Component {
     }
 
     /**
-     * Set the created app from step 3
+     * Set the created token from step 4
      * @param {*} createdToken token created
      */
     setCreatedToken = (createdToken) => {
         this.setState({ createdToken });
+    }
+
+    /**
+     * Set the created keytype from step 3
+     * @param {*} createdKeyType token created
+     */
+    setCreatedKeyType = (createdKeyType) => {
+        this.setState({ createdKeyType });
     }
 
     /**
@@ -164,7 +174,7 @@ class Wizard extends Component {
             throttlingPolicyList,
         } = this.props;
         const {
-            currentStep, createdApp, createdToken, redirect, nextStep,
+            currentStep, createdApp, createdToken, redirect, nextStep, createdKeyType,
         } = this.state;
 
         if (redirect) {
@@ -241,6 +251,7 @@ class Wizard extends Component {
                                     nextStep={nextStep}
                                     incrementStep={this.handleNext}
                                     decrementStep={this.handleBack}
+                                    setCreatedKeyType={this.setCreatedKeyType}
                                 />
                                 <GenerateAccessTokenStep
                                     currentStep={currentStep}
@@ -249,6 +260,7 @@ class Wizard extends Component {
                                     nextStep={nextStep}
                                     incrementStep={this.handleNext}
                                     decrementStep={this.handleBack}
+                                    createdKeyType={createdKeyType}
                                 />
                                 <CopyAccessTokenStep
                                     currentStep={currentStep}
