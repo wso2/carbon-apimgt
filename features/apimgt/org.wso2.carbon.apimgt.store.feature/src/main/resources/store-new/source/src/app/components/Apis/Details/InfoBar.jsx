@@ -658,6 +658,7 @@ class InfoBar extends React.Component {
                                         />
                                     </Typography>
                                     <Grid container spacing={16} item xs={8}>
+                                    {console.log(api.endpointURLs)}
                                         {api.endpointURLs.map(endpoint => {
                                             return <Grid key={endpoint} item xs={6} >
                                                 <ExpansionPanel>
