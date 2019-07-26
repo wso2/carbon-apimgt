@@ -652,10 +652,14 @@ class InfoBar extends React.Component {
                                 </div>
                                 <div className={classes.infoContent}>
                                     <Typography variant='subtitle2' >
-                                        Available Environments</Typography>
+                                        <FormattedMessage
+                                            id='Apis.Details.InfoBar.available.environments'
+                                            defaultMessage='Available Environments'
+                                        />
+                                    </Typography>
                                     <Grid container spacing={16} item xs={8}>
-                                        {api.endpointURLs.map(i => {
-                                            return <Grid key={i} item xs={6} >
+                                        {api.endpointURLs.map(endpoint => {
+                                            return <Grid key={endpoint} item xs={6} >
                                                 <ExpansionPanel>
                                                     <ExpansionPanelSummary
                                                         expandIcon={<ExpandMoreIcon />}
@@ -663,24 +667,33 @@ class InfoBar extends React.Component {
                                                         id="panel1a-header"
                                                     >
                                                         <div className={classes.iconAligner}>
-                                                            {i.environmentType === 'hybrid' && (
+                                                            {endpoint.environmentType === 'hybrid' && (
                                                                 <Cloud className={classes.iconEven} />
                                                             )}
-                                                            {i.environmentType === 'production' && (
+                                                            {endpoint.environmentType === 'production' && (
                                                                 <CheckCircle className={classes.iconEven} />
                                                             )}
-                                                            {i.environmentType === 'sandbox' && (
+                                                            {endpoint.environmentType === 'sandbox' && (
                                                                 <Build className={classes.iconEven} />
-                                                            )}<span className={classes.iconTextWrapper}>
-                                                                <Typography className={classes.heading}>{i.environmentName} </Typography></span>
+                                                            )}
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <Typography className={classes.heading}>
+                                                                    {endpoint.environmentName}
+                                                                </Typography>
+                                                            </span>
                                                         </div>
                                                     </ExpansionPanelSummary>
                                                     <ExpansionPanelDetails>
                                                         <Grid container item xs={12} spacing={16}>
-                                                            <Typography className={classes.heading}>Gateway URLs</Typography>
+                                                            <Typography className={classes.heading}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.gateway.urls'
+                                                                    defaultMessage='Gateway URLs'
+                                                                />
+                                                            </Typography>
                                                             <Grid item xs={12} >
                                                                 <TextField
-                                                                    defaultValue={i.environmentURLs.http}
+                                                                    defaultValue={endpoint.environmentURLs.http}
                                                                     id='bootstrap-input'
                                                                     InputProps={{
                                                                         disableUnderline: true,
@@ -695,12 +708,13 @@ class InfoBar extends React.Component {
                                                                     }}
                                                                 />
                                                                 <Tooltip
-                                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                                    title={prodUrlCopied ? 
+                                                                        'Copied' : 'Copy to clipboard'}
                                                                     placement='right'
                                                                 >
                                                                     <CopyToClipboard
                                                                         text={epUrl}
-                                                                        onCopy={this.onCopy('prodUrlCopied')}
+                                                                        onCopy={() => this.onCopy('prodUrlCopied')}
                                                                     >
                                                                         <FileCopy color='secondary' />
                                                                     </CopyToClipboard>
@@ -708,7 +722,7 @@ class InfoBar extends React.Component {
                                                             </Grid>
                                                             <Grid item xs={12} >
                                                                 <TextField
-                                                                    defaultValue={i.environmentURLs.https}
+                                                                    defaultValue={endpoint.environmentURLs.https}
                                                                     id='bootstrap-input'
                                                                     InputProps={{
                                                                         disableUnderline: true,
@@ -723,12 +737,13 @@ class InfoBar extends React.Component {
                                                                     }}
                                                                 />
                                                                 <Tooltip
-                                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
+                                                                    title={prodUrlCopied ? 
+                                                                        'Copied' : 'Copy to clipboard'}
                                                                     placement='right'
                                                                 >
                                                                     <CopyToClipboard
                                                                         text={epUrl}
-                                                                        onCopy={this.onCopy('prodUrlCopied')}
+                                                                        onCopy={() => this.onCopy('prodUrlCopied')}
                                                                     >
                                                                         <FileCopy color='secondary' />
                                                                     </CopyToClipboard>
@@ -751,7 +766,8 @@ class InfoBar extends React.Component {
                                         </Typography>
                                     ) : (
                                             <Typography className={classes.buttonOverviewText}>
-                                                <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' />
+                                                <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' 
+                                                />
                                             </Typography>
                                         )}
                                     {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
