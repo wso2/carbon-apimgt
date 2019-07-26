@@ -16,15 +16,15 @@
  *under the License.
  */
 
-package org.wso2.carbon.apimgt.keymgt.handlers;
+package org.wso2.carbon.apimgt.impl.handlers;
 
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
@@ -37,10 +37,12 @@ import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.recovery.IdentityRecoveryConstants;
 import org.wso2.carbon.identity.recovery.IdentityRecoveryServerException;
 import org.wso2.carbon.identity.recovery.util.Utils;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.api.UserStoreException;
+
 import java.util.List;
+
 import static java.util.Arrays.asList;
 
 /**
@@ -86,7 +88,7 @@ public class UserPostSelfRegistrationHandler extends AbstractEventHandler {
             throws org.wso2.carbon.identity.recovery.IdentityRecoveryServerException {
         try {
             //Realm service is used for user management tasks
-            RealmService realmService = APIKeyMgtDataHolder.getRealmService();
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             UserStoreManager userStoreManager;
             try {
                 userStoreManager = realmService.getTenantUserRealm(IdentityTenantUtil.getTenantId(tenantDomain))
