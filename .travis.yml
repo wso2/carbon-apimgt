@@ -1,5 +1,7 @@
 language: java
 sudo: true
+install:
+  - ""
 # Can't update to xenial distribution (ubuntu 16.04) bause of the Java JDK restriction (Not supporting )
 dist: trusty
 
