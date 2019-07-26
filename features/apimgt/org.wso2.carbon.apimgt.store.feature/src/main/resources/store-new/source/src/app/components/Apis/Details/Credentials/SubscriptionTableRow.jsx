@@ -24,6 +24,7 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 /**
  * @inheritdoc
@@ -77,7 +78,12 @@ const subscriptionTableRow = (props) => {
                             className={classes.button}
                             to={'/applications/' + app.value}
                         >
-                            <span>MANAGE APP</span>
+                            <span>
+                                <FormattedMessage
+                                    id='Apis.Details.Credentials.SubscriptionTableRow.manage.app'
+                                    defaultMessage='MANAGE APP'
+                                />
+                            </span>
                             <CustomIcon
                                 width={16}
                                 height={16}
@@ -100,7 +106,12 @@ const subscriptionTableRow = (props) => {
                                     updateSubscriptionData,
                                 )}
                             >
-                                <span>UNSUBSCRIBE</span>
+                                <span>
+                                    <FormattedMessage
+                                        id='Apis.Details.Credentials.SubscriptionTableRow.unsubscribe'
+                                        defaultMessage='UNSUBSCRIBE'
+                                    />
+                                </span>
                                 <CustomIcon
                                     width={16}
                                     height={16}
@@ -118,7 +129,12 @@ const subscriptionTableRow = (props) => {
                             onClick={() => loadInfo('PRODUCTION', app.value)}
                             onKeyDown={() => loadInfo('PRODUCTION', app.value)}
                         >
-                            <span>PROD KEYS</span>
+                            <span>
+                                <FormattedMessage
+                                    id='Apis.Details.Credentials.SubscriptionTableRow.prod.keys'
+                                    defaultMessage='PROD KEYS'
+                                />
+                            </span>
                             <CustomIcon
                                 width={16}
                                 height={16}
@@ -135,7 +151,12 @@ const subscriptionTableRow = (props) => {
                             onClick={() => loadInfo('SANDBOX', app.value)}
                             onKeyDown={() => loadInfo('SANDBOX', app.value)}
                         >
-                            <span>SANDBOX KEYS</span>
+                            <span>
+                                <FormattedMessage
+                                    id='Apis.Details.Credentials.SubscriptionTableRow.sandbox.keys'
+                                    defaultMessage='SANDBOX KEYS'
+                                />
+                            </span>
                             <CustomIcon
                                 width={16}
                                 height={16}

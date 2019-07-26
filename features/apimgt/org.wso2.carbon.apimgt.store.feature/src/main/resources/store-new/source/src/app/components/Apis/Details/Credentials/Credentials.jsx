@@ -25,6 +25,7 @@ import Subscription from 'AppData/Subscription';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { ApiContext } from '../ApiContext';
 import Wizard from './Wizard/Wizard';
 import SubscriptionTableRow from './SubscriptionTableRow';
@@ -161,12 +162,16 @@ class Credentials extends React.Component {
     handleSubscribe = () => {
         const { updateSubscriptionData } = this.context;
         const { subscriptionRequest } = this.state;
+        const { intl } = this.props;
         const api = new Api();
         api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
             subscriptionRequest.throttlingPolicy)
             .then((response) => {
                 console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-                Alert.info('Subscribed successfully');
+                Alert.info(intl.formatMessage({
+                    defaultMessage: 'Subscribed successfully',
+                    id: 'Apis.Details.Credentials.Credentials.subscribed.successfully',
+                }));
                 if (updateSubscriptionData) updateSubscriptionData();
                 this.setState({ openAvailable: false });
             })
@@ -215,15 +220,22 @@ class Credentials extends React.Component {
      * @memberof Subscriptions
      */
     handleSubscriptionDelete(subscriptionId, updateSubscriptionData) {
+        const { intl } = this.props;
         const client = new Subscription();
         const promisedDelete = client.deleteSubscription(subscriptionId);
         promisedDelete.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
-                Alert.info('Something went wrong while deleting the Subscription!');
+                Alert.info(intl.formatMessage({
+                    defaultMessage: 'Something went wrong while deleting the Subscription!',
+                    id: 'Apis.Details.Credentials.Credentials.something.went.wrong.with.subscription',
+                }));
                 return;
             }
-            Alert.info('Subscription deleted successfully!');
+            Alert.info(intl.formatMessage({
+                defaultMessage: 'Subscription deleted successfully!',
+                id: 'Apis.Details.Credentials.Credentials.subscription.deleted.successfully',
+            }));
             if (updateSubscriptionData) updateSubscriptionData();
         });
     }
@@ -233,7 +245,7 @@ class Credentials extends React.Component {
      * @inheritdoc
      */
     render() {
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
         const {
             api, updateSubscriptionData, applicationsAvailable, subscribedApplications,
         } = this.context;
@@ -244,21 +256,38 @@ class Credentials extends React.Component {
         return (
             <div className={classes.contentWrapper}>
                 <Typography onClick={this.handleExpandClick} variant='display1' className={classes.titleSub}>
-                    API Credentials
+                    <FormattedMessage
+                        id='Apis.Details.Credentials.Credentials.api.credentials'
+                        defaultMessage='API Credentials'
+                    />
                 </Typography>
                 <Typography variant='body1' gutterBottom>
-                    API Credentials are grouped in to applications. An application is primarily used to decouple
-                    the consumer from the APIs. It allows you to Generate and use a single key for multiple APIs
-                    and subscribe multiple times to a single API with different SLA levels.
+                    <FormattedMessage
+                        id='Apis.Details.Credentials.Credentials.'
+                        defaultMessage={`API Credentials are grouped in to applications. An application is 
+                        primarily used to decouple the consumer from the APIs. It allows you to Generate 
+                        and use a single key for multiple APIs and subscribe multiple times to a single 
+                        API with different SLA levels.`}
+                    />
                 </Typography>
                 {applicationsAvailable.length === 0 && subscribedApplications.length === 0 ? (
                     !wizardOn && (
                         <GenericDisplayDialog
                             classes={classes}
                             handleClick={this.startStopWizard}
-                            heading='Generate Credentials'
-                            caption='You need to generate credentials to access this API'
-                            buttonText='GENERATE'
+                            heading={intl.formatMessage({
+                                defaultMessage: 'Generate Credentials',
+                                id: 'Apis.Details.Credentials.Credentials.generate.credentials',
+                            })}
+                            caption={intl.formatMessage({
+                                defaultMessage: 'You need to generate credentials to access this API',
+                                id: 'Apis.Details.Credentials.Credentials.you.need.to'
+                                + '.generate.credentials.to.access.this.api',
+                            })}
+                            buttonText={intl.formatMessage({
+                                defaultMessage: 'GENERATE',
+                                id: 'Apis.Details.Credentials.Credentials.generate',
+                            })}
                         />
                     )
                 ) : (
@@ -330,7 +359,6 @@ class Credentials extends React.Component {
                         </Dialog>
                     </React.Fragment>
                 )}
-                {/* {wizardOn && <Wizard />} */}
             </div>
         );
     }
@@ -343,6 +371,7 @@ Credentials.propTypes = {
         tableMain: PropTypes.shape({}),
         th: PropTypes.shape({}),
     }).isRequired,
+    intl: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Credentials);
+export default injectIntl(withStyles(styles, { withTheme: true })(Credentials));

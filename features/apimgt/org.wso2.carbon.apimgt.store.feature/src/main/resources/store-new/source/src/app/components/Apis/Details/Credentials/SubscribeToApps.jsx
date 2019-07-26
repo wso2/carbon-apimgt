@@ -28,6 +28,7 @@ import Button from '@material-ui/core/Button';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 /**
  * @inheritdoc
@@ -58,10 +59,17 @@ const subscrbeToApps = (props) => {
     const {
         classes, api, openAvailable, handleClickToggle,
         Transition, applicationsAvailable, handleSubscribe, subscriptionRequest,
-        throttlingPolicyList, updateSubscriptionRequest,
+        throttlingPolicyList, updateSubscriptionRequest, intl,
     } = props;
     const appLength = applicationsAvailable.length;
-    const appPlaceholder = appLength > 0 ? 'Applications' : 'Application';
+    const appPlaceholder = appLength > 0
+        ? intl.formatMessage({
+            defaultMessage: 'Applications',
+            id: 'Apis.Details.Credentials.SubscibeToApps.application',
+        }) : intl.formatMessage({
+            defaultMessage: 'Application',
+            id: 'Apis.Details.Credentials.SubscibeToApps.application',
+        });
     return (
         <Dialog
             fullScreen
@@ -95,7 +103,10 @@ const subscrbeToApps = (props) => {
                                 className={classes.button}
                                 onClick={() => handleSubscribe()}
                             >
-                                Subscribe
+                                <FormattedMessage
+                                    id='Apis.Details.Credentials.SubscibeToApps.subscribe'
+                                    defaultMessage='Subscribe'
+                                />
                             </Button>
                         </Toolbar>
                     </Grid>
@@ -123,6 +134,7 @@ subscrbeToApps.propTypes = {
     handleClickToggle: PropTypes.func.isRequired,
     openAvailable: PropTypes.bool.isRequired,
     handleSubscribe: PropTypes.func.isRequired,
+    intl: PropTypes.func.isRequired,
     updateSubscriptionRequest: PropTypes.func.isRequired,
     subscriptionRequest: PropTypes.shape({}).isRequired,
     applicationsAvailable: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
@@ -133,4 +145,4 @@ subscrbeToApps.propTypes = {
     Transition: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(subscrbeToApps);
+export default injectIntl(withStyles(styles, { withTheme: true })(subscrbeToApps));

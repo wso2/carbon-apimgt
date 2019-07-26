@@ -22,6 +22,7 @@ import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import PropTypes from 'prop-types';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
     subscribeButtons: {
@@ -39,18 +40,31 @@ const styles = theme => ({
 });
 const subscibeButtonPanel = (props) => {
     const {
-        classes, avalibleAppsLength, subscribedAppsLength, handleClickToggle,
+        classes, avalibleAppsLength, subscribedAppsLength, handleClickToggle, intl,
     } = props;
     return (
         <div className={classes.subscribeButtons}>
             <div>
-                <Typography variant='headline'>Subscribed Applications</Typography>
+                <Typography variant='headline'>
+                    <FormattedMessage
+                        id='Apis.Details.Credentials.SubscibeButtonPanel.subscribed.applications'
+                        defaultMessage='Subscribed Applications'
+                    />
+                </Typography>
                 <Typography variant='caption'>
                         (
                     {' '}
                     {subscribedAppsLength}
                     {' '}
-                    {subscribedAppsLength === 1 ? 'subscription' : 'subscriptions'}
+                    {subscribedAppsLength === 1
+                        ? intl.formatMessage({
+                            defaultMessage: 'subscription',
+                            id: 'Apis.Details.Credentials.SubscibeButtonPanel.subscription',
+                        })
+                        : intl.formatMessage({
+                            defaultMessage: 'subscriptions',
+                            id: 'Apis.Details.Credentials.SubscibeButtonPanel.subscriptions',
+                        })}
                     {' '}
                         )
                 </Typography>
@@ -68,7 +82,10 @@ const subscibeButtonPanel = (props) => {
                             className={classes.buttonElm}
                             onClick={() => handleClickToggle('openAvailable')}
                         >
-                            Subscribe to Available App
+                            <FormattedMessage
+                                id='Apis.Details.Credentials.SubscibeButtonPanel.subscribe.to.available.app'
+                                defaultMessage='Subscribe to Available App'
+                            />
                         </Button>
                         <Typography
                             variant='caption'
@@ -77,7 +94,10 @@ const subscibeButtonPanel = (props) => {
                         >
                             {avalibleAppsLength}
                             {' '}
-                            Available
+                            <FormattedMessage
+                                id='Apis.Details.Credentials.SubscibeButtonPanel.available'
+                                defaultMessage='Available'
+                            />
                         </Typography>
                     </div>
                 )}
@@ -88,7 +108,10 @@ const subscibeButtonPanel = (props) => {
                     className={classes.buttonElm}
                     onClick={() => handleClickToggle('openNew')}
                 >
-                    Subscribe to New App
+                    <FormattedMessage
+                        id='Apis.Details.Credentials.SubscibeButtonPanel.subscribe.to.new.app'
+                        defaultMessage='Subscribe to New App'
+                    />
                 </Button>
             </ScopeValidation>
         </div>
@@ -101,7 +124,8 @@ subscibeButtonPanel.propTypes = {
         buttonElmText: PropTypes.shape({}),
     }).isRequired,
     handleClickToggle: PropTypes.func.isRequired,
+    intl: PropTypes.func.isRequired,
     avalibleAppsLength: PropTypes.number.isRequired,
     subscribedAppsLength: PropTypes.number.isRequired,
 };
-export default withStyles(styles, { withTheme: true })(subscibeButtonPanel);
+export default injectIntl(withStyles(styles, { withTheme: true })(subscibeButtonPanel));

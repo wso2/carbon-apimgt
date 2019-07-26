@@ -21,6 +21,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import KeyConfiguration from 'AppComponents/Shared/AppsAndKeys/KeyConfiguration';
 import Application from 'AppData/Application';
+import { injectIntl } from 'react-intl';
 
 const generateKeysStep = (props) => {
     const [tab, setTab] = useState(0);
@@ -33,7 +34,7 @@ const generateKeysStep = (props) => {
     });
 
     const {
-        currentStep, createdApp, decrementStep, incrementStep, nextStep, setCreatedKeyType,
+        currentStep, createdApp, decrementStep, incrementStep, nextStep, setCreatedKeyType, intl,
     } = props;
 
     /**
@@ -42,7 +43,15 @@ const generateKeysStep = (props) => {
     * @memberof Wizard
     */
     const handleTabChange = (event, currentTab) => {
-        const keyType = currentTab === 0 ? 'PRODUCTION' : 'SANDBOX';
+        const keyType = currentTab === 0
+            ? intl.formatMessage({
+                defaultMessage: 'PRODUCTION',
+                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.tabchange.production',
+            })
+            : intl.formatMessage({
+                defaultMessage: 'SANDBOX',
+                id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.tabchange.sandbox',
+            });
         const newRequest = { ...keyRequest, keyType };
         setTab(currentTab);
         setKeyRequest(newRequest);
@@ -74,8 +83,16 @@ const generateKeysStep = (props) => {
         return (
             <React.Fragment>
                 <Tabs value={tab} onChange={handleTabChange} fullWidth indicatorColor='secondary' textColor='secondary'>
-                    <Tab label='PRODUCTION' />
-                    <Tab label='SANDBOX' />
+                    <Tab label={intl.formatMessage({
+                        defaultMessage: 'PRODUCTION',
+                        id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
+                    })}
+                    />
+                    <Tab label={intl.formatMessage({
+                        defaultMessage: 'SANDBOX',
+                        id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.sandbox',
+                    })}
+                    />
                 </Tabs>
                 {tab === 0 && (
                     <div>
@@ -101,4 +118,4 @@ const generateKeysStep = (props) => {
     return '';
 };
 
-export default generateKeysStep;
+export default injectIntl(generateKeysStep);

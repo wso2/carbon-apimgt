@@ -30,6 +30,7 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import { Redirect } from 'react-router-dom';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import CreateAppStep from './CreateAppStep';
 import SubscribeToAppStep from './SubscribeToAppStep';
 import GenerateKeysStep from './GenerateKeysStep';
@@ -84,8 +85,29 @@ class Wizard extends Component {
      */
     constructor(props) {
         super(props);
-        this.steps = ['Create application', 'Subscribe to new application',
-            'Generate Keys', 'Generate Access Token', 'Copy Access Token'];
+        const { intl } = this.props;
+        this.steps = [
+            intl.formatMessage({
+                defaultMessage: 'Create application',
+                id: 'Apis.Details.Credentials.Wizard.Wizard.create',
+            }),
+            intl.formatMessage({
+                defaultMessage: 'Subscribe to new application',
+                id: 'Apis.Details.Credentials.Wizard.Wizard.subscribe.to.new.application',
+            }),
+            intl.formatMessage({
+                defaultMessage: 'Generate Keys',
+                id: 'Apis.Details.Credentials.Wizard.Wizard.generate.keys',
+            }),
+            intl.formatMessage({
+                defaultMessage: 'Generate Access Token',
+                id: 'Apis.Details.Credentials.Wizard.Wizard.generate.access.token',
+            }),
+            intl.formatMessage({
+                defaultMessage: 'Copy Access Token',
+                id: 'Apis.Details.Credentials.Wizard.Wizard.copy.access.token',
+            }),
+        ];
         this.state = {
             currentStep: 0,
             nextStep: 0,
@@ -195,7 +217,10 @@ class Wizard extends Component {
                                 </IconButton>
                                 <div className={classes.subscribeTitle}>
                                     <Typography variant='h6'>
-                                        Subscribe to new Application
+                                        <FormattedMessage
+                                            id='Apis.Details.Credentials.Wizard.Wizard.subscribe.to.new.application'
+                                            defaultMessage='Subscribe to new Application'
+                                        />
                                     </Typography>
                                 </div>
                             </Toolbar>
@@ -218,13 +243,19 @@ class Wizard extends Component {
                         {nextStep === this.steps.length ? (
                             <div>
                                 <Typography className={classes.instructions}>
-                                    All steps completed!
+                                    <FormattedMessage
+                                        id='Apis.Details.Credentials.Wizard.Wizard.all.steps.completed'
+                                        defaultMessage='All steps completed!'
+                                    />
                                 </Typography>
                                 <Button
                                     onClick={this.handleReset}
                                     className={classes.button}
                                 >
-                                            Reset
+                                    <FormattedMessage
+                                        id='Apis.Details.Credentials.Wizard.Wizard.rest'
+                                        defaultMessage='Reset'
+                                    />
                                 </Button>
                             </div>
                         ) : (
@@ -270,7 +301,6 @@ class Wizard extends Component {
                                     nextStep={nextStep}
                                     incrementStep={this.handleNext}
                                 />
-
                                 <div className={classes.wizardButtons}>
                                     <Button
                                         disabled={currentStep < this.steps.length - 1}
@@ -278,7 +308,10 @@ class Wizard extends Component {
                                         className={classes.button}
                                         variant='outlined'
                                     >
-                                                    Test
+                                        <FormattedMessage
+                                            id='Apis.Details.Credentials.Wizard.Wizard.test'
+                                            defaultMessage='Test'
+                                        />
                                     </Button>
                                     <Button
                                         variant='contained'
@@ -286,7 +319,19 @@ class Wizard extends Component {
                                         onClick={() => this.handleNext('next')}
                                         className={classes.button}
                                     >
-                                        {currentStep === this.steps.length - 1 ? 'Finish' : 'Next'}
+                                        {currentStep === this.steps.length - 1
+                                            ? (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Credentials.Wizard.Wizard.finish'
+                                                    defaultMessage='Finish'
+                                                />
+                                            )
+                                            : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Credentials.Wizard.Wizard.next'
+                                                    defaultMessage='Next'
+                                                />
+                                            )}
                                     </Button>
                                 </div>
                             </div>
@@ -312,8 +357,9 @@ Wizard.propTypes = {
     }).isRequired,
     updateSubscriptionData: PropTypes.func.isRequired,
     handleClickToggle: PropTypes.func.isRequired,
+    intl: PropTypes.func.isRequired,
     apiId: PropTypes.string.isRequired,
     throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-export default withStyles(styles)(Wizard);
+export default injectIntl(withStyles(styles)(Wizard));

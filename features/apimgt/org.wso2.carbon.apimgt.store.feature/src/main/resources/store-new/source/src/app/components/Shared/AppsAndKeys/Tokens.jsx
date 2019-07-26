@@ -162,14 +162,14 @@ const tokens = (props) => {
                     ))}
                 </Select>
                 <Typography variant='caption'>
-                    {/* <FormattedMessage
+                    <FormattedMessage
                         id='Shared.AppsAndKeys.Tokens.when.you.generate'
                         defaultMessage={'When you generate access tokens to APIs protected by scope/s,'
                             + ' you can select the scope/s and then generate the token for it. Scopes enable '
                             + 'fine-grained access control to API resources based on user roles. You define scopes to '
                             + 'an API resource. When a user invokes the API, his/her OAuth 2 bearer token cannot grant '
                             + 'access to any API resource beyond its associated scopes.'}
-                    /> */}
+                    />
                 </Typography>
             </FormControl>
         </React.Fragment>

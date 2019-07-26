@@ -20,6 +20,7 @@ import React, { useState, useEffect } from 'react';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import { injectIntl } from 'react-intl';
 
 const createAppStep = (props) => {
     const [throttlingPolicyList, setThrottlingPolicyList] = useState([]);
@@ -32,13 +33,16 @@ const createAppStep = (props) => {
     const [isNameValid, setIsNameValid] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const {
-        currentStep, setCreatedApp, decrementStep, nextStep, incrementStep,
+        currentStep, setCreatedApp, decrementStep, nextStep, incrementStep, intl,
     } = props;
 
     const validateName = (value) => {
         if (!value || value.trim() === '') {
             setIsNameValid({ isNameValid: false });
-            return Promise.reject(new Error('Application name is required'));
+            return Promise.reject(new Error(intl.formatMessage({
+                defaultMessage: 'Application name is required',
+                id: 'Apis.Details.Credentials.Wizard.CreateAppStep.application.name.is.required',
+            })));
         }
         setIsNameValid({ isNameValid: true });
         return Promise.resolve(true);
@@ -84,7 +88,10 @@ const createAppStep = (props) => {
                 .catch((error) => {
                     const { response } = error;
                     if (response && response.body) {
-                        const message = response.body.description || 'Error while creating the application';
+                        const message = response.body.description || intl.formatMessage({
+                            defaultMessage: 'Error while creating the application',
+                            id: 'Apis.Details.Credentials.Wizard.CreateAppStep.error.while.creating.the.application',
+                        });
                         Alert.error(message);
                     } else {
                         Alert.error(error.message);
@@ -109,4 +116,4 @@ const createAppStep = (props) => {
     return '';
 };
 
-export default createAppStep;
+export default injectIntl(createAppStep);

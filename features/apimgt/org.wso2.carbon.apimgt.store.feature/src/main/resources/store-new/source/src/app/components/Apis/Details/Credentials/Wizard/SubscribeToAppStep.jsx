@@ -20,6 +20,7 @@ import React, { useState, useEffect } from 'react';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
+import { injectIntl } from 'react-intl';
 
 const subscribeToAppStep = (props) => {
     const [subscriptionRequest, setApplicationRequest] = useState({
@@ -30,7 +31,7 @@ const subscribeToAppStep = (props) => {
     const [newApp, setNewApp] = useState(null);
     const {
         apiId, currentStep, throttlingPolicyList, createdApp, decrementStep, incrementStep,
-        nextStep,
+        nextStep, intl,
     } = props;
 
     useEffect(() => {
@@ -53,7 +54,10 @@ const subscribeToAppStep = (props) => {
                 subscriptionRequest.throttlingPolicy)
                 .then((response) => {
                     console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-                    Alert.info('Subscribed successfully');
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Subscribed successfully',
+                        id: 'Apis.Details.Credentials.Wizard.SubscribeToAppStep.subscribed.successfully',
+                    }));
                     incrementStep('current');
                 })
                 .catch((error) => {
@@ -77,4 +81,4 @@ const subscribeToAppStep = (props) => {
     return '';
 };
 
-export default subscribeToAppStep;
+export default injectIntl(subscribeToAppStep);
