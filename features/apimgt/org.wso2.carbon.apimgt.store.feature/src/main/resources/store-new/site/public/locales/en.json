@@ -1,10 +1,16 @@
 {
-  "created.by": "Created by",
-  "last.update": "Last update",
-  "throttling.policies": "Throttling Policies",
-  "tags": "Tags",
-  "transport": "Transport",
-  "not.set.for.this.api": "NOT SET FOR THIS API",
+  "access.token": "Access Token",
+  "access.token.validity.period": "Access token validity period",
+  "api.console.require.access.token": "You require an access token to try the API. Please log in and subscribe to the API to generate an access token. If you already have an access token, please provide it below.",
+  "api.gateways": "API Gateways",
+  "applications": "Applications",
+  "enter.access.token": "Enter access Token",
+  "environment": "Environment",
   "grant.types": "Grant Types",
-  "token.type":"Token Type"
+  "key": "Key",
+  "micro.gateways": "Micro Gateways",
+  "notice": "Notice",
+  "require.application.subscribe": "Please subscribe to an application",
+  "subscription.scopes.description": "When you generate access tokens to APIs protected by scope/s, you can select the scope/s and then generate the token for it. Scopes enable fine-grained access control to API resources based on user roles. You define scopes to an API resource. When a user invokes the API, his/her OAuth 2 bearer token cannot grant access to any API resource beyond its associated scopes.",
+  "token.expiration.description": "You can set an expiration period to determine the validity period of the token after generation. Set this to a negative value to ensure that the token never expires."
 }

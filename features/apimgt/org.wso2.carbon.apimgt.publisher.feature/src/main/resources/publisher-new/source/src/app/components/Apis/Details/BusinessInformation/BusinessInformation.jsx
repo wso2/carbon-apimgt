@@ -107,7 +107,10 @@ class BusinessInformation extends React.Component {
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        Business Information
+                        <FormattedMessage
+                            id='Apis.Details.BusinessInformation.BusinessInformation.business.info'
+                            defaultMessage='Business Information'
+                        />
                     </Typography>
                 </div>
                 <ApiContext.Consumer>
@@ -119,8 +122,16 @@ class BusinessInformation extends React.Component {
                                         <TextField
                                             fullWidth
                                             id='name'
-                                            label='Business Owner'
-                                            helperText='Provide the name of the business owner'
+                                            label={<FormattedMessage
+                                                id={'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.business.owner.name'}
+                                                defaultMessage='Business Owner'
+                                            />}
+                                            helperText={<FormattedMessage
+                                                id={'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.business.owner.name.helper.text'}
+                                                defaultMessage='Provide the name of the business owner'
+                                            />}
                                             type='text'
                                             name='name'
                                             margin='normal'
@@ -136,8 +147,16 @@ class BusinessInformation extends React.Component {
                                         <TextField
                                             fullWidth
                                             id='name'
-                                            label='Business Owner Email'
-                                            helperText='Provide the email of the business owner'
+                                            label={<FormattedMessage
+                                                id={'Apis.Details.BusinessInformation.BusinessInformation.' +
+                                                'business.owner.email'}
+                                                defaultMessage='Business Owner Email'
+                                            />}
+                                            helperText={<FormattedMessage
+                                                id={'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.business.owner.email.helper.text'}
+                                                defaultMessage='Provide the email of the business owner'
+                                            />}
                                             type='text'
                                             name='name'
                                             margin='normal'
@@ -153,8 +172,16 @@ class BusinessInformation extends React.Component {
                                         <TextField
                                             fullWidth
                                             id='name'
-                                            label='Technical Owner'
-                                            helperText='Provide the name of the business owner'
+                                            label={<FormattedMessage
+                                                id={'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.technical.owner.name'}
+                                                defaultMessage='Technical Owner'
+                                            />}
+                                            helperText={<FormattedMessage
+                                                id={'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.technical.owner.name.helper.text'}
+                                                defaultMessage='Provide the name of the technical owner'
+                                            />}
                                             type='text'
                                             name='name'
                                             margin='normal'
@@ -170,8 +197,16 @@ class BusinessInformation extends React.Component {
                                         <TextField
                                             fullWidth
                                             id='name'
-                                            label='Technical Owner Email'
-                                            helperText='Provide the name of the business owner'
+                                            label={<FormattedMessage
+                                                id={'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.technical.owner.email'}
+                                                defaultMessage='Technical Owner Email'
+                                            />}
+                                            helperText={<FormattedMessage
+                                                id={'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.technical.owner.email.helper.text'}
+                                                defaultMessage='Provide the email of the technical owner'
+                                            />}
                                             type='text'
                                             name='name'
                                             margin='normal'

@@ -244,10 +244,13 @@ class CreateEditForm extends React.Component {
                 <FormControl margin='normal' className={classes.FormControlOdd}>
                     <TextField
                         fullWidth
-                        label='Name *'
+                        label={<FormattedMessage
+                            id='Apis.Details.Documents.CreateEditForm.document.name'
+                            defaultMessage='Name *'
+                        />}
                         helperText={
                             <FormattedMessage
-                                id='documents.markdown.editor.create.name.description'
+                                id='Apis.Details.Documents.CreateEditForm.document.name.helper.text'
                                 defaultMessage='Provide the name for the document'
                             />
                         }
@@ -269,10 +272,13 @@ class CreateEditForm extends React.Component {
                         multiline
                         margin='normal'
                         variant='outlined'
-                        label='Summary *'
+                        label={<FormattedMessage
+                            id='Apis.Details.Documents.CreateEditForm.document.summary'
+                            defaultMessage='Summary *'
+                        />}
                         helperText={
                             <FormattedMessage
-                                id='documents.markdown.editor.create.summary.description'
+                                id='Apis.Details.Documents.CreateEditForm.document.summary.helper.text'
                                 defaultMessage='Provide a brief description for the document'
                             />
                         }
@@ -288,7 +294,10 @@ class CreateEditForm extends React.Component {
                 </FormControl>
                 <FormControl component='fieldset' className={classes.formControlFirst}>
                     <FormLabel component='legend'>
-                        <FormattedMessage id='documents.markdown.editor.create.type' defaultMessage='Type' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.CreateEditForm.document.create.type'
+                            defaultMessage='Type'
+                        />
                     </FormLabel>
                     <RadioGroup
                         aria-label='Type'
@@ -306,7 +315,7 @@ class CreateEditForm extends React.Component {
                                     <Icon>help_outline</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id='documents.markdown.editor.create.how.to'
+                                            id='Apis.Details.Documents.CreateEditForm.document.create.type.how.to'
                                             defaultMessage='How To'
                                         />
                                     </div>
@@ -322,7 +331,7 @@ class CreateEditForm extends React.Component {
                                     <Icon>code</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id='documents.markdown.editor.create.sample.and.sdk'
+                                            id='Apis.Details.Documents.CreateEditForm.document.create.type.sample'
                                             defaultMessage='Sample &amp; SDK'
                                         />
                                     </div>
@@ -338,7 +347,7 @@ class CreateEditForm extends React.Component {
                                     <Icon>forum</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id='documents.markdown.editor.create.public.forum'
+                                            id='Apis.Details.Documents.CreateEditForm.document.create.type.public.forum'
                                             defaultMessage='Public Forum'
                                         />
                                     </div>
@@ -354,7 +363,8 @@ class CreateEditForm extends React.Component {
                                     <Icon>forum</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id='documents.markdown.editor.create.support.forum'
+                                            id={'Apis.Details.Documents.CreateEditForm.document.create.type.support.' +
+                                            'forum'}
                                             defaultMessage='Support Forum'
                                         />
                                     </div>
@@ -370,7 +380,7 @@ class CreateEditForm extends React.Component {
                                     <Icon>video_label</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id='documents.markdown.editor.create.other'
+                                            id='Apis.Details.Documents.CreateEditForm.document.create.type.other'
                                             defaultMessage='Other'
                                         />
                                     </div>
@@ -383,10 +393,17 @@ class CreateEditForm extends React.Component {
                     <FormControl margin='normal' className={classes.FormControlOdd}>
                         <TextField
                             fullWidth
-                            label='Other Document Category *'
+                            label={
+                                <FormattedMessage
+                                    id={'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
+                                    'category'}
+                                    defaultMessage='Other Document Category *'
+                                />
+                            }
                             helperText={
                                 <FormattedMessage
-                                    id='documents.markdown.editor.create.name.description'
+                                    id={'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
+                                    'category.helper.text'}
                                     defaultMessage='Provide the document category'
                                 />
                             }
@@ -403,7 +420,9 @@ class CreateEditForm extends React.Component {
                 )}
                 <FormControl component='fieldset' className={classes.formControl}>
                     <FormLabel component='legend'>
-                        <FormattedMessage id='documents.markdown.editor.create.source' defaultMessage='Source' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.CreateEditForm.source'
+                            defaultMessage='Source' />
                     </FormLabel>
                     <RadioGroup
                         aria-label='Source'
@@ -418,7 +437,7 @@ class CreateEditForm extends React.Component {
                             control={<Radio />}
                             label={
                                 <FormattedMessage
-                                    id='documents.markdown.editor.create.inline'
+                                    id='Apis.Details.Documents.CreateEditForm.source.inline'
                                     defaultMessage='Inline'
                                 />
                             }
@@ -429,7 +448,7 @@ class CreateEditForm extends React.Component {
                             control={<Radio />}
                             label={
                                 <FormattedMessage
-                                    id='documents.markdown.editor.create.markdown'
+                                    id='Apis.Details.Documents.CreateEditForm.source.markdown'
                                     defaultMessage='Markdown'
                                 />
                             }
@@ -438,14 +457,19 @@ class CreateEditForm extends React.Component {
                             disabled={this.setDisable('URL')}
                             value='URL'
                             control={<Radio />}
-                            label={<FormattedMessage id='documents.markdown.editor.create.url' defaultMessage='URL' />}
+                            label={<FormattedMessage
+                                id='Apis.Details.Documents.CreateEditForm.source.url'
+                                defaultMessage='URL'
+                            />}
                         />
                         <FormControlLabel
                             disabled={this.setDisable('FILE')}
                             value='FILE'
                             control={<Radio />}
                             label={
-                                <FormattedMessage id='documents.markdown.editor.create.file' defaultMessage='File' />
+                                <FormattedMessage
+                                    id='Apis.Details.Documents.CreateEditForm.source.file'
+                                    defaultMessage='File' />
                             }
                         />
                     </RadioGroup>
@@ -455,10 +479,13 @@ class CreateEditForm extends React.Component {
                         <TextField
                             fullWidth
                             margin='normal'
-                            label={<FormattedMessage id='documents.markdown.editor.create.url' defaultMessage='URL' />}
+                            label={<FormattedMessage
+                                id='Apis.Details.Documents.CreateEditForm.source.url.url'
+                                defaultMessage='URL'
+                            />}
                             helperText={
                                 <FormattedMessage
-                                    id='documents.markdown.editor.create.description.url'
+                                    id='Apis.Details.Documents.CreateEditForm.source.url.helper.text'
                                     defaultMessage='Provide the URL to the source'
                                 />
                             }
@@ -500,8 +527,9 @@ class CreateEditForm extends React.Component {
                         <div className={classes.contentWrapper}>
                             <Typography component='p' className={classes.content}>
                                 <FormattedMessage
-                                    id='document.gotonext.content'
-                                    defaultMessage='Please save the document. The content can be edited in the next step.'
+                                    id='Apis.Details.Documents.CreateEditForm.document.content.info'
+                                    defaultMessage={'Please save the document. The content can be edited in the next ' +
+                                    'step.'}
                                 />
                             </Typography>
                         </div>

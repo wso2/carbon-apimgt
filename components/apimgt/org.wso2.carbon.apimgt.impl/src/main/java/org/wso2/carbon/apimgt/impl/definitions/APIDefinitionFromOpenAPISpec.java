@@ -300,7 +300,6 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         Set<URITemplate> uriTemplates = api.getUriTemplates();
-        Set<Scope> scopes = api.getScopes();
 
         if (endpointsSet.length < 1) {
             throw new APIManagementException(
@@ -346,48 +345,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
         swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
         swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
-
-        JSONObject securityDefinitionObject = new JSONObject();
-        JSONObject scopesObject = new JSONObject();
-
-        JSONArray xWso2ScopesArray = new JSONArray();
-        JSONObject xWso2ScopesObject;
-
-        JSONObject swaggerScopesObject;//++++++++
-        JSONArray xScopesArray = new JSONArray();//+++++++
-        JSONObject securityDefinitionJsonObject = new JSONObject();//+++++++
-        JSONObject securityDefinitionAttr = new JSONObject();
-
-        if (scopes != null) {
-            for (Scope scope : scopes) {
-                xWso2ScopesObject = new JSONObject();
-                swaggerScopesObject = new JSONObject();//++++++
-                swaggerScopesObject.put(scope.getName(), scope.getDescription());//+++++
-                xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
-
-                xWso2ScopesArray.add(xWso2ScopesObject);
-                xScopesArray.add(swaggerScopesObject);//+++++++++++++
-            }
-        }
-
-        securityDefinitionJsonObject.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
-        securityDefinitionJsonObject.put(APIConstants.SWAGGER_SECURITY_OAUTH2_TOKEN_URL, "https://test.com");//+++
-        securityDefinitionJsonObject
-                .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_PASSWORD);//++++
-        if (!xScopesArray.isEmpty()) {
-            securityDefinitionJsonObject.put(APIConstants.SWAGGER_SCOPES, xScopesArray);//++++++++
-        }
-        securityDefinitionAttr.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, securityDefinitionJsonObject);//++++
-
-        scopesObject.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xWso2ScopesArray);
-        securityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, scopesObject);
-
-        swaggerObject.put(APIConstants.SWAGGER_X_WSO2_SECURITY, securityDefinitionObject);
-        swaggerObject.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitionAttr);//++++++
-
+        swaggerObject = populateSwaggerScopeInfo(swaggerObject, api.getScopes());
         return swaggerObject.toJSONString();
     }
 
@@ -458,6 +416,8 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                 }
             }
 
+            // add scope in the API object to swagger
+            swaggerObj = populateSwaggerScopeInfo(swaggerObj, api.getScopes());
             return swaggerObj.toJSONString();
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing swagger definition", e);
@@ -661,5 +621,54 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         }
         operationObject.put(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
         operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
+        if (uriTemplate.getScope() != null) {
+            operationObject.put(APIConstants.SWAGGER_X_SCOPE, uriTemplate.getScope().getKey());
+        }
+    }
+
+    /**
+     * Populate scope details in swagger
+     *
+     * @param swaggerObject existing swagger json object
+     * @param scopes        scopes information to include
+     * @return swagger object with updated scopes
+     */
+    private JSONObject populateSwaggerScopeInfo(JSONObject swaggerObject, Set<Scope> scopes) {
+
+        JSONObject securityDefinitionObject = new JSONObject();
+        JSONObject scopesObject = new JSONObject();
+        JSONArray xWso2ScopesArray = new JSONArray();
+        JSONObject xWso2ScopesObject;
+        JSONObject xScopesArrayObj = new JSONObject();
+        JSONObject securityDefinitionJsonObject = new JSONObject();
+        JSONObject securityDefinitionAttr = new JSONObject();
+
+        if (scopes != null) {
+            for (Scope scope : scopes) {
+                xWso2ScopesObject = new JSONObject();
+                xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
+                xWso2ScopesArray.add(xWso2ScopesObject);
+                xScopesArrayObj.put(scope.getKey(), scope.getDescription());
+            }
+        }
+
+        securityDefinitionJsonObject.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
+        securityDefinitionJsonObject.put(APIConstants.SWAGGER_SECURITY_OAUTH2_TOKEN_URL, "https://test.com");
+        securityDefinitionJsonObject
+                .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_PASSWORD);
+        if (!xScopesArrayObj.isEmpty()) {
+            securityDefinitionJsonObject.put(APIConstants.SWAGGER_SCOPES, xScopesArrayObj);
+        }
+        securityDefinitionAttr.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, securityDefinitionJsonObject);
+
+        scopesObject.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xWso2ScopesArray);
+        securityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, scopesObject);
+
+        swaggerObject.put(APIConstants.SWAGGER_X_WSO2_SECURITY, securityDefinitionObject);
+        swaggerObject.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitionAttr);
+        return swaggerObject;
     }
 }

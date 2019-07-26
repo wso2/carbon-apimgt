@@ -3,6 +3,7 @@ import { ListItemIcon, Drawer, List, withStyles, ListItem, ListItemText } from '
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     list: {
@@ -66,7 +67,29 @@ const GlobalNavBar = (props) => {
                                             strokeColor={strokeColor}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText classes={{ primary: classes.listText }} primary='APIs' />
+                                    <ListItemText
+                                        classes={{ primary: classes.listText }}
+                                        primary={
+                                            <FormattedMessage
+                                                id='Base.Header.navbar.GlobalNavBar.apis'
+                                                defaultMessage='APIs'
+                                            />
+                                        }
+                                    />
+                                </ListItem>
+                            </Link>
+                            <Link to='/api-products'>
+                                <ListItem button>
+                                    <ListItemIcon>
+                                        <CustomIcon
+                                            width={32}
+                                            height={32}
+                                            icon='api'
+                                            className={classes.listText}
+                                            strokeColor={strokeColor}
+                                        />
+                                    </ListItemIcon>
+                                    <ListItemText classes={{ primary: classes.listText }} primary='API Products' />
                                 </ListItem>
                             </Link>
                         </List>

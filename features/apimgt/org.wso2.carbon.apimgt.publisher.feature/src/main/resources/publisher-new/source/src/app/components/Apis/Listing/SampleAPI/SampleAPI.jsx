@@ -27,7 +27,7 @@ import green from '@material-ui/core/colors/green';
 import Create from '@material-ui/icons/Create';
 import GetApp from '@material-ui/icons/GetApp';
 import { PropTypes } from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
@@ -85,9 +85,14 @@ class SampleAPI extends Component {
      * @memberof SampleAPI
      */
     handleDeploySample() {
+        const { intl } = this.props;
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Listing.SampleAPI.SampleAPI.created',
+                defaultMessage: 'Sample Pet-Store API created successfully',
+            }));
             return sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
         });
         swaggerUpdatePromise.catch((error) => {
@@ -97,9 +102,11 @@ class SampleAPI extends Component {
         swaggerUpdatePromise.then((api) => {
             api.publish()
                 .then(() => {
-                    const message = 'Pet-Store API Published successfully';
                     this.setState({ published: true, api });
-                    Alert.info(message);
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Listing.SampleAPI.SampleAPI.published',
+                        defaultMessage: 'Pet-Store API published successfully',
+                    }));
                 })
                 .catch((error) => {
                     console.error(error);
@@ -214,10 +221,12 @@ class SampleAPI extends Component {
                     </Typography>
                     <Typography component='p' className={classes.content}>
                         <FormattedMessage
-                            id={
-                                'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' +
-                                'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' +
-                                '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'
+                            id='Apis.Listing.SampleAPI.SampleAPI.description'
+                            defaultMessage={
+                                'WSO2 API Publisher enables API providers to ' +
+                                ' publish APIs, share documentation, provision API keys and gather feedback' +
+                                ' on features, quality and usage. To get started, Create an API ' +
+                                'or Publish a sample API.'
                             }
                         />
                     </Typography>
@@ -253,6 +262,7 @@ class SampleAPI extends Component {
 
 SampleAPI.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
-export default withStyles(styles)(SampleAPI);
+export default injectIntl(withStyles(styles)(SampleAPI));

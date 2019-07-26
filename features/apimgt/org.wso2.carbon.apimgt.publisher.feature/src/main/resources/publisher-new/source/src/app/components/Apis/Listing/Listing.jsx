@@ -19,10 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import API from 'AppData/api.js';
 import { Progress } from 'AppComponents/Shared';
-import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
-
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SampleAPI from './SampleAPI/SampleAPI';
 import CardView from './CardView/CardView';
@@ -56,31 +53,9 @@ class Listing extends React.Component {
         this.state = {
             apis: null,
         };
-        this.updateAPIsList = this.updateAPIsList.bind(this);
-        this.updateApi = this.updateApi.bind(this);
         this.state.listType = this.props.theme.custom.defaultApiView;
     }
 
-    /**
-     *
-     * @inheritdoc
-     * @memberof Listing
-     */
-    componentDidMount() {
-        API.all()
-            .then((response) => {
-                this.setState({ apis: response.obj });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    doRedirectToLogin();
-                }
-            });
-    }
     /**
      *
      * Switch the view between grid and list view
@@ -106,24 +81,7 @@ class Listing extends React.Component {
         }
         this.setState({ apis });
     }
-    /**
-     *
-     * Update APIs list if an API get deleted in card or table view
-     * @param {String} apiUUID UUID(ID) of the deleted API
-     * @memberof Listing
-     */
-    updateAPIsList(apiUUID) {
-        this.setState((currentState) => {
-            const { apis } = currentState;
-            for (const apiIndex in apis.list) {
-                if (apis.list[apiIndex].id === apiUUID) {
-                    apis.list.splice(apiIndex, 1);
-                    this.setState({ apis });
-                    break;
-                }
-            }
-        });
-    }
+
     /**
      *
      * @inheritdoc
@@ -131,12 +89,14 @@ class Listing extends React.Component {
      * @memberof Listing
      */
     render() {
-        const { apis, notFound, listType } = this.state;
-        const { classes } = this.props;
+        const { listType } = this.state;
+        const {
+            apis, notFound, isAPIProduct, classes, updateAPIsList,
+        } = this.props;
         if (notFound) {
             return (
                 <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} />
+                    <TopMenu setListType={this.setListType} apis={apis} isAPIProduct={isAPIProduct} />
                     <div className={classes.contentInside}>
                         <ResourceNotFound />
                     </div>
@@ -146,7 +106,7 @@ class Listing extends React.Component {
         if (!apis) {
             return (
                 <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} />
+                    <TopMenu setListType={this.setListType} apis={apis} isAPIProduct={isAPIProduct} />
                     <div className={classes.contentInside}>
                         <Progress />
                     </div>
@@ -156,7 +116,7 @@ class Listing extends React.Component {
         if (apis.list.length === 0) {
             return (
                 <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} />
+                    <TopMenu setListType={this.setListType} apis={apis} isAPIProduct={isAPIProduct} />
                     <div className={classes.contentInside}>
                         <SampleAPI />
                     </div>
@@ -166,12 +126,12 @@ class Listing extends React.Component {
 
         return (
             <main className={classes.content}>
-                <TopMenu setListType={this.setListType} apis={apis} />
+                <TopMenu setListType={this.setListType} apis={apis} isAPIProduct={isAPIProduct} />
                 <div className={classes.contentInside}>
                     {listType === 'grid' ? (
-                        <CardView updateAPIsList={this.updateAPIsList} apis={apis} />
+                        <CardView updateAPIsList={updateAPIsList} apis={apis} isAPIProduct={isAPIProduct} />
                     ) : (
-                        <TableView updateAPIsList={this.updateAPIsList} apis={apis} />
+                        <TableView updateAPIsList={updateAPIsList} apis={apis} isAPIProduct={isAPIProduct} />
                     )}
                 </div>
             </main>
@@ -183,9 +143,6 @@ Listing.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.func,
     }).isRequired,
-    location: PropTypes.shape({
-        pathname: PropTypes.string,
-    }).isRequired,
     classes: PropTypes.shape({
         content: PropTypes.string,
         contentInside: PropTypes.string,
@@ -193,6 +150,10 @@ Listing.propTypes = {
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,
+    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number }).isRequired,
+    notFound: PropTypes.bool.isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
+    updateAPIsList: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Listing);

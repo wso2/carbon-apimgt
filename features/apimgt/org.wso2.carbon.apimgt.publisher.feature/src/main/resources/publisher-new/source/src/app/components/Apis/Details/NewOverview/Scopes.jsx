@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -33,20 +34,42 @@ function Scopes(props) {
                 <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Scopes
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Scopes.scopes'
+                                defaultMessage='Scopes'
+                            />
                         </Typography>
                         <Link to={'/apis/' + api.id + '/scopes'}>
                             <Button variant='contained' color='default'>
-                                Edit
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Scopes.edit'
+                                    defaultMessage='Edit'
+                                />
                             </Button>
                         </Link>
                     </div>
 
                     {/* Scopes */}
-                    {api.scopes.length !== 0 && <React.Fragment>{api.scopes}</React.Fragment>}
+                    {api.scopes.length !== 0 &&
+                        api.scopes.map(scope => (
+                        // Without the `key`, React will fire a key warning
+                            <React.Fragment>
+                                <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                    {scope.name}
+                                </Typography>
+                                <Typography component='p' variant='body1'>
+                                    {scope.description}
+                                </Typography>
+                            </React.Fragment>
+                        ))
+                    }
                     {api.scopes.length === 0 && (
                         <Typography component='p' variant='body1' className={parentClasses.subtitle}>
-                            &lt;Not Configured&gt;
+                            &lt;
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Scopes.not.configured'
+                                defaultMessage='Not Configured'
+                            />&gt;
                         </Typography>
                     )}
                 </Paper>

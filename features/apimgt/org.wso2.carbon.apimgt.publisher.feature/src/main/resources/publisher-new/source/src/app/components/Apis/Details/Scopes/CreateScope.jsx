@@ -20,7 +20,7 @@ import TextField from '@material-ui/core/TextField';
 import React from 'react';
 import APIPropertyField from 'AppComponents/Apis/Details/Overview/APIPropertyField';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import TagsInput from 'react-tagsinput';
 import Api from 'AppData/api';
 import Button from '@material-ui/core/Button';
@@ -73,17 +73,27 @@ class CreateScope extends React.Component {
     addScope() {
         const api = new Api();
         const scope = this.state.apiScope;
+        const { intl } = this.props;
         scope.bindings = {
             type: 'role',
             values: this.state.roles,
         };
-        const promisedScopeAdd = api.addScope(this.props.match.params.api_uuid, scope);
-        promisedScopeAdd.then((response) => {
-            if (response.status !== 201) {
-                Alert.info('Something went wrong while updating the scope');
+        const newApi = this.props.api;
+        newApi.scopes.push(scope);
+        // eslint-disable-next-line no-underscore-dangle
+        const promisedApiUpdate = api.update(newApi._data);
+        promisedApiUpdate.then((response) => {
+            if (response.status !== 200) {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
+                    defaultMessage: 'Something went wrong while updating the scope',
+                }));
                 return;
             }
-            Alert.info('Scope added successfully');
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
+                defaultMessage: 'Scope added successfully',
+            }));
             const { apiScopes } = this.state;
             this.setState({
                 apiScopes,
@@ -125,7 +135,7 @@ class CreateScope extends React.Component {
                     component='h2'
                 >
                     <FormattedMessage
-                        id='create.new.scopes'
+                        id='Apis.Details.Scopes.CreateScope.create.new.scope'
                         defaultMessage='Create New Scope'
                     />
                 </Typography>
@@ -149,7 +159,7 @@ class CreateScope extends React.Component {
                             id='description'
                             name='description'
                             helperText={<FormattedMessage
-                                id='create.scope.helper.text'
+                                id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
                                 defaultMessage='Short description about the scope'
                             />}
                             margin='normal'
@@ -172,7 +182,7 @@ class CreateScope extends React.Component {
                         className={classes.buttonSave}
                     >
                         <FormattedMessage
-                            id='save'
+                            id='Apis.Details.Scopes.CreateScope.save'
                             defaultMessage='Save'
                         />
                     </Button>
@@ -183,7 +193,7 @@ class CreateScope extends React.Component {
                             className={classes.buttonCancel}
                         >
                             <FormattedMessage
-                                id='cancel.btn'
+                                id='Apis.Details.Scopes.CreateScope.cancel'
                                 defaultMessage='Cancel'
                             />
                         </Button>
@@ -202,10 +212,11 @@ CreateScope.propTypes = {
         id: PropTypes.string,
     }).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 CreateScope.defaultProps = {
     match: { params: {} },
 };
 
-export default withRouter(withStyles(styles)(CreateScope));
+export default injectIntl(withRouter(withStyles(styles)(CreateScope)));

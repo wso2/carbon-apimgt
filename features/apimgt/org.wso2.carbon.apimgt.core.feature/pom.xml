@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.24-SNAPSHOT</version>
+        <version>6.5.36-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,8 +35,8 @@
     </description>
     <dependencies>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>
@@ -58,7 +58,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete file="src/main/resources/repository/database/WSO2AM_DB.h2.db" />
+                                <delete file="src/main/resources/repository/database/WSO2AM_DB.mv.db" />
                             </tasks>
                         </configuration>
                     </execution>

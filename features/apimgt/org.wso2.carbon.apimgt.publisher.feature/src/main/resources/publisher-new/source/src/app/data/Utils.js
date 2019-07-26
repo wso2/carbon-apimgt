@@ -36,10 +36,12 @@ class Utils {
         for (let pair of pairs) {
             pair = pair.split('=');
             const cookieName = pair[0].trim();
-            const value = encodeURIComponent(pair[1]);
-            if (cookieName === nameWithEnv) {
-                cookie = value;
-                break;
+            if (pair[1] !== 'undefined') {
+                const value = encodeURIComponent(pair[1]);
+                if (cookieName === nameWithEnv) {
+                    cookie = value;
+                    break;
+                }
             }
         }
         return cookie;
@@ -237,6 +239,7 @@ class Utils {
             label: 'Default',
             host: window.location.host,
             loginTokenPath: '/login/token',
+            refreshTokenPath: '/services/refresh/refresh.jag',
         };
     }
 }

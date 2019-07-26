@@ -24,7 +24,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
 const styles = theme => ({
@@ -61,11 +61,11 @@ const styles = theme => ({
  */
 class KeyConfiguration extends React.Component {
     /**
-    * This method is used to handle the updating of key generation
-    * request object.
-    * @param {*} field field that should be updated in key request
-    * @param {*} event event fired
-    */
+     * This method is used to handle the updating of key generation
+     * request object.
+     * @param {*} field field that should be updated in key request
+     * @param {*} event event fired
+     */
     handleChange(field, event) {
         const { keyRequest, updateKeyRequest } = this.props;
         const newRequest = { ...keyRequest };
@@ -80,8 +80,7 @@ class KeyConfiguration extends React.Component {
                 if (currentTarget.checked) {
                     newGrantTypes = [...newGrantTypes, currentTarget.id];
                 } else {
-                    newGrantTypes = newRequest.supportedGrantTypes
-                        .filter(item => item !== currentTarget.id);
+                    newGrantTypes = newRequest.supportedGrantTypes.filter(item => item !== currentTarget.id);
                 }
                 newRequest.supportedGrantTypes = newGrantTypes;
                 break;
@@ -98,7 +97,9 @@ class KeyConfiguration extends React.Component {
      * @memberof KeyConfiguration
      */
     render() {
-        const { classes, keyRequest, notFound } = this.props;
+        const {
+            classes, keyRequest, notFound, intl,
+        } = this.props;
         const { supportedGrantTypes, callbackUrl } = keyRequest;
         if (notFound) {
             return <ResourceNotFound />;
@@ -132,7 +133,10 @@ class KeyConfiguration extends React.Component {
                                         value='refresh_token'
                                     />
                                 )}
-                                label='Refresh Token'
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Refresh Token',
+                                    id: 'Shared.AppsAndKeys.KeyConfiguration.refresh.token',
+                                })}
                             />
                             <FormControlLabel
                                 control={(
@@ -154,7 +158,10 @@ class KeyConfiguration extends React.Component {
                                         onChange={e => this.handleChange('grantType', e)}
                                     />
                                 )}
-                                label='Implicit'
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Implicit',
+                                    id: 'Shared.AppsAndKeys.KeyConfiguration.implicit',
+                                })}
                             />
                         </div>
                         <div className={classes.checkboxWrapperColumn}>
@@ -167,25 +174,29 @@ class KeyConfiguration extends React.Component {
                                         onChange={e => this.handleChange('grantType', e)}
                                     />
                                 )}
-                                label='Code'
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Code',
+                                    id: 'Shared.AppsAndKeys.KeyConfiguration.code',
+                                })}
                             />
                             <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        id='client_credentials'
-                                        checked
-                                        disabled
-                                        value='client_credentials'
-                                    />
-                                )}
-                                label='Client Credential'
+                                control={
+                                    <Checkbox id='client_credentials' checked disabled value='client_credentials' />
+                                }
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Client Credential',
+                                    id: 'Shared.AppsAndKeys.KeyConfiguration.code',
+                                })}
                             />
                         </div>
                     </div>
                     <FormHelperText>
-                        The application can use the following grant types to generate
+                        <FormattedMessage
+                            defaultMessage='The application can use the following grant types to generate
                         Access Tokens. Based on the application requirement,
-                        you can enable or disable grant types for this application.
+                        you can enable or disable grant types for this application.'
+                            id='Shared.AppsAndKeys.KeyConfiguration.the.application.can'
+                        />
                     </FormHelperText>
                 </FormControl>
 
@@ -202,9 +213,12 @@ class KeyConfiguration extends React.Component {
                             value={callbackUrl}
                         />
                         <FormHelperText>
-                            {`Callback URL is a redirection URI in the client
+                            <FormattedMessage
+                                defaultMessage="Callback URL is a redirection URI in the client
                             application which is used by the authorization server to send the
-                            client's user-agent (usually web browser) back after granting access.`}
+                            client's user-agent (usually web browser) back after granting access."
+                                id='Shared.AppsAndKeys.KeyConfiguration.callback.url'
+                            />
                         </FormHelperText>
                     </FormControl>
                 }
@@ -213,4 +227,4 @@ class KeyConfiguration extends React.Component {
     }
 }
 
-export default withStyles(styles)(KeyConfiguration);
+export default injectIntl(withStyles(styles)(KeyConfiguration));

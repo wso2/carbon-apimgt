@@ -502,6 +502,7 @@ public final class APIConstants {
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
     public static final String API_RXT_MEDIA_TYPE = "application/vnd.wso2-api+xml";
     public static final String DOCUMENT_RXT_MEDIA_TYPE = "application/vnd.wso2-document+xml";
+    public static final String API_PRODUCT_RXT_MEDIA_TYPE = "application/vnd.wso2-product+xml";
     public static final int TOP_TATE_MARGIN = 4;
 
     public static final class Permissions {
@@ -1343,6 +1344,17 @@ public final class APIConstants {
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
 
+    //api-product related constants
+    public static final String API_PRODUCT_KEY = "product";
+    public static final String API_PRODUCT_RESOURCE_COLLECTION = "products";
+    public static final String API_PRODUCT_RESOURCE_NAME = "/product";
+    public static final String API_PRODUCT_VERSION = "1.0.0";
+    public static final String PRODUCT_DOCUMENTATION_KEY = "productdocument";
+    public static final String DOC_PRODUCT_BASE_PATH = "overview_productBasePath";
+    public static final String PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/products";
+    public static final String API_IDENTIFIER_TYPE = "API";
+    public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
+
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
         public static final String ENABLE_ADVANCE_THROTTLING = "EnableAdvanceThrottling";
@@ -1418,6 +1430,7 @@ public final class APIConstants {
         public static final String DELETED = "deleted";
 
         public static final String API = "API";
+        public static final String API_PRODUCT = "APIProduct";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
 
@@ -1431,6 +1444,7 @@ public final class APIConstants {
         public static final String GROUPS = "groups";
         public static final String STATUS = "status";
         public static final String API_NAME = "api_name";
+        public static final String API_PRODUCT_NAME = "api_product_name";
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
     }
@@ -1457,7 +1471,7 @@ public final class APIConstants {
         public static final String DIGEST_AUTH = "DigestAuth";
     }
 
-    public enum APIType {
+    public enum APITransportType {
         HTTP, WS,
     }
 
@@ -1552,6 +1566,11 @@ public final class APIConstants {
 
     public static final String KEY_SUFFIX = "_KEY";
 
+    public static final String COLUMN_PRODUCT_DEFINITION = "DEFINITION";
+    public static final String PRODUCTSCOPE_PREFIX = "productscope";
+    public static final String API_PRODUCT_SUBSCRIPTION_TYPE = "APIProduct";
+    public static final String API_SUBSCRIPTION_TYPE = "API";
+
     public static class OASResourceAuthTypes {
         public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
         public static final String APPLICATION_USER = "Application User";
@@ -1588,4 +1607,10 @@ public final class APIConstants {
     public static final String HTTP_HEAD = "HEAD";
     public static final String HTTP_OPTIONS = "OPTIONS";
     public static final String HTTP_PATCH = "PATCH";
+
+    // Supported API Types
+    public enum ApiTypes {
+        API,
+        PRODUCT_API
+    }
 }

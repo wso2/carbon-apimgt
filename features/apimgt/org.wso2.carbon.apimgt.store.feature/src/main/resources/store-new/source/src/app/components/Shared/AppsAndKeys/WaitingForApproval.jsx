@@ -1,5 +1,6 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import { injectIntl, } from 'react-intl';
 
 const styles = theme => ({
     root: {
@@ -8,14 +9,20 @@ const styles = theme => ({
 });
 
 const waitingForApproval = (props) => {
-    const { classes, keyState, states } = props;
-    let message = 'A request to register this application has been sent.';
+    const {
+        classes, keyState, states, intl,
+    } = props;
+    let message = intl.formatMessage({
+        defaultMessage: 'A request to register this application has been sent.',
+        id: 'Shared.AppsAndKeys.WaitingForApproval.msg.ok',
+    });
     if (keyState === states.REJECTED) {
-        message = 'This application has been rejected from generating keys';
+        message = intl.formatMessage({
+            defaultMessage: 'This application has been rejected from generating keys',
+            id: 'Shared.AppsAndKeys.WaitingForApproval.msg.reject',
+        });
     }
-    return (
-        <div className={classes.root}>{message}</div>
-    );
+    return <div className={classes.root}>{message}</div>;
 };
 
-export default withStyles(styles)(waitingForApproval);
+export default injectIntl(withStyles(styles)(waitingForApproval));

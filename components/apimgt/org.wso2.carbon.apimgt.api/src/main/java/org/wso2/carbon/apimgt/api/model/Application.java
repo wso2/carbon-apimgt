@@ -155,6 +155,10 @@ public class Application {
         oauthApps.put(keyType, oAuthApplication);
     }
 
+    public void clearOAuthApps() {
+        oauthApps.clear();
+    }
+
     public int getId() {
         return id;
     }

@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
@@ -115,8 +116,12 @@ class ApplicationEdit extends Component {
             appTiers: [],
             notFound: false,
             appLifeCycleStatus: null,
+            appAttributes: null,
+            allAppAttributes: null,
         };
         this.handleChange = this.handleChange.bind(this);
+        this.handleAttributesChange = this.handleAttributesChange.bind(this);
+        this.isRequiredAttribute = this.isRequiredAttribute.bind(this);
     }
 
     /**
@@ -127,19 +132,23 @@ class ApplicationEdit extends Component {
         const api = new API();
         const promisedApplication = Application.get(match.params.application_id);
         const promisedTiers = api.getAllTiers('application');
-        Promise.all([promisedApplication, promisedTiers])
+        const promisedAttributes = api.getAllApplicationAttributes();
+        Promise.all([promisedApplication, promisedTiers, promisedAttributes])
             .then((response) => {
-                const [application, tierResponse] = response;
+                const [application, tierResponse, allAttributes] = response;
                 this.setState({
                     quota: application.throttlingPolicy,
                     appName: application.name,
                     appDescription: application.description,
                     id: application.applicationId,
                     appLifeCycleStatus: application.lifeCycleStatus,
+                    appAttributes: application.attributes,
                 });
                 const appTiers = [];
                 tierResponse.body.list.map(item => appTiers.push(item.name));
-                this.setState({ appTiers });
+                const allAppAttributes = [];
+                allAttributes.body.list.map(item => allAppAttributes.push(item));
+                this.setState({ appTiers, allAppAttributes });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -162,6 +171,34 @@ class ApplicationEdit extends Component {
     };
 
     /**
+     * @param {object} name application attribute name
+     * @returns {void}
+     * @memberof ApplicationEdit
+     */
+    handleAttributesChange = name => (event) => {
+        const { appAttributes } = this.state;
+        appAttributes[name.key] = event.target.value;
+        this.setState({ appAttributes });
+    };
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {void}
+     * @memberof ApplicationEdit
+     */
+    isRequiredAttribute = (name) => {
+        const { allAppAttributes } = this.state;
+        if (allAppAttributes) {
+            for (let i = 0; i < allAppAttributes.length; i++) {
+                if (allAppAttributes[i].attribute === name.key) {
+                    return allAppAttributes[i].required;
+                }
+            }
+        }
+        return false;
+    };
+
+    /**
      * @memberof ApplicationEdit
      */
     handleClose = () => {
@@ -174,14 +211,17 @@ class ApplicationEdit extends Component {
      */
     handleSubmit = (event) => {
         const {
-            appName, id, quota, appDescription, appLifeCycleStatus,
+            appName, id, quota, appDescription, appLifeCycleStatus, appAttributes,
         } = this.state;
         const {
-            history,
+            history, intl,
         } = this.props;
         event.preventDefault();
         if (!appName) {
-            Alert.error('Application name is required');
+            Alert.error(intl.formatMessage({
+                id: 'Applications.Edit.app.name.required',
+                defaultMessage: 'Application name is required',
+            }));
         } else {
             const updatedApplication = {
                 applicationId: id,
@@ -189,6 +229,7 @@ class ApplicationEdit extends Component {
                 throttlingPolicy: quota,
                 description: appDescription,
                 lifeCycleStatus: appLifeCycleStatus,
+                attributes: appAttributes,
             };
             const api = new API();
             const promisedUpdate = api.updateApplication(updatedApplication, null);
@@ -197,11 +238,17 @@ class ApplicationEdit extends Component {
                     const appId = response.body.applicationId;
                     const redirectUrl = '/applications/' + appId;
                     history.push(redirectUrl);
-                    Alert.info('Application updated successfully');
+                    Alert.info(intl.formatMessage({
+                        id: 'Applications.Edit.app.updated.success',
+                        defaultMessage: 'Application updated successfully',
+                    }));
                     console.log('Application updated successfully.');
                 })
                 .catch((error) => {
-                    Alert.error('Error while updating application');
+                    Alert.error(intl.formatMessage({
+                        id: 'Applications.Edit.error.update.app',
+                        defaultMessage: 'Error while updating application',
+                    }));
                     console.log('Error while updating application ' + error);
                 });
         }
@@ -212,9 +259,9 @@ class ApplicationEdit extends Component {
      * @returns {React.Fragment}
      */
     render() {
-        const { classes } = this.props;
+        const { classes, intl } = this.props;
         const {
-            notFound, appDescription, open, appName, appTiers, quota,
+            notFound, appDescription, open, appName, appTiers, quota, appAttributes, allAppAttributes,
         } = this.state;
         if (notFound) {
             return <ResourceNotFound />;
@@ -230,7 +277,7 @@ class ApplicationEdit extends Component {
                                 </IconButton>
                             </Link>
                             <Typography variant='title' color='inherit' className={classes.flex}>
-                                Edit Application
+                                <FormattedMessage id='Applications.Edit.edit.app' defaultMessage='Edit Application' />
                             </Typography>
                         </Toolbar>
                     </AppBar>
@@ -241,17 +288,33 @@ class ApplicationEdit extends Component {
                                     <FormControl margin='normal' className={classes.FormControl}>
                                         <TextField
                                             required
-                                            label='Application Name'
+                                            label={(
+                                                <FormattedMessage
+                                                    id='Applications.Edit.app.name'
+                                                    defaultMessage='Application Name'
+                                                />
+                                            )}
                                             value={appName || ''}
                                             InputLabelProps={{
                                                 shrink: true,
                                             }}
-                                            helperText='Enter a name to identify the Application. You will be able to
-                                            pick this application when subscribing to APIs '
+                                            helperText={(
+                                                <FormattedMessage
+                                                    id='Applications.Edit.app.name.helper'
+                                                    defaultMessage={'Enter a name to identify the'
+                                                    + ' Application. You will be able to pick this application when'
+                                                    + ' subscribing to APIs'}
+                                                />
+                                            )}
                                             fullWidth
                                             name='appName'
                                             onChange={this.handleChange('appName')}
-                                            placeholder='My Mobile Application'
+                                            placeholder={
+                                                intl.formatMessage({
+                                                    id: 'Applications.Edit.app.name.placeholder',
+                                                    defaultMessage: 'My Mobile Application',
+                                                })
+                                            }
                                             autoFocus
                                             className={classes.inputText}
                                         />
@@ -259,7 +322,10 @@ class ApplicationEdit extends Component {
                                     {appTiers && (
                                         <FormControl margin='normal' className={classes.FormControlOdd}>
                                             <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
-                                                Per Token Quota
+                                                <FormattedMessage
+                                                    id='Applications.Edit.token.quota'
+                                                    defaultMessage='Per Token Quota'
+                                                />
                                             </InputLabel>
                                             <Select
                                                 value={quota}
@@ -273,35 +339,85 @@ class ApplicationEdit extends Component {
                                                 ))}
                                             </Select>
                                             <Typography variant='caption'>
-                                                Assign API request quota per access token. Allocated quota will be
-                                                shared among all the subscribed APIs of the application.
+                                                <FormattedMessage
+                                                    id='Applications.Edit.token.quota.caption'
+                                                    defaultMessage={'Assign API request quota per access token.'
+                                                    + ' Allocated quota will be shared among all the subscribed APIs'
+                                                    + ' of the application.'}
+                                                />
                                             </Typography>
                                         </FormControl>
                                     )}
                                     <FormControl margin='normal' className={classes.FormControl}>
                                         <TextField
-                                            label='Application Description'
+                                            label={(
+                                                <FormattedMessage
+                                                    id='Applications.Edit.app.desc'
+                                                    defaultMessage='Application Description'
+                                                />
+                                            )}
                                             InputLabelProps={{
                                                 shrink: true,
                                             }}
                                             value={appDescription || ''}
-                                            helperText='Describe the application'
+                                            helperText={(
+                                                <FormattedMessage
+                                                    id='Applications.Edit.app.desc.helper'
+                                                    defaultMessage='Describe the application'
+                                                />
+                                            )}
                                             fullWidth
                                             multiline
                                             rowsMax='4'
                                             name='appDescription'
                                             onChange={this.handleChange('appDescription')}
-                                            placeholder='This application is grouping apis for my mobile application'
+                                            placeholder={
+                                                intl.formatMessage({
+                                                    id: 'Applications.Edit.app.desc.placeholder',
+                                                    defaultMessage: 'This application is grouping'
+                                                        + ' apis for my mobile application',
+                                                })
+                                            }
                                             className={classes.inputText}
                                         />
                                     </FormControl>
+                                    {appAttributes && (
+                                        Object.entries(appAttributes).map(([key, value]) => (
+                                            <FormControl margin='normal' className={classes.FormControl} key={key}>
+                                                <TextField
+                                                    required={this.isRequiredAttribute({ key })}
+                                                    label={key}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    value={value}
+                                                    helperText={allAppAttributes
+                                                        && (Object.entries(allAppAttributes).map((item) => {
+                                                            if (item[1].attribute === key) {
+                                                                return item[1].description;
+                                                            }
+                                                            return '';
+                                                        }))
+                                                    }
+                                                    fullWidth
+                                                    name={key}
+                                                    onChange={this.handleAttributesChange({ key })}
+                                                    placeholder={'Enter ' + key}
+                                                    className={classes.inputText}
+                                                />
+                                            </FormControl>
+                                        ))
+                                    )}
                                     <div className={classes.buttonsWrapper}>
                                         <Link to='/applications' className={classes.buttonRight}>
                                             <Button
                                                 variant='outlined'
                                                 className={classes.button}
                                             >
-                                                Cancel
+                                                <FormattedMessage
+                                                    id='Applications.Edit.cancel'
+                                                    defaultMessage='CANCEL'
+                                                />
                                             </Button>
                                         </Link>
                                         <Button
@@ -310,7 +426,10 @@ class ApplicationEdit extends Component {
                                             color='primary'
                                             onClick={this.handleSubmit}
                                         >
-                                            UPDATE APPLICATION
+                                            <FormattedMessage
+                                                id='Applications.Edit.update.app'
+                                                defaultMessage='UPDATE APPLICATION'
+                                            />
                                         </Button>
                                     </div>
                                 </Grid>
@@ -322,8 +441,10 @@ class ApplicationEdit extends Component {
         );
     }
 }
+
 ApplicationEdit.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ApplicationEdit);
+export default injectIntl(withStyles(styles)(ApplicationEdit));

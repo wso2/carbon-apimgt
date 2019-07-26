@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -74,9 +75,13 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
         String errorMsg = null;
 
         try {
-            APIIdentifier identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
-                    subWorkflowDTO.getApiName(), subWorkflowDTO.getApiVersion());
-
+            Identifier identifier;
+            if (subWorkflowDTO.getProductIdentifier() != null) {
+                identifier = subWorkflowDTO.getProductIdentifier();
+            } else {
+               identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
+                        subWorkflowDTO.getApiName(), subWorkflowDTO.getApiVersion());
+            }
             apiMgtDAO.removeSubscription(identifier, ((SubscriptionWorkflowDTO) workflowDTO).getApplicationId());
         } catch (APIManagementException e) {
             errorMsg = "Could not complete subscription deletion workflow for api: " + subWorkflowDTO.getApiName();

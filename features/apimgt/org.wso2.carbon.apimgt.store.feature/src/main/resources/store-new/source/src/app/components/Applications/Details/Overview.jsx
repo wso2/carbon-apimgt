@@ -24,9 +24,11 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
+import { FormattedMessage } from 'react-intl';
 import Loading from '../../Base/Loading/Loading';
 import API from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+
 /**
  *
  *
@@ -94,7 +96,12 @@ class Overview extends Component {
                         <Table>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell>Throttling Tier</TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Applications.Details.Overview.less'
+                                            defaultMessage='Throttling Tier'
+                                        />
+                                    </TableCell>
                                     <TableCell>
                                         {application.throttlingTier}
                                         {' '}
@@ -102,11 +109,21 @@ class Overview extends Component {
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
-                                    <TableCell>Life Cycle State</TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Applications.Details.Overview.life.cycle.state'
+                                            defaultMessage='Life Cycle State'
+                                        />
+                                    </TableCell>
                                     <TableCell>{application.lifeCycleStatus}</TableCell>
                                 </TableRow>
                                 <TableRow>
-                                    <TableCell>Application Description</TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Applications.Details.Overview.application.description'
+                                            defaultMessage='Application Description'
+                                        />
+                                    </TableCell>
                                     <TableCell>{application.description}</TableCell>
                                 </TableRow>
                             </TableBody>

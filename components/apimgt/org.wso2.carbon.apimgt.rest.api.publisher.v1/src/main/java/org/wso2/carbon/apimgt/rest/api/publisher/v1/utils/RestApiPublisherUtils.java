@@ -31,6 +31,7 @@ import org.netbeans.lib.cvsclient.commandLine.command.log;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -44,6 +45,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,24 +64,18 @@ public class RestApiPublisherUtils {
 
         boolean isValid = false;
 
-//        if (api.getEndpointConfig() != null) { todo
-//            JSONTokener tokener = new JSONTokener(api.getEndpointConfig());
-//            JSONObject endpointCfg = new JSONObject(tokener);
-//            try {
-//                String prodEndpointUrl = endpointCfg.getJSONObject(RestApiConstants.PRODUCTION_ENDPOINTS)
-//                        .getString("url");
-//                String sandboxEndpointUrl = endpointCfg.getJSONObject(RestApiConstants.SANDBOX_ENDPOINTS)
-//                        .getString("url");
-//                isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
-//
-//                if (isValid) {
-//                    isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
-//                }
-//            } catch (JSONException ex) {
-//                RestApiUtil.handleBadRequest(
-//                        "Error in endpoint configurations. Web Socket APIs do not accept array of endpoints.", log);
-//            }
-//        }
+        if (api.getEndpointConfig() != null) {
+            LinkedHashMap endpointConfig = (LinkedHashMap) api.getEndpointConfig();
+            String prodEndpointUrl = String
+                    .valueOf(((LinkedHashMap) endpointConfig.get("production_endpoints")).get("url"));
+            String sandboxEndpointUrl = String
+                    .valueOf(((LinkedHashMap) endpointConfig.get("sandbox_endpoints")).get("url"));
+            isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
+
+            if (isValid) {
+                isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
+            }
+        }
 
         return isValid;
     }
@@ -243,4 +239,57 @@ public class RestApiPublisherUtils {
         }
         return "";
     }
+
+    /**
+     * Attaches a file to the specified product document
+     *
+     * @param productId identifier of the API Product, the document belongs to
+     * @param documentation Documentation object
+     * @param inputStream input Stream containing the file
+     * @param fileDetails file details object as cxf Attachment
+     * @throws APIManagementException if unable to add the file
+     */
+    public static void attachFileToProductDocument(String productId, Documentation documentation, InputStream inputStream,
+            Attachment fileDetails) throws APIManagementException {
+
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String documentId = documentation.getId();
+        String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
+        String tmpFolder = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator
+                + RestApiConstants.DOC_UPLOAD_TMPDIR + File.separator + randomFolderName;
+        File docFile = new File(tmpFolder);
+
+        boolean folderCreated = docFile.mkdirs();
+        if (!folderCreated) {
+            RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, log);
+        }
+
+        InputStream docInputStream = null;
+        try {
+            ContentDisposition contentDisposition = fileDetails.getContentDisposition();
+            String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            if (StringUtils.isBlank(filename)) {
+                filename = RestApiConstants.DOC_NAME_DEFAULT + randomFolderName;
+                log.warn(
+                        "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
+                                + filename + "'");
+            }
+            APIProductIdentifier productIdentifier = APIMappingUtil
+                    .getAPIProductIdentifierFromUUID(productId, tenantDomain);
+
+            RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
+            docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
+            String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
+            mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
+            apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
+            apiProvider.updateDocumentation(productIdentifier, documentation);
+            docFile.deleteOnExit();
+        } catch (FileNotFoundException e) {
+            RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
+        } finally {
+            IOUtils.closeQuietly(docInputStream);
+        }
+    }
+
 }

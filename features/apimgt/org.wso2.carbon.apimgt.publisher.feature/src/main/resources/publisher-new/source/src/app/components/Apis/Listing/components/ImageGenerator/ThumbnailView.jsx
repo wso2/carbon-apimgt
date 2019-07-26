@@ -268,7 +268,10 @@ class ThumbnailView extends Component {
             let fileObj;
             if (selectedTab === 'upload') {
                 if (!api.id && !file) {
-                    Alert.error(intl.formatMessage({ id: 'thumbnail.validation.error' }));
+                    Alert.error(intl.formatMessage({
+                        id: 'thumbnail.validation.error',
+                        defaultMessage: 'Invalid file or API information is not set correctly.',
+                    }));
                     return;
                 }
                 /* eslint prefer-destructuring: ["error", {VariableDeclarator: {object: true}}] */
@@ -304,14 +307,20 @@ class ThumbnailView extends Component {
         const thumbnailPromise = api.addAPIThumbnail(apiId, file);
         thumbnailPromise
             .then(() => {
-                Alert.info(intl.formatMessage({ id: 'thumbnail.upload.success' }));
+                Alert.info(intl.formatMessage({
+                    id: 'thumbnail.upload.success',
+                    defaultMessage: 'Thumbnail uploaded successfully',
+                }));
                 this.setState({ open: false, thumbnail: file.preview });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                Alert.error(intl.formatMessage({ id: 'thumbnail.upload.error' }));
+                Alert.error(intl.formatMessage({
+                    id: 'thumbnail.upload.error',
+                    defaultMessage: 'Error occurred while uploading new thumbnail. Please try again.',
+                }));
             });
     }
 
@@ -354,7 +363,7 @@ class ThumbnailView extends Component {
      */
     render() {
         const {
-            api, classes, width, height, isEditable, theme, intl,
+            api, classes, width, height, isEditable, theme, intl, isAPIProduct,
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
         const {
@@ -362,7 +371,7 @@ class ThumbnailView extends Component {
         } = this.state;
         let { category } = this.state;
         if (!category) category = MaterialIcons.categories[0].name;
-        const overviewPath = `/apis/${api.id}/overview`;
+        const overviewPath = isAPIProduct ? `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
         let view;
 
         if (thumbnail) {
@@ -568,6 +577,7 @@ ThumbnailView.propTypes = {
     isEditable: PropTypes.bool,
     intl: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(ThumbnailView));

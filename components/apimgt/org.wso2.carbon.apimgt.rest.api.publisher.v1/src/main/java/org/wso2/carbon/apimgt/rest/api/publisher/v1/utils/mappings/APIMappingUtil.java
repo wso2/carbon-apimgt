@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -29,10 +30,15 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -49,6 +55,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
@@ -56,6 +67,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -122,6 +138,7 @@ public class APIMappingUtil {
             handleException("Error while converting endpointConfig to json", e);
         }
 
+        model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
 
@@ -594,6 +611,8 @@ public class APIMappingUtil {
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
             List<APIOperationsDTO> operationsDTOs = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
             dto.setOperations(operationsDTOs);
+            List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
+            dto.setScopes(scopeDTOS);
         }
 
         Set<String> apiTags = model.getTags();
@@ -616,7 +635,7 @@ public class APIMappingUtil {
             dto.setType(APIDTO.TypeEnum.fromValue(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.toString().equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
             if (StringUtils.isEmpty(model.getTransports())) {
                 List<String> transports = new ArrayList<>();
                 transports.add(APIConstants.HTTPS_PROTOCOL);
@@ -1317,4 +1336,461 @@ public class APIMappingUtil {
         }
         return operationsDTOs;
     }
+
+    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList) {
+        APIProductListDTO listDto = new APIProductListDTO();
+        List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
+        for (APIProduct apiProduct : productList) {
+            APIProductInfoDTO productDto = new APIProductInfoDTO();
+            productDto.setName(apiProduct.getId().getName());
+            productDto.setProvider(apiProduct.getId().getProviderName());
+            productDto.setContext(apiProduct.getContext());
+            productDto.setDescription(apiProduct.getDescription());
+            productDto.setState(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO.StateEnum
+                    .valueOf(apiProduct.getState()));
+            productDto.setId(apiProduct.getUuid());
+            productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                    .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+            list.add(productDto);
+        }
+        
+        listDto.setList(list);
+        listDto.setCount(list.size());
+        return listDto;
+    }
+
+    public static APIProductDTO fromAPIProducttoDTO(APIProduct product) {
+        APIProductDTO productDto = new APIProductDTO();
+        productDto.setName(product.getId().getName());
+        productDto.setProvider(product.getId().getProviderName());
+        productDto.setId(product.getUuid());
+        productDto.setContext(product.getContext());
+        productDto.setDescription(product.getDescription());
+        APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
+        businessInformation.setBusinessOwner(product.getBusinessOwner());
+        businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
+        productDto.setBusinessInformation(businessInformation );
+        
+        productDto.setState(StateEnum.valueOf(product.getState()));
+        productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
+                .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
+        List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
+        //Aggregate API resources to each relevant API.
+        Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
+        List<APIProductResource> resources = product.getProductResources();
+        for (APIProductResource apiProductResource : resources) {
+            String uuid = apiProductResource.getApiId();
+            if(aggregatedAPIs.containsKey(uuid)) {
+                ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
+                URITemplate template = apiProductResource.getUriTemplate();
+                List<ProductAPIOperationsDTO> operations = productAPI.getOperations();
+                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
+                operation.setHttpVerb(template.getHTTPVerb());
+                operation.setUritemplate(template.getResourceURI());
+                operations.add(operation);
+
+            } else {
+                ProductAPIDTO productAPI = new ProductAPIDTO();
+                productAPI.setApiId(uuid);
+                productAPI.setName(apiProductResource.getApiName());
+                List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
+                URITemplate template = apiProductResource.getUriTemplate();
+
+                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
+                operation.setHttpVerb(template.getHTTPVerb());
+                operation.setUritemplate(template.getResourceURI());
+                operations.add(operation);
+
+                productAPI.setOperations(operations);
+                aggregatedAPIs.put(uuid, productAPI);
+            }
+        }
+        apis = new ArrayList<ProductAPIDTO>(aggregatedAPIs.values());
+        productDto.setApis(apis);
+        
+        String subscriptionAvailability = product.getSubscriptionAvailability();
+        if (subscriptionAvailability != null) {
+            productDto.setSubscriptionAvailability(
+                    mapSubscriptionAvailabilityFromAPIProducttoDTO(subscriptionAvailability));
+        }
+
+        if (product.getSubscriptionAvailableTenants() != null) {
+            productDto.setSubscriptionAvailableTenants(Arrays.asList(product.getSubscriptionAvailableTenants().split(",")));
+        }
+
+        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = product.getAvailableTiers();
+        List<String> tiersToReturn = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
+            tiersToReturn.add(tier.getName());
+        }
+        productDto.setPolicies(tiersToReturn);
+        if (product.getVisibility() != null) {
+            productDto.setVisibility(mapVisibilityFromAPIProducttoDTO(product.getVisibility()));
+        }
+
+        if (product.getVisibleRoles() != null) {
+            productDto.setVisibleRoles(Arrays.asList(product.getVisibleRoles().split(",")));
+        }
+
+        if (product.getVisibleTenants() != null) {
+            productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
+        }
+
+        if (StringUtils.isEmpty(product.getTransports())) {
+            List<String> transports = new ArrayList<>();
+            transports.add(APIConstants.HTTPS_PROTOCOL);
+
+            productDto.setTransport(transports);
+        } else {
+            productDto.setTransport(Arrays.asList(product.getTransports().split(",")));
+        }
+
+        List<String> environmentsList = new ArrayList<String>();
+        environmentsList.addAll(product.getEnvironments());
+        productDto.setGatewayEnvironments(environmentsList);
+        if (product.getAdditionalProperties() != null) {
+            JSONObject additionalProperties = product.getAdditionalProperties();
+            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            for (Object propertyKey : additionalProperties.keySet()) {
+                String key = (String) propertyKey;
+                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+            }
+            productDto.setAdditionalProperties(additionalPropertiesMap);
+        }
+
+        if (product.getApiSecurity() != null) {
+            productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
+        }
+
+        return productDto;
+    }
+    
+    private static APIProductDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPIProducttoDTO(
+            String subscriptionAvailability) {
+
+        switch (subscriptionAvailability) {
+            case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT :
+                return APIProductDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
+            case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS :
+                return APIProductDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
+            case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS :
+                return APIProductDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
+            default:
+                return null; // how to handle this?
+        }
+
+    }
+    
+    private static APIProductDTO.VisibilityEnum mapVisibilityFromAPIProducttoDTO(String visibility) {
+        switch (visibility) { //public, private,controlled, restricted
+            case APIConstants.API_GLOBAL_VISIBILITY :
+                return APIProductDTO.VisibilityEnum.PUBLIC;
+            case APIConstants.API_PRIVATE_VISIBILITY :
+                return APIProductDTO.VisibilityEnum.PRIVATE;
+            case APIConstants.API_RESTRICTED_VISIBILITY :
+                return APIProductDTO.VisibilityEnum.RESTRICTED;
+            default:
+                return null; // how to handle this?
+        }
+    }
+    
+    public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider)
+            throws APIManagementException {
+        APIProduct product = new APIProduct();
+        APIProductIdentifier id = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), dto.getName(), APIConstants.API_PRODUCT_VERSION); //todo: replace this with dto.getVersion
+        product.setID(id);
+        product.setUuid(dto.getId());
+        product.setDescription(dto.getDescription());
+
+        String context = dto.getContext();
+
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+
+        context = context.startsWith("/") ? context : ("/" + context);
+        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+            //Create tenant aware context for API
+            context = "/t/" + providerDomain + context;
+        }
+
+        product.setContext(context);
+
+        if(dto.getBusinessInformation() != null) {
+            product.setBusinessOwner(dto.getBusinessInformation().getBusinessOwner());
+            product.setBusinessOwnerEmail(dto.getBusinessInformation().getBusinessOwnerEmail());
+        }
+
+        String state = dto.getState() == null ? APIStatus.CREATED.toString() :dto.getState().toString() ;
+        product.setState(state);
+        Set<Tier> apiTiers = new HashSet<>();
+        List<String> tiersFromDTO = dto.getPolicies();
+        
+        if (dto.getVisibility() != null) {
+            product.setVisibility(mapVisibilityFromDTOtoAPIProduct(dto.getVisibility()));
+        }
+        if (dto.getVisibleRoles() != null) {
+            String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
+            product.setVisibleRoles(visibleRoles);
+        }
+        if (dto.getVisibleTenants() != null) {
+            String visibleTenants = StringUtils.join(dto.getVisibleTenants(), ',');
+            product.setVisibleTenants(visibleTenants);
+        }
+
+        List<String> accessControlRoles = dto.getAccessControlRoles();
+        if (accessControlRoles == null || accessControlRoles.isEmpty()) {
+            product.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
+            product.setAccessControlRoles("null");
+        } else {
+            product.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
+            product.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
+        }
+
+        for (String tier : tiersFromDTO) {
+            apiTiers.add(new Tier(tier));
+        }
+        product.setAvailableTiers(apiTiers);
+        if (dto.getSubscriptionAvailability() != null) {
+            product.setSubscriptionAvailability(
+                    mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
+        }
+        
+        Map<String, String> additionalProperties = dto.getAdditionalProperties();
+        if (additionalProperties != null) {
+            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+                product.addProperty(entry.getKey(), entry.getValue());
+            }
+        }
+        if (dto.getSubscriptionAvailableTenants() != null) {
+            product.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
+        }
+
+        String transports = StringUtils.join(dto.getTransport(), ',');
+        product.setTransports(transports);
+
+        if (dto.getGatewayEnvironments().size() > 0) {
+            List<String> gatewaysList = dto.getGatewayEnvironments();
+            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
+        } else if (dto.getGatewayEnvironments() != null) {
+            //this means the provided gatewayEnvironments is "" (empty)
+            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
+        }
+
+        List<APIProductResource> productResources = new ArrayList<APIProductResource>();
+
+        for (int i = 0; i < dto.getApis().size(); i++) {
+            ProductAPIDTO res = dto.getApis().get(i);
+            List<ProductAPIOperationsDTO> productAPIOperationsDTO = res.getOperations();
+            for (ProductAPIOperationsDTO resourceItem : productAPIOperationsDTO) {
+ 
+                URITemplate template = new URITemplate();
+                template.setHTTPVerb(resourceItem.getHttpVerb());
+                template.setResourceURI(resourceItem.getUritemplate());
+                template.setUriTemplate(resourceItem.getUritemplate());
+                
+                APIProductResource resource = new APIProductResource();
+                resource.setApiId(res.getApiId());
+                resource.setUriTemplate(template);
+                productResources.add(resource);
+            }
+            
+        }
+
+        APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
+        CORSConfiguration corsConfiguration;
+        if (apiCorsConfigurationDTO != null) {
+            corsConfiguration =
+                    new CORSConfiguration(apiCorsConfigurationDTO.isCorsConfigurationEnabled(),
+                            apiCorsConfigurationDTO.getAccessControlAllowOrigins(),
+                            apiCorsConfigurationDTO.isAccessControlAllowCredentials(),
+                            apiCorsConfigurationDTO.getAccessControlAllowHeaders(),
+                            apiCorsConfigurationDTO.getAccessControlAllowMethods());
+
+        } else {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        product.setCorsConfiguration(corsConfiguration);
+
+        product.setProductResources(productResources);
+        product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
+        product.setAuthorizationHeader(dto.getAuthorizationHeader());
+        return product;
+    }
+    
+    private static String mapVisibilityFromDTOtoAPIProduct(APIProductDTO.VisibilityEnum visibility) {
+        switch (visibility) {
+            case PUBLIC:
+                return APIConstants.API_GLOBAL_VISIBILITY;
+            case PRIVATE:
+                return APIConstants.API_PRIVATE_VISIBILITY;
+            case RESTRICTED:
+                return APIConstants.API_RESTRICTED_VISIBILITY;
+            default:
+                return null; // how to handle this?
+        }
+    }
+    
+    private static String mapSubscriptionAvailabilityFromDTOtoAPIProduct(
+            APIProductDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
+        switch (subscriptionAvailability) {
+        case CURRENT_TENANT:
+                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
+        case ALL_TENANTS:
+                return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
+        case SPECIFIC_TENANTS:
+                return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
+            default:
+                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT; // default to current tenant
+        }
+
+    }
+
+    /**
+     * Converts a List object of API resource paths into a DTO
+     *
+     * @param resourcePathList List of API resource paths
+     * @param limit   maximum number of API resource paths to be returned
+     * @param offset  starting index
+     * @return ResourcePathListDTO object containing ResourcePathDTOs
+     */
+    public static ResourcePathListDTO fromResourcePathListToDTO(List<ResourcePath> resourcePathList, int limit,
+            int offset) {
+        ResourcePathListDTO resourcePathListDTO = new ResourcePathListDTO();
+        List<ResourcePathDTO> resourcePathDTOs = new ArrayList<ResourcePathDTO>();
+
+        //identifying the proper start and end indexes
+        int size =resourcePathList.size();
+        int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= size - 1 ? offset + limit -1 : size - 1;
+
+        for (int i = start; i <= end; i++) {
+            ResourcePath path = resourcePathList.get(i);
+            ResourcePathDTO dto = new ResourcePathDTO();
+            dto.setId(path.getId());
+            dto.setResourcePath(path.getResourcePath());
+            dto.setHttpVerb(path.getHttpVerb());
+            resourcePathDTOs.add(dto);
+        }
+
+        resourcePathListDTO.setCount(resourcePathDTOs.size());
+        resourcePathListDTO.setList(resourcePathDTOs);
+        return resourcePathListDTO;
+    }
+
+    /**
+     * Sets pagination urls for a ResourcePathListDTO object
+     *
+     * @param resourcePathListDTO ResourcePathListDTO object to which pagination urls need to be set
+     * @param offset     starting index
+     * @param limit      max number of returned objects
+     * @param size       max offset
+     */
+    public static void setPaginationParamsForAPIResourcePathList(ResourcePathListDTO resourcePathListDTO, int offset,
+            int limit, int size) {
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getResourcePathPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getResourcePathPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        resourcePathListDTO.setPagination(paginationDTO);
+    }
+
+    /**
+     * Sets pagination urls for a APIProductListDTO object given pagination parameters and url parameters
+     *
+     * @param apiProductListDTO a APIProductListDTO object
+     * @param query      search condition
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
+     */
+    public static void setPaginationParams(APIProductListDTO apiProductListDTO, String query, int offset, int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        apiProductListDTO.setPagination(paginationDTO);
+    }
+
+    /**
+     * Returns the APIProductIdentifier given the uuid
+     *
+     * @param productId                 API Product uuid
+     * @param requestedTenantDomain tenant domain of the API
+     * @return APIProductIdentifier which represents the given id
+     * @throws APIManagementException
+     */
+    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String productId, String requestedTenantDomain)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProduct product = apiProvider.getAPIProductbyUUID(productId, requestedTenantDomain);
+        return product.getId();
+    }
+
+        /**
+     * Extract scopes from the swagger
+     *
+     * @param swagger swagger document
+     * @return list of scopes
+     * @throws APIManagementException throw if parsing exception occur
+     */
+    private static List<ScopeDTO> getScopesFromSwagger(String swagger) throws APIManagementException {
+
+        JSONParser parser = new JSONParser();
+        List<ScopeDTO> scopes = new ArrayList<>();
+        try {
+            JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
+            JSONObject securityObj = (JSONObject) swaggerObj.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+            JSONObject apimSecurityObj = (JSONObject) securityObj.get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
+            JSONArray scopesList = (JSONArray) apimSecurityObj.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+            scopesList.forEach((scope) -> {
+                ScopeDTO scopeDTO = new ScopeDTO();
+                JSONObject scopeObj = (JSONObject) scope;
+                scopeDTO.setName((String) scopeObj.get(APIConstants.SWAGGER_NAME));
+                scopeDTO.setDescription((String) scopeObj.get(APIConstants.SWAGGER_DESCRIPTION));
+                ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
+                bindingsDTO.setValues(Arrays.asList(((String) scopeObj.get(APIConstants.SWAGGER_ROLES)).split(",")));
+                scopeDTO.setBindings(bindingsDTO);
+                scopes.add(scopeDTO);
+            });
+
+        } catch (ParseException e) {
+            throw new APIManagementException("Error occurred while parsing swagger.");
+        }
+        return scopes;
+    }
+
 }

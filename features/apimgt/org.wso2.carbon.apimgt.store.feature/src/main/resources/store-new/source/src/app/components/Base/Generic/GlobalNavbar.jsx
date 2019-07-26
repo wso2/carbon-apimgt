@@ -17,6 +17,8 @@
  */
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { injectIntl } from 'react-intl';
 import {
     ListItemIcon, Drawer, List, withStyles, ListItem, ListItemText,
 } from '@material-ui/core';
@@ -46,7 +48,7 @@ const styles = theme => ({
 class GlobalNavBar extends Component {
     render() {
         const {
-            open, toggleGlobalNavBar, classes, theme,
+            open, toggleGlobalNavBar, classes, theme, intl,
         } = this.props;
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
         const commonStyle = {
@@ -70,7 +72,13 @@ class GlobalNavBar extends Component {
                                         <ListItemIcon>
                                             <CustomIcon width={32} height={32} icon='api' className={classes.listText} strokeColor={strokeColor} />
                                         </ListItemIcon>
-                                        <ListItemText classes={{ primary: classes.listText }} primary='APIs' />
+                                        <ListItemText
+                                            classes={{ primary: classes.listText }}
+                                            primary={intl.formatMessage({
+                                                id: 'Base.Generic.GlobalNavbar.menu.apis',
+                                                defaultMessage: 'APIs',
+                                            })}
+                                        />
                                     </ListItem>
                                 </Link>
                                 <Link to='/applications'>
@@ -78,7 +86,13 @@ class GlobalNavBar extends Component {
                                         <ListItemIcon>
                                             <CustomIcon width={32} height={32} icon='applications' className={classes.listText} strokeColor={strokeColor} />
                                         </ListItemIcon>
-                                        <ListItemText classes={{ primary: classes.listText }} primary='Applications' />
+                                        <ListItemText
+                                            classes={{ primary: classes.listText }}
+                                            primary={intl.formatMessage({
+                                                id: 'Base.Generic.GlobalNavbar.menu.applications',
+                                                defaultMessage: 'Applications',
+                                            })}
+                                        />
                                     </ListItem>
                                 </Link>
                             </List>
@@ -90,4 +104,8 @@ class GlobalNavBar extends Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(GlobalNavBar);
+GlobalNavBar.propTypes = {
+    intl: PropTypes.shape({}).isRequired,
+};
+
+export default injectIntl(withStyles(styles, { withTheme: true })(GlobalNavBar));

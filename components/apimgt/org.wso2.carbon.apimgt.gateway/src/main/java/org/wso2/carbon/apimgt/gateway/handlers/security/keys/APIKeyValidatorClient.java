@@ -181,6 +181,8 @@ public class APIKeyValidatorClient {
         dto.setSpikeArrestUnit(generatedDto.getSpikeArrestUnit());
         dto.setSubscriberTenantDomain(generatedDto.getSubscriberTenantDomain());
         dto.setStopOnQuotaReach(generatedDto.getStopOnQuotaReach());
+        dto.setProductName(generatedDto.getProductName());
+        dto.setProductProvider(generatedDto.getProductProvider());
         return dto;
     }
 
@@ -226,6 +228,51 @@ public class APIKeyValidatorClient {
         } catch (Exception e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                            "Error while accessing backend services for API key validation", e);
+        }
+    }
+
+    public ArrayList<URITemplate> getAPIProductURITemplates(String context, String apiVersion
+    ) throws APISecurityException {
+
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
+        if (cookie != null) {
+            keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+        }
+        try {
+            TracingSpan span = null;
+            if (Util.tracingEnabled()) {
+                TracingSpan keySpan = (TracingSpan) MessageContext.getCurrentMessageContext()
+                        .getProperty(APIMgtGatewayConstants.KEY_VALIDATION);
+                TracingTracer tracer = Util.getGlobalTracer();
+                span = Util.startSpan(APIMgtGatewayConstants.GET_ALL_URI_TEMPLATES, keySpan, tracer);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Get all URI templates request from gateway to keymanager via web service call for:"
+                        + context + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
+            org.wso2.carbon.apimgt.api.model.xsd.URITemplate[] dto =
+                    keyValidationServiceStub.getAPIProductURITemplates(context, apiVersion);
+            if (log.isDebugEnabled()) {
+                log.debug("Get all URI templates response received to gateway from keymanager via web service"
+                        + " call for:" + context + " at "
+                        + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+            }
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(span);
+            }
+            ServiceContext serviceContext = keyValidationServiceStub.
+                    _getServiceClient().getLastOperationContext().getServiceContext();
+            cookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
+            ArrayList<URITemplate> templates = new ArrayList<URITemplate>();
+            for (org.wso2.carbon.apimgt.api.model.xsd.URITemplate aDto : dto) {
+                URITemplate temp = toTemplates(aDto);
+                templates.add(temp);
+            }
+            return templates;
+        } catch (Exception e) {
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    "Error while accessing backend services for API key validation", e);
         }
     }
 

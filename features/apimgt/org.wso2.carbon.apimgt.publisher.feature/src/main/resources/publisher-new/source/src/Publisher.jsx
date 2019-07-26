@@ -145,7 +145,7 @@ class Publisher extends React.Component {
             .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages: defineMessages(data) });
+                this.setState({ messages: defineMessages({ ...data }) });
             });
     }
 
@@ -157,12 +157,15 @@ class Publisher extends React.Component {
      */
     render() {
         const { user, userResolved } = this.state;
-
         if (!userResolved) {
             return <Progress />;
         }
         if (!user) {
-            return <RedirectToLogin />;
+            return (
+                <IntlProvider locale={language} messages={this.state.messages}>
+                    <RedirectToLogin />
+                </IntlProvider>
+            );
         }
         return (
             <IntlProvider locale={language} messages={this.state.messages}>

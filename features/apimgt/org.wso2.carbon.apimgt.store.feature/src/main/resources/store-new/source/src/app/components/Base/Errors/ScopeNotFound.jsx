@@ -16,21 +16,32 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React, { Component } from 'react';
 
 const ScopeNotFound = (props) => {
     return (
         <div>
-            <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>Un-authorized Access</h4>
+            <div className='message message-danger'>
+                <h4>
+                    <i className='icon fw fw-error' />
+                    <FormattedMessage id='Base.Errors.ScopeNotFound.title' defaultMessage='Un-authorized Access' />
+                </h4>
                 <p>
-                    Sorry, the page you are looking for <span style={{color: 'green'}}> {props.location.pathname} </span>
-                    is not allowed under logged in user role scopes. Please login with different user with relevant permission to access this resource.
+                    <FormattedMessage
+                        id='Base.Errors.ScopeNotFound.message.first'
+                        defaultMessage='Sorry, the page you are looking for '
+                    />
+                    <span style={{ color: 'green' }}>
+                        {props.location.pathname}
+                    </span>
+                    <FormattedMessage
+                        id='Base.Errors.ScopeNotFound.message.second'
+                        defaultMessage=' is not allowed under logged in user role scopes. Please login with different user with relevant permission to access this resource.'
+                    />
                 </p>
             </div>
-
         </div>
     );
 };
 
-export default ScopeNotFound
+export default ScopeNotFound;

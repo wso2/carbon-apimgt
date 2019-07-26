@@ -18,7 +18,7 @@
 
 import React from 'react';
 import Configurations from 'Config';
-
+import { FormattedMessage } from 'react-intl';
 
 const page = Configurations.app.context + '/services/auth/login';
 
@@ -45,7 +45,7 @@ export function doRedirectToLogin() {
  * all the login redirection done in other places of the code
  * @class RedirectToLogin
  */
-export default class RedirectToLogin extends React.Component {
+class RedirectToLogin extends React.Component {
     /**
      *
      * @inheritdoc
@@ -62,6 +62,14 @@ export default class RedirectToLogin extends React.Component {
      * @memberof RedirectToLogin
      */
     render() {
-        return `You will be redirected to ${page}`;
+        return (
+            <FormattedMessage
+                id='Apis.Shared.RedirectToLogin.you.will.be.redirected.to'
+                defaultMessage='You will be redirected to {page}'
+                values={{ page }}
+            />
+        );
     }
 }
+
+export default RedirectToLogin;

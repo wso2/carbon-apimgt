@@ -24,6 +24,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import Application from '../../../data/Application';
 import Loading from '../../Base/Loading/Loading';
 import KeyConfiguration from './KeyConfiguration';
@@ -99,7 +100,8 @@ class TokenManager extends React.Component {
      */
     componentDidMount() {
         if (this.appId) {
-            this.application.then(application => application.getKeys())
+            this.application
+                .then(application => application.getKeys())
                 .then((keys) => {
                     const { keyType } = this.props;
                     const { keyRequest } = this.state;
@@ -137,52 +139,72 @@ class TokenManager extends React.Component {
      */
     generateKeys() {
         const { keyRequest, keys } = this.state;
-        const { keyType, updateSubscriptionData } = this.props;
-        this.application.then((application) => {
-            return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
-        }).then((response) => {
-            console.log('Keys generated successfully with ID : ' + response);
-            if (updateSubscriptionData) {
-                updateSubscriptionData();
-            }
-            const newKeys = new Map([...keys]);
-            newKeys.set(keyType, response);
-            this.setState({ keys: newKeys });
-        }).catch((error) => {
-            if (process.env.NODE_ENV !== 'production') {
-                console.error(error);
-            }
-            const { status } = error;
-            if (status === 404) {
-                this.setState({ notFound: true });
-            }
-        });
+        const { keyType, updateSubscriptionData, intl } = this.props;
+        this.application
+            .then((application) => {
+                return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
+            })
+            .then((response) => {
+                console.log(
+                    intl.formatMessage({
+                        defaultMessage: 'Keys generated successfully with ID : ',
+                        id: 'Shared.AppsAndKeys.TokenManager.keys.generated.success',
+                    }) + response,
+                );
+                if (updateSubscriptionData) {
+                    updateSubscriptionData();
+                }
+                const newKeys = new Map([...keys]);
+                newKeys.set(keyType, response);
+                this.setState({ keys: newKeys });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
     }
 
     /**
-   *
-   * @memberof KeyConfiguration
-   */
+     *
+     * @memberof KeyConfiguration
+     */
     updateKeys() {
         const { keys, keyRequest } = this.state;
         const { keyType } = this.props;
         const applicationKey = keys.get(keyType);
-        this.application.then((application) => {
-            return application.updateKeys(
-                applicationKey.tokenType, keyType, keyRequest.supportedGrantTypes,
-                keyRequest.callbackUrl, applicationKey.consumerKey, applicationKey.consumerSecret,
-            );
-        }).then((response) => {
-            console.log('Keys updated successfully : ' + response);
-        }).catch((error) => {
-            if (process.env.NODE_ENV !== 'production') {
-                console.error(error);
-            }
-            const { status } = error;
-            if (status === 404) {
-                this.setState({ notFound: true });
-            }
-        });
+        this.application
+            .then((application) => {
+                return application.updateKeys(
+                    applicationKey.tokenType,
+                    keyType,
+                    keyRequest.supportedGrantTypes,
+                    keyRequest.callbackUrl,
+                    applicationKey.consumerKey,
+                    applicationKey.consumerSecret,
+                );
+            })
+            .then((response) => {
+                console.log(
+                    intl.formatMessage({
+                        defaultMessage: 'Keys updated successfully : ',
+                        id: 'Shared.AppsAndKeys.TokenManager.keys.generated.success',
+                    }) + response,
+                );
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
     }
 
     /**
@@ -203,19 +225,20 @@ class TokenManager extends React.Component {
             <div className={classes.root}>
                 <Typography variant='headline' className={classes.keyTitle}>
                     {keyType}
-                    {' '}
-                    Key and Secret
+                    <FormattedMessage
+                        defaultMessage='Key and Secret'
+                        id='Shared.AppsAndKeys.TokenManager.key.and.secret'
+                    />
                 </Typography>
-                <ViewKeys
-                    selectedApp={selectedApp}
-                    keyType={keyType}
-                    keys={keys}
-                />
+                <ViewKeys selectedApp={selectedApp} keyType={keyType} keys={keys} />
 
                 <ExpansionPanel>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography className={classes.heading} variant='subtitle1'>
-                            Key Configuration
+                            <FormattedMessage
+                                defaultMessage='Key Configuration'
+                                id='Shared.AppsAndKeys.TokenManager.key.configuration'
+                            />
                         </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails className={classes.keyConfigWrapper}>
@@ -253,4 +276,4 @@ TokenManager.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(TokenManager);
+export default injectIntl(withStyles(styles)(TokenManager));

@@ -22,6 +22,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
+import { injectIntl } from 'react-intl';
 import Api from '../../../data/api';
 
 /**
@@ -31,11 +32,14 @@ import Api from '../../../data/api';
  * @returns
  */
 function RenderMethodBase(props) {
-    const { theme, method } = props;
+    const { theme, method, intl } = props;
     let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
-        console.log('Check the theme settings. The resourceChipColors is not populated properlly');
+        console.log(intl.formatMessage({
+            defaultMessage: 'Check the theme settings. The resourceChipColors is not populated properlly',
+            id: 'Apis.Details.Resources.check.the.theme',
+        }));
         chipColor = '#cccccc';
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
@@ -151,6 +155,9 @@ class Resources extends React.Component {
 }
 Resources.propTypes = {
     classes: PropTypes.object.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles)(Resources);
+export default injectIntl(withStyles(styles)(Resources));

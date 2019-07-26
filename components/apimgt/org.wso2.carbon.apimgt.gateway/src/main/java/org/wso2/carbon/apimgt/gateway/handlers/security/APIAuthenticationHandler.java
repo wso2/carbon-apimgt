@@ -87,6 +87,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String apiLevelPolicy;
     private String certificateInformation;
     private String apiUUID;
+    private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
 
     public String getApiUUID() {
         return apiUUID;
@@ -130,6 +131,26 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      */
     public void setAPILevelPolicy(String apiLevelPolicy) {
         this.apiLevelPolicy = apiLevelPolicy;
+    }
+
+    /**
+     * Get type of the API
+     * @return API Type
+     */
+    public String getApiType() {
+        return apiType;
+    }
+
+    /**
+     * Set type of the API
+     * @param apiType API Type
+     */
+    public void setApiType(String apiType) {
+        // Since we currently support only Product APIs as the alternative, set the value to "PRODUCT_API" only if
+        // the same value is provided as the type. Else the default value will remain as "API".
+        if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType)) {
+            this.apiType = apiType;
+        }
     }
 
     private boolean removeOAuthHeadersFromOutMessage = true;
@@ -303,6 +324,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 long currentTime = System.currentTimeMillis();
                 messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
             }
+
+            messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
+
             if (authenticators.isEmpty()) {
                 initializeAuthenticators();
             }

@@ -30,6 +30,7 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from '../../Shared/Alert';
 import SubscriptionTableData from './SubscriptionTableData';
 import APIList from '../../Apis/Listing/APIList';
@@ -137,7 +138,7 @@ class Subscriptions extends React.Component {
                 const { subscriptions } = this.state;
                 for (const endpointIndex in subscriptions) {
                     if (Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex)
-                    && subscriptions[endpointIndex].subscriptionId === subscriptionId) {
+                        && subscriptions[endpointIndex].subscriptionId === subscriptionId) {
                         subscriptions.splice(endpointIndex, 1);
                         break;
                     }
@@ -196,9 +197,12 @@ class Subscriptions extends React.Component {
      */
     handleSubscribe(applicationId, apiId, policy) {
         const api = new Api();
-
+        const { intl } = this.props;
         if (!policy) {
-            Alert.error('Select a subscription policy');
+            Alert.error(intl.formatMessage({
+                id: 'Applications.Details.Subscriptions.select.a.subscription.policy',
+                defaultMessage: 'Select a subscription policy',
+            }));
             return;
         }
 
@@ -206,9 +210,15 @@ class Subscriptions extends React.Component {
         promisedSubscribe
             .then((response) => {
                 if (response.status !== 201) {
-                    Alert.error('Error occurred  during subscription');
+                    Alert.error(intl.formatMessage({
+                        id: 'Applications.Details.Subscriptions.error.occurred.during.subscription.not.201',
+                        defaultMessage: 'Error occurred during subscription',
+                    }));
                 } else {
-                    Alert.info('Subscription successful');
+                    Alert.info(intl.formatMessage({
+                        id: 'Applications.Details.Subscriptions.subscription.successful',
+                        defaultMessage: 'Subscription successful',
+                    }));
                     this.updateSubscriptions(applicationId);
                 }
             })
@@ -217,7 +227,10 @@ class Subscriptions extends React.Component {
                 if (status === 401) {
                     this.setState({ isAuthorize: false });
                 }
-                Alert.error('Error occurred  during subscription');
+                Alert.error(intl.formatMessage({
+                    id: 'Applications.Details.Subscriptions.error.occurred.during.subscription',
+                    defaultMessage: 'Error occurred during subscription',
+                }));
             });
     }
 
@@ -244,7 +257,10 @@ class Subscriptions extends React.Component {
             return (
                 <div className={classes.root}>
                     <Typography variant='headline' className={classes.keyTitle}>
-                        Subscription Management
+                        <FormattedMessage
+                            id='Applications.Details.Subscriptions.subscription.management'
+                            defaultMessage='Subscription Management'
+                        />
                     </Typography>
 
                     <Grid container className='tab-grid' spacing={16}>
@@ -252,38 +268,61 @@ class Subscriptions extends React.Component {
                             <Card className={classes.card}>
                                 <CardActions>
                                     <Typography variant='h6' gutterBottom className={classes.cardTitle}>
-                                        Subscriptions
+                                        <FormattedMessage
+                                            id='Applications.Details.Subscriptions.subscriptions'
+                                            defaultMessage='Subscriptions'
+                                        />
                                     </Typography>
                                 </CardActions>
                                 <Divider />
                                 <CardContent className={classes.cardContent}>
                                     {
-                                        subscriptionsNotFound ?
-                                            (<ResourceNotFound />) :
-                                            (
+                                        subscriptionsNotFound
+                                            ? (<ResourceNotFound />)
+                                            : (
                                                 <Table>
                                                     <TableHead>
                                                         <TableRow>
                                                             <TableCell className={classes.firstCell}>
-                                                                API Name
+                                                                <FormattedMessage
+                                                                    id='Applications.Details.Subscriptions.api.name'
+                                                                    defaultMessage='API Name'
+                                                                />
                                                             </TableCell>
-                                                            <TableCell>Subscription Tier</TableCell>
-                                                            <TableCell>Status</TableCell>
-                                                            <TableCell>Action</TableCell>
+                                                            <TableCell>
+                                                                <FormattedMessage
+                                                                    id={`Applications.Details.Subscriptions
+                                                                    .subscription.tier`}
+                                                                    defaultMessage='Subscription Tier'
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormattedMessage
+                                                                    id='Applications.Details.Subscriptions.Status'
+                                                                    defaultMessage='Status'
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormattedMessage
+                                                                    id='Applications.Details.Subscriptions.action'
+                                                                    defaultMessage='Action'
+                                                                />
+                                                            </TableCell>
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
                                                         {subscriptions
-                                                    && subscriptions.map((subscription) => {
-                                                        return (
-                                                            <SubscriptionTableData
-                                                                subscription={subscription}
-                                                                handleSubscriptionDelete={this.handleSubscriptionDelete}
-                                                            />
-                                                        );
-                                                    })}
+                                                            && subscriptions.map((subscription) => {
+                                                                return (
+                                                                    <SubscriptionTableData
+                                                                        subscription={subscription}
+                                                                        handleSubscriptionDelete={this.handleSubscriptionDelete}
+                                                                    />
+                                                                );
+                                                            })}
                                                     </TableBody>
-                                                </Table>)
+                                                </Table>
+                                            )
                                     }
                                 </CardContent>
                             </Card>
@@ -305,7 +344,7 @@ class Subscriptions extends React.Component {
     }
 }
 Subscriptions.propTypes = {
-    classes: PropTypes.object,
+    classes: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(Subscriptions);
+export default injectIntl(withStyles(styles)(Subscriptions));

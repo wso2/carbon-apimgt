@@ -10,6 +10,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { resourceMethod, resourcePath, ScopeValidation } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
+import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     root: {
@@ -98,17 +99,30 @@ class DeleteApiButton extends React.Component {
      * @memberof DeleteApiButton
      */
     handleApiDelete() {
-        const { api, history } = this.props;
-        api.delete().then((response) => {
-            if (response.status !== 200) {
-                console.log(response);
-                Alert.error('Something went wrong while deleting the API!');
-                return;
-            }
-            const redirectURL = '/apis';
-            Alert.success('API ' + api.name + ' was deleted successfully!');
-            history.push(redirectURL);
-        });
+        const { api, history, isAPIProduct } = this.props;
+        if (isAPIProduct) {
+            api.deleteProduct().then((response) => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    Alert.error('Something went wrong while deleting the API Product!');
+                    return;
+                }
+                const redirectURL = '/api-products';
+                Alert.success('API Product ' + api.name + ' was deleted successfully!');
+                history.push(redirectURL);
+            });
+        } else {
+            api.delete().then((response) => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    Alert.error('Something went wrong while deleting the API!');
+                    return;
+                }
+                const redirectURL = '/apis';
+                Alert.success('API ' + api.name + ' was deleted successfully!');
+                history.push(redirectURL);
+            });
+        }
     }
 
     /**
@@ -118,7 +132,11 @@ class DeleteApiButton extends React.Component {
      * @memberof DeleteApiButton
      */
     render() {
-        const { api, onClick, classes } = this.props;
+        const {
+            api, onClick, classes, isAPIProduct,
+        } = this.props;
+        const type = isAPIProduct ? 'API Product ' : 'API ';
+        const version = isAPIProduct ? null : '-' + api.version;
         const deleteHandler = onClick || this.handleApiDelete;
         return (
             <React.Fragment>
@@ -139,19 +157,33 @@ class DeleteApiButton extends React.Component {
                     </div>
                 </ScopeValidation>
                 <Dialog open={this.state.openMenu} transition={Slide}>
-                    <DialogTitle>Confirm</DialogTitle>
+                    <DialogTitle>
+                        <FormattedMessage
+                            id='Apis.Details.components.DeleteApiButton.title.confirm'
+                            defaultMessage='Confirm'
+                        />
+                    </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Are you sure you want to delete the API ({api.name} - {api.version}
-                            )?
+                            <FormattedMessage
+                                id='Apis.Details.components.DeleteApiButton.text.content'
+                                defaultMessage='Are you sure you want to delete the {type} {name} {version} ?'
+                                values={{ type, name: api.name, version }}
+                            />
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button dense variant='outlined' color='secondary' onClick={deleteHandler}>
-                            Delete
+                            <FormattedMessage
+                                id='Apis.Details.components.DeleteApiButton.button.delete'
+                                defaultMessage='Delete'
+                            />
                         </Button>
                         <Button dense onClick={this.handleRequestClose}>
-                            Cancel
+                            <FormattedMessage
+                                id='Apis.Details.components.DeleteApiButton.button.cancel'
+                                defaultMessage='Cancel'
+                            />
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -171,6 +203,7 @@ DeleteApiButton.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     onClick: PropTypes.func,
     classes: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default withRouter(withStyles(styles, { withTheme: true })(DeleteApiButton));

@@ -28,7 +28,7 @@ import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Backup from '@material-ui/icons/Backup';
 import classNames from 'classnames';
 
@@ -150,7 +150,7 @@ class ApiCreateSwagger extends React.Component {
             const { valid } = oldState;
             const validUpdated = valid;
             validUpdated.swaggerFile.empty = newFiles.length === 0;
-            return { valid: validUpdated, newFiles };
+            return { valid: validUpdated, files: newFiles };
         });
     }
 
@@ -178,6 +178,7 @@ class ApiCreateSwagger extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         const { uploadMethod, files, swaggerUrl } = this.state;
+        const { intl } = this.props;
         if ((uploadMethod === 'file' && files.length === 0) || (uploadMethod === 'url' && !swaggerUrl)) {
             this.setState(({ valid, files: currentFiles, swaggerUrl: currentSwaggerUrl }) => {
                 const validUpdated = valid;
@@ -197,7 +198,10 @@ class ApiCreateSwagger extends React.Component {
                 .create(data)
                 .then(this.createAPICallback)
                 .catch((errorResponse) => {
-                    Alert.error('Something went wrong while creating the API!');
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Create.SwaggerApiCreateSwagger.url.upload.error',
+                        defaultMessage: 'Something went wrong while creating the API!',
+                    }));
                     this.setState({ loading: false });
                     const { response } = errorResponse;
                     if (response.body) {
@@ -219,7 +223,10 @@ class ApiCreateSwagger extends React.Component {
                 .create(swagger)
                 .then(this.createAPICallback)
                 .catch((errorResponse) => {
-                    Alert.error('Something went wrong while creating the API!');
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Create.SwaggerApiCreateSwagger.file.upload.error',
+                        defaultMessage: 'Something went wrong while creating the API!',
+                    }));
                     this.setState({ loading: false });
                     const { response } = errorResponse;
                     if (response.body) {
@@ -348,7 +355,12 @@ class ApiCreateSwagger extends React.Component {
                                     error={valid.swaggerUrl.empty}
                                     fullWidth
                                     id='swaggerUrl'
-                                    label='Swagger Url'
+                                    label={
+                                        <FormattedMessage
+                                            id='Apis.Create.Swagger.ApiCreateSwagger.error.empty'
+                                            defaultMessage='Swagger URL'
+                                        />
+                                    }
                                     placeholder='eg: http://petstore.swagger.io/v2/swagger.json'
                                     helperText={
                                         valid.swaggerUrl.empty ? (
@@ -414,6 +426,9 @@ class ApiCreateSwagger extends React.Component {
 }
 
 ApiCreateSwagger.propTypes = {
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
@@ -421,4 +436,4 @@ ApiCreateSwagger.propTypes = {
     valid: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ApiCreateSwagger);
+export default injectIntl(withStyles(styles)(ApiCreateSwagger));

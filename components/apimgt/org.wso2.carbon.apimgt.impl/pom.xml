@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.24-SNAPSHOT</version>
+        <version>6.5.36-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -140,6 +140,7 @@
         <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
+            <version>1.2.140.wso2v3</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.osgi</groupId>

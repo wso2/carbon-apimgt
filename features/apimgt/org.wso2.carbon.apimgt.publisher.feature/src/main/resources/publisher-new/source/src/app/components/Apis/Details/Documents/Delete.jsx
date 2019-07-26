@@ -77,7 +77,7 @@ function Delete(props) {
         docPromise
             .then((doc) => {
                 Alert.info(`${doc.name} ${intl.formatMessage({
-                    id: 'documents.markdown.editor.create.updated.successfully',
+                    id: 'Apis.Details.Documents.Delete.document.delete.successfully',
                     defaultMessage: 'deleted successfully.',
                 })}`);
                 setOpen(!open);
@@ -100,7 +100,11 @@ function Delete(props) {
     return (
         <div>
             <Button onClick={toggleOpen}>
-                <Icon>delete_forever</Icon> <FormattedMessage id='documents.listing.delete' defaultMessage='Delete' />
+                <Icon>delete_forever</Icon>
+                <FormattedMessage
+                    id='Apis.Details.Documents.Delete.document.delete'
+                    defaultMessage='Delete'
+                />
             </Button>
             <Dialog
                 open={open}
@@ -110,7 +114,7 @@ function Delete(props) {
             >
                 <DialogTitle id='alert-dialog-title'>
                     <FormattedMessage
-                        id='documents.listing.delete.confirm.title'
+                        id='Apis.Details.Documents.Delete.document.listing.delete.confirm.title'
                         defaultMessage='Are you sure to delete?'
                     />
                 </DialogTitle>
@@ -118,17 +122,23 @@ function Delete(props) {
                     <DialogContentText id='alert-dialog-description'>
                         <strong>{apiName}</strong>
                         <FormattedMessage
-                            id='documents.listing.delete.confirm.body'
+                            id='Apis.Details.Documents.Delete.document.listing.delete.confirm.body'
                             defaultMessage=' will be permernently deleted. Are you sure?'
                         />
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => runAction('no')} color='primary'>
-                        <FormattedMessage id='documents.listing.delete.cancel' defaultMessage='Cancel' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Delete.document.listing.delete.cancel'
+                            defaultMessage='Cancel'
+                        />
                     </Button>
                     <Button onClick={() => runAction('yes')} color='primary' autoFocus>
-                        <FormattedMessage id='documents.listing.delete.yes' defaultMessage='Yes. Delete' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Delete.document.listing.delete.yes'
+                            defaultMessage='Yes. Delete'
+                        />
                     </Button>
                 </DialogActions>
             </Dialog>

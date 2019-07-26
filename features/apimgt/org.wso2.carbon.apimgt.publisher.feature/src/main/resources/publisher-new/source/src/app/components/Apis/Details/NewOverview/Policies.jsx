@@ -18,6 +18,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -33,11 +34,17 @@ function Policies(props) {
                 <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Throttling Policies
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Policies.throttling.policies'
+                                defaultMessage='Throttling Policies'
+                            />
                         </Typography>
                         <Link to={'/apis/' + api.id + '/documents'}>
                             <Button variant='contained' color='default'>
-                                Edit
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Policies.edit'
+                                    defaultMessage='Edit'
+                                />
                             </Button>
                         </Link>
                     </div>

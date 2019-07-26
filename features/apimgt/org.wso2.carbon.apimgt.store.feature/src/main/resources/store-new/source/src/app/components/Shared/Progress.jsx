@@ -24,7 +24,7 @@ import React from 'react';
  */
 const Progress = () => {
     return (
-        <div class="apim-dual-ring"></div>
+        <div className='apim-dual-ring' />
     );
 };
 

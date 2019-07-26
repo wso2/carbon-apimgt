@@ -16,21 +16,33 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React, { Component } from 'react';
+import { FormattedMessage } from 'react-intl';
 
 const NotFound = (props) => {
     return (
         <div>
-            <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 Page Not Found!</h4>
+            <div className='message message-danger'>
+                <h4>
+                    <i className='icon fw fw-error' />
+                    <FormattedMessage id='Base.Errors.PageNotfound.title' defaultMessage='404 Page Not Found!' />
+                </h4>
                 <p>
-                    Sorry the page you are looking for <span style={{color: 'green'}}> {props.location.pathname} </span>
-                    is not available.
+                    <FormattedMessage
+                        id='Base.Errors.PageNotfound.message.first'
+                        defaultMessage='Sorry the page you are looking for'
+                    />
+                    <span style={{ color: 'green' }}>
+                        {props.location.pathname}
+                    </span>
+                    <FormattedMessage
+                        id='Base.Errors.PageNotfound.message.second'
+                        defaultMessage=' is not available.'
+                    />
                 </p>
             </div>
-
         </div>
     );
 };
 
-export default NotFound
+export default NotFound;

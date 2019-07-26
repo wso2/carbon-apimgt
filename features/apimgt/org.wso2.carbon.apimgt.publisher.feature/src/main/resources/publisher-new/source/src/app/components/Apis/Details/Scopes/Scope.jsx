@@ -22,7 +22,7 @@ import 'react-tagsinput/react-tagsinput.css';
 import TagsInput from 'react-tagsinput';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
-
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Api from 'AppData/api';
 import Loading from '../../../Base/Loading/Loading';
 
@@ -78,16 +78,26 @@ class Scope extends React.Component {
      */
     removeScope() {
         const scopeName = this.props.name;
-        Alert.info('Deleting the Scope ...');
+        const { intl } = this.props;
+        Alert.info(intl.formatMessage({
+            id: 'Apis.Details.Scopes.Scope.scope.deleting.the.scope',
+            defaultMessage: 'Deleting the Scope ...',
+        }));
         const api = new Api();
         const promisedScopeDelete = api.deleteScope(this.props.api_uuid, scopeName);
         promisedScopeDelete.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
-                Alert.error('Something went wrong while deleting the ' + scopeName + ' Scope!');
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Scopes.Scope.something.went.wrong.while.deleting.the.scope',
+                    defaultMessage: 'Something went wrong while deleting the {scopeName} Scope!',
+                }, { scopeName }));
                 return;
             }
-            Alert.success(scopeName + ' Scope deleted successfully!');
+            Alert.success(intl.formatMessage({
+                id: 'Apis.Details.Scopes.Scope.scope.deleted.successfully',
+                defaultMessage: '{scopeName} Scope deleted successfully!',
+            }, { scopeName }));
             this.props.deleteScope(scopeName);
         });
     }
@@ -119,16 +129,27 @@ class Scope extends React.Component {
      */
     handleSubmit() {
         const scopeName = this.props.name;
-        Alert.info('Updating the Scope ...');
+        const { intl } = this.props;
+        Alert.info(intl.formatMessage({
+            id: 'Apis.Details.Scopes.Scope.scope.deleted.updating.the.scope',
+            defaultMessage: 'Updating the Scope ...',
+        }));
+
         const api = new Api();
         const promisedScopeUpdate = api.updateScope(this.props.api_uuid, scopeName, this.state.apiScope);
         promisedScopeUpdate.then((response) => {
             if (response.status !== 200) {
                 console.log(response);
-                Alert.error('Something went wrong while updating the ' + scopeName + ' Scope!');
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Scopes.Scope.something.went.wrong.while.updating.the.scope',
+                    defaultMessage: 'Something went wrong while updating the {scopeName} Scope!',
+                }, { scopeName }));
                 return;
             }
-            Alert.success(scopeName + ' Scope updated successfully!');
+            Alert.success(intl.formatMessage({
+                id: 'Apis.Details.Scopes.Scope.scope.updated.successfully',
+                defaultMessage: '{scopeName} Scope updated successfully!',
+            }, { scopeName }));
             this.props.updateScope(scopeName, this.state.apiScope);
         });
     }
@@ -138,6 +159,7 @@ class Scope extends React.Component {
      * @memberof Scope
      */
     render() {
+        const { intl } = this.props;
         return (
             <div id={this.props.name}>
                 <Row type='flex' justify='start' className='resource-head'>
@@ -158,7 +180,10 @@ class Scope extends React.Component {
                                 <Col span={20}>
                                     <Input
                                         name='descriptions'
-                                        placeholder='descriptions'
+                                        placeholder={intl.formatMessage({
+                                            id: 'Apis.Details.Scopes.Scope.scope.descriptions',
+                                            defaultMessage: 'descriptions',
+                                        })}
                                         type='text'
                                         onChange={this.handleChangeDescription}
                                         defaultValue={this.state.apiScope.description}
@@ -169,12 +194,20 @@ class Scope extends React.Component {
                                         value={this.state.apiScope.bindings.values}
                                         onChange={this.handleChange}
                                         onlyUnique
-                                        inputProps={{ placeholder: 'add a valid role' }}
+                                        inputProps={{
+                                            placeholder: intl.formatMessage({
+                                                id: 'Apis.Details.Scopes.Scope.scope.add.a.valid.role',
+                                                defaultMessage: 'add a valid role',
+                                            }),
+                                        }}
                                     />
                                 </Col>
                                 <Col span={20}>
                                     <Button loading={this.state.creating} type='primary' onClick={this.handleSubmit}>
-                                        Update
+                                        <FormattedMessage
+                                            id='Apis.Details.Scopes.Scope.scope.update'
+                                            defaultMessage='Update'
+                                        />
                                     </Button>
                                 </Col>
                             </Row>
@@ -196,4 +229,4 @@ Scope.propTypes = {
     updateScope: PropTypes.func.isRequired,
 };
 
-export default Scope;
+export default injectIntl(Scope);
