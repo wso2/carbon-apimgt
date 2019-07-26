@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.events.APIMOAuthEventInterceptor;
-import org.wso2.carbon.apimgt.keymgt.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.PermissionBasedScopeIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.RoleBasedScopesIssuer;
@@ -36,7 +35,6 @@ import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
-import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.oauth.event.OAuthEventInterceptor;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
@@ -87,16 +85,6 @@ public class APIKeyMgtServiceComponent {
             } else {
                 log.debug("Token Revocation Notifier Feature is disabled.");
             }
-
-            // Activating UserPostSelfRegistration handler component
-            try {
-                serviceRegistration = ctxt.getBundleContext()
-                        .registerService(AbstractEventHandler.class.getName(), new UserPostSelfRegistrationHandler(),
-                                null);
-            } catch (Exception e) {
-                log.error("Error while activating custom User selfRegistration handler component.", e);
-            }
-
             // loading white listed scopes
             List<String> whitelist = null;
             APIManagerConfigurationService configurationService = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
