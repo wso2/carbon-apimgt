@@ -658,7 +658,6 @@ class InfoBar extends React.Component {
                                         />
                                     </Typography>
                                     <Grid container spacing={16} item xs={8}>
-                                    {console.log(api.endpointURLs)}
                                         {api.endpointURLs.map(endpoint => {
                                             return <Grid key={endpoint} item xs={6} >
                                                 <ExpansionPanel>
@@ -709,7 +708,7 @@ class InfoBar extends React.Component {
                                                                     }}
                                                                 />
                                                                 <Tooltip
-                                                                    title={prodUrlCopied ? 
+                                                                    title={prodUrlCopied ?
                                                                         'Copied' : 'Copy to clipboard'}
                                                                     placement='right'
                                                                 >
@@ -738,7 +737,7 @@ class InfoBar extends React.Component {
                                                                     }}
                                                                 />
                                                                 <Tooltip
-                                                                    title={prodUrlCopied ? 
+                                                                    title={prodUrlCopied ?
                                                                         'Copied' : 'Copy to clipboard'}
                                                                     placement='right'
                                                                 >
@@ -767,7 +766,9 @@ class InfoBar extends React.Component {
                                         </Typography>
                                     ) : (
                                             <Typography className={classes.buttonOverviewText}>
-                                                <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' 
+                                                <FormattedMessage
+                                                    id='Apis.Details.InfoBar.more'
+                                                    defaultMessage='MORE'
                                                 />
                                             </Typography>
                                         )}
