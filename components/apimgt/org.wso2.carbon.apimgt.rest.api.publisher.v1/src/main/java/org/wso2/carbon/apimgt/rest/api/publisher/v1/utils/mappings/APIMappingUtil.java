@@ -932,7 +932,6 @@ public class APIMappingUtil {
                             scope.setName(definedScope.getName());
                             scope.setDescription(definedScope.getDescription());
                             scope.setRoles(definedScope.getRoles());
-                            template.setScopes(scope);
                             template.setScope(scope);
                         }
                     }

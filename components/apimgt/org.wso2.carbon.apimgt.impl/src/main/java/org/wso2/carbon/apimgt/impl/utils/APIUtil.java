@@ -448,7 +448,7 @@ public final class APIUtil {
                 uriTemplate.setThrottlingTiers(throttlingTier);
                 uriTemplate.setMediationScript(mediationScript);
                 resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                uriTemplate.setScopes(findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey)));
+                uriTemplate.setScope(findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey)));
                 //Checking for duplicate uri template names
                 if (uriTemplateNames.contains(uTemplate)) {
                     for (URITemplate tmp : uriTemplates) {
@@ -457,7 +457,7 @@ public final class APIUtil {
                             tmp.setAuthTypes(authType);
                             tmp.setThrottlingTiers(throttlingTier);
                             resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                            tmp.setScopes(findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey)));
+                            tmp.setScope(findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey)));
                             break;
                         }
                     }
@@ -643,7 +643,7 @@ public final class APIUtil {
                 uriTemplate.setMediationScript(mediationScript);
                 uriTemplate.setMediationScripts(method, mediationScript);
                 resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                uriTemplate.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                uriTemplate.setScope(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
                 //Checking for duplicate uri template names
 
                 if (uriTemplateNames.contains(uTemplate)) {
@@ -654,7 +654,7 @@ public final class APIUtil {
                             tmp.setThrottlingTiers(throttlingTier);
                             tmp.setMediationScripts(method, mediationScript);
                             resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                            tmp.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                            tmp.setScope(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
                             break;
                         }
                     }

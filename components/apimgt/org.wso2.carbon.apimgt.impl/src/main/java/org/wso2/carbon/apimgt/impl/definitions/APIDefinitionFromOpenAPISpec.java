@@ -139,7 +139,6 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             template.setAuthType(authType);
                             template.setAuthTypes(authType);
                             template.setScope(scope);
-                            template.setScopes(scope);
 
                             uriTemplates.add(template);
                         } else {

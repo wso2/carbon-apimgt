@@ -155,9 +155,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                         }
                     } else if (((URITemplate) template).getScopes() != null) {
                         //todo: fix template.getScopes() properly to return all scopes
-                        List<Scope> scopesList = new ArrayList<Scope>() {{
-                            add(((URITemplate) template).getScopes());
-                        }};
+                        Scope[] scopesList = ((URITemplate) template).getScopes();
                         for (Scope scpObj : scopesList) {
                             if (scope.equalsIgnoreCase(scpObj.getKey())) {
                                 //we found scopes matches

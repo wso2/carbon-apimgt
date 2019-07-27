@@ -5885,7 +5885,7 @@ public class ApiMgtDAO {
                         Scope scopeByKey = APIUtil.findScopeByKey(api.getScopes(), scopeKey);
                         if (scopeByKey != null) {
                             if (scopeByKey.getId() > 0) {
-                                uriTemplate.getScopes().setId(scopeByKey.getId());
+                                uriTemplate.getScope().setId(scopeByKey.getId());
                             }
                         }
                     }

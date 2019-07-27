@@ -166,7 +166,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         OAuth2Definition oAuth2Definition = new OAuth2Definition().password("https://test.com");
 
         Set<Scope> scopes = api.getScopes();
-        
+
         if (scopes != null && !scopes.isEmpty()) {
             List<Map<String,String>> xSecurityScopesArray = new ArrayList<>();
             for (Scope scope : scopes) {
@@ -250,7 +250,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
             if (swaggerObj.getPath(path) == null) {
                 for (Map.Entry<String, URITemplate> verbMapEntry : verbMap.entrySet()) {
                     URITemplate uriTemplate = verbMapEntry.getValue();
-                    addOrUpdatePathToSwagger(swaggerObj, uriTemplate);   
+                    addOrUpdatePathToSwagger(swaggerObj, uriTemplate);
                 }
             }
         }
@@ -337,20 +337,23 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
      * @return URL template after setting the scopes
      */
     private URITemplate setScopesToTemplate(URITemplate template, List<String> scopes) {
+        Scope[] templateScopes = new Scope[scopes.size()];
+        int idx = 0;
         for (String scope : scopes) {
             Scope scopeObj = new Scope();
             scopeObj.setKey(scope);
             scopeObj.setName(scope);
-
-            template.setScopes(scopeObj);
+            templateScopes[idx] = scopeObj;
+            idx++;
         }
+        template.setScopes(templateScopes);
         return template;
     }
 
     /**
      * Add a new path based on the provided URI template to swagger if it does not exists. If it exists,
      * adds the respective operation to the existing path
-     * 
+     *
      * @param swagger swagger object
      * @param uriTemplate URI template
      */
@@ -370,7 +373,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     /**
      * Creates a new operation object using the URI template object
-     * 
+     *
      * @param uriTemplate URI template
      * @return a new operation object using the URI template object
      */
@@ -394,7 +397,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     /**
      *  Updates managed info of a provided operation such as auth type and throttling
-     * 
+     *
      * @param uriTemplate URI template
      * @param operation swagger operation
      */
@@ -414,7 +417,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     /**
-     * Creates a json string using the swagger object. 
+     * Creates a json string using the swagger object.
      *
      * @param swaggerObj swagger object
      * @return json string using the swagger object

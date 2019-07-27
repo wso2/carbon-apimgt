@@ -22,7 +22,7 @@
                <xs:element minOccurs="0" name="resourceURI" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="resourceURIExist" type="xs:boolean"/>
                <xs:element minOccurs="0" name="scope" nillable="true" type="ax2131:Scope"/>
-               <xs:element minOccurs="0" name="scopes" nillable="true" type="ax2131:Scope"/>
+               <xs:element minOccurs="0" maxOccurs="unbounded"  name="scopes" nillable="true" type="xs:anyType"/>
                <xs:element maxOccurs="unbounded" minOccurs="0" name="throttlingConditions" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="throttlingConditionsAsString" nillable="true" type="xs:string"/>
                <xs:element minOccurs="0" name="throttlingTier" nillable="true" type="xs:string"/>

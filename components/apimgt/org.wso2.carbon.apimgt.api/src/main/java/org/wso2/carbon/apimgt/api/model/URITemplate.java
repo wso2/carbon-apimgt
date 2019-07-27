@@ -40,7 +40,7 @@ public class URITemplate implements Serializable{
     private List<String> throttlingTiers = new ArrayList<String>();
     private Scope scope;
     private String mediationScript;
-    private List<Scope> scopes = new ArrayList<Scope>();
+    private Scope[] scopes;
     private Map<String, String> mediationScripts = new HashMap<String, String>();
     private ConditionGroupDTO[] conditionGroups;
     private int id;
@@ -241,16 +241,19 @@ public class URITemplate implements Serializable{
     public Scope getScope() {
         return scope;
     }
-    public Scope getScopes() {
-        return scope;
+
+    public Scope[] getScopes() {
+        return scopes;
     }
 
     public void setScope(Scope scope) {
         this.scope = scope;
+        this.scopes = scope != null ? new Scope[]{scope} : null;
     }
 
-    public void setScopes(Scope scope){
-        this.scopes.add(scope);
+    public void setScopes(Scope[] scopes) {
+        this.scopes = scopes;
+        this.scope = scopes != null ? scopes[0] : null;
     }
 
     public String getResourceMap(){
@@ -262,10 +265,10 @@ public class URITemplate implements Serializable{
             verb.put("throttling_tier",throttlingTiers.get(i));
             //Following parameter is not required as it not need to reflect UI level. If need please enable it.
             // /verb.put("throttling_conditions", throttlingConditions.get(i));
-            try{
-                Scope tmpScope = scopes.get(i);
-                if(tmpScope != null){
-                    verb.put("scope",tmpScope.getKey());
+            try {
+                Scope tmpScope = scopes[i];
+                if (tmpScope != null) {
+                    verb.put("scope", tmpScope.getKey());
                 }
             }catch(IndexOutOfBoundsException e){
                 //todo need to rewrite to prevent this type of exceptions
@@ -337,7 +340,7 @@ public class URITemplate implements Serializable{
         if (mediationScript != null ? !mediationScript.equals(that.mediationScript) : that.mediationScript != null) {
             return false;
         }
-        if (scopes != null ? !scopes.equals(that.scopes) : that.scopes != null) {
+        if (scopes != null ? !Arrays.equals(scopes, that.scopes) : that.scopes != null) {
             return false;
         }
         if (mediationScripts != null ? !mediationScripts.equals(that.mediationScripts) : that.mediationScripts !=
@@ -363,7 +366,7 @@ public class URITemplate implements Serializable{
         result = 31 * result + (throttlingTiers != null ? throttlingTiers.hashCode() : 0);
         result = 31 * result + (scope != null ? scope.hashCode() : 0);
         result = 31 * result + (mediationScript != null ? mediationScript.hashCode() : 0);
-        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
+        result = 31 * result + (scopes != null ? Arrays.hashCode(scopes) : 0);
         result = 31 * result + (mediationScripts != null ? mediationScripts.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(conditionGroups);
         return result;
