@@ -45,6 +45,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,24 +64,18 @@ public class RestApiPublisherUtils {
 
         boolean isValid = false;
 
-//        if (api.getEndpointConfig() != null) { todo
-//            JSONTokener tokener = new JSONTokener(api.getEndpointConfig());
-//            JSONObject endpointCfg = new JSONObject(tokener);
-//            try {
-//                String prodEndpointUrl = endpointCfg.getJSONObject(RestApiConstants.PRODUCTION_ENDPOINTS)
-//                        .getString("url");
-//                String sandboxEndpointUrl = endpointCfg.getJSONObject(RestApiConstants.SANDBOX_ENDPOINTS)
-//                        .getString("url");
-//                isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
-//
-//                if (isValid) {
-//                    isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
-//                }
-//            } catch (JSONException ex) {
-//                RestApiUtil.handleBadRequest(
-//                        "Error in endpoint configurations. Web Socket APIs do not accept array of endpoints.", log);
-//            }
-//        }
+        if (api.getEndpointConfig() != null) {
+            LinkedHashMap endpointConfig = (LinkedHashMap) api.getEndpointConfig();
+            String prodEndpointUrl = String
+                    .valueOf(((LinkedHashMap) endpointConfig.get("production_endpoints")).get("url"));
+            String sandboxEndpointUrl = String
+                    .valueOf(((LinkedHashMap) endpointConfig.get("sandbox_endpoints")).get("url"));
+            isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
+
+            if (isValid) {
+                isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
+            }
+        }
 
         return isValid;
     }

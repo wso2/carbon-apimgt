@@ -40,7 +40,6 @@ class API extends Resource {
                 "https"
             ];
             this.visibility = "PUBLIC";
-            this.context = context;
             this.endpointConfig = {
                 endpoint_type: 'http',
                 sandbox_endpoints: {
@@ -1246,7 +1245,7 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
             return client.apis["Throttling Policies"].getAllThrottlingPolicies({
-                    policyLevel: 'subscription'
+                    policyLevel: policyLevel
                 },
                 this._requestMetaData(),
             );

@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.34-SNAPSHOT</version>
+        <version>6.5.38-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -122,6 +122,11 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.governance</groupId>
+            <artifactId>org.wso2.carbon.identity.recovery</artifactId>
+            <version>${carbon.identity.governance.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.governance</groupId>
@@ -498,6 +503,7 @@
                             net.sf.saxon.*,
                             org.wso2.carbon.identity.oauth.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
                             org.wso2.carbon.identity.oauth2.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
+                            org.wso2.carbon.identity.recovery.*;version="${carbon.identity.recovery.pkg.version}",
                             org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.statsupdate.stub.*;version="${carbon.apimgt.imp.pkg.version}",

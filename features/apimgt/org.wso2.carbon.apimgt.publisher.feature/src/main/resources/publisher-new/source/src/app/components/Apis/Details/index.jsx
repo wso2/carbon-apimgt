@@ -485,7 +485,7 @@ class Details extends Component {
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route
                                     path={isAPIProduct ? Details.subPaths.OVERVIEW_PRODUCT : Details.subPaths.OVERVIEW}
-                                    component={() => <Overview />}
+                                    component={() => <Overview api={api} />}
                                 />
                                 <Route
                                     path={Details.subPaths.API_DEFINITION}

@@ -105,6 +105,15 @@
     response.addCookie(cookie);
 
     cookie = {
+        'name': 'WSO2_AM_REFRESH_TOKEN_1_Default',
+        'value': refreshTokenPart1,
+        'path': site.context + "/",
+        "secure": true,
+        "maxAge": 3600
+    };
+    response.addCookie(cookie);
+
+    cookie = {
         'name': 'AM_ID_TOKEN_DEFAULT_P2',
         'value': idTokenPart2,
         'path': site.context + "/services/logout",
