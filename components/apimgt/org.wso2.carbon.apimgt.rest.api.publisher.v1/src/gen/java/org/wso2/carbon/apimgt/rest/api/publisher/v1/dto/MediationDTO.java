@@ -50,7 +50,40 @@ public enum TypeEnum {
 }
 
     private TypeEnum type = null;
-    private String config = null;
+
+@XmlType(name="SourceTypeEnum")
+@XmlEnum(String.class)
+public enum SourceTypeEnum {
+
+    @XmlEnumValue("FILE") FILE(String.valueOf("FILE")), @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE"));
+
+
+    private String value;
+
+    SourceTypeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static SourceTypeEnum fromValue(String v) {
+        for (SourceTypeEnum b : SourceTypeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private SourceTypeEnum sourceType = null;
 
   /**
    **/
@@ -107,20 +140,19 @@ public enum TypeEnum {
 
   /**
    **/
-  public MediationDTO config(String config) {
-    this.config = config;
+  public MediationDTO sourceType(SourceTypeEnum sourceType) {
+    this.sourceType = sourceType;
     return this;
   }
 
   
-  @ApiModelProperty(example = "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"log_in_message\"> <log level=\"full\"> <property name=\"IN_MESSAGE\" value=\"IN_MESSAGE_21133232\"/> </log> </sequence>", required = true, value = "")
-  @JsonProperty("config")
-  @NotNull
-  public String getConfig() {
-    return config;
+  @ApiModelProperty(value = "")
+  @JsonProperty("sourceType")
+  public SourceTypeEnum getSourceType() {
+    return sourceType;
   }
-  public void setConfig(String config) {
-    this.config = config;
+  public void setSourceType(SourceTypeEnum sourceType) {
+    this.sourceType = sourceType;
   }
 
 
@@ -136,12 +168,12 @@ public enum TypeEnum {
     return Objects.equals(id, mediation.id) &&
         Objects.equals(name, mediation.name) &&
         Objects.equals(type, mediation.type) &&
-        Objects.equals(config, mediation.config);
+        Objects.equals(sourceType, mediation.sourceType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, config);
+    return Objects.hash(id, name, type, sourceType);
   }
 
   @Override
@@ -152,7 +184,7 @@ public enum TypeEnum {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    config: ").append(toIndentedString(config)).append("\n");
+    sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
     sb.append("}");
     return sb.toString();
   }

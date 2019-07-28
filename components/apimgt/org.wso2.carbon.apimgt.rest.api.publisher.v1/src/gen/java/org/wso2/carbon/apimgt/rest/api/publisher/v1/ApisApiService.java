@@ -51,9 +51,10 @@ public interface ApisApiService {
       public Response apisApiIdLifecycleStateGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext);
       public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext);
+      public Response apisApiIdMediationPoliciesMediationPolicyIdContentGet(String apiId, String mediationPolicyId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId, String ifMatch, MessageContext messageContext);
       public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId, String ifNoneMatch, MessageContext messageContext);
-      public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId, MediationDTO body, String ifMatch, MessageContext messageContext);
+      public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String type, String apiId, String mediationPolicyId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext);
       public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext);
       public Response apisApiIdMonetizationGet(String apiId, MessageContext messageContext);
       public Response apisApiIdMonetizePost(String apiId, APIMonetizationInfoDTO body, MessageContext messageContext);

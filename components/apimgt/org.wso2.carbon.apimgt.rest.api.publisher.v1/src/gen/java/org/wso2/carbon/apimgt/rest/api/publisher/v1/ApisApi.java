@@ -284,6 +284,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.apisApiIdMediationPoliciesGet(apiId, limit, offset, query, ifNoneMatch, securityContext);
     }
 
+    @GET
+    @Path("/{apiId}/mediation-policies/{mediationPolicyId}/content")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Downloadt an API specific mediation policy", notes = "This operation can be used to download a particular API specific mediation policy. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Mediation Policies",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Mediation policy returned. ", response = Void.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Document does not exist. ", response = ErrorDTO.class) })
+    public Response apisApiIdMediationPoliciesMediationPolicyIdContentGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+        return delegate.apisApiIdMediationPoliciesMediationPolicyIdContentGet(apiId, mediationPolicyId, ifNoneMatch, securityContext);
+    }
+
     @DELETE
     @Path("/{apiId}/mediation-policies/{mediationPolicyId}")
     @Consumes({ "application/json" })
@@ -335,8 +352,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apisApiIdMediationPoliciesMediationPolicyIdPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId, @ApiParam(value = "Mediation policy object that needs to be updated " ,required=true) MediationDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
-        return delegate.apisApiIdMediationPoliciesMediationPolicyIdPut(apiId, mediationPolicyId, body, ifMatch, securityContext);
+    public Response apisApiIdMediationPoliciesMediationPolicyIdPut(@Multipart(value = "type")  String type, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "inlineContent", required = false)  String inlineContent, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+        return delegate.apisApiIdMediationPoliciesMediationPolicyIdPut(type, apiId, mediationPolicyId, fileInputStream, fileDetail, inlineContent, ifMatch, securityContext);
     }
 
     @POST

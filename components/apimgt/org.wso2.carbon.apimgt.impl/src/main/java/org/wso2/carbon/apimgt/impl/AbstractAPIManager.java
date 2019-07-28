@@ -826,7 +826,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 String[] path = resourcePath.split(RegistryConstants.PATH_SEPARATOR);
                 String resourceType = path[(path.length - 2)];
                 mediation.setType(resourceType);
-                mediation.setConfig(contentString);
 
             } catch (RegistryException e) {
                 log.error("Error occurred while getting content stream of the ,mediation policy ", e);
@@ -2373,7 +2372,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 String[] path = resourcePath.split(RegistryConstants.PATH_SEPARATOR);
                 String resourceType = path[(path.length - 2)];
                 mediation.setType(resourceType);
-                mediation.setConfig(contentString);
             } catch (XMLStreamException e) {
                 String errorMsg = "Error occurred while getting omElement out of mediation content";
                 log.error(errorMsg, e);

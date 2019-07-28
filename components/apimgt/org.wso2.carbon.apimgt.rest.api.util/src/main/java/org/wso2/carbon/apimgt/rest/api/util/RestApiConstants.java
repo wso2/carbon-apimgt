@@ -42,6 +42,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_APPLICATION = "application";
     public static final String RESOURCE_SUBSCRIPTION = "subscription";
     public static final String RESOURCE_DOCUMENTATION = "documentation";
+    public static final String RESOURCE_MEDIATION_POLICY = "mediation-policy";
     public static final String RESOURCE_POLICY = "policy";
     public static final String RESOURCE_APP_POLICY = "application policy";
     public static final String RESOURCE_APP_CONSUMER_KEY = "application consumer key";
