@@ -3581,6 +3581,9 @@ definitions:
       version:
         type: string
         example: 1.0.0
+      type:
+        type: string
+        example: WS
       provider:
         description: |
           If the provider value is not given, the user invoking the API will be used as the provider.
@@ -3654,6 +3657,10 @@ definitions:
       isDefaultVersion:
         type: boolean
         example: false
+      type:
+        type: string
+        description: This describes the transport type of the API
+        example: WS
       transport:
         type: array
         items:
@@ -3661,6 +3668,10 @@ definitions:
             Supported transports for the API (http and/or https).
           type: string
         example: ["http","https"]
+      operations:
+        type: array
+        items:
+          $ref: '#/definitions/APIOperations'
       authorizationHeader:
         type: string
         description: |
@@ -4699,6 +4710,17 @@ definitions:
       lastName:
         type: string
       email:
+        type: string
+
+  APIOperations:
+    title: Operation
+    properties:
+      id:
+        type: string
+        example: "apioperation"
+      target:
+        type: string
+      verb:
         type: string
 
 #-----------------------------------------------------

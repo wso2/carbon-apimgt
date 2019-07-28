@@ -72,11 +72,9 @@ import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -388,6 +386,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(apiToReturn).build();
     }
 
+    /**
+     * Get GraphQL Schema of given API
+     *
+     * @param apiId          apiId
+     * @param accept
+     * @param ifNoneMatch If--Match header value
+     * @param messageContext message context
+     * @return Response with GraphQL Schema
+     */
     @Override
     public Response apisApiIdGraphqlSchemaGet(String apiId, String accept, String ifNoneMatch, MessageContext messageContext) {
         try {
@@ -419,6 +426,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Update GraphQL Schema
+     * @param apiId api Id
+     * @param schemaDefinition graphQL schema definition
+     * @param ifMatch
+     * @param messageContext
+     * @return
+     */
     @Override
     public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) {
         try {
@@ -429,9 +444,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             schemaDefinition = URLDecoder.decode(schemaDefinition.split
-                            (APIConstants.GRAPHQL_SCHEMA_DEFINITION_SEPARATOR)[1], StandardCharsets.UTF_8.name());
+                    (APIConstants.GRAPHQL_SCHEMA_DEFINITION_SEPARATOR)[1], StandardCharsets.UTF_8.name());
             List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schemaDefinition);
-            Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI,operationArray);
+            Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationArray);
             originalAPI.setUriTemplates(uriTemplates);
 
             String resourcePath = apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
@@ -1749,6 +1764,24 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail,
+            String url, String additionalProperties, String implementationType, String ifMatch,
+            MessageContext messageContext) {
+        // do some magic!
+        return Response.ok().entity("magic!").build();
+    }
+
+    /**
+     * Import a GraphQL Schema
+     * @param type APIType
+     * @param fileInputStream input file
+     * @param fileDetail file Detail
+     * @param additionalProperties api object as string format
+     * @param ifMatch If--Match header value
+     * @param messageContext messageContext
+     * @return Response with GraphQL API
+     */
+    @Override
     public Response apisImportGraphQLSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
                                                 String additionalProperties, String ifMatch,
                                                 MessageContext messageContext) {
@@ -1825,6 +1858,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
+
+    /**
+     * Validate graphQL Schema
+     * @param fileInputStream  input file
+     * @param fileDetail file Detail
+     * @param messageContext messageContext
+     * @return Validation response
+     */
     @Override
     public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
 
@@ -1874,8 +1915,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     *
-     * @param schema
+     * Extract GraphQL Operations from given schema
+     * @param schema graphQL Schema
      * @return the arrayList of APIOperationsDTO
      */
     private List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
