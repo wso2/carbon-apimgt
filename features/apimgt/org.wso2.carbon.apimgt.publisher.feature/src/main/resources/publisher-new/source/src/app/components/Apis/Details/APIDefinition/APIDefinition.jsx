@@ -99,7 +99,6 @@ class APIDefinition extends React.Component {
             openEditor: false,
             swagger: null,
             graphQL: null,
-            api: null,
             format: null,
             convertTo: null,
         };
@@ -125,27 +124,26 @@ class APIDefinition extends React.Component {
     componentDidMount() {
         const { api } = this.props;
         let promisedApi;
-        if (api.type === "GRAPHQL") {
-            promisedApi =  api.getSchema(api.id);
+        if (api.type === 'GRAPHQL') {
+            promisedApi = api.getSchema(api.id);
         } else {
             promisedApi = api.getSwagger(api.id);
         }
 
         promisedApi
             .then((response) => {
-                if (api.type === "GRAPHQL") {
+                if (api.type === 'GRAPHQL') {
                     this.setState({
-                        api: api,
                         graphQL: response.obj.schemaDefinition,
                         format: 'txt',
                     });
                 } else {
-                this.setState({
-                    swagger: json2yaml.stringify(response.obj),
-                    format: 'yaml',
-                    convertTo: this.getConvertToFormat('yaml'),
-                });
-            }
+                    this.setState({
+                        swagger: json2yaml.stringify(response.obj),
+                        format: 'yaml',
+                        convertTo: this.getConvertToFormat('yaml'),
+                    });
+                }
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -172,7 +170,7 @@ class APIDefinition extends React.Component {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const { result } = e.target;
-                if(graphQL != null) {
+                if (graphQL != null) {
                     this.validateAndImportSchema(file);
                 } else {
                     this.validateAndUpdateApiDefinition(result);
@@ -185,55 +183,6 @@ class APIDefinition extends React.Component {
                 defaultMessage: 'Unsupported File Type.',
             }));
         }
-    }
-
-    /**
-     * Validates the given graphQL api schema.
-     * @param {*}  file graphQL schema.
-     */
-    validateAndImportSchema(file) {
-        const { api, intl } = this.props;
-        const promisedValidation = api.validateGraphQLFile(file);
-        promisedValidation
-        .then((response) => {
-            const { isValid, graphQLInfo } = response.obj;
-            if (isValid == true) {
-            api.operations = graphQLInfo.operations;
-            this.updateGraphQLAPIDefinition(api,file);
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-            Alert.error(intl.formatMessage({
-                id: 'Error.while.validating.the.imported.graphQLSchema',
-                defaultMessage: 'Error while validating imported schema',
-            }));
-        });
-    }
-
-    /**
-     * Update the graphQL api with its operation
-     * @param {*}  api
-     * @param {*}  graphQLInfo
-     */
-    updateGraphQLAPIDefinition(api, graphQLSchema) {
-        const { intl } = this.props;
-        const promisedAPI = api.updateGraphQLAPIDefinition(api.id,graphQLSchema);
-        promisedAPI
-        .then((response) => {
-            this.setState({ graphQL : response.data });
-            Alert.success(intl.formatMessage({
-                id: 'GraphQL.API.Definition.Updated.Successfully',
-                defaultMessage: 'GraphQL API Definition Updated Successfully',
-            }));
-        })
-        .catch((err) => {
-            console.log(err);
-            Alert.error(intl.formatMessage({
-                id: 'Error.while.updating.the.graphQL.schema',
-                defaultMessage: 'Error while updating graphQL schema',
-            }));
-        });
     }
 
     /**
@@ -258,6 +207,55 @@ class APIDefinition extends React.Component {
      */
     getConvertToFormat(format) {
         return format === 'json' ? 'yaml' : 'json';
+    }
+
+    /**
+     * Validates the given graphQL api schema.
+     * @param {*}  file graphQL schema.
+     */
+    validateAndImportSchema(file) {
+        const { api, intl } = this.props;
+        const promisedValidation = api.validateGraphQLFile(file);
+        promisedValidation
+            .then((response) => {
+                const { isValid, graphQLInfo } = response.obj;
+                if (isValid === true) {
+                    api.operations = graphQLInfo.operations;
+                    this.updateGraphQLAPIDefinition(api, file);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Error.while.validating.the.imported.graphQLSchema',
+                    defaultMessage: 'Error while validating imported schema',
+                }));
+            });
+    }
+
+    /**
+     * Update the graphQL api with its operation
+     * @param {*}  api
+     * @param {*}  graphQLInfo
+     */
+    updateGraphQLAPIDefinition(api, graphQLSchema) {
+        const { intl } = this.props;
+        const promisedAPI = api.updateGraphQLAPIDefinition(api.id, graphQLSchema);
+        promisedAPI
+            .then((response) => {
+                this.setState({ graphQL: response.data });
+                Alert.success(intl.formatMessage({
+                    id: 'GraphQL.API.Definition.Updated.Successfully',
+                    defaultMessage: 'GraphQL API Definition Updated Successfully',
+                }));
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Error.while.updating.the.graphQL.schema',
+                    defaultMessage: 'Error while updating graphQL schema',
+                }));
+            });
     }
 
     /**
@@ -410,9 +408,9 @@ class APIDefinition extends React.Component {
         let fileName;
         let isGraphQL = 0;
 
-        if(graphQL !== null) {
+        if (graphQL !== null) {
             downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(graphQL);
-            fileName = 'schema.' + "graphql";
+            fileName = 'schema.graphql';
             isGraphQL = 1;
         } else {
             downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(swagger);
@@ -428,7 +426,7 @@ class APIDefinition extends React.Component {
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
-        if (!swagger && !graphQL){
+        if (!swagger && !graphQL) {
             return <Progress />;
         }
 
@@ -442,17 +440,14 @@ class APIDefinition extends React.Component {
                                 defaultMessage='API Definition'
                             />
                         </Typography>
-                        {isGraphQL === 0  && (
-                        <Button size='small' className={classes.button} onClick={this.openEditor}>
-                            <EditRounded className={classes.buttonIcon} />
-                            Edit
-                        </Button>)}
-
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.edit'
-                                defaultMessage='Edit'
-                            />
-                        </Button>
+                        {isGraphQL === 0 && (
+                            <Button size='small' className={classes.button} onClick={this.openEditor}>
+                                <EditRounded className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.edit'
+                                    defaultMessage='Edit'
+                                />
+                            </Button>)}
                         <Dropzone
                             multiple={false}
                             className={classes.dropzone}
@@ -480,7 +475,7 @@ class APIDefinition extends React.Component {
                         </a>
 
                     </div>
-                    {isGraphQL === 0  &&
+                    {isGraphQL === 0 &&
                     <div className={classes.converterWrapper}>
                         <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
                             <FormattedMessage

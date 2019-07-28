@@ -135,17 +135,36 @@ function Overview(props) {
         loadResources = <Resources parentClasses={classes} api={newApi} />;
         loadScopes = <Scopes parentClasses={classes} />;
     }
-    if (newApi.apiType === API.CONSTS.APIProduct) {
-        endpointsCheckItem = null;
-        scopesCheckItem = null;
-        loadResources = <ProductResources parentClasses={classes} api={newApi} />;
-        loadEndpoints = null;
-        loadScopes = null;
-    } else if (newApi.apiType === API.CONSTS.API) {
-        endpointsCheckItem = <CheckItem itemSuccess itemLabel='Endpoints' />;
-        scopesCheckItem = <CheckItem itemSuccess={false} itemLabel='Scopes' />;
-        loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
+    function getResourcesClassForAPIs(apiType, api) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <Operations parentClasses={classes} api={api} />;
+            case 'Product':
+                return <ProductResources parentClasses={classes} api={api} />;
+            default:
+                return <Resources parentClasses={classes} api={api} />;
+        }
     }
+    function getItemSuccessLabelForAPIType(apiType) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <CheckItem itemSuccess itemLabel='Operations' />;
+            default:
+                return <CheckItem itemSuccess itemLabel='Resources' />;
+        }
+    }
+
+        if (newApi.apiType === API.CONSTS.APIProduct) {
+            endpointsCheckItem = null;
+            scopesCheckItem = null;
+            loadResources = <ProductResources parentClasses={classes} api={newApi} />;
+            loadEndpoints = null;
+            loadScopes = null;
+        } else if (newApi.apiType === API.CONSTS.API) {
+            endpointsCheckItem = <CheckItem itemSuccess itemLabel='Endpoints' />;
+            scopesCheckItem = <CheckItem itemSuccess={false} itemLabel='Scopes' />;
+            loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
+        }
     return (
         <ApiContext.Consumer>
             {({ api }) => (
@@ -155,9 +174,7 @@ function Overview(props) {
                         <Grid container>
                             {endpointsCheckItem}
                             <CheckItem itemSuccess={false} itemLabel='Policies' />
-                            {api.type === "GRAPHQL" ? (
-                             <CheckItem itemSuccess itemLabel='Operations' />
-                            ) : (<CheckItem itemSuccess itemLabel='Resources' />)}
+                            {getItemSuccessLabelForAPIType(api.type)}
                             <CheckItem itemSuccess={false} itemLabel='Scopes' />
                             <CheckItem itemSuccess itemLabel='Resources' />
                             {scopesCheckItem}
@@ -170,12 +187,8 @@ function Overview(props) {
                         <Grid container spacing={24}>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Configuration parentClasses={classes} />
-                                {loadResources}
-                                {api.type === "GRAPHQL" ? (
-                             <Operations parentClasses={classes} api={api} />)
-                              : (<Resources parentClasses={classes} api={api} />)}
-                                {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
-                                    (loadResources)}
+                                 {loadResources}
+                                {getResourcesClassForAPIs(api.type, api)}
                                 <AdditionalProperties parentClasses={classes} />
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>

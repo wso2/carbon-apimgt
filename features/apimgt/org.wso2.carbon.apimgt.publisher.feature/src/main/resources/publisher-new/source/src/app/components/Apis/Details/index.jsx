@@ -45,8 +45,8 @@ import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
-import Resources from './Resources/Resources';
 import Operations from './Operations/Operations';
+import Resources from './Resources/Resources';
 import Endpoints from './Endpoints/Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
@@ -141,6 +141,7 @@ class Details extends Component {
         const { location } = this.props;
         const currentLink = location.pathname.match(/[^/]+(?=\/$|$)/g);
         let active = null;
+        const isAPIProduct = null;
         if (currentLink && currentLink.length > 0) {
             [active] = currentLink;
         }
@@ -405,28 +406,23 @@ class Details extends Component {
                             active={active}
                             Icon={<CodeIcon />}
                         />
-                        {api.type === "GRAPHQL" ? (
-                        <LeftMenuItem
-                            text='operations'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<ResourcesIcon />}
-                        />) :
-                        (<LeftMenuItem
-                        text='resources'
-                        handleMenuSelect={this.handleMenuSelect}
-                        active={active}
-                        Icon={<ResourcesIcon />}
-                        />)
+                        {api.type === 'GRAPHQL' ? (
+                            <LeftMenuItem
+                                text='operations'
+                                handleMenuSelect={this.handleMenuSelect}
+                                active={active}
+                                Icon={<ResourcesIcon />}
+                            />) :
+                            (<LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.resources',
+                                    defaultMessage: 'resources',
+                                })}
+                                handleMenuSelect={this.handleMenuSelect}
+                                active={active}
+                                Icon={<ResourcesIcon />}
+                            />)
                         }
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.resources',
-                                defaultMessage: 'resources',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<ResourcesIcon />}
-                        />
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.lifecycle',
@@ -519,9 +515,10 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
-                                {api.type === "GRAPHQL" ? (
-                                <Route path={Details.subPaths.RESOURCES} component={() => <Operations api={api} />} />):
-                                <Route path={Details.subPaths.OPERATIONS} component={() => <Resources api={api} />} />}
+
+                                <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
+                                <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
+
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />

@@ -170,11 +170,9 @@ class APIThumb extends Component {
                     </Grid>
                 </CardContent>
                 <CardActions className={classes.apiActions}>
-                    <Chip label={api.lifeCycleStatus} color='default' />
-                    {api.type === "GRAPHQL" && (
-                           <Chip label={api.type} color='primary' />
+                    {api.type === 'GRAPHQL' && (
+                        <Chip label={api.type} color='primary' />
                     )}
-                    <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     <Chip label={isAPIProduct ? api.state : api.lifeCycleStatus} color='default' />
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} isAPIProduct={isAPIProduct} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}

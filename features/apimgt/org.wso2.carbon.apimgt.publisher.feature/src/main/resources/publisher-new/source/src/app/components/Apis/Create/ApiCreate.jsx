@@ -27,7 +27,6 @@ import APIProductCreateWrapper from './Default/APIProductCreateWrapper';
 import ApiCreateSwagger from './OpenAPI/ApiCreateOpenAPI';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 import ApiCreateGraphQL from './GraphQL/APICreateGrpahQL';
-import APICreateTopMenu from './Components/APICreateTopMenu';
 import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
 
 const styles = {

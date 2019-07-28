@@ -120,8 +120,10 @@ class Resources extends React.Component {
                 <div className={parentClasses.titleWrapper}>
                     <Typography variant='h5' component='h3' className={parentClasses.title}>
                         <FormattedMessage
-                            id='Apis.Details.NewOverview.Resources.resources'
-                            defaultMessage='Resources'
+                            id={api.type === 'GraphQL' ?
+                                ('Apis.Details.NewOverview.Operations.operations') :
+                                'Apis.Details.NewOverview.Resources.resources'}
+                            defaultMessage={api.type === 'GraphQL' ? 'Operation' : 'Resources'}
                         />
                     </Typography>
                     <Link to={'/apis/' + api.id + '/resources'}>
