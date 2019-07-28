@@ -983,7 +983,7 @@ public final class APIConstants {
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
 
     public static final String API_TYPE = "API_TYPE";
-    public static final String GRAPHQL_API = "GRAPHQL_API";
+    public static final String GRAPHQL_API = "GRAPHQL";
     public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
     public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
     public static final String GRAPHQL_API_OPERATION_VERB_INFO_DTO = "OPERATION_VERB_INFO_DTO";
@@ -1521,7 +1521,7 @@ public final class APIConstants {
         public static final String DIGEST_AUTH = "DigestAuth";
     }
 
-    public enum APIType {
+    public enum APITransportType {
         HTTP, WS, GRAPHQL
     }
 

@@ -94,11 +94,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
-
         try {
-            String payload;
             String validationErrorMessage;
             String operationList = "";
+            String payload = "";
             GraphQLSchema schema = null;
             Parser parser = new Parser();
             SchemaParser schemaParser = new SchemaParser();
@@ -106,7 +105,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
             ArrayList<String> roleArrayList = new ArrayList<>();
             ArrayList<String> operationArray = new ArrayList<>();
             ArrayList<String> validationErrorMessageList = new ArrayList<>();
-            HashMap<String,  ArrayList<String>> scopeRoleMappingList = new HashMap<>();
+            HashMap<String, ArrayList<String>> scopeRoleMappingList = new HashMap<>();
             HashMap<String, String> operationScopeMappingList = new HashMap<>();
             List<ValidationError> validationErrors = null;
 
@@ -115,18 +114,26 @@ public class GraphQLAPIHandler extends AbstractHandler {
             RelayUtils.buildMessage(axis2MC);
 
             // Extract payload from  messageContext
-            if (axis2MC.getEnvelope().getBody().getFirstElement() != null) {
-                payload = axis2MC.getEnvelope().getBody().getFirstElement().getFirstElement().getText();
+            OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
+            if (body != null && body.getFirstElement() != null) {
+                payload = body.getFirstElement().getFirstElement().getText();
             } else {
-                String[] queryParams = ((Axis2MessageContext) messageContext).getProperties().
-                        get(REST_SUB_REQUEST_PATH).toString().split(QUERY_PATH_String);
-                if (queryParams.length > 0) {
-                    String queryURLValue = queryParams[1];
-                    payload = URLDecoder.decode(queryURLValue, UNICODE_TRANSFORMATION_FORMAT);
+                String requestPath = ((Axis2MessageContext) messageContext).getProperties().
+                        get(REST_SUB_REQUEST_PATH).toString();
+                if (!requestPath.isEmpty()) {
+                    String[] queryParams = ((Axis2MessageContext) messageContext).getProperties().
+                            get(REST_SUB_REQUEST_PATH).toString().split(QUERY_PATH_String);
+                    if (queryParams.length > 0) {
+                        String queryURLValue = queryParams[1];
+                        payload = URLDecoder.decode(queryURLValue, UNICODE_TRANSFORMATION_FORMAT);
+                    } else {
+                        handleFailure(messageContext, "invalid request path");
+                        return false;
+                    }
                 } else {
-                    handleFailure(messageContext, "payload cannot be empty");
-                    return false;
+                    handleFailure(messageContext, "request path cannot be empty");
                 }
+
             }
 
             // Validate payload with graphQLSchema
@@ -163,7 +170,9 @@ public class GraphQLAPIHandler extends AbstractHandler {
                             operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
                         }
                     }
-                    scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
+                    if (!roleArrayList.isEmpty()) {
+                        scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
+                    }
                 }
             }
 
@@ -199,6 +208,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         return true;
                     }
                 } else {
+                    handleFailure(messageContext, "operation definition cannot be empty");
                     return false;
                 }
             }

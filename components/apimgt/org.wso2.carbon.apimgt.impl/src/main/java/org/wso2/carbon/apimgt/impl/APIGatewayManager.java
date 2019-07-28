@@ -126,11 +126,9 @@ public class APIGatewayManager {
             LocalEntryAdminClient localEntryAdminClient;
 
             try {
-                client = new APIGatewayAdminClient(api.getId(), environment);
                 String definition;
-                client = new APIGatewayAdminClient(environment);
                 String operation;
-                String definition = "";
+                client = new APIGatewayAdminClient(environment);
                 long apiGetStartTime = System.currentTimeMillis();
                 APIData apiData = client.getApi(tenantDomain, api.getId());
                 endTime = System.currentTimeMillis();
@@ -138,7 +136,7 @@ public class APIGatewayManager {
                     log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
                 }
                 localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
-                if (api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
+                if (api.getType() != null && api.getType().equals(APIConstants.APITransportType.GRAPHQL.toString())) {
                     definition = buildSchemaWithScopesAndRoles(api);
                     localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");
                     localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
@@ -155,14 +153,14 @@ public class APIGatewayManager {
                     api.setUriTemplates(uriTemplates);
                 } else {
                     definition = api.getSwaggerDefinition();
-                        localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
+                    localEntryAdminClient.deleteEntry(api.getUUID());
+                    localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
                                 definition.replaceAll("&(?!amp;)", "&amp;").
                                         replaceAll("<", "&lt;").replaceAll(">", "&gt;")
                                 + "</localEntry>");
                 }
                 // If the API exists in the Gateway
                 if (apiData != null) {
-                    String operation;
                     startTime = System.currentTimeMillis();
                     // If the Gateway type is 'production' and the production url
                     // has been removed
@@ -442,7 +440,7 @@ public class APIGatewayManager {
     /**
      * build schema with scopes and roles
      *
-     * @param api
+     * @param api api object
      * @return schemaDefinition
      */
     private String buildSchemaWithScopesAndRoles(API api) {
@@ -531,8 +529,11 @@ public class APIGatewayManager {
                         }
                         scopeRoles.add(role);
                     }
-                    scopeRoleMappingType = scopeRoleBuilder.toString() + "}\n";
-                    scopeRoleMappingBuilder.append(scopeRoleMappingType);
+
+                    if (!scopeRoleBuilder.toString().isEmpty()) {
+                        scopeRoleMappingType = scopeRoleBuilder.toString() + "}\n";
+                        scopeRoleMappingBuilder.append(scopeRoleMappingType);
+                    }
                 }
                 schemaDefinitionBuilder.append(scopeRoleMappingBuilder.toString());
             }
@@ -801,7 +802,7 @@ public class APIGatewayManager {
     public boolean isAPIPublished(API api, String tenantDomain)throws APIManagementException {
         for (Environment environment : environments.values()) {
             try {
-                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
                 // If the API exists in at least one environment, consider as
                 // published and return true.
                 APIIdentifier id = api.getId();

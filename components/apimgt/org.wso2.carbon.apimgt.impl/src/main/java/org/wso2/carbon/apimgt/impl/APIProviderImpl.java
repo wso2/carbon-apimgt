@@ -1799,9 +1799,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = null;
         APITemplateBuilder builder = null;
 
-        if (api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
+        if (api.getType() != null && api.getType().equals(APIConstants.APITransportType.GRAPHQL.toString())) {
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
-            api.setType(APIConstants.GRAPHQL_API);
         }
         api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         if (api.getId().getProviderName().contains("AT")) {

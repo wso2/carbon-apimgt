@@ -340,12 +340,12 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
         JSONObject pathsObject = new JSONObject();
 
-        if(api.getType().equals(APIConstants.GRAPHQL_API)) {
+        if (api.getType().equals(APIConstants.APITransportType.GRAPHQL.toString())) {
             List<String> verbList = new ArrayList<>();
             verbList.add("GET");
             verbList.add("POST");
             URITemplate swaggerTemplate = new URITemplate();
-            for(String verb : verbList) {
+            for (String verb : verbList) {
                 swaggerTemplate.setAuthType("Any");
                 swaggerTemplate.setHTTPVerb(verb);
                 swaggerTemplate.setHttpVerbs(verb);
@@ -378,15 +378,15 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         JSONObject pathItemObject = new JSONObject();
 
         for (Object pathObject : pathsObject.entrySet()) {
-            Map.Entry resourcePath = (Map.Entry)pathObject;
-            pathsObjectValues = (JSONObject)resourcePath.getValue();
+            Map.Entry resourcePath = (Map.Entry) pathObject;
+            pathsObjectValues = (JSONObject) resourcePath.getValue();
             for (Object resource : pathsObjectValues.entrySet()) {
                 JSONArray parametersObj = new JSONArray();
                 JSONObject queryParamObj = new JSONObject();
-                resourceObject = (Map.Entry)resource;
-                JSONObject resourceParams = (JSONObject)resourceObject.getValue();
+                resourceObject = (Map.Entry) resource;
+                JSONObject resourceParams = (JSONObject) resourceObject.getValue();
 
-                if(resourceObject.getKey()!= null) {
+                if (resourceObject.getKey() != null) {
                     if (resourceObject.getKey().toString().equals("get")) {
                         parameter = "query";
                         inValue = "query";
@@ -396,7 +396,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                         JSONObject schema = new JSONObject();
                         JSONObject payload = new JSONObject();
                         JSONObject typeOfPayload = new JSONObject();
-                        schema.put("type" , "object");
+                        schema.put("type", "object");
                         typeOfPayload.put("type", "string");
                         payload.put("payload",typeOfPayload);
                         schema.put("properties" , payload);
@@ -436,6 +436,66 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                 syncAPIDefinitionWithURITemplates(swaggerObj, uriTemplateMap);
             } else {
                 setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
+            if (!api.getType().equals(APIConstants.GRAPHQL_API)) {
+                //Generates below model using the API's URI template
+                // path -> [verb1 -> template1, verb2 -> template2, ..]
+                Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
+                JSONObject pathsJsonObj = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_PATHS);
+                Iterator pathEntriesIterator = pathsJsonObj.entrySet().iterator();
+                while (pathEntriesIterator.hasNext()) {
+                    Object pathObj = pathEntriesIterator.next();
+                    Map.Entry pathEntry = (Map.Entry) pathObj;
+                    String pathName = (String) pathEntry.getKey();
+                    JSONObject pathJsonObj = (JSONObject)pathEntry.getValue();
+
+                    Map<String, URITemplate> uriTemplatesForPath = uriTemplateMap.get(pathName);
+                    if (uriTemplatesForPath == null) {
+                        //remove paths that are not in URI Templates
+                        pathEntriesIterator.remove();
+                    } else {
+                        Iterator operationEntriesIterator = pathJsonObj.entrySet().iterator();
+                        while (operationEntriesIterator.hasNext()) {
+                            Object operationObj = operationEntriesIterator.next();
+                            Map.Entry operationEntry = (Map.Entry) operationObj;
+                            String verb = (String) operationEntry.getKey();
+                            JSONObject operationJsonObj = (JSONObject)operationEntry.getValue();
+
+                            URITemplate template = uriTemplatesForPath.get(verb.toUpperCase());
+                            if (template == null) {
+                                // if particular operation is not available in URI templates, then remove it from swagger
+                                operationEntriesIterator.remove();
+                            } else {
+                                // if operation is available in URI templates, update swagger operation
+                                // with auth type, scope etc
+                                updateOperationManagedInfo(template, operationJsonObj);
+                            }
+                        }
+
+                        // if there are any verbs (operations) exists in uri template not defined in current path item
+                        // (pathJsonObj) in swagger then add them
+                        for (Map.Entry<String, URITemplate> uriTemplatesForPathEntry : uriTemplatesForPath.entrySet()) {
+                            String verb = uriTemplatesForPathEntry.getKey();
+                            URITemplate uriTemplate = uriTemplatesForPathEntry.getValue();
+                            JSONObject operationJsonObj = (JSONObject)pathJsonObj.get(verb.toLowerCase());
+                            if (operationJsonObj == null) {
+                                operationJsonObj = createOperationFromTemplate(uriTemplate);
+                                pathJsonObj.put(verb.toLowerCase(), operationJsonObj);
+                            }
+                        }
+                    }
+                }
+
+                // add to swagger if there are any new path templates
+                for (Map.Entry<String, Map<String, URITemplate>> uriTemplateMapEntry : uriTemplateMap.entrySet()) {
+                    String path = uriTemplateMapEntry.getKey();
+                    Map<String, URITemplate> verbMap = uriTemplateMapEntry.getValue();
+                    if (pathsJsonObj.get(path) == null) {
+                        for (Map.Entry<String, URITemplate> verbMapEntry : verbMap.entrySet()) {
+                            URITemplate uriTemplate = verbMapEntry.getValue();
+                            addOrUpdatePathsFromURITemplate(pathsJsonObj, uriTemplate);
+                        }
+                    }
+                }
             }
 
             // add scope in the API object to swagger
