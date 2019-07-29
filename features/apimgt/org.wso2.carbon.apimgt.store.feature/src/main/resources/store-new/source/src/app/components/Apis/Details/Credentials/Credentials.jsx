@@ -81,7 +81,7 @@ const styles = theme => ({
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         fontSize: '11px',
         paddingLeft: theme.spacing.unit,
-        height: 35,
+        height: theme.spacing.unit * 4,
     },
     th: {
         color: theme.palette.getContrastText(theme.palette.background.default),
