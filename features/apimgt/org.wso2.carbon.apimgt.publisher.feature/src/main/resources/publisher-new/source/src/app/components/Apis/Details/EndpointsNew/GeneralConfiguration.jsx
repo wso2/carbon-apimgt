@@ -87,7 +87,7 @@ function GeneralConfiguration(props) {
     } = props;
     const [isConfigExpanded, setConfigExpand] = useState(true);
     const [endpointCertificates, setEndpointCertificates] = useState([]);
-    const [epTypeSubHeading, setEpTypeSubHeading] = useState('REST/ HTTP');
+    const [epTypeSubHeading, setEpTypeSubHeading] = useState('Single HTTP/ REST');
 
     /**
      * Method to upload the certificate content by calling the rest api.
@@ -124,7 +124,7 @@ function GeneralConfiguration(props) {
      * @return {string} The endpoint type string.
      * */
     const getEndpointTypeSubHeading = () => {
-        let type = 'REST/ HTTP';
+        let type = '';
         const epType = epConfig.endpoint_type;
         switch (epType) {
             case 'load_balance':
@@ -141,9 +141,9 @@ function GeneralConfiguration(props) {
         const endpointTypeKey = endpointType.key;
 
         if (endpointTypeKey === 'address') {
-            type = type.concat(' SOAP/ HTTP');
+            type = type.concat(' HTTP/ SOAP');
         } else {
-            type = type.concat(' REST/ HTTP');
+            type = type.concat(' HTTP/ REST');
         }
         return type;
     };
