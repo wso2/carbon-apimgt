@@ -82,6 +82,9 @@ const styles = theme => ({
     certDetailsHeader: {
         fontWeight: '600',
     },
+    uploadCertDialogHeader: {
+        fontWeight: '600',
+    },
 });
 /**
  * The base component for advanced endpoint configurations.
@@ -319,7 +322,7 @@ function Certificates(props) {
             </Dialog>
             <Dialog open={uploadCertificateOpen}>
                 <DialogTitle>
-                    <Typography>
+                    <Typography className={classes.uploadCertDialogHeader}>
                         <FormattedMessage
                             id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.uploadCertificate'
                             defaultMessage='Upload Certificate'
