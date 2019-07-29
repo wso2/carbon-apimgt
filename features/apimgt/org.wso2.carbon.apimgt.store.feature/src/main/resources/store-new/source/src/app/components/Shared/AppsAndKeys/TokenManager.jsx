@@ -228,7 +228,6 @@ class TokenManager extends React.Component {
                     />
                 </Typography>
                 <ViewKeys selectedApp={selectedApp} keyType={keyType} keys={keys} />
-
                 <ExpansionPanel>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography className={classes.heading} variant='subtitle1'>

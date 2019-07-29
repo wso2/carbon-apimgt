@@ -30,7 +30,7 @@ import { ApiContext } from '../ApiContext';
 import Wizard from './Wizard/Wizard';
 import SubscriptionTableRow from './SubscriptionTableRow';
 import SubscribeToApps from './SubscribeToApps';
-import SubscibeButtonPanel from './subscibeButtonPanel';
+import SubscibeButtonPanel from './SubscibeButtonPanel';
 
 /**
  * @inheritdoc

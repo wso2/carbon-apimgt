@@ -23,6 +23,11 @@ import API from 'AppData/api';
 import { injectIntl } from 'react-intl';
 
 const subscribeToAppStep = (props) => {
+    const SUBSCRIPTION_STATES = {
+        ON_HOLD: 'ON_HOLD',
+        UNBLOCKED: 'UNBLOCKED',
+        REJECTED: 'REJECTED',
+    };
     const [subscriptionRequest, setApplicationRequest] = useState({
         applicationId: '',
         apiId: '',
@@ -31,7 +36,7 @@ const subscribeToAppStep = (props) => {
     const [newApp, setNewApp] = useState(null);
     const {
         apiId, currentStep, throttlingPolicyList, createdApp, decrementStep, incrementStep,
-        nextStep, intl,
+        nextStep, intl, setStepStatus, stepStatuses,
     } = props;
 
     useEffect(() => {
@@ -53,12 +58,17 @@ const subscribeToAppStep = (props) => {
             api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
                 subscriptionRequest.throttlingPolicy)
                 .then((response) => {
-                    console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-                    Alert.info(intl.formatMessage({
-                        defaultMessage: 'Subscribed successfully',
-                        id: 'Apis.Details.Credentials.Wizard.SubscribeToAppStep.subscribed.successfully',
-                    }));
-                    incrementStep('current');
+                    if (response.body.status === SUBSCRIPTION_STATES.UNBLOCKED) {
+                        console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
+                        Alert.info(intl.formatMessage({
+                            defaultMessage: 'Subscribed successfully',
+                            id: 'Apis.Details.Credentials.Wizard.SubscribeToAppStep.subscribed.successfully',
+                        }));
+                        incrementStep('current');
+                        setStepStatus(stepStatuses.PROCEED);
+                    } else {
+                        setStepStatus(stepStatuses.BLOCKED);
+                    }
                 })
                 .catch((error) => {
                     console.log('Error while creating the subscription.');

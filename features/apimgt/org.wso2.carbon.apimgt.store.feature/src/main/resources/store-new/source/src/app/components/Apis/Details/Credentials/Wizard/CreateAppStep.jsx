@@ -23,6 +23,11 @@ import Alert from 'AppComponents/Shared/Alert';
 import { injectIntl } from 'react-intl';
 
 const createAppStep = (props) => {
+    const APPLICATION_STATES = {
+        CREATED: 'CREATED',
+        APPROVED: 'APPROVED',
+        REJECTED: 'REJECTED',
+    };
     const [throttlingPolicyList, setThrottlingPolicyList] = useState([]);
     const [applicationRequest, setApplicationRequest] = useState({
         name: '',
@@ -33,7 +38,7 @@ const createAppStep = (props) => {
     const [isNameValid, setIsNameValid] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const {
-        currentStep, setCreatedApp, decrementStep, nextStep, incrementStep, intl,
+        currentStep, setCreatedApp, decrementStep, nextStep, incrementStep, intl, setStepStatus, stepStatuses,
     } = props;
 
     const validateName = (value) => {
@@ -80,10 +85,15 @@ const createAppStep = (props) => {
                 .then(() => api.createApplication(applicationRequest))
                 .then((response) => {
                     const data = JSON.parse(response.data);
-                    const appCreated = { value: data.applicationId, label: data.name };
-                    console.log('Application created successfully.');
-                    setCreatedApp(appCreated);
-                    incrementStep('current');
+                    if (data.status === APPLICATION_STATES.APPROVED) {
+                        const appCreated = { value: data.applicationId, label: data.name };
+                        console.log('Application created successfully.');
+                        setCreatedApp(appCreated);
+                        incrementStep('current');
+                        setStepStatus(stepStatuses.PROCEED);
+                    } else {
+                        setStepStatus(stepStatuses.BLOCKED);
+                    }
                 })
                 .catch((error) => {
                     const { response } = error;

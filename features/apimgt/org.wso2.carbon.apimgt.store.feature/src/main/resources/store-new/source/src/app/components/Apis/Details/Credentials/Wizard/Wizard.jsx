@@ -108,6 +108,10 @@ class Wizard extends Component {
                 id: 'Apis.Details.Credentials.Wizard.Wizard.copy.access.token',
             }),
         ];
+        this.stepStatuses = {
+            PROCEED: 'PROCEED',
+            BLOCKED: 'BLOCKED',
+        };
         this.state = {
             currentStep: 0,
             nextStep: 0,
@@ -115,7 +119,17 @@ class Wizard extends Component {
             createdToken: null,
             redirect: false,
             createdKeyType: '',
+            stepStatus: 'PROCEED',
         };
+    }
+
+    /**
+     * Used to set the status retured after executing each step. Used in workflow
+     * scenario to evaluate wheather we can proceed to next step
+     * @param {*} stepStatus status
+     */
+    setStepStatus = (stepStatus) => {
+        this.setState({ stepStatus });
     }
 
     /**
@@ -196,7 +210,7 @@ class Wizard extends Component {
             throttlingPolicyList,
         } = this.props;
         const {
-            currentStep, createdApp, createdToken, redirect, nextStep, createdKeyType,
+            currentStep, createdApp, createdToken, redirect, nextStep, createdKeyType, stepStatus,
         } = this.state;
 
         if (redirect) {
@@ -260,80 +274,96 @@ class Wizard extends Component {
                             </div>
                         ) : (
                             <div className={classes.wizardContent}>
-                                <CreateAppStep
-                                    currentStep={currentStep}
-                                    setCreatedApp={this.setCreatedApp}
-                                    nextStep={nextStep}
-                                    incrementStep={this.handleNext}
-                                    decrementStep={this.handleBack}
-                                />
-                                <SubscribeToAppStep
-                                    throttlingPolicyList={throttlingPolicyList}
-                                    currentStep={currentStep}
-                                    createdApp={createdApp}
-                                    apiId={apiId}
-                                    nextStep={nextStep}
-                                    incrementStep={this.handleNext}
-                                    decrementStep={this.handleBack}
-                                />
-                                <GenerateKeysStep
-                                    currentStep={currentStep}
-                                    createdApp={createdApp}
-                                    nextStep={nextStep}
-                                    incrementStep={this.handleNext}
-                                    decrementStep={this.handleBack}
-                                    setCreatedKeyType={this.setCreatedKeyType}
-                                />
-                                <GenerateAccessTokenStep
-                                    currentStep={currentStep}
-                                    createdApp={createdApp}
-                                    setCreatedToke={this.setCreatedToken}
-                                    nextStep={nextStep}
-                                    incrementStep={this.handleNext}
-                                    decrementStep={this.handleBack}
-                                    createdKeyType={createdKeyType}
-                                />
-                                <CopyAccessTokenStep
-                                    currentStep={currentStep}
-                                    createdToken={createdToken}
-                                    handleClickToggle={handleClickToggle}
-                                    updateSubscriptionData={updateSubscriptionData}
-                                    nextStep={nextStep}
-                                    incrementStep={this.handleNext}
-                                />
-                                <div className={classes.wizardButtons}>
-                                    <Button
-                                        disabled={currentStep < this.steps.length - 1}
-                                        onClick={this.handleRedirectTest}
-                                        className={classes.button}
-                                        variant='outlined'
-                                    >
-                                        <FormattedMessage
-                                            id='Apis.Details.Credentials.Wizard.Wizard.test'
-                                            defaultMessage='Test'
+                                {stepStatus === this.stepStatuses.PROCEED && (
+                                    <React.Fragment>
+                                        <CreateAppStep
+                                            currentStep={currentStep}
+                                            setCreatedApp={this.setCreatedApp}
+                                            nextStep={nextStep}
+                                            incrementStep={this.handleNext}
+                                            decrementStep={this.handleBack}
+                                            setStepStatus={this.setStepStatus}
+                                            stepStatuses={this.stepStatuses}
                                         />
-                                    </Button>
-                                    <Button
-                                        variant='contained'
-                                        color='primary'
-                                        onClick={() => this.handleNext('next')}
-                                        className={classes.button}
-                                    >
-                                        {currentStep === this.steps.length - 1
-                                            ? (
+                                        <SubscribeToAppStep
+                                            throttlingPolicyList={throttlingPolicyList}
+                                            currentStep={currentStep}
+                                            createdApp={createdApp}
+                                            apiId={apiId}
+                                            nextStep={nextStep}
+                                            incrementStep={this.handleNext}
+                                            decrementStep={this.handleBack}
+                                            setStepStatus={this.setStepStatus}
+                                            stepStatuses={this.stepStatuses}
+                                        />
+                                        <GenerateKeysStep
+                                            currentStep={currentStep}
+                                            createdApp={createdApp}
+                                            nextStep={nextStep}
+                                            incrementStep={this.handleNext}
+                                            decrementStep={this.handleBack}
+                                            setCreatedKeyType={this.setCreatedKeyType}
+                                            setStepStatus={this.setStepStatus}
+                                            stepStatuses={this.stepStatuses}
+                                        />
+                                        <GenerateAccessTokenStep
+                                            currentStep={currentStep}
+                                            createdApp={createdApp}
+                                            setCreatedToke={this.setCreatedToken}
+                                            nextStep={nextStep}
+                                            incrementStep={this.handleNext}
+                                            decrementStep={this.handleBack}
+                                            createdKeyType={createdKeyType}
+                                        />
+                                        <CopyAccessTokenStep
+                                            currentStep={currentStep}
+                                            createdToken={createdToken}
+                                            handleClickToggle={handleClickToggle}
+                                            updateSubscriptionData={updateSubscriptionData}
+                                            nextStep={nextStep}
+                                            incrementStep={this.handleNext}
+                                            stepStatus={stepStatus}
+                                        />
+                                        <div className={classes.wizardButtons}>
+                                            <Button
+                                                disabled={currentStep < this.steps.length - 1}
+                                                onClick={this.handleRedirectTest}
+                                                className={classes.button}
+                                                variant='outlined'
+                                            >
                                                 <FormattedMessage
-                                                    id='Apis.Details.Credentials.Wizard.Wizard.finish'
-                                                    defaultMessage='Finish'
+                                                    id='Apis.Details.Credentials.Wizard.Wizard.test'
+                                                    defaultMessage='Test'
                                                 />
-                                            )
-                                            : (
-                                                <FormattedMessage
-                                                    id='Apis.Details.Credentials.Wizard.Wizard.next'
-                                                    defaultMessage='Next'
-                                                />
-                                            )}
-                                    </Button>
-                                </div>
+                                            </Button>
+                                            <Button
+                                                variant='contained'
+                                                color='primary'
+                                                onClick={() => this.handleNext('next')}
+                                                className={classes.button}
+                                            >
+                                                {currentStep === this.steps.length - 1
+                                                    ? (
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Credentials.Wizard.Wizard.finish'
+                                                            defaultMessage='Finish'
+                                                        />
+                                                    )
+                                                    : (
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Credentials.Wizard.Wizard.next'
+                                                            defaultMessage='Next'
+                                                        />
+                                                    )}
+                                            </Button>
+                                        </div>
+                                    </React.Fragment>
+                                )}
+                                {stepStatus === this.stepStatuses.BLOCKED && (
+                                    <Typography variant='h4'>
+                                        Approval request for this step has been Sent
+                                    </Typography>
+                                )}
                             </div>
                         )}
                     </div>

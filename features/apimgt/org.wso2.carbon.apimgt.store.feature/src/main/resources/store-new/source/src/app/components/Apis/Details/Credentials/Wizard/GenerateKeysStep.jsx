@@ -24,6 +24,12 @@ import Application from 'AppData/Application';
 import { injectIntl } from 'react-intl';
 
 const generateKeysStep = (props) => {
+    const keyStates = {
+        COMPLETED: 'COMPLETED',
+        APPROVED: 'APPROVED',
+        CREATED: 'CREATED',
+        REJECTED: 'REJECTED',
+    };
     const [tab, setTab] = useState(0);
     const [notFound, setNotFound] = useState(false);
 
@@ -34,7 +40,8 @@ const generateKeysStep = (props) => {
     });
 
     const {
-        currentStep, createdApp, decrementStep, incrementStep, nextStep, setCreatedKeyType, intl,
+        currentStep, createdApp, decrementStep, incrementStep, nextStep, setCreatedKeyType,
+        intl, setStepStatus, stepStatuses,
     } = props;
 
     /**
@@ -63,9 +70,14 @@ const generateKeysStep = (props) => {
                 return application.generateKeys(keyRequest.keyType, keyRequest.supportedGrantTypes,
                     keyRequest.callbackUrl);
             }).then((response) => {
-                incrementStep('current');
-                setCreatedKeyType(keyRequest.keyType);
-                console.log('Keys generated successfully with ID : ' + response);
+                if (response.keyState === keyStates.CREATED || response.keyState === keyStates.REJECTED) {
+                    setStepStatus(stepStatuses.BLOCKED);
+                } else {
+                    incrementStep('current');
+                    setCreatedKeyType(keyRequest.keyType);
+                    setStepStatus(stepStatuses.PROCEED);
+                    console.log('Keys generated successfully with ID : ' + response);
+                }
             }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
