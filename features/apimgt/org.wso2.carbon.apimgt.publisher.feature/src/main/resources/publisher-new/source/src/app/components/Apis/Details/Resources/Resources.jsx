@@ -21,7 +21,6 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -45,9 +44,8 @@ import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
 import Resource from './Resource';
 import { Progress } from 'AppComponents/Shared';
-import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
-import {FormLabel, Radio, RadioGroup} from "@material-ui/core";
+import { Radio, RadioGroup} from "@material-ui/core";
 
 const styles = theme => ({
     root: {
@@ -441,12 +439,13 @@ class Resources extends React.Component {
         const { intl } = this.props;
         const api = new Api();
         const { id } = this.props.api;
+        const { policyLevel, selectedPolicy } = this.state;
         const promisedApi = api.get(id);
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
-                if('perAPI' === this.state.policyLevel) {
-                    apiData.apiThrottlingPolicy = this.state.selectedPolicy;
+                if ('perAPI' === policyLevel) {
+                    apiData.apiThrottlingPolicy = selectedPolicy;
                 } else {
                     apiData.apiThrottlingPolicy = null;
                 }
@@ -564,9 +563,9 @@ class Resources extends React.Component {
         this.setState({ showPolicy: !this.state.showPolicy, showAddResource: false });
     }
     advancedPolicyTypeChange = (event) => {
-        if('perResource' === event.target.value) {
-        } else if('perAPI' === event.target.value) {
-            this.setState({ selectedPolicy: this.props.api.apiThrottlingPolicy });
+        const { apiThrottlingPolicy } = this.props.api;
+        if ('perAPI' === event.target.value) {
+            this.setState({ selectedPolicy: apiThrottlingPolicy });
         }
         this.setState({ policyLevel: event.target.value });
     }

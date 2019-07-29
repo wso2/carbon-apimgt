@@ -399,7 +399,7 @@ class Resource extends React.Component {
                                                 />
                                             </Typography>
                                         </TableCell>
-                                        {policyLevel==='perResource' &&
+                                        {policyLevel === 'perResource' &&
                                         <TableCell>
                                             <Typography variant='subtitle2'>
                                                 <FormattedMessage

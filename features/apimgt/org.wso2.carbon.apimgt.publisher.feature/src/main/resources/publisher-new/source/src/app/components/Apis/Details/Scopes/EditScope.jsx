@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -57,13 +57,13 @@ class EditScope extends React.Component {
         super(props);
         // this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
-        const { api } = this.props;
+        const { api, location } = this.props;
         this.state = {
             apiScope: api.scopes.filter((scope) => {
-                return scope.name === this.props.location.state.scopeName;
+                return scope.name === location.state.scopeName;
             })[0],
         };
-        this.addScope = this.addScope.bind(this);
+        this.updateScope = this.updateScope.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
     }
 
@@ -71,11 +71,10 @@ class EditScope extends React.Component {
      * Add new scope
      * @memberof Scopes
      */
-    addScope() {
+    updateScope() {
         const restApi = new Api();
         const updatedScope = this.state.apiScope;
-        const { intl } = this.props;
-        const { api } = this.props;
+        const { intl, api, history } = this.props;
         api.scopes = api.scopes.map((scope) => {
             if (scope.name === updatedScope.name) {
                 return updatedScope;
@@ -83,7 +82,6 @@ class EditScope extends React.Component {
                 return scope;
             }
         });
-        const { history } = this.props;
         // eslint-disable-next-line no-underscore-dangle
         const promisedApiUpdate = restApi.update(api._data);
         promisedApiUpdate.then((response) => {
@@ -126,8 +124,9 @@ class EditScope extends React.Component {
     }
 
     render() {
-        const { classes } = this.props;
-        const url = `/apis/${this.props.api.id}/scopes`;
+        const { classes, api } = this.props;
+        const { apiScope } = this.state;
+        const url = `/apis/${api.id}/scopes`;
         return (
             <Grid container>
                 <Typography
@@ -150,7 +149,7 @@ class EditScope extends React.Component {
                             type='text'
                             name='name'
                             margin='normal'
-                            value={this.state.apiScope.name}
+                            value={apiScope.name}
                             onChange={this.handleInputs}
                         />
                     </APIPropertyField>
@@ -181,7 +180,7 @@ class EditScope extends React.Component {
                     <Button
                         variant='contained'
                         color='primary'
-                        onClick={this.addScope}
+                        onClick={this.updateScope}
                         className={classes.buttonSave}
                     >
                         <FormattedMessage

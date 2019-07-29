@@ -623,9 +623,8 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
         if (uriTemplate.getScope() != null) {
             operationObject.put(APIConstants.SWAGGER_X_SCOPE, uriTemplate.getScope().getKey());
-        }
-        else {
-            if(operationObject.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
+        } else {
+            if (operationObject.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
                 operationObject.remove(APIConstants.SWAGGER_X_SCOPE);
             }
         }

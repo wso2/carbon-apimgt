@@ -151,10 +151,9 @@ function Delete(props) {
 }
 Delete.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    apiId: PropTypes.shape({}).isRequired,
-    scopeName: PropTypes.shape({}).isRequired,
+    scopeName: PropTypes.string.isRequired,
     intl: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({}).isRequired,
+    api: PropTypes.instanceOf(Object).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Delete));
