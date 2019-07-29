@@ -253,7 +253,7 @@ public class URITemplate implements Serializable{
 
     public void setScopes(Scope[] scopes) {
         this.scopes = scopes;
-        this.scope = scopes != null ? scopes[0] : null;
+        this.scope = ((scopes != null) && (scopes.length != 0)) ? scopes[0] : null;
     }
 
     public String getResourceMap(){
@@ -266,7 +266,7 @@ public class URITemplate implements Serializable{
             //Following parameter is not required as it not need to reflect UI level. If need please enable it.
             // /verb.put("throttling_conditions", throttlingConditions.get(i));
             try {
-                Scope tmpScope = scopes[i];
+                Scope tmpScope = scopes != null ? scopes[i] : null;
                 if (tmpScope != null) {
                     verb.put("scope", tmpScope.getKey());
                 }
