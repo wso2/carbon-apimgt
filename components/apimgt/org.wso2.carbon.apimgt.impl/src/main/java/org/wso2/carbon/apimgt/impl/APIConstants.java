@@ -1487,6 +1487,7 @@ public final class APIConstants {
         public static final String SIGNATURE_ALGORITHM = "alg";
         public static final String AM_APPLICATION_SCOPE = "am_application_scope";
         public static final String TOKEN_TYPE = "typ";
+        public static final String BACKEND_TOKEN = "backendJwt";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

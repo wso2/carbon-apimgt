@@ -40,7 +40,7 @@ public class JwtTokenInfoDTO implements Serializable {
     private String consumerKey;
     private List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
     private Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<String, SubscriptionPolicyDTO>();
-
+    private String backendJwt;
 
     public String getSubscriber() {
         return subscriber;
@@ -136,5 +136,13 @@ public class JwtTokenInfoDTO implements Serializable {
 
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
+    }
+
+    public String getBackendJwt() {
+        return backendJwt;
+    }
+
+    public void setBackendJwt(String backendJwt) {
+        this.backendJwt = backendJwt;
     }
 }

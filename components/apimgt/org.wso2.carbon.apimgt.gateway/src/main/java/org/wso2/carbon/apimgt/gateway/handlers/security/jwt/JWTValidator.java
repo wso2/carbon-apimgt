@@ -234,6 +234,16 @@ public class JWTValidator {
                 }
             }
         }
+        // Set JWT token sent to the backend
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        boolean backendJwtGenerationEnabled = Boolean.parseBoolean(config.getFirstProperty(
+                APIConstants.ENABLE_JWT_GENERATION));
+        if (log.isDebugEnabled()) {
+            log.debug("JWT Generation for backend enabled : " + backendJwtGenerationEnabled);
+        }
+        if (backendJwtGenerationEnabled && payload.get(APIConstants.JwtTokenConstants.BACKEND_TOKEN) != null) {
+            authContext.setCallerToken(payload.getString(APIConstants.JwtTokenConstants.BACKEND_TOKEN));
+        }
 
         return authContext;
     }
