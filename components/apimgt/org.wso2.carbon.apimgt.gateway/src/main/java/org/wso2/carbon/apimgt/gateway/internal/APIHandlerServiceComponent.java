@@ -24,6 +24,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
@@ -42,6 +43,13 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -97,6 +105,19 @@ public class APIHandlerServiceComponent {
                         KeyTemplateRetriever webServiceBlockConditionsRetriever = new KeyTemplateRetriever();
                         webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
                     }
+                }
+                // Read the trust store
+                ServerConfiguration config = CarbonUtils.getServerConfiguration();
+                char[] trustStorePassword = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_PASSWORD)
+                        .toCharArray();
+                String trustStoreLocation = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_LOCATION);
+                try {
+                    FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation));
+                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    trustStore.load(trustStoreStream, trustStorePassword);
+                    ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+                } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+                    log.error("Error in loading trust store.", e);
                 }
             }
         } catch (APIManagementException | AxisFault e) {

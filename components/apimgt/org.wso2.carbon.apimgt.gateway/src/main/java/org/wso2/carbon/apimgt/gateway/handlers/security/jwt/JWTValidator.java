@@ -27,7 +27,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -37,16 +36,11 @@ import org.wso2.carbon.apimgt.gateway.utils.SwaggerUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
@@ -55,7 +49,6 @@ import java.security.SignatureException;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.util.Base64;
 
 /**
@@ -65,7 +58,7 @@ public class JWTValidator {
 
     private static final Log log = LogFactory.getLog(JWTValidator.class);
 
-    private final String JWT_PUBLIC_CERTIFICATE_ALIAS = "JWT_CERTIFICATE_ALIAS";
+    private final String JWT_PUBLIC_CERTIFICATE_ALIAS = "jwt_certificate_alias";
     private String apiLevelPolicy;
     private boolean isGatewayTokenCacheEnabled;
 
@@ -370,20 +363,12 @@ public class JWTValidator {
         Certificate publicCert;
         //Read the client-truststore.jks into a KeyStore
         try {
-            ServerConfiguration config = CarbonUtils.getServerConfiguration();
-
-            char[] trustStorePassword = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_PASSWORD)
-                    .toCharArray();
-            String trustStoreLocation = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_LOCATION);
-
-            FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation));
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(trustStoreStream, trustStorePassword);
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
             // Read public certificate from trust store
             publicCert = trustStore.getCertificate(JWT_PUBLIC_CERTIFICATE_ALIAS);
-        } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+        } catch (KeyStoreException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error in retrieving public certificate from trust store", e);
+                    "Error in retrieving public certificate from the trust store", e);
         }
 
         if (publicCert != null) {
