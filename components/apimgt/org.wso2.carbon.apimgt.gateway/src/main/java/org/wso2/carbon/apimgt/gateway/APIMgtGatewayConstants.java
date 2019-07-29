@@ -138,5 +138,11 @@ public class APIMgtGatewayConstants {
     public static final String CORS_REQUEST_HANDLER_ERROR = "Error in CORS_Request Handler";
     public static final String API_KEY_VALIDATOR_ERROR = "Error while accessing backend services for API key validation";
     public static final String GOOGLE_ANALYTICS_ERROR = "Error in Google Analytics Handler";
+
+    /**
+     * Constants for trust store access
+     * */
+    public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
+    public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
 }
 

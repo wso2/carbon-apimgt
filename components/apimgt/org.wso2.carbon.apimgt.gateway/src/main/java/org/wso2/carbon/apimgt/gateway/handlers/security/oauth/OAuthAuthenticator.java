@@ -26,6 +26,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
@@ -46,6 +48,7 @@ import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -178,8 +181,28 @@ public class OAuthAuthenticator implements Authenticator {
         }
         String authenticationScheme;
         try {
-            if (StringUtils.countMatches(apiKey, APIConstants.DOT) == 2) { // JWT token contains two dots
-                isJwtToken = true;
+            //Initial guess of a JWT token using the presence of a DOT.
+            if (apiKey.contains(APIConstants.DOT)) {
+                try {
+                    JSONObject decodedHeader = new JSONObject(new String(Base64.getUrlDecoder()
+                            .decode(apiKey.split("\\.")[0])));
+                    // Check if the decoded header contains type as 'JWT'.
+                    if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
+                        isJwtToken = true;
+                        if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
+                            log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                    "Invalid JWT token");
+                        }
+                    }
+                } catch (JSONException | IllegalArgumentException e) {
+                    isJwtToken = false;
+                    log.debug("Not a JWT token. Failed to decode the token header.", e);
+                }
+            }
+            // Find the resource authentication scheme based on the token type
+            if (isJwtToken) {
+                // If a JWT token
                 swagger = (Swagger) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
                 if (swagger == null) {
                     log.debug("Swagger is missing in the gateway. " +
@@ -195,6 +218,7 @@ public class OAuthAuthenticator implements Authenticator {
                 verbInfoDTO.setThrottling(SwaggerUtils.getResourceThrottlingTier(swagger, synCtx));
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
             } else {
+                // If an OAuth token
                 authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
             }
         } catch (APISecurityException ex) {
@@ -273,8 +297,7 @@ public class OAuthAuthenticator implements Authenticator {
             //Start JWT token validation
             if (isJwtToken) {
                 try {
-                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, swagger,
-                            authenticationScheme);
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, swagger);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
                     log.debug("User is authorized using JWT token to access the resource.");
                     return new AuthenticationResponse(true, isMandatory, false, 0, null);

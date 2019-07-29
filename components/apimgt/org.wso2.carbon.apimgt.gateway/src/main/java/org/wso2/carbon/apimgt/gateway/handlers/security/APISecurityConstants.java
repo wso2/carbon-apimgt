@@ -79,7 +79,7 @@ public class APISecurityConstants {
     public static final int MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS = 900917;
 
     public static final int API_AUTH_MISSING_SWAGGER = 900918;
-    public static final String API_AUTH_MISSING_SWAGGER_ERROR_MESSAGE = "Swagger is missing in the Gateway";
+    public static final String API_AUTH_MISSING_SWAGGER_ERROR_MESSAGE = "Internal Server Error";
 
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages

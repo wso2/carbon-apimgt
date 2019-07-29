@@ -27,6 +27,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -64,6 +65,7 @@ public class JWTValidator {
 
     private static final Log log = LogFactory.getLog(JWTValidator.class);
 
+    private final String JWT_PUBLIC_CERTIFICATE_ALIAS = "JWT_CERTIFICATE_ALIAS";
     private String apiLevelPolicy;
     private boolean isGatewayTokenCacheEnabled;
 
@@ -79,20 +81,14 @@ public class JWTValidator {
      * @param jwtToken             The JWT token sent with the API request
      * @param synCtx               The message to be authenticated
      * @param swagger              The swagger object of the invoked API
-     * @param authenticationScheme The resource authentication scheme of the invoked API resource
      * @return an AuthenticationContext object which contains the authentication information
      * @throws APISecurityException in case of authentication failure
      */
     @MethodStats
-    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, Swagger swagger,
-                                              String authenticationScheme)
+    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, Swagger swagger)
             throws APISecurityException {
 
         String[] splitToken = jwtToken.split("\\.");
-        if (splitToken.length != 3) {
-            log.debug("Invalid JWT token.");
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
-        }
 
         JSONObject payload = null;
         boolean isVerified = false;
@@ -179,7 +175,6 @@ public class JWTValidator {
                     }
                 }
                 checkTokenExpiration(tokenSignature, payload, tenantDomain);
-                validateTokenGrantType(payload, authenticationScheme);
                 validateScopes(synCtx, swagger, payload);
 
                 if (isGatewayTokenCacheEnabled) {
@@ -362,48 +357,6 @@ public class JWTValidator {
     }
 
     /**
-     * Validate the JWT token grant type against the resource authentication scheme.
-     *
-     * @param payload              The payload of the JWT token
-     * @param authenticationScheme The resource authentication scheme of the invoked API resource
-     * @throws APISecurityException in case of token grant type validation failure
-     */
-    private void validateTokenGrantType(JSONObject payload, String authenticationScheme) throws APISecurityException {
-        if (payload.getString(APIConstants.JwtTokenConstants.SCOPE) != null) {
-            String[] tokenScopes = payload.getString(APIConstants.JwtTokenConstants.SCOPE)
-                    .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
-            boolean isClientGrantType = false;
-
-            for (String scope : tokenScopes) {
-                // If "am_application_scope" scope contains, the token is of client_credentials grant type
-                if (APIConstants.JwtTokenConstants.AM_APPLICATION_SCOPE.equals(scope)) {
-                    isClientGrantType = true;
-                    log.debug("Client_credentials grant type token.");
-                    break;
-                }
-            }
-
-            if ((isClientGrantType && APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authenticationScheme)) ||
-                    (!isClientGrantType && APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authenticationScheme))) {
-                // 1) tokens of client credentials grant type are not allowed to access when
-                // the resource authentication is set to Application User only
-                // 2) tokens of grant types other than client credentials are not allowed to access when
-                // the resource authentication is set to Application only
-                if (log.isDebugEnabled()) {
-                    log.debug("Token grant type does not allow to access the resource, " +
-                            "User: " + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
-                }
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE,
-                        APISecurityConstants.getAuthenticationFailureMessage(APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE));
-            }
-            log.debug("Token grant type validation passed, " +
-                    "User:" + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
-        }
-        log.debug("No scopes found in the token. Grant type validation cannot be performed, " +
-                "User: " + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
-    }
-
-    /**
      * Verify the JWT token signature.
      *
      * @param splitToken The JWT token which is split into [header, payload, signature]
@@ -419,15 +372,15 @@ public class JWTValidator {
         try {
             ServerConfiguration config = CarbonUtils.getServerConfiguration();
 
-            char[] trustStorePassword = config.getFirstProperty("Security.TrustStore.Password").toCharArray();
-            String trustStoreLocation = config.getFirstProperty("Security.TrustStore.Location");
-            String alias = config.getFirstProperty("Security.KeyStore.KeyAlias");
+            char[] trustStorePassword = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_PASSWORD)
+                    .toCharArray();
+            String trustStoreLocation = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_LOCATION);
 
             FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation));
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(trustStoreStream, trustStorePassword);
             // Read public certificate from trust store
-            publicCert = trustStore.getCertificate(alias);
+            publicCert = trustStore.getCertificate(JWT_PUBLIC_CERTIFICATE_ALIAS);
         } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     "Error in retrieving public certificate from trust store", e);
@@ -446,7 +399,7 @@ public class JWTValidator {
                 byte[] decodedSignature = Base64.getUrlDecoder().decode(splitToken[2]);
                 return signatureInstance.verify(decodedSignature);
             } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
-                log.debug("Signature verification failed.", e);
+                log.error("Signature verification failed.", e);
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token", e);
             }
