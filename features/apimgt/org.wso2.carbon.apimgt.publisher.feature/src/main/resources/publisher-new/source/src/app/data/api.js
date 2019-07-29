@@ -50,6 +50,7 @@ class API extends Resource {
                 }
             };
         }
+        this.apiType = API.CONSTS.API;
         this._data = properties;
         for (const key in properties) {
             if (Object.prototype.hasOwnProperty.call(properties, key)) {
@@ -1311,5 +1312,12 @@ class API extends Resource {
         }, this._requestMetaData());
     }
 }
+
+API.CONSTS = {
+    API: 'API',
+    APIProduct: 'APIProduct',
+}
+
+Object.freeze(API.CONSTS);
 
 export default API;

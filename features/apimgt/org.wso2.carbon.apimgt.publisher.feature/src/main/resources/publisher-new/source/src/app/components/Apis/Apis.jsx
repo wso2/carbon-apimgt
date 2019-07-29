@@ -19,11 +19,10 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import APIDetails from './Details/APIDetails';
-import APIProductDetails from './Details/APIProductDetails';
 import ApiCreate from './Create/ApiCreate';
 import APIProductListing from './Listing/APIProductListing';
 import APIListing from './Listing/APIListing';
+import Details from './Details/index';
 
 const Apis = () => {
     return (
@@ -32,8 +31,8 @@ const Apis = () => {
             <Route exact path='/api-products' component={APIProductListing} />
             <Route path='/apis/create' component={ApiCreate} />
             <Route path='/api-products/create' component={ApiCreate} />
-            <Route path='/apis/:apiUUID/' component={APIDetails} />
-            <Route path='/api-products/:apiProdUUID/' component={APIProductDetails} />
+            <Route path='/apis/:apiUUID/' render={props => <Details {...props} isAPIProduct={false} />} />
+            <Route path='/api-products/:apiProdUUID/' render={props => <Details {...props} isAPIProduct />} />
         </Switch>
     );
 };
