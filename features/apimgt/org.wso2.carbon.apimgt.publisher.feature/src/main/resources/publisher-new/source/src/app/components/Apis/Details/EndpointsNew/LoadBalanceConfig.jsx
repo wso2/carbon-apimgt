@@ -184,12 +184,6 @@ function LoadBalanceConfig(props) {
                 />
             </Grid>
             <Grid className={classes.configButtonContainer}>
-                <Button color='primary' onClick={closeLBConfigDialog}>
-                    <FormattedMessage
-                        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.cancel.button'
-                        defaultMessage='Close'
-                    />
-                </Button>
                 <Button
                     color='primary'
                     autoFocus
@@ -199,6 +193,15 @@ function LoadBalanceConfig(props) {
                     <FormattedMessage
                         id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.save.button'
                         defaultMessage='Save'
+                    />
+                </Button>
+                <Button
+                    color='secondary'
+                    onClick={closeLBConfigDialog}
+                >
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.cancel.button'
+                        defaultMessage='Close'
                     />
                 </Button>
             </Grid>

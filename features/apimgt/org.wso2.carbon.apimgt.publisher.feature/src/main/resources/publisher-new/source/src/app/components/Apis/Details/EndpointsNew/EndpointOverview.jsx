@@ -95,7 +95,13 @@ const styles = theme => ({
     configDialogHeader: {
         fontWeight: '600',
     },
+    addLabel: {
+        padding: theme.spacing.unit * 2,
+    },
 });
+
+const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
+    { key: 'address', value: 'HTTP/SOAP Endpoint' }];
 
 /**
  * The endpoint overview component. This component holds the views of endpoint creation and configuration.
@@ -105,7 +111,7 @@ const styles = theme => ({
 function EndpointOverview(props) {
     const { classes, api, onChangeAPI } = props;
     const { endpointConfig, endpointSecurity } = api;
-    const [endpointType, setEndpointType] = useState({ key: 'http', value: 'HTTP/REST Endpoint' });
+    const [endpointType, setEndpointType] = useState(endpointTypes[0]);
     const [epConfig, setEpConfig] = useState(endpointConfig);
     const [endpointSecurityInfo, setEndpointSecurityInfo] = useState({});
     const [isLBConfigOpen, setLBConfigOpen] = useState(false);
@@ -116,9 +122,6 @@ function EndpointOverview(props) {
         category: '',
         config: undefined,
     });
-
-    const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
-        { key: 'address', value: 'HTTP/SOAP Endpoint' }];
 
     /**
      * Method to get the type of the endpoint. (HTTP/REST or HTTP/SOAP)
@@ -142,7 +145,7 @@ function EndpointOverview(props) {
         }
     };
     useEffect(() => {
-        setEpConfig(endpointConfig);
+        // setEpConfig(endpointConfig);
         setEndpointType(getEndpointType(endpointConfig.endpoint_type));
         setEndpointSecurityInfo(endpointSecurity);
     }, []);
@@ -167,23 +170,44 @@ function EndpointOverview(props) {
      * */
     const editEndpoint = (index, category, url) => {
         let modifiedEndpoint = null;
-        const endpointTypeProperty = getEndpointTypeProperty(epConfig.endpoint_type, category);
+        // Make a copy of the endpoint config.
+        const endpointConfigCopy = JSON.parse(JSON.stringify(epConfig));
+
+        /*
+        * If the index > 0, it means that the endpoint is load balance or fail over.
+        * Otherwise it is the default endpoint. (index = 0)
+        * */
         if (index > 0) {
-            modifiedEndpoint = epConfig[endpointTypeProperty];
-            if (epConfig.endpoint_type === 'failover') {
+            const endpointTypeProperty = getEndpointTypeProperty(endpointConfigCopy.endpoint_type, category);
+            modifiedEndpoint = endpointConfigCopy[endpointTypeProperty];
+            /*
+            * In failover case, the failover endpoints are a separate object. But in endpoint listing, since we
+            *  consider all the endpoints as a single list, to get the real index of the failover endpoint we use
+            *  index - 1.
+            * */
+            if (endpointConfigCopy.endpoint_type === 'failover') {
                 modifiedEndpoint[index - 1].url = url;
             } else {
                 modifiedEndpoint[index].url = url;
             }
+            endpointConfigCopy[endpointTypeProperty] = modifiedEndpoint;
         } else {
-            modifiedEndpoint = epConfig[category];
+            modifiedEndpoint = endpointConfigCopy[category];
+            /*
+            * In this case, we are editing the default endpoint.
+            * If the endpoint type is load balance, the production_endpoints or the sandbox_endpoint object is an
+            *  array. Otherwise, in failover mode, the default endpoint is an object.
+            *
+            * So, we check whether the endpoints is an array or an object.
+            * */
             if (Array.isArray(modifiedEndpoint)) {
                 modifiedEndpoint[0].url = url;
             } else {
                 modifiedEndpoint.url = url;
             }
+            endpointConfigCopy[category] = modifiedEndpoint;
         }
-        setEpConfig({ ...epConfig, [endpointTypeProperty]: modifiedEndpoint });
+        setEpConfig(endpointConfigCopy);
     };
 
     /**
@@ -194,6 +218,7 @@ function EndpointOverview(props) {
      * @param {string} newURL The url of the new endpoint.
      * */
     const addEndpoint = (category, type, newURL) => {
+        const endpointConfigCopy = JSON.parse(JSON.stringify(epConfig));
         let endpointTemplate = {};
         if (endpointType.key === 'address' || type === 'failover') {
             endpointTemplate = {
@@ -207,7 +232,7 @@ function EndpointOverview(props) {
             };
         }
         const epConfigProperty = getEndpointTypeProperty(type, category);
-        let endpointList = epConfig[epConfigProperty];
+        let endpointList = endpointConfigCopy[epConfigProperty];
         /**
          * Check whether we have existing endpoints added.
          * */
@@ -220,7 +245,8 @@ function EndpointOverview(props) {
         } else {
             endpointList = [endpointTemplate];
         }
-        setEpConfig({ ...epConfig, [epConfigProperty]: endpointList });
+        endpointConfigCopy[epConfigProperty] = endpointList;
+        setEpConfig(endpointConfigCopy);
     };
 
     /**
@@ -245,35 +271,28 @@ function EndpointOverview(props) {
         const selectedType = endpointTypes.filter((type) => {
             return type.key === selectedKey;
         })[0];
-        let endpointConfiguration = {};
+
+        let endpointTemplate = {};
         if (selectedKey === 'address') {
-            endpointConfiguration = {
-                ...epConfig,
+            endpointTemplate = {
                 endpoint_type: 'address',
-                production_endpoints: {
-                    endpoint_type: 'address',
-                    template_not_supported: false,
-                    url: 'http://myservice/resource',
-                },
-                sandbox_endpoints: {
-                    endpoint_type: 'address',
-                    template_not_supported: false,
-                    url: 'http://myservice/resource',
-                },
+                template_not_supported: false,
+                url: 'http://myservice/resource',
             };
         } else {
-            endpointConfiguration = {
-                ...epConfig,
-                production_endpoints: {
-                    url: 'http://myservice/resource',
-                },
-                sandbox_endpoints: {
-                    url: 'http://myservice/resource',
-                },
-                endpoint_type: 'http',
+            endpointTemplate = {
+                url: 'http://myservice/resource',
             };
         }
-        setEpConfig(endpointConfiguration);
+
+        const endpointConfigCopy = {
+            endpoint_type: selectedKey,
+            production_endpoints: endpointTemplate,
+            sandbox_endpoints: endpointTemplate,
+            failOver: 'False',
+        };
+
+        setEpConfig(endpointConfigCopy);
         setEndpointType(selectedType);
     };
 
@@ -404,7 +423,7 @@ function EndpointOverview(props) {
     return (
         <div className={classes.overviewWrapper}>
             <GeneralConfiguration
-                epConfig={epConfig}
+                epConfig={(JSON.parse(JSON.stringify(epConfig)))}
                 endpointSecurityInfo={endpointSecurityInfo}
                 onChangeEndpointCategory={onChangeEndpointCategory}
                 handleToggleEndpointSecurity={handleToggleEndpointSecurity}
@@ -456,6 +475,14 @@ function EndpointOverview(props) {
                 <Grid xs className={classes.endpointsTypeSelectWrapper}>
                     <div />
                     <div className={classes.endpointTypesSelectWrapper}>
+                        <div className={classes.addLabel}>
+                            <Typography>
+                                <FormattedMessage
+                                    id='Apis.Details.EndpointsNew.EndpointOverview.add.text'
+                                    defaultMessage='Add'
+                                />
+                            </Typography>
+                        </div>
                         <FormControl component='fieldset' className={classes.formControl}>
                             <RadioGroup
                                 aria-label='EndpointType'

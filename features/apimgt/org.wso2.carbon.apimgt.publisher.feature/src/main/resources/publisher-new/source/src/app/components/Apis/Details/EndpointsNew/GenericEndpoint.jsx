@@ -67,7 +67,6 @@ function GenericEndpoint(props) {
     return (
         <div className={classes.endpointInputWrapper}>
             <TextField
-                id='endpoint-input'
                 label={<FormattedMessage
                     id='Apis.Details.EndpointsNew.GenericEndpoint.service.url.input'
                     defaultMessage='Service URL'
@@ -97,6 +96,7 @@ function GenericEndpoint(props) {
                                 <IconButton
                                     className={classes.iconButton}
                                     aria-label='Delete'
+                                    color='secondary'
                                     onClick={() => deleteEndpoint(index, type, category)}
                                 >
                                     <Icon>

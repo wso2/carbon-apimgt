@@ -67,7 +67,6 @@ function GenericEndpointAdd(props) {
     return (
         <div className={classes.endpointInputWrapper}>
             <TextField
-                id='endpoint-input'
                 label={<FormattedMessage
                     id='Apis.Details.EndpointsNew.GenericEndpoint.service.url.input'
                     defaultMessage='Service URL'

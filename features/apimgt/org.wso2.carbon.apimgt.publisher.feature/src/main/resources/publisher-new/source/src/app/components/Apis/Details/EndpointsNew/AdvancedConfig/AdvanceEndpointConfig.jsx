@@ -498,16 +498,23 @@ function AdvanceEndpointConfig(props) {
                 />
             </Grid>
             <Grid className={classes.advanceDialogActions}>
-                <Button onClick={onCancel} color='primary'>
-                    <FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.cancel.button'
-                        defaultMessage='Close'
-                    />
-                </Button>
-                <Button onClick={() => onSaveAdvanceConfig(advanceConfigObj)} color='primary' autoFocus>
+                <Button
+                    onClick={() => onSaveAdvanceConfig(advanceConfigObj)}
+                    color='primary'
+                    autoFocus
+                >
                     <FormattedMessage
                         id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.config.save.button'
                         defaultMessage='Save'
+                    />
+                </Button>
+                <Button
+                    onClick={onCancel}
+                    color='secondary'
+                >
+                    <FormattedMessage
+                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.cancel.button'
+                        defaultMessage='Close'
                     />
                 </Button>
             </Grid>
