@@ -1709,7 +1709,7 @@
         <mockito.all.version>1.10.19</mockito.all.version>
         <reflection.version>0.9.11</reflection.version>
         <woodstox-core.version>5.2.1</woodstox-core.version>
-        <apache.commons.version>2.6.2</apache.commons.version>
+        <apache.commons.version>2.7.0</apache.commons.version>
         <apache.commons.lang3.version>3.9</apache.commons.lang3.version>
         <io.swagger.codegen.version>2.4.5</io.swagger.codegen.version>
 
