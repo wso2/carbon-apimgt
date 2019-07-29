@@ -468,8 +468,8 @@ class APIDefinition extends React.Component {
                         <DialogContentText id='alert-dialog-description'>
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.api.definition.save.confirmation'
-                                defaultMessage='Do you want to save the API Definition?
-                                This will affect the existing resources.'
+                                defaultMessage={'Do you want to save the API Definition? This will affect the' +
+                                ' existing resources.'}
                             />
                         </DialogContentText>
                     </DialogContent>
