@@ -97,4 +97,29 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
     return tmpEndpointConfig;
 }
 
-export { getEndpointTypeProperty, mergeEndpoints, getEndpointTemplateByType };
+function endpointsToList(endpointConfig) {
+    const config = JSON.parse(JSON.stringify(endpointConfig));
+    const endpoints = [];
+
+    if (Array.isArray(config.production_endpoints)) {
+        endpoints.concat(config.production_endpoints);
+    } else {
+        endpoints.push(config.production_endpoints);
+    }
+
+    if (Array.isArray(config.sandbox_endpoints)) {
+        endpoints.concat(config.sandbox_endpoints);
+    } else {
+        endpoints.push(config.sandbox_endpoints);
+    }
+
+    if (config.endpoint_type === 'failover') {
+        endpoints.push(...config.sandbox_failovers);
+        endpoints.push(...config.production_failovers);
+    }
+
+    console.log('1', endpoints);
+    return endpoints;
+}
+
+export { getEndpointTypeProperty, mergeEndpoints, getEndpointTemplateByType, endpointsToList };

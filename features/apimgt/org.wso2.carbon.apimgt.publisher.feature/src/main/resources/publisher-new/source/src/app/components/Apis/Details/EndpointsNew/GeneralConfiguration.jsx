@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Button,
     Collapse,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
     ExpansionPanel,
     ExpansionPanelDetails,
     ExpansionPanelSummary,
@@ -40,7 +35,9 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import EndpointSecurity from './GeneralConfiguration/EndpointSecurity';
 import Certificates from './GeneralConfiguration/Certificates';
-import LoadBalanceConfig from './LoadBalanceConfig';
+import API from '../../../../data/api';
+import Alert from '../../../Shared/Alert';
+import { endpointsToList } from './endpointUtils';
 
 const styles = theme => ({
     endpointTypeSelect: {
@@ -49,6 +46,9 @@ const styles = theme => ({
     configHeaderContainer: {
         display: 'flex',
         justifyContent: 'space-between',
+    },
+    generalConfigContent: {
+        boxShadow: 'inset -1px 2px 3px 0px #c3c3c3',
     },
     secondaryHeading: {
         fontSize: theme.typography.pxToRem(15),
@@ -76,6 +76,7 @@ const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
  * */
 function GeneralConfiguration(props) {
     const {
+        intl,
         epConfig,
         endpointSecurityInfo,
         handleToggleEndpointSecurity,
@@ -85,8 +86,121 @@ function GeneralConfiguration(props) {
         classes,
     } = props;
     const [isConfigExpanded, setConfigExpand] = useState(true);
-    const [isLBConfigOpen, setLBConfigOpen] = useState(false);
+    const [endpointCertificates, setEndpointCertificates] = useState([]);
+    const [epTypeSubHeading, setEpTypeSubHeading] = useState('REST/ HTTP');
 
+    /**
+     * Method to upload the certificate content by calling the rest api.
+     * */
+    const saveCertificate = (certificate, endpoint, alias) => {
+        API.addCertificate(certificate, endpoint, alias).then((resp) => {
+            if (resp.status === 201) {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.add.success',
+                    defaultMessage: 'Certificate added successfully',
+                }));
+                const tmpCertificates = [...endpointCertificates];
+                tmpCertificates.push({
+                    alias: resp.obj.alias,
+                    endpoint: resp.obj.endpoint,
+                });
+                setEndpointCertificates(tmpCertificates);
+            }
+        }).catch((err) => {
+            console.error(err.message);
+            if (err.message === 'Conflict') {
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.alias.exist',
+                    defaultMessage: 'Adding Certificate Failed. Certificate alias exists.',
+                }));
+            }
+        });
+    };
+
+    /**
+     * Method to get the endpoint type heading.
+     * Ex: Load Balance REST/ HTTP, Fail Over SOAP/ HTTP
+     *
+     * @return {string} The endpoint type string.
+     * */
+    const getEndpointTypeSubHeading = () => {
+        let type = 'REST/ HTTP';
+        const epType = epConfig.endpoint_type;
+        switch (epType) {
+            case 'load_balance':
+                type = 'Load Balance';
+                break;
+            case 'failover':
+                type = 'Fail Over';
+                break;
+            default:
+                type = 'Single';
+                break;
+        }
+
+        const endpointTypeKey = endpointType.key;
+
+        if (endpointTypeKey === 'address') {
+            type = type.concat(' SOAP/ HTTP');
+        } else {
+            type = type.concat(' REST/ HTTP');
+        }
+        return type;
+    };
+
+    /**
+     * Method to delete the selected certificate.
+     *
+     * @param {string} alias The alias of the certificate to be deleted.
+     * */
+    const deleteCertificate = (alias) => {
+        API.deleteEndpointCertificate(alias).then((resp) => {
+            setEndpointCertificates(() => {
+                if (resp.status === 200) {
+                    return endpointCertificates.filter((cert) => {
+                        return cert.alias !== alias;
+                    });
+                } else {
+                    return -1;
+                }
+            });
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.delete.success',
+                defaultMessage: 'Certificate Deleted Successfully',
+            }));
+        }).catch((err) => {
+            console.log(err);
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.delete.error',
+                defaultMessage: 'Error Deleting Certificate',
+            }));
+        });
+    };
+
+    useEffect(() => {
+        const heading = getEndpointTypeSubHeading();
+        setEpTypeSubHeading(heading);
+    }, [props]);
+
+    // Get the certificates from backend.
+    useEffect(() => {
+        API.getEndpointCertificates().then((resp) => {
+            const { certificates } = resp.obj;
+            const endpoints = endpointsToList(epConfig);
+            const filteredCertificates = certificates.filter((cert) => {
+                for (const endpoint of endpoints) {
+                    if (endpoint.url.indexOf(cert.endpoint) !== -1) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            setEndpointCertificates(filteredCertificates);
+        }).catch((err) => {
+            console.error(err);
+            setEndpointCertificates([]);
+        });
+    }, []);
     return (
         <div>
             <ExpansionPanel expanded={isConfigExpanded} onChange={() => setConfigExpand(!isConfigExpanded)}>
@@ -103,10 +217,23 @@ function GeneralConfiguration(props) {
                         />
                     </Typography>
                     <Typography className={classes.secondaryHeading}>
-                        Endpoint Type: {epConfig.endpoint_type}, Endpoint Security: , Certificates: None
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.endpoint.type.sub.heading'
+                            defaultMessage='Endpoint Type'
+                        /> : {epTypeSubHeading},
+                        {' '}
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.endpoint.security.sub.heading'
+                            defaultMessage='Endpoint Security'
+                        />: {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'},
+                        {' '}
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.certificates.sub.heading'
+                            defaultMessage='Certificates'
+                        />: {endpointCertificates.length}
                     </Typography>
                 </ExpansionPanelSummary>
-                <ExpansionPanelDetails>
+                <ExpansionPanelDetails className={classes.generalConfigContent}>
                     <Grid container direction='row'>
                         <Grid item xs container className={classes.endpointConfigSection} direction='column'>
                             <FormControl className={classes.endpointTypeSelect}>
@@ -150,32 +277,15 @@ function GeneralConfiguration(props) {
                             </Collapse>
                         </Grid>
                         <Grid item xs className={classes.endpointConfigSection}>
-                            <Certificates />
+                            <Certificates
+                                certificates={endpointCertificates}
+                                uploadCertificate={saveCertificate}
+                                deleteCertificate={deleteCertificate}
+                            />
                         </Grid>
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-            <Dialog open={isLBConfigOpen}>
-                <DialogTitle>
-                    <Typography className={classes.dialogHeader}>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.EndpointListing.loadbalance.endpoint.configuration'
-                            defaultMessage='Load Balance Endpoint Configuration'
-                        />
-                    </Typography>
-                </DialogTitle>
-                <DialogContent>
-                    <LoadBalanceConfig />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setLBConfigOpen(false)} color='primary'>
-                        <FormattedMessage id='Apis.Details.EndpointsNew.EndpointListing.close' defaultMessage='Close' />
-                    </Button>
-                    <Button onClick={() => setLBConfigOpen(false)} color='primary' autoFocus>
-                        <FormattedMessage id='Apis.Details.EndpointsNew.EndpointListing.save' defaultMessage='Save' />
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </div>
     );
 }
@@ -188,6 +298,7 @@ GeneralConfiguration.propTypes = {
     handleEndpointTypeSelect: PropTypes.func.isRequired,
     endpointType: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(GeneralConfiguration));

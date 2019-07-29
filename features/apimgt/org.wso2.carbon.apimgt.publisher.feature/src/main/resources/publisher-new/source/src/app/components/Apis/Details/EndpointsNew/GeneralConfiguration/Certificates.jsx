@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
     Button,
@@ -36,6 +36,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Dropzone from 'react-dropzone';
+import API from '../../../../../data/api';
 
 const styles = theme => ({
     fileinput: {
@@ -78,6 +79,9 @@ const styles = theme => ({
         maxHeight: '250px',
         overflow: 'scroll',
     },
+    certDetailsHeader: {
+        fontWeight: '600',
+    },
 });
 /**
  * The base component for advanced endpoint configurations.
@@ -85,31 +89,19 @@ const styles = theme => ({
  * @returns {any} The HTML representation of the Certificates.
  */
 function Certificates(props) {
-    const { classes } = props;
-    const [certificate, setCertificate] = useState({ name: '', content: '' });
-    const [certificateList, setCertificateList] = useState([
-        {
-            alias: 'Active',
-            endpoint: 'http://localhost/service',
-            cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
-            color: '#0fc520',
-        },
-        {
-            alias: 'About to expire (1 week)',
-            endpoint: 'http://localhost/service',
-            cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
-            color: '#dca80a',
-        },
-        {
-            alias: 'Expired',
-            endpoint: 'http://localhost/service',
-            cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
-            color: '#c50f0f',
-        },
-    ]);
+    const {
+        classes,
+        certificates,
+        uploadCertificate,
+        deleteCertificate,
+    } = props;
+    const [certificate, setCertificate] = useState({ name: '', content: {} });
+    const [certificateList, setCertificateList] = useState([]);
     const [alias, setAlias] = useState('');
     const [endpoint, setEndpoint] = useState('');
     const [uploadCertificateOpen, setUploadCertificateOpen] = useState(false);
+    const [openCertificateDetails, setOpenCertificateDetails] = useState({ open: false, anchor: null, details: {} });
+    const [certificateToDelete, setCertificateToDelete] = useState({ open: false, alias: '' });
 
     const closeCertificateUpload = () => {
         setUploadCertificateOpen(false);
@@ -122,16 +114,27 @@ function Certificates(props) {
      * Method to upload the certificate content by calling the rest api.
      * */
     const saveCertificate = () => {
-        // TODO: Call backend api and upload certificate.
-        // TODO: Based on the response, display message.
-        certificateList.push({
-            alias,
-            endpoint,
-            cn: 'CN=localhost, OU=wso2, O=wso2, L=colombo, ST=western, C=lk',
-            color: '#dca80a',
-        });
-        setCertificateList(certificateList);
+        uploadCertificate(certificate.content, endpoint, alias);
         closeCertificateUpload();
+    };
+
+    /**
+     * Show the selected certificate details in a popover.
+     *
+     * @param {any} event The button click event.
+     * @param {string} certAlias  The alias of the certificate which information is required.
+     * */
+    const showCertificateDetails = (event, certAlias) => {
+        API.getCertificateStatus(certAlias).then((response) => {
+            setOpenCertificateDetails({
+                details: response.body,
+                open: true,
+                alias: certAlias,
+                anchor: event.currentTarget,
+            });
+        }).catch((err) => {
+            console.error(err);
+        });
     };
 
     /**
@@ -139,12 +142,9 @@ function Certificates(props) {
      *
      * @param {string} certificateAlias The alias of the certificate that is needed to be deleted.
      * */
-    const deleteCertificate = (certificateAlias) => {
-        setCertificateList(() => {
-            return certificateList.filter((cert) => {
-                return cert.alias !== certificateAlias;
-            });
-        });
+    const deleteEndpointCertificate = (certificateAlias) => {
+        deleteCertificate(certificateAlias);
+        setCertificateToDelete({ open: false, alias: '' });
     };
 
     /**
@@ -154,17 +154,14 @@ function Certificates(props) {
      * */
     const onDrop = (file) => {
         const certificateFile = file[0];
-        let encodedContent = '';
         if (certificateFile) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                encodedContent = btoa(e.target.result);
-                setCertificate({ name: certificateFile.name, content: encodedContent });
-            };
-            reader.readAsBinaryString(certificateFile);
+            setCertificate({ name: certificateFile.name, content: certificateFile });
         }
     };
 
+    useEffect(() => {
+        setCertificateList(certificates);
+    }, [certificates]);
     return (
         <Grid container direction='column'>
             {/* TODO: Add list of existing certificates */}
@@ -183,13 +180,26 @@ function Certificates(props) {
                             return (
                                 <ListItem>
                                     <ListItemAvatar>
-                                        <Icon style={{ color: cert.color }}>
-                                            security
+                                        <Icon>
+                                            lock
                                         </Icon>
                                     </ListItemAvatar>
-                                    <ListItemText primary={cert.alias + ' | ' + cert.endpoint} secondary={cert.cn} />
+                                    <ListItemText
+                                        primary={cert.alias}
+                                        secondary={cert.endpoint}
+                                    />
                                     <ListItemSecondaryAction>
-                                        <IconButton onClick={() => deleteCertificate(cert.alias)}>
+                                        <IconButton
+                                            onClick={event => showCertificateDetails(event, cert.alias)}
+                                        >
+                                            <Icon>
+                                                info
+                                            </Icon>
+                                        </IconButton>
+                                        <IconButton
+                                            onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
+                                            color='secondary'
+                                        >
                                             <Icon>
                                                 delete
                                             </Icon>
@@ -228,6 +238,85 @@ function Certificates(props) {
                     </ListItem>
                 </List>
             </Grid>
+            <Dialog open={certificateToDelete.open}>
+                <DialogTitle>
+                    <Icon style={{ color: '#dd1c30' }}>
+                        warning
+                    </Icon>
+                    {'Delete Certificate'}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.confirm.certificate.delete'
+                            defaultMessage='Do you want to delete the ertificate'
+                        /> { ' ' + certificateToDelete.alias + '?'}
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.delete.cannot.undone'
+                            defaultMessage=' This cannot be undone.'
+                        />
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => deleteEndpointCertificate(certificateToDelete.alias)}
+                        color='primary'
+                        autoFocus
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.delete.ok.button'
+                            defaultMessage='OK'
+                        />
+                    </Button>
+                    <Button
+                        onClick={() => setCertificateToDelete({ open: false, alias: '' })}
+                        color='secondary'
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.delete.cancel.button'
+                            defaultMessage='Cancel'
+                        />
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={openCertificateDetails.open}>
+                <DialogTitle>
+                    <Typography className={classes.certDetailsHeader}>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.details.of'
+                            defaultMessage='Details of'
+                        />
+                        {' ' + openCertificateDetails.alias}
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.status'
+                            defaultMessage='Status'
+                        />
+                        {' : ' + openCertificateDetails.details.status}
+                    </Typography>
+                    <Typography>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.subject'
+                            defaultMessage='Subject'
+                        />
+                        {' : ' + openCertificateDetails.details.subject}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setOpenCertificateDetails({ open: false, anchor: null, details: {} })}
+                        color='primary'
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.details.close.button'
+                            defaultMessage='Close'
+                        />
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Dialog open={uploadCertificateOpen}>
                 <DialogTitle>
                     <Typography>
@@ -241,26 +330,28 @@ function Certificates(props) {
                     <Grid>
                         <div>
                             <TextField
+                                required
                                 id='certificateEndpoint'
                                 label={<FormattedMessage
                                     id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.endpoint'
                                     defaultMessage='Endpoint'
                                 />}
-                                value={alias}
+                                value={endpoint}
                                 placeholder='Endpoint'
-                                onChange={event => setAlias(event.target.value)}
+                                onChange={event => setEndpoint(event.target.value)}
                                 margin='normal'
                                 fullWidth
                             />
                             <TextField
+                                required
                                 id='certificateAlias'
                                 label={<FormattedMessage
                                     id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.alias'
                                     defaultMessage='Alias'
                                 />}
-                                value={endpoint}
+                                value={alias}
                                 placeholder='My Alias'
-                                onChange={event => setEndpoint(event.target.value)}
+                                onChange={event => setAlias(event.target.value)}
                                 margin='normal'
                                 fullWidth
                             />
@@ -287,9 +378,18 @@ function Certificates(props) {
                             >
                                 <div className={classes.dropZoneWrapper}>
                                     {certificate.name === '' ?
-                                        <Icon style={{ fontSize: 56 }}>
-                                            cloud_upload
-                                        </Icon> :
+                                        <div>
+                                            <Icon style={{ fontSize: 56 }}>
+                                                cloud_upload
+                                            </Icon>
+                                            <Typography>
+                                                <FormattedMessage
+                                                    id={'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.'
+                                                    + 'click.or.drop.to.upload.file'}
+                                                    defaultMessage='Click or drag the certificate file to upload.'
+                                                />
+                                            </Typography>
+                                        </div> :
                                         <div className={classes.uploadedFile}>
                                             <Icon style={{ fontSize: 56 }}>
                                                 insert_drive_file
@@ -303,16 +403,21 @@ function Certificates(props) {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={closeCertificateUpload} color='primary'>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.cancel.button'
-                            defaultMessage='Close'
-                        />
-                    </Button>
-                    <Button onClick={saveCertificate} color='primary' autoFocus>
+                    <Button
+                        onClick={saveCertificate}
+                        color='primary'
+                        autoFocus
+                        disabled={alias === '' || endpoint === '' || certificate.name === ''}
+                    >
                         <FormattedMessage
                             id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.config.save.button'
                             defaultMessage='Save'
+                        />
+                    </Button>
+                    <Button onClick={closeCertificateUpload} color='secondary'>
+                        <FormattedMessage
+                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.cancel.button'
+                            defaultMessage='Close'
                         />
                     </Button>
                 </DialogActions>
@@ -327,6 +432,9 @@ Certificates.propTypes = {
         fileinput: PropTypes.shape({}),
         button: PropTypes.shape({}),
     }).isRequired,
+    certificates: PropTypes.shape({}).isRequired,
+    uploadCertificate: PropTypes.func.isRequired,
+    deleteCertificate: PropTypes.func.isRequired,
 
 };
 export default injectIntl(withStyles(styles)(Certificates));
