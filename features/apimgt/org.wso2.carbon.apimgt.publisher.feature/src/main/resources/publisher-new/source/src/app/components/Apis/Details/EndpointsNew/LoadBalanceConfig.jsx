@@ -117,7 +117,7 @@ function LoadBalanceConfig(props) {
     };
 
     return (
-        <div>
+        <React.Fragment>
             <Grid container direction='column'>
                 <TextField
                     id='algorithmSelect'
@@ -205,7 +205,7 @@ function LoadBalanceConfig(props) {
                     />
                 </Button>
             </Grid>
-        </div>
+        </React.Fragment>
     );
 }
 

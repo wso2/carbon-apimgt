@@ -425,7 +425,6 @@ function Certificates(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-
         </Grid>
     );
 }

@@ -420,130 +420,142 @@ function EndpointOverview(props) {
         setAdvancedConfigOptions({ open: false });
     };
 
+    console.log(api.type);
     return (
-        <div className={classes.overviewWrapper}>
-            <GeneralConfiguration
-                epConfig={(JSON.parse(JSON.stringify(epConfig)))}
-                endpointSecurityInfo={endpointSecurityInfo}
-                onChangeEndpointCategory={onChangeEndpointCategory}
-                handleToggleEndpointSecurity={handleToggleEndpointSecurity}
-                handleEndpointSecurityChange={handleEndpointSecurityChange}
-                handleEndpointTypeSelect={handleEndpointTypeSelect}
-                endpointType={endpointType}
-            />
-            <Paper className={classes.endpointContainer}>
-                <Grid container xs spacing={2}>
-                    <Grid xs className={classes.endpointsWrapperLeft}>
-                        <Typography className={classes.endpointName}>
-                            <FormattedMessage
-                                id='Apis.Details.EndpointsNew.EndpointOverview.production'
-                                defaultMessage='Production'
-                            />
-                        </Typography>
-                        <GenericEndpoint
-                            className={classes.defaultEndpointWrapper}
-                            endpointURL={epConfig.production_endpoints.length > 0 ?
-                                epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
-                            type=''
-                            index={0}
-                            category='production_endpoints'
-                            editEndpoint={editEndpoint}
-                            setAdvancedConfigOpen={toggleAdvanceConfig}
-                        />
-                    </Grid>
-                    <Grid xs className={classes.endpointsWrapperRight}>
-                        <div className={classes.sandboxHeading}>
-                            <Typography className={classes.endpointName}>
-                                <FormattedMessage
-                                    id='Apis.Details.EndpointsNew.EndpointOverview.sandbox'
-                                    defaultMessage='Sandbox'
-                                />
-                            </Typography>
-                        </div>
-                        <GenericEndpoint
-                            className={classes.defaultEndpointWrapper}
-                            endpointURL={epConfig.sandbox_endpoints.length > 0 ?
-                                epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
-                            type=''
-                            index={0}
-                            category='sandbox_endpoints'
-                            editEndpoint={editEndpoint}
-                            setAdvancedConfigOpen={toggleAdvanceConfig}
-                        />
-                    </Grid>
+        <React.Fragment className={classes.overviewWrapper}>
+            <Grid container xs={12}>
+                <Grid container item xs={12}>
+                    <GeneralConfiguration
+                        epConfig={(JSON.parse(JSON.stringify(epConfig)))}
+                        endpointSecurityInfo={endpointSecurityInfo}
+                        onChangeEndpointCategory={onChangeEndpointCategory}
+                        handleToggleEndpointSecurity={handleToggleEndpointSecurity}
+                        handleEndpointSecurityChange={handleEndpointSecurityChange}
+                        handleEndpointTypeSelect={handleEndpointTypeSelect}
+                        endpointType={endpointType}
+                        apiType={api.type}
+                    />
                 </Grid>
-                <Grid xs className={classes.endpointsTypeSelectWrapper}>
-                    <div />
-                    <div className={classes.endpointTypesSelectWrapper}>
-                        <div className={classes.addLabel}>
-                            <Typography>
-                                <FormattedMessage
-                                    id='Apis.Details.EndpointsNew.EndpointOverview.add.text'
-                                    defaultMessage='Add'
+                <Paper className={classes.endpointContainer}>
+                    <Grid container item xs={12}>
+                        <Grid item container xs spacing={2}>
+                            <Grid xs className={classes.endpointsWrapperLeft}>
+                                <Typography className={classes.endpointName}>
+                                    <FormattedMessage
+                                        id='Apis.Details.EndpointsNew.EndpointOverview.production'
+                                        defaultMessage='Production'
+                                    />
+                                </Typography>
+                                <GenericEndpoint
+                                    className={classes.defaultEndpointWrapper}
+                                    endpointURL={epConfig.production_endpoints.length > 0 ?
+                                        epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
+                                    type=''
+                                    index={0}
+                                    category='production_endpoints'
+                                    editEndpoint={editEndpoint}
+                                    setAdvancedConfigOpen={toggleAdvanceConfig}
                                 />
-                            </Typography>
-                        </div>
-                        <FormControl component='fieldset' className={classes.formControl}>
-                            <RadioGroup
-                                aria-label='EndpointType'
-                                name='endpointType'
-                                className={classes.radioGroup}
-                                value={epConfig.endpoint_type}
-                                onChange={onChangeEndpointCategory}
-                            >
-                                <FormControlLabel
-                                    value='failover'
-                                    control={<Radio />}
-                                    label='Failover'
+                            </Grid>
+                            <Grid xs className={classes.endpointsWrapperRight}>
+                                <div className={classes.sandboxHeading}>
+                                    <Typography className={classes.endpointName}>
+                                        <FormattedMessage
+                                            id='Apis.Details.EndpointsNew.EndpointOverview.sandbox'
+                                            defaultMessage='Sandbox'
+                                        />
+                                    </Typography>
+                                </div>
+                                <GenericEndpoint
+                                    className={classes.defaultEndpointWrapper}
+                                    endpointURL={epConfig.sandbox_endpoints.length > 0 ?
+                                        epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
+                                    type=''
+                                    index={0}
+                                    category='sandbox_endpoints'
+                                    editEndpoint={editEndpoint}
+                                    setAdvancedConfigOpen={toggleAdvanceConfig}
                                 />
-                                <FormControlLabel
-                                    value='load_balance'
-                                    control={<Radio />}
-                                    label='Load balance'
-                                />
-                            </RadioGroup>
-                        </FormControl>
-                        <div>
-                            <IconButton
-                                disabled={epConfig.endpoint_type !== 'load_balance'}
-                                aria-label='Delete'
-                                onClick={() => setLBConfigOpen(true)}
-                            >
-                                <Icon>
-                                    settings
-                                </Icon>
-                            </IconButton>
-                        </div>
-                    </div>
-                    <div />
-                </Grid>
-                <Grid xs container>
-                    <Grid xs className={classes.endpointsWrapperLeft}>
-                        <EndpointListing
-                            apiEndpoints={epConfig.production_endpoints}
-                            failOvers={epConfig.production_failovers}
-                            epType={epConfig.endpoint_type}
-                            addNewEndpoint={addEndpoint}
-                            removeEndpoint={removeEndpoint}
-                            editEndpoint={editEndpoint}
-                            setAdvancedConfigOpen={toggleAdvanceConfig}
-                            category='production_endpoints'
-                        />
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid xs className={classes.endpointsWrapperRight}>
-                        <EndpointListing
-                            apiEndpoints={epConfig.sandbox_endpoints}
-                            failOvers={epConfig.sandbox_failovers}
-                            epType={epConfig.endpoint_type}
-                            addNewEndpoint={addEndpoint}
-                            removeEndpoint={removeEndpoint}
-                            editEndpoint={editEndpoint}
-                            setAdvancedConfigOpen={toggleAdvanceConfig}
-                            category='sandbox_endpoints'
-                        />
-                    </Grid>
-                </Grid>
-            </Paper>
+                    {api.type === 'HTTP' ?
+                        <Grid container item xs={12} direction='column'>
+                            <Grid xs className={classes.endpointsTypeSelectWrapper}>
+                                <div />
+                                <div className={classes.endpointTypesSelectWrapper}>
+                                    <div className={classes.addLabel}>
+                                        <Typography>
+                                            <FormattedMessage
+                                                id='Apis.Details.EndpointsNew.EndpointOverview.add.text'
+                                                defaultMessage='Add'
+                                            />
+                                        </Typography>
+                                    </div>
+                                    <FormControl component='fieldset' className={classes.formControl}>
+                                        <RadioGroup
+                                            aria-label='EndpointType'
+                                            name='endpointType'
+                                            className={classes.radioGroup}
+                                            value={epConfig.endpoint_type}
+                                            onChange={onChangeEndpointCategory}
+                                        >
+                                            <FormControlLabel
+                                                value='failover'
+                                                control={<Radio />}
+                                                label='Failover'
+                                            />
+                                            <FormControlLabel
+                                                value='load_balance'
+                                                control={<Radio />}
+                                                label='Load balance'
+                                            />
+                                        </RadioGroup>
+                                    </FormControl>
+                                    <div>
+                                        <IconButton
+                                            disabled={epConfig.endpoint_type !== 'load_balance'}
+                                            aria-label='Delete'
+                                            onClick={() => setLBConfigOpen(true)}
+                                        >
+                                            <Icon>
+                                                settings
+                                            </Icon>
+                                        </IconButton>
+                                    </div>
+                                </div>
+                                <div />
+                            </Grid>
+                            <Grid xs container>
+                                <Grid xs className={classes.endpointsWrapperLeft}>
+                                    <EndpointListing
+                                        apiEndpoints={epConfig.production_endpoints}
+                                        failOvers={epConfig.production_failovers}
+                                        epType={epConfig.endpoint_type}
+                                        addNewEndpoint={addEndpoint}
+                                        removeEndpoint={removeEndpoint}
+                                        editEndpoint={editEndpoint}
+                                        setAdvancedConfigOpen={toggleAdvanceConfig}
+                                        category='production_endpoints'
+                                    />
+                                </Grid>
+                                <Grid xs className={classes.endpointsWrapperRight}>
+                                    <EndpointListing
+                                        apiEndpoints={epConfig.sandbox_endpoints}
+                                        failOvers={epConfig.sandbox_failovers}
+                                        epType={epConfig.endpoint_type}
+                                        addNewEndpoint={addEndpoint}
+                                        removeEndpoint={removeEndpoint}
+                                        editEndpoint={editEndpoint}
+                                        setAdvancedConfigOpen={toggleAdvanceConfig}
+                                        category='sandbox_endpoints'
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        : <div /> }
+                </Paper>
+            </Grid>
             <Dialog open={isLBConfigOpen}>
                 <DialogTitle>
                     <Typography className={classes.configDialogHeader}>
@@ -582,7 +594,7 @@ function EndpointOverview(props) {
                     />
                 </DialogContent>
             </Dialog>
-        </div>
+        </React.Fragment>
     );
 }
 

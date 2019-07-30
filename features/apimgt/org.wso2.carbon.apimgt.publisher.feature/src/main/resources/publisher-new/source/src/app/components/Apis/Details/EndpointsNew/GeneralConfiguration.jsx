@@ -53,6 +53,7 @@ const styles = theme => ({
     secondaryHeading: {
         fontSize: theme.typography.pxToRem(15),
         color: theme.palette.text.secondary,
+        display: 'flex',
     },
     heading: {
         fontSize: theme.typography.pxToRem(15),
@@ -62,6 +63,9 @@ const styles = theme => ({
     },
     endpointConfigSection: {
         padding: '10px',
+    },
+    generalConfigPanel: {
+        width: '100%',
     },
 });
 
@@ -84,6 +88,7 @@ function GeneralConfiguration(props) {
         handleEndpointTypeSelect,
         endpointType,
         classes,
+        apiType,
     } = props;
     const [isConfigExpanded, setConfigExpand] = useState(true);
     const [endpointCertificates, setEndpointCertificates] = useState([]);
@@ -202,8 +207,12 @@ function GeneralConfiguration(props) {
         });
     }, []);
     return (
-        <div>
-            <ExpansionPanel expanded={isConfigExpanded} onChange={() => setConfigExpand(!isConfigExpanded)}>
+        <React.Fragment>
+            <ExpansionPanel
+                expanded={isConfigExpanded}
+                onChange={() => setConfigExpand(!isConfigExpanded)}
+                className={classes.generalConfigPanel}
+            >
                 <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls='panel1bh-content'
@@ -216,17 +225,21 @@ function GeneralConfiguration(props) {
                             defaultMessage='GeneralConfiguration'
                         />
                     </Typography>
+                    {apiType === 'HTTP' ?
+                        <Typography className={classes.secondaryHeading}>
+                            <FormattedMessage
+                                id='Apis.Details.EndpointsNew.GeneralConfiguration.endpoint.type.sub.heading'
+                                defaultMessage='Endpoint Type'
+                            /> : {epTypeSubHeading}
+                            {' | '}
+                            <FormattedMessage
+                                id='Apis.Details.EndpointsNew.GeneralConfiguration.endpoint.security.sub.heading'
+                                defaultMessage='Endpoint Security'
+                            />: {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'}
+                            {' | '}
+                        </Typography>
+                        : <div />}
                     <Typography className={classes.secondaryHeading}>
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.endpoint.type.sub.heading'
-                            defaultMessage='Endpoint Type'
-                        /> : {epTypeSubHeading},
-                        {' '}
-                        <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.endpoint.security.sub.heading'
-                            defaultMessage='Endpoint Security'
-                        />: {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'},
-                        {' '}
                         <FormattedMessage
                             id='Apis.Details.EndpointsNew.GeneralConfiguration.certificates.sub.heading'
                             defaultMessage='Certificates'
@@ -234,48 +247,55 @@ function GeneralConfiguration(props) {
                     </Typography>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.generalConfigContent}>
-                    <Grid container direction='row'>
-                        <Grid item xs container className={classes.endpointConfigSection} direction='column'>
-                            <FormControl className={classes.endpointTypeSelect}>
-                                <InputLabel htmlFor='endpoint-type-select'>
-                                    <FormattedMessage
-                                        id='Apis.Details.EndpointsNew.EndpointOverview.endpointType'
-                                        defaultMessage='Endpoint Type'
+                    <Grid container direction='row' xs={12}>
+                        {apiType === 'HTTP' ?
+                            <Grid container item xs={8}>
+                                <Grid item xs container className={classes.endpointConfigSection} direction='column'>
+                                    <FormControl className={classes.endpointTypeSelect}>
+                                        <InputLabel htmlFor='endpoint-type-select'>
+                                            <FormattedMessage
+                                                id='Apis.Details.EndpointsNew.EndpointOverview.endpointType'
+                                                defaultMessage='Endpoint Type'
+                                            />
+                                        </InputLabel>
+                                        <Select
+                                            value={endpointType.key}
+                                            onChange={handleEndpointTypeSelect}
+                                            inputProps={{
+                                                name: 'key',
+                                                id: 'endpoint-type-select',
+                                            }}
+                                        >
+                                            {endpointTypes.map((type) => {
+                                                return (<MenuItem value={type.key}>{type.value}</MenuItem>);
+                                            })}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs className={classes.endpointConfigSection}>
+                                    <FormControlLabel
+                                        value='start'
+                                        checked={endpointSecurityInfo !== null}
+                                        control={<Switch color='primary' />}
+                                        label={<FormattedMessage
+                                            id={'Apis.Details.EndpointsNew.EndpointOverview.' +
+                                            'endpoint.security.enable.switch'}
+                                            defaultMessage='Endpoint Security'
+                                        />}
+                                        labelPlacement='start'
+                                        onChange={handleToggleEndpointSecurity}
                                     />
-                                </InputLabel>
-                                <Select
-                                    value={endpointType.key}
-                                    onChange={handleEndpointTypeSelect}
-                                    inputProps={{
-                                        name: 'key',
-                                        id: 'endpoint-type-select',
-                                    }}
-                                >
-                                    {endpointTypes.map((type) => {
-                                        return (<MenuItem value={type.key}>{type.value}</MenuItem>);
-                                    })}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs className={classes.endpointConfigSection}>
-                            <FormControlLabel
-                                value='start'
-                                checked={endpointSecurityInfo !== null}
-                                control={<Switch color='primary' />}
-                                label={<FormattedMessage
-                                    id='Apis.Details.EndpointsNew.EndpointOverview.endpoint.security.enable.switch'
-                                    defaultMessage='Endpoint Security'
-                                />}
-                                labelPlacement='start'
-                                onChange={handleToggleEndpointSecurity}
-                            />
-                            <Collapse in={endpointSecurityInfo !== null}>
-                                <EndpointSecurity
-                                    securityInfo={endpointSecurityInfo}
-                                    onChangeEndpointAuth={handleEndpointSecurityChange}
-                                />
-                            </Collapse>
-                        </Grid>
+                                    <Collapse in={endpointSecurityInfo !== null}>
+                                        <EndpointSecurity
+                                            securityInfo={endpointSecurityInfo}
+                                            onChangeEndpointAuth={handleEndpointSecurityChange}
+                                        />
+                                    </Collapse>
+                                </Grid>
+                            </Grid>
+                            :
+                            <div />}
+
                         <Grid item xs className={classes.endpointConfigSection}>
                             <Certificates
                                 certificates={endpointCertificates}
@@ -286,7 +306,7 @@ function GeneralConfiguration(props) {
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
-        </div>
+        </React.Fragment>
     );
 }
 
@@ -299,6 +319,7 @@ GeneralConfiguration.propTypes = {
     endpointType: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    apiType: PropTypes.string.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(GeneralConfiguration));

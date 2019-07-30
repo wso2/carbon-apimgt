@@ -27,20 +27,6 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
-const styles = theme => ({
-    credentialsContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginTop: theme.spacing.unit * 2,
-    },
-    textField: {
-        marginLeft: theme.spacing.unit,
-    },
-    advancedConfigWrapper: {
-        width: '75%',
-    },
-});
-
 /**
  * The base component for advanced endpoint configurations.
  * @param {any} props The props that are being passed
@@ -48,7 +34,6 @@ const styles = theme => ({
  */
 function EndpointSecurity(props) {
     const {
-        classes,
         intl,
         securityInfo,
         onChangeEndpointAuth,
@@ -80,9 +65,9 @@ function EndpointSecurity(props) {
     }, [props]);
 
     return (
-        <form className={classes.advancedConfigWrapper}>
-            <Grid container direction='column' form>
-                <FormControl className={classes.formControl}>
+        <Grid container direction='column'>
+            <Grid item xs={12}>
+                <FormControl>
                     <InputLabel htmlFor='auth-type-select'>
                         <FormattedMessage
                             id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.auth.type'
@@ -90,6 +75,7 @@ function EndpointSecurity(props) {
                         />
                     </InputLabel>
                     <Select
+                        fullwidth
                         value={endpointSecurityInfo.type}
                         onChange={(event) => { onChangeEndpointAuth(event, 'type'); }}
                         inputProps={{
@@ -104,7 +90,9 @@ function EndpointSecurity(props) {
                         ))}
                     </Select>
                 </FormControl>
-                <div className={classes.credentialsContainer}>
+            </Grid>
+            <Grid item container xs={12}>
+                <Grid item xs>
                     <TextField
                         required
                         id='auth-userName'
@@ -117,6 +105,8 @@ function EndpointSecurity(props) {
                         value={endpointSecurityInfo.username}
                         onBlur={(event) => { onChangeEndpointAuth(event, 'username'); }}
                     />
+                </Grid>
+                <Grid item xs>
                     <TextField
                         required
                         type='password'
@@ -130,9 +120,9 @@ function EndpointSecurity(props) {
                             event => setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value })}
                         onBlur={(event) => { onChangeEndpointAuth(event, 'password'); }}
                     />
-                </div>
+                </Grid>
             </Grid>
-        </form>
+        </Grid>
     );
 }
 
@@ -148,4 +138,4 @@ EndpointSecurity.propTypes = {
     onChangeEndpointAuth: PropTypes.func.isRequired,
 };
 
-export default injectIntl(withStyles(styles)(EndpointSecurity));
+export default injectIntl((EndpointSecurity));

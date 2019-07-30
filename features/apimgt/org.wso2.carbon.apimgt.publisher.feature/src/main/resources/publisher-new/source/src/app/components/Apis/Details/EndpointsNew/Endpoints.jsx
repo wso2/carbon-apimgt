@@ -41,6 +41,7 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: theme.spacing.unit * 2,
     },
     buttonSection: {
         marginTop: theme.spacing.unit * 2,
@@ -63,7 +64,7 @@ function Endpoints(props) {
     };
 
     return (
-        <div className={classes.root}>
+        <React.Fragment className={classes.root}>
             <div>
                 <Typography variant='h4' align='left' className={classes.titleWrapper}>
                     <FormattedMessage
@@ -113,7 +114,7 @@ function Endpoints(props) {
                         </Grid>
                     </div>)}
             </ApiContext.Consumer>
-        </div>
+        </React.Fragment>
     );
 }
 

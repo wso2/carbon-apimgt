@@ -65,7 +65,7 @@ function GenericEndpoint(props) {
         setServiceUrl(endpointURL);
     }, [endpointURL]);
     return (
-        <div className={classes.endpointInputWrapper}>
+        <React.Fragment className={classes.endpointInputWrapper}>
             <TextField
                 label={<FormattedMessage
                     id='Apis.Details.EndpointsNew.GenericEndpoint.service.url.input'
@@ -108,7 +108,7 @@ function GenericEndpoint(props) {
                     ),
                 }}
             />
-        </div>);
+        </React.Fragment>);
 }
 
 GenericEndpoint.propTypes = {
