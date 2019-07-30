@@ -32,7 +32,7 @@ import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
 import Api from '../../../data/api';
 import Progress from '../../Shared/Progress';
-import AuthManager from '../../../data/AuthManager';
+
 
 const LoadableSwitch = Loadable.Map({
     loader: {
@@ -181,10 +181,20 @@ class Details extends React.Component {
             const promisedApi = dataApi.getAPIById(this.api_uuid);
             const existingSubscriptions = dataApi.getSubscriptions(this.api_uuid, null);
             const promisedApplications = dataApi.getAllApplications();
-
-            Promise.all([promisedApi, existingSubscriptions, promisedApplications])
+            promisedApi.then((api) => {
+                this.setState({ api: api.body });
+            }).catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+            Promise.all([existingSubscriptions, promisedApplications])
                 .then((response) => {
-                    const [api, subscriptions, applications] = response.map(data => data.obj);
+                    const [subscriptions, applications] = response.map(data => data.obj);
                     const appIdToNameMapping = applications.list.reduce((acc, cur) => {
                         acc[cur.applicationId] = cur.name;
                         return acc;
@@ -212,7 +222,7 @@ class Details extends React.Component {
                                 label: filteredApp.name,
                             };
                         });
-                    this.setState({ api, subscribedApplications, applicationsAvailable }, () => {
+                    this.setState({ subscribedApplications, applicationsAvailable }, () => {
                         if (callback) {
                             callback();
                         }
