@@ -101,7 +101,7 @@ function GeneralConfiguration(props) {
         API.addCertificate(certificate, endpoint, alias).then((resp) => {
             if (resp.status === 201) {
                 Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.add.success',
+                    id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.add.success',
                     defaultMessage: 'Certificate added successfully',
                 }));
                 const tmpCertificates = [...endpointCertificates];
@@ -115,7 +115,7 @@ function GeneralConfiguration(props) {
             console.error(err.message);
             if (err.message === 'Conflict') {
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.alias.exist',
+                    id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.alias.exist',
                     defaultMessage: 'Adding Certificate Failed. Certificate alias exists.',
                 }));
             }
@@ -170,13 +170,13 @@ function GeneralConfiguration(props) {
                 }
             });
             Alert.info(intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.delete.success',
+                id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.delete.success',
                 defaultMessage: 'Certificate Deleted Successfully',
             }));
         }).catch((err) => {
             console.log(err);
             Alert.info(intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.delete.error',
+                id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.delete.error',
                 defaultMessage: 'Error Deleting Certificate',
             }));
         });
@@ -221,19 +221,19 @@ function GeneralConfiguration(props) {
                 >
                     <Typography className={classes.heading}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.general.configuration.heading'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.general.configuration.heading'
                             defaultMessage='GeneralConfiguration'
                         />
                     </Typography>
                     {apiType === 'HTTP' ?
                         <Typography className={classes.secondaryHeading}>
                             <FormattedMessage
-                                id='Apis.Details.EndpointsNew.GeneralConfiguration.endpoint.type.sub.heading'
+                                id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.type.sub.heading'
                                 defaultMessage='Endpoint Type'
                             /> : {epTypeSubHeading}
                             {' | '}
                             <FormattedMessage
-                                id='Apis.Details.EndpointsNew.GeneralConfiguration.endpoint.security.sub.heading'
+                                id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
                                 defaultMessage='Endpoint Security'
                             />: {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'}
                             {' | '}
@@ -241,7 +241,7 @@ function GeneralConfiguration(props) {
                         : <div />}
                     <Typography className={classes.secondaryHeading}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.certificates.sub.heading'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'
                             defaultMessage='Certificates'
                         />: {endpointCertificates.length}
                     </Typography>
@@ -254,7 +254,7 @@ function GeneralConfiguration(props) {
                                     <FormControl className={classes.endpointTypeSelect}>
                                         <InputLabel htmlFor='endpoint-type-select'>
                                             <FormattedMessage
-                                                id='Apis.Details.EndpointsNew.EndpointOverview.endpointType'
+                                                id='Apis.Details.Endpoints.EndpointOverview.endpointType'
                                                 defaultMessage='Endpoint Type'
                                             />
                                         </InputLabel>
@@ -278,7 +278,7 @@ function GeneralConfiguration(props) {
                                         checked={endpointSecurityInfo !== null}
                                         control={<Switch color='primary' />}
                                         label={<FormattedMessage
-                                            id={'Apis.Details.EndpointsNew.EndpointOverview.' +
+                                            id={'Apis.Details.Endpoints.EndpointOverview.' +
                                             'endpoint.security.enable.switch'}
                                             defaultMessage='Endpoint Security'
                                         />}

@@ -442,7 +442,7 @@ function EndpointOverview(props) {
                             <Grid xs className={classes.endpointsWrapperLeft}>
                                 <Typography className={classes.endpointName}>
                                     <FormattedMessage
-                                        id='Apis.Details.EndpointsNew.EndpointOverview.production'
+                                        id='Apis.Details.Endpoints.EndpointOverview.production'
                                         defaultMessage='Production'
                                     />
                                 </Typography>
@@ -461,7 +461,7 @@ function EndpointOverview(props) {
                                 <div className={classes.sandboxHeading}>
                                     <Typography className={classes.endpointName}>
                                         <FormattedMessage
-                                            id='Apis.Details.EndpointsNew.EndpointOverview.sandbox'
+                                            id='Apis.Details.Endpoints.EndpointOverview.sandbox'
                                             defaultMessage='Sandbox'
                                         />
                                     </Typography>
@@ -487,7 +487,7 @@ function EndpointOverview(props) {
                                     <div className={classes.addLabel}>
                                         <Typography>
                                             <FormattedMessage
-                                                id='Apis.Details.EndpointsNew.EndpointOverview.add.text'
+                                                id='Apis.Details.Endpoints.EndpointOverview.add.text'
                                                 defaultMessage='Add'
                                             />
                                         </Typography>
@@ -560,7 +560,7 @@ function EndpointOverview(props) {
                 <DialogTitle>
                     <Typography className={classes.configDialogHeader}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.EndpointOverview.load.balance.configuration.title'
+                            id='Apis.Details.Endpoints.EndpointOverview.load.balance.configuration.title'
                             defaultMessage='Load Balance Configuration'
                         />
                     </Typography>
@@ -580,7 +580,7 @@ function EndpointOverview(props) {
                 <DialogTitle>
                     <Typography className={classes.configDialogHeader}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.EndpointOverview.advance.endpoint.configuration'
+                            id='Apis.Details.Endpoints.EndpointOverview.advance.endpoint.configuration'
                             defaultMessage='Advance Configuration'
                         />
                     </Typography>
