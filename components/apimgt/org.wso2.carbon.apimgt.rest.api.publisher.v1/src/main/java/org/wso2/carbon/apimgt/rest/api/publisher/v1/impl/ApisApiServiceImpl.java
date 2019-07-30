@@ -1432,7 +1432,7 @@ public class ApisApiServiceImpl implements ApisApiService {
           Boolean returnContent, MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, true);
+        Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, returnContent);
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
                 (OpenAPIDefinitionValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);

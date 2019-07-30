@@ -44,14 +44,13 @@ public class ApplicationManagementServiceClient {
 
     private IdentityApplicationManagementServiceStub identityApplicationManagementServiceStub;
 
-    public ApplicationManagementServiceClient() throws APIManagementException {
+    public ApplicationManagementServiceClient(String serviceURL) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration();
-        String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         //username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
 
         if (serviceURL == null) {
-            throw new APIManagementException("Required connection details for the key management server not provided");
+            serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
         }
 
         try {
@@ -69,6 +68,10 @@ public class ApplicationManagementServiceClient {
         } catch (AxisFault axisFault) {
             throw new APIManagementException("Error while initializing the OAuth admin service stub", axisFault);
         }
+    }
+
+    public ApplicationManagementServiceClient() throws APIManagementException {
+        this(null);
     }
 
     protected IdentityApplicationManagementServiceStub getIdentityApplicationManagementServiceStub(String serviceURL,

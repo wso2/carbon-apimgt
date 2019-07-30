@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
@@ -935,7 +936,6 @@ public class APIMappingUtil {
                             scope.setName(definedScope.getName());
                             scope.setDescription(definedScope.getDescription());
                             scope.setRoles(definedScope.getRoles());
-                            template.setScopes(scope);
                             template.setScope(scope);
                         }
                     }
@@ -1127,9 +1127,22 @@ public class APIMappingUtil {
         OpenAPIDefinitionValidationResponseDTO responseDTO = new OpenAPIDefinitionValidationResponseDTO();
         responseDTO.setIsValid(model.isValid());
 
-        if (model.isValid() && returnContent) {
-            responseDTO.setContent(model.getContent());
-        } else if (!model.isValid()) {
+        if (model.isValid()) {
+            APIDefinitionValidationResponse.Info modelInfo = model.getInfo();
+            if (modelInfo != null) {
+                OpenAPIDefinitionValidationResponseInfoDTO infoDTO =
+                        new OpenAPIDefinitionValidationResponseInfoDTO();
+                infoDTO.setOpenAPIVersion(modelInfo.getOpenAPIVersion());
+                infoDTO.setName(modelInfo.getName());
+                infoDTO.setVersion(modelInfo.getVersion());
+                infoDTO.setContext(modelInfo.getContext());
+                infoDTO.setDescription(modelInfo.getDescription());
+                responseDTO.setInfo(infoDTO);
+            }
+            if (returnContent) {
+                responseDTO.setContent(model.getContent());
+            }
+        } else {
             responseDTO.setErrors(getErrorListItemsDTOsFromErrorHandlers(model.getErrorItems()));
         }
         return responseDTO;

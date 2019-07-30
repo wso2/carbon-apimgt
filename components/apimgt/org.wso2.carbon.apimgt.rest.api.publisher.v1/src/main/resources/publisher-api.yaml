@@ -7732,6 +7732,25 @@ definitions:
         description: |
           OpenAPI definition content.
         type: string
+      info:
+        description: |
+          API definition information
+        properties:
+          name:
+            type: string
+            example: "PetStore"
+          version:
+            type: string
+            example: "1.0.0"
+          context:
+            type: string
+            example: "/petstore"
+          description:
+            type: string
+            example: "A sample API that uses a petstore as an example to demonstrate swagger-2.0 specification"
+          openAPIVersion:
+            type: string
+            example: "3.0.0"
       errors:
         type: array
         description: |
