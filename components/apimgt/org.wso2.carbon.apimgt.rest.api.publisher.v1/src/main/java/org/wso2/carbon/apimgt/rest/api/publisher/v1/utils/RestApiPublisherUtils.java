@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +45,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,21 +62,17 @@ public class RestApiPublisherUtils {
     public static boolean isValidWSAPI(APIDTO api) {
 
         boolean isValid = false;
-        if (api.getEndpointConfig() != null) {
-            JSONObject endpointCfg = new JSONObject((Map)api.getEndpointConfig());
-            try {
-                String prodEndpointUrl = endpointCfg.getJSONObject(RestApiConstants.PRODUCTION_ENDPOINTS)
-                        .getString("url");
-                String sandboxEndpointUrl = endpointCfg.getJSONObject(RestApiConstants.SANDBOX_ENDPOINTS)
-                        .getString("url");
-                isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
 
-                if (isValid) {
-                    isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
-                }
-            } catch (JSONException ex) {
-                RestApiUtil.handleBadRequest(
-                        "Error in endpoint configurations. Web Socket APIs do not accept array of endpoints.", log);
+        if (api.getEndpointConfig() != null) {
+            LinkedHashMap endpointConfig = (LinkedHashMap) api.getEndpointConfig();
+            String prodEndpointUrl = String
+                    .valueOf(((LinkedHashMap) endpointConfig.get("production_endpoints")).get("url"));
+            String sandboxEndpointUrl = String
+                    .valueOf(((LinkedHashMap) endpointConfig.get("sandbox_endpoints")).get("url"));
+            isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
+
+            if (isValid) {
+                isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
             }
         }
 

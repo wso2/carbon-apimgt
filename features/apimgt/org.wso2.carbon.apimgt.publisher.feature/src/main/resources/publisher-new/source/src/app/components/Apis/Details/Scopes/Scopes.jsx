@@ -31,6 +31,15 @@ import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
+import {
+    List,
+    ListItem,
+    ListItemText,
+} from '@material-ui/core';
+import AddCircle from '@material-ui/icons/AddCircle';
+import MUIDataTable from 'mui-datatables';
+import Edit from '../Documents/Edit';
+import Delete from '../Documents/Delete';
 
 const styles = theme => ({
     buttonProgress: {
@@ -38,6 +47,31 @@ const styles = theme => ({
         margin: theme.spacing.unit,
     },
     headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+    root: {
+        width: '100%',
+        maxWidth: 800,
+        backgroundColor: theme.palette.background.paper,
+    },
+    heading: {
+        flexGrow: 1,
+        marginTop: 10,
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    mainTitle: {
+        paddingLeft: 0,
+    },
+    button: {
+        marginLeft: theme.spacing.unit * 2,
+        textTransform: theme.custom.leftMenuTextStyle,
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+    },
+    buttonIcon: {
+        marginRight: 10,
+    },
 });
 /**
  * Generate the scopes UI in API details page.
@@ -54,6 +88,7 @@ class Scopes extends React.Component {
         super(props);
         this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
+        this.api_data = props.api;
         this.state = {
             apiScopes: null,
             apiScope: {},
@@ -163,10 +198,100 @@ class Scopes extends React.Component {
      * @memberof Scopes
      */
     render() {
+        const { intl } = this.props;
         const { api } = this.props;
         const { scopes } = api;
         const { classes } = this.props;
         const url = `/apis/${api.id}/scopes/create`;
+        const columns = [
+            intl.formatMessage({
+                id: 'Apis.Details.Scopes.Scopes.table.header.name',
+                defaultMessage: 'Name',
+            }),
+            {
+                options: {
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData && tableMeta.rowData[1]) {
+                            const roles = value || [];
+                            return (
+                                roles.join(',')
+                            );
+                        }
+                        return false;
+                    },
+                    filter: false,
+                    label: <FormattedMessage
+                        id='Apis.Details.Scopes.Scopes.table.header.roles'
+                        defaultMessage='Applying Roles'
+                    />,
+                },
+            },
+            {
+                options: {
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData) {
+                            return (
+                                <List component='nav' className={classes.root}>
+                                    {value.map(resource => (
+                                        <ListItem button>
+                                            <ListItemText primary={resource} />
+                                        </ListItem>
+                                    ))}
+                                </List>
+                            );
+                        }
+                        return false;
+                    },
+                    filter: false,
+                    label: <FormattedMessage
+                        id='Apis.Details.Scopes.Scopes.table.header.usages'
+                        defaultMessage='Used In'
+                    />,
+                },
+            },
+            {
+                options: {
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData) {
+                            const scopeName = tableMeta.rowData[1];
+                            return (
+                                <table className={classes.actionTable}>
+                                    <tr>
+                                        <td>
+                                            <Edit scopeName={scopeName} apiId={this.apiId} />
+                                        </td>
+                                        <td>
+                                            <Delete scopeName={scopeName} apiId={this.apiId} />
+                                        </td>
+                                    </tr>
+                                </table>
+                            );
+                        }
+                        return false;
+                    },
+                    filter: false,
+                    label: <FormattedMessage
+                        id='Apis.Details.Scopes.Scopes.table.header.actions'
+                        defaultMessage='Actions'
+                    />,
+                },
+            }];
+        const options = {
+            filterType: 'multiselect',
+            selectableRows: false,
+        };
+        const scopesList = api.scopes.map((scope) => {
+            const aScope = [];
+            aScope.push(scope.name);
+            aScope.push(scope.bindings.values);
+            const resources = api.operations.filter((op) => {
+                return op.scopes.includes(scope.name);
+            }).map((op) => {
+                return op.uritemplate + ' ' + op.httpVerb;
+            });
+            aScope.push(resources);
+            return aScope;
+        });
 
         if (!scopes) {
             return <Progress />;
@@ -210,63 +335,36 @@ class Scopes extends React.Component {
         }
 
         return (
-            <div>
-                {/* <Card
-                    title='Add Scope'
-                    style={{
-                        width: '100%',
-                        marginBottom: 20,
-                    }}
-                >
-                    <Row type='flex' justify='start'>
-                        <Col span={4}> Scope Name </Col>
-                        <Col span={10}>
-                            <Input id='name' onChange={this.handleInputs} value={apiScope.name || ''} />
-                        </Col>
-                    </Row>
-                    <br />
-                    <Row type='flex' justify='start'>
-                        <Col span={4}> Description </Col>
-                        <Col span={10}>
-                            <Input id='description' onChange={this.handleInputs} value={apiScope.description || ''} />
-                        </Col>
-                    </Row>
-                    <br />
-                    <Row type='flex' justify='start'>
-                        <Col span={4}> Roles </Col>
-                        <Col span={10}>
-                            <TagsInput
-                                value={roles}
-                                onChange={this.handleInputs}
-                                onlyUnique
-                                inputProps={{
-                                    placeholder: 'add a role',
-                                }}
-                            />
-                        </Col>
-                    </Row>
-                    <br />
-                    <Row type='flex' justify='start'>
-                        <Col span={5} />
-                        <Col span={10}>
-                            <button onClick={this.addScope}> Add Scope to API </button>
-                        </Col>
-                        <Col span={5} />
-                    </Row>
-                </Card>
-                {Object.keys(apiScopes).map((key) => {
-                    const scope = apiScopes[key];
-                    return (
-                        <Scope
-                            name={scope.name}
-                            description={scope.description}
-                            api_uuid={this.api_uuid}
-                            deleteScope={this.deleteScope}
-                            key={key}
-                            updateScope={this.updateScope}
+            <div className={classes.heading}>
+                <div className={classes.titleWrapper}>
+                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <FormattedMessage
+                            id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                            defaultMessage='Scopes'
                         />
-                    );
-                })} */}
+                    </Typography>
+                    <Link to={url}>
+                        <Button size='small' className={classes.button}>
+                            <AddCircle className={classes.buttonIcon} />
+                            <FormattedMessage
+                                id='Apis.Details.Scopes.Scopes.heading.scope.add_new'
+                                defaultMessage='Add New Scope'
+                            />
+                        </Button>
+                    </Link>
+                </div>
+
+                <MUIDataTable
+                    title={intl.formatMessage({
+                        id: 'Apis.Details.Scopes.Scopes.table.scope.name',
+                        defaultMessage: 'Scopes',
+                    })}
+                    data={scopesList}
+                    columns={columns}
+                    options={options}
+                />
+
+
             </div>
         );
     }
@@ -276,7 +374,7 @@ Scopes.propTypes = {
     match: PropTypes.shape({
         params: PropTypes.object,
     }),
-    api: PropTypes.shape({}).isRequired,
+    api: PropTypes.instanceOf(Object).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
