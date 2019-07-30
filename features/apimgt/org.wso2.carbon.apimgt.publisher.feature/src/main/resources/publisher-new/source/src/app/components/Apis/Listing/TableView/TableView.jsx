@@ -9,6 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import { Link } from 'react-router-dom';
+import { injectIntl } from 'react-intl';
 
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
@@ -167,7 +168,7 @@ class TableView extends React.Component {
     handleDeleteAPIs() {
         this.setState({ isDeleting: true });
         const { selected } = this.state;
-        const { updateAPIsList } = this.props;
+        const { updateAPIsList, intl } = this.props;
         const promisedDeleteAll = selected.map(apiUUID =>
             API.delete(apiUUID)
                 .then(() => {
@@ -175,10 +176,15 @@ class TableView extends React.Component {
                     const index = selected.indexOf(apiUUID);
                     if (index !== -1) selected.splice(index, 1);
                 })
-                .catch(() => Alert.info(`Error while deleting the ${apiUUID}`)));
-
+                .catch(() => Alert.info(`${intl.formatMessage({
+                    id: 'Apis.Listing.TableView.TableView.error.while.deleting.the.api',
+                    defaultMessage: 'Error while deleting the',
+                })} ${apiUUID}`)));
         Promise.all(promisedDeleteAll).then((response) => {
-            Alert.info(`${response.length} API(s) deleted successfully!`);
+            Alert.info(`${response.length} + ${intl.formatMessage({
+                id: 'Apis.Listing.TableView.TableView.apis.deleted.successfully',
+                defaultMessage: 'API(s) deleted successfully!',
+            })}`);
             this.setState({ isDeleting: false, selected });
         });
     }
@@ -293,6 +299,7 @@ TableView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     apis: PropTypes.shape({ list: PropTypes.array }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(TableView);
+export default injectIntl(withStyles(styles)(TableView));
