@@ -7,7 +7,9 @@ exports[`Test scenarios for <Footer/> component should match with the existing s
   <p
     className="MuiTypography-root-2 MuiTypography-body1-11 MuiTypography-noWrap-28"
   >
-    WSO2 APIM v3.0.0 | © 2019 WSO2 Inc
+    <span>
+      WSO2 APIM v3.0.0 | © 2019 WSO2 Inc
+    </span>
   </p>
 </footer>
 `;

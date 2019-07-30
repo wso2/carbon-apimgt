@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import APIClientFactory from './APIClientFactory';
-import AuthManager from './AuthManager';
 import Utils from './Utils';
 
 /** *
@@ -34,7 +33,6 @@ export default class Resource {
      * @returns {object} Metadata for API request
      */
     static _requestMetaData(data = {}) {
-        AuthManager.refreshTokenOnExpire();
         /* TODO: This should be moved to an interceptor ~tmkb */
         return {
             requestContentType: data['Content-Type'] || 'application/json',

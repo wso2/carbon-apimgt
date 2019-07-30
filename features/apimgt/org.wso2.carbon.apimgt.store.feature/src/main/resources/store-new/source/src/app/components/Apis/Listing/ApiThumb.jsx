@@ -174,7 +174,7 @@ class ApiThumb extends React.Component {
         const details_link = '/apis/' + this.props.api.id;
         const { api, classes, theme } = this.props;
         const { thumbnail } = theme.custom;
-        const {
+        const { 
             name, version, context, provider,
         } = this.props.api;
         const { rating } = this.state;
@@ -202,7 +202,7 @@ class ApiThumb extends React.Component {
             );
         }
         return (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.thumbWrapper}>
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={3} className={classes.thumbWrapper}>
                 <Link to={details_link} className={classes.imageWrapper}>
                     {!defaultImage && ImageView}
                     {defaultImage && <img src={defaultImage} />}

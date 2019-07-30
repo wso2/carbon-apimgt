@@ -90,7 +90,8 @@ class AuthManager {
     static getUser(environmentName = Utils.getCurrentEnvironment().label) {
         const userData = localStorage.getItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
-        if (!(userData && partialToken)) {
+        const refreshToken = Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, environmentName);
+        if (!(userData && (partialToken || refreshToken))) {
             return null;
         }
         return User.fromJson(JSON.parse(userData), environmentName);
@@ -289,22 +290,21 @@ class AuthManager {
      * @return {AxiosPromise}
      */
     static refresh(environment) {
-        const authHeader = 'Bearer ' + AuthManager.getUser(environment.label).getRefreshPartialToken();
         const params = {
-            grant_type: 'refresh_token',
+            refresh_token: AuthManager.getUser(environment.label).getRefreshPartialToken(),
             validity_period: -1,
             scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
-        const url = environment.loginTokenPath + Utils.CONST.CONTEXT_PATH;
-        /* TODO: Fetch this from configs ~tmkb */
+        const url = Utils.CONST.CONTEXT_PATH + environment.refreshTokenPath;
         const headers = {
-            Authorization: authHeader,
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Alt-Referer': referrer,
         };
-        return axios.post(url, qs.stringify(params), {
+        return fetch(url, {
+            method: 'POST',
+            body: qs.stringify(params),
             headers,
         });
     }

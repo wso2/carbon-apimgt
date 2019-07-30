@@ -69,7 +69,7 @@ const APICreateMenu = (props) => {
                 </ListItem>
                 <Divider />
                 <ListItem>
-                    <Link to='/apis/create/rest'>
+                    <Link to='/apis/create/ws'>
                         <ListItemText
                             primary={
                                 <FormattedMessage

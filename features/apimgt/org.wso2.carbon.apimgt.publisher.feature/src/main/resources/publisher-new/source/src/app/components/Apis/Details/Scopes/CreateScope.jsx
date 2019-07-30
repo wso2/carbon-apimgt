@@ -78,9 +78,12 @@ class CreateScope extends React.Component {
             type: 'role',
             values: this.state.roles,
         };
-        const promisedScopeAdd = api.addScope(this.props.match.params.api_uuid, scope);
-        promisedScopeAdd.then((response) => {
-            if (response.status !== 201) {
+        const newApi = this.props.api;
+        newApi.scopes.push(scope);
+        // eslint-disable-next-line no-underscore-dangle
+        const promisedApiUpdate = api.update(newApi._data);
+        promisedApiUpdate.then((response) => {
+            if (response.status !== 200) {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
                     defaultMessage: 'Something went wrong while updating the scope',
