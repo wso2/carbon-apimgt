@@ -361,7 +361,10 @@ class Wizard extends Component {
                                 )}
                                 {stepStatus === this.stepStatuses.BLOCKED && (
                                     <Typography variant='h4'>
-                                        Approval request for this step has been Sent
+                                        <FormattedMessage
+                                            id='Apis.Details.Credentials.Wizard.Wizard.approval.request.for.this.step'
+                                            defaultMessage='Approval request for this step has been Sent'
+                                        />
                                     </Typography>
                                 )}
                             </div>

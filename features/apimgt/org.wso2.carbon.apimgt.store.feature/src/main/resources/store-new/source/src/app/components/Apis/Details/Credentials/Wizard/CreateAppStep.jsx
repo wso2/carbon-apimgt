@@ -77,7 +77,6 @@ const createAppStep = (props) => {
             });
     }, []);
 
-    // creates an application application if current step is 1
     useEffect(() => {
         if (nextStep === 1 && nextStep > currentStep) {
             const api = new API();
