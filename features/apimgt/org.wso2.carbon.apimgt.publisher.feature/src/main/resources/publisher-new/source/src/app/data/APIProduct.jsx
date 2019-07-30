@@ -134,7 +134,8 @@ class APIProduct extends Resource {
             }
         );
         return promisedProducts.then(response => {
-            return new APIProduct(response.body)
+            response.obj.apiType = API.CONSTS.APIProduct;
+            return response;
         });
     }
 

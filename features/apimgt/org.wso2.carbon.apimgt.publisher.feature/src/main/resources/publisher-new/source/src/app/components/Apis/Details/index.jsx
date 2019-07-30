@@ -244,33 +244,6 @@ class Details extends Component {
     }
 
     /**
-     * Conditionally return endpoint menu item.
-     * @param {*} apiType  'API' or 'APIProduct'
-     * @returns {*} endpoint menu item
-     */
-    getEndpointsMenuItem(apiType) {
-        const { active } = this.state;
-        const { intl } = this.props;
-        switch (apiType) {
-            case Api.CONSTS.API: {
-                return (<LeftMenuItem
-                    text={intl.formatMessage({
-                        id: 'Apis.Details.index.endpoints',
-                        defaultMessage: 'endpoints',
-                    })}
-                    handleMenuSelect={this.handleMenuSelect}
-                    active={active}
-                    Icon={<EndpointIcon />}
-                />);
-            }
-            default: {
-                return null;
-            }
-        }
-    }
-
-
-    /**
      *
      *
      * @param {*} newAPI
@@ -354,19 +327,12 @@ class Details extends Component {
             location: { pathname }, // nested destructuring
         } = this.props;
 
-        let typeInPath = 'apis';
-        let apiType = Api.CONSTS.API;
-
-        if (isAPIProduct) {
-            typeInPath = 'api-products';
-            apiType = Api.CONSTS.APIProduct;
-        }
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
             return <PageNotFound location={pageLocation} />;
         }
 
-        const redirectUrl = '/' + typeInPath + '/' + match.params.api_uuid + '/' + active;
+        const redirectUrl = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + match.params.api_uuid + '/' + active;
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFoundMessageText = defineMessages({
@@ -398,7 +364,7 @@ class Details extends Component {
             <React.Fragment>
                 <ApiContext.Provider value={this.state}>
                     <div className={classes.LeftMenu}>
-                        <Link to={'/' + typeInPath + '/'}>
+                        <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
                             <div className={classes.leftLInkMain}>
                                 <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
                             </div>
@@ -420,7 +386,18 @@ class Details extends Component {
                             active={active}
                             Icon={<ConfigurationIcon />}
                         />
-                        {this.getEndpointsMenuItem(apiType)}
+                        {isAPIProduct ?
+                            null :
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.endpoints',
+                                    defaultMessage: 'endpoints',
+                                })}
+                                handleMenuSelect={this.handleMenuSelect}
+                                active={active}
+                                Icon={<EndpointIcon />}
+                            />
+                        }
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.api.definition',
@@ -448,15 +425,18 @@ class Details extends Component {
                             active={active}
                             Icon={<LifeCycleIcon />}
                         />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.left.menu.scope',
-                                defaultMessage: 'scopes',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<ScopesIcon />}
-                        />
+                        {isAPIProduct ?
+                            null :
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.left.menu.scope',
+                                    defaultMessage: 'scopes',
+                                })}
+                                handleMenuSelect={this.handleMenuSelect}
+                                active={active}
+                                Icon={<ScopesIcon />}
+                            />
+                        }
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.documents',
@@ -510,11 +490,11 @@ class Details extends Component {
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route
-                                    path={Details.subPaths.OVERVIEW}
+                                    path={Details.subPaths.OVERVIEW_PRODUCT}
                                     component={() => <Overview api={api} />}
                                 />
                                 <Route
-                                    path={Details.subPaths.OVERVIEW_PRODUCT}
+                                    path={Details.subPaths.OVERVIEW}
                                     component={() => <Overview api={api} />}
                                 />
                                 <Route

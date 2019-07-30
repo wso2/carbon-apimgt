@@ -101,7 +101,6 @@ class APIListing extends Component {
             notFound={notFound}
             listType={listType}
             updateAPIsList={this.updateAPIsList}
-            isAPIProduct={false}
         />);
     }
 }
