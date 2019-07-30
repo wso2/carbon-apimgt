@@ -19,7 +19,6 @@ import PropTypes from 'prop-types';
 import {
     Grid,
     TextField,
-    withStyles,
     MenuItem,
     InputLabel,
     Select,
