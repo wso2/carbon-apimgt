@@ -71,7 +71,7 @@ const Configurations = {
                     ],
                 },
                 landingPage: {
-                    active: true,
+                    active: false,
                     carousel: {
                         active: true,
                         slides: [
@@ -89,6 +89,42 @@ const Configurations = {
                             },
                             {
                                 src: '/store-new/site/public/images/landing/03.jpg',
+                                title: 'Nam vel ex <span>feugiat</span> nunc laoreet',
+                                content:
+                                    'Nam vel ex feugiat nunc laoreet elementum. Duis sed nibh condimentum, posuere risus a, mollis diam. Vivamus ultricies, augue id pulvinar semper, mauris lorem bibendum urna, eget tincidunt quam ex ut diam.',
+                            },
+                        ],
+                    },
+                    listByTag: {
+                        active: true,
+                        content: [
+                            {
+                                tag: 'Finance',
+                                title: 'Checkout our Finance APIs',
+                                description:
+                                    'We offers online payment solutions and has more than 123 million customers worldwide. The WSO2 Finane API makes powerful functionality available to developers by exposing various features of our platform. Functionality includes but is not limited to invoice management, transaction processing and account management.',
+                                maxCount: 5,
+                            },
+                            {
+                                tag: 'weather',
+                                title: 'Checkout our Weather APIs',
+                                description:
+                                    'We offers online payment solutions and has more than 123 million customers worldwide. The WSO2 Finane API makes powerful functionality available to developers by exposing various features of our platform. Functionality includes but is not limited to invoice management, transaction processing and account management.',
+                                maxCount: 5,
+                            },
+                        ],
+                    },
+                    parallax: {
+                        active: true,
+                        content: [
+                            {
+                                src: '/store-new/site/public/images/landing/parallax1.jpg',
+                                title: 'Lorem <span>ipsum</span> dolor sit amet',
+                                content:
+                                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer felis lacus, placerat vel condimentum in, porta a urna. Suspendisse dolor diam, vestibulum at molestie dapibus, semper eget ex. Morbi sit amet euismod tortor.',
+                            },
+                            {
+                                src: '/store-new/site/public/images/landing/parallax2.jpg',
                                 title: 'Nam vel ex <span>feugiat</span> nunc laoreet',
                                 content:
                                     'Nam vel ex feugiat nunc laoreet elementum. Duis sed nibh condimentum, posuere risus a, mollis diam. Vivamus ultricies, augue id pulvinar semper, mauris lorem bibendum urna, eget tincidunt quam ex ut diam.',
