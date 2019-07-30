@@ -23,7 +23,8 @@ import {
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import APIProduct from 'AppData/APIProduct';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -179,12 +180,28 @@ class Details extends React.Component {
         this.updateSubscriptionData = () => {
             const user = AuthManager.getUser();
 
-            const api = new Api();
-            const promised_api = api.getAPIById(this.api_uuid);
-            if(!user){
-                promised_api.then((response) => {
+            const { path } = this.props;
+
+            let promisedAPI = null;
+            let existingSubscriptions = null;
+            let promisedApplications = null;
+
+            if (path === '/apis') {
+                const api = new Api();
+                promisedAPI = api.getAPIById(this.api_uuid);
+                existingSubscriptions = api.getSubscriptions(this.api_uuid, null);
+                promisedApplications = api.getAllApplications();
+            } else if (path === '/api-products') {
+                const apiProducts = new APIProduct();
+                promisedAPI = apiProducts.getAPIProductById(this.api_uuid);
+                existingSubscriptions = apiProducts.getSubscriptions(this.api_uuid, null);
+                promisedApplications = apiProducts.getAllApplications();
+            }
+
+            if (!user) {
+                promisedAPI.then((response) => {
                     this.setState({ api: response.body });
-                }).catch( (error) => {
+                }).catch((error) => {
                     if (process.env.NODE_ENV !== 'production') {
                         console.log(error);
                     }
@@ -195,10 +212,9 @@ class Details extends React.Component {
                 });
                 return;
             }
-            const existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
-            const promised_applications = api.getAllApplications();
 
-            Promise.all([promised_api, existing_subscriptions, promised_applications])
+
+            Promise.all([promisedAPI, existingSubscriptions, promisedApplications])
                 .then((response) => {
                     const [api, subscriptions, applications] = response.map(data => data.obj);
                     // Getting the policies from api details
@@ -329,12 +345,13 @@ class Details extends React.Component {
     render() {
         this.updateActiveLink();
 
-        const { classes, theme, intl, } = this.props;
+        const { classes, theme, intl } = this.props;
         const { active, api } = this.state;
         const redirect_url = '/apis/' + this.props.match.params.api_uuid + '/overview';
         const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
-        return ( api ? <ApiContext.Provider value={this.state}>
+        return (api ? (
+            <ApiContext.Provider value={this.state}>
                 <style>{globalStyle}</style>
                 <div className={classes.LeftMenu}>
                     <Link to='/apis' className={classes.leftLInkMainWrapper}>
@@ -358,7 +375,8 @@ class Details extends React.Component {
                     <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
-            </ApiContext.Provider> : <div class="apim-dual-ring"></div>
+            </ApiContext.Provider>
+        ) : <div className='apim-dual-ring' />
         );
     }
 }

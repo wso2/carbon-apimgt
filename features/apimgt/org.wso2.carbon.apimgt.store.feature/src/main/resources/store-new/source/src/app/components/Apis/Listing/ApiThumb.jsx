@@ -110,9 +110,10 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     componentDidMount() {
-        const api = new Api();
-        const promised_rating = api.getRatingFromUser(this.props.api.id, null);
-        promised_rating.then((response) => {
+        const apiClient = new Api();
+        const { api } = this.props;
+        const promisedRating = apiClient.getRatingFromUser(api.id, null);
+        promisedRating.then((response) => {
             this.setState({ rating: response.obj.userRating });
         });
     }
@@ -124,19 +125,20 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     render() {
-        const details_link = '/apis/' + this.props.api.id;
-        const { api, classes, theme } = this.props;
+        const { path, api } = this.props;
+        const detailsLink = path + '/' + api.id;
+        const { classes, theme } = this.props;
         const { imageThumbnail } = theme.custom;
         const {
             name, version, context, provider,
-        } = this.props.api;
+        } = api;
         const { rating } = this.state;
         const starColor = theme.palette.getContrastText(theme.custom.imageThumbnail.contentBackgroundColor);
         const imageWidth = theme.custom.imageThumbnail.width;
         const defaultImage = theme.custom.imageThumbnail.defaultApiImage;
         return (
             <Grid item xs={12} sm={6} md={4} lg={3} xl={3} className={classes.thumbWrapper}>
-                <Link to={details_link} className={classes.imageWrapper}>
+                <Link to={detailsLink} className={classes.imageWrapper}>
                     {!defaultImage && <ImageGenerator api={api} width={imageWidth} />}
                     {defaultImage && <img src={defaultImage} />}
                 </Link>
@@ -146,7 +148,7 @@ class ApiThumb extends React.Component {
                         [classes.imageOverlap]: imageThumbnail.contentPictureOverlap,
                     })}
                 >
-                    <Link to={details_link} className={classes.imageWrapper}>
+                    <Link to={detailsLink} className={classes.imageWrapper}>
                         <Typography className={classes.thumbHeader} variant='display1' gutterBottom onClick={this.handleRedirectToAPIOverview} title={name}>
                             {name}
                         </Typography>
@@ -184,8 +186,8 @@ class ApiThumb extends React.Component {
 }
 
 ApiThumb.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(ApiThumb);

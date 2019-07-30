@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Component } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
@@ -23,11 +23,7 @@ import {
     ListItemIcon, Drawer, List, withStyles, ListItem, ListItemText,
 } from '@material-ui/core';
 import CustomIcon from '../../Shared/CustomIcon';
-/**
- *
- *
- * @param {*} theme
- */
+
 const styles = theme => ({
     list: {
         width: theme.custom.drawerWidth,
@@ -39,13 +35,19 @@ const styles = theme => ({
         color: theme.palette.getContrastText(theme.palette.background.drawer),
     },
 });
+
 /**
- *
+ * API Store side navigation bar
  *
  * @class GlobalNavBar
- * @extends {Component}
+ * @extends {PureComponent}
  */
-class GlobalNavBar extends Component {
+class GlobalNavBar extends React.PureComponent {
+    /**
+     * @inheritdoc
+     * @returns {React.PureComponent} @inheritdoc
+     * @memberof GlobalNavBar
+     */
     render() {
         const {
             open, toggleGlobalNavBar, classes, theme, intl,
@@ -63,14 +65,28 @@ class GlobalNavBar extends Component {
         const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
         return (
             <div>
-                <Drawer className={classes.drawerStyles} PaperProps={paperStyles} SlideProps={commonStyle} ModalProps={commonStyle} BackdropProps={commonStyle} open={open} onClose={toggleGlobalNavBar}>
+                <Drawer
+                    className={classes.drawerStyles}
+                    PaperProps={paperStyles}
+                    SlideProps={commonStyle}
+                    ModalProps={commonStyle}
+                    BackdropProps={commonStyle}
+                    open={open}
+                    onClose={toggleGlobalNavBar}
+                >
                     <div tabIndex={0} role='button' onClick={toggleGlobalNavBar} onKeyDown={toggleGlobalNavBar}>
                         <div className={classes.list}>
                             <List>
                                 <Link to='/apis'>
                                     <ListItem button>
                                         <ListItemIcon>
-                                            <CustomIcon width={32} height={32} icon='api' className={classes.listText} strokeColor={strokeColor} />
+                                            <CustomIcon
+                                                width={32}
+                                                height={32}
+                                                icon='api'
+                                                className={classes.listText}
+                                                strokeColor={strokeColor}
+                                            />
                                         </ListItemIcon>
                                         <ListItemText
                                             classes={{ primary: classes.listText }}
@@ -81,10 +97,36 @@ class GlobalNavBar extends Component {
                                         />
                                     </ListItem>
                                 </Link>
+                                <Link to='/api-products'>
+                                    <ListItem button>
+                                        <ListItemIcon>
+                                            <CustomIcon
+                                                width={32}
+                                                height={32}
+                                                icon='api'
+                                                className={classes.listText}
+                                                strokeColor={strokeColor}
+                                            />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            classes={{ primary: classes.listText }}
+                                            primary={intl.formatMessage({
+                                                id: 'Base.Generic.GlobalNavbar.menu.apiproducts',
+                                                defaultMessage: 'API Products',
+                                            })}
+                                        />
+                                    </ListItem>
+                                </Link>
                                 <Link to='/applications'>
                                     <ListItem button>
                                         <ListItemIcon>
-                                            <CustomIcon width={32} height={32} icon='applications' className={classes.listText} strokeColor={strokeColor} />
+                                            <CustomIcon
+                                                width={32}
+                                                height={32}
+                                                icon='applications'
+                                                className={classes.listText}
+                                                strokeColor={strokeColor}
+                                            />
                                         </ListItemIcon>
                                         <ListItemText
                                             classes={{ primary: classes.listText }}

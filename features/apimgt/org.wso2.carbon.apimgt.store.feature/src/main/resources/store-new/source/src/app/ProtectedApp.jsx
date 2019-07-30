@@ -232,6 +232,7 @@ export default class ProtectedApp extends Component {
                         <Switch>
                             <Redirect exact from='/' to='/apis' />
                             <Route path='/apis' component={Apis} />
+                            <Route path='/api-products' component={Apis} />
                             {isAuthenticated ? (
                                 <React.Fragment>
                                     <Route

@@ -18,68 +18,16 @@
 
 import React from 'react';
 import qs from 'qs';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import List from '@material-ui/icons/List';
-import { FormattedMessage } from 'react-intl';
-import GridIcon from '@material-ui/icons/GridOn';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Loading from '../../Base/Loading/Loading';
 import API from '../../../data/api';
-import ApiThumb from './ApiThumb';
-import CustomIcon from '../../Shared/CustomIcon';
-import ApiTableView from './ApiTableView';
+import CommonListing from './CommonListing';
 
-/**
- *
- *
- * @param {*} theme
- */
-const styles = theme => ({
-    rightIcon: {
-        marginLeft: theme.spacing.unit,
-    },
-    button: {
-        margin: theme.spacing.unit,
-        marginBottom: 0,
-    },
-    buttonRight: {
-        alignSelf: 'flex-end',
-        display: 'flex',
-    },
-    ListingWrapper: {
-        paddingTop: 10,
-        paddingLeft: 35,
-        width: theme.custom.contentAreaWidth,
-    },
-    root: {
-        height: 70,
-        background: theme.palette.background.paper,
-        borderBottom: 'solid 1px ' + theme.palette.grey.A200,
-        display: 'flex',
-    },
-    mainIconWrapper: {
-        paddingTop: 13,
-        paddingLeft: 35,
-        paddingRight: 20,
-    },
-    mainTitle: {
-        paddingTop: 10,
-    },
-    mainTitleWrapper: {
-        flexGrow: 1,
-    },
-    content: {
-        flexGrow: 1,
-    },
-});
+
 /**
  *
  *
@@ -188,8 +136,8 @@ class Listing extends React.Component {
             value: 1,
             order: 'asc',
             orderBy: 'name',
+            path: props.match.path,
         };
-        this.state.listType = this.props.theme.custom.defaultApiView;
     }
 
     /**
@@ -248,68 +196,16 @@ class Listing extends React.Component {
      * @memberof Listing
      */
     render() {
-        if (this.state.notFound) {
+        const { notFound } = this.state;
+
+        if (notFound) {
             return <ResourceNotFound />;
         }
 
-        const { order, orderBy, apis } = this.state;
-        const { theme, classes } = this.props;
-        const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
+        const { apis, path } = this.state;
 
-        return (
-            <main className={classes.content}>
-                <div className={classes.root}>
-                    <div className={classes.mainIconWrapper}>
-                        <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
-                    </div>
-                    <div className={classes.mainTitleWrapper}>
-                        <Typography variant='display1' className={classes.mainTitle}>
-                            <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
-                        </Typography>
-                        {this.state.apis && (
-                            <Typography variant='caption' gutterBottom align='left'>
-                                <FormattedMessage defaultMessage='Displaying' id='Apis.Listing.Listing.displaying' />
-                                {this.state.apis.count}
-                                <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.count' />
-                            </Typography>
-                        )}
-                    </div>
-                    <div className={classes.buttonRight}>
-                        <IconButton className={classes.button} onClick={() => this.setListType('list')}>
-                            <List color={this.state.listType === 'list' ? 'primary' : 'default'} />
-                        </IconButton>
-                        <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
-                            <GridIcon color={this.state.listType === 'grid' ? 'primary' : 'default'} />
-                        </IconButton>
-                    </div>
-                </div>
-
-                <Grid container spacing={0} justify='center'>
-                    <Grid item xs={12}>
-                        {this.state.apis ? (
-                            this.state.listType === 'grid' ? (
-                                <Grid container className={classes.ListingWrapper}>
-                                    {this.state.apis.list.map(api => (
-                                        <ApiThumb api={api} key={api.id} />
-                                    ))}
-                                </Grid>
-                            ) : (
-                                <React.Fragment>
-                                    <ApiTableView apis={apis.list} />
-                                </React.Fragment>
-                            )
-                        ) : (
-                            <Loading />
-                        )}
-                    </Grid>
-                </Grid>
-            </main>
-        );
+        return <CommonListing apis={apis} path={path} />;
     }
 }
 
-Listing.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
-};
-export default withStyles(styles, { withTheme: true })(Listing);
+export default (Listing);

@@ -16,22 +16,42 @@
  * under the License.
  */
 
-import React from 'react'
-import {Route, Switch} from 'react-router-dom'
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
 
-import Listing from './Listing/Listing'
-import Details from './Details/index'
-import {PageNotFound} from '../Base/Errors'
+import Listing from './Listing/Listing';
+import APIProductListing from './Listing/APIProductListing';
+import Details from './Details/index';
+import { PageNotFound } from '../Base/Errors';
 
-
-class Apis extends React.Component {
+/**
+ * Default API Store overview page
+ *
+ * @class Apis
+ * @extends {PureComponent}
+ */
+class Apis extends React.PureComponent {
+    /**
+     * @inheritdoc
+     * @returns {React.PureComponent} @inheritdoc
+     * @memberof Apis
+     */
     render() {
         return (
             <Switch>
-                <Route exact path={"/apis"} component={Listing}/>
-                <Route path={"/apis/:api_uuid/"} render={ props => (
-                    <Details {...props} />)}/>
-                <Route component={PageNotFound}/>
+                <Route exact path='/apis' component={Listing} />
+                <Route exact path='/api-products' component={APIProductListing} />
+                <Route
+                    path='/apis/:api_uuid/'
+                    render={props => (
+                        <Details {...props} path='/apis' />)}
+                />
+                <Route
+                    path='/api-products/:api_uuid/'
+                    render={props => (
+                        <Details {...props} path='/api-products' />)}
+                />
+                <Route component={PageNotFound} />
             </Switch>
         );
     }
