@@ -39,20 +39,16 @@ import CheckCircle from '@material-ui/icons/CheckCircle';
 import Cloud from '@material-ui/icons/Cloud';
 import Build from '@material-ui/icons/Build';
 import Update from '@material-ui/icons/Update';
-import LinkIcon from '@material-ui/icons/Link';
-import Button from '@material-ui/core/Button';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ImageGenerator from '../Listing/ImageGenerator';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Loading from '../../Base/Loading/Loading';
 import { ApiContext } from './ApiContext';
 
 /**
@@ -173,7 +169,6 @@ const styles = theme => ({
         height: '40px',
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
         alignItems: 'center',
-        left: '0',
         paddingLeft: '5px',
         paddingRight: '5px',
     },
@@ -397,23 +392,24 @@ class StarRatingBar extends React.Component {
      */
     render() {
         const { classes, theme } = this.props;
-        if (!this.state.rating) {
+        const { rating: rate, showRateNow, dummyRateValue } = this.state;
+        if (!rate) {
             return <span />;
         }
         return (
             <React.Fragment>
-                {this.state.rating.count > 0 ? (
+                {rate.count > 0 ? (
                     <React.Fragment>
                         <StarRate className={classes.starRate} />
                         <div className={classes.ratingSummery}>
                             <div className={classes.userRating}>
-                                <Typography variant='display1'>{this.state.rating.avgRating * 2}</Typography>
+                                <Typography variant='display1'>{rate.avgRating * 2}</Typography>
                                 <Typography variant='caption'>/10</Typography>
                             </div>
                             <Typography variant='caption' gutterBottom align='left'>
-                                {this.state.rating.count}
+                                {rate.count}
                                 {' '}
-                                {this.state.rating.count == 1 ? 'user' : 'users'}
+                                {rate.count === 1 ? 'user' : 'users'}
                             </Typography>
                         </div>
                     </React.Fragment>
@@ -426,14 +422,14 @@ class StarRatingBar extends React.Component {
                     )}
                 <VerticalDivider height={32} />
                 <div className={classes.ratingBoxWrapper}>
-                    {this.state.showRateNow && (
+                    {showRateNow && (
                         <div className={classes.ratingBox}>
                             <HighlightOff />
                             <VerticalDivider height={32} />
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
                                 <StarRate
                                     color={
-                                        i <= this.state.rating.userRating * 2 || i <= this.state.dummyRateValue
+                                        i <= rate.userRating * 2 || i <= dummyRateValue
                                             ? 'primary'
                                             : ''
                                     }
@@ -444,11 +440,11 @@ class StarRatingBar extends React.Component {
                             ))}
                         </div>
                     )}
-                    {this.state.rating.userRating ? (
+                    {rate.userRating ? (
                         <React.Fragment>
                             <StarRate className={classes.starRateMy} onClick={this.showRateBox} />
                             <div className={classes.ratingSummery} onClick={this.showRateBox}>
-                                <Typography variant='display1'>{this.state.rating.userRating * 2}</Typography>
+                                <Typography variant='display1'>{rate.userRating * 2}</Typography>
                                 <Typography variant='caption' gutterBottom align='left'>
                                     <FormattedMessage id='Apis.Details.InfoBar.you' defaultMessage='YOU' />
                                 </Typography>
@@ -685,70 +681,275 @@ class InfoBar extends React.Component {
                                                     </ExpansionPanelSummary>
                                                     <ExpansionPanelDetails>
                                                         <Grid container item xs={12} spacing={16}>
-                                                            <Typography className={classes.heading}>
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.InfoBar.gateway.urls'
-                                                                    defaultMessage='Gateway URLs'
-                                                                />
-                                                            </Typography>
-                                                            <Grid item xs={12} >
-                                                                <TextField
-                                                                    defaultValue={endpoint.environmentURLs.http}
-                                                                    id='bootstrap-input'
-                                                                    InputProps={{
-                                                                        disableUnderline: true,
-                                                                        classes: {
-                                                                            root: classes.bootstrapRoot,
-                                                                            input: classes.bootstrapInput,
-                                                                        },
-                                                                    }}
-                                                                    InputLabelProps={{
-                                                                        shrink: true,
-                                                                        className: classes.bootstrapFormLabel,
-                                                                    }}
-                                                                />
-                                                                <Tooltip
-                                                                    title={prodUrlCopied ?
-                                                                        'Copied' : 'Copy to clipboard'}
-                                                                    placement='right'
-                                                                >
-                                                                    <CopyToClipboard
-                                                                        text={epUrl}
-                                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                            {(endpoint.URLs.http !== null || endpoint.URLs.https !== null ||
+                                                                endpoint.URLs.ws !== null || endpoint.URLs.wss !== null) && (
+                                                                    <Typography className={classes.heading}>
+                                                                        <FormattedMessage
+                                                                            id='Apis.Details.InfoBar.gateway.urls'
+                                                                            defaultMessage='Gateway URLs'
+                                                                        />
+                                                                    </Typography>
+                                                                )}
+                                                            {endpoint.URLs.http !== null && (
+                                                                <Grid item xs={12} >
+                                                                    <TextField
+                                                                        defaultValue={endpoint.URLs.http}
+                                                                        id='bootstrap-input'
+                                                                        InputProps={{
+                                                                            disableUnderline: true,
+                                                                            classes: {
+                                                                                root: classes.bootstrapRoot,
+                                                                                input: classes.bootstrapInput,
+                                                                            },
+                                                                        }}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                            className: classes.bootstrapFormLabel,
+                                                                        }}
+                                                                    />
+                                                                    <Tooltip
+                                                                        title={prodUrlCopied ?
+                                                                            'Copied' : 'Copy to clipboard'}
+                                                                        placement='right'
                                                                     >
-                                                                        <FileCopy color='secondary' />
-                                                                    </CopyToClipboard>
-                                                                </Tooltip>
-                                                            </Grid>
-                                                            <Grid item xs={12} >
-                                                                <TextField
-                                                                    defaultValue={endpoint.environmentURLs.https}
-                                                                    id='bootstrap-input'
-                                                                    InputProps={{
-                                                                        disableUnderline: true,
-                                                                        classes: {
-                                                                            root: classes.bootstrapRoot,
-                                                                            input: classes.bootstrapInput,
-                                                                        },
-                                                                    }}
-                                                                    InputLabelProps={{
-                                                                        shrink: true,
-                                                                        className: classes.bootstrapFormLabel,
-                                                                    }}
-                                                                />
-                                                                <Tooltip
-                                                                    title={prodUrlCopied ?
-                                                                        'Copied' : 'Copy to clipboard'}
-                                                                    placement='right'
-                                                                >
-                                                                    <CopyToClipboard
-                                                                        text={epUrl}
-                                                                        onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        <CopyToClipboard
+                                                                            text={epUrl}
+                                                                            onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        >
+                                                                            <FileCopy color='secondary' />
+                                                                        </CopyToClipboard>
+                                                                    </Tooltip>
+                                                                </Grid>
+                                                            )}
+                                                            {endpoint.URLs.https !== null && (
+                                                                <Grid item xs={12} >
+                                                                    <TextField
+                                                                        defaultValue={endpoint.URLs.https}
+                                                                        id='bootstrap-input'
+                                                                        InputProps={{
+                                                                            disableUnderline: true,
+                                                                            classes: {
+                                                                                root: classes.bootstrapRoot,
+                                                                                input: classes.bootstrapInput,
+                                                                            },
+                                                                        }}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                            className: classes.bootstrapFormLabel,
+                                                                        }}
+                                                                    />
+                                                                    <Tooltip
+                                                                        title={prodUrlCopied ?
+                                                                            'Copied' : 'Copy to clipboard'}
+                                                                        placement='right'
                                                                     >
-                                                                        <FileCopy color='secondary' />
-                                                                    </CopyToClipboard>
-                                                                </Tooltip>
-                                                            </Grid></Grid>
+                                                                        <CopyToClipboard
+                                                                            text={epUrl}
+                                                                            onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        >
+                                                                            <FileCopy color='secondary' />
+                                                                        </CopyToClipboard>
+                                                                    </Tooltip>
+                                                                </Grid>
+                                                            )}
+                                                            {endpoint.URLs.ws !== null && (
+                                                                <Grid item xs={12} >
+                                                                    <TextField
+                                                                        defaultValue={endpoint.URLs.http}
+                                                                        id='bootstrap-input'
+                                                                        InputProps={{
+                                                                            disableUnderline: true,
+                                                                            classes: {
+                                                                                root: classes.bootstrapRoot,
+                                                                                input: classes.bootstrapInput,
+                                                                            },
+                                                                        }}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                            className: classes.bootstrapFormLabel,
+                                                                        }}
+                                                                    />
+                                                                    <Tooltip
+                                                                        title={prodUrlCopied ?
+                                                                            'Copied' : 'Copy to clipboard'}
+                                                                        placement='right'
+                                                                    >
+                                                                        <CopyToClipboard
+                                                                            text={epUrl}
+                                                                            onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        >
+                                                                            <FileCopy color='secondary' />
+                                                                        </CopyToClipboard>
+                                                                    </Tooltip>
+                                                                </Grid>
+                                                            )}
+                                                            {endpoint.URLs.wss !== null && (
+                                                                <Grid item xs={12} >
+                                                                    <TextField
+                                                                        defaultValue={endpoint.URLs.http}
+                                                                        id='bootstrap-input'
+                                                                        InputProps={{
+                                                                            disableUnderline: true,
+                                                                            classes: {
+                                                                                root: classes.bootstrapRoot,
+                                                                                input: classes.bootstrapInput,
+                                                                            },
+                                                                        }}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                            className: classes.bootstrapFormLabel,
+                                                                        }}
+                                                                    />
+                                                                    <Tooltip
+                                                                        title={prodUrlCopied ?
+                                                                            'Copied' : 'Copy to clipboard'}
+                                                                        placement='right'
+                                                                    >
+                                                                        <CopyToClipboard
+                                                                            text={epUrl}
+                                                                            onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        >
+                                                                            <FileCopy color='secondary' />
+                                                                        </CopyToClipboard>
+                                                                    </Tooltip>
+                                                                </Grid>
+                                                            )}
+                                                            {(endpoint.defaultVersionURLs.http !== null
+                                                                || endpoint.defaultVersionURLs.https !== null
+                                                                || endpoint.defaultVersionURLs.ws !== null
+                                                                || endpoint.defaultVersionURLs.wss !== null) && (
+                                                                    <Typography className={classes.heading}>
+                                                                        <FormattedMessage
+                                                                            id='Apis.Details.InfoBar.gateway.urls'
+                                                                            defaultMessage='Default Gateway URLs'
+                                                                        />
+                                                                    </Typography>
+                                                                )}
+                                                            {endpoint.defaultVersionURLs.http !== null && (
+                                                                <Grid item xs={12} >
+                                                                    <TextField
+                                                                        defaultValue={endpoint.defaultVersionURLs.http}
+                                                                        id='bootstrap-input'
+                                                                        InputProps={{
+                                                                            disableUnderline: true,
+                                                                            classes: {
+                                                                                root: classes.bootstrapRoot,
+                                                                                input: classes.bootstrapInput,
+                                                                            },
+                                                                        }}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                            className: classes.bootstrapFormLabel,
+                                                                        }}
+                                                                    />
+                                                                    <Tooltip
+                                                                        title={prodUrlCopied ?
+                                                                            'Copied' : 'Copy to clipboard'}
+                                                                        placement='right'
+                                                                    >
+                                                                        <CopyToClipboard
+                                                                            text={epUrl}
+                                                                            onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        >
+                                                                            <FileCopy color='secondary' />
+                                                                        </CopyToClipboard>
+                                                                    </Tooltip>
+                                                                </Grid>
+                                                            )}
+                                                            {endpoint.defaultVersionURLs.https !== null && (
+                                                                <Grid item xs={12} >
+                                                                    <TextField
+                                                                        defaultValue={endpoint.defaultVersionURLs.https}
+                                                                        id='bootstrap-input'
+                                                                        InputProps={{
+                                                                            disableUnderline: true,
+                                                                            classes: {
+                                                                                root: classes.bootstrapRoot,
+                                                                                input: classes.bootstrapInput,
+                                                                            },
+                                                                        }}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                            className: classes.bootstrapFormLabel,
+                                                                        }}
+                                                                    />
+                                                                    <Tooltip
+                                                                        title={prodUrlCopied ?
+                                                                            'Copied' : 'Copy to clipboard'}
+                                                                        placement='right'
+                                                                    >
+                                                                        <CopyToClipboard
+                                                                            text={epUrl}
+                                                                            onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        >
+                                                                            <FileCopy color='secondary' />
+                                                                        </CopyToClipboard>
+                                                                    </Tooltip>
+                                                                </Grid>
+                                                            )}
+                                                            {endpoint.defaultVersionURLs.ws !== null && (
+                                                                <Grid item xs={12} >
+                                                                    <TextField
+                                                                        defaultValue={endpoint.defaultVersionURLs.ws}
+                                                                        id='bootstrap-input'
+                                                                        InputProps={{
+                                                                            disableUnderline: true,
+                                                                            classes: {
+                                                                                root: classes.bootstrapRoot,
+                                                                                input: classes.bootstrapInput,
+                                                                            },
+                                                                        }}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                            className: classes.bootstrapFormLabel,
+                                                                        }}
+                                                                    />
+                                                                    <Tooltip
+                                                                        title={prodUrlCopied ?
+                                                                            'Copied' : 'Copy to clipboard'}
+                                                                        placement='right'
+                                                                    >
+                                                                        <CopyToClipboard
+                                                                            text={epUrl}
+                                                                            onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        >
+                                                                            <FileCopy color='secondary' />
+                                                                        </CopyToClipboard>
+                                                                    </Tooltip>
+                                                                </Grid>
+                                                            )}
+                                                            {endpoint.defaultVersionURLs.wss !== null && (
+                                                                <Grid item xs={12} >
+                                                                    <TextField
+                                                                        defaultValue={endpoint.defaultVersionURLs.wss}
+                                                                        id='bootstrap-input'
+                                                                        InputProps={{
+                                                                            disableUnderline: true,
+                                                                            classes: {
+                                                                                root: classes.bootstrapRoot,
+                                                                                input: classes.bootstrapInput,
+                                                                            },
+                                                                        }}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                            className: classes.bootstrapFormLabel,
+                                                                        }}
+                                                                    />
+                                                                    <Tooltip
+                                                                        title={prodUrlCopied ?
+                                                                            'Copied' : 'Copy to clipboard'}
+                                                                        placement='right'
+                                                                    >
+                                                                        <CopyToClipboard
+                                                                            text={epUrl}
+                                                                            onCopy={() => this.onCopy('prodUrlCopied')}
+                                                                        >
+                                                                            <FileCopy color='secondary' />
+                                                                        </CopyToClipboard>
+                                                                    </Tooltip>
+                                                                </Grid>
+                                                            )}
+                                                        </Grid>
                                                     </ExpansionPanelDetails>
                                                 </ExpansionPanel>
                                             </Grid>
