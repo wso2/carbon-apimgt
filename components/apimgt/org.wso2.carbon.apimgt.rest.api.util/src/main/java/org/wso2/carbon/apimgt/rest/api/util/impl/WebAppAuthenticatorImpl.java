@@ -153,7 +153,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                             }
                             return true;
                         }
-                    } else if (((URITemplate) template).getAllScopes() != null) {
+                    } else if (!((URITemplate) template).getAllScopes().isEmpty()) {
                         List<Scope> scopesList = new ArrayList<Scope>() {{
                             add(((URITemplate) template).getScopes());
                         }};
