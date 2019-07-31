@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -91,7 +91,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
-    private Swagger swagger;
+    private OpenAPI openAPI;
 
     public String getApiUUID() {
         return apiUUID;
@@ -307,20 +307,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
-        // Read swagger from local entry
-        if (swagger == null && apiUUID != null) {
+        // Read OpenAPI from local entry
+        if (openAPI == null && apiUUID != null) {
             synchronized (this) {
-                if (swagger == null) {
+                if (openAPI == null) {
                     Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID);
                     if (localEntryObj != null) {
-                        SwaggerParser parser = new SwaggerParser();
-                        swagger = parser.parse(localEntryObj.getValue().toString());
+                        OpenAPIParser parser = new OpenAPIParser();
+                        openAPI = parser.readContents(localEntryObj.getValue().toString(), null, null).getOpenAPI();
                     }
                 }
             }
         }
-        // Add swagger to message context
-        messageContext.setProperty(APIMgtGatewayConstants.API_SWAGGER, swagger);
+        // Add OpenAPI to message context
+        messageContext.setProperty(APIMgtGatewayConstants.API_SWAGGER, openAPI);
 
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {

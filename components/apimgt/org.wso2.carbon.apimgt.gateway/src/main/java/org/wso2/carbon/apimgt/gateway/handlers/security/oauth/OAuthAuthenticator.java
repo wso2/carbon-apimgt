@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
-import io.swagger.models.Swagger;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -33,19 +33,17 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
-import org.wso2.carbon.apimgt.gateway.utils.SwaggerUtils;
+import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -105,7 +103,7 @@ public class OAuthAuthenticator implements Authenticator {
     @MethodStats
     public AuthenticationResponse authenticate(MessageContext synCtx) {
         boolean isJwtToken = false;
-        Swagger swagger = null;
+        OpenAPI openAPI = null;
         String apiKey = null;
         boolean defaultVersionInvoked = false;
         TracingSpan getClientDomainSpan = null;
@@ -203,19 +201,19 @@ public class OAuthAuthenticator implements Authenticator {
             // Find the resource authentication scheme based on the token type
             if (isJwtToken) {
                 // If a JWT token
-                swagger = (Swagger) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
-                if (swagger == null) {
+                openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
+                if (openAPI == null) {
                     log.debug("Swagger is missing in the gateway. " +
                             "Therefore, JWT authentication cannot be performed.");
                     return new AuthenticationResponse(false, isMandatory, true,
                             APISecurityConstants.API_AUTH_MISSING_SWAGGER,
                             "JWT authentication cannot be performed.");
                 }
-                authenticationScheme = SwaggerUtils.getResourceAuthenticationScheme(swagger, synCtx);
+                authenticationScheme = OpenAPIUtils.getResourceAuthenticationScheme(openAPI, synCtx);
                 VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
                 verbInfoDTO.setHttpVerb(httpMethod);
                 verbInfoDTO.setAuthType(authenticationScheme);
-                verbInfoDTO.setThrottling(SwaggerUtils.getResourceThrottlingTier(swagger, synCtx));
+                verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
             } else {
                 // If an OAuth token
@@ -297,7 +295,7 @@ public class OAuthAuthenticator implements Authenticator {
             //Start JWT token validation
             if (isJwtToken) {
                 try {
-                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, swagger);
+                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, openAPI);
                     APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
                     log.debug("User is authorized using JWT token to access the resource.");
                     return new AuthenticationResponse(true, isMandatory, false, 0, null);

@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.utils;
 
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -25,18 +25,18 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
 
-public class SwaggerUtils {
+public class OpenAPIUtils {
 
     /**
      * Return the resource authentication scheme of the API resource.
      *
-     * @param swagger swagger of the API
+     * @param openAPI OpenAPI of the API
      * @param synCtx  The message containing resource request
      * @return the resource authentication scheme
      */
-    public static String getResourceAuthenticationScheme(Swagger swagger, MessageContext synCtx) {
+    public static String getResourceAuthenticationScheme(OpenAPI openAPI, MessageContext synCtx) {
         String authType = null;
-        Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+        Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
         if (vendorExtensions != null) {
             authType = (String) vendorExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
         }
@@ -61,12 +61,12 @@ public class SwaggerUtils {
     /**
      * Return the scopes bound to the API resource.
      *
-     * @param swagger swagger of the API
+     * @param openAPI OpenAPI of the API
      * @param synCtx  The message containing resource request
      * @return the scopes
      */
-    public static String getScopesOfResource(Swagger swagger, MessageContext synCtx) {
-        Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+    public static String getScopesOfResource(OpenAPI openAPI, MessageContext synCtx) {
+        Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
         if (vendorExtensions != null) {
             return  (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
         }
@@ -76,13 +76,13 @@ public class SwaggerUtils {
     /**
      * Return the throttling tier of the API resource.
      *
-     * @param swagger swagger of the API
+     * @param openAPI OpenAPI of the API
      * @param synCtx  The message containing resource request
      * @return the resource throttling tier
      */
-    public static String getResourceThrottlingTier(Swagger swagger, MessageContext synCtx) {
+    public static String getResourceThrottlingTier(OpenAPI openAPI, MessageContext synCtx) {
         String throttlingTier = null;
-        Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
+        Map<String, Object> vendorExtensions = getPathItemExtensions(synCtx, openAPI);
         if (vendorExtensions != null) {
             throttlingTier = (String) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
         }
@@ -92,29 +92,30 @@ public class SwaggerUtils {
         return APIConstants.UNLIMITED_TIER;
     }
 
-    private static Map<String, Object> getVendorExtensions(MessageContext synCtx, Swagger swagger) {
-        if (swagger != null) {
+    private static Map<String, Object> getPathItemExtensions(MessageContext synCtx, OpenAPI openAPI) {
+        if (openAPI != null) {
             String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
-            Path path = swagger.getPath(apiElectedResource);
+            PathItem path = openAPI.getPaths().get(apiElectedResource);
+
             if (path != null) {
                 switch (httpMethod) {
                     case APIConstants.HTTP_GET:
-                        return path.getGet().getVendorExtensions();
+                        return path.getGet().getExtensions();
                     case APIConstants.HTTP_POST:
-                        return path.getPost().getVendorExtensions();
+                        return path.getPost().getExtensions();
                     case APIConstants.HTTP_PUT:
-                        return path.getPut().getVendorExtensions();
+                        return path.getPut().getExtensions();
                     case APIConstants.HTTP_DELETE:
-                        return path.getDelete().getVendorExtensions();
+                        return path.getDelete().getExtensions();
                     case APIConstants.HTTP_HEAD:
-                        return path.getHead().getVendorExtensions();
+                        return path.getHead().getExtensions();
                     case APIConstants.HTTP_OPTIONS:
-                        return path.getOptions().getVendorExtensions();
+                        return path.getOptions().getExtensions();
                     case APIConstants.HTTP_PATCH:
-                        return path.getPatch().getVendorExtensions();
+                        return path.getPatch().getExtensions();
                 }
             }
         }

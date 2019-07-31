@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt;
 
-import io.swagger.models.Swagger;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.utils.SwaggerUtils;
+import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -73,12 +73,12 @@ public class JWTValidator {
      *
      * @param jwtToken             The JWT token sent with the API request
      * @param synCtx               The message to be authenticated
-     * @param swagger              The swagger object of the invoked API
+     * @param openAPI              The OpenAPI object of the invoked API
      * @return an AuthenticationContext object which contains the authentication information
      * @throws APISecurityException in case of authentication failure
      */
     @MethodStats
-    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, Swagger swagger)
+    public AuthenticationContext authenticate(String jwtToken, MessageContext synCtx, OpenAPI openAPI)
             throws APISecurityException {
 
         String[] splitToken = jwtToken.split("\\.");
@@ -168,7 +168,7 @@ public class JWTValidator {
                     }
                 }
                 checkTokenExpiration(tokenSignature, payload, tenantDomain);
-                validateScopes(synCtx, swagger, payload);
+                validateScopes(synCtx, openAPI, payload);
 
                 if (isGatewayTokenCacheEnabled) {
                     getGatewayKeyCache().put(cacheKey, payload);
@@ -296,13 +296,13 @@ public class JWTValidator {
      * in the JWT token payload.
      *
      * @param synCtx  The message to be authenticated
-     * @param swagger The swagger object of the invoked API
+     * @param openAPI The OpenAPI object of the invoked API
      * @param payload The payload of the JWT token
      * @throws APISecurityException in case of scope validation failure
      */
-    private void validateScopes(MessageContext synCtx, Swagger swagger, JSONObject payload)
+    private void validateScopes(MessageContext synCtx, OpenAPI openAPI, JSONObject payload)
             throws APISecurityException {
-        String resourceScope = SwaggerUtils.getScopesOfResource(swagger, synCtx);
+        String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
 
         if (StringUtils.isNotBlank(resourceScope) && payload.getString(APIConstants.JwtTokenConstants.SCOPE) != null) {
             String[] tokenScopes = payload.getString(APIConstants.JwtTokenConstants.SCOPE)
