@@ -70,7 +70,7 @@ const styles = theme => ({
 });
 
 const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
-    { key: 'address', value: 'HTTP/SOAP Endpoint' }];
+    { key: 'address', value: 'HTTP/SOAP Endpoint' }, { key: 'default', value: 'Dynamic Endpoints' }];
 
 /**
  * The component which holds the general configurations of the endpoints.
@@ -131,6 +131,12 @@ function GeneralConfiguration(props) {
     const getEndpointTypeSubHeading = () => {
         let type = '';
         const epType = epConfig.endpoint_type;
+        const endpointTypeKey = endpointType.key;
+
+        if (endpointTypeKey === 'default') {
+            return 'Dynamic Endpoints';
+        }
+
         switch (epType) {
             case 'load_balance':
                 type = 'Load Balance';
@@ -142,9 +148,6 @@ function GeneralConfiguration(props) {
                 type = 'Single';
                 break;
         }
-
-        const endpointTypeKey = endpointType.key;
-
         if (endpointTypeKey === 'address') {
             type = type.concat(' HTTP/ SOAP');
         } else {
@@ -206,6 +209,7 @@ function GeneralConfiguration(props) {
             setEndpointCertificates([]);
         });
     }, []);
+    console.log(apiType !== 'HTTP' || endpointType.key === 'default');
     return (
         <React.Fragment>
             <ExpansionPanel
@@ -225,32 +229,45 @@ function GeneralConfiguration(props) {
                             defaultMessage='GeneralConfiguration'
                         />
                     </Typography>
-                    {apiType === 'HTTP' ?
+                    {apiType !== 'HTTP' ?
+                        <div /> :
                         <Typography className={classes.secondaryHeading}>
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.type.sub.heading'
                                 defaultMessage='Endpoint Type'
                             /> : {epTypeSubHeading}
                             {' | '}
+                        </Typography> }
+                    {apiType !== 'HTTP' ?
+                        <div /> :
+                        <Typography
+                            className={classes.secondaryHeading}
+                            hidden={apiType !== 'HTTP' || endpointType.key === 'default'}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
                                 defaultMessage='Endpoint Security'
                             />: {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'}
                             {' | '}
-                        </Typography>
-                        : <div />}
-                    <Typography className={classes.secondaryHeading}>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'
-                            defaultMessage='Certificates'
-                        />: {endpointCertificates.length}
-                    </Typography>
+                        </Typography> }
+                    {apiType !== 'HTTP' || endpointType.key === 'default' ?
+                        <div /> :
+                        <Typography
+                            className={classes.secondaryHeading}
+                            hidden={apiType !== 'HTTP' || endpointType.key === 'default'}
+                        >
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'
+                                defaultMessage='Certificates'
+                            />: {endpointCertificates.length}
+                        </Typography> }
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.generalConfigContent}>
                     <Grid container direction='row' xs={12}>
-                        {apiType === 'HTTP' ?
+                        {apiType !== 'HTTP' ?
+                            <div /> :
                             <Grid container item xs={8}>
-                                <Grid item xs container className={classes.endpointConfigSection} direction='column'>
+                                <Grid item xs className={classes.endpointConfigSection}>
                                     <FormControl className={classes.endpointTypeSelect}>
                                         <InputLabel htmlFor='endpoint-type-select'>
                                             <FormattedMessage
@@ -272,37 +289,43 @@ function GeneralConfiguration(props) {
                                         </Select>
                                     </FormControl>
                                 </Grid>
-                                <Grid item xs className={classes.endpointConfigSection}>
-                                    <FormControlLabel
-                                        value='start'
-                                        checked={endpointSecurityInfo !== null}
-                                        control={<Switch color='primary' />}
-                                        label={<FormattedMessage
-                                            id={'Apis.Details.Endpoints.EndpointOverview.' +
-                                            'endpoint.security.enable.switch'}
-                                            defaultMessage='Endpoint Security'
-                                        />}
-                                        labelPlacement='start'
-                                        onChange={handleToggleEndpointSecurity}
-                                    />
-                                    <Collapse in={endpointSecurityInfo !== null}>
-                                        <EndpointSecurity
-                                            securityInfo={endpointSecurityInfo}
-                                            onChangeEndpointAuth={handleEndpointSecurityChange}
+                                {apiType !== 'HTTP' ?
+                                    <div /> :
+                                    <Grid
+                                        item
+                                        xs
+                                        className={classes.endpointConfigSection}
+                                    >
+                                        <FormControlLabel
+                                            value='start'
+                                            checked={endpointSecurityInfo !== null}
+                                            control={<Switch color='primary' />}
+                                            label={<FormattedMessage
+                                                id={'Apis.Details.Endpoints.EndpointOverview.' +
+                                                'endpoint.security.enable.switch'}
+                                                defaultMessage='Endpoint Security'
+                                            />}
+                                            labelPlacement='start'
+                                            onChange={handleToggleEndpointSecurity}
                                         />
-                                    </Collapse>
-                                </Grid>
+                                        <Collapse in={endpointSecurityInfo !== null}>
+                                            <EndpointSecurity
+                                                securityInfo={endpointSecurityInfo}
+                                                onChangeEndpointAuth={handleEndpointSecurityChange}
+                                            />
+                                        </Collapse>
+                                    </Grid>
+                                }
                             </Grid>
-                            :
-                            <div />}
-
-                        <Grid item xs className={classes.endpointConfigSection}>
+                        }
+                        <Grid item xs className={classes.endpointConfigSection} hidden={endpointType.key === 'default'}>
                             <Certificates
                                 certificates={endpointCertificates}
                                 uploadCertificate={saveCertificate}
                                 deleteCertificate={deleteCertificate}
                             />
                         </Grid>
+
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
