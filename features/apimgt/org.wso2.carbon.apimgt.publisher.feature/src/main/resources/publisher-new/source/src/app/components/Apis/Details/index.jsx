@@ -425,18 +425,15 @@ class Details extends Component {
                             active={active}
                             Icon={<LifeCycleIcon />}
                         />
-                        {isAPIProduct ?
-                            null :
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.left.menu.scope',
-                                    defaultMessage: 'scopes',
-                                })}
-                                handleMenuSelect={this.handleMenuSelect}
-                                active={active}
-                                Icon={<ScopesIcon />}
-                            />
-                        }
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.left.menu.scope',
+                                defaultMessage: 'scopes',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ScopesIcon />}
+                        />
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.documents',
@@ -513,7 +510,12 @@ class Details extends Component {
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
                                 <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
+                                <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
+                                <Route
+                                    path={Details.subPaths.DOCUMENTS_PRODUCT}
+                                    component={() => <Documents api={api} />}
+                                />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
                                     component={() => <Subscriptions api={api} />}
@@ -522,7 +524,11 @@ class Details extends Component {
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
                                 <Route
                                     path={Details.subPaths.BUSINESS_INFO}
-                                    component={() => <BusinessInformation />}
+                                    component={() => <BusinessInformation api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.BUSINESS_INFO_PRODUCT}
+                                    component={() => <BusinessInformation api={api} />}
                                 />
                                 <Route path={Details.subPaths.PROPERTIES} component={() => <Properties />} />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
@@ -551,11 +557,14 @@ Details.subPaths = {
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',
+    SCOPES_PRODUCT: '/api-products/:apiprod_uuid/scopes',
     DOCUMENTS: '/apis/:api_uuid/documents',
+    DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
     SECURITY: '/apis/:api_uuid/security',
     COMMENTS: '/apis/:api_uuid/comments',
     BUSINESS_INFO: '/apis/:api_uuid/business info',
+    BUSINESS_INFO_PRODUCT: '/api-products/:apiprod_uuid/business info',
     PROPERTIES: '/apis/:api_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
 };

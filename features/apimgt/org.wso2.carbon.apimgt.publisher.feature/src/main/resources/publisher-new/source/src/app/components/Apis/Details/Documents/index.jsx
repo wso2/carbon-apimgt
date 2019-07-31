@@ -17,23 +17,46 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router-dom';
 
+import { PageNotFound } from 'AppComponents/Base/Errors';
 import Listing from './Listing';
 import Details from './Details';
 import DocCreate from './Create';
-import { PageNotFound } from 'AppComponents/Base/Errors';
 
 const Documents = (props) => {
-    const {api} = props;
+    const { api } = props;
     return (
-        <Switch>
-            <Route exact path='/apis/:apiUUID/documents' component={() => <Listing api={api}/>} />
-            <Route path='/apis/:apiUUID/documents/:documentId/details' component={Details} />
-            <Route path='/apis/:apiUUID/documents/create' component={DocCreate} />
-            <Route component={PageNotFound} />
-        </Switch>
+        <div>
+            <Switch>
+                <Route
+                    exact
+                    path='/apis/:apiUUID/documents'
+                    render={routerprops => <Listing {...routerprops} api={api} />}
+                />
+                <Route
+                    exact
+                    path='/api-products/:apiProductUUID/documents'
+                    render={routerprops => <Listing {...routerprops} api={api} />}
+                />
+                <Route
+                    path='/apis/:apiUUID/documents/:documentId/details'
+                    render={routerprops => <Details {...routerprops} api={api} />}
+                />
+                <Route
+                    path='/api-products/:apiProductUUID/documents/:documentId/details'
+                    render={routerprops => <Details {...routerprops} api={api} />}
+                />
+                <Route path='/apis/:apiUUID/documents/create' component={DocCreate} />
+                <Route component={PageNotFound} />
+            </Switch>
+        </div>
     );
+};
+
+Documents.propTypes = {
+    api: PropTypes.shape({}).isRequired,
 };
 
 export default Documents;

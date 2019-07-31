@@ -25,8 +25,9 @@ import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
-import CreateEditForm from './CreateEditForm';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
+import CreateEditForm from './CreateEditForm';
 
 const styles = theme => ({
     addNewWrapper: {
@@ -55,8 +56,10 @@ const styles = theme => ({
 });
 
 function Create(props) {
-    const restAPI = new Api();
-    const { classes, toggleAddDocs, intl } = props;
+    const {
+        classes, toggleAddDocs, intl, apiType,
+    } = props;
+    const restAPI = (apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
     let createEditForm = useRef(null);
 
     const addDocument = (apiId) => {
@@ -85,7 +88,7 @@ function Create(props) {
                             }
                         });
                 } else {
-                    Alert.info(`${doc.name} ${intl.formatMessage({
+                    Alert.info(`${doc.body.name} ${intl.formatMessage({
                         id: 'Apis.Details.Documents.Create.markdown.editor.success',
                         defaultMessage: ' added successfully.',
                     })}`);
@@ -117,6 +120,7 @@ function Create(props) {
                 innerRef={(node) => {
                     createEditForm = node;
                 }}
+                apiType={apiType}
             />
             <Divider />
             <ApiContext.Consumer>
@@ -144,6 +148,7 @@ function Create(props) {
 Create.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Create));

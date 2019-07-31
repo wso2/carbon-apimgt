@@ -20,7 +20,7 @@ import Utils from './Utils';
 import Resource from './Resource';
 
 /**
- * An abstract representation of an API
+ * An abstract representation of an API Product
  */
 class APIProduct extends Resource {
 
@@ -133,7 +133,7 @@ class APIProduct extends Resource {
                 console.error(error);
             }
         );
-        return promisedProducts.then(response => {
+        return promisedProducts.then((response) => {
             response.obj.apiType = API.CONSTS.APIProduct;
             return response;
         });
@@ -208,7 +208,28 @@ class APIProduct extends Resource {
     }
 
     /**
-     * Return documents attached to a given API Product
+     * Add document to API Product
+     * @param {*} id API Product ID to which the document should be attached 
+     * @param {*} body 
+     */
+    addDocument(id, body) {
+        const promisedAddDocument = this.client.then((client) => {
+            const payload = {
+                apiProductId: id,
+                body,
+                'Content-Type': 'application/json'
+            };
+            return client.apis['Document (Collection)'].post_api_products__apiProductId__documents(payload, this._requestMetaData());
+        }).catch(
+            error => {
+                console.error(error);
+            }
+        );
+        return promisedAddDocument;
+    }
+
+    /**
+     * Returns documents attached to a given API Product
      *
      * @param {String} id API Product UUID
      */
@@ -227,9 +248,149 @@ class APIProduct extends Resource {
         return promisedDocuments;
     }
 
+    /**
+     * Updates a product document
+     * @param {*} productId 
+     * @param {*} docId 
+     * @param {*} body 
+     */
+    updateDocument(productId, docId, body) {
+        const promisedUpdateDocument = this.client.then((client) => {
+            const payload = {
+                apiProductId: productId,
+                body,
+                documentId: docId,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Document (Individual)'].put_api_products__apiProductId__documents__documentId_(
+                payload,
+                this._requestMetaData(),
+            ).catch(
+                error => {
+                    console.error(error);
+                }
+            );
+        });
+        return promisedUpdateDocument;
+    }
 
 
+    /**
+     * Get specified document attached to specified product
+     * @param {*} productId 
+     * @param {*} docId 
+     */
+    getDocument(productId, docId) {
+        const promisedDocument = this.client.then((client) => {
+            return client.apis['Document (Individual)'].get_api_products__apiProductId__documents__documentId_({
+                apiProductId: productId,
+                    documentId: docId,
+                },
+                this._requestMetaData(),
+            );
+        }).catch(
+            error => {
+                console.error(error);
+            }
+        );
+        return promisedDocument;
+    }
 
+    /**
+     * Add inline content to a INLINE type document
+     * @param {*} apiProductId API Product ID
+     * @param {*} documentId Document ID
+     * @param {*} sourceType 
+     * @param {*} inlineContent Content to be added to document
+     */
+    addInlineContentToDocument(apiProductId, documentId, sourceType, inlineContent) {
+        const promise = this.client.then((client) => {
+            const payload = {
+                apiProductId,
+                documentId,
+                sourceType,
+                inlineContent,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Document (Individual)'].post_api_products__apiProductId__documents__documentId__content(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        }).catch(
+            error => {
+                console.error(error);
+            }
+        );
+        return promise;
+    }
+
+    /**
+     * Get the inline content of a given document
+     * @param {*} apiProductId 
+     * @param {*} docId 
+     */
+    getInlineContentOfDocument(apiProductId, docId) {
+        const promisedDocContent = this.client.then((client) => {
+            const payload = {
+                apiProductId: apiProductId,
+                documentId: docId
+            };
+            return client.apis['Document (Individual)'].get_api_products__apiProductId__documents__documentId__content(payload);
+        }).catch(
+            error => {
+                console.error(error);
+            }
+        );
+        return promisedDocContent;
+    }
+
+    /**
+     * Delete specified document
+     * @param {*} productId 
+     * @param {*} docId 
+     */
+    deleteDocument(productId, docId) {
+        const promiseDeleteDocument = this.client.then((client) => {
+            return client.apis['Document (Individual)'].delete_api_products__apiProductId__documents__documentId_({
+                    apiProductId: productId,
+                    documentId: docId,
+                },
+                this._requestMetaData(),
+            );
+        }).catch(
+            error => {
+                console.error(error);
+            }
+        );
+        return promiseDeleteDocument;
+    }
+
+    /**
+     * Add a File resource to a document
+     * @param {*} productId 
+     * @param {*} docId 
+     * @param {*} fileToDocument 
+     */
+    addFileToDocument(productId, docId, fileToDocument) {
+        const promiseAddFileToDocument = this.client.then((client) => {
+            const payload = {
+                apiProductId: productId,
+                documentId: docId,
+                file: fileToDocument,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Document (Individual)'].post_api_products__apiProductId__documents__documentId__content(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+
+        return promiseAddFileToDocument;
+    }
 }
 
 export default APIProduct;

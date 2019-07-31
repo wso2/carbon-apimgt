@@ -18,10 +18,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import Api from 'AppData/api';
-import PageContainer from 'AppComponents/Base/container/';
-import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import PageNavigation from '../../APIsNavigation';
 import { withStyles } from '@material-ui/core/styles';
 import Dropzone from 'react-dropzone';
 import FormControl from '@material-ui/core/FormControl';
@@ -38,6 +34,11 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Input from '@material-ui/core/Input';
 import { Link } from 'react-router-dom';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
+import PageContainer from 'AppComponents/Base/container/';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import PageNavigation from '../../APIsNavigation';
 
 /**
  * API Details Document page component
@@ -119,9 +120,21 @@ class Details extends React.Component {
      * @memberof Details
      */
     componentDidMount() {
-        const { apiUUID, documentId } = this.props.match.params;
-        const api = new Api();
-        const promisedDocument = api.getDocument(apiUUID, documentId);
+        const { apiType } = this.props.api;
+        let promisedDocument;
+        switch (apiType) {
+            case Api.CONSTS.APIProduct: {
+                const { apiProductUUID, documentId } = this.props.match.params;
+                const apiProduct = new APIProduct();
+                promisedDocument = apiProduct.getDocument(apiProductUUID, documentId);
+                break;
+            }
+            default: {
+                const { apiUUID, documentId } = this.props.match.params;
+                const api = new Api();
+                promisedDocument = api.getDocument(apiUUID, documentId);
+            }
+        }
         promisedDocument
             .then((response) => {
                 if (response.obj) {
@@ -137,6 +150,7 @@ class Details extends React.Component {
                 }
             });
     }
+
     handleTextChange = prop => (event) => {
         this.state.doc[prop] = event.target.value;
         this.setState({ doc: this.state.doc });
@@ -249,12 +263,12 @@ class Details extends React.Component {
      * @memberof Details
      */
     render() {
-        const { classes } = this.props;
+        const { classes, api } = this.props;
         const {
             notFound, doc, isEditable, files,
         } = this.state;
-        const docListingPath = '/apis/' + this.props.match.params.apiUUID + '/documents';
-
+        const docListingPath = api.apiType === Api.CONSTS.APIProduct ? '/api-products/' :
+            '/apis/' + this.props.match.params.apiUUID + '/documents';
         if (notFound) {
             return (
                 <PageContainer pageNav={<PageNavigation />}>
@@ -482,7 +496,11 @@ class Details extends React.Component {
 }
 
 Details.propTypes = {
-    classes: PropTypes.object.isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.object,
+    }).isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({ apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]) }).isRequired,
 };
 
 export default withStyles(styles)(Details);
