@@ -681,8 +681,10 @@ class InfoBar extends React.Component {
                                                     </ExpansionPanelSummary>
                                                     <ExpansionPanelDetails>
                                                         <Grid container item xs={12} spacing={16}>
-                                                            {(endpoint.URLs.http !== null || endpoint.URLs.https !== null ||
-                                                                endpoint.URLs.ws !== null || endpoint.URLs.wss !== null) && (
+                                                            {(endpoint.URLs.http !== null ||
+                                                                endpoint.URLs.https !== null ||
+                                                                endpoint.URLs.ws !== null ||
+                                                                endpoint.URLs.wss !== null) && (
                                                                     <Typography className={classes.heading}>
                                                                         <FormattedMessage
                                                                             id='Apis.Details.InfoBar.gateway.urls'
@@ -755,7 +757,7 @@ class InfoBar extends React.Component {
                                                             {endpoint.URLs.ws !== null && (
                                                                 <Grid item xs={12} >
                                                                     <TextField
-                                                                        defaultValue={endpoint.URLs.http}
+                                                                        defaultValue={endpoint.URLs.ws}
                                                                         id='bootstrap-input'
                                                                         InputProps={{
                                                                             disableUnderline: true,
@@ -786,7 +788,7 @@ class InfoBar extends React.Component {
                                                             {endpoint.URLs.wss !== null && (
                                                                 <Grid item xs={12} >
                                                                     <TextField
-                                                                        defaultValue={endpoint.URLs.http}
+                                                                        defaultValue={endpoint.URLs.wss}
                                                                         id='bootstrap-input'
                                                                         InputProps={{
                                                                             disableUnderline: true,
