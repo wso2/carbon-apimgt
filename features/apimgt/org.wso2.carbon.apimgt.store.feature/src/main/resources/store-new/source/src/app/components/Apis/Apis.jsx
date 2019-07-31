@@ -19,7 +19,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import Listing from './Listing/Listing';
+import APIListing from './Listing/APIListing';
 import APIProductListing from './Listing/APIProductListing';
 import Details from './Details/index';
 import { PageNotFound } from '../Base/Errors';
@@ -39,7 +39,7 @@ class Apis extends React.PureComponent {
     render() {
         return (
             <Switch>
-                <Route exact path='/apis' component={Listing} />
+                <Route exact path='/apis' component={APIListing} />
                 <Route exact path='/api-products' component={APIProductListing} />
                 <Route
                     path='/apis/:api_uuid/'
