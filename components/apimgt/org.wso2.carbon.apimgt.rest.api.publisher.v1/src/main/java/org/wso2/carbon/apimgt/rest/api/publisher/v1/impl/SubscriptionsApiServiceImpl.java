@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *
  */
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
@@ -64,7 +62,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
-            //validates the subscriptionId if it exists
+            // validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
 
             if (currentSubscription == null) {
@@ -87,7 +85,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         return null;
     }
 
-    /** Retieves all subscriptions or retrieves subscriptions for a given API Id
+    /**
+     * Retrieves all subscriptions or retrieves subscriptions for a given API Id
      *
      * @param apiId API identifier
      * @param limit max number of objects returns
@@ -97,8 +96,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      */
     public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
             MessageContext messageContext) {
-        //pre-processing
-        //setting default limit and offset if they are null
+        // pre-processing
+        // setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
@@ -124,7 +123,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             return Response.ok().entity(subscriptionListDTO).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -226,7 +225,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
 
-            //validates the subscriptionId if it exists
+            // validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
             if (currentSubscription == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
