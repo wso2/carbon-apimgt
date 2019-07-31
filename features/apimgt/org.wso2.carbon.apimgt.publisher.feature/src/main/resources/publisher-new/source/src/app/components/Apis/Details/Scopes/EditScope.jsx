@@ -75,15 +75,16 @@ class EditScope extends React.Component {
         const restApi = new Api();
         const updatedScope = this.state.apiScope;
         const { intl, api, history } = this.props;
-        api.scopes = api.scopes.map((scope) => {
+        // eslint-disable-next-line no-underscore-dangle
+        const apiData = api._data;
+        apiData.scopes = api.scopes.map((scope) => {
             if (scope.name === updatedScope.name) {
                 return updatedScope;
             } else {
                 return scope;
             }
         });
-        // eslint-disable-next-line no-underscore-dangle
-        const promisedApiUpdate = restApi.update(api._data);
+        const promisedApiUpdate = restApi.update(apiData);
         promisedApiUpdate.then((response) => {
             if (response.status !== 200) {
                 Alert.info(intl.formatMessage({

@@ -436,9 +436,8 @@ class Resources extends React.Component {
     }
 
     updateAPI() {
-        const { intl } = this.props;
         const api = new Api();
-        const { id } = this.props.api;
+        const { intl, api: { id } } = this.props;
         const { policyLevel, selectedPolicy } = this.state;
         const promisedApi = api.get(id);
         promisedApi

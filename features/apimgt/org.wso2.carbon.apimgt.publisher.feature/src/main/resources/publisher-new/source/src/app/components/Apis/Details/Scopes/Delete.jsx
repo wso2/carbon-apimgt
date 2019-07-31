@@ -21,13 +21,9 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
+import ConfirmDialog from '../../../Shared/ConfirmDialog';
 
 const styles = {
     appBar: {
@@ -93,8 +89,8 @@ function Delete(props) {
             });
     };
 
-    const runAction = (action) => {
-        if (action === 'yes') {
+    const runAction = (confirm) => {
+        if (confirm) {
             deleteScope();
         } else {
             setOpen(!open);
@@ -110,42 +106,28 @@ function Delete(props) {
                     defaultMessage='Delete'
                 />
             </Button>
-            <Dialog
+            <ConfirmDialog
+                key='key-dialog'
+                labelCancel={<FormattedMessage
+                    id='Apis.Details.Documents.Delete.document.listing.label.cancel'
+                    defaultMessage='Cancel'
+                />}
+                title={<FormattedMessage
+                    id='Apis.Details.Documents.Delete.document.listing.delete.confirm'
+                    defaultMessage='Confirm Delete'
+                />}
+                message={<FormattedMessage
+                    id='Apis.Details.Documents.Delete.document.listing.label.ok'
+                    defaultMessage='Are you sure you want to delete scope {scope} ?'
+                    values={{ scope: scopeName }}
+                />}
+                labelOk={<FormattedMessage
+                    id='Apis.Details.Documents.Delete.document.listing.label.ok'
+                    defaultMessage='Yes'
+                />}
+                callback={runAction}
                 open={open}
-                onClose={toggleOpen}
-                aria-labelledby='alert-dialog-title'
-                aria-describedby='alert-dialog-description'
-            >
-                <DialogTitle id='alert-dialog-title'>
-                    <FormattedMessage
-                        id='Apis.Details.Documents.Delete.document.listing.delete.confirm.title'
-                        defaultMessage='Are you sure to delete?'
-                    />
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText id='alert-dialog-description'>
-                        <strong>{scopeName}</strong>
-                        <FormattedMessage
-                            id='Apis.Details.Documents.Delete.document.listing.delete.confirm.body'
-                            defaultMessage=' will be permernently deleted. Are you sure?'
-                        />
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => runAction('no')} color='primary'>
-                        <FormattedMessage
-                            id='Apis.Details.Documents.Delete.document.listing.delete.cancel'
-                            defaultMessage='Cancel'
-                        />
-                    </Button>
-                    <Button onClick={() => runAction('yes')} color='primary' autoFocus>
-                        <FormattedMessage
-                            id='Apis.Details.Documents.Delete.document.listing.delete.yes'
-                            defaultMessage='Yes. Delete'
-                        />
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            />
         </div>
     );
 }
