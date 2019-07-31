@@ -376,4 +376,8 @@ public class URITemplate implements Serializable{
     public void setId(int id) {
         this.id = id;
     }
+
+    public List<Scope> retrieveAllScopes() {
+        return this.scopes;
+    }
 }
