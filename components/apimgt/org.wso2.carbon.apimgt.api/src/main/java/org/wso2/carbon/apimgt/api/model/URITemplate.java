@@ -44,10 +44,6 @@ public class URITemplate implements Serializable{
     private Map<String, String> mediationScripts = new HashMap<String, String>();
     private ConditionGroupDTO[] conditionGroups;
     private int id;
-    
-    public List<Scope> getAllScopes(){
-        return scopes;
-    }
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
