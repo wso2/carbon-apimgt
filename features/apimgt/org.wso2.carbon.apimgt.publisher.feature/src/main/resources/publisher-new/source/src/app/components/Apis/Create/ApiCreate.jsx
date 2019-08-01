@@ -26,6 +26,7 @@ import APICreateWrapper from './Default/APICreateWrapper';
 import APIProductCreateWrapper from './Default/APIProductCreateWrapper';
 import ApiCreateSwagger from './OpenAPI/ApiCreateOpenAPI';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
+import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
 
 const styles = {
     content: {
@@ -49,6 +50,7 @@ function ApiCreate(props) {
                 <Route path='/api-products/create' component={APIProductCreateWrapper} />
                 <Route path='/apis/create/openapi' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
+                <Route path='/apis/create/ws' component={ApiCreateWebSocket} />
                 <Route component={PageNotFound} />
             </Switch>
         </main>

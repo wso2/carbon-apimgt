@@ -49,6 +49,7 @@ class APICreateWrapper extends Component {
     handleSubmit(e) {
         e.preventDefault();
         const { api: currentAPI } = this.state;
+        const { type: apiType } = this.props;
         if (!currentAPI.name || !currentAPI.context || !currentAPI.version) {
             // Checking the api name,version,context undefined or empty states
             this.setState((oldState) => {
@@ -60,6 +61,9 @@ class APICreateWrapper extends Component {
                 return { valid: validUpdated };
             });
             return;
+        }
+        if (apiType === 'ws') {
+            currentAPI.type = 'WS';
         }
         currentAPI
             .save()
@@ -113,6 +117,7 @@ class APICreateWrapper extends Component {
      * @inheritDoc
      */
     render() {
+        const { type } = this.props;
         return (
             <React.Fragment>
                 <APICreateTopMenu />
@@ -122,6 +127,7 @@ class APICreateWrapper extends Component {
                     inputChange={this.inputChange}
                     isAPIProduct={false}
                     valid={this.state.valid}
+                    type={type}
                 />
             </React.Fragment>);
     }

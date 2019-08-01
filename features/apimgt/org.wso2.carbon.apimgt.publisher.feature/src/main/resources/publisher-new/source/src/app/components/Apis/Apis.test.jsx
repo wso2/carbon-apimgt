@@ -49,7 +49,7 @@ describe('Test APIs main routing component', () => {
                 <APIs />
             </MemoryRouter>
         );
-        const wrapper = mount(exactApisPath);
+        const wrapper = mountWithIntl(exactApisPath);
         expect(wrapper.find(Route).prop('path')).toEqual(exactPath);
         expect(wrapper.contains('Testing Listing page')).toBeTruthy();
     });
@@ -60,7 +60,7 @@ describe('Test APIs main routing component', () => {
                 <APIs />
             </MemoryRouter>
         );
-        const wrapper = mount(exactApisPath);
+        const wrapper = mountWithIntl(exactApisPath);
         expect(wrapper.find(Route).prop('path')).toEqual(exactPath);
         expect(wrapper.contains('Testing Listing page')).toBeTruthy();
     });
@@ -72,7 +72,7 @@ describe('Test APIs main routing component', () => {
             </MemoryRouter>
         );
 
-        const wrapper = mount(createAPI);
+        const wrapper = mountWithIntl(createAPI);
         expect(wrapper.find(ApiCreate)).toHaveLength(1);
 
         // Page not found is expected here, Because we are navigating to exact /apis/create path

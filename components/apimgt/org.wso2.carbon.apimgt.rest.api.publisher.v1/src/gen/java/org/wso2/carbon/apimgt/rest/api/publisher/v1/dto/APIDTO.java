@@ -200,6 +200,40 @@ public enum AccessControlEnum {
     private String createdTime = null;
     private String lastUpdatedTime = null;
     private Object endpointConfig = null;
+
+@XmlType(name="EndpointImplementationTypeEnum")
+@XmlEnum(String.class)
+public enum EndpointImplementationTypeEnum {
+
+    @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE")), @XmlEnumValue("ENDPOINT") ENDPOINT(String.valueOf("ENDPOINT"));
+
+
+    private String value;
+
+    EndpointImplementationTypeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static EndpointImplementationTypeEnum fromValue(String v) {
+        for (EndpointImplementationTypeEnum b : EndpointImplementationTypeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
     private List<ScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
@@ -906,6 +940,23 @@ public enum AccessControlEnum {
 
   /**
    **/
+  public APIDTO endpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
+    this.endpointImplementationType = endpointImplementationType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "INLINE", value = "")
+  @JsonProperty("endpointImplementationType")
+  public EndpointImplementationTypeEnum getEndpointImplementationType() {
+    return endpointImplementationType;
+  }
+  public void setEndpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
+    this.endpointImplementationType = endpointImplementationType;
+  }
+
+  /**
+   **/
   public APIDTO scopes(List<ScopeDTO> scopes) {
     this.scopes = scopes;
     return this;
@@ -1005,6 +1056,7 @@ public enum AccessControlEnum {
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(endpointConfig, API.endpointConfig) &&
+        Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies);
@@ -1012,7 +1064,7 @@ public enum AccessControlEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -1060,6 +1112,7 @@ public enum AccessControlEnum {
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
+    sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");

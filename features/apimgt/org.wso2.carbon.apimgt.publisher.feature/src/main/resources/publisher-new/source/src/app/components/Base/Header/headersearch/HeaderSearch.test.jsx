@@ -22,6 +22,7 @@ import { MemoryRouter } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
 import API from 'AppData/api.js';
 import AuthManager from 'AppData/AuthManager';
 import { getExampleBodyById } from 'AppTests/Utils/MockAPIModel';
@@ -63,7 +64,7 @@ describe('Publisher <HeaderSearch> component tests', () => {
                 </MemoryRouter>
             </MuiThemeProvider>
         );
-        const wrapper = await mount(headerSearchComponent);
+        const wrapper = await mountWithIntl(headerSearchComponent);
         return wrapper;
     }
 
