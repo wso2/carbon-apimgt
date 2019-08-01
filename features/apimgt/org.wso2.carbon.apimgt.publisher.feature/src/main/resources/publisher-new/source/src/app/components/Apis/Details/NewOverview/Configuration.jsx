@@ -387,6 +387,7 @@ function Configuration(props) {
                                 />
                             </Typography>
                             <Typography variant='body1'>
+<<<<<<< 9c9df3be30d7fba363a1489078658269105f804c
                                 ({api.tags && api.tags.map(tag =>
                                     (<Chip
                                         key={tag}
@@ -394,6 +395,9 @@ function Configuration(props) {
                                         className={parentClasses.chip}
                                     />))
                                 })
+=======
+                                {api.tags && api.tags.map(tag => <Chip key={tag} label={tag} className={parentClasses.chip} />)}
+>>>>>>> Review Changes
                             </Typography>
                         </React.Fragment>
                     }
