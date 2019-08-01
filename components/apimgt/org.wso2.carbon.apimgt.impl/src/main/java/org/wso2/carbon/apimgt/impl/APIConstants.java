@@ -435,6 +435,9 @@ public final class APIConstants {
     public static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
     public static final String APP_DISPLAY_NAME = "DisplayName";
     public static final String APP_TOKEN_TYPE = "TokenType";
+    public static final String APP_SKIP_CONSENT_DISPLAY = "Skip Consent";
+    public static final String APP_SKIP_CONSENT_NAME = "skipConsent";
+    public static final String APP_SKIP_CONSENT_VALUE = "true";
     public static final String RECEIVER_URL = "receiverURL";
     public static final String AUTHENTICATOR_URL = "authenticatorURL";
     public static final String USERNAME = "username";

@@ -15,6 +15,7 @@ const NavBar = (props) => {
     const items = [
         {
             name: intl.formatMessage({
+                id: 'Apis.APIsNavigation.alerts',
                 defaultMessage: 'Alerts',
             }),
             linkTo: '/alerts',

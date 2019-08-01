@@ -25,7 +25,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 import API from 'AppData/api.js';
@@ -187,4 +187,4 @@ APIThumb.propTypes = {
     isAPIProduct: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(APIThumb);
+export default injectIntl(withStyles(styles)(APIThumb));

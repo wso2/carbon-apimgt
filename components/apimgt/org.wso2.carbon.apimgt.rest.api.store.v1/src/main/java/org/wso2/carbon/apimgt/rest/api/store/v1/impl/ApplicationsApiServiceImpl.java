@@ -525,7 +525,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     private ApplicationKeyDTO getApplicationKeyByAppIDAndKeyType(String applicationId, String keyType) {
         List<APIKey> applicationKeys = getApplicationKeys(applicationId);
-        if (applicationKeys!= null) {
+        if (applicationKeys != null) {
             for (APIKey apiKey : applicationKeys) {
                 if (keyType != null && keyType.equals(apiKey.getType())) {
                     return ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
