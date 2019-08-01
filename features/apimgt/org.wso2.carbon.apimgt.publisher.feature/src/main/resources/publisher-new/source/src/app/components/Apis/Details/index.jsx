@@ -48,7 +48,7 @@ import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Resources from './Resources/Resources';
-import Endpoints from './Endpoints/Endpoints';
+import Endpoints from './EndpointsNew/Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';

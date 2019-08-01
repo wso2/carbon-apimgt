@@ -110,6 +110,10 @@ class TopMenu extends React.Component {
                 <div className={classes.mainTitleWrapper}>
                     <Typography variant='display1' className={classes.mainTitle}>
                         {isAPIProduct ? 'API Products' : 'APIs'}
+                        <FormattedMessage
+                            id='Apis.Listing.components.TopMenu.apis'
+                            defaultMessage='APIs'
+                        />
                     </Typography>
                     {apis && (
                         <Typography variant='caption' gutterBottom align='left'>
@@ -118,6 +122,11 @@ class TopMenu extends React.Component {
                                 defaultMessage='Displaying'
                             />{' '}
                             {apis.count} {isAPIProduct ? ' API Product(s)' : ' API(s)'}
+                            {' '} {apis.count} {' '}
+                            <FormattedMessage
+                                id='Apis.Listing.components.TopMenu.api'
+                                defaultMessage='API'
+                            />
                         </Typography>
                     )}
                 </div>
@@ -126,14 +135,20 @@ class TopMenu extends React.Component {
                     {isAPIProduct ? (
                         <Link to='/api-products/create'>
                             <Button variant='contained' className={classes.createButton}>
-                                <FormattedMessage id='create.an.api.product' defaultMessage='Create an API Product' />
+                                <FormattedMessage
+                                    id='Apis.Listing.components.TopMenu.create.an.api.product'
+                                    defaultMessage='Create an API Product'
+                                />
                             </Button>
                         </Link>
                     ) : (
                         <APICreateMenu
                             buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}
                         >
-                            <FormattedMessage id='create.an.api' defaultMessage='Create API' />
+                            <FormattedMessage
+                                id='Apis.Listing.components.TopMenu.create.api'
+                                defaultMessage='Create API'
+                            />
                         </APICreateMenu>
                     )}
                 </div>
