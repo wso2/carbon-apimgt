@@ -29,6 +29,7 @@ public class APIDefinitionValidationResponse {
 
     private String content;
     private String jsonContent;
+    private Info info;
 
     private ArrayList<ErrorHandler> errorItems = new ArrayList<>();
 
@@ -62,5 +63,61 @@ public class APIDefinitionValidationResponse {
 
     public ArrayList<ErrorHandler> getErrorItems() {
         return errorItems;
+    }
+
+    public void setInfo(Info info) {
+        this.info = info;
+    }
+
+    public Info getInfo() {
+        return info;
+    }
+
+    public static class Info {
+        private String openAPIVersion;
+        private String name;
+        private String version;
+        private String context;
+        private String description;
+
+        public String getOpenAPIVersion() {
+            return openAPIVersion;
+        }
+
+        public void setOpenAPIVersion(String openAPIVersion) {
+            this.openAPIVersion = openAPIVersion;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getContext() {
+            return context;
+        }
+
+        public void setContext(String context) {
+            this.context = context;
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -19,6 +20,7 @@ public class OpenAPIDefinitionValidationResponseDTO   {
   
     private Boolean isValid = null;
     private String content = null;
+    private OpenAPIDefinitionValidationResponseInfoDTO info = null;
     private List<ErrorListItemDTO> errors = new ArrayList<>();
 
   /**
@@ -59,6 +61,23 @@ public class OpenAPIDefinitionValidationResponseDTO   {
   }
 
   /**
+   **/
+  public OpenAPIDefinitionValidationResponseDTO info(OpenAPIDefinitionValidationResponseInfoDTO info) {
+    this.info = info;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("info")
+  public OpenAPIDefinitionValidationResponseInfoDTO getInfo() {
+    return info;
+  }
+  public void setInfo(OpenAPIDefinitionValidationResponseInfoDTO info) {
+    this.info = info;
+  }
+
+  /**
    * If there are more than one error list them out. For example, list out validation errors by each field. 
    **/
   public OpenAPIDefinitionValidationResponseDTO errors(List<ErrorListItemDTO> errors) {
@@ -88,12 +107,13 @@ public class OpenAPIDefinitionValidationResponseDTO   {
     OpenAPIDefinitionValidationResponseDTO openAPIDefinitionValidationResponse = (OpenAPIDefinitionValidationResponseDTO) o;
     return Objects.equals(isValid, openAPIDefinitionValidationResponse.isValid) &&
         Objects.equals(content, openAPIDefinitionValidationResponse.content) &&
+        Objects.equals(info, openAPIDefinitionValidationResponse.info) &&
         Objects.equals(errors, openAPIDefinitionValidationResponse.errors);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(isValid, content, errors);
+    return Objects.hash(isValid, content, info, errors);
   }
 
   @Override
@@ -103,6 +123,7 @@ public class OpenAPIDefinitionValidationResponseDTO   {
     
     sb.append("    isValid: ").append(toIndentedString(isValid)).append("\n");
     sb.append("    content: ").append(toIndentedString(content)).append("\n");
+    sb.append("    info: ").append(toIndentedString(info)).append("\n");
     sb.append("    errors: ").append(toIndentedString(errors)).append("\n");
     sb.append("}");
     return sb.toString();

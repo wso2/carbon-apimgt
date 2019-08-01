@@ -120,6 +120,97 @@ class API extends Resource {
         }
     }
 
+    importOpenAPIByFile(openAPIData, callback = null) {
+        let payload, promise_create;
+
+        promise_create = this.client.then((client) => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                file: openAPIData,
+                additionalProperties: JSON.stringify(apiData),
+            };
+
+            return client.apis['APIs'].importOpenAPIDefinition(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        if (callback) {
+            return promise_create.then(callback);
+        } else {
+            return promise_create;
+        }
+    }
+
+    importOpenAPIByUrl(openAPIUrl, callback = null) {
+        let payload, promise_create;
+
+        promise_create = this.client.then((client) => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                url: openAPIUrl,
+                additionalProperties: JSON.stringify(apiData),
+            };
+
+            return client.apis['APIs'].importOpenAPIDefinition(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        if (callback) {
+            return promise_create.then(callback);
+        } else {
+            return promise_create;
+        }
+    }
+
+    validateOpenAPIByFile(openAPIData, callback = null) {
+        let payload, promise_validate;
+        payload = {
+            file: openAPIData,
+            'Content-Type': 'multipart/form-data'
+        };
+        promise_validate = this.client.then((client) => {
+            return client.apis['Validation'].validateOpenAPIDefinition(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        if (callback) {
+            return promise_validate.then(callback);
+        } else {
+            return promise_validate;
+        }
+    }
+
+    validateOpenAPIByUrl(url, callback = null) {
+        let payload, promise_validate;
+        payload = {
+            url: url,
+            'Content-Type': 'multipart/form-data'
+        };
+        promise_validate = this.client.then((client) => {
+            return client.apis['Validation'].validateOpenAPIDefinition(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        if (callback) {
+            return promise_validate.then(callback);
+        } else {
+            return promise_validate;
+        }
+    }
 
     /**
      * Get detailed policy information of the API
@@ -192,7 +283,7 @@ class API extends Resource {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.APIProduct.properties;
             const data = {};
-            
+
             Object.keys(this).forEach(apiAttribute => {
                 if (apiAttribute in properties) {
                     data[apiAttribute] = this[apiAttribute];
@@ -471,7 +562,7 @@ class API extends Resource {
             }, this._requestMetaData());
         });
     }
-    
+
     /**
      * Delete the current api product instance
      * @param id {String} UUID of the API which want to delete
@@ -1108,6 +1199,24 @@ class API extends Resource {
 
     /**
      *
+     * To get API object with the fields filled as per the definition
+     * @param {Object} client Client object after resolving this.client.then()
+     * @returns API Object corresponding to spec fields
+     * @memberof API
+     */
+    getDataFromSpecFields(client){
+        const properties = client.spec.definitions.API.properties;
+        const data = {};
+        Object.keys(this).forEach(apiAttribute => {
+            if (apiAttribute in properties) {
+                data[apiAttribute] = this[apiAttribute];
+            }
+        });
+        return data;
+    }
+
+    /**
+     *
      * Static method for get all APIs for current environment user.
      * @static
      * @param {Object} params APIs filtering parameters i:e { "name": "MyBank API"}
@@ -1230,7 +1339,7 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
             return client.apis['API Product (Individual)'].delete_api_products__apiProductId_({
-                apiProductId: id 
+                apiProductId: id
             }, this._requestMetaData());
         });
     }

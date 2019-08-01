@@ -49,6 +49,7 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.collections.CollectionUtils;
@@ -294,11 +295,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             validationResponse.setValid(false);
             for (String message : parseAttemptForV3.getMessages()) {
-                ErrorItem errorItem = new ErrorItem();
-                errorItem.setErrorCode(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode());
-                errorItem.setMessage(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorMessage());
-                errorItem.setDescription(message);
-                validationResponse.getErrorItems().add(errorItem);
+                addErrorToValidationResponse(validationResponse, message);
                 if (message.contains("openapi is missing")) {
                     //reset the validation status and fallback to v2 validation
                     fallbackToV2 = true;
@@ -307,8 +304,10 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                 }
             }
         } else {
-            validationResponse.setValid(true);
-            validationResponse.setContent(apiDefinition);
+            OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+            io.swagger.v3.oas.models.info.Info info = openAPI.getInfo();
+            updateValidationResponseAsSuccess(validationResponse, apiDefinition,
+                    openAPI.getOpenapi(), info.getTitle(), info.getVersion(), null, info.getDescription());
             if (returnJsonContent) {
                 validationResponse.setJsonContent(Json.pretty(parseAttemptForV3.getOpenAPI()));
             }
@@ -319,26 +318,68 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
             SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition, false);
             if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
                 for (String message : parseAttemptForV2.getMessages()) {
-                    ErrorItem errorItem = new ErrorItem();
-                    errorItem.setErrorCode(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode());
-                    errorItem.setMessage(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorMessage());
-                    errorItem.setDescription(message);
-                    validationResponse.getErrorItems().add(errorItem);
+                    ErrorItem errorItem = addErrorToValidationResponse(validationResponse, message);
                     if (message.contains("swagger is missing")) {
                         errorItem.setDescription("attribute swagger or openapi should present");
                         break;
                     }
                 }
             } else {
-                validationResponse.setValid(true);
-                validationResponse.setContent(apiDefinition);
+                Swagger swagger = parseAttemptForV2.getSwagger();
+                Info info = swagger.getInfo();
+                updateValidationResponseAsSuccess(validationResponse, apiDefinition,
+                        swagger.getSwagger(), info.getTitle(), info.getVersion(), swagger.getBasePath(),
+                        info.getDescription());
                 if (returnJsonContent) {
                     validationResponse.setJsonContent(io.swagger.util.Json.pretty(parseAttemptForV2.getSwagger()));
                 }
+
             }
         }
 
         return validationResponse;
+    }
+
+    /**
+     * Update the APIDefinitionValidationResponse object with success state using the values given
+     *
+     * @param validationResponse APIDefinitionValidationResponse object to be updated
+     * @param originalAPIDefinition original API Definition
+     * @param openAPIVersion version of OpenAPI Spec (2.0 or 3.0.0)
+     * @param title title of the OpenAPI Definition
+     * @param version version of the OpenAPI Definition
+     * @param context base path of the OpenAPI Definition
+     * @param description description of the OpenAPI Definition
+     */
+    private void updateValidationResponseAsSuccess(APIDefinitionValidationResponse validationResponse,
+            String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
+            String description) {
+        validationResponse.setValid(true);
+        validationResponse.setContent(originalAPIDefinition);
+        APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
+        info.setOpenAPIVersion(openAPIVersion);
+        info.setName(title);
+        info.setVersion(version);
+        info.setContext(context);
+        info.setDescription(description);
+        validationResponse.setInfo(info);
+    }
+
+    /**
+     * Add error item with the provided message to the provided validation response object
+     *
+     * @param validationResponse APIDefinitionValidationResponse object
+     * @param errMessage error message
+     * @return added ErrorItem object
+     */
+    private ErrorItem addErrorToValidationResponse(APIDefinitionValidationResponse validationResponse,
+            String errMessage) {
+        ErrorItem errorItem = new ErrorItem();
+        errorItem.setErrorCode(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode());
+        errorItem.setMessage(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorMessage());
+        errorItem.setDescription(errMessage);
+        validationResponse.getErrorItems().add(errorItem);
+        return errorItem;
     }
 
     @Override
