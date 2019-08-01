@@ -18,6 +18,7 @@
 
 import React from 'react';
 import Notification from 'rc-notification';
+import { injectIntl } from 'react-intl';
 import Message from './Message';
 
 /**
@@ -130,7 +131,7 @@ Alert.defaultDuration = 5;
 /* In seconds */
 Alert.defaultTop = 0;
 
-export default {
+export default injectIntl({
     info: (message, duration, onClose) => {
         const msg = new Alert(message, 'info', duration, onClose);
         msg.show();
@@ -157,4 +158,4 @@ export default {
         return msg;
     },
     configs: Alert.config,
-};
+});

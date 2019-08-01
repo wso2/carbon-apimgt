@@ -23,7 +23,7 @@ import {
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -32,7 +32,7 @@ import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
 import Api from '../../../data/api';
 import Progress from '../../Shared/Progress';
-import AuthManager from '../../../data/AuthManager';
+
 
 const LoadableSwitch = Loadable.Map({
     loader: {
@@ -176,84 +176,63 @@ class Details extends React.Component {
          *
          * @memberof Details
          */
-        this.updateSubscriptionData = () => {
-            const user = AuthManager.getUser();
-
-            const api = new Api();
-            const promised_api = api.getAPIById(this.api_uuid);
-            if(!user){
-                promised_api.then((response) => {
-                    this.setState({ api: response.body });
-                }).catch( (error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const status = error.status;
-                    if (status === 404) {
-                        this.setState({ notFound: true });
-                    }
-                });
-                return;
-            }
-            const existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
-            const promised_applications = api.getAllApplications();
-
-            Promise.all([promised_api, existing_subscriptions, promised_applications])
+        this.updateSubscriptionData = (callback) => {
+            const dataApi = new Api();
+            const promisedApi = dataApi.getAPIById(this.api_uuid);
+            const existingSubscriptions = dataApi.getSubscriptions(this.api_uuid, null);
+            const promisedApplications = dataApi.getAllApplications();
+            promisedApi.then((api) => {
+                this.setState({ api: api.body });
+            }).catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+            Promise.all([existingSubscriptions, promisedApplications])
                 .then((response) => {
-                    const [api, subscriptions, applications] = response.map(data => data.obj);
-                    // Getting the policies from api details
-                    this.setState({ api });
-                    if (api && api.tiers) {
-                        const apiTiers = api.tiers;
-                        const tiers = [];
-                        for (let i = 0; i < apiTiers.length; i++) {
-                            const tierName = apiTiers[i];
-                            tiers.push({ value: tierName, label: tierName });
-                        }
-                        this.setState({ tiers });
-                        if (tiers.length > 0) {
-                            this.setState({ policyName: tiers[0].value });
-                        }
-                    }
-
-                    const subscribedApplications = [];
+                    const [subscriptions, applications] = response.map(data => data.obj);
+                    const appIdToNameMapping = applications.list.reduce((acc, cur) => {
+                        acc[cur.applicationId] = cur.name;
+                        return acc;
+                    }, {});
                     // get the application IDs of existing subscriptions
-                    subscriptions.list.map(element => subscribedApplications.push({
-                        value: element.applicationId,
-                        policy: element.throttlingPolicy,
-                        status: element.status,
-                        subscriptionId: element.subscriptionId,
-                    }));
-                    this.setState({ subscribedApplications });
+                    const subscribedApplications = subscriptions.list.map((element) => {
+                        return {
+                            value: element.applicationId,
+                            policy: element.throttlingPolicy,
+                            status: element.status,
+                            subscriptionId: element.subscriptionId,
+                            label: appIdToNameMapping[element.applicationId],
+                        };
+                    });
 
-                    // Removing subscribed applications from all the applications and get the available applications to subscribe
-                    const applicationsAvailable = [];
-                    for (let i = 0; i < applications.list.length; i++) {
-                        const applicationId = applications.list[i].applicationId;
-                        const applicationName = applications.list[i].name;
-                        const applicationStatus = applications.list[i].status;
-                        // include the application only if it does not has an existing subscriptions
-                        let applicationSubscribed = false;
-                        for (let j = 0; j < subscribedApplications.length; j++) {
-                            if (subscribedApplications[j].value === applicationId) {
-                                applicationSubscribed = true;
-                                subscribedApplications[j].label = applicationName;
-                            }
+                    // Removing subscribed applications from all the applications and get
+                    // the available applications to subscribe
+                    const subscribedAppIds = subscribedApplications.map(sub => sub.value);
+                    const applicationsAvailable = applications.list
+                        .filter(app => !subscribedAppIds.includes(app.applicationId)
+                         && app.status === 'APPROVED')
+                        .map((filteredApp) => {
+                            return {
+                                value: filteredApp.applicationId,
+                                label: filteredApp.name,
+                            };
+                        });
+                    this.setState({ subscribedApplications, applicationsAvailable }, () => {
+                        if (callback) {
+                            callback();
                         }
-                        if (!applicationSubscribed && applicationStatus === 'APPROVED') {
-                            applicationsAvailable.push({ value: applicationId, label: applicationName });
-                        }
-                    }
-                    this.setState({ applicationsAvailable });
-                    if (applicationsAvailable && applicationsAvailable.length > 0) {
-                        this.setState({ applicationId: applicationsAvailable[0].value });
-                    }
+                    });
                 })
                 .catch((error) => {
                     if (process.env.NODE_ENV !== 'production') {
                         console.log(error);
                     }
-                    const status = error.status;
+                    const { status } = error;
                     if (status === 404) {
                         this.setState({ notFound: true });
                     }
@@ -329,12 +308,13 @@ class Details extends React.Component {
     render() {
         this.updateActiveLink();
 
-        const { classes, theme, intl, } = this.props;
+        const { classes, theme, intl } = this.props;
         const { active, api } = this.state;
         const redirect_url = '/apis/' + this.props.match.params.api_uuid + '/overview';
         const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
-        return ( api ? <ApiContext.Provider value={this.state}>
+        return (api ? (
+            <ApiContext.Provider value={this.state}>
                 <style>{globalStyle}</style>
                 <div className={classes.LeftMenu}>
                     <Link to='/apis' className={classes.leftLInkMainWrapper}>
@@ -358,7 +338,8 @@ class Details extends React.Component {
                     <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
-            </ApiContext.Provider> : <div class="apim-dual-ring"></div>
+            </ApiContext.Provider>
+        ) : <div className='apim-dual-ring' />
         );
     }
 }
