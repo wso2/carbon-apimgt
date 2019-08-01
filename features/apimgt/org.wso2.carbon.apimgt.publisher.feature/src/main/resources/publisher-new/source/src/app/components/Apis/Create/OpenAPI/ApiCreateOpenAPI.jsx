@@ -29,6 +29,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
+import Typography from '@material-ui/core/Typography';
 
 import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
 import Alert from 'AppComponents/Shared/Alert';
@@ -168,6 +169,20 @@ class ApiCreateOpenAPI extends React.Component {
                 defaultMessage='Create API'
             />,
         ];
+    }
+
+    static getSubstitutedContext(api) {
+        let substitutedContext = '{context}/{version}';
+        if (api.context) {
+            substitutedContext = api.context;
+            if (api.context.indexOf('{version}') < 0) {
+                substitutedContext = api.context + '/{version}';
+            }
+        }
+        if (api.version) {
+            substitutedContext = substitutedContext.replace('{version}', api.version);
+        }
+        return substitutedContext;
     }
 
     setOpenAPIFiles(openAPIFiles) {
@@ -370,11 +385,29 @@ class ApiCreateOpenAPI extends React.Component {
         } = this.state;
         const steps = ApiCreateOpenAPI.getSteps();
         const { classes } = this.props;
+        const substitutedContext = ApiCreateOpenAPI.getSubstitutedContext(api);
         return (
             <React.Fragment>
                 <APICreateTopMenu />
                 <Grid container spacing={24} className={classes.root}>
                     <Grid item xs={12} md={6}>
+                        <div className={classes.titleWrapper}>
+                            <Typography variant='h4' align='left' className={classes.mainTitle}>
+                                <FormattedMessage
+                                    id='Apis.Create.OpenAPI.ApiCreateOpenAPI.import.api'
+                                    defaultMessage='Import an OpenAPI Definition'
+                                />
+                            </Typography>
+                            {activeStep === 1 && (
+                                <Typography variant='h5' align='left' className={classes.subTitle} hidden>
+                                    <FormattedMessage
+                                        id='Apis.Create.Default.APICreateDefault.gateway.url'
+                                        defaultMessage='Gateway_URL/'
+                                    />
+                                    {substitutedContext}
+                                </Typography>
+                            )}
+                        </div>
                         <Stepper activeStep={activeStep} className={classes.stepper}>
                             {steps.map((label) => {
                                 const props = {};
