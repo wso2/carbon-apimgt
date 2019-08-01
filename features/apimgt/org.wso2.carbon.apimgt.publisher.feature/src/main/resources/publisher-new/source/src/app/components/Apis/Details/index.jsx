@@ -386,8 +386,7 @@ class Details extends Component {
                             active={active}
                             Icon={<ConfigurationIcon />}
                         />
-                        {isAPIProduct ?
-                            null :
+                        {!isAPIProduct &&
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.endpoints',

@@ -73,8 +73,8 @@ function Delete(props) {
     };
     const deleteDoc = () => {
         const {
- apiId, docId, getDocumentsList, apiType 
-} = props;
+            apiId, docId, getDocumentsList, apiType,
+        } = props;
         const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
         const docPromise = restApi.deleteDocument(apiId, docId);
         docPromise

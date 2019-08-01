@@ -147,7 +147,7 @@ function Create(props) {
 
 Create.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
+    intl: PropTypes.func.isRequired,
     apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]).isRequired,
 };
 

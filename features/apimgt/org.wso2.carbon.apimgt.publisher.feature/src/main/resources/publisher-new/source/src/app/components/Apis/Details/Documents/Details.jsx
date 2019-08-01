@@ -38,7 +38,7 @@ import Api from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import PageContainer from 'AppComponents/Base/container/';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import PageNavigation from '../../APIsNavigation';
+import PageNavigation from 'AppComponents/Apis/APIsNavigation';
 
 /**
  * API Details Document page component
@@ -120,19 +120,17 @@ class Details extends React.Component {
      * @memberof Details
      */
     componentDidMount() {
-        const { apiType } = this.props.api;
+        const { api, match: { params: { apiProductUUID, documentId, apiUUID } } } = this.props;
         let promisedDocument;
-        switch (apiType) {
+        switch (api.apiType) {
             case Api.CONSTS.APIProduct: {
-                const { apiProductUUID, documentId } = this.props.match.params;
                 const apiProduct = new APIProduct();
                 promisedDocument = apiProduct.getDocument(apiProductUUID, documentId);
                 break;
             }
             default: {
-                const { apiUUID, documentId } = this.props.match.params;
-                const api = new Api();
-                promisedDocument = api.getDocument(apiUUID, documentId);
+                const newApi = new Api();
+                promisedDocument = newApi.getDocument(apiUUID, documentId);
             }
         }
         promisedDocument

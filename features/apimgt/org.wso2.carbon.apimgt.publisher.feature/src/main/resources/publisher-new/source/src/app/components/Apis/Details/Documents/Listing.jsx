@@ -108,12 +108,11 @@ class Listing extends React.Component {
      Get the document list attached to current API and set it to the state
      */
     getDocumentsList() {
-        const { apiType } = this.props.api;
-        const { intl } = this.props;
+        const { api, intl } = this.props;
 
-        if (apiType === API.CONSTS.APIProduct) {
+        if (api.apiType === API.CONSTS.APIProduct) {
             const apiProduct = new APIProduct();
-            const docs = apiProduct.getDocuments(this.props.api.id);
+            const docs = apiProduct.getDocuments(api.id);
             docs.then((response) => {
                 this.setState({ docs: response.obj.list });
             }).catch((errorResponse) => {
@@ -127,8 +126,8 @@ class Listing extends React.Component {
                 }));
             });
         } else {
-            const api = new API();
-            const docs = api.getDocuments(this.props.api.id);
+            const newApi = new API();
+            const docs = newApi.getDocuments(this.props.api.id);
             docs.then((response) => {
                 this.setState({ docs: response.obj.list });
             }).catch((errorResponse) => {
