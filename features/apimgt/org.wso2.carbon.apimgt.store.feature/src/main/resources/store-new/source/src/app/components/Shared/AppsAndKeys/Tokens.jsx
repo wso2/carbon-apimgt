@@ -16,7 +16,7 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -27,7 +27,6 @@ import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import { injectIntl, } from 'react-intl';
 import Application from 'AppData/Application';
 import Loading from '../../Base/Loading/Loading';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
@@ -127,7 +126,7 @@ class Tokens extends React.Component {
 
         if (!application) {
             console.warn(intl.formatMessage({
-                defaultMessage: 'No Application found!', id:'Shared.AppsAndKeys.Tokens.no.application.found'}));
+                defaultMessage: 'No Application found!', id: 'Shared.AppsAndKeys.Tokens.no.application.found' }));
             return false;
         }
         if (!timeout || timeout.length === 0) {
@@ -156,21 +155,24 @@ class Tokens extends React.Component {
                     <TextField
                         required
                         label={intl.formatMessage({
-                                defaultMessage: 'Access token validity period', id:'Shared.AppsAndKeys.Tokens.access.token'})}
+                            defaultMessage: 'Access token validity period',
+                            id: 'Shared.AppsAndKeys.Tokens.access.token',
+                        })}
                         InputLabelProps={{
                             shrink: true,
                         }}
                         helperText={intl.formatMessage({
-                                defaultMessage: 'You can set an expiration period to determine the validity period of ' +
-                                'the token after generation. Set this to a negative value to ensure that the token never' +
-                                ' expires.', id:'Shared.AppsAndKeys.Tokens.you.can.set'})}
+                            defaultMessage: 'You can set an expiration period to determine the validity period of '
+                            + 'the token after generation. Set this to a negative value to ensure that the token never'
+                            + ' expires.',
+                            id: 'Shared.AppsAndKeys.Tokens.you.can.set',
+                        })}
                         fullWidth
                         name='timeout'
                         onChange={e => this.handleOnChange(e)}
                         placeholder={this.context.intl.formatMessage({
-                            id: 'access.token.validity.period.placeholder',
-                            defaultMessage: intl.formatMessage({
-                                defaultMessage: 'Enter time in milliseconds', id:'Shared.AppsAndKeys.Tokens.enter.time'}),
+                            id: 'Shared.AppsAndKeys.Tokens.enter.time',
+                            defaultMessage: 'Enter time in milliseconds',
                         })}
                         value={timeout}
                         autoFocus
@@ -182,10 +184,12 @@ class Tokens extends React.Component {
                     className={classes.FormControlOdd}
                     disabled={subscriptionScopes.length === 0}
                 >
-                    <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}><FormattedMessage
-                            id='Shared.AppsAndKeys.Tokens.when.you.generate'
+                    <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.Tokens.when.you.generate.scopes'
                             defaultMessage='Scopes'
-                        /></InputLabel>
+                        />
+                    </InputLabel>
                     <Select
                         name='scopesSelected'
                         multiple

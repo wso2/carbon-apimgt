@@ -57,7 +57,7 @@ class ConfirmDialog extends React.Component {
             <Dialog open={open} onClose={this.handleRequestClose}>
                 <DialogTitle>{title || <FormattedMessage id='Shared.ConfirmDialog.please.confirm' defaultMessage='Please Confirm' />}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>{message || <FormattedMessage id='Shared.ConfirmDialog.please.confirm' defaultMessage='Are you sure?' />}</DialogContentText>
+                    <DialogContentText>{message || <FormattedMessage id='Shared.ConfirmDialog.please.confirm.sure' defaultMessage='Are you sure?' />}</DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>

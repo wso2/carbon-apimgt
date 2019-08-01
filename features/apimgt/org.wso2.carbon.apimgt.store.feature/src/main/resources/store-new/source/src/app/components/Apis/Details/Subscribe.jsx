@@ -563,10 +563,10 @@ class Subscribe extends Component {
                         {this.state.subscribedApplications && this.state.subscribedApplications.length > 0 && (
                             <div>
                                 <Typography variant='caption' className={classes.subtitle}>
-                                <FormattedMessage
-                                                id='Apis.Details.Subscribe.showing.two'
-                                                defaultMessage='subscribed Applications'
-                                            />
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscribe.subscribed.applications'
+                                        defaultMessage='subscribed Applications'
+                                    />
                                     {this.state.subscribedApplications && this.state.subscribedApplications.length > 2 && (
                                         <span>
                                             -
@@ -639,7 +639,7 @@ class Subscribe extends Component {
                 >
                     <DialogTitle id='alert-dialog-title'>
                         <FormattedMessage
-                            id='Apis.Details.Subscribe.created.success'
+                            id='Apis.Details.Subscribe.use.location.service'
                             defaultMessage="Use Google's location service?"
                         />
                     </DialogTitle>

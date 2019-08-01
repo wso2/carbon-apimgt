@@ -244,7 +244,7 @@ class CookiePolicy extends React.Component {
                         <h2 id='cookie'>
                             <FormattedMessage
                                 defaultMessage='What is a cookie?'
-                                id='Policy.CookiePolicy.description5'
+                                id='Policy.CookiePolicy.what.is.a.cookie'
                             />
                         </h2>
                         <p>

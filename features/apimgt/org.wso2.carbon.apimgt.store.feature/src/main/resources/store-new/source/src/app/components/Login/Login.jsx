@@ -224,7 +224,12 @@ class Login extends Component {
         if (this.state.redirectToIS) {
             return (
                 <Redirecting
-                    message={<FormattedMessage defaultMessage='You are now being redirected to Identity Provider.' />}
+                    message={(
+                        <FormattedMessage
+                            id='Login.Login.redirected.to.identity.provider'
+                            defaultMessage='You are now being redirected to Identity Provider.'
+                        />
+                    )}
                 />
             );
         }
@@ -364,7 +369,7 @@ class Login extends Component {
                                                     component={Link}
                                                     to='/'
                                                 >
-                                                    <FormattedMessage defaultMessage='Go Back' />
+                                                    <FormattedMessage id='Login.Login.go.back' defaultMessage='Go Back' />
                                                 </Button>
 
                                                 <Typography type='body1' style={{ marginTop: 10 }}>

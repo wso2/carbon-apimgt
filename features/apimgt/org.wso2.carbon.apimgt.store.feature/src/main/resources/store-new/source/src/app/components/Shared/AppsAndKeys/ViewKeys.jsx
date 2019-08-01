@@ -315,7 +315,7 @@ class ViewKeys extends React.Component {
                             <Grid item xs={6}>
                                 <InputLabel htmlFor='adornment-amount'>
                                     <FormattedMessage
-                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.title'
+                                        id='Shared.AppsAndKeys.ViewKeys.access.token'
                                         defaultMessage='Access Token'
                                     />
                                 </InputLabel>
