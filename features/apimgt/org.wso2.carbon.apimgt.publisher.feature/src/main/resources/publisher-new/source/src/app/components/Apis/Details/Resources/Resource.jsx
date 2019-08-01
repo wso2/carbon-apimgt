@@ -117,6 +117,10 @@ const styles = theme => ({
     scopeSelect: {
         width: '100%',
     },
+    selectWidth: {
+        margin: theme.spacing.unit * 1,
+        minWidth: 120,
+    },
     descriptionWrapperUp: {
         paddingBottom: '0 !important',
     },
@@ -264,7 +268,7 @@ class Resource extends React.Component {
      */
     render() {
         const {
-            classes, method, path, scopes, theme, intl,
+            classes, method, path, scopes, theme, intl, policyLevel
         } = this.props;
         const resource = this.state.method;
         let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
@@ -362,7 +366,7 @@ class Resource extends React.Component {
                                             />
                                         </TableCell>
                                         <TableCell>
-                                                <Select
+                                                <Select className={classes.selectWidth}
                                                     value={resource['x-scope']}
                                                     onChange={this.handleScopeChange}
                                                     inputProps={{
@@ -395,6 +399,7 @@ class Resource extends React.Component {
                                                 />
                                             </Typography>
                                         </TableCell>
+                                        {policyLevel === 'perResource' &&
                                         <TableCell>
                                             <Typography variant='subtitle2'>
                                                 <FormattedMessage
@@ -403,10 +408,11 @@ class Resource extends React.Component {
                                                 />
                                             </Typography>
                                         </TableCell>
+                                        }
                                     </TableRow>
                                     <TableRow className={classes.row}>
                                         <TableCell>
-                                            <Select
+                                            <Select className={classes.selectWidth}
                                                 value={resource['x-auth-type']}
                                                 onChange={this.handleAuthTypeChange}
                                                 fieldName='Auth Type'
@@ -449,8 +455,9 @@ class Resource extends React.Component {
                                                 </MenuItem>
                                             </Select>
                                         </TableCell>
+                                        {policyLevel==='perResource' &&
                                         <TableCell>
-                                            <Select
+                                            <Select className={classes.selectWidth}
                                                 value={resource['x-throttling-tier']}
                                                 onChange={this.handlePolicyChange}
                                                 fieldName='Throttling Policy'
@@ -465,6 +472,7 @@ class Resource extends React.Component {
                                                 ))}
                                             </Select>
                                         </TableCell>
+                                        }
                                     </TableRow>
                                 </Table>
                             </Grid>
