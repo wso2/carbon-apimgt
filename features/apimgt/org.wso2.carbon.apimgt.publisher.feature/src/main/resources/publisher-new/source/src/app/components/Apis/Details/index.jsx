@@ -55,6 +55,7 @@ import Scope from './Scopes';
 import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
+import MediationPolicies from './MediationPolicies/MediationPolicies';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import ApiContext from './components/ApiContext';
@@ -511,6 +512,10 @@ class Details extends Component {
                                     path={Details.subPaths.BUSINESS_INFO}
                                     component={() => <BusinessInformation />}
                                 />
+                                <Route
+                                    path={Details.subPaths.MEDIATION_POLICY}
+                                    component={() => <MediationPolicies api={api} />}
+                                />
                                 <Route path={Details.subPaths.PROPERTIES} component={() => <Properties />} />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
                             </Switch>
@@ -545,6 +550,7 @@ Details.subPaths = {
     BUSINESS_INFO: '/apis/:api_uuid/business info',
     PROPERTIES: '/apis/:api_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
+    MEDIATION_POLICIES: '/apis/:api_uuid/mediation-policies',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

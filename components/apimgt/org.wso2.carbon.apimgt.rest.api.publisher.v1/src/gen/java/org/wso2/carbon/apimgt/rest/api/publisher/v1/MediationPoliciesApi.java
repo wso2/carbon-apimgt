@@ -43,7 +43,7 @@ MediationPoliciesApiService delegate = new MediationPoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
         })
-    }, tags={ "Mediation Policies" })
+    }, tags={ "Mediation Policy [Collection]" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of mediation policies is returned. ", response = MediationListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),

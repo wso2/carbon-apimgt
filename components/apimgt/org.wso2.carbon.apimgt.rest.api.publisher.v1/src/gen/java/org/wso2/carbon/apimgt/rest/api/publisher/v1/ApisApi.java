@@ -275,7 +275,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
         })
-    }, tags={ "Mediation Policies",  })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying APIs is returned. ", response = MediationListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -292,7 +292,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
-    }, tags={ "Mediation Policies",  })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Mediation policy returned. ", response = Void.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -309,7 +309,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies")
         })
-    }, tags={ "Mediation Policies",  })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
@@ -327,7 +327,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
-    }, tags={ "Mediation Policies",  })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Mediation policy returned. ", response = MediationDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -345,7 +345,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mediation_policy_manage", description = "Update and delete mediation policies")
         })
-    }, tags={ "Mediation Policies",  })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated API object ", response = MediationDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -364,9 +364,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mediation_policy_create", description = "Create mediation policies")
         })
-    }, tags={ "Mediation Policies",  })
+    }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. mediation policy uploaded ", response = MediationDTO.class),
+        @ApiResponse(code = 201, message = "OK. mediation policy uploaded ", response = MediationDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })

@@ -2299,6 +2299,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\": 1,\r\n   \"next\": null,\r\n   \"previous\": null,\r\n   \"list\": [   {\r\n      \"name\": \"add_custom_header_fault\",\r\n      \"id\": \"6460d7e6-4272-4e3a-9879-437228d83123\",\r\n      \"type\": \"fault\"\r\n   }]\r\n}"
       summary: |
         Get all mediation policies of an API
+      operationid:  apisApiIdMediationPoliciesGet
       description: |
         This operation provides you a list of available mediation policies of an API.
       parameters:
@@ -2311,7 +2312,7 @@ paths:
           type: string
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - Mediation Policies
+        - Mediation Policy (Individual)
       responses:
         200:
           description: |
@@ -2347,10 +2348,10 @@ paths:
       security:
         - OAuth2Security:
           - apim:mediation_policy_create
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer 6cea3696-0151-3282-bf79-a0c4db6f308a\" -H \"Content-Type: multipart/form-data\" -X POST -F file=@sequence.xml \"https://localhost:9443/api/am/publisher/v1.0/apis/40082986-6488-4b86-801a-b0b069d4588c/mediation-policies\""
-      x-wso2-request: "POST https://localhost:9443/api/am/publisher/v1.0/apis/40082986-6488-4b86-801a-b0b069d4588c/mediation-policies\r\nContent-Type: multipart/form-data\r\nAuthorization: Bearer 6cea3696-0151-3282-bf79-a0c4db6f308a\r\n\r\n -F file=@sequence.xml"
-      x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://localhost:9443/api/am/publisher/v1.0/registry/resource/_system/governance/apimgt/applicationdata/provider/admin/hello/1.0.0/fault/add_custom_header_fault.xml\r\nContent-Type: application/json\r\n\r\n{  \r\n   \"id\":\"624b9f7d-bfaf-484b-94cc-e84491f5d725\",\r\n   \"name\":\"add_custom_header\",\r\n   \"type\":\"in\",\r\n    \"sourceType\":\"FILE\"\r\n}"
+      x-examples:
+        $ref: docs/examples/apis/apis_id_mediationpolicies_post.yaml
       summary: Add an API specific mediation policy
+      operationid: apisApiIdMediationPoliciesPost
       description: |
         This operation can be used to add an API specifc mediation policy.
       parameters:
@@ -2372,9 +2373,9 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Mediation Policies
+        - Mediation Policy (Individual)
       responses:
-        200:
+        201:
           description: |
             OK.
             mediation policy uploaded
@@ -2430,13 +2431,10 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23\" https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725"
-      x-wso2-request: "GET https://localhost:9443/api/am/publisher/v0.14/apis/40082986-6488-4b86-801a-b0b069d4588c/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725\r\nAuthorization: Bearer 5aa0acc0-0ce3-3a0b-8cc8-db5ef696ee23"
-      x-wso2-response: "HTTP/1.1 200 OK
-                        Content-Type: application/json
-                        \n{\n\"id\":\"32a42249-5bc1-431e-bb38-f51d5ecd66b0\",\n\"name\":\"header_sequence\",\n\"type\":\"IN\",\n\"sourceType\":\"FILE\"}
-                        "
+      x-examples:
+        $ref: docs/examples/apis/apis_id_mediationpolicies_id_get.yaml
       summary: Get an API specific mediation policy
+      operationid:  apisApiIdMediationPoliciesMediationPolicyIdGet
       description: |
         This operation can be used to retrieve a particular API specific mediation policy.
       parameters:
@@ -2444,7 +2442,7 @@ paths:
         - $ref: '#/parameters/mediationPolicyId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Mediation Policies
+        - Mediation Policy (Individual)
       responses:
         200:
           description: |
@@ -2491,10 +2489,10 @@ paths:
       security:
         - OAuth2Security:
           - apim:mediation_policy_manage
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc\" -X DELETE https://localhost:9443/api/am/publisher/v1.0/apis/40082986-6488-4b86-801a-b0b069d4588c/mediation-policies/60f5146d-1774-405d-86b3-9b040ac266d5"
-      x-wso2-request: "DELETE https://localhost:9443/api/am/publisher/v1.4/apis/40082986-6488-4b86-801a-b0b069d4588c/mediation-policies/60f5146d-1774-405d-86b3-9b040ac266d5\r\nAuthorization: Bearer fb2a0784-f60c-3276-8fde-5b0f70e61ecc"
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-examples:
+        $ref: docs/examples/apis/apis_id_mediationpolicies_id_delete.yaml
       summary: Delete an API specific mediation policy
+      operationid:  apisApiIdMediationPoliciesMediationPolicyIdDelete
       description: |
         This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy.
       parameters:
@@ -2502,7 +2500,7 @@ paths:
         - $ref: '#/parameters/mediationPolicyId'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Mediation Policies
+        - Mediation Policy (Individual)
       responses:
         200:
           description: |
@@ -2541,6 +2539,7 @@ paths:
       x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v1.0/apis/40082986-6488-4b86-801a-b0b069d4588c/mediation- olicies/820fdcf7-7258-42b5-809e-674b893644d1\r\nContent-Type: multipart/form-data\r\nAuthorization: Bearer 9e41fae2-3ada-3dd1-8f12-2077202f4285\r\n\r\n{\r\n   \"name\": \"add_custom_header\",\r\n   \"type\": \"in\",\r\n  \"sourceType\": \"FILE\"  \n\"\r\n}"
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"id\": \"a7365481-5b3f-463c-a646-a498895ac210\",\r\n   \"name\": \"add_custom_header\",\r\n   \"type\": \"in\",\r\n   \"sourceType\": \"FILE\" \n\"\r\n}"
       summary: Update an API specific mediation policy
+      operationid:  apisApiIdMediationPoliciesMediationPolicyIdPut
       description: |
         This operation can be used to update an existing mediation policy of an API.
       parameters:
@@ -2563,7 +2562,7 @@ paths:
         - $ref: '#/parameters/mediationPolicyId'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Mediation Policies
+        - Mediation Policy (Individual)
       responses:
         200:
           description: |
@@ -2634,6 +2633,7 @@ paths:
 
                        [file content]"
       summary: Downloadt an API specific mediation policy
+      operationid:  apisApiIdMediationPoliciesMediationPolicyIdContentGet
       description: |
         This operation can be used to download a particular API specific mediation policy.
       parameters:
@@ -2641,7 +2641,7 @@ paths:
       - $ref: '#/parameters/mediationPolicyId'
       - $ref: '#/parameters/If-None-Match'
       tags:
-      - Mediation Policies
+      - Mediation Policy (Individual)
       responses:
         200:
           description: |
@@ -3647,13 +3647,11 @@ paths:
       security:
         - OAuth2Security:
           - apim:mediation_policy_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/mediation-policies"
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/publisher/v0.14/mediation-policies
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\": 10,\r\n   \"next\": null,\r\n   \"previous\": null,\r\n   \"list\":    [\r\n            {\r\n         \"name\": \"debug_json_fault\",\r\n         \"id\": \"563de8f3-dd1d-4ec7-afc2-d158c663ed34\",\r\n         \"type\": \"fault\"\r\n      },\r\n            {\r\n         \"name\": \"json_fault\",\r\n         \"id\": \"f9c36f4d-a2b6-41e7-b311-d358a47916be\",\r\n         \"type\": \"fault\"\r\n      },\r\n            {\r\n         \"name\": \"json_to_xml_in_message\",\r\n         \"id\": \"3921225b-7918-4b95-a851-22c4e4e3e911\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"debug_in_flow\",\r\n         \"id\": \"2bc15f93-4455-4763-89b8-83600fb9d731\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"log_in_message\",\r\n         \"id\": \"4d287cca-76ab-44ca-b22e-919fc27c50e3\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"preserve_accept_header\",\r\n         \"id\": \"3776b215-b3bc-40b6-bdcb-06efa7de64be\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"xml_to_json_in_message\",\r\n         \"id\": \"50ac2002-769e-4f90-8549-6d0248dff7d2\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"xml_to_json_out_message\",\r\n         \"id\": \"2af75853-ed75-4d25-81aa-0ebbeca691ea\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"json_to_xml_out_message\",\r\n         \"id\": \"d9fa3ffc-f6b6-4171-ab97-eb44196cb66e\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"debug_out_flow\",\r\n         \"id\": \"260b7701-4071-46bd-9b66-900ac6fffed6\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"apply_accept_header\",\r\n         \"id\": \"15c17c2f-33e3-4c37-a262-04dfa49983a4\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"log_out_message\",\r\n         \"id\": \"d37dca41-c048-492a-82cf-9a2292c6fff0\",\r\n         \"type\": \"out\"\r\n      }\r\n   ]\r\n}"
+      x-examples:
+        $ref: docs/examples/mediation-policies/mediation_policies_get.yaml
       summary: |
         Get all global level mediation policies
+      operationId: mediationPoliciesGet
       description: |
         This operation provides you a list of available all global level mediation policies.
       parameters:
@@ -3665,7 +3663,7 @@ paths:
           type: string
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - Mediation Policies
+        - Mediation Policy [Collection]
       responses:
         200:
           description: |

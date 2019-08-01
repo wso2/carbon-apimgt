@@ -1310,6 +1310,116 @@ class API extends Resource {
             });
         }, this._requestMetaData());
     }
+
+    /**
+     * Get the available mediation policies by the api uuid.
+     * @param {String} api uuid
+     * @returns {Promise}
+     *
+     */
+    static getMediationPolicies(apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["Mediation Policy [Collection]"].apisApiIdMediationPoliciesGet({
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Add a mediation policy to a given api.
+     * @param {String} api uuid
+     * @returns {Promise}
+     *
+     */
+    static addMediationPolicy(apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["Mediation Policy (Individual)"].apisApiIdMediationPoliciesPost({
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get the available mediation policies by the mediation policy uuid and api.
+     * @param {String} seqId mediation policy uuid
+     * @param {String} api uuid
+     * @returns {Promise}
+     *
+     */
+    static getMediationPolicy(seqId, apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["Mediation Policy (Individual)"].apisApiIdMediationPoliciesMediationPolicyIdGet({
+                    seqId: seqId,
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Delete the available mediation policies by the mediation policy uuid and api.
+     * @param {String} seqId mediation policy uuid
+     * @param {String} api uuid
+     * @returns {Promise}
+     *
+     */
+    static deleteMediationPolicy(seqId, apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["Mediation Policy (Individual)"].apisApiIdMediationPoliciesMediationPolicyIdDelete({
+                    seqId: seqId,
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Update the available mediation policies by the mediation policy uuid and api.
+     * @param {String} seqId mediation policy uuid
+     * @param {String} api uuid
+     * @returns {Promise}
+     *
+     */
+    static updateMediationPolicy(seqId, apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["Mediation Policy (Individual)"].apisApiIdMediationPoliciesMediationPolicyIdPut({
+                    seqId: seqId,
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get the the content of a mediation policy.
+     * @param {String} seqId mediation policy uuid
+     * @param {String} api uuid
+     * @returns {Promise}
+     *
+     */
+    static getMediationPolicyContent(seqId, apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["Mediation Policy (Individual)"].apisApiIdMediationPoliciesMediationPolicyIdContentGet({
+                    seqId: seqId,
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
 }
 
 export default API;

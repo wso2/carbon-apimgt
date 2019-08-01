@@ -211,20 +211,22 @@ Content-Type: application/json
 You can search in attributes by using an **&quot;&lt;attribute&gt;:&quot;** modifier.
 
 Eg.
-&quot;provider:wso2&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
+&quot;provider:wso2&quot; will match an API if the provider of the API contains &quot;wso2&quot;.
+&quot;provider:&quot;wso2&quot;&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
 &quot;status:PUBLISHED&quot; will match an API if the API is in PUBLISHED state.
 &quot;label:external&quot; will match an API if it contains a Microgateway label called &quot;external&quot;.
 
-Additionally you can use wildcards.
-
+Also you can use combined modifiers
 Eg.
-&quot;provider:wso2*&quot; will match an API if the provider of the API starts with &quot;wso2&quot;.
+name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
 
-Supported attribute modifiers are [**version, context, status,
+Supported attribute modifiers are [**version, context, name, status,
 description, subcontext, doc, provider, label**]
 
-If no advanced attribute modifier has been specified, search will match the
-given query string against API Name.
+If no advanced attribute modifier has been specified,  the API names containing
+the search term will be returned as a result.
+
+Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
 </p>
                         </td>
                         <td>
@@ -1026,7 +1028,6 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </div>
                     <div id="response-searchGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
 Content-Type: application/json
-Location: https://localhost:9443/api/am/publisher/v1.0/search?limit&#x3D;25&amp;offset&#x3D;0&amp;query&#x3D;test
 
 {
   &quot;count&quot; : 5,
