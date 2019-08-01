@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
@@ -31,17 +30,26 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
+public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor {
 
-    private static final Log logger = LogFactory.getLog(PostAuthenticationInterceptor.class);
+    private static final Log logger = LogFactory.getLog(SubscriberRegistrationInterceptor.class);
     private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
-    public PostAuthenticationInterceptor() {
+
+    public SubscriberRegistrationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
     }
 
+    /**
+     * Handles the incoming message after post authentication. Only used in Store REST API, to register a newly signed up
+     * store user who hasn't logged in to Store for the first time either via REST API or Store UI. 
+     * This method will register the user as a subscriber 
+     * (register in AM_SUBSCRIBER table, add the default application for subscriber etc.).
+     *
+     * @param message cxf message
+     */
     @Override
-    public void handleMessage(Message message) throws Fault {
+    public void handleMessage(Message message) {
         String username = RestApiUtil.getLoggedInUsername();
         String groupId = RestApiUtil.getLoggedInUserGroupId();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
