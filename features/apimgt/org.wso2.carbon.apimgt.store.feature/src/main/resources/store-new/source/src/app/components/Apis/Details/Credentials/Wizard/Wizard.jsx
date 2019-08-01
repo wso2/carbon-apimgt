@@ -76,6 +76,9 @@ const styles = theme => ({
     },
 });
 
+const stepComponents = [CreateAppStep, SubscribeToAppStep, GenerateKeysStep,
+    GenerateAccessTokenStep, CopyAccessTokenStep];
+
 /**
  * Class used for wizard
  */
@@ -114,7 +117,6 @@ class Wizard extends Component {
         };
         this.state = {
             currentStep: 0,
-            nextStep: 0,
             createdApp: null,
             createdToken: null,
             redirect: false,
@@ -158,40 +160,22 @@ class Wizard extends Component {
 
     /**
      * Increment the current step or next step by 1
-     * @param {*} type step type
      */
-    handleNext = (type) => {
-        switch (type) {
-            case 'current':
-                this.setState(({ currentStep }) => {
-                    return { currentStep: currentStep + 1 };
-                });
-                break;
-            case 'next':
-                this.setState(({ nextStep }) => {
-                    return { nextStep: nextStep + 1 };
-                });
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Decrement the next step by 1
-     */
-    handleBack = () => {
-        this.setState(({ nextStep }) => {
-            return { nextStep: nextStep - 1 };
+    handleNext = () => {
+        this.setState(({ currentStep }) => {
+            return { currentStep: currentStep + 1 };
         });
     }
 
-    handleReset = () => {
-        this.setState({
-            currentStep: 0,
-            nextStep: 0,
-        });
-    };
+/**
+ * Rest the currentStep to 0 and bring wizard back to first step
+ * @memberof Wizard
+ */
+handleReset = () => {
+    this.setState({
+        currentStep: 0,
+    });
+};
 
     /**
      * Set state.redirect to true to redirect to the API console page
@@ -206,13 +190,10 @@ class Wizard extends Component {
      */
     render() {
         const {
-            classes, updateSubscriptionData, apiId, handleClickToggle,
-            throttlingPolicyList,
+            classes, updateSubscriptionData, apiId, handleClickToggle, throttlingPolicyList,
         } = this.props;
-        const {
-            currentStep, createdApp, createdToken, redirect, nextStep, createdKeyType, stepStatus,
-        } = this.state;
-
+        const { currentStep, redirect, stepStatus } = this.state;
+        const CurrentStepComponent = stepComponents[currentStep];
         if (redirect) {
             return <Redirect push to={'/apis/' + apiId + '/test'} />;
         }
@@ -254,121 +235,37 @@ class Wizard extends Component {
                         </Stepper>
                     </div>
                     <div>
-                        {nextStep === this.steps.length ? (
-                            <div>
-                                <Typography className={classes.instructions}>
+                        <div className={classes.wizardContent}>
+                            {stepStatus === this.stepStatuses.PROCEED && (
+                                <React.Fragment>
+                                    <CurrentStepComponent
+                                        {...this.state}
+                                        incrementStep={this.handleNext}
+                                        setStepStatus={this.setStepStatus}
+                                        stepStatuses={this.stepStatuses}
+                                        classes={classes}
+                                        setCreatedApp={this.setCreatedApp}
+                                        throttlingPolicyList={throttlingPolicyList}
+                                        apiId={apiId}
+                                        setCreatedKeyType={this.setCreatedKeyType}
+                                        setCreatedToken={this.setCreatedToken}
+                                        handleClickToggle={handleClickToggle}
+                                        updateSubscriptionData={updateSubscriptionData}
+                                        handleReset={this.handleReset}
+                                        handleRedirectTest={this.handleRedirectTest}
+                                    />
+                                </React.Fragment>
+                            )}
+                            {stepStatus === this.stepStatuses.BLOCKED && (
+                                <Typography variant='h4'>
                                     <FormattedMessage
-                                        id='Apis.Details.Credentials.Wizard.Wizard.all.steps.completed'
-                                        defaultMessage='All steps completed!'
+                                        id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'
+                                             + 'for.this.step.has'}
+                                        defaultMessage='Approval request for this step has been Sent'
                                     />
                                 </Typography>
-                                <Button
-                                    onClick={this.handleReset}
-                                    className={classes.button}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.Credentials.Wizard.Wizard.rest'
-                                        defaultMessage='Reset'
-                                    />
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className={classes.wizardContent}>
-                                {stepStatus === this.stepStatuses.PROCEED && (
-                                    <React.Fragment>
-                                        <CreateAppStep
-                                            currentStep={currentStep}
-                                            setCreatedApp={this.setCreatedApp}
-                                            nextStep={nextStep}
-                                            incrementStep={this.handleNext}
-                                            decrementStep={this.handleBack}
-                                            setStepStatus={this.setStepStatus}
-                                            stepStatuses={this.stepStatuses}
-                                        />
-                                        <SubscribeToAppStep
-                                            throttlingPolicyList={throttlingPolicyList}
-                                            currentStep={currentStep}
-                                            createdApp={createdApp}
-                                            apiId={apiId}
-                                            nextStep={nextStep}
-                                            incrementStep={this.handleNext}
-                                            decrementStep={this.handleBack}
-                                            setStepStatus={this.setStepStatus}
-                                            stepStatuses={this.stepStatuses}
-                                        />
-                                        <GenerateKeysStep
-                                            currentStep={currentStep}
-                                            createdApp={createdApp}
-                                            nextStep={nextStep}
-                                            incrementStep={this.handleNext}
-                                            decrementStep={this.handleBack}
-                                            setCreatedKeyType={this.setCreatedKeyType}
-                                            setStepStatus={this.setStepStatus}
-                                            stepStatuses={this.stepStatuses}
-                                        />
-                                        <GenerateAccessTokenStep
-                                            currentStep={currentStep}
-                                            createdApp={createdApp}
-                                            setCreatedToke={this.setCreatedToken}
-                                            nextStep={nextStep}
-                                            incrementStep={this.handleNext}
-                                            decrementStep={this.handleBack}
-                                            createdKeyType={createdKeyType}
-                                        />
-                                        <CopyAccessTokenStep
-                                            currentStep={currentStep}
-                                            createdToken={createdToken}
-                                            handleClickToggle={handleClickToggle}
-                                            updateSubscriptionData={updateSubscriptionData}
-                                            nextStep={nextStep}
-                                            incrementStep={this.handleNext}
-                                            stepStatus={stepStatus}
-                                        />
-                                        <div className={classes.wizardButtons}>
-                                            <Button
-                                                disabled={currentStep < this.steps.length - 1}
-                                                onClick={this.handleRedirectTest}
-                                                className={classes.button}
-                                                variant='outlined'
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Details.Credentials.Wizard.Wizard.test'
-                                                    defaultMessage='Test'
-                                                />
-                                            </Button>
-                                            <Button
-                                                variant='contained'
-                                                color='primary'
-                                                onClick={() => this.handleNext('next')}
-                                                className={classes.button}
-                                            >
-                                                {currentStep === this.steps.length - 1
-                                                    ? (
-                                                        <FormattedMessage
-                                                            id='Apis.Details.Credentials.Wizard.Wizard.finish'
-                                                            defaultMessage='Finish'
-                                                        />
-                                                    )
-                                                    : (
-                                                        <FormattedMessage
-                                                            id='Apis.Details.Credentials.Wizard.Wizard.next'
-                                                            defaultMessage='Next'
-                                                        />
-                                                    )}
-                                            </Button>
-                                        </div>
-                                    </React.Fragment>
-                                )}
-                                {stepStatus === this.stepStatuses.BLOCKED && (
-                                    <Typography variant='h4'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Credentials.Wizard.Wizard.approval.request.for.this.step'
-                                            defaultMessage='Approval request for this step has been Sent'
-                                        />
-                                    </Typography>
-                                )}
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </React.Fragment>

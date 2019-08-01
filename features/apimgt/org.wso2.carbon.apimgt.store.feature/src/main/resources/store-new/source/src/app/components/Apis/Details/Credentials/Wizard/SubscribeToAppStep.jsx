@@ -21,6 +21,7 @@ import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 import { injectIntl } from 'react-intl';
+import ButtonPanel from './ButtonPanel';
 
 const subscribeToAppStep = (props) => {
     const SUBSCRIPTION_STATES = {
@@ -35,9 +36,32 @@ const subscribeToAppStep = (props) => {
     });
     const [newApp, setNewApp] = useState(null);
     const {
-        apiId, currentStep, throttlingPolicyList, createdApp, decrementStep, incrementStep,
-        nextStep, intl, setStepStatus, stepStatuses,
+        apiId, currentStep, throttlingPolicyList, createdApp, incrementStep, intl, setStepStatus,
+        stepStatuses, classes,
     } = props;
+
+    const subscribeToApplication = () => {
+        const api = new API();
+        api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
+            subscriptionRequest.throttlingPolicy)
+            .then((response) => {
+                if (response.body.status === SUBSCRIPTION_STATES.UNBLOCKED) {
+                    console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Subscribed successfully',
+                        id: 'Apis.Details.Credentials.Wizard.SubscribeToAppStep.subscribed.successfully',
+                    }));
+                    incrementStep();
+                    setStepStatus(stepStatuses.PROCEED);
+                } else {
+                    setStepStatus(stepStatuses.BLOCKED);
+                }
+            })
+            .catch((error) => {
+                console.log('Error while creating the subscription.');
+                console.error(error);
+            });
+    };
 
     useEffect(() => {
         const newSubscriptionRequest = { ...subscriptionRequest, apiId };
@@ -51,44 +75,21 @@ const subscribeToAppStep = (props) => {
         setNewApp(createdApp);
     }, [createdApp]);
 
-    // Subscribe to api when current step is 2
-    useEffect(() => {
-        if (nextStep === 2 && nextStep > currentStep) {
-            const api = new API();
-            api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
-                subscriptionRequest.throttlingPolicy)
-                .then((response) => {
-                    if (response.body.status === SUBSCRIPTION_STATES.UNBLOCKED) {
-                        console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
-                        Alert.info(intl.formatMessage({
-                            defaultMessage: 'Subscribed successfully',
-                            id: 'Apis.Details.Credentials.Wizard.SubscribeToAppStep.subscribed.successfully',
-                        }));
-                        incrementStep('current');
-                        setStepStatus(stepStatuses.PROCEED);
-                    } else {
-                        setStepStatus(stepStatuses.BLOCKED);
-                    }
-                })
-                .catch((error) => {
-                    console.log('Error while creating the subscription.');
-                    console.error(error);
-                    decrementStep();
-                });
-        }
-    }, [nextStep]);
-
-    if (currentStep === 1) {
-        return (
+    return (
+        <React.Fragment>
             <SubscribeToApi
                 throttlingPolicyList={throttlingPolicyList}
                 applicationsAvailable={[newApp]}
                 subscriptionRequest={subscriptionRequest}
                 updateSubscriptionRequest={setApplicationRequest}
             />
-        );
-    }
-    return '';
+            <ButtonPanel
+                classes={classes}
+                currentStep={currentStep}
+                handleCurrentStep={subscribeToApplication}
+            />
+        </React.Fragment>
+    );
 };
 
 export default injectIntl(subscribeToAppStep);

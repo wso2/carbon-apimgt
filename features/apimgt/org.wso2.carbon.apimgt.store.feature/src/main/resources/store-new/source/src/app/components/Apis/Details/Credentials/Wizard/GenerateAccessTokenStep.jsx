@@ -21,6 +21,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Tokens from 'AppComponents/Shared/AppsAndKeys/Tokens';
 import Application from 'AppData/Application';
+import ButtonPanel from './ButtonPanel';
 
 const generateAccessTokenStep = (props) => {
     const [keyType, setKeyType] = useState('PRODUCTION');
@@ -33,7 +34,7 @@ const generateAccessTokenStep = (props) => {
         keyType: '',
     });
     const {
-        currentStep, createdApp, setCreatedToke, decrementStep, nextStep, incrementStep, createdKeyType,
+        currentStep, createdApp, setCreatedToken, incrementStep, createdKeyType, classes,
     } = props;
 
     useEffect(() => {
@@ -43,75 +44,71 @@ const generateAccessTokenStep = (props) => {
     }, [createdKeyType]);
 
     useEffect(() => {
-        if (currentStep === 3) {
-            Application.get(createdApp.value)
-                .then((application) => {
-                    application.getKeys().then(() => {
-                        const subscriptionScopesList = application.subscriptionScopes
-                            .map((scope) => { return scope.scopeKey; });
-                        setSubscriptionScopes(subscriptionScopesList);
-                    });
-                }).catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.error(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        setNotFound(true);
-                    }
+        Application.get(createdApp.value)
+            .then((application) => {
+                application.getKeys().then(() => {
+                    const subscriptionScopesList = application.subscriptionScopes
+                        .map((scope) => { return scope.scopeKey; });
+                    setSubscriptionScopes(subscriptionScopesList);
                 });
-        }
-    }, [currentStep]);
+            }).catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    setNotFound(true);
+                }
+            });
+    }, []);
 
-    useEffect(() => {
-        if (nextStep === 4 && nextStep > currentStep) {
-            Application.get(createdApp.value)
-                .then((application) => {
-                    return application.generateToken(accessTokenRequest.keyType,
-                        accessTokenRequest.timeout,
-                        accessTokenRequest.scopesSelected);
-                })
-                .then((response) => {
-                    console.log('token generated successfully ' + response);
-                    setCreatedToke(response);
-                    incrementStep('current');
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.error(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        setNotFound(true);
-                    }
-                    decrementStep();
-                });
-        }
-    }, [nextStep]);
+    const generateAccessToken = () => {
+        Application.get(createdApp.value)
+            .then((application) => {
+                return application.generateToken(accessTokenRequest.keyType,
+                    accessTokenRequest.timeout,
+                    accessTokenRequest.scopesSelected);
+            })
+            .then((response) => {
+                console.log('token generated successfully ' + response);
+                setCreatedToken(response);
+                incrementStep();
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    setNotFound(true);
+                }
+            });
+    };
 
-    if (currentStep === 3) {
-        return (
-            <React.Fragment>
-                <Tabs
-                    value={0}
-                    fullWidth
-                    indicatorColor='secondary'
-                    textColor='secondary'
-                >
-                    <Tab label={keyType} />
-                </Tabs>
-                <div>
-                    <Tokens
-                        updateAccessTokenRequest={setAccessTokenRequest}
-                        accessTokenRequest={accessTokenRequest}
-                        subscriptionScopes={subscriptionScopes}
-                    />
-                </div>
-
-            </React.Fragment>
-        );
-    }
-    return '';
+    return (
+        <React.Fragment>
+            <Tabs
+                value={0}
+                fullWidth
+                indicatorColor='secondary'
+                textColor='secondary'
+            >
+                <Tab label={keyType} />
+            </Tabs>
+            <div>
+                <Tokens
+                    updateAccessTokenRequest={setAccessTokenRequest}
+                    accessTokenRequest={accessTokenRequest}
+                    subscriptionScopes={subscriptionScopes}
+                />
+            </div>
+            <ButtonPanel
+                classes={classes}
+                currentStep={currentStep}
+                handleCurrentStep={generateAccessToken}
+            />
+        </React.Fragment>
+    );
 };
 
 export default generateAccessTokenStep;

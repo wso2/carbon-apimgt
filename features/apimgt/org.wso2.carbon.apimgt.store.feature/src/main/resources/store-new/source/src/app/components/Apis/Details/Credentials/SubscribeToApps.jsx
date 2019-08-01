@@ -101,7 +101,7 @@ const subscrbeToApps = (props) => {
                                 variant='contained'
                                 color='primary'
                                 className={classes.button}
-                                onClick={() => handleSubscribe()}
+                                onClick={handleSubscribe}
                             >
                                 <FormattedMessage
                                     id='Apis.Details.Credentials.SubscibeToApps.subscribe'

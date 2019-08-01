@@ -16,12 +16,13 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import KeyConfiguration from 'AppComponents/Shared/AppsAndKeys/KeyConfiguration';
 import Application from 'AppData/Application';
 import { injectIntl } from 'react-intl';
+import ButtonPanel from './ButtonPanel';
 
 const generateKeysStep = (props) => {
     const keyStates = {
@@ -40,8 +41,8 @@ const generateKeysStep = (props) => {
     });
 
     const {
-        currentStep, createdApp, decrementStep, incrementStep, nextStep, setCreatedKeyType,
-        intl, setStepStatus, stepStatuses,
+        currentStep, createdApp, incrementStep, setCreatedKeyType, intl,
+        setStepStatus, stepStatuses, classes,
     } = props;
 
     /**
@@ -63,71 +64,69 @@ const generateKeysStep = (props) => {
         setTab(currentTab);
         setKeyRequest(newRequest);
     };
+    const generateKeys = () => {
+        Application.get(createdApp.value).then((application) => {
+            return application.generateKeys(keyRequest.keyType, keyRequest.supportedGrantTypes,
+                keyRequest.callbackUrl);
+        }).then((response) => {
+            if (response.keyState === keyStates.CREATED || response.keyState === keyStates.REJECTED) {
+                setStepStatus(stepStatuses.BLOCKED);
+            } else {
+                incrementStep();
+                setCreatedKeyType(keyRequest.keyType);
+                setStepStatus(stepStatuses.PROCEED);
+                console.log('Keys generated successfully with ID : ' + response);
+            }
+        }).catch((error) => {
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(error);
+            }
+            const { status } = error;
+            if (status === 404) {
+                setNotFound(true);
+            }
+        });
+    };
 
-    useEffect(() => {
-        if (nextStep === 3 && nextStep > currentStep) {
-            Application.get(createdApp.value).then((application) => {
-                return application.generateKeys(keyRequest.keyType, keyRequest.supportedGrantTypes,
-                    keyRequest.callbackUrl);
-            }).then((response) => {
-                if (response.keyState === keyStates.CREATED || response.keyState === keyStates.REJECTED) {
-                    setStepStatus(stepStatuses.BLOCKED);
-                } else {
-                    incrementStep('current');
-                    setCreatedKeyType(keyRequest.keyType);
-                    setStepStatus(stepStatuses.PROCEED);
-                    console.log('Keys generated successfully with ID : ' + response);
-                }
-            }).catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    setNotFound(true);
-                }
-                decrementStep();
-            });
-        }
-    }, [nextStep]);
-
-    if (currentStep === 2) {
-        return (
-            <React.Fragment>
-                <Tabs value={tab} onChange={handleTabChange} fullWidth indicatorColor='secondary' textColor='secondary'>
-                    <Tab label={intl.formatMessage({
-                        defaultMessage: 'PRODUCTION',
-                        id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
-                    })}
+    return (
+        <React.Fragment>
+            <Tabs value={tab} onChange={handleTabChange} fullWidth indicatorColor='secondary' textColor='secondary'>
+                <Tab label={intl.formatMessage({
+                    defaultMessage: 'PRODUCTION',
+                    id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
+                })}
+                />
+                <Tab label={intl.formatMessage({
+                    defaultMessage: 'SANDBOX',
+                    id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.sandbox',
+                })}
+                />
+            </Tabs>
+            {tab === 0 && (
+                <div>
+                    <KeyConfiguration
+                        updateKeyRequest={setKeyRequest}
+                        keyRequest={keyRequest}
+                        keyType='PRODUCTION'
                     />
-                    <Tab label={intl.formatMessage({
-                        defaultMessage: 'SANDBOX',
-                        id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.sandbox',
-                    })}
+                </div>
+            )}
+            {tab === 1 && (
+                <div>
+                    <KeyConfiguration
+                        updateKeyRequest={setKeyRequest}
+                        keyRequest={keyRequest}
+                        keyType='SANDBOX'
                     />
-                </Tabs>
-                {tab === 0 && (
-                    <div>
-                        <KeyConfiguration
-                            updateKeyRequest={setKeyRequest}
-                            keyRequest={keyRequest}
-                            keyType='PRODUCTION'
-                        />
-                    </div>
-                )}
-                {tab === 1 && (
-                    <div>
-                        <KeyConfiguration
-                            updateKeyRequest={setKeyRequest}
-                            keyRequest={keyRequest}
-                            keyType='SANDBOX'
-                        />
-                    </div>
-                )}
-            </React.Fragment>
-        );
-    }
-    return '';
+                </div>
+            )}
+            <ButtonPanel
+                classes={classes}
+                currentStep={currentStep}
+                handleCurrentStep={generateKeys}
+            />
+        </React.Fragment>
+    );
 };
 
 export default injectIntl(generateKeysStep);

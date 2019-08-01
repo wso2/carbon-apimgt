@@ -21,6 +21,7 @@ import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationC
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import { injectIntl } from 'react-intl';
+import ButtonPanel from './ButtonPanel';
 
 const createAppStep = (props) => {
     const APPLICATION_STATES = {
@@ -36,9 +37,10 @@ const createAppStep = (props) => {
         tokenType: null,
     });
     const [isNameValid, setIsNameValid] = useState(true);
+
     const [notFound, setNotFound] = useState(false);
     const {
-        currentStep, setCreatedApp, decrementStep, nextStep, incrementStep, intl, setStepStatus, stepStatuses,
+        currentStep, setCreatedApp, incrementStep, intl, setStepStatus, stepStatuses, classes,
     } = props;
 
     const validateName = (value) => {
@@ -51,6 +53,37 @@ const createAppStep = (props) => {
         }
         setIsNameValid({ isNameValid: true });
         return Promise.resolve(true);
+    };
+
+    const createApplication = () => {
+        const api = new API();
+        validateName(applicationRequest.name)
+            .then(() => api.createApplication(applicationRequest))
+            .then((response) => {
+                const data = response.body;
+                if (data.status === APPLICATION_STATES.APPROVED) {
+                    const appCreated = { value: data.applicationId, label: data.name };
+                    console.log('Application created successfully.');
+                    setCreatedApp(appCreated);
+                    incrementStep();
+                    setStepStatus(stepStatuses.PROCEED);
+                } else {
+                    setStepStatus(stepStatuses.BLOCKED);
+                }
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response && response.body) {
+                    const message = response.body.description || intl.formatMessage({
+                        defaultMessage: 'Error while creating the application',
+                        id: 'Apis.Details.Credentials.Wizard.CreateAppStep.error.while.creating.the.application',
+                    });
+                    Alert.error(message);
+                } else {
+                    Alert.error(error.message);
+                }
+                console.error('Error while creating the application');
+            });
     };
 
     useEffect(() => {
@@ -77,42 +110,8 @@ const createAppStep = (props) => {
             });
     }, []);
 
-    useEffect(() => {
-        if (nextStep === 1 && nextStep > currentStep) {
-            const api = new API();
-            validateName(applicationRequest.name)
-                .then(() => api.createApplication(applicationRequest))
-                .then((response) => {
-                    const data = JSON.parse(response.data);
-                    if (data.status === APPLICATION_STATES.APPROVED) {
-                        const appCreated = { value: data.applicationId, label: data.name };
-                        console.log('Application created successfully.');
-                        setCreatedApp(appCreated);
-                        incrementStep('current');
-                        setStepStatus(stepStatuses.PROCEED);
-                    } else {
-                        setStepStatus(stepStatuses.BLOCKED);
-                    }
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response && response.body) {
-                        const message = response.body.description || intl.formatMessage({
-                            defaultMessage: 'Error while creating the application',
-                            id: 'Apis.Details.Credentials.Wizard.CreateAppStep.error.while.creating.the.application',
-                        });
-                        Alert.error(message);
-                    } else {
-                        Alert.error(error.message);
-                    }
-                    decrementStep();
-                    console.error('Error while creating the application');
-                });
-        }
-    }, [nextStep]);
-
-    if (currentStep === 0) {
-        return (
+    return (
+        <React.Fragment>
             <ApplicationCreateForm
                 throttlingPolicyList={throttlingPolicyList}
                 applicationRequest={applicationRequest}
@@ -120,9 +119,13 @@ const createAppStep = (props) => {
                 validateName={validateName}
                 isNameValid={isNameValid}
             />
-        );
-    }
-    return '';
+            <ButtonPanel
+                classes={classes}
+                currentStep={currentStep}
+                handleCurrentStep={createApplication}
+            />
+        </React.Fragment>
+    );
 };
 
 export default injectIntl(createAppStep);

@@ -16,26 +16,31 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import ViewToken from 'AppComponents/Shared/AppsAndKeys/ViewToken';
+import ButtonPanel from './ButtonPanel';
 
 const copyAccessTokenStep = (props) => {
     const {
-        currentStep, createdToken, handleClickToggle, updateSubscriptionData,
+        currentStep, createdToken, updateSubscriptionData, classes, handleClickToggle, handleReset, handleRedirectTest,
     } = props;
 
-    useEffect(() => {
-        if (currentStep > 4) {
-            handleClickToggle('openNew', updateSubscriptionData);
-        }
-    }, [currentStep]);
+    const completeStep = () => {
+        handleClickToggle('openNew', updateSubscriptionData);
+    };
 
-    if (currentStep === 4 && createdToken) {
-        return (
+    return (
+        <React.Fragment>
             <ViewToken token={createdToken} />
-        );
-    }
-    return '';
+            <ButtonPanel
+                classes={classes}
+                currentStep={currentStep}
+                handleCurrentStep={completeStep}
+                handleReset={handleReset}
+                handleRedirectTest={handleRedirectTest}
+            />
+        </React.Fragment>
+    );
 };
 
 export default copyAccessTokenStep;
