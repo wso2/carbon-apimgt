@@ -199,7 +199,7 @@ beans.xml
             <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
-            <bean id="SubscriberRegistrationInterceptor">
+            <ref bean="SubscriberRegistrationInterceptor">
             <ref bean="ValidationInInterceptor"/>
             <ref bean="ETagInInterceptor"/>
         </cxf:inInterceptors>
