@@ -56,11 +56,11 @@ import javax.cache.Caching;
  * the user based on the scopes attached to the API resources.
  * You can place this handler name in your web application if you need Basic authentication.
  */
-public class BasicAuthInterceptor extends AbstractPhaseInterceptor {
+public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
-    private static final Log log = LogFactory.getLog(BasicAuthInterceptor.class);
+    private static final Log log = LogFactory.getLog(BasicAuthenticationInterceptor.class);
 
-    public BasicAuthInterceptor() {
+    public BasicAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
     }

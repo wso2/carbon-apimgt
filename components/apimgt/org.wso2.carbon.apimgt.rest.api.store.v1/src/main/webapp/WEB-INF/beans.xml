@@ -37,7 +37,7 @@
 
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
-    <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthInterceptor" />
+    <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
     <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
     <bean id="SubscriberRegistrationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.SubscriberRegistrationInterceptor" />
     <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
