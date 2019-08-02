@@ -724,6 +724,8 @@ public class APIMappingUtil {
             dto.setAdditionalProperties(additionalPropertiesMap);
         }
 
+        dto.setEndpointImplementationType(APIDTO.EndpointImplementationTypeEnum.valueOf(model.getImplementation()));
+
         dto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(model.getAccessControl()) ?
                 APIDTO.AccessControlEnum.RESTRICTED :
                 APIDTO.AccessControlEnum.NONE);
