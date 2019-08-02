@@ -279,7 +279,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @param username          Username
      * @param path              Path Info
      * @param verb              HTTP Request Method
-     * @return
+     * @return whether user role validation against REST API scope roles is success or not.
      */
     private boolean validateUserRolesWithRESTAPIScopes(List<Scope> resourceScopeList, Map<String, String> restAPIScopes,
                                                        String[] userRoles, String username, String path, String verb) {
