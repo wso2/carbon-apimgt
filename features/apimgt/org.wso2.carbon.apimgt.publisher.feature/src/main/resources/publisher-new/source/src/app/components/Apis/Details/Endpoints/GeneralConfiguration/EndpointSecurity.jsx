@@ -47,14 +47,14 @@ function EndpointSecurity(props) {
         {
             key: 'BASIC',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.basic',
+                id: 'Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.basic',
                 defaultMessage: 'Basic Auth',
             }),
         },
         {
             key: 'DIGEST',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.digest.auth',
+                id: 'Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.digest.auth',
                 defaultMessage: 'Digest Auth',
             }),
         }];
@@ -69,7 +69,7 @@ function EndpointSecurity(props) {
                 <FormControl>
                     <InputLabel htmlFor='auth-type-select'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.auth.type'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.auth.type'
                             defaultMessage='Auth Type'
                         />
                     </InputLabel>
@@ -96,7 +96,7 @@ function EndpointSecurity(props) {
                         required
                         id='auth-userName'
                         label={<FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.user.name.input'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input'
                             defaultMessage='User Name'
                         />}
                         onChange={
@@ -111,7 +111,7 @@ function EndpointSecurity(props) {
                         type='password'
                         id='auth-password'
                         label={<FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.EndpointSecurity.password.input'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.input'
                             defaultMessage='Password'
                         />}
                         value={endpointSecurityInfo.password}

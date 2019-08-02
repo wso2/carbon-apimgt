@@ -123,7 +123,7 @@ function LoadBalanceConfig(props) {
                     id='algorithmSelect'
                     select
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.LoadBalanceConfig.algorithm'
+                        id='Apis.Details.Endpoints.LoadBalanceConfig.algorithm'
                         defaultMessage='Algorithm'
                     />}
                     value={lbConfig.algoCombo}
@@ -141,7 +141,7 @@ function LoadBalanceConfig(props) {
                     <TextField
                         id='customAlgoInput'
                         label={<FormattedMessage
-                            id='Apis.Details.EndpointsNew.LoadBalanceConfig.class.name.for.algorithm'
+                            id='Apis.Details.Endpoints.LoadBalanceConfig.class.name.for.algorithm'
                             defaultMessage='Class Name for Algorithm'
                         />}
                         required
@@ -156,7 +156,7 @@ function LoadBalanceConfig(props) {
                     id='sessionMgtSelect'
                     select
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.LoadBalanceConfig.session.management'
+                        id='Apis.Details.Endpoints.LoadBalanceConfig.session.management'
                         defaultMessage='Session Management'
                     />}
                     value={lbConfig.sessionManagement}
@@ -173,7 +173,7 @@ function LoadBalanceConfig(props) {
                 <TextField
                     id='sessionTimeout'
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.LoadBalanceConfig.session.timeout'
+                        id='Apis.Details.Endpoints.LoadBalanceConfig.session.timeout'
                         defaultMessage='Session Timeout (Millis)'
                     />}
                     value={lbConfig.sessionTimeOut}
@@ -191,7 +191,7 @@ function LoadBalanceConfig(props) {
                     disabled={lbConfig.algoClassName === ''}
                 >
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.save.button'
+                        id='Apis.Details.Endpoints.EndpointOverview.loadbalance.config.save.button'
                         defaultMessage='Save'
                     />
                 </Button>
@@ -200,7 +200,7 @@ function LoadBalanceConfig(props) {
                     onClick={closeLBConfigDialog}
                 >
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.EndpointOverview.loadbalance.config.cancel.button'
+                        id='Apis.Details.Endpoints.EndpointOverview.loadbalance.config.cancel.button'
                         defaultMessage='Close'
                     />
                 </Button>

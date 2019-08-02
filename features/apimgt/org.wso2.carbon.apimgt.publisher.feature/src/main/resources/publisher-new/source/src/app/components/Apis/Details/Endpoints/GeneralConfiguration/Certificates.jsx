@@ -171,7 +171,7 @@ function Certificates(props) {
             <Grid>
                 <Typography className={classes.certificatesHeader}>
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificates'
+                        id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificates'
                         defaultMessage='Certificates'
                     />
                 </Typography>
@@ -251,11 +251,11 @@ function Certificates(props) {
                 <DialogContent>
                     <Typography>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.confirm.certificate.delete'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.confirm.certificate.delete'
                             defaultMessage='Do you want to delete the Certificate'
                         /> { ' ' + certificateToDelete.alias + '?'}
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.delete.cannot.undone'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.cannot.undone'
                             defaultMessage=' This cannot be undone.'
                         />
                     </Typography>
@@ -267,7 +267,7 @@ function Certificates(props) {
                         autoFocus
                     >
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.delete.ok.button'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.ok.button'
                             defaultMessage='OK'
                         />
                     </Button>
@@ -276,7 +276,7 @@ function Certificates(props) {
                         color='secondary'
                     >
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.delete.cancel.button'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.cancel.button'
                             defaultMessage='Cancel'
                         />
                     </Button>
@@ -286,7 +286,7 @@ function Certificates(props) {
                 <DialogTitle>
                     <Typography className={classes.certDetailsHeader}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.certificate.details.of'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.details.of'
                             defaultMessage='Details of'
                         />
                         {' ' + openCertificateDetails.alias}
@@ -295,14 +295,14 @@ function Certificates(props) {
                 <DialogContent>
                     <Typography>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.status'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.status'
                             defaultMessage='Status'
                         />
                         {' : ' + openCertificateDetails.details.status}
                     </Typography>
                     <Typography>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.subject'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.subject'
                             defaultMessage='Subject'
                         />
                         {' : ' + openCertificateDetails.details.subject}
@@ -314,7 +314,7 @@ function Certificates(props) {
                         color='primary'
                     >
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.details.close.button'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.details.close.button'
                             defaultMessage='Close'
                         />
                     </Button>
@@ -324,7 +324,7 @@ function Certificates(props) {
                 <DialogTitle>
                     <Typography className={classes.uploadCertDialogHeader}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.uploadCertificate'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.uploadCertificate'
                             defaultMessage='Upload Certificate'
                         />
                     </Typography>
@@ -336,7 +336,7 @@ function Certificates(props) {
                                 required
                                 id='certificateEndpoint'
                                 label={<FormattedMessage
-                                    id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.endpoint'
+                                    id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.endpoint'
                                     defaultMessage='Endpoint'
                                 />}
                                 value={endpoint}
@@ -349,7 +349,7 @@ function Certificates(props) {
                                 required
                                 id='certificateAlias'
                                 label={<FormattedMessage
-                                    id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.alias'
+                                    id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.alias'
                                     defaultMessage='Alias'
                                 />}
                                 value={alias}
@@ -387,7 +387,7 @@ function Certificates(props) {
                                             </Icon>
                                             <Typography>
                                                 <FormattedMessage
-                                                    id={'Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.'
+                                                    id={'Apis.Details.Endpoints.GeneralConfiguration.Certificates.'
                                                     + 'click.or.drop.to.upload.file'}
                                                     defaultMessage='Click or drag the certificate file to upload.'
                                                 />
@@ -413,13 +413,13 @@ function Certificates(props) {
                         disabled={alias === '' || endpoint === '' || certificate.name === ''}
                     >
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.config.save.button'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.config.save.button'
                             defaultMessage='Save'
                         />
                     </Button>
                     <Button onClick={closeCertificateUpload} color='secondary'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.GeneralConfiguration.Certificates.cancel.button'
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.cancel.button'
                             defaultMessage='Close'
                         />
                     </Button>

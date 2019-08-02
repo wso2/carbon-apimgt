@@ -108,84 +108,84 @@ function AdvanceEndpointConfig(props) {
         {
             key: '101001',
             value: '101001 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.receiver.io.error.receiving',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.receiver.io.error.receiving',
                 defaultMessage: 'Receiver IO error receiving',
             }),
         },
         {
             key: '101500',
             value: '101500 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.sender.io.error.sending',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.sender.io.error.sending',
                 defaultMessage: 'Sender IO Error Sending',
             }),
         },
         {
             key: '101000',
             value: '101000 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.receiver.io.error.sending',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.receiver.io.error.sending',
                 defaultMessage: 'Retriever IO Error Sending',
             }),
         },
         {
             key: '101501',
             value: '101501 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.sender.io.error.receiving',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.sender.io.error.receiving',
                 defaultMessage: 'Sender IO Error Receiving',
             }),
         },
         {
             key: '101503',
             value: '101503 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.connection.failed',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connection.failed',
                 defaultMessage: 'Connection Failed',
             }),
         },
         {
             key: '101504',
             value: '101504 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.connection.timed.out',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connection.timed.out',
                 defaultMessage: 'Connection Timed Out',
             }),
         },
         {
             key: '101505',
             value: '101505 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.connection.closed',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connection.closed',
                 defaultMessage: 'Connection Closed',
             }),
         },
         {
             key: '101506',
             value: '101506 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.tpp.protocol.violation',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.tpp.protocol.violation',
                 defaultMessage: 'TTP Protocol Violation',
             }),
         },
         {
             key: '101507',
             value: '101507 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.connect.cancel',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connect.cancel',
                 defaultMessage: 'Connect Cancel',
             }),
         },
         {
             key: '101508',
             value: '101508 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.connect.timeout',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.connect.timeout',
                 defaultMessage: 'Connect Timeout',
             }),
         },
         {
             key: '101509',
             value: '101509 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.send.abort',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.send.abort',
                 defaultMessage: 'Send Abort',
             }),
         },
         {
             key: '101510',
             value: '101510 : ' + intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.response.processing.failure',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.response.processing.failure',
                 defaultMessage: 'Response Processing Failure',
             }),
         }];
@@ -197,14 +197,14 @@ function AdvanceEndpointConfig(props) {
         {
             key: 'fault',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.execute.fault.sequence',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.execute.fault.sequence',
                 defaultMessage: 'Execute Fault Sequence',
             }),
         },
         {
             key: 'discard',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.discard.message',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.discard.message',
                 defaultMessage: 'Discard Message',
             }),
         },
@@ -219,14 +219,14 @@ function AdvanceEndpointConfig(props) {
         {
             key: 'POX',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.plain.old.xml',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.plain.old.xml',
                 defaultMessage: 'Plain Old XML (POX)',
             }),
         },
         {
             key: 'REST',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.representational.state.transfer',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.representational.state.transfer',
                 defaultMessage: 'Representational State Transer (REST)',
             }),
         },
@@ -237,7 +237,7 @@ function AdvanceEndpointConfig(props) {
         {
             key: 'leave-as-is',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.leave.as.is',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.leave.as.is',
                 defaultMessage: 'Leave As-Is',
             }),
         },
@@ -252,7 +252,7 @@ function AdvanceEndpointConfig(props) {
         {
             key: 'leave-as-is',
             value: intl.formatMessage({
-                id: 'Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.leave.as.is',
+                id: 'Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.leave.as.is',
                 defaultMessage: 'Leave As-Is',
             }),
         },
@@ -284,14 +284,14 @@ function AdvanceEndpointConfig(props) {
                 <Grid item container className={classes.configSubContainer}>
                     <Typography className={classes.subTitle}>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.message.content'
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.message.content'
                             defaultMessage='Message Content'
                         />
                     </Typography>
                     <FormControl className={classes.formControl}>
                         <InputLabel htmlFor='err-code-select'>
                             <FormattedMessage
-                                id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.format.select'
+                                id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.format.select'
                                 defaultMessage='Format'
                             />
                         </InputLabel>
@@ -312,7 +312,7 @@ function AdvanceEndpointConfig(props) {
                     <FormControl className={classes.formControl}>
                         <InputLabel htmlFor='err-code-select'>
                             <FormattedMessage
-                                id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.optimize.select'
+                                id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.optimize.select'
                                 defaultMessage='Optimize'
                             />
                         </InputLabel>
@@ -340,7 +340,7 @@ function AdvanceEndpointConfig(props) {
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.error.code'
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.error.code'
                             defaultMessage='Error Code'
                         />
                     </InputLabel>
@@ -367,7 +367,7 @@ function AdvanceEndpointConfig(props) {
                     onChange={event => handleConfigFieldChange(event, 'suspendDuration')}
                     label={
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.initial.duration.ms'
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.initial.duration.ms'
                             defaultMessage='Initial Duration (ms)'
                         />
                     }
@@ -381,7 +381,7 @@ function AdvanceEndpointConfig(props) {
                     onChange={event => handleConfigFieldChange(event, 'suspendMaxDuration')}
                     label={
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.max.duration.ms'
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.max.duration.ms'
                             defaultMessage='Max Duration (ms)'
                         />
                     }
@@ -395,7 +395,7 @@ function AdvanceEndpointConfig(props) {
                     id='factor-input'
                     label={
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.factor'
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.factor'
                             defaultMessage='Factor'
                         />
                     }
@@ -406,14 +406,14 @@ function AdvanceEndpointConfig(props) {
             <Grid item container className={classes.configSubContainer}>
                 <Typography className={classes.subTitle}>
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.endpoint.timeout.state'
+                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.endpoint.timeout.state'
                         defaultMessage='Endpoint Timeout State'
                     />
                 </Typography>
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.error.code'
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.error.code'
                             defaultMessage='Error Code'
                         />
                     </InputLabel>
@@ -438,7 +438,7 @@ function AdvanceEndpointConfig(props) {
                     value={advanceConfigObj.retryTimeOut}
                     onChange={event => handleConfigFieldChange(event, 'retryTimeOut')}
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.retries.before.suspension'
+                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.retries.before.suspension'
                         defaultMessage='Retries Before Suspension'
                     />
                     }
@@ -451,7 +451,7 @@ function AdvanceEndpointConfig(props) {
                     value={advanceConfigObj.retryDelay}
                     onChange={event => handleConfigFieldChange(event, 'retryDelay')}
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.retry.delay.ms'
+                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.retry.delay.ms'
                         defaultMessage='Retry Delay (ms)'
                     />}
                     type='number'
@@ -466,7 +466,7 @@ function AdvanceEndpointConfig(props) {
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor='err-code-select'>
                         <FormattedMessage
-                            id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.action'
+                            id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.action'
                             defaultMessage='Action'
                         />
                     </InputLabel>
@@ -490,7 +490,7 @@ function AdvanceEndpointConfig(props) {
                     value={advanceConfigObj.actionDuration}
                     onChange={event => handleConfigFieldChange(event, 'actionDuration')}
                     label={<FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.duration.ms'
+                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.duration.ms'
                         defaultMessage='Duration (ms)'
                     />}
                     type='number'
@@ -504,7 +504,7 @@ function AdvanceEndpointConfig(props) {
                     autoFocus
                 >
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.config.save.button'
+                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.config.save.button'
                         defaultMessage='Save'
                     />
                 </Button>
@@ -513,7 +513,7 @@ function AdvanceEndpointConfig(props) {
                     color='secondary'
                 >
                     <FormattedMessage
-                        id='Apis.Details.EndpointsNew.AdvancedConfig.AdvanceEndpointConfig.cancel.button'
+                        id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.cancel.button'
                         defaultMessage='Close'
                     />
                 </Button>

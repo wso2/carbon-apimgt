@@ -68,7 +68,7 @@ function GenericEndpointAdd(props) {
         <React.Fragment className={classes.endpointInputWrapper}>
             <TextField
                 label={<FormattedMessage
-                    id='Apis.Details.EndpointsNew.GenericEndpoint.service.url.input'
+                    id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
                     defaultMessage='Service URL'
                 />}
                 className={classes.textField}
