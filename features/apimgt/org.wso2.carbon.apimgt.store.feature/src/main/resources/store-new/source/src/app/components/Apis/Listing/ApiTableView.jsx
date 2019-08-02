@@ -25,44 +25,9 @@ import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
 import ImageGenerator from './ImageGenerator';
-import StarRatingBar from './StarRating';
+import StarRatingBar from './StarRatingBar';
 import ApiThumb from './ApiThumb';
 import { ApiContext } from '../Details/ApiContext';
-
-class StarRatingColumn extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            rating: null,
-        };
-        this.api = new API();
-    }
-
-    componentDidMount() {
-        const promised_rating = this.api.getRatingFromUser(this.props.apiId, null);
-        promised_rating
-            .then((response) => {
-                const rating = response.obj;
-                this.setState({
-                    rating: rating.userRating,
-                });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
-    render() {
-        const { rating } = this.state;
-        return rating && <StarRatingBar rating={rating} />;
-    }
-}
 
 class ApiTableView extends React.Component {
     constructor(props) {
@@ -306,12 +271,20 @@ class ApiTableView extends React.Component {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
                             const apiId = tableMeta.rowData[0];
-                            return <StarRatingColumn apiId={apiId} />;
+                            const avgRating = tableMeta.rowData[7];
+                            return <StarRatingBar avgRating={avgRating} apiId={apiId} isEditable={false} showSummary={false} />;
                         }
                     },
                     options: {
                         sort: false,
                     },
+                },
+            },
+            {
+                name: 'avgRating',
+                options: {
+                    display: 'excluded',
+                    filter: false,
                 },
             },
         ];

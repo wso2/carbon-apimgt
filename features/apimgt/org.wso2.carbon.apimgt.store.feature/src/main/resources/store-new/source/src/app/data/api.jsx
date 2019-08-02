@@ -386,10 +386,23 @@ export default class API extends Resource {
         }
     }
 
+    removeRatingOfUser(apiId, callback = null) {
+        const promiseDelete = this.client.then((client) => {
+            return client.apis.Ratings.delete_apis__apiId__user_rating({ apiId }, this._requestMetaData());
+        }).catch((error) => {
+            console.error(error);
+        });
+        if (callback) {
+            return promiseDelete.then(callback);
+        } else {
+            return promiseDelete;
+        }
+    }
+
 
     addRating(apiId, ratingInfo, callback = null) {
         const promise = this.client.then((client) => {
-            return client.apis['API (Individual)'].put_apis__apiId__user_rating(
+            return client.apis.Ratings.put_apis__apiId__user_rating(
                 { apiId, body: ratingInfo },
                 this._requestMetaData(),
             );
