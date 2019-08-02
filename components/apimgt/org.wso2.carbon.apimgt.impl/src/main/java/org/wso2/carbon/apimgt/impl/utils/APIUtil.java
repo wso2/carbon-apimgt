@@ -8453,6 +8453,7 @@ public final class APIUtil {
 
         APIProduct apiProduct;
         try {
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
@@ -8482,6 +8483,8 @@ public final class APIUtil {
             apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             apiProduct.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
+            apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
