@@ -43,6 +43,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -190,7 +191,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                                     .getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
                             if (userRoles != null) {
                                 return validateUserRolesWithRESTAPIScopes(resourceScopeList, restAPIScopes,
-                                        userRoles, username, path, verb);
+                                        userRoles, username, path, verb, inMessage);
                             } else {
                                 log.error("Error while validating roles. Invalid user roles found for user: "
                                         + username);
@@ -279,10 +280,16 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @param username          Username
      * @param path              Path Info
      * @param verb              HTTP Request Method
+     * @param inMessage         cxf Message to set the matched user scopes for the resource
      * @return whether user role validation against REST API scope roles is success or not.
      */
     private boolean validateUserRolesWithRESTAPIScopes(List<Scope> resourceScopeList, Map<String, String> restAPIScopes,
-                                                       String[] userRoles, String username, String path, String verb) {
+                                                       String[] userRoles, String username, String path, String verb,
+                                                       Message inMessage) {
+
+        //Holds the REST API scope list which the user will get successfully validated against with
+        List<Scope> validatedUserScopes = new ArrayList<>();
+
         //iterate the non empty scope list of the URITemplate of the invoking resource
         for (Scope scope : resourceScopeList) {
             //get the configured roles list string of the requested resource
@@ -293,23 +300,36 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 //check if the roles related to the API resource contains any of the role of the user
                 for (String role : userRoles) {
                     if (resourceRoleList.contains(role)) {
+                        //Role validation is success. Add the current scope to the validated user scope list and
+                        //skip role check iteration of current scope and move to next resource scope.  
+                        validatedUserScopes.add(scope);
                         if (log.isDebugEnabled()) {
                             log.debug("Basic Authentication: scope validation successful for user: "
                                     + username + " with scope: " + scope.getKey()
                                     + " for resource path: " + path + " and verb " + verb);
                         }
-                        return true;
+                        break;
                     }
                 }
             } else {
-                // No role for the requested resource scope
+                //No role for the requested resource scope. Add it to the validated user scope list. 
+                validatedUserScopes.add(scope);
                 if (log.isDebugEnabled()) {
                     log.debug("Role validation skipped. No REST API scope to role mapping defined for resource scope: "
                             + scope.getKey() + " Treated as anonymous scope.");
                 }
-                return true;
             }
         }
+        if (!validatedUserScopes.isEmpty()) {
+            //Add the successfully validated user scope list to the cxf message
+            inMessage.put(RestApiConstants.USER_REST_API_SCOPES, validatedUserScopes);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully validated REST API Scopes for the user " + username + " :  " + validatedUserScopes);
+            }
+            return true;
+
+        }
+        //none of the resource scopes were matched against the user role set
         log.error("Insufficient privileges. Role validation failed for user: "
                 + username + " to access resource path: " + path + " and verb " + verb);
         return false;
