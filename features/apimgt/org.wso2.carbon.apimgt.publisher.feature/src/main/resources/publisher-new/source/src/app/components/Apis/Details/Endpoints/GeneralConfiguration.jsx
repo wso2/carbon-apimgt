@@ -226,7 +226,7 @@ function GeneralConfiguration(props) {
                     <Typography className={classes.heading}>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.general.configuration.heading'
-                            defaultMessage='GeneralConfiguration'
+                            defaultMessage='General Configuration'
                         />
                     </Typography>
                     {apiType !== 'HTTP' ?
