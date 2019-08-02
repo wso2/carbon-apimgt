@@ -311,10 +311,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (openAPI == null && apiUUID != null) {
             synchronized (this) {
                 if (openAPI == null) {
+                    long startTime = System.currentTimeMillis();
                     Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID);
                     if (localEntryObj != null) {
                         OpenAPIParser parser = new OpenAPIParser();
                         openAPI = parser.readContents(localEntryObj.getValue().toString(), null, null).getOpenAPI();
+                    }
+                    long endTime = System.currentTimeMillis();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Time to parse the swagger(ms) : " + (endTime - startTime));
                     }
                 }
             }

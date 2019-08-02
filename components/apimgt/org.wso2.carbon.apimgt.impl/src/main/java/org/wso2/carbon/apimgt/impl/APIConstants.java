@@ -1485,9 +1485,11 @@ public final class APIConstants {
         public static final String ISSUED_TIME = "iat";
         public static final String EXPIRED_TIME = "exp";
         public static final String SIGNATURE_ALGORITHM = "alg";
-        public static final String AM_APPLICATION_SCOPE = "am_application_scope";
         public static final String TOKEN_TYPE = "typ";
         public static final String BACKEND_TOKEN = "backendJwt";
+        public static final String SUBSCRIBED_APIS = "subscribedAPIs";
+        public static final String API_CONTEXT = "context";
+        public static final String API_VERSION = "version";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -1640,4 +1642,7 @@ public final class APIConstants {
         API,
         PRODUCT_API
     }
+
+    public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
+
 }

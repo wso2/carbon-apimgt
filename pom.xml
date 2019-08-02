@@ -1669,6 +1669,7 @@
         <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
         <imp.pkg.version.io.swagger.parser>[2.1.6, 3.0.0)</imp.pkg.version.io.swagger.parser>
         <imp.pkg.version.com.nimbus>[7.3.0,8.0.0)</imp.pkg.version.com.nimbus>
+        <imp.pkg.version.openapitools.swagger.parser>[2.0.0,2.1.0)</imp.pkg.version.openapitools.swagger.parser>
 
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 

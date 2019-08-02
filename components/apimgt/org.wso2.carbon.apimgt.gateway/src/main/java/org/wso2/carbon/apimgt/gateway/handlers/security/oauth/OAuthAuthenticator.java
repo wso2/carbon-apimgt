@@ -203,7 +203,7 @@ public class OAuthAuthenticator implements Authenticator {
                 // If a JWT token
                 openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
                 if (openAPI == null) {
-                    log.debug("Swagger is missing in the gateway. " +
+                    log.error("Swagger is missing in the gateway. " +
                             "Therefore, JWT authentication cannot be performed.");
                     return new AuthenticationResponse(false, isMandatory, true,
                             APISecurityConstants.API_AUTH_MISSING_SWAGGER,

@@ -108,16 +108,18 @@ public class APIHandlerServiceComponent {
                 }
                 // Read the trust store
                 ServerConfiguration config = CarbonUtils.getServerConfiguration();
-                char[] trustStorePassword = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_PASSWORD)
-                        .toCharArray();
+                String trustStorePassword = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_PASSWORD);
                 String trustStoreLocation = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_LOCATION);
-                try {
-                    FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation));
-                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    trustStore.load(trustStoreStream, trustStorePassword);
-                    ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
-                } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
-                    log.error("Error in loading trust store.", e);
+                if (trustStoreLocation != null && trustStorePassword != null) {
+                    try (FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation))) {
+                        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                        trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
+                        ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+                    } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+                        log.error("Error in loading trust store.", e);
+                    }
+                } else {
+                    log.error("Error in loading trust store. Configurations are not set.");
                 }
             }
         } catch (APIManagementException | AxisFault e) {
