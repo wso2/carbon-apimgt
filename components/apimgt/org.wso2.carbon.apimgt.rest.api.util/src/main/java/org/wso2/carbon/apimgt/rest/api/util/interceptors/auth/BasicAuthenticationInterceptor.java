@@ -159,6 +159,11 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         Map<String, String> restAPIScopes;
         //get all the URI templates of the REST API from the base path
         Set<URITemplate> uriTemplates = getURITemplatesForBasePath(basePath);
+        if (uriTemplates.isEmpty()) {
+            log.debug("No matching scope validation logic found for app request with path: " + basePath
+                    + ". Skipping role validation.");
+            return true;
+        }
 
         //iterate through all the URITemplates to get the relevant URI template and get the scopes attached to validate
         for (Object template : uriTemplates.toArray()) {
@@ -259,9 +264,8 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
             uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
         } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
             uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
-        } else {
-            String errorMessage = "No matching scope validation logic found for app request with path: " + basePath;
-            log.error(errorMessage);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
         }
         return uriTemplates;
     }
