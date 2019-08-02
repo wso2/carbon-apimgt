@@ -91,6 +91,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -1305,7 +1306,7 @@ public class APIMappingUtil {
 
     /**
      * Returns workflow state DTO from the provided information
-     * 
+     *
      * @param lifecycleStateDTO Lifecycle state DTO
      * @param stateChangeResponse workflow response from API lifecycle change
      * @return workflow state DTO
@@ -1853,12 +1854,16 @@ public class APIMappingUtil {
                     scopeDTO.setName((String) scopeObj.get(APIConstants.SWAGGER_NAME));
                     scopeDTO.setDescription((String) scopeObj.get(APIConstants.SWAGGER_DESCRIPTION));
                     ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
-                    bindingsDTO.setValues(Arrays.asList(((String) scopeObj.get(APIConstants.SWAGGER_ROLES)).split(",")));
+                    String roles = (String) scopeObj.get(APIConstants.SWAGGER_ROLES);
+                    if (roles.isEmpty()) {
+                        bindingsDTO.setValues(Collections.emptyList());
+                    } else {
+                        bindingsDTO.setValues(Arrays.asList((roles).split(",")));
+                    }
                     scopeDTO.setBindings(bindingsDTO);
                     scopes.add(scopeDTO);
                 });
             }
-
         } catch (ParseException e) {
             throw new APIManagementException("Error occurred while parsing swagger.");
         }

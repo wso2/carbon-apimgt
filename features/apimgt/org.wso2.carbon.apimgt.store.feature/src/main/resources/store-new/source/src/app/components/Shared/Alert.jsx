@@ -18,6 +18,7 @@
 
 import React from 'react';
 import Notification from 'rc-notification';
+import { injectIntl } from 'react-intl';
 import Message from './Message';
 
 /**
@@ -53,7 +54,6 @@ class Alert {
     show() {
         const promisedInstance = this._getMessageInstance();
         const { onClose } = this;
-        const { intl } = this.prop;
         promisedInstance
             .then((instance) => {
                 instance.notice({
@@ -68,8 +68,7 @@ class Alert {
                     ),
                 });
             })
-            .catch(error => console.error(intl.formatMessage({
-                defaultMessage: 'Error while showing alert'}) + error));
+            .catch(error => console.error('Error while showing alert' + error));
         /* TODO: Remove above console error with logging library error method */
     }
 
@@ -132,7 +131,7 @@ Alert.defaultDuration = 5;
 /* In seconds */
 Alert.defaultTop = 0;
 
-export default {
+export default injectIntl({
     info: (message, duration, onClose) => {
         const msg = new Alert(message, 'info', duration, onClose);
         msg.show();
@@ -159,4 +158,4 @@ export default {
         return msg;
     },
     configs: Alert.config,
-};
+});

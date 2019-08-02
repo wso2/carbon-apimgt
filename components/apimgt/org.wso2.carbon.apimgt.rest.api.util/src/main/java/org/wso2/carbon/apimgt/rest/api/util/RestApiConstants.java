@@ -32,6 +32,11 @@ public final class RestApiConstants {
     public static final String APPLICATION_ZIP = "application/zip";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
+    
+    public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
+    public static final String OAUTH2_AUTHENTICATION = "oauth2";
+    public static final String BASIC_AUTHENTICATION = "basic_auth";
+    public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
     

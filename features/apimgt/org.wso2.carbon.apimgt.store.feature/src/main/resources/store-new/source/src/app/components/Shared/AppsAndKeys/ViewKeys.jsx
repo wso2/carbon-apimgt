@@ -37,7 +37,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
 import Application from '../../../data/Application';
@@ -85,12 +85,60 @@ const styles = theme => ({
  * Class used to displays in key generation UI
  */
 class ViewKeys extends React.Component {
-    state = {
-        showCS: false,
-        open: false,
-        showToken: false,
-        showCurl: false,
-    };
+    /**
+     * @param {*} props properties
+     */
+    constructor(props) {
+        super(props);
+        const { selectedApp } = this.props;
+        let appId;
+        if (selectedApp) {
+            appId = selectedApp.appId || selectedApp.value;
+        }
+        this.applicationPromise = Application.get(appId);
+        this.state = {
+            showCS: false,
+            open: false,
+            showToken: false,
+            showCurl: false,
+            accessTokenRequest: {
+                timeout: 3600,
+                scopesSelected: [],
+                keyType: '',
+            },
+            subscriptionScopes: [],
+        };
+    }
+
+    /**
+     * Fetch Application object by ID coming from URL path params and fetch related keys to display
+     */
+    componentDidMount() {
+        const { accessTokenRequest } = this.state;
+        const { keyType } = this.props;
+        this.applicationPromise
+            .then((application) => {
+                application.getKeys().then(() => {
+                    const newRequest = { ...accessTokenRequest, keyType };
+                    const subscriptionScopes = application.subscriptionScopes
+                        .map((scope) => { return scope.scopeKey; });
+                    this.setState({ accessTokenRequest: newRequest, subscriptionScopes });
+                });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    }
+
+    updateAccessTokenRequest = (accessTokenRequest) => {
+        this.setState({ accessTokenRequest });
+    }
 
     /**
      * Handle onClick of the copy icon
@@ -101,7 +149,7 @@ class ViewKeys extends React.Component {
         });
         const that = this;
         const elementName = name;
-        const caller = function () {
+        const caller = () => {
             that.setState({
                 [elementName]: false,
             });
@@ -150,20 +198,16 @@ class ViewKeys extends React.Component {
      * Generate access token
      * */
     generateAccessToken = () => {
-        const that = this;
-        const promiseTokens = this.tokens.generateToken();
+        const { accessTokenRequest } = this.state;
         const { intl } = this.props;
-        promiseTokens
+        this.applicationPromise
+            .then(application => application.generateToken(accessTokenRequest.keyType,
+                accessTokenRequest.timeout,
+                accessTokenRequest.scopesSelected))
             .then((response) => {
-                console.log(
-                    intl.formatMessage({
-                        defaultMessage: 'token generated successfully : ',
-                        id: 'Shared.AppsAndKeys.ViewKeys.success',
-                    }),
-                    response,
-                );
-                that.token = response;
-                that.setState({
+                console.log('token generated successfully ' + response);
+                this.token = response;
+                this.setState({
                     showToken: true,
                     token: response.accessToken,
                     tokenScopes: response.tokenScopes,
@@ -186,21 +230,11 @@ class ViewKeys extends React.Component {
      */
     render() {
         const {
-            notFound,
-            showCS,
-            showToken,
-            showCurl,
-            secretCopied,
-            tokenCopied,
-            keyCopied,
-            open,
-            token,
-            tokenScopes,
-            tokenValidityTime,
+            notFound, showCS, showToken, showCurl, secretCopied, tokenCopied, keyCopied, open,
+            token, tokenScopes, tokenValidityTime, accessTokenRequest, subscriptionScopes,
         } = this.state;
-        const { intl } = this.props;
         const {
-            keyType, classes, fullScreen, selectedApp, keys,
+            intl, keyType, classes, fullScreen, keys,
         } = this.props;
 
         if (notFound) {
@@ -305,7 +339,7 @@ class ViewKeys extends React.Component {
                             <FormControl>
                                 <FormHelperText id='consumer-secret-helper-text'>
                                     <FormattedMessage
-                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.title'
+                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.of.application'
                                         defaultMessage='Consumer Secret of the application'
                                     />
                                 </FormHelperText>
@@ -315,7 +349,7 @@ class ViewKeys extends React.Component {
                             <Grid item xs={6}>
                                 <InputLabel htmlFor='adornment-amount'>
                                     <FormattedMessage
-                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.title'
+                                        id='Shared.AppsAndKeys.ViewKeys.access.token'
                                         defaultMessage='Access Token'
                                     />
                                 </InputLabel>
@@ -356,11 +390,9 @@ class ViewKeys extends React.Component {
                                         <DialogContentText>
                                             {!showToken && (
                                                 <Tokens
-                                                    innerRef={(node) => {
-                                                        this.tokens = node;
-                                                    }}
-                                                    selectedApp={selectedApp}
-                                                    keyType={keyType}
+                                                    updateAccessTokenRequest={this.updateAccessTokenRequest}
+                                                    accessTokenRequest={accessTokenRequest}
+                                                    subscriptionScopes={subscriptionScopes}
                                                 />
                                             )}
                                             {showToken && <ViewToken token={this.token} />}

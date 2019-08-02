@@ -32,7 +32,7 @@ import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
 import { MenuItem } from '@material-ui/core/Menu';
 import Grid from '@material-ui/core/Grid';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Utils from '../../data/Utils';
 import ConfigManager from '../../data/ConfigManager';
 import User from '../../data/User';
@@ -89,7 +89,7 @@ class Login extends Component {
                 console.error(
                     intl.formatMessage({
                         defaultMessage: 'Error while receiving environment configurations : ',
-                        id: 'Login.Login.env.error',
+                        id: 'Base.Login.Login.env.error',
                     }),
                     error,
                 );
@@ -171,7 +171,7 @@ class Login extends Component {
             this.setState({
                 message: intl.formatMessage({
                     defaultMessage: 'Please fill both username and password fields',
-                    id: 'Login.Login.user.pass.error',
+                    id: 'Base.Login.Login.user.pass.error',
                 }),
             });
             return;
@@ -218,13 +218,16 @@ class Login extends Component {
         const isMoreThanOneEnvironments = this.state.environments && this.state.environments.length > 1;
         const isSsoUpdated = this.state.authConfigs.length !== 0;
         const isSsoEnabled = isSsoUpdated && this.state.authConfigs[this.state.environmentId].is_sso_enabled.value;
-        const { appName, appLabel } = this.props;
+        const { appName, appLabel, intl } = this.props;
 
         // Redirect to Identity Provider
         if (this.state.redirectToIS) {
             return (
                 <Redirecting
-                    message={<FormattedMessage defaultMessage='You are now being redirected to Identity Provider.' />}
+                    message={intl.formatMessage({
+                        defaultMessage: 'You are now being redirected to Identity Provider.',
+                        id: 'Base.Login.Login.you.are.now.being.redirected.to.identity.provider',
+                    })}
                 />
             );
         }
@@ -275,14 +278,20 @@ class Login extends Component {
                                         <Paper elevation={1} square className='login-paper'>
                                             <form className='login-form'>
                                                 <Typography type='body1' gutterBottom>
-                                                    <FormattedMessage defaultMessage='Sign in to your account' id='Login.Login.sign.in' />
+                                                    <FormattedMessage
+                                                        defaultMessage='Sign in to your account'
+                                                        id='Base.Login.Login.sign.in'
+                                                    />
                                                 </Typography>
 
                                                 {/* Environments */}
                                                 {isMoreThanOneEnvironments && (
                                                     <FormControl style={{ width: '100%', marginTop: '2%' }}>
                                                         <InputLabel htmlFor='environment'>
-                                                            <FormattedMessage defaultMessage='Environment' id='Login.Login.environment' />
+                                                            <FormattedMessage
+                                                                defaultMessage='Environment'
+                                                                id='Base.Login.Login.environment'
+                                                            />
                                                         </InputLabel>
                                                         <Select
                                                             onChange={this.handleEnvironmentChange}
@@ -308,7 +317,10 @@ class Login extends Component {
                                                                     marginTop: '5%',
                                                                 }}
                                                             >
-                                                                <FormattedMessage defaultMessage='Single Sign On is enabled.' id='Login.Login.single.sign.on' />
+                                                                <FormattedMessage
+                                                                    defaultMessage='Single Sign On is enabled.'
+                                                                    id='Base.Login.Login.single.sign.on'
+                                                                />
                                                             </FormControl>
                                                         ) : (
                                                             <FormControl style={{ width: '100%' }}>
@@ -351,9 +363,15 @@ class Login extends Component {
                                                     onClick={this.handleSubmit}
                                                 >
                                                     {isSsoEnabled ? (
-                                                        <FormattedMessage defaultMessage='Visit Login Page' id='Login.Login.visit.login' />
+                                                        <FormattedMessage
+                                                            defaultMessage='Visit Login Page'
+                                                            id='Base.Login.Login.visit.login'
+                                                        />
                                                     ) : (
-                                                        <FormattedMessage defaultMessage='Login' id='Login.Login.button.login' />
+                                                        <FormattedMessage
+                                                            defaultMessage='Login'
+                                                            id='Base.Login.Login.button.login'
+                                                        />
                                                     )}
                                                 </Button>
                                                 <Button
@@ -364,13 +382,22 @@ class Login extends Component {
                                                     component={Link}
                                                     to='/'
                                                 >
-                                                    <FormattedMessage defaultMessage='Go Back' />
+                                                    <FormattedMessage
+                                                        defaultMessage='Go Back'
+                                                        id='Base.Login.Login.go.back'
+                                                    />
                                                 </Button>
 
                                                 <Typography type='body1' style={{ marginTop: 10 }}>
-                                                    <FormattedMessage defaultMessage="Don't have an account?" id='Login.Login.dont.have.account' />
+                                                    <FormattedMessage
+                                                        defaultMessage="Don't have an account?"
+                                                        id='Base.Login.Login.dont.have.account'
+                                                    />
                                                     <Link to='/sign-up' style={{ textDecoration: 'none' }}>
-                                                        <FormattedMessage defaultMessage='Sign Up here' id='Login.Login.sign.up.here'  />
+                                                        <FormattedMessage
+                                                            defaultMessage='Sign Up here'
+                                                            id='Base.Login.Login.sign.up.here'
+                                                        />
                                                     </Link>
                                                 </Typography>
                                             </form>

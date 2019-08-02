@@ -40,9 +40,9 @@ export default class API extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getAllAPIs(callback = null) {
+    getAllAPIs(params = {}, callback = null) {
         const promiseGetAll = this.client.then((client) => {
-            return client.apis.APIs.get_apis({}, this._requestMetaData());
+            return client.apis.APIs.get_apis(params, this._requestMetaData());
         });
         if (callback) {
             return promiseGetAll.then(callback);
@@ -562,4 +562,21 @@ export default class API extends Resource {
         });
         return promise;
     }
+    /**
+     * Get the thumnail of an API
+     *
+     * @param id {string} UUID of the api
+     */
+    getAPIThumbnail(id) {
+        const promised_getAPIThumbnail = this.client.then((client) => {
+            return client.apis.APIs.get_apis__apiId__thumbnail({
+                    apiId: id
+                },
+                this._requestMetaData(),
+            );
+        });
+
+        return promised_getAPIThumbnail;
+    }
+
 }

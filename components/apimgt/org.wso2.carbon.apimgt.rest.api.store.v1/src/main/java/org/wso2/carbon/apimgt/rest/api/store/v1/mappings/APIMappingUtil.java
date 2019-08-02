@@ -38,11 +38,12 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEnvironmentURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -336,9 +337,14 @@ public class APIMappingUtil {
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
             if (environment != null) {
-                APIEnvironmentURLsDTO environmentURLsDTO = new APIEnvironmentURLsDTO();
-                String[] gwEndpoints = environment.getApiGatewayEndpoint().split(",");
-
+                APIURLsDTO apiURLsDTO = new APIURLsDTO();
+                APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
+                String[] gwEndpoints = null;
+                if ("WS".equalsIgnoreCase(api.getType())) {
+                    gwEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
+                } else {
+                    gwEndpoints = environment.getApiGatewayEndpoint().split(",");
+                }
                 Map<String, String> domains = new HashMap<>();
                 if (tenantDomain != null) {
                     domains = apiConsumer.getTenantDomainMappings(tenantDomain,
@@ -362,15 +368,33 @@ public class APIMappingUtil {
                     }
 
                     if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
-                        environmentURLsDTO.setHttp(endpointBuilder.toString());
+                        apiURLsDTO.setHttp(endpointBuilder.toString());
+                    } else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
+                        apiURLsDTO.setHttps(endpointBuilder.toString());
+                    } else if (gwEndpoint.contains("ws:")) {
+                        apiURLsDTO.setWs(endpointBuilder.toString());
+                    } else if (gwEndpoint.contains("wss:")) {
+                        apiURLsDTO.setWss(endpointBuilder.toString());
                     }
-                    else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
-                        environmentURLsDTO.setHttps(endpointBuilder.toString());
+
+                    if (api.isDefaultVersion()) {
+                        int index = endpointBuilder.indexOf(api.getId().getVersion());
+                        endpointBuilder.replace(index, endpointBuilder.length(), "");
+                        if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
+                            apiDefaultVersionURLsDTO.setHttp(endpointBuilder.toString());
+                        } else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
+                            apiDefaultVersionURLsDTO.setHttps(endpointBuilder.toString());
+                        } else if (gwEndpoint.contains("ws:")) {
+                            apiDefaultVersionURLsDTO.setWs(endpointBuilder.toString());
+                        } else if (gwEndpoint.contains("wss:")) {
+                            apiDefaultVersionURLsDTO.setWss(endpointBuilder.toString());
+                        }
                     }
                 }
 
                 APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
-                apiEndpointURLsDTO.setEnvironmentURLs(environmentURLsDTO);
+                apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
+                apiEndpointURLsDTO.setUrLs(apiURLsDTO);
 
                 apiEndpointURLsDTO.setEnvironmentName(environment.getName());
                 apiEndpointURLsDTO.setEnvironmentType(environment.getType());

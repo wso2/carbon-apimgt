@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.regex.Pattern;
 
@@ -49,10 +50,18 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
     }
     public void handleMessage(Message inMessage) {
         //by-passes the interceptor if user calls an anonymous api
-        if (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
-                !Boolean.parseBoolean(RestApiConstants.AUTHENTICATION_REQUIRED)) {
+        if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
             return;
         }
+
+        //check if "Authorization: Bearer" header is present in the request. If not, by-passes the interceptor. If yes,
+        //set the request_authentication_scheme property in the message as oauth2. 
+        if (RestApiUtil.extractOAuthAccessTokenFromMessage(inMessage,
+                RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME) == null) {
+            return;
+        }
+
+        inMessage.put(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME, RestApiConstants.OAUTH2_AUTHENTICATION);
 
         if(handleRequest(inMessage, null)){
             /*String requestedTenant = ((ArrayList) ((TreeMap) (inMessage.get(Message.PROTOCOL_HEADERS))).get("X-WSO2_Tenant")).get(0).toString();

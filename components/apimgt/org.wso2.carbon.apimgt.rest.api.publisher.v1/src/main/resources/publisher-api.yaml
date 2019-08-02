@@ -6774,6 +6774,41 @@ definitions:
       groupId:
         type: string
         example: ""
+#-----------------------------------------------------
+# The Application Info resource
+#-----------------------------------------------------
+  ApplicationInfo:
+    title: Application info object with basic application details
+    properties:
+      applicationId:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorApp
+      subscriber:
+        type: string
+        example: admin
+      throttlingPolicy:
+        type: string
+        example: Unlimited
+      description:
+        type: string
+        example: Sample calculator application
+      status:
+        type: string
+        example: APPROVED
+        default: ""
+      groups:
+        type: array
+        items:
+          type: string
+        example: ""
+      subscriptionCount:
+        type: integer
+      attributes:
+        type: object
+        example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
 # The Document List resource
@@ -7058,15 +7093,17 @@ definitions:
     required:
       - subscriptionId
       - applicationInfo
-      - policy
+      - throttlingPolicy
       - subscriptionStatus
     properties:
       subscriptionId:
         type: string
         example: 01234567-0123-0123-0123-012345678901
       applicationInfo:
-        $ref: '#/definitions/Application'
-      policy:
+        $ref: '#/definitions/ApplicationInfo'
+      apiInfo:
+        $ref: '#/definitions/APIInfo'
+      throttlingPolicy:
         type: string
         example: Unlimited
       subscriptionStatus:
