@@ -41,8 +41,8 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
     }
 
     /**
-     * Handles the incoming message after post authentication. Only used in Store REST API, to register a newly signed up
-     * store user who hasn't logged in to Store for the first time either via REST API or Store UI. 
+     * Handles the incoming message after post authentication. Only used in Store REST API, to register a newly 
+     * signed up store user who hasn't logged in to Store for the first time either via REST API or Store UI. 
      * This method will register the user as a subscriber 
      * (register in AM_SUBSCRIBER table, add the default application for subscriber etc.).
      *
