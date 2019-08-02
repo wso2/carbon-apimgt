@@ -117,6 +117,10 @@ const styles = theme => ({
     scopeSelect: {
         width: '100%',
     },
+    selectWidth: {
+        margin: theme.spacing.unit * 1,
+        minWidth: 120,
+    },
     descriptionWrapperUp: {
         paddingBottom: '0 !important',
     },
@@ -170,6 +174,8 @@ class Resource extends React.Component {
         this.deleteResource = this.deleteResource.bind(this);
         this.handleScopeChange = this.handleScopeChange.bind(this);
         this.changeContentTypes = this.changeContentTypes.bind(this);
+        this.handlePolicyChange = this.handlePolicyChange.bind(this);
+        this.handleAuthTypeChange = this.handleAuthTypeChange.bind(this);
     }
     componentDidMount() {
         this.props.onRef(this);
@@ -178,17 +184,17 @@ class Resource extends React.Component {
         this.props.onRef(undefined);
     }
     handleScopeChange(e) {
-        this.setState({ scopes: e.target.value });
-        this.handleScopeChangeInSwaggerRoot(e.target.value);
+        this.handleMethodChangeInSwaggerRoot('x-scope', e.target.value);
     }
-    handleScopeChangeInSwaggerRoot(scopes) {
-        const tempMethod = this.props.methodData;
-        tempMethod['x-scope'] = scopes;
-        tempMethod.security.map((object, i) => {
-            if (object.OAuth2Security) {
-                object.OAuth2Security = scopes;
-            }
-        });
+    handlePolicyChange(e)  {
+        this.handleMethodChangeInSwaggerRoot('x-throttling-tier', e.target.value);
+    }
+    handleAuthTypeChange(e) {
+        this.handleMethodChangeInSwaggerRoot('x-auth-type', e.target.value);
+    }
+    handleMethodChangeInSwaggerRoot(key, value) {
+        const tempMethod = this.state.method;
+        tempMethod[key] = value;
         this.setState({ method: tempMethod });
         this.props.updatePath(this.props.path, this.props.method, this.state.method);
     }
@@ -262,9 +268,9 @@ class Resource extends React.Component {
      */
     render() {
         const {
-            classes, method, path, scopes, theme, intl,
+            classes, method, path, scopes, theme, intl, policyLevel
         } = this.props;
-        const initScope = this.props.methodData['x-scope'];
+        const resource = this.state.method;
         let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
         let chipTextColor = '#000000';
         if (!chipColor) {
@@ -291,7 +297,7 @@ class Resource extends React.Component {
                             id: 'Apis.Details.Resources.Resource.click.here.to.add.summery',
                             defaultMessage: 'Click here to add summery',
                         })}
-                        fieldValue={this.state.method.summery}
+                        fieldValue={resource.summery}
                         type='textarea'
                         fieldName='summery'
                     />
@@ -310,7 +316,7 @@ class Resource extends React.Component {
                                             id: 'Apis.Details.Resources.Resource.click.here.to.add.description',
                                             defaultMessage: 'Click here to add description',
                                         })}
-                                        fieldValue={this.state.method.description}
+                                        fieldValue={resource.description}
                                         type='textarea'
                                         fieldName='description'
                                     />
@@ -347,21 +353,21 @@ class Resource extends React.Component {
                                     <TableRow className={classes.row}>
                                         <TableCell>
                                             <SelectContentType
-                                                value={this.state.method.produces}
+                                                value={resource.produces}
                                                 onChange={this.changeContentTypes}
                                                 fieldName='produces'
                                             />
                                         </TableCell>
                                         <TableCell>
                                             <SelectContentType
-                                                value={this.state.method.consumes}
+                                                value={resource.consumes}
                                                 onChange={this.changeContentTypes}
                                                 fieldName='consumes'
                                             />
                                         </TableCell>
                                         <TableCell>
-                                                <Select
-                                                    value={this.state.scopes || initScope}
+                                                <Select className={classes.selectWidth}
+                                                    value={resource['x-scope']}
                                                     onChange={this.handleScopeChange}
                                                     inputProps={{
                                                         name: 'scopes',
@@ -378,6 +384,95 @@ class Resource extends React.Component {
                                                         ))}
                                                 </Select>
                                         </TableCell>
+                                    </TableRow>
+                                </Table>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <Table>
+                                    <TableRow className={classes.row}>
+                                        <TableCell>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.Resource.authtype'
+                                                    defaultMessage='Auth Type'
+                                                />
+                                            </Typography>
+                                        </TableCell>
+                                        {policyLevel === 'perResource' &&
+                                        <TableCell>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.Resource.throttling.policy'
+                                                    defaultMessage='Throttling Policy'
+                                                />
+                                            </Typography>
+                                        </TableCell>
+                                        }
+                                    </TableRow>
+                                    <TableRow className={classes.row}>
+                                        <TableCell>
+                                            <Select className={classes.selectWidth}
+                                                value={resource['x-auth-type']}
+                                                onChange={this.handleAuthTypeChange}
+                                                fieldName='Auth Type'
+                                            >
+                                                <MenuItem
+                                                    key='None'
+                                                    value='None'
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.authType.none'
+                                                        defaultMessage='None'
+                                                    />
+                                                </MenuItem>
+                                                <MenuItem
+                                                    key='Application'
+                                                    value='Application'
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.authType.application'
+                                                        defaultMessage='Application'
+                                                    />
+                                                </MenuItem>
+                                                <MenuItem
+                                                    key='Application User'
+                                                    value='Application User'
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.authType.application_user'
+                                                        defaultMessage='Application User'
+                                                    />
+                                                </MenuItem>
+                                                <MenuItem
+                                                    key='Application & Application User'
+                                                    value='Application & Application User'
+                                                >
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Resources.Resource.authType.application_and_user'
+                                                        defaultMessage='Application & Application User'
+                                                    />
+                                                </MenuItem>
+                                            </Select>
+                                        </TableCell>
+                                        {policyLevel==='perResource' &&
+                                        <TableCell>
+                                            <Select className={classes.selectWidth}
+                                                value={resource['x-throttling-tier']}
+                                                onChange={this.handlePolicyChange}
+                                                fieldName='Throttling Policy'
+                                            >
+                                                {this.props.apiPolicies.map((policy) => (
+                                                    <MenuItem
+                                                        key={policy.name}
+                                                        value={policy.name}
+                                                    >
+                                                        {policy.displayName}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </TableCell>
+                                        }
                                     </TableRow>
                                 </Table>
                             </Grid>
@@ -413,7 +508,7 @@ class Resource extends React.Component {
                                 {/* <WrappedPropertyAddForm propsSubmitHandler={this.propsSubmitHandler} /> */}
                             </Grid>
                             <Grid item xs={12}>
-                                {this.state.method.parameters && this.state.method.parameters.length > 0 && (
+                                {resource.parameters && resource.parameters.length > 0 && (
                                     <Table>
                                         <TableHead>
                                             <TableRow>
@@ -456,7 +551,7 @@ class Resource extends React.Component {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {this.state.method.parameters.map(function (param, i) {
+                                            {resource.parameters.map(function (param, i) {
                                                 return (
                                                     <TableRow key={i}>
                                                         <TableCell>

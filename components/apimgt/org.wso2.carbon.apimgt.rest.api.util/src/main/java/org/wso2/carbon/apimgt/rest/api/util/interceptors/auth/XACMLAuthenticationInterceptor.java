@@ -44,12 +44,13 @@ public class XACMLAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
     }
+
     public void handleMessage(Message inMessage) {
         //by-passes the interceptor if user calls an anonymous api
-        if (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
-                !Boolean.parseBoolean(RestApiConstants.AUTHENTICATION_REQUIRED)) {
+        if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
             return;
         }
+                
         handleRequest(inMessage, null);
     }
 

@@ -117,7 +117,7 @@
   "apim.sdk.supported_languages": "android,java,scala-akka,csharp,dart,flash,groovy,javascript,jmeter,perl,php,python,ruby,swift4,clojure,csharp-dotnet2,nodejs-server",
   "apim.token.revocation.notifier_impl": "org.wso2.carbon.apimgt.keymgt.events.TokenRevocationNotifierImpl",
   "apim.token.revocation.enable_realtime_notifier": true,
-  "apim.token.revocation.enable_persistent_notifier": true,
+  "apim.token.revocation.enable_persistent_notifier": false,
   "apim.token.revocation.realtime_notifier.ttl": "5000",
   "apim.token.revocation.persistent_notifier.hostname": "https://localhost:2379/v2/keys/jti/",
   "apim.token.revocation.persistent_notifier.ttl": "5000",

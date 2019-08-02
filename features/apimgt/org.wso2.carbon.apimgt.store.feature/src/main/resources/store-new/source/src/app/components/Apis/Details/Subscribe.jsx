@@ -38,7 +38,7 @@ import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import Loading from '../../Base/Loading/Loading';
@@ -462,11 +462,11 @@ class Subscribe extends Component {
                         <Typography gutterBottom>
                             <FormattedMessage
                                 id='Apis.Details.Subscribe.test.description'
-                                defaultMessage='Create an Application and subscribe this API to that Application.
-                                                                        An application is a logical collection of APIs.
-                                                                        Applications allow you to use a single access token to invoke a collection
-                                                                        of APIs and to subscribe to one API multiple times with different SLA levels.
-                                                                        The DefaultApplication is pre-created and allows unlimited access by default.'
+                                defaultMessage={`Create an Application and subscribe this API to that Application.
+                                                An application is a logical collection of APIs.
+                                                Applications allow you to use a single access token to invoke a collection
+                                                of APIs and to subscribe to one API multiple times with different SLA levels.
+                                                The DefaultApplication is pre-created and allows unlimited access by default.`}
                             />
                         </Typography>
 
@@ -563,15 +563,15 @@ class Subscribe extends Component {
                         {this.state.subscribedApplications && this.state.subscribedApplications.length > 0 && (
                             <div>
                                 <Typography variant='caption' className={classes.subtitle}>
-                                <FormattedMessage
-                                                id='Apis.Details.Subscribe.showing.two'
-                                                defaultMessage='subscribed Applications'
-                                            />
+                                    <FormattedMessage
+                                        id='Apis.Details.Subscribe.showing.two.subscribed.applications'
+                                        defaultMessage='subscribed Applications'
+                                    />
                                     {this.state.subscribedApplications && this.state.subscribedApplications.length > 2 && (
                                         <span>
                                             -
                                             <FormattedMessage
-                                                id='Apis.Details.Subscribe.showing.two'
+                                                id='Apis.Details.Subscribe.showing.two.out.of'
                                                 defaultMessage='showing 2 out of'
                                             />
                                             {this.state.subscribedApplications.length}
@@ -639,7 +639,7 @@ class Subscribe extends Component {
                 >
                     <DialogTitle id='alert-dialog-title'>
                         <FormattedMessage
-                            id='Apis.Details.Subscribe.created.success'
+                            id='Apis.Details.Subscribe.use.google.location.service'
                             defaultMessage="Use Google's location service?"
                         />
                     </DialogTitle>

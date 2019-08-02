@@ -53,8 +53,10 @@ public class APIMOAuthEventInterceptor extends AbstractOAuthEventInterceptor {
         log.debug("Initializing OAuth interceptor");
         realtimeNotifierProperties = APIManagerConfiguration.getRealtimeTokenRevocationNotifierProperties();
         persistentNotifierProperties = APIManagerConfiguration.getPersistentTokenRevocationNotifiersProperties();
-        realtimeNotifierEnabled = !realtimeNotifierProperties.isEmpty();
-        persistentNotifierEnabled = !persistentNotifierProperties.isEmpty();
+
+        realtimeNotifierEnabled = realtimeNotifierProperties != null;
+        persistentNotifierEnabled = persistentNotifierProperties != null;
+
         String className = APIManagerConfiguration.getTokenRevocationClassName();
         try {
             tokenRevocationNotifier = (TokenRevocationNotifier) Class.forName(className).getConstructor()

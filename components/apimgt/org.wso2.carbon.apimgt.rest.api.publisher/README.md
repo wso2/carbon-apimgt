@@ -182,11 +182,13 @@ beans.xml file.
            and uncomment the AuthenticationInterceptor which contains "BasicAuthenticationInterceptor"-->
    <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
    <!--<bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />-->
+   <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
    <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
    <cxf:bus>
        <cxf:inInterceptors>
            <ref bean="PreAuthenticationInterceptor"/>
            <ref bean="AuthenticationInterceptor"/>
+           <ref bean="PostAuthenticationInterceptor"/>
            <ref bean="ValidationInInterceptor"/>
        </cxf:inInterceptors>
    </cxf:bus>

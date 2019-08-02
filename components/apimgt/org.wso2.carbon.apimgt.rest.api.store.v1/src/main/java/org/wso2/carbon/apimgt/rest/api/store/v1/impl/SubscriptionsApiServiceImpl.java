@@ -250,7 +250,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     }
 
     /**
-     * Create multiple new subscriptions with the list of subscription details specified in the body parameter
+     * Create multiple new subscriptions with the list of subscription details specified in the body parameter.
      *
      * @param body        list of new subscription details
      * @return list of newly added subscription as a SubscriptionDTO if successful

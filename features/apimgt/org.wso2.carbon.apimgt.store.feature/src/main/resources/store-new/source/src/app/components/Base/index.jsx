@@ -22,38 +22,29 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import ListItem from '@material-ui/core/ListItem';
+import Hidden from '@material-ui/core/Hidden';
 import { Menu as MenuIcon } from '@material-ui/icons';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
 import {
-    MenuItem,
-    MenuList,
-    ListItemIcon,
-    ListItemText,
-    Divider,
+    MenuItem, MenuList, ListItemIcon, ListItemText, Divider,
 } from '@material-ui/core';
 import NightMode from '@material-ui/icons/Brightness2';
 
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { findDOMNode } from 'react-dom';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 import Person from '@material-ui/icons/Person';
 import Popper from '@material-ui/core/Popper';
 import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import HowToReg from '@material-ui/icons/HowToReg';
 import { FormattedMessage } from 'react-intl';
+import Drawer from '@material-ui/core/Drawer';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
-import GlobalNavBar from './Generic/GlobalNavbar';
-import GenericSearch from './Generic/GenericSearch';
+import GlobalNavBar from './Header/GlobalNavbar';
+import GenericSearch from './Header/GenericSearch';
 import Utils from '../../data/Utils';
 import VerticalDivider from '../Shared/VerticalDivider';
 
@@ -79,16 +70,12 @@ const styles = theme => ({
     wrapper: {
         minHeight: '100%',
         marginBottom: -50,
-        background:
-        theme.palette.background.default
-        + ' url('
-        + theme.custom.backgroundImage
-        + ') repeat left top',
+        background: theme.palette.background.default + ' url(' + theme.custom.backgroundImage + ') repeat left top',
     },
     contentWrapper: {
         display: 'flex',
         flexDirection: 'row',
-        overflow: 'auto',
+        overflowY: 'hidden',
         position: 'relative',
         minHeight: 'calc(100vh - 114px)',
     },
@@ -111,6 +98,18 @@ const styles = theme => ({
             minHeight: 64,
         },
     },
+    list: {
+        width: theme.custom.drawerWidth,
+    },
+    drawerStyles: {
+        top: theme.mixins.toolbar['@media (min-width:600px)'].minHeight,
+    },
+    listInline: {
+        '& ul': {
+            display: 'flex',
+            flexDirection: 'row',
+        }
+    }
 });
 
 class Layout extends React.Component {
@@ -118,6 +117,7 @@ class Layout extends React.Component {
         super(props);
         this.toggleGlobalNavBar = this.toggleGlobalNavBar.bind(this);
     }
+
     state = {
         environments: {},
         environmentId: 0,
@@ -137,10 +137,7 @@ class Layout extends React.Component {
                 });
             })
             .catch((error) => {
-                console.error(
-                    'Error while receiving environment configurations : ',
-                    error,
-                );
+                console.error('Error while receiving environment configurations : ', error);
             });
 
         const storedThemeIndex = localStorage.getItem('themeIndex');
@@ -173,7 +170,7 @@ class Layout extends React.Component {
     doOIDCLogout = (e) => {
         e.preventDefault();
         window.location = '/store-new/services/logout';
-    }
+    };
 
     handleClickButton = (key) => {
         this.setState({
@@ -181,21 +178,21 @@ class Layout extends React.Component {
             anchorEl: findDOMNode(this.button),
         });
     };
+
     handleRequestClose = (key) => {
         this.setState({
             [key]: false,
         });
     };
-    handleSwitch = name => (event) => {
-        this.setState({ [name]: event.target.checked });
-        this.props.setTheme();
-    };
+
     toggleGlobalNavBar(event) {
         this.setState({ openNavBar: !this.state.openNavBar });
     }
+
     handleToggleUserMenu = () => {
         this.setState(state => ({ openUserMenu: !state.openUserMenu }));
     };
+
     handleCloseUserMenu = (event) => {
         if (this.anchorEl.contains(event.target)) {
             return;
@@ -216,22 +213,59 @@ class Layout extends React.Component {
 
     render() {
         const { classes, theme } = this.props;
+        const { openNavBar } = this.state;
         const user = AuthManager.getUser();
-
+        // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
+        const commonStyle = {
+            style: { top: 64 },
+        };
+        const paperStyles = {
+            style: {
+                backgroundColor: theme.palette.background.drawer,
+                top: 64,
+            },
+        };
         return (
             <React.Fragment>
                 <div className={classes.wrapper}>
                     <AppBar position='fixed' className={classes.appBar}>
                         <Toolbar className={classes.toolbar}>
-                            <IconButton
-                                onClick={this.toggleGlobalNavBar}
-                                color='inherit'
-                            >
-                                <MenuIcon className={classes.menuIcon} />
-                            </IconButton>
+                            <Hidden mdUp>
+                                <IconButton onClick={this.toggleGlobalNavBar} color='inherit'>
+                                    <MenuIcon className={classes.menuIcon} />
+                                </IconButton>
+                            </Hidden>
                             <Link to='/'>
                                 <img src={theme.custom.logo} />
                             </Link>
+                            <Hidden smDown>
+                                <VerticalDivider height={32} />
+                                <div className={classes.listInline}>
+                                    <GlobalNavBar smallView={true} />
+                                </div>
+                            </Hidden>
+                            <Hidden mdUp>
+                                <Drawer
+                                    className={classes.drawerStyles}
+                                    PaperProps={paperStyles}
+                                    SlideProps={commonStyle}
+                                    ModalProps={commonStyle}
+                                    BackdropProps={commonStyle}
+                                    open={openNavBar}
+                                    onClose={this.toggleGlobalNavBar}
+                                >
+                                    <div
+                                        tabIndex={0}
+                                        role='button'
+                                        onClick={this.toggleGlobalNavBar}
+                                        onKeyDown={this.toggleGlobalNavBar}
+                                    >
+                                        <div className={classes.list}>
+                                            <GlobalNavBar smallView={false} />
+                                        </div>
+                                    </div>
+                                </Drawer>
+                            </Hidden>
                             <VerticalDivider height={32} />
                             <GenericSearch />
                             <VerticalDivider height={72} />
@@ -239,9 +273,7 @@ class Layout extends React.Component {
                             <EnvironmentMenu
                                 environments={this.state.environments}
                                 environmentLabel={Utils.getEnvironment().label}
-                                handleEnvironmentChange={
-                                    this.handleEnvironmentChange
-                                }
+                                handleEnvironmentChange={this.handleEnvironmentChange}
                             />
                             {user ? (
                                 <React.Fragment>
@@ -249,14 +281,13 @@ class Layout extends React.Component {
                                         buttonRef={(node) => {
                                             this.anchorEl = node;
                                         }}
-                                        aria-owns={
-                                            open ? 'menu-list-grow' : null
-                                        }
+                                        aria-owns={open ? 'menu-list-grow' : null}
                                         aria-haspopup='true'
                                         onClick={this.handleToggleUserMenu}
                                         className={classes.userLink}
                                     >
-                                        <Person /> {user.name}
+                                        <Person />
+                                        {user.name}
                                     </Button>
                                     <Popper
                                         open={this.state.openUserMenu}
@@ -278,18 +309,11 @@ class Layout extends React.Component {
                                                 id='menu-list-grow'
                                                 style={{
                                                     transformOrigin:
-                                                        placement === 'bottom'
-                                                            ? 'center top'
-                                                            : 'center bottom',
+                                                        placement === 'bottom' ? 'center top' : 'center bottom',
                                                 }}
                                             >
                                                 <Paper>
-                                                    <ClickAwayListener
-                                                        onClickAway={
-                                                            this
-                                                                .handleCloseUserMenu
-                                                        }
-                                                    >
+                                                    <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
                                                         <MenuList>
                                                             <MenuItem onClick={this.handleCloseUserMenu}>
                                                                 <FormattedMessage
@@ -310,13 +334,15 @@ class Layout extends React.Component {
                                                                 />
                                                             </MenuItem>
                                                             <Divider />
-                                                            <MenuItem className={classes.menuItem} onClick={this.handleCloseUserMenu}>
+                                                            <MenuItem
+                                                                className={classes.menuItem}
+                                                                onClick={this.handleCloseUserMenu}
+                                                            >
                                                                 <ListItemText primary='Night Mode' />
                                                                 <ListItemIcon className={classes.icon}>
                                                                     <NightMode />
                                                                 </ListItemIcon>
                                                             </MenuItem>
-
                                                         </MenuList>
                                                     </ClickAwayListener>
                                                 </Paper>
@@ -335,23 +361,15 @@ class Layout extends React.Component {
                                     <a href='/store-new/services/configs'>
                                         <Button className={classes.userLink}>
                                             <Person />
-                                            <FormattedMessage
-                                                id='Base.index.sign.in'
-                                                defaultMessage=' Sign-in'
-                                            />
+                                            <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
                                         </Button>
                                     </a>
                                 </React.Fragment>
                             )}
                         </Toolbar>
                     </AppBar>
-                    <GlobalNavBar
-                        toggleGlobalNavBar={this.toggleGlobalNavBar}
-                        open={this.state.openNavBar}
-                    />
-                    <div className={classes.contentWrapper}>
-                        {this.props.children}
-                    </div>
+
+                    <div className={classes.contentWrapper}>{this.props.children}</div>
 
                     <div className={classes.push} />
                 </div>

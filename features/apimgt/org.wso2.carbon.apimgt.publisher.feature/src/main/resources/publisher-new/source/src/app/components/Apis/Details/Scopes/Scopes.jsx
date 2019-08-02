@@ -20,7 +20,7 @@ import 'react-tagsinput/react-tagsinput.css';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Api from 'AppData/api';
-import { Progress, Alert } from 'AppComponents/Shared';
+import { Progress } from 'AppComponents/Shared';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
@@ -38,8 +38,8 @@ import {
 } from '@material-ui/core';
 import AddCircle from '@material-ui/icons/AddCircle';
 import MUIDataTable from 'mui-datatables';
-import Edit from '../Documents/Edit';
-import Delete from '../Documents/Delete';
+import Icon from '@material-ui/core/Icon';
+import Delete from './Delete';
 
 const styles = theme => ({
     buttonProgress: {
@@ -89,123 +89,6 @@ class Scopes extends React.Component {
         this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
         this.api_data = props.api;
-        this.state = {
-            apiScopes: null,
-            apiScope: {},
-            roles: [],
-            scopesList: [],
-        };
-        this.deleteScope = this.deleteScope.bind(this);
-        this.updateScope = this.updateScope.bind(this);
-        this.handleInputs = this.handleInputs.bind(this);
-        this.addScope = this.addScope.bind(this);
-        props.api.scopes.map((scope) => {
-            const aScope = [];
-            const resources = [];
-            aScope.push(scope.name);
-            aScope.push(scope.bindings.values);
-            props.api.operations.map((op) => {
-                if (op.scopes.includes(scope.name)) {
-                    resources.push(op.uritemplate + ' ' + op.httpVerb);
-                }
-                return false;
-            });
-            aScope.push(resources);
-            this.state.scopesList.push(aScope);
-            return false;
-        });
-    }
-
-    /**
-     * Delete scope
-     * @param {any} scopeName Name of the scope need to be deleted
-     * @memberof Scopes
-     */
-    deleteScope(scopeName) {
-        const { apiScopes } = this.state;
-        for (const apiScope in apiScopes) {
-            if (Object.prototype.hasOwnProperty.call(apiScopes, apiScope) && apiScopes[apiScope].name === scopeName) {
-                apiScopes.splice(apiScope, 1);
-                break;
-            }
-        }
-        this.setState({
-            apiScopes,
-        });
-    }
-
-    /**
-     * Update scope
-     * @param {any} scopeName Scope name to be updated
-     * @param {any} scopeObj New Scope object
-     * @memberof Scopes
-     */
-    updateScope(scopeName, scopeObj) {
-        const { apiScopes } = this.state;
-        for (const apiScope in apiScopes) {
-            if (Object.prototype.hasOwnProperty.call(apiScopes, apiScope) && apiScopes[apiScope].name === scopeName) {
-                apiScopes[apiScope].description = scopeObj.description;
-                break;
-            }
-        }
-        this.setState({
-            apiScopes,
-        });
-    }
-
-    /**
-     * Add new scope
-     * @memberof Scopes
-     */
-    addScope() {
-        const { intl } = this.props;
-        const api = new Api();
-        const scope = this.state.apiScope;
-        scope.bindings = {
-            type: 'role',
-            values: this.state.roles,
-        };
-        const promisedScopeAdd = api.addScope(this.props.match.params.api_uuid, scope);
-        promisedScopeAdd.then((response) => {
-            if (response.status !== 201) {
-                console.log(response);
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Scopes.Scope.something.went.wrong.while.updating.the.scope',
-                    defaultMessage: 'Something went wrong while updating the {scopeName} Scope!',
-                }, { scopeName: scope.name }));
-                return;
-            }
-            Alert.success(intl.formatMessage({
-                id: 'Apis.Details.Scopes.Scope.scope.added.successfully',
-                defaultMessage: '{scopeName} Scope added successfully!',
-            }, { scopeName: scope.name }));
-            const { apiScopes } = this.state;
-            apiScopes[apiScopes.length] = this.state.apiScope;
-            this.setState({
-                apiScopes,
-                apiScope: {},
-                roles: [],
-            });
-        });
-    }
-    /**
-     * Handle api scope addition event
-     * @param {any} event Button Click event
-     * @memberof Scopes
-     */
-    handleInputs(event) {
-        if (Array.isArray(event)) {
-            this.setState({
-                roles: event,
-            });
-        } else {
-            const input = event.target;
-            const { apiScope } = this.state;
-            apiScope[input.id] = input.value;
-            this.setState({
-                apiScope,
-            });
-        }
     }
 
     /**
@@ -219,10 +102,15 @@ class Scopes extends React.Component {
         const { scopes } = api;
         const { classes } = this.props;
         const url = `/apis/${api.id}/scopes/create`;
+        const editUrl = `/apis/${api.id}/scopes/edit`;
         const columns = [
             intl.formatMessage({
                 id: 'Apis.Details.Scopes.Scopes.table.header.name',
                 defaultMessage: 'Name',
+            }),
+            intl.formatMessage({
+                id: 'Apis.Details.Scopes.Scopes.table.header.description',
+                defaultMessage: 'Description',
             }),
             {
                 options: {
@@ -269,15 +157,29 @@ class Scopes extends React.Component {
                 options: {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
-                            const scopeName = tableMeta.rowData[1];
+                            const scopeName = tableMeta.rowData[0];
                             return (
                                 <table className={classes.actionTable}>
                                     <tr>
                                         <td>
-                                            <Edit scopeName={scopeName} apiId={this.apiId} />
+                                            <Link to={{
+                                                pathname: editUrl,
+                                                state: {
+                                                    scopeName,
+                                                },
+                                            }}
+                                            >
+                                                <Button>
+                                                    <Icon>edit</Icon>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Documents.Edit.documents.text.editor.edit'
+                                                        defaultMessage='Edit'
+                                                    />
+                                                </Button>
+                                            </Link>
                                         </td>
                                         <td>
-                                            <Delete scopeName={scopeName} apiId={this.apiId} />
+                                            <Delete scopeName={scopeName} apiId={this.apiId} api={api} />
                                         </td>
                                     </tr>
                                 </table>
@@ -296,6 +198,19 @@ class Scopes extends React.Component {
             filterType: 'multiselect',
             selectableRows: false,
         };
+        const scopesList = api.scopes.map((scope) => {
+            const aScope = [];
+            aScope.push(scope.name);
+            aScope.push(scope.description);
+            aScope.push(scope.bindings.values);
+            const resources = api.operations.filter((op) => {
+                return op.scopes.includes(scope.name);
+            }).map((op) => {
+                return op.uritemplate + ' ' + op.httpVerb;
+            });
+            aScope.push(resources);
+            return aScope;
+        });
 
         if (!scopes) {
             return <Progress />;
@@ -363,7 +278,7 @@ class Scopes extends React.Component {
                         id: 'Apis.Details.Scopes.Scopes.table.scope.name',
                         defaultMessage: 'Scopes',
                     })}
-                    data={this.state.scopesList}
+                    data={scopesList}
                     columns={columns}
                     options={options}
                 />

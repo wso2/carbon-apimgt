@@ -12,15 +12,17 @@ import javax.xml.bind.annotation.*;
 
 
 
-public class APIEnvironmentURLsDTO   {
+public class APIURLsDTO   {
   
     private String http = null;
     private String https = null;
+    private String ws = null;
+    private String wss = null;
 
   /**
    * HTTP environment URL
    **/
-  public APIEnvironmentURLsDTO http(String http) {
+  public APIURLsDTO http(String http) {
     this.http = http;
     return this;
   }
@@ -38,7 +40,7 @@ public class APIEnvironmentURLsDTO   {
   /**
    * HTTPS environment URL
    **/
-  public APIEnvironmentURLsDTO https(String https) {
+  public APIURLsDTO https(String https) {
     this.https = https;
     return this;
   }
@@ -53,6 +55,42 @@ public class APIEnvironmentURLsDTO   {
     this.https = https;
   }
 
+  /**
+   * WS environment URL
+   **/
+  public APIURLsDTO ws(String ws) {
+    this.ws = ws;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "ws://localhost:9099/phoneverify/1.0.0", value = "WS environment URL")
+  @JsonProperty("ws")
+  public String getWs() {
+    return ws;
+  }
+  public void setWs(String ws) {
+    this.ws = ws;
+  }
+
+  /**
+   * WSS environment URL
+   **/
+  public APIURLsDTO wss(String wss) {
+    this.wss = wss;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "wss://localhost:9099/phoneverify/1.0.0", value = "WSS environment URL")
+  @JsonProperty("wss")
+  public String getWss() {
+    return wss;
+  }
+  public void setWss(String wss) {
+    this.wss = wss;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -62,23 +100,27 @@ public class APIEnvironmentURLsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIEnvironmentURLsDTO apIEnvironmentURLs = (APIEnvironmentURLsDTO) o;
-    return Objects.equals(http, apIEnvironmentURLs.http) &&
-        Objects.equals(https, apIEnvironmentURLs.https);
+    APIURLsDTO apIURLs = (APIURLsDTO) o;
+    return Objects.equals(http, apIURLs.http) &&
+        Objects.equals(https, apIURLs.https) &&
+        Objects.equals(ws, apIURLs.ws) &&
+        Objects.equals(wss, apIURLs.wss);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(http, https);
+    return Objects.hash(http, https, ws, wss);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIEnvironmentURLsDTO {\n");
+    sb.append("class APIURLsDTO {\n");
     
     sb.append("    http: ").append(toIndentedString(http)).append("\n");
     sb.append("    https: ").append(toIndentedString(https)).append("\n");
+    sb.append("    ws: ").append(toIndentedString(ws)).append("\n");
+    sb.append("    wss: ").append(toIndentedString(wss)).append("\n");
     sb.append("}");
     return sb.toString();
   }
