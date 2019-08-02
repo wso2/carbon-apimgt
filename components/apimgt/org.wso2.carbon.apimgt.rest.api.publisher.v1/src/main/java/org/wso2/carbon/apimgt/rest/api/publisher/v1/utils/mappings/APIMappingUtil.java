@@ -1520,6 +1520,13 @@ public class APIMappingUtil {
             productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
         }
 
+        productDto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(product.getAccessControl()) ?
+                APIProductDTO.AccessControlEnum.RESTRICTED :
+                APIProductDTO.AccessControlEnum.NONE);
+        if (product.getAccessControlRoles() != null) {
+            productDto.setAccessControlRoles(Arrays.asList(product.getAccessControlRoles().split(",")));
+        }
+
         if (StringUtils.isEmpty(product.getTransports())) {
             List<String> transports = new ArrayList<>();
             transports.add(APIConstants.HTTPS_PROTOCOL);

@@ -7930,6 +7930,54 @@ public final class APIUtil {
     }
 
     /**
+     * To set the resource properties to the API.
+     *
+     * @param apiProduct          API Product that need to set the resource properties.
+     * @param registry     Registry to get the resource from.
+     * @param artifactPath Path of the API artifact.
+     * @return Updated API.
+     * @throws RegistryException Registry Exception.
+     */
+    private static APIProduct setResourceProperties(APIProduct apiProduct, Registry registry, String artifactPath) throws RegistryException {
+        Resource productResource = registry.get(artifactPath);
+        Properties properties = productResource.getProperties();
+        if (properties != null) {
+            Enumeration propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (log.isDebugEnabled()) {
+                    log.debug("API Product '" + apiProduct.getId().toString() + "' " + "has the property " + propertyName);
+                }
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    apiProduct.addProperty(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                            productResource.getProperty(propertyName));
+                }
+            }
+        }
+        apiProduct.setAccessControl(productResource.getProperty(APIConstants.ACCESS_CONTROL));
+
+        String accessControlRoles = null;
+
+        String displayPublisherRoles = productResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+        if (displayPublisherRoles == null) {
+
+            String publisherRoles = productResource.getProperty(APIConstants.PUBLISHER_ROLES);
+
+            if (publisherRoles != null) {
+                accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(
+                        productResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                        null : productResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            }
+        } else {
+            accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(displayPublisherRoles) ?
+                    null : displayPublisherRoles;
+        }
+
+        apiProduct.setAccessControlRoles(accessControlRoles);
+        return apiProduct;
+    }
+
+    /**
      * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if 
      * config is not available in tenant registry
      *
@@ -8458,14 +8506,15 @@ public final class APIUtil {
             String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName, productVersion);
-            int apiId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
+            int apiProductId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
 
-            if (apiId == -1) {
+            if (apiProductId == -1) {
                 return null;
             }
 
             apiProduct = new APIProduct(apiProductIdentifier);
-            apiProduct.setProductId(apiId);
+            setResourceProperties(apiProduct, registry, artifactPath);
+            apiProduct.setProductId(apiProductId);
             //set uuid
             apiProduct.setUuid(artifact.getId());
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
