@@ -87,7 +87,7 @@ public abstract class APIDefinition {
     /**
      * This method generates API definition using the given api's URI templates and the swagger.
      * It will alter the provided swagger definition based on the URI templates. For example: if there is a new
-     * URI template which is not included in the swagger, it will be added to the swagger as a basic resource. Any 
+     * URI template which is not included in the swagger, it will be added to the swagger as a basic resource. Any
      * additional resources inside the swagger will be removed from the swagger. Changes to scopes, throtting policies,
      * on the resource will be updated on the swagger
      *
@@ -129,11 +129,11 @@ public abstract class APIDefinition {
     }
 
     /**
-     * Creates a helper uri template map using provided API's URI templates. 
+     * Creates a helper uri template map using provided API's URI templates.
      * Creates map in below format:
      *      /order      -> [post -> template1]
      *      /order/{id} -> [get -> template2, put -> template3, ..]
-     * 
+     *
      * @param api API object
      * @return a structured uri template map using provided API's URI templates
      */
@@ -158,7 +158,7 @@ public abstract class APIDefinition {
      * @return APIDefinitionValidationResponse object with validation information
      */
     public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
-            boolean returnJsonContent);
+            boolean returnJsonContent) throws APIManagementException;
 
     /**
      * This method validates the given OpenAPI definition by URL
@@ -167,6 +167,7 @@ public abstract class APIDefinition {
      * @param returnJsonContent whether to return the converted json form of the
      * @return APIDefinitionValidationResponse object with validation information
      */
-    public abstract APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent);
+    public abstract APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent)
+            throws APIManagementException;
 
 }

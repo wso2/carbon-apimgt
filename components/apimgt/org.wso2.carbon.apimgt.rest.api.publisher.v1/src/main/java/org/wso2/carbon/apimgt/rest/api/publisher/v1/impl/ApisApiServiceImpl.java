@@ -903,7 +903,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves API Lifecycle state information
-     * 
+     *
      * @param apiId API Id
      * @param ifNoneMatch If-None-Match header value
      * @return API Lifecycle state information
@@ -951,28 +951,28 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query,
             String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId,
             String ifMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId,
             String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
     }
 
-    @Override 
+    @Override
     public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String apiId, String mediationPolicyId,
             MediationDTO body, String ifMatch, MessageContext messageContext) {
         // do some magic!
@@ -1432,7 +1432,12 @@ public class ApisApiServiceImpl implements ApisApiService {
           Boolean returnContent, MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, returnContent);
+        Map validationResponseMap = null;
+        try {
+            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, returnContent);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+        }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
                 (OpenAPIDefinitionValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
@@ -1454,7 +1459,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                                             String additionalProperties, MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, true);
+        Map validationResponseMap = null;
+        try {
+            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, true);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+        }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
                 (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
@@ -1702,8 +1712,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      *  of type OpenAPIDefinitionValidationResponseDTO for the REST API. A value with key 'model' will have the
      *  validation response of type APIDefinitionValidationResponse coming from the impl level.
      */
-    private Map validateOpenAPIDefinition(String url, InputStream fileInputStream,
-                                                                             Boolean returnContent) {
+    private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Boolean returnContent)
+            throws APIManagementException {
         handleInvalidParams(fileInputStream, url);
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinition apiDefinition = new APIDefinitionUsingOASParser();

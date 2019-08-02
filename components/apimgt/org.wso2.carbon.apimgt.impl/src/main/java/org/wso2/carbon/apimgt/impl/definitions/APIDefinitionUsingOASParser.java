@@ -115,13 +115,13 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                 template.setUriTemplate(pathString);
 
                 if (op.getSecurity() != null) {
-                    // If scopes defined in the operation level set those to the URL template 
+                    // If scopes defined in the operation level set those to the URL template
                     List<String> scopes = getOAuth2ScopeListFromSecurityElementMap(oauth2SchemeKey, op.getSecurity());
                     if (scopes != null) {
                         template = setScopesToTemplate(template, scopes);
                     }
                 } else if (globalScopes != null && globalScopes.size() > 0) {
-                    // If there are no scopes defined in the operation level but there are global scopes, then set those 
+                    // If there are no scopes defined in the operation level but there are global scopes, then set those
                     template = setScopesToTemplate(template, globalScopes);
                 }
 
@@ -187,7 +187,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         OAuth2Definition oAuth2Definition = new OAuth2Definition().password("https://test.com");
 
         Set<Scope> scopes = api.getScopes();
-        
+
         if (scopes != null && !scopes.isEmpty()) {
             List<Map<String,String>> xSecurityScopesArray = new ArrayList<>();
             for (Scope scope : scopes) {
@@ -219,7 +219,8 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     @Override
-    public String generateAPIDefinition(API api, String apiDefinition, boolean syncOperations) throws APIManagementException {
+    public String generateAPIDefinition(API api, String apiDefinition, boolean syncOperations)
+            throws APIManagementException {
         SwaggerParser parser = new SwaggerParser();
         Swagger swaggerObj = parser.parse(apiDefinition);
 
@@ -235,7 +236,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                 //remove paths that are not in URI Templates
                 swaggerObj.getPaths().remove(pathName);
             } else {
-                //If path is available in the URI template, then check for operations(verbs) 
+                //If path is available in the URI template, then check for operations(verbs)
                 for (Map.Entry<HttpMethod, Operation> operationEntry : path.getOperationMap().entrySet()) {
                     HttpMethod httpMethod = operationEntry.getKey();
                     Operation operation = operationEntry.getValue();
@@ -244,7 +245,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                         // if particular operation is not available in URI templates, then remove it from swagger
                         path.set(httpMethod.toString().toLowerCase(), null);
                     } else {
-                        // if operation is available in URI templates, update swagger operation 
+                        // if operation is available in URI templates, update swagger operation
                         // with auth type, scope etc
                         updateOperationManagedInfo(template, operation);
                     }
@@ -264,14 +265,14 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
             }
         }
 
-        // add to swagger if there are any new templates 
+        // add to swagger if there are any new templates
         for (Map.Entry<String, Map<String, URITemplate>> uriTemplateMapEntry : uriTemplateMap.entrySet()) {
             String path = uriTemplateMapEntry.getKey();
             Map<String, URITemplate> verbMap = uriTemplateMapEntry.getValue();
             if (swaggerObj.getPath(path) == null) {
                 for (Map.Entry<String, URITemplate> verbMapEntry : verbMap.entrySet()) {
                     URITemplate uriTemplate = verbMapEntry.getValue();
-                    addOrUpdatePathToSwagger(swaggerObj, uriTemplate);   
+                    addOrUpdatePathToSwagger(swaggerObj, uriTemplate);
                 }
             }
         }
@@ -286,7 +287,8 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent) {
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+            throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         boolean fallbackToV2 = false;
 
@@ -331,7 +333,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                         swagger.getSwagger(), info.getTitle(), info.getVersion(), swagger.getBasePath(),
                         info.getDescription());
                 if (returnJsonContent) {
-                    validationResponse.setJsonContent(io.swagger.util.Json.pretty(parseAttemptForV2.getSwagger()));
+                    validationResponse.setJsonContent(getSwaggerJsonString(parseAttemptForV2.getSwagger()));
                 }
 
             }
@@ -383,7 +385,8 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     @Override
-    public APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent) {
+    public APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent)
+            throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
@@ -491,7 +494,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     /**
      * Add a new path based on the provided URI template to swagger if it does not exists. If it exists,
      * adds the respective operation to the existing path
-     * 
+     *
      * @param swagger swagger object
      * @param uriTemplate URI template
      */
@@ -511,7 +514,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     /**
      * Creates a new operation object using the URI template object
-     * 
+     *
      * @param uriTemplate URI template
      * @return a new operation object using the URI template object
      */
@@ -535,7 +538,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     /**
      *  Updates managed info of a provided operation such as auth type and throttling
-     * 
+     *
      * @param uriTemplate URI template
      * @param operation swagger operation
      */
@@ -555,7 +558,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     /**
-     * Creates a json string using the swagger object. 
+     * Creates a json string using the swagger object.
      *
      * @param swaggerObj swagger object
      * @return json string using the swagger object
