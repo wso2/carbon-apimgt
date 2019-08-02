@@ -71,6 +71,7 @@ const styles = theme => ({
     thumbWrapper: {
         position: 'relative',
         paddingTop: 20,
+        marginRight: theme.spacing.unit * 2,
     },
     deleteIcon: {
         fill: 'red',
@@ -202,7 +203,7 @@ class ApiThumb extends React.Component {
             );
         }
         return (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={3} className={classes.thumbWrapper}>
+            <div className={classes.thumbWrapper}>
                 <Link to={details_link} className={classes.imageWrapper}>
                     {!defaultImage && ImageView}
                     {defaultImage && <img src={defaultImage} />}
@@ -250,7 +251,7 @@ class ApiThumb extends React.Component {
                         </Typography>
                     </div>
                 </div>
-            </Grid>
+            </div>
         );
     }
 }

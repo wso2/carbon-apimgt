@@ -48,7 +48,7 @@ function Landing(props) {
                                     {listByTagContent[0].description}
                                 </Typography>
                             )}
-                            <ApisWithTag tag={listByTagContent[0].tag} />
+                            <ApisWithTag tag={listByTagContent[0].tag} maxCount={listByTagContent[1].maxCount} />
                         </Grid>
                     )}
                 </Grid>
@@ -68,7 +68,7 @@ function Landing(props) {
                                     {listByTagContent[1].description}
                                 </Typography>
                             )}
-                            <ApisWithTag tag={listByTagContent[1].tag} />
+                            <ApisWithTag tag={listByTagContent[1].tag} maxCount={listByTagContent[1].maxCount} />
                         </Grid>
                     )}
                 </Grid>

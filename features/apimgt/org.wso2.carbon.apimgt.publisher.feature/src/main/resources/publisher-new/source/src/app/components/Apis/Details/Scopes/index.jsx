@@ -19,6 +19,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import CreateScope from './CreateScope';
+import EditScope from './EditScope';
 import Scopes from './Scopes';
 import { PageNotFound } from '../../../Base/Errors';
 
@@ -27,6 +28,7 @@ const Scope = ({ api }) => {
         <Switch>
             <Route exact path='/apis/:api_uuid/scopes/' component={() => <Scopes api={api} />} />
             <Route exact path='/apis/:api_uuid/scopes/create' component={() => <CreateScope api={api} />} />
+            <Route exact path='/apis/:api_uuid/scopes/edit' component={() => <EditScope api={api} />} />
             <Route component={PageNotFound} />
         </Switch>
     );

@@ -23,8 +23,6 @@ import Loadable from 'react-loadable';
 import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout'
 import SignUp from './app/components/AnonymousView/SignUp';
-import PrivacyPolicy from './app/components/Policy/PrivacyPolicy';
-import CookiePolicy from './app/components/Policy/CookiePolicy';
 import Progress from './app/components/Shared/Progress';
 
 const LoadableProtectedApp = Loadable({
@@ -67,8 +65,6 @@ class Store extends React.Component {
                     <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
                     <Route path='/logout' component={Logout} />
                     <Route path='/sign-up' component={SignUp} />
-                    <Route path='/policy/privacy-policy' component={PrivacyPolicy} />
-                    <Route path='/policy/cookie-policy' component={CookiePolicy} />
                     <Route component={LoadableProtectedApp} />
                 </Switch>
             </Router>

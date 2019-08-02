@@ -6,8 +6,7 @@ import Applications from './components/Applications/Applications';
 import Landing from './components/LandingPage/Landing';
 import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreateForm';
 import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
-import ApplicationEdit from './components/Applications/Edit/ApplicationEdit';
-
+import EditApp from './components/Applications/Edit/EditApp';
 function AppRouts(props) {
     const { isAuthenticated, isUserFound, theme, } = props;
     return (
@@ -19,7 +18,7 @@ function AppRouts(props) {
                 <React.Fragment>
                     <Route path='/applications' component={Applications} />
                     <Route path='/application/create' component={ApplicationCreate} />
-                    <Route path='/application/edit/:application_id' component={ApplicationEdit} />
+                    <Route path='/application/edit/:application_id' component={EditApp} />
                 </React.Fragment>
             ) : (
                 [

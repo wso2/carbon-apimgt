@@ -328,7 +328,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + appName);
             serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[2];
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[3];
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(applicationName);
@@ -337,6 +337,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             tokenTypeProviderProperty.setName(APIConstants.APP_TOKEN_TYPE);
             tokenTypeProviderProperty.setValue(applicationInfo.getTokenType());
             serviceProviderProperties[1] = tokenTypeProviderProperty;
+            ServiceProviderProperty consentProperty = new ServiceProviderProperty();
+            consentProperty.setDisplayName(APIConstants.APP_SKIP_CONSENT_DISPLAY);
+            consentProperty.setName(APIConstants.APP_SKIP_CONSENT_NAME);
+            consentProperty.setValue(APIConstants.APP_SKIP_CONSENT_VALUE);
+            serviceProviderProperties[2] = consentProperty;
             serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
@@ -380,6 +385,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             //Setting the SaasApplication attribute to created service provider
             createdServiceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
+            createdServiceProvider.setSpProperties(serviceProviderProperties);
 
             //Updating the service provider with Inbound Authentication Configs and SaasApplication
             appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);

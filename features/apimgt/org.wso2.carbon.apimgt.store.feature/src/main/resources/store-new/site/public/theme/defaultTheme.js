@@ -71,7 +71,7 @@ const Configurations = {
                     ],
                 },
                 landingPage: {
-                    active: false,
+                    active: true,
                     carousel: {
                         active: true,
                         slides: [
@@ -99,7 +99,7 @@ const Configurations = {
                         active: true,
                         content: [
                             {
-                                tag: 'Finance',
+                                tag: 'finance',
                                 title: 'Checkout our Finance APIs',
                                 description:
                                     'We offers online payment solutions and has more than 123 million customers worldwide. The WSO2 Finane API makes powerful functionality available to developers by exposing various features of our platform. Functionality includes but is not limited to invoice management, transaction processing and account management.',

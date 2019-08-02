@@ -40,10 +40,10 @@ const styles = theme => ({
 function ApisWithTag(props) {
     const [apis, setApis] = useState(null);
     const [notFound, setNotFound] = useState(false);
-    const { tag, classes } = props;
+    const { tag, classes, maxCount } = props;
     useEffect(() => {
         const restApi = new API();
-        const promised_apis = restApi.getAllAPIs({ query: 'tag:' + tag });
+        const promised_apis = restApi.getAllAPIs({ query: 'tag:' + tag, limit: maxCount });
         promised_apis
             .then((response) => {
                 setApis(response.obj);
@@ -80,5 +80,6 @@ function ApisWithTag(props) {
 ApisWithTag.propTypes = {
     classes: PropTypes.object.isRequired,
     tag: PropTypes.object.isRequired,
+    maxCount: PropTypes.object.isRequired,
 };
 export default withStyles(styles)(ApisWithTag);
