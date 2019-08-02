@@ -127,7 +127,6 @@ public class BasicAuthInterceptor extends AbstractPhaseInterceptor {
             if (userRealm.getUserStoreManager()
                     .authenticate(MultitenantUtils.getTenantAwareUsername(username), password)) {
                 //set the correct tenant info for downstream code.
-                RestApiUtil.setThreadLocalRequestedTenant(username);
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(username);
