@@ -20,7 +20,8 @@ import React from 'react';
 
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
-import { Login, Logout } from './app/components';
+import Login from './app/components/Login/Login';
+import Logout from './app/components/Logout'
 import SignUp from './app/components/AnonymousView/SignUp';
 import Progress from './app/components/Shared/Progress';
 
