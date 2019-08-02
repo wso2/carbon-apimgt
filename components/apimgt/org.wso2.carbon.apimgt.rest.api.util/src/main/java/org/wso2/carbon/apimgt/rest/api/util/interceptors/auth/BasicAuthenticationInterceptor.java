@@ -327,7 +327,6 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 log.debug("Successfully validated REST API Scopes for the user " + username + " :  " + validatedUserScopes);
             }
             return true;
-
         }
         //none of the resource scopes were matched against the user role set
         log.error("Insufficient privileges. Role validation failed for user: "
