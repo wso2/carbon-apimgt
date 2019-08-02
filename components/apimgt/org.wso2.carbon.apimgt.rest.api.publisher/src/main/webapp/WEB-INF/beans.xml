@@ -49,8 +49,8 @@
         <cxf:inInterceptors>
             <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>
-            <ref bean="ValidationInInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
+            <ref bean="ValidationInInterceptor"/>            
         </cxf:inInterceptors>
     </cxf:bus>
 </beans>
