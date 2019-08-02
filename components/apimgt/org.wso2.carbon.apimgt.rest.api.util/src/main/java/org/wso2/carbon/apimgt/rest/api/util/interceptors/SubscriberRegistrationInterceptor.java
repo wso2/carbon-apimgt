@@ -33,8 +33,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(SubscriberRegistrationInterceptor.class);
-    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
-
+    
     public SubscriberRegistrationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
@@ -69,7 +68,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
                     }
                     return;
                 }
-                if (!SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain)) {
+                if (!APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
                     loadTenantRegistry();
                 }
                 apiConsumer.addSubscriber(username, groupId);
