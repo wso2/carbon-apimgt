@@ -382,6 +382,7 @@ public final class APIConstants {
     public static final String CURRENCY = "currencyType";
     public static final String BILLING_CYCLE = "billingCycle";
     public static final String FIXED_RATE = "fixedRate";
+    public static final String DYNAMIC_RATE = "dynamicRate";
     public static final String FIXED_PRICE = "fixedPrice";
     public static final String PRICE_PER_REQUEST = "pricePerRequest";
     public static final String API_MONETIZATION_STATUS = "isMonetizationEnabled";
