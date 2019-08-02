@@ -256,10 +256,15 @@ class Details extends Component {
         /* eslint no-param-reassign: ["error", { "props": false }] */
         if (newAPI._data) delete newAPI._data;
         if (newAPI.client) delete newAPI.client;
+
+        const modifiedNewAPI = JSON.parse(JSON.stringify(newAPI));
+        if (modifiedNewAPI.apiType) delete modifiedNewAPI.apiType;
+
         if (isAPIProduct) {
-            const promisedApi = restAPI.updateProduct(JSON.parse(JSON.stringify(newAPI)));
+            const promisedApi = restAPI.updateProduct(modifiedNewAPI);
             promisedApi
-                .then((api) => {
+                .then((response) => {
+                    const { obj: api } = response;
                     Alert.info(`${api.name} updated successfully.`);
                     this.setState({ api });
                 })
@@ -273,9 +278,10 @@ class Details extends Component {
                     }
                 });
         } else {
-            const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
+            const promisedApi = restAPI.update(modifiedNewAPI);
             promisedApi
-                .then((api) => {
+                .then((response) => {
+                    const { obj: api } = response;
                     Alert.info(`${api.name} updated successfully.`);
                     this.setState({ api });
                 })

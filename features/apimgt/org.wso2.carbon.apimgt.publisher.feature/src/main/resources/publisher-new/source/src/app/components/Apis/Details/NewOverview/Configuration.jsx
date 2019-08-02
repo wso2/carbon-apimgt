@@ -80,7 +80,7 @@ function Configuration(props) {
                             {/* Type */}
                             {(api.apiType === API.CONSTS.APIProduct) ?
                                 null :
-                                <div>
+                                <React.Fragment>
                                     <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                         <FormattedMessage
                                             id='Apis.Details.NewOverview.Configuration.type'
@@ -91,7 +91,7 @@ function Configuration(props) {
                                         {api.type && <React.Fragment>{api.type}</React.Fragment>}
                                         {!api.type && <React.Fragment>?</React.Fragment>}
                                     </Typography>
-                                </div>
+                                </React.Fragment>
                             }
                             {/* workflowStatus */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
@@ -138,32 +138,40 @@ function Configuration(props) {
                                 {api.context && <React.Fragment>{api.context}</React.Fragment>}
                             </Typography>
                             {/* Version */}
-                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.NewOverview.Configuration.version'
-                                    defaultMessage='Version'
-                                />
-                            </Typography>
-                            <Typography component='p' variant='body1'>
-                                {api.version && <React.Fragment>{api.version}</React.Fragment>}
-                            </Typography>
+                            {(api.apiType === API.CONSTS.APIProduct) ?
+                                null :
+                                <React.Fragment>
+                                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.Configuration.version'
+                                            defaultMessage='Version'
+                                        />
+                                    </Typography>
+                                    <Typography component='p' variant='body1'>
+                                        {api.version && <React.Fragment>{api.version}</React.Fragment>}
+                                    </Typography>
+                                </React.Fragment>
+                            }
                             {/* Default Version */}
-                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.NewOverview.Configuration.default.version'
-                                    defaultMessage='Default Version'
-                                />
-                                <Tooltip
-                                    placement='top'
-                                    classes={{
-                                        tooltip: parentClasses.htmlTooltip,
-                                    }}
-                                    disableHoverListener
-                                    title={
-                                        <React.Fragment>
-                                            <FormattedMessage
-                                                id='Apis.Details.NewOverview.Configuration.tooltip'
-                                                defaultMessage={'Marks one API version in a group as ' +
+                            {(api.apiType === API.CONSTS.APIProduct) ?
+                                null :
+                                <React.Fragment>
+                                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.Configuration.default.version'
+                                            defaultMessage='Default Version'
+                                        />
+                                        <Tooltip
+                                            placement='top'
+                                            classes={{
+                                                tooltip: parentClasses.htmlTooltip,
+                                            }}
+                                            disableHoverListener
+                                            title={
+                                                <React.Fragment>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewOverview.Configuration.tooltip'
+                                                        defaultMessage={'Marks one API version in a group as ' +
                                                     'the default so that it can be invoked without specifying ' +
                                                     'the version number in the URL. For example, if you mark ' +
                                                     'http://host:port/youtube/2.0 as the default API, ' +
@@ -173,19 +181,21 @@ function Configuration(props) {
                                                     'If you mark an unpublished API as the default, ' +
                                                     'the previous default published API will still be used' +
                                                     ' as the default until the new default API is published.'}
-                                            />
-                                        </React.Fragment>
-                                    }
-                                >
-                                    <Button className={parentClasses.helpButton}>
-                                        <HelpOutline className={parentClasses.helpIcon} />
-                                    </Button>
-                                </Tooltip>
-                            </Typography>
-                            <Typography component='p' variant='body1'>
-                                {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
-                                {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
-                            </Typography>
+                                                    />
+                                                </React.Fragment>
+                                            }
+                                        >
+                                            <Button className={parentClasses.helpButton}>
+                                                <HelpOutline className={parentClasses.helpIcon} />
+                                            </Button>
+                                        </Tooltip>
+                                    </Typography>
+                                    <Typography component='p' variant='body1'>
+                                        {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
+                                        {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
+                                    </Typography>
+                                </React.Fragment>
+                            }
                             {/* Transports */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                 <FormattedMessage
@@ -387,6 +397,7 @@ function Configuration(props) {
                                 />
                             </Typography>
                             <Typography variant='body1'>
+<<<<<<< 295443ddfeced3bd08f08cdb62da3998c04b9ec1
 <<<<<<< 9c9df3be30d7fba363a1489078658269105f804c
                                 ({api.tags && api.tags.map(tag =>
                                     (<Chip
@@ -398,6 +409,10 @@ function Configuration(props) {
 =======
                                 {api.tags && api.tags.map(tag => <Chip key={tag} label={tag} className={parentClasses.chip} />)}
 >>>>>>> Review Changes
+=======
+                                {api.tags &&
+                                    api.tags.map(tag => <Chip key={tag} label={tag} className={parentClasses.chip} />)}
+>>>>>>> Add changes to support API Product configurations view and edit pages
                             </Typography>
                         </React.Fragment>
                     }
