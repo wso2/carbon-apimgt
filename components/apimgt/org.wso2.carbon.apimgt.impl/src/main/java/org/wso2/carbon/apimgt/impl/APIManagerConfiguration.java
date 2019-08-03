@@ -779,12 +779,6 @@ public class APIManagerConfiguration {
                                 .getText()));
                         System.setProperty("jms.username", jmsConnectionProperties.getUsername());
                     }
-                    OMElement jmsConnectionDestinationElement = jmsConnectionDetailElement
-                            .getFirstChildWithName(new QName
-                                    (APIConstants.AdvancedThrottleConstants.JMS_CONNECTION_DESTINATION));
-                    if (jmsConnectionDestinationElement != null) {
-                        jmsConnectionProperties.setDestination(jmsConnectionDestinationElement.getText());
-                    }
                     OMElement jmsConnectionPasswordElement = jmsConnectionDetailElement.getFirstChildWithName(new
                             QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
                     if (jmsConnectionPasswordElement != null) {

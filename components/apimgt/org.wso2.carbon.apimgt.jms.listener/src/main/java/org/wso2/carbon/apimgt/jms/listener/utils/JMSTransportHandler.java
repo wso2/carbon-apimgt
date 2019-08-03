@@ -22,18 +22,24 @@ package org.wso2.carbon.apimgt.jms.listener.utils;
 import org.apache.axis2.transport.base.threads.NativeWorkerPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 public class JMSTransportHandler {
     private static final Log log = LogFactory.getLog(JMSTransportHandler.class);
     private ThrottleProperties.JMSConnectionProperties jmsConnectionProperties;
     private JMSConnectionFactory jmsConnectionFactory;
-    private JMSListener jmsListener;
+    private JMSListener jmsListenerForThrottleDataTopic;
+    private JMSListener jmsListenerForTokenRevocationTopic;
     private boolean stopIssued = false;
+    private static final Object lock = new Object();
 
     public JMSTransportHandler() {
         if (ServiceReferenceHolder.getInstance().getAPIMConfiguration() != null) {
@@ -44,8 +50,7 @@ public class JMSTransportHandler {
     }
 
     /**
-     * This method will used to subscribe JMS and update throttle data map.
-     * Then this will listen to topic updates and check all update and update throttle data map accordingly.
+     * This method is used to subscribe to JMS topics and receive JMS messages
      */
     public void subscribeForJmsEvents() {
         Properties properties;
@@ -61,30 +66,45 @@ public class JMSTransportHandler {
             for (final String name : properties.stringPropertyNames()) {
                 parameters.put(name, properties.getProperty(name));
             }
-            String destination = jmsConnectionProperties.getDestination();
             jmsConnectionFactory = new JMSConnectionFactory(parameters,
                                                             ListenerConstants
                                                                     .CONNECTION_FACTORY_NAME);
-            Map<String, String> messageConfig = new HashMap<String, String>();
-            messageConfig.put(JMSConstants.PARAM_DESTINATION, destination);
             int minThreadPoolSize = jmsConnectionProperties.getJmsTaskManagerProperties().getMinThreadPoolSize();
             int maxThreadPoolSize = jmsConnectionProperties.getJmsTaskManagerProperties().getMaxThreadPoolSize();
             int keepAliveTimeInMillis = jmsConnectionProperties.getJmsTaskManagerProperties()
                     .getKeepAliveTimeInMillis();
             int jobQueueSize = jmsConnectionProperties.getJmsTaskManagerProperties().getJobQueueSize();
-            JMSTaskManager jmsTaskManager = JMSTaskManagerFactory.createTaskManagerForService(jmsConnectionFactory,
-                                                                                              ListenerConstants.CONNECTION_FACTORY_NAME,
-                                                                                              new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
-                                                                                                                   keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
-                                                                                                                   "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
-            jmsTaskManager.setJmsMessageListener(new JMSMessageListener(ServiceReferenceHolder.getInstance()
-                                                                                .getThrottleDataHolder()));
 
-            jmsListener = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME + "#" + destination,
-                                          jmsTaskManager);
-            jmsListener.startListener();
-            log.info("Starting jms topic consumer thread...");
+            //Listening to throttleData topic
+            Map<String, String> messageConfig = new HashMap<String, String>();
+            messageConfig.put(JMSConstants.PARAM_DESTINATION, JMSConstants.TOPIC_THROTTLE_DATA);
+            JMSTaskManager jmsTaskManagerForThrottleDataTopic = JMSTaskManagerFactory
+                    .createTaskManagerForService(jmsConnectionFactory,
+                            ListenerConstants.CONNECTION_FACTORY_NAME,
+                            new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
+                                    keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
+                                    "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
+            jmsTaskManagerForThrottleDataTopic.setJmsMessageListener(new JMSMessageListener());
 
+            jmsListenerForThrottleDataTopic = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
+                    + "#" + JMSConstants.TOPIC_THROTTLE_DATA, jmsTaskManagerForThrottleDataTopic);
+            jmsListenerForThrottleDataTopic.startListener();
+            log.info("Starting jms topic consumer thread for the throttleData topic...");
+
+            //Listening to tokenRevocation topic
+            messageConfig.put(JMSConstants.PARAM_DESTINATION, JMSConstants.TOPIC_TOKEN_REVOCATION);
+            JMSTaskManager jmsTaskManagerForTokenRevocationTopic = JMSTaskManagerFactory.createTaskManagerForService(
+                    jmsConnectionFactory,
+                    ListenerConstants.CONNECTION_FACTORY_NAME,
+                    new NativeWorkerPool(minThreadPoolSize, maxThreadPoolSize,
+                            keepAliveTimeInMillis, jobQueueSize, "JMS Threads",
+                            "JMSThreads" + UUID.randomUUID().toString()), messageConfig);
+            jmsTaskManagerForTokenRevocationTopic.setJmsMessageListener(new JMSMessageListener());
+
+            jmsListenerForTokenRevocationTopic = new JMSListener(ListenerConstants.CONNECTION_FACTORY_NAME
+                    + "#" + JMSConstants.TOPIC_TOKEN_REVOCATION, jmsTaskManagerForTokenRevocationTopic);
+            jmsListenerForTokenRevocationTopic.startListener();
+            log.info("Starting jms topic consumer thread for the tokenRevocation topic...");
         } catch (IOException e) {
             log.error("Cannot read properties file from resources. " + e.getMessage(), e);
         }
@@ -94,15 +114,20 @@ public class JMSTransportHandler {
 
         log.info("Starting to Shutdown the Listener...");
 
-        if (jmsListener != null && !stopIssued && jmsConnectionFactory != null) {
+        if (!stopIssued && jmsConnectionFactory != null) {
             // To prevent multiple components executing stop at the same time,
             // we are checking if a shutdown triggered by a previous thread is in progress.
-            synchronized (jmsListener) {
+            synchronized (lock) {
                 if (!stopIssued) {
                     stopIssued = true;
-                    log.debug("Stopping JMS Listener");
-                    jmsListener.stopListener();
-                    log.debug("JMS Listener Stopped");
+                    log.debug("Stopping JMS Listeners");
+                    if (jmsListenerForTokenRevocationTopic != null) {
+                        jmsListenerForTokenRevocationTopic.stopListener();
+                    }
+                    if (jmsListenerForThrottleDataTopic != null) {
+                        jmsListenerForThrottleDataTopic.stopListener();
+                    }
+                    log.debug("JMS Listeners Stopped");
                     jmsConnectionFactory.stop();
                     log.debug("JMS Connection Factory Stopped");
                 }

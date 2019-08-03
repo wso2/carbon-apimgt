@@ -49,8 +49,10 @@
                             javax.transaction.*,
                             org.apache.axis2.*,
                             org.apache.commons.*,
-                            org.wso2.carbon.apimgt.impl.dto.*,
-                            org.wso2.carbon.apimgt.broker.lifecycle.service.*,
+                            org.wso2.carbon.apimgt.impl.dto.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.broker.lifecycle.service.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.context.*;version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.utils.*;version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
