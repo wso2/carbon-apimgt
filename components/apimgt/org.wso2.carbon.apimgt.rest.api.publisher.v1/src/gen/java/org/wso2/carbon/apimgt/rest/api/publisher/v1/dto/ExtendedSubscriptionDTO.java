@@ -2,7 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
 import javax.validation.constraints.*;
 
@@ -17,8 +18,9 @@ import javax.xml.bind.annotation.*;
 public class ExtendedSubscriptionDTO   {
   
     private String subscriptionId = null;
-    private ApplicationDTO applicationInfo = null;
-    private String policy = null;
+    private ApplicationInfoDTO applicationInfo = null;
+    private APIInfoDTO apiInfo = null;
+    private String throttlingPolicy = null;
 
 @XmlType(name="SubscriptionStatusEnum")
 @XmlEnum(String.class)
@@ -75,7 +77,7 @@ public enum SubscriptionStatusEnum {
 
   /**
    **/
-  public ExtendedSubscriptionDTO applicationInfo(ApplicationDTO applicationInfo) {
+  public ExtendedSubscriptionDTO applicationInfo(ApplicationInfoDTO applicationInfo) {
     this.applicationInfo = applicationInfo;
     return this;
   }
@@ -84,29 +86,46 @@ public enum SubscriptionStatusEnum {
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("applicationInfo")
   @NotNull
-  public ApplicationDTO getApplicationInfo() {
+  public ApplicationInfoDTO getApplicationInfo() {
     return applicationInfo;
   }
-  public void setApplicationInfo(ApplicationDTO applicationInfo) {
+  public void setApplicationInfo(ApplicationInfoDTO applicationInfo) {
     this.applicationInfo = applicationInfo;
   }
 
   /**
    **/
-  public ExtendedSubscriptionDTO policy(String policy) {
-    this.policy = policy;
+  public ExtendedSubscriptionDTO apiInfo(APIInfoDTO apiInfo) {
+    this.apiInfo = apiInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiInfo")
+  public APIInfoDTO getApiInfo() {
+    return apiInfo;
+  }
+  public void setApiInfo(APIInfoDTO apiInfo) {
+    this.apiInfo = apiInfo;
+  }
+
+  /**
+   **/
+  public ExtendedSubscriptionDTO throttlingPolicy(String throttlingPolicy) {
+    this.throttlingPolicy = throttlingPolicy;
     return this;
   }
 
   
   @ApiModelProperty(example = "Unlimited", required = true, value = "")
-  @JsonProperty("policy")
+  @JsonProperty("throttlingPolicy")
   @NotNull
-  public String getPolicy() {
-    return policy;
+  public String getThrottlingPolicy() {
+    return throttlingPolicy;
   }
-  public void setPolicy(String policy) {
-    this.policy = policy;
+  public void setThrottlingPolicy(String throttlingPolicy) {
+    this.throttlingPolicy = throttlingPolicy;
   }
 
   /**
@@ -156,14 +175,15 @@ public enum SubscriptionStatusEnum {
     ExtendedSubscriptionDTO extendedSubscription = (ExtendedSubscriptionDTO) o;
     return Objects.equals(subscriptionId, extendedSubscription.subscriptionId) &&
         Objects.equals(applicationInfo, extendedSubscription.applicationInfo) &&
-        Objects.equals(policy, extendedSubscription.policy) &&
+        Objects.equals(apiInfo, extendedSubscription.apiInfo) &&
+        Objects.equals(throttlingPolicy, extendedSubscription.throttlingPolicy) &&
         Objects.equals(subscriptionStatus, extendedSubscription.subscriptionStatus) &&
         Objects.equals(workflowId, extendedSubscription.workflowId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationInfo, policy, subscriptionStatus, workflowId);
+    return Objects.hash(subscriptionId, applicationInfo, apiInfo, throttlingPolicy, subscriptionStatus, workflowId);
   }
 
   @Override
@@ -173,7 +193,8 @@ public enum SubscriptionStatusEnum {
     
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
-    sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
+    sb.append("    apiInfo: ").append(toIndentedString(apiInfo)).append("\n");
+    sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    subscriptionStatus: ").append(toIndentedString(subscriptionStatus)).append("\n");
     sb.append("    workflowId: ").append(toIndentedString(workflowId)).append("\n");
     sb.append("}");
