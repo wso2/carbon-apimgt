@@ -158,6 +158,7 @@ class Configuration extends React.Component {
             tags: null,
             isDefaultVersion: null,
             transport: null,
+            securityScheme: null,
             authorizationHeader: null,
             responseCaching: null,
             cacheTimeout: null,
@@ -183,6 +184,13 @@ class Configuration extends React.Component {
             return 'no';
         }
     }
+    getAPISecurityState(type, securityScheme, apiSecurityScheme) {
+        if (securityScheme) {
+            return securityScheme.includes(type);
+        } else {
+            return apiSecurityScheme.includes(type);
+        }
+    }
     getTransportState(type, transport, apiTransport) {
         if (transport) {
             return transport.includes(type);
@@ -202,6 +210,20 @@ class Configuration extends React.Component {
         }
         this.setState({
             [name]: value,
+        });
+    };
+    handleAPISecuritySchemeChange = apiSecurityScheme => (event) => {
+        const { value, checked } = event.target;
+        this.setState((oldState) => {
+            let { securityScheme } = oldState;
+            if (!securityScheme) securityScheme = apiSecurityScheme;
+            if (checked && !securityScheme.includes(value)) {
+                securityScheme.push(value);
+            } else if (!checked && securityScheme.includes(value)) {
+                securityScheme.splice(securityScheme.indexOf(value), 1);
+            }
+
+            return { securityScheme };
         });
     };
     handleTransportChange = apiTransport => (event) => {
@@ -243,6 +265,7 @@ class Configuration extends React.Component {
             tags,
             isDefaultVersion,
             transport,
+            securityScheme,
             authorizationHeader,
             responseCaching,
             cacheTimeout,
@@ -272,6 +295,9 @@ class Configuration extends React.Component {
         if (transport) {
             oldAPI.transport = transport;
         }
+        if (securityScheme) {
+            oldAPI.securityScheme = securityScheme;
+        }
         if (authorizationHeader) {
             oldAPI.authorizationHeader = authorizationHeader;
         }
@@ -294,6 +320,7 @@ class Configuration extends React.Component {
             tags,
             isDefaultVersion,
             transport,
+            securityScheme,
             authorizationHeader,
             responseCaching,
             cacheTimeout,
@@ -301,6 +328,9 @@ class Configuration extends React.Component {
         let error = false;
         if (transport) {
             error = transport.length === 0;
+        }
+        if (securityScheme) {
+            error = securityScheme.length === 0;
         }
 
         return (
@@ -509,6 +539,71 @@ class Configuration extends React.Component {
                                                                 'transport.helper.text'}
                                                                 defaultMessage='Please select at least one transport.'
                                                             />
+                                                        </FormHelperText>
+                                                    )}
+                                                </FormGroup>
+                                            </FormControl>
+                                            {/* API Security */}
+                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                API Security
+                                                <Tooltip
+                                                    placement='top'
+                                                    classes={{
+                                                        tooltip: classes.htmlTooltip,
+                                                    }}
+                                                    disableHoverListener
+                                                    title={
+                                                        <React.Fragment>
+                                                            OAuth2 is used as the default security schema.
+                                                        </React.Fragment>
+                                                    }
+                                                >
+                                                    <Button className={classes.helpButton}>
+                                                        <HelpOutline className={classes.helpIcon} />
+                                                    </Button>
+                                                </Tooltip>
+                                            </Typography>
+
+                                            <FormControl
+                                                required
+                                                error={error}
+                                                component='fieldset'
+                                                className={classes.formControl}
+                                            >
+                                                <FormGroup className={classes.group}>
+                                                    <FormControlLabel
+                                                        control={
+                                                            <Checkbox
+                                                                checked={this.getAPISecurityState(
+                                                                    'oauth2',
+                                                                    securityScheme,
+                                                                    api.securityScheme,
+                                                                )}
+                                                                onChange={this
+                                                                    .handleAPISecuritySchemeChange(api.securityScheme)}
+                                                                value='oauth2'
+                                                            />
+                                                        }
+                                                        label='OAuth2'
+                                                    />
+                                                    <FormControlLabel
+                                                        control={
+                                                            <Checkbox
+                                                                checked={this.getAPISecurityState(
+                                                                    'basic_auth',
+                                                                    securityScheme,
+                                                                    api.securityScheme,
+                                                                )}
+                                                                onChange={this
+                                                                    .handleAPISecuritySchemeChange(api.securityScheme)}
+                                                                value='basic_auth'
+                                                            />
+                                                        }
+                                                        label='Basic Auth'
+                                                    />
+                                                    {error && (
+                                                        <FormHelperText className={classes.error}>
+                                                            Please select at least one API security schema.
                                                         </FormHelperText>
                                                     )}
                                                 </FormGroup>
