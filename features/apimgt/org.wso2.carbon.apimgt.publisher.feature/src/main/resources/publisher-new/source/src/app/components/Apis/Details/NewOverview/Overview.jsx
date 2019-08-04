@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import API from 'AppData/api';
 import CheckItem from './CheckItem';
 import ApiContext from '../components/ApiContext';
 import Resources from './Resources';
@@ -118,21 +119,35 @@ function Overview(props) {
     const { classes, api: newApi } = props;
     let loadResources;
     let loadScopes;
+    let loadEndpoints;
+    let endpointsCheckItem;
+    let scopesCheckItem;
     if (newApi.type !== 'WS') {
         loadResources = <Resources parentClasses={classes} api={newApi} />;
         loadScopes = <Scopes parentClasses={classes} />;
     }
+    if (newApi.apiType === API.CONSTS.APIProduct) {
+        endpointsCheckItem = null;
+        scopesCheckItem = null;
+        loadResources = <ProductResources parentClasses={classes} api={newApi} />;
+        loadEndpoints = null;
+        loadScopes = null;
+    } else if (newApi.apiType === API.CONSTS.API) {
+        endpointsCheckItem = <CheckItem itemSuccess itemLabel='Endpoints' />;
+        scopesCheckItem = <CheckItem itemSuccess={false} itemLabel='Scopes' />;
+        loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
+    }
     return (
         <ApiContext.Consumer>
-            {({ api, isAPIProduct }) => (
+            {({ api }) => (
                 <Grid container spacing={24}>
                     {console.info(api)}
                     <Grid item xs={12}>
                         <Grid container>
-                            {isAPIProduct ? null : (<CheckItem itemSuccess itemLabel='Endpoints' />)}
+                            {endpointsCheckItem}
                             <CheckItem itemSuccess={false} itemLabel='Policies' />
                             <CheckItem itemSuccess itemLabel='Resources' />
-                            {isAPIProduct ? null : (<CheckItem itemSuccess={false} itemLabel='Scopes' />)}
+                            {scopesCheckItem}
                             <CheckItem itemSuccess={false} itemLabel='Documents' />
                             <CheckItem itemSuccess={false} itemLabel='Business Information' />
                             <CheckItem itemSuccess={false} itemLabel='Description' />
@@ -142,15 +157,14 @@ function Overview(props) {
                         <Grid container spacing={24}>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Configuration parentClasses={classes} />
-                                {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
-                                    (loadResources)}
+                                {loadResources}
                                 <AdditionalProperties parentClasses={classes} />
                             </Grid>
                             <Grid item xs={12} md={6} lg={6}>
                                 <Lifecycle parentClasses={classes} />
-                                {isAPIProduct ? null : (<Endpoints parentClasses={classes} api={api} />)}
+                                {loadEndpoints}
                                 <BusinessInformation parentClasses={classes} />
-                                {isAPIProduct ? null : (loadScopes)}
+                                {loadScopes}
                                 <Documents parentClasses={classes} api={api} />
                                 <Policies parentClasses={classes} />
                             </Grid>

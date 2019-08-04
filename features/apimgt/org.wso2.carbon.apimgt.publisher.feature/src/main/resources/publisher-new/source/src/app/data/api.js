@@ -50,6 +50,7 @@ class API extends Resource {
                 }
             };
         }
+        this.apiType = API.CONSTS.API;
         this._data = properties;
         for (const key in properties) {
             if (Object.prototype.hasOwnProperty.call(properties, key)) {
@@ -1122,9 +1123,14 @@ class API extends Resource {
             params.query = query;
         }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return apiClient.then((client) => {
+        const promisedAPIs = apiClient.then((client) => {
             return client.apis['API (Collection)'].get_apis(params, Resource._requestMetaData());
         });
+
+        return promisedAPIs.then((response) => {
+            response.obj.apiType = API.CONSTS.API;
+            return response;
+        }); 
     }
 
     /**
@@ -1311,5 +1317,12 @@ class API extends Resource {
         }, this._requestMetaData());
     }
 }
+
+API.CONSTS = {
+    API: 'API',
+    APIProduct: 'APIProduct',
+}
+
+Object.freeze(API.CONSTS);
 
 export default API;
