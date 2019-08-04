@@ -365,3 +365,7 @@
     transform: rotate(360deg);
   }
 }
+.slideContentTitle span{
+  background: #f05107;
+  color: rgb(255, 255, 255);
+}

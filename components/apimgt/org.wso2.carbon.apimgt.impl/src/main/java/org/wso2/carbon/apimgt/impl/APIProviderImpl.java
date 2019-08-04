@@ -7015,7 +7015,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         APIProductIdentifier identifier = apiProduct.getId();
         String documentationPath = APIUtil.getProductDocPath(identifier) + documentationName;
-        String contentPath = APIUtil.getProductDocContentPath(identifier, documentationName) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
+        String contentPath = APIUtil.getProductDocPath(identifier) +
+                APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
                 RegistryConstants.PATH_SEPARATOR + documentationName;
         boolean isTenantFlowStarted = false;
         try {

@@ -25,7 +25,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 import API from 'AppData/api.js';
@@ -82,8 +82,8 @@ class APIThumb extends Component {
     handleApiDelete() {
         const { id } = this.props.api;
         this.setState({ loading: true });
-        const { updateAPIsList, isAPIProduct } = this.props;
-        if (isAPIProduct) {
+        const { updateAPIsList, apiType } = this.props;
+        if (apiType === API.CONSTS.APIProduct) {
             const promisedDelete = API.deleteProduct(id);
             promisedDelete.then((response) => {
                 if (response.status !== 200) {
@@ -123,8 +123,9 @@ class APIThumb extends Component {
      * @memberof APIThumb
      */
     render() {
-        const { classes, api, isAPIProduct } = this.props;
+        const { classes, api, apiType } = this.props;
         const { isHover, loading } = this.state;
+        api.apiType = apiType;
 
         return (
             <Card
@@ -141,7 +142,6 @@ class APIThumb extends Component {
                     height={140}
                     title='Thumbnail'
                     api={api}
-                    isAPIProduct={isAPIProduct}
                 />
                 <CardContent className={classes.apiDetails}>
                     <Typography gutterBottom variant='headline' component='h2'>
@@ -160,7 +160,7 @@ class APIThumb extends Component {
                                 {api.context}
                             </Typography>
                         </Grid>
-                        {isAPIProduct ? null : (
+                        {(apiType === API.CONSTS.APIProduct) ? null : (
                             <Grid item md={6}>
                                 <FormattedMessage id='version' defaultMessage='Version' />:
                                 <Typography variant='body2'>{api.version}</Typography>
@@ -169,8 +169,11 @@ class APIThumb extends Component {
                     </Grid>
                 </CardContent>
                 <CardActions className={classes.apiActions}>
-                    <Chip label={isAPIProduct ? api.state : api.lifeCycleStatus} color='default' />
-                    <DeleteApiButton onClick={this.handleApiDelete} api={api} isAPIProduct={isAPIProduct} />
+                    <Chip
+                        label={(apiType === API.CONSTS.APIProduct) ? api.state : api.lifeCycleStatus}
+                        color='default'
+                    />
+                    <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>
             </Card>
@@ -184,7 +187,7 @@ APIThumb.propTypes = {
         id: PropTypes.string,
     }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
-    isAPIProduct: PropTypes.shape({}).isRequired,
+    apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]).isRequired,
 };
 
-export default withStyles(styles)(APIThumb);
+export default injectIntl(withStyles(styles)(APIThumb));

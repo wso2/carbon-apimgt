@@ -1428,4 +1428,15 @@ public class RestApiUtil {
             throw new ForbiddenException(errorDTO);
         }
     }
+
+    /**
+     * Check if user calls an anonymous REST API.
+     *
+     * @param inMessage cxf message
+     * @return true if user calls anonymous API, false otherwise.
+     */
+    public static boolean checkIfAnonymousAPI(Message inMessage) {
+        return (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
+                !((Boolean) inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED)));
+    }
 }

@@ -50,6 +50,7 @@ class API extends Resource {
                 }
             };
         }
+        this.apiType = API.CONSTS.API;
         this._data = properties;
         for (const key in properties) {
             if (Object.prototype.hasOwnProperty.call(properties, key)) {
@@ -1122,9 +1123,14 @@ class API extends Resource {
             params.query = query;
         }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return apiClient.then((client) => {
+        const promisedAPIs = apiClient.then((client) => {
             return client.apis['API (Collection)'].get_apis(params, Resource._requestMetaData());
         });
+
+        return promisedAPIs.then((response) => {
+            response.obj.apiType = API.CONSTS.API;
+            return response;
+        }); 
     }
 
     /**
@@ -1251,6 +1257,72 @@ class API extends Resource {
             );
         });
     }
+
+    /**
+     * Get all the endpoint certificates.
+     * */
+    static getEndpointCertificates() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+           return client.apis['Certificates (Collection)'].get_endpoint_certificates();
+        });
+    }
+
+    /**
+     * Upload endpoint certificate.
+     *
+     * @param {any} certificateFile The certificate file to be uploaded.
+     * @param {string} endpoint The certificate endpoint.
+     * @param {string} alias The certificate alias.
+     * */
+    static addCertificate(certificateFile, endpoint, alias) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['Certificates (Individual)'].post_endpoint_certificates({
+                certificate: certificateFile,
+                endpoint,
+                alias
+            });
+        }, this._requestMetaData({
+            'Content-Type': 'multipart/form-data'
+        }));
+    }
+
+    /**
+     * Get the status of the endpoint certificate which matches the given alias.
+     *
+     * @param {string} alias The alias of the certificate which the information required.
+     * */
+    static getCertificateStatus(alias) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            return client.apis['Certificates (Individual)'].get_endpoint_certificates__alias_({
+                alias: alias
+            });
+        }, this._requestMetaData());
+    }
+
+    /**
+     * Delete the endpoint certificate which represented by the given alias.
+     *
+     * @param {string} alias The alias of the certificate
+     * */
+    static deleteEndpointCertificate(alias) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then((client) => {
+            console.log(client.apis['Certificates (Individual)']);
+            return client.apis['Certificates (Individual)'].delete_endpoint_certificates__alias_({
+                alias
+            });
+        }, this._requestMetaData());
+    }
 }
+
+API.CONSTS = {
+    API: 'API',
+    APIProduct: 'APIProduct',
+}
+
+Object.freeze(API.CONSTS);
 
 export default API;

@@ -2,7 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEnvironmentURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
 import javax.validation.constraints.*;
 
 
@@ -17,7 +18,8 @@ public class APIEndpointURLsDTO   {
   
     private String environmentName = null;
     private String environmentType = null;
-    private APIEnvironmentURLsDTO environmentURLs = null;
+    private APIURLsDTO urLs = null;
+    private APIDefaultVersionURLsDTO defaultVersionURLs = null;
 
   /**
    **/
@@ -55,19 +57,36 @@ public class APIEndpointURLsDTO   {
 
   /**
    **/
-  public APIEndpointURLsDTO environmentURLs(APIEnvironmentURLsDTO environmentURLs) {
-    this.environmentURLs = environmentURLs;
+  public APIEndpointURLsDTO urLs(APIURLsDTO urLs) {
+    this.urLs = urLs;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("environmentURLs")
-  public APIEnvironmentURLsDTO getEnvironmentURLs() {
-    return environmentURLs;
+  @JsonProperty("URLs")
+  public APIURLsDTO getUrLs() {
+    return urLs;
   }
-  public void setEnvironmentURLs(APIEnvironmentURLsDTO environmentURLs) {
-    this.environmentURLs = environmentURLs;
+  public void setUrLs(APIURLsDTO urLs) {
+    this.urLs = urLs;
+  }
+
+  /**
+   **/
+  public APIEndpointURLsDTO defaultVersionURLs(APIDefaultVersionURLsDTO defaultVersionURLs) {
+    this.defaultVersionURLs = defaultVersionURLs;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("defaultVersionURLs")
+  public APIDefaultVersionURLsDTO getDefaultVersionURLs() {
+    return defaultVersionURLs;
+  }
+  public void setDefaultVersionURLs(APIDefaultVersionURLsDTO defaultVersionURLs) {
+    this.defaultVersionURLs = defaultVersionURLs;
   }
 
 
@@ -82,12 +101,13 @@ public class APIEndpointURLsDTO   {
     APIEndpointURLsDTO apIEndpointURLs = (APIEndpointURLsDTO) o;
     return Objects.equals(environmentName, apIEndpointURLs.environmentName) &&
         Objects.equals(environmentType, apIEndpointURLs.environmentType) &&
-        Objects.equals(environmentURLs, apIEndpointURLs.environmentURLs);
+        Objects.equals(urLs, apIEndpointURLs.urLs) &&
+        Objects.equals(defaultVersionURLs, apIEndpointURLs.defaultVersionURLs);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, environmentType, environmentURLs);
+    return Objects.hash(environmentName, environmentType, urLs, defaultVersionURLs);
   }
 
   @Override
@@ -97,7 +117,8 @@ public class APIEndpointURLsDTO   {
     
     sb.append("    environmentName: ").append(toIndentedString(environmentName)).append("\n");
     sb.append("    environmentType: ").append(toIndentedString(environmentType)).append("\n");
-    sb.append("    environmentURLs: ").append(toIndentedString(environmentURLs)).append("\n");
+    sb.append("    urLs: ").append(toIndentedString(urLs)).append("\n");
+    sb.append("    defaultVersionURLs: ").append(toIndentedString(defaultVersionURLs)).append("\n");
     sb.append("}");
     return sb.toString();
   }

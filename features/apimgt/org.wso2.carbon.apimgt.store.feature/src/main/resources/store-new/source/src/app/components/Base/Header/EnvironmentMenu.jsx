@@ -97,7 +97,8 @@ class EnvironmentMenu extends React.Component {
                 >
                     <FormattedMessage
                         id='Base.Header.EnvironmentMenu.environment.label'
-                        defaultMessage={environmentLabel}
+                        defaultMessage='{environmentLabel}'
+                        values={{ environmentLabel }}
                     />
                 </Button>
 

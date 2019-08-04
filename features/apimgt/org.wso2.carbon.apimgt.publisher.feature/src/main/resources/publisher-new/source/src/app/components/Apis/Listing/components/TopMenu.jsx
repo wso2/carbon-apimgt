@@ -10,6 +10,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import API from 'AppData/api';
 import APICreateMenu from '../components/APICreateMenu';
 
 const styles = theme => ({
@@ -68,25 +69,7 @@ class TopMenu extends React.Component {
         super(props);
         this.state = {
             listType: this.props.theme.custom.defaultApiView,
-            isAPIProduct: this.props.isAPIProduct,
         };
-        this.changeAPIProductProperty = this.changeAPIProductProperty.bind(this);
-    }
-    /**
-     * @inheritDoc
-     * @param {@} prevProps
-     */
-    componentDidUpdate(prevProps) {
-        if (this.props.isAPIProduct !== prevProps.isAPIProduct) {
-            this.changeAPIProductProperty(this.props.isAPIProduct);
-        }
-    }
-    /**
-     * Change state for product
-     * @param {*} isProduct
-     */
-    changeAPIProductProperty(isProduct) {
-        this.setState({ isAPIProduct: isProduct });
     }
 
 
@@ -100,7 +83,7 @@ class TopMenu extends React.Component {
         const {
             classes, apis, setListType, theme,
         } = this.props;
-        const { listType, isAPIProduct } = this.state;
+        const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
         return (
             <div className={classes.root}>
@@ -108,32 +91,59 @@ class TopMenu extends React.Component {
                     <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                 </div>
                 <div className={classes.mainTitleWrapper}>
-                    <Typography variant='display1' className={classes.mainTitle}>
-                        {isAPIProduct ? 'API Products' : 'APIs'}
-                    </Typography>
                     {apis && (
-                        <Typography variant='caption' gutterBottom align='left'>
-                            <FormattedMessage
-                                id='Apis.Listing.components.TopMenu.displaying'
-                                defaultMessage='Displaying'
-                            />{' '}
-                            {apis.count} {isAPIProduct ? ' API Product(s)' : ' API(s)'}
-                        </Typography>
+                        <div>
+                            <Typography variant='display1' className={classes.mainTitle}>
+                                {apis.apiType === API.CONSTS.APIProduct ?
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.TopMenu.apiproducts'
+                                        defaultMessage='API Products'
+                                    /> :
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.TopMenu.apis'
+                                        defaultMessage='APIs'
+                                    />
+                                }
+                            </Typography>
+                            <Typography variant='caption' gutterBottom align='left'>
+                                <FormattedMessage
+                                    id='Apis.Listing.components.TopMenu.displaying'
+                                    defaultMessage='Displaying'
+                                />
+                                {' '} {apis.count} {' '}
+                                {apis.apiType === API.CONSTS.APIProduct ?
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.TopMenu.apiproduct(s)'
+                                        defaultMessage='API Product(s)'
+                                    /> :
+                                    <FormattedMessage
+                                        id='Apis.Listing.components.TopMenu.api(s)'
+                                        defaultMessage='API(s)'
+                                    />
+                                }
+                            </Typography>
+                        </div>
                     )}
                 </div>
                 <VerticalDivider height={70} />
                 <div className={classes.APICreateMenu}>
-                    {isAPIProduct ? (
+                    {apis && apis.apiType === API.CONSTS.APIProduct ? (
                         <Link to='/api-products/create'>
                             <Button variant='contained' className={classes.createButton}>
-                                <FormattedMessage id='create.an.api.product' defaultMessage='Create an API Product' />
+                                <FormattedMessage
+                                    id='Apis.Listing.components.TopMenu.create.an.api.product'
+                                    defaultMessage='Create an API Product'
+                                />
                             </Button>
                         </Link>
                     ) : (
                         <APICreateMenu
                             buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}
                         >
-                            <FormattedMessage id='create.an.api' defaultMessage='Create API' />
+                            <FormattedMessage
+                                id='Apis.Listing.components.TopMenu.create.api'
+                                defaultMessage='Create API'
+                            />
                         </APICreateMenu>
                     )}
                 </div>
@@ -153,11 +163,10 @@ class TopMenu extends React.Component {
 TopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     setListType: PropTypes.func.isRequired,
-    apis: PropTypes.shape({}).isRequired,
+    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number, apiType: PropTypes.string }).isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,
-    isAPIProduct: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(TopMenu);
