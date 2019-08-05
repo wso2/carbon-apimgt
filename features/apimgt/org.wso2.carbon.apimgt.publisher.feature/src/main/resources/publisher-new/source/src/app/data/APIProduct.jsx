@@ -370,6 +370,47 @@ class APIProduct extends Resource {
 
         return promiseAddFileToDocument;
     }
+
+    /**
+     * Update an api swagger via PUT HTTP method
+     * @param {*} swagger 
+     */
+    updateSwagger(swagger) {
+        const promised_update = this.client.then((client) => {
+            const payload = {
+                apiProductId: this.id,
+                apiDefinition: JSON.stringify(swagger),
+                'Content-Type': 'multipart/form-data',
+            };
+            return client.apis['API Product (Individual)'].put_api_products__apiProductId__swagger(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            ).catch((error) => {
+                console.error(error);
+            });
+        });
+        return promised_update.then(response => {
+            return this;
+        });
+    }
+
+    /**
+     * Get the swagger of an API Product
+     * @param id {String} UUID of the API Product in which the swagger is needed
+
+     */
+    getSwagger(id) {
+        const promise_get = this.client.then((client) => {
+            return client.apis['API Product (Individual)'].get_api_products__apiProductId__swagger({
+                apiProductId: id
+            }, this._requestMetaData());
+        }).catch((error) => {
+            console.error(error);
+        });
+        return promise_get;
+    }
 }
 
 export default APIProduct;

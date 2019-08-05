@@ -38,6 +38,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import MonacoEditor from 'react-monaco-editor';
 import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppComponents/API';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 
 import Dropzone from 'react-dropzone';
@@ -510,6 +511,7 @@ APIDefinition.propTypes = {
         updateSwagger: PropTypes.func,
         getSwagger: PropTypes.func,
         id: PropTypes.string,
+        apiType: PropTypes.oneOf(API.CONSTS.API, API.CONSTS.APIProduct),
     }).isRequired,
     history: PropTypes.shape({
         push: PropTypes.object,

@@ -503,6 +503,10 @@ class Details extends Component {
                                     path={Details.subPaths.API_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.API_DEFINITION_PRODUCT}
+                                    component={() => <APIDefinition api={api} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
@@ -555,6 +559,7 @@ Details.subPaths = {
     OVERVIEW: '/apis/:api_uuid/overview',
     OVERVIEW_PRODUCT: '/api-products/:apiprod_uuid/overview',
     API_DEFINITION: '/apis/:api_uuid/api definition',
+    API_DEFINITION_PRODUCT: '/api-products/:apiprod_uuid/api definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
