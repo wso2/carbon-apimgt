@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
@@ -26,12 +26,11 @@ import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import Api from '../../../data/api';
+import { FormattedMessage } from 'react-intl';
 
 /**
- *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme object
  */
 const styles = theme => ({
     titleBar: {
@@ -82,168 +81,145 @@ const styles = theme => ({
     quotaHelp: {
         position: 'relative',
     },
+    subscribeRoot: {
+        paddingLeft: theme.spacing.unit * 2,
+    },
 });
-/**
- *
- *
- * @class SubscribeToApi
- * @extends {Component}
- */
-class SubscribeToApi extends Component {
-    /**
-     *Creates an instance of SubscribeToApi.
-     * @param {*} props
-     * @memberof SubscribeToApi
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            appSelected: null,
-            tierSelected: null,
-        };
-    }
 
-    /**
-     *
-     *
-     * @memberof SubscribeToApi
-     */
-    componentDidMount() {
-        const { newApp, applicationsAvailable, api } = this.props;
-        if (newApp) {
-            this.state.appSelected = this.props.newApp.value;
-        } else {
-            this.state.appSelected = applicationsAvailable[0].value;
+const subscribeToApi = (props) => {
+    const [appSelected, setAppSelected] = useState('');
+    const [policySelected, setPolicySelected] = useState('');
+    const [applicationsList, seAapplicationsList] = useState([]);
+    const { classes, throttlingPolicyList, applicationsAvailable } = props;
+
+    useEffect(() => {
+        if (throttlingPolicyList) {
+            setPolicySelected(throttlingPolicyList[0]);
         }
-        this.state.tiers = this.getTiers(api);
-        if (this.state.tiers.length > 0) {
-            this.setState({ tierSelected: this.state.tiers[0].value });
+    }, [throttlingPolicyList]);
+
+    useEffect(() => {
+        if (applicationsAvailable && applicationsAvailable[0]) {
+            seAapplicationsList(applicationsAvailable);
+            setAppSelected(applicationsAvailable[0].value);
         }
-    }
+    }, [applicationsAvailable]);
 
     /**
-     *
-     *
-     * @param {*} api
-     * @returns
-     * @memberof SubscribeToApi
-     */
-    getTiers(api) {
-        const tiers = [];
-
-        if (api && api.tiers) {
-            const apiTiers = api.tiers;
-            for (let i = 0; i < apiTiers.length; i++) {
-                const tierName = apiTiers[i];
-                tiers.push({ value: tierName, label: tierName });
-            }
+    * This method is used to handle the updating of subscription
+    * request object and selected fields.
+    * @param {*} field field that should be updated in subscription request
+    * @param {*} event event fired
+    */
+    const handleChange = (field, event) => {
+        const { subscriptionRequest, updateSubscriptionRequest } = props;
+        const newRequest = { ...subscriptionRequest };
+        const { target } = event;
+        switch (field) {
+            case 'application':
+                newRequest.applicationId = target.value;
+                setAppSelected(target.value);
+                break;
+            case 'throttlingPolicy':
+                newRequest.throttlingPolicy = target.value;
+                setPolicySelected(target.value);
+                break;
+            default:
+                break;
         }
-        return tiers;
-    }
-
-    /**
-     *
-     *
-     * @memberof SubscribeToApi
-     */
-    handleChange = (event) => {
-        this.setState({ [event.target.name]: event.target.value });
+        updateSubscriptionRequest(newRequest);
     };
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof SubscribeToApi
-     */
-    createSubscription() {
-        const apiUuid = this.props.api.id;
-
-        const applicationId = this.state.appSelected;
-        const policy = this.state.tierSelected;
-        const api = new Api();
-        return api.subscribe(apiUuid, applicationId, policy);
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof SubscribeToApi
-     */
-    render() {
-        const {
-            classes, applicationsAvailable, newApp, rootClass,
-        } = this.props;
-        if (newApp) {
-            applicationsAvailable.push(newApp); // Add the new app to the applications available
-        }
-
-        return (
-            <Grid container spacing={24} className={rootClass}>
-                <Grid item xs={12} md={6}>
-                    {this.state.appSelected && (
-                        <FormControl className={classes.FormControl} disabled={this.props.newApp}>
-                            <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
-                                Application
-                            </InputLabel>
-
-                            <Select
-                                value={this.state.appSelected}
-                                onChange={this.handleChange}
-                                input={<Input name='appSelected' id='app-label-placeholder' />}
-                                displayEmpty
-                                name='appSelected'
-                                className={classes.selectEmpty}
-                            >
-                                {applicationsAvailable.map(app => (
-                                    <MenuItem value={app.value} key={app.value}>
-                                        {app.label}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            <FormHelperText>Select an Application to subscribe</FormHelperText>
-                        </FormControl>
-                    )}
-                    {this.state.tiers && (
-                        <FormControl className={classes.FormControlOdd}>
-                            <InputLabel shrink htmlFor='tier-label-placeholder' className={classes.quotaHelp}>
-                                Throttling Tier
-                            </InputLabel>
-                            <Select
-                                value={this.state.tierSelected}
-                                onChange={this.handleChange}
-                                input={<Input name='tierSelected' id='tier-label-placeholder' />}
-                                displayEmpty
-                                name='tierSelected'
-                                className={classes.selectEmpty}
-                            >
-                                {this.state.tiers.map(tier => (
-                                    <MenuItem value={tier.value} key={tier.value}>
-                                        {tier.label}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            <FormHelperText>
-                                Available Tiers -
-                                {' '}
-                                {this.state.tiers.map((tier, index) => (
-                                    <span key={tier.value}>
-                                        {tier.label}
-                                        {index !== this.state.tiers.length - 1 && <span>,</span>}
-                                    </span>
-                                ))}
-                            </FormHelperText>
-                        </FormControl>
-                    )}
-                </Grid>
+    return (
+        <Grid container spacing={24} className={classes.subscribeRoot}>
+            <Grid item xs={12} md={6}>
+                {appSelected && (
+                    <FormControl className={classes.FormControl}>
+                        <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.SubscribeToApi.application'
+                                defaultMessage='Application'
+                            />
+                        </InputLabel>
+                        <Select
+                            value={appSelected}
+                            onChange={e => handleChange('application', e)}
+                            input={<Input name='appSelected' id='app-label-placeholder' />}
+                            displayEmpty
+                            name='appSelected'
+                            className={classes.selectEmpty}
+                        >
+                            {applicationsList.map(app => (
+                                <MenuItem value={app.value} key={app.value}>
+                                    {app.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <FormHelperText>
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.SubscribeToApi.select.an.application.to.subscribe'
+                                defaultMessage='Select an Application to subscribe'
+                            />
+                        </FormHelperText>
+                    </FormControl>
+                )}
+                {throttlingPolicyList && (
+                    <FormControl className={classes.FormControlOdd}>
+                        <InputLabel shrink htmlFor='policy-label-placeholder' className={classes.quotaHelp}>
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.SubscribeToApi.throttling.policy'
+                                defaultMessage='Throttling Policy'
+                            />
+                        </InputLabel>
+                        <Select
+                            value={policySelected}
+                            onChange={e => handleChange('throttlingPolicy', e)}
+                            input={<Input name='policySelected' id='policy-label-placeholder' />}
+                            displayEmpty
+                            name='policySelected'
+                            className={classes.selectEmpty}
+                        >
+                            {throttlingPolicyList.map(policy => (
+                                <MenuItem value={policy} key={policy}>
+                                    {policy}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        <FormHelperText>
+                            <FormattedMessage
+                                id='Shared.AppsAndKeys.SubscribeToApi.available.policies'
+                                defaultMessage='Available Policies -'
+                            />
+                            {' '}
+                            {throttlingPolicyList.map((policy, index) => (
+                                <span key={policy}>
+                                    {policy}
+                                    {index !== throttlingPolicyList.length - 1 && <span>,</span>}
+                                </span>
+                            ))}
+                        </FormHelperText>
+                    </FormControl>
+                )}
             </Grid>
-        );
-    }
-}
-
-SubscribeToApi.propTypes = {
-    classes: PropTypes.object.isRequired,
+        </Grid>
+    );
+};
+subscribeToApi.propTypes = {
+    classes: PropTypes.shape({
+        FormControl: PropTypes.shape({}),
+        quotaHelp: PropTypes.shape({}),
+        selectEmpty: PropTypes.shape({}),
+        FormControlOdd: PropTypes.shape({}),
+        subscribeRoot: PropTypes.shape({}),
+    }).isRequired,
+    applicationsAvailable: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string,
+        label: PropTypes.string,
+    })).isRequired,
+    throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
+    subscriptionRequest: PropTypes.shape({}).isRequired,
+    updateSubscriptionRequest: PropTypes.func.isRequired,
+    rootClass: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(SubscribeToApi);
+export default withStyles(styles)(subscribeToApi);

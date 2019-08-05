@@ -23,16 +23,17 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
-import qs from 'qs';
 import TablePagination from '@material-ui/core/TablePagination';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Base/Alert';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
 import NewApp from 'AppComponents/Applications/Create/NewApp';
+import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
 import AppsTableContent from './AppsTableContent';
 import ApplicationTableHead from './ApplicationTableHead';
+
 /**
  *
  * @inheritdoc
@@ -95,6 +96,10 @@ const styles = theme => ({
         paddingTop: theme.spacing.unit,
         width: theme.custom.contentAreaWidth,
     },
+    dialogContainer: {
+        width: 1000,
+        padding: theme.spacing.unit * 2,
+    },
 });
 
 /**
@@ -116,6 +121,7 @@ class Listing extends Component {
             alertMessage: null,
             page: 0,
             rowsPerPage: 10,
+            open: false,
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -131,7 +137,6 @@ class Listing extends Component {
      * @memberof Listing
      */
     updateApps = () => {
-        const { history, location } = this.props;
         const promisedApplications = Application.all();
         promisedApplications
             .then((applications) => {
@@ -186,19 +191,36 @@ class Listing extends Component {
     };
 
     /**
-     *
-     *
+     * @memberof NewApp
+     */
+    handleClose = () => {
+        this.setState({ open: false });
+    };
+
+    /**
+     * @memberof Listing
+     */
+    handleClickOpen = () => {
+        this.setState({ open: true });
+    };
+
+    /**
      * @param {*} event event
      * @memberof Listing
      */
     handleAppDelete(event) {
         const { data } = this.state;
+        const { intl } = this.props;
         const id = event.currentTarget.getAttribute('data-appId');
         const newData = new Map([...data]);
         const app = newData.get(id);
         app.deleting = true;
         this.setState({ data: newData });
-        const message = 'Application: ' + app.name + ' deleted successfully!';
+
+        const message = intl.formatMessage({
+            defaultMessage: 'Application {name} deleted successfully!',
+            id: 'Applications.Listing.Listing.application.deleted.successfully',
+        }, { name: app.name });
         const promisedDelete = Application.deleteApp(id);
         promisedDelete.then((ok) => {
             if (ok) {
@@ -213,12 +235,12 @@ class Listing extends Component {
      */
     render() {
         const {
-            data, order, orderBy, alertMessage, rowsPerPage, page,
+            data, order, orderBy, alertMessage, rowsPerPage, page, open,
         } = this.state;
         if (!data) {
             return <Loading />;
         }
-        const { classes, theme } = this.props;
+        const { classes, theme, intl } = this.props;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
         return (
             <main className={classes.content}>
@@ -228,27 +250,56 @@ class Listing extends Component {
                     </div>
                     <div className={classes.mainTitleWrapper}>
                         <Typography variant='display1' className={classes.mainTitle}>
-                            Applications
+                            <FormattedMessage
+                                id='Applications.Listing.Listing.applications'
+                                defaultMessage='Applications'
+                            />
+
                         </Typography>
                         {data && (
                             <Typography variant='caption' gutterBottom align='left'>
                                 {data.count === 0 ? (
-                                    <React.Fragment>No Applications created</React.Fragment>
+                                    <React.Fragment>
+                                        <FormattedMessage
+                                            id='Applications.Listing.Listing.no.applications.created'
+                                            defaultMessage='No Applications created'
+                                        />
+                                    </React.Fragment>
                                 ) : (
                                     <React.Fragment>
-                                            Displaying
+                                        <FormattedMessage
+                                            id='Applications.Listing.Listing.displaying'
+                                            defaultMessage='Displaying'
+                                        />
                                         {' '}
                                         {data.count}
                                         {' '}
-                                        {data.count === 1 ? 'Application' : 'Applications'}
+                                        {data.count === 1
+                                            ? (
+                                                <FormattedMessage
+                                                    id='Applications.Listing.Listing.displaying.application'
+                                                    defaultMessage='Application'
+                                                />
+                                            )
+                                            : (
+                                                <FormattedMessage
+                                                    id='Applications.Listing.Listing.displaying.applications'
+                                                    defaultMessage='Applications'
+                                                />
+                                            )}
                                     </React.Fragment>
                                 )}
                             </Typography>
                         )}
                     </div>
-                    {data.size !== 0 && (
+                    {(data.size !== 0 || open) && (
                         <div className={classes.createLinkWrapper}>
-                            <NewApp updateApps={this.updateApps} />
+                            <NewApp
+                                updateApps={this.updateApps}
+                                open={open}
+                                handleClickOpen={this.handleClickOpen}
+                                handleClose={this.handleClose}
+                            />
                         </div>
                     )}
                 </div>
@@ -258,10 +309,13 @@ class Listing extends Component {
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
                                 <Typography variant='caption' gutterBottom align='left'>
-                                    An application is a logical collection of APIs. Applications allow you to use a
-                                    single access token to invoke a collection of APIs and to subscribe to one
-                                    API multiple times with different SLA levels. The DefaultApplication is
-                                    pre-created and allows unlimited access by default.
+                                    <FormattedMessage
+                                        id='Applications.Listing.Listing.logical.description'
+                                        defaultMessage={`An application is a logical collection of APIs. 
+                                        Applications allow you to use a single access token to invoke a
+                                         collection of APIs and to subscribe to one API multiple times pre-created
+                                          and allows unlimited access by default.`}
+                                    />
                                 </Typography>
                                 <Table>
                                     <ApplicationTableHead
@@ -296,21 +350,24 @@ class Listing extends Component {
                                 />
                             </div>
                         ) : (
-                            <div className={classes.appContent}>
-                                <InlineMessage type='info' style={{ width: 1000, padding: theme.spacing.unit * 2 }}>
-                                    <Typography variant='headline' component='h3'>
-                                            Create New Application
-                                    </Typography>
-                                    <Typography component='p'>
-                                        An application is a logical collection of APIs. Applications
-                                        allow you to use a single access token to invoke a collection
-                                        of APIs and to subscribe to one API multiple times with different
-                                        SLA levels. The DefaultApplication is pre-created and allows unlimited
-                                        access by default.
-                                    </Typography>
-                                    <NewApp updateApps={this.updateApps} />
-                                </InlineMessage>
-                            </div>
+                            <GenericDisplayDialog
+                                classes={classes}
+                                handleClick={this.handleClickOpen}
+                                heading='Create New Application'
+
+                                caption={intl.formatMessage({
+                                    defaultMessage: `An application is a logical collection of APIs. Applications
+                                    allow you to use a single access token to invoke a collection
+                                    of APIs and to subscribe to one API multiple times with different
+                                    SLA levels. The DefaultApplication is pre-created and allows unlimited
+                                    access by default.`,
+                                    id: 'Applications.Listing.Listing.generic.display.description',
+                                })}
+                                buttonText={intl.formatMessage({
+                                    defaultMessage: 'ADD NEW APPLICATION',
+                                    id: 'Applications.Listing.Listing.generic.display.description',
+                                })}
+                            />
                         )}
                     </Grid>
                 </Grid>
@@ -319,8 +376,17 @@ class Listing extends Component {
     }
 }
 Listing.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        root: PropTypes.string,
+        flex: PropTypes.string,
+        content: PropTypes.string,
+        mainIconWrapper: PropTypes.string,
+        mainTitle: PropTypes.string,
+        mainTitleWrapper: PropTypes.string,
+        createLinkWrapper: PropTypes.string,
+        appContent: PropTypes.string,
+    }).isRequired,
+    intl: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Listing);
+export default injectIntl(withStyles(styles, { withTheme: true })(Listing));

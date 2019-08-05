@@ -1,177 +1,130 @@
-/*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+/**
+ * Copyright (c)  WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import TextField from '@material-ui/core/TextField';
-import { withStyles } from '@material-ui/core/styles';
-import FormControl from '@material-ui/core/FormControl';
-import { FormattedMessage } from 'react-intl';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+import React, { useState } from 'react';
 import Grid from '@material-ui/core/Grid';
-import API from 'AppData/api';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button';
+import { Link } from 'react-router-dom';
+
+import EndpointOverview from './EndpointOverview';
 import ApiContext from '../components/ApiContext';
 
 const styles = theme => ({
-    FormControl: {
-        padding: '0 20px',
-        width: '100%',
-        marginTop: 0,
+    endpointTypesWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'row',
+        margin: '2px',
     },
-    FormControlOdd: {
-        padding: '0 20px',
-        backgroundColor: theme.palette.background.paper,
-        width: '100%',
-        marginTop: 0,
+    root: {
+        flexGrow: 1,
+        paddingRight: '10px',
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: theme.spacing.unit * 2,
+    },
+    buttonSection: {
+        marginTop: theme.spacing.unit * 2,
     },
 });
+
 /**
- * @export @inheritDoc
- * @class InputForm
- * @extends {Component}
+ * The base component of the endpoints view.
+ * @param {any} props The props passed to the layout
+ * @returns {any} HTML representation.
  */
-class Endpoints extends Component {
-    /**
-     * @inheritDoc
-     * @returns {React.Component}
-     * @memberof Endpoints
-     */
-    handleInputChange () {
-        console.info('handle input change');
-    }
-    handleSubmit () {
-        console.info('handle submit');
-    }
-    showEndpoint (api, type) {
-        if (api.endpointConfig) {
-            if (type === 'prod') {
-                return api.getProductionEndpoint();
-            }
-            if (type === 'sand') {
-                return api.getSandboxEndpoint();
-            }
+function Endpoints(props) {
+    const { classes } = props;
+    const [modifiedAPI, setModifiedAPI] = useState({});
+
+    const saveAPI = (oldAPI, updateFunc) => {
+        if (modifiedAPI !== {}) {
+            updateFunc(modifiedAPI);
         }
-        return null;
     };
 
-    render() {
-        const { classes } = this.props;
-        return (
+    return (
+        <React.Fragment className={classes.root}>
+            <div>
+                <Typography variant='h4' align='left' className={classes.titleWrapper}>
+                    <FormattedMessage
+                        id='Apis.Details.Endpoints.Endpoints.endpoints.header'
+                        defaultMessage='Endpoints'
+                    />
+                </Typography>
+            </div>
             <ApiContext.Consumer>
-                {({ api }) => (
-                    <Grid container spacing={24} className={classes.root}>
-                        <Grid item xs={12} md={8}>
-                            <div className={classes.titleWrapper}>
-                                <Typography variant='h4' align='left' className={classes.mainTitle}>
-                                   Endpoints
-                                </Typography>
-                            </div>
-                            <form onSubmit={this.handleSubmit}>
-                                <FormControl margin='normal' className={classes.FormControl}>
-                                    <TextField
-                                        error={false}
-                                        fullWidth
-                                        id='prodEndpoint'
-                                        placeholder='E.g: http://appserver/resource'
-                                        helperText={
-                                            false ? (
-                                                <FormattedMessage
-                                                    id='error.empty'
-                                                    defaultMessage='This field can not be empty.'
-                                                />
-                                            ) : (
-                                                <FormattedMessage
-                                                    id='api.create.endpoint.help'
-                                                    defaultMessage='This is the actual endpoint where the API implementation can be found'
-                                                />
-                                            )
-                                        }
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        label='Production Endpoint'
-                                        type='text'
-                                        name='Production Endpoint'
-                                        margin='normal'
-                                        value={this.showEndpoint(api,'prod')}
-                                        onChange={this.handleInputChange}
-                                    />
-                                </FormControl>
-                                <FormControl margin='normal' className={classes.FormControlOdd}>
-                                    <TextField
-                                        error={false}
-                                        fullWidth
-                                        id='sandboxEndpoint'
-                                        placeholder='E.g: http://appserver/resource'
-                                        helperText={
-                                            false ? (
-                                                <FormattedMessage
-                                                    id='error.empty'
-                                                    defaultMessage='This field can not be empty.'
-                                                />
-                                            ) : (
-                                                <FormattedMessage
-                                                    id='api.create.endpoint.help'
-                                                    defaultMessage='This is the actual endpoint where the API implementation can be found'
-                                                />
-                                            )
-                                        }
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        label='Sandbox Endpoint'
-                                        type='text'
-                                        name='Sandbox Endpoint'
-                                        margin='normal'
-                                        value={this.showEndpoint(api,'sand')}
-                                        onChange={this.handleInputChange}
-                                    />
-                                </FormControl>
-                                <Grid
-                                    container
-                                    direction='row'
-                                    alignItems='flex-start'
-                                    spacing={16}
-                                    className={classes.buttonSection}
-                                >
-                                    <Grid item>
-                                        <Button type='submit' variant='contained' color='primary'>
-                                            Save
-                                        </Button>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button onClick={() => this.props.history.push('/apis')}>
-                                            <FormattedMessage id='cancel' defaultMessage='Cancel' />
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </form>
+                {({ api, updateAPI }) => (
+                    <div>
+                        <Grid container>
+                            <Grid item xs={12}>
+                                <EndpointOverview api={api} onChangeAPI={setModifiedAPI} />
+                            </Grid>
                         </Grid>
-                    </Grid>
-                )}
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='flex-start'
+                            spacing={16}
+                            className={classes.buttonSection}
+                        >
+                            <Grid item>
+                                <Button
+                                    type='submit'
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => saveAPI(modifiedAPI, updateAPI)}
+                                >
+                                    <FormattedMessage
+                                        id='Apis.Details.Endpoints.Endpoints.save'
+                                        defaultMessage='Save'
+                                    />
+                                </Button>
+                            </Grid>
+                            <Grid item>
+                                <Link to={'/apis/' + api.id + '/overview'}>
+                                    <Button>
+                                        <FormattedMessage
+                                            id='Apis.Details.Endpoints.Endpoints.cancel'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </Link>
+                            </Grid>
+                        </Grid>
+                    </div>)}
             </ApiContext.Consumer>
-        );
-    }
+        </React.Fragment>
+    );
 }
 
 Endpoints.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        root: PropTypes.shape({}),
+        buttonSection: PropTypes.shape({}),
+        endpointTypesWrapper: PropTypes.shape({}),
+        mainTitle: PropTypes.shape({}),
+    }).isRequired,
 };
 
-export default withStyles(styles)(Endpoints);
+export default injectIntl(withStyles(styles)(Endpoints));

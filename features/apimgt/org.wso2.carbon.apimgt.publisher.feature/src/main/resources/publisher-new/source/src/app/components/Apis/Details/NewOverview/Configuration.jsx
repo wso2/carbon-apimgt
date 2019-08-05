@@ -26,13 +26,14 @@ import Chip from '@material-ui/core/Chip';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
+import API from 'AppData/api';
 import ApiContext from '../components/ApiContext';
 
 function Configuration(props) {
     const { parentClasses } = props;
     return (
         <ApiContext.Consumer>
-            {({ api, isAPIProduct }) => (
+            {({ api }) => (
                 <Paper className={parentClasses.root} elevation={1}>
                     <div className={parentClasses.titleWrapper}>
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
@@ -41,7 +42,9 @@ function Configuration(props) {
                                 defaultMessage='Configuration'
                             />
                         </Typography>
-                        <Link to={(isAPIProduct ? '/api-products/' : '/apis/') + api.id + '/configuration'}>
+                        <Link to={((api.apiType === API.CONSTS.APIProduct) ? '/api-products/' : '/apis/') +
+                            api.id + '/configuration'}
+                        >
                             <Button variant='contained' color='default'>
                                 <FormattedMessage
                                     id='Apis.Details.NewOverview.Configuration.edit'
@@ -75,16 +78,21 @@ function Configuration(props) {
                                 {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
                             </Typography>
                             {/* Type */}
-                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.NewOverview.Configuration.type'
-                                    defaultMessage='Type'
-                                />
-                            </Typography>
-                            <Typography component='p' variant='body1'>
-                                {api.type && <React.Fragment>{api.type}</React.Fragment>}
-                                {!api.type && <React.Fragment>?</React.Fragment>}
-                            </Typography>
+                            {(api.apiType === API.CONSTS.APIProduct) ?
+                                null :
+                                <div>
+                                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.Configuration.type'
+                                            defaultMessage='Type'
+                                        />
+                                    </Typography>
+                                    <Typography component='p' variant='body1'>
+                                        {api.type && <React.Fragment>{api.type}</React.Fragment>}
+                                        {!api.type && <React.Fragment>?</React.Fragment>}
+                                    </Typography>
+                                </div>
+                            }
                             {/* workflowStatus */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                 <FormattedMessage
@@ -369,15 +377,26 @@ function Configuration(props) {
                         </div>
                     </div>
 
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.tags'
-                            defaultMessage='Tags'
-                        />
-                    </Typography>
-                    <Typography variant='body1'>
-                        {api.tags && api.tags.map(tag => <Chip key={tag} label={tag} className={parentClasses.chip} />)}
-                    </Typography>
+                    {(api.apiType === API.CONSTS.APIProduct) ?
+                        null :
+                        <React.Fragment>
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.tags'
+                                    defaultMessage='Tags'
+                                />
+                            </Typography>
+                            <Typography variant='body1'>
+                                ({api.tags && api.tags.map(tag =>
+                                    (<Chip
+                                        key={tag}
+                                        label={tag}
+                                        className={parentClasses.chip}
+                                    />))
+                                })
+                            </Typography>
+                        </React.Fragment>
+                    }
                 </Paper>
             )}
         </ApiContext.Consumer>

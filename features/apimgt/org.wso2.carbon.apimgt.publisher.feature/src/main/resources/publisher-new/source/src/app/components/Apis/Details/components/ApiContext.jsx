@@ -22,7 +22,6 @@ const ApiContext = React.createContext({
     active: 'overview',
     updateAPI: () => {},
     api: null,
-    isAPIProduct: false,
 });
 
 export default ApiContext;
