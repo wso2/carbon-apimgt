@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl.exception;
+package org.wso2.carbon.apimgt.api;
 
 /**
  * This enum class holds error codes that we need to pass to upper level. For example, to the UI.
@@ -34,7 +34,6 @@ public enum ExceptionCodes implements ErrorHandler {
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " The tier name is invalid"),
-    SWAGGER_PARSE_EXCEPTION(900306, "Error while parsing swagger json", 400, "Error while parsing swagger json"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
     API_NOT_FOUND(900308, "API not found", 404, "API could not be found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
@@ -59,14 +58,11 @@ public enum ExceptionCodes implements ErrorHandler {
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
     COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
             "A Composite API already exists for this application"),
-    SWAGGER_NOT_FOUND(900329, "Swagger definition not found", 404, "Swagger definition not found"),
     API_DEFINITION_NOT_FOUND(900330, "API definition not found", 404, "API definition not found"),
     APPLICATION_KEY_MAPPING_NOT_FOUND(900331, "Application Key mapping not found", 404, "Application Key mapping not " +
             "found"),
     NO_UPDATE_PERMISSIONS(900332, "No permissions to update API.", 403, "No permissions to update API."),
     NO_DELETE_PERMISSIONS(900333, "No permissions to delete API.", 403, "No permissions to delete API."),
-    UNSUPPORTED_API_DEFINITION_TYPE(900334, "Unsupported Definition Type", 400,
-            "Unsupported Definition Type. Only SWAGGER and WSDL are allowed."),
     API_ATTRIBUTE_NOT_FOUND(900335, "API attribute not found", 404, "API attribute not found"),
     SUBSCRIPTION_ALREADY_EXISTS(900336, "Subscription already exists", 409, "Subscription already exists"),
     SDK_NOT_GENERATED(900337, "Error while generating SDK", 500, "Error while generating SDK"),
@@ -99,8 +95,6 @@ public enum ExceptionCodes implements ErrorHandler {
     TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
     BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
-    SWAGGER_URL_MALFORMED(900504, "Swagger url malformed", 400, "swagger url is malformed"),
-
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -160,6 +154,20 @@ public enum ExceptionCodes implements ErrorHandler {
     UNSUPPORTED_WSDL_EXTENSIBILITY_ELEMENT(900678, "Invalid WSDL", 400, "WSDL extensibility element not supported"),
     ERROR_WHILE_INITIALIZING_WSDL_FACTORY(900679, "Internal WSDL error", 500, "Error while initializing WSDL factory"),
     ERROR_WHILE_CREATING_WSDL_ARCHIVE(900680, "Internal WSDL error", 500, "Error while creating WSDL archive"),
+
+
+    //OpenAPI/Swagger related codes [900750 900???)
+    MALFORMED_OPENAPI_DEFINITON(900758, "Malformed OpenAPI Definition", 400, "The provided OpenAPI definition is not parsable as a valid JSON or YAML."),
+    UNRECOGNIZED_OPENAPI_DEFINITON(900759, "Unrecognized OpenAPI Definition", 400, "The definition is parsable but cannot be identified as an OpenAPI definition."),
+    INVALID_SWAGGER_VERSION(900760, "Invalid Swagger Definition", 400, "Unsupported swagger version provided. Please add with swagger version 2.0."),
+    INVALID_SWAGGER_PARAMS(900751, "Invalid Swagger Definition", 400, "Swagger contains invalid parameters. Please add valid swagger definition."),
+    INVALID_OPENAPI_VERSION(900752, "Invalid OpenAPI Definition", 400, "Unsupported OpenAPI version provided. Please add with OpenAPI version 3.0.0."),
+    INVALID_OPENAPI_NO_INFO_PATH(900753, "Invalid OpenAPI Definition", 400, "Required property 'info' or 'paths' are not provided."),
+    OPENAPI_PARSE_EXCEPTION(900754, "Error while parsing OpenAPI definition", 400, "Error while parsing OpenAPI definition"),
+    OPENAPI_NOT_FOUND(900755, "OpenAPI definition not found", 404, "OpenAPI definition not found"),
+    OPENAPI_URL_MALFORMED(900756, "OpenAPI definition retrieval from URL failed", 400, "Exception occurred while retrieving the OpenAPI definition from URL"),
+    OPENAPI_URL_NO_200(900757, "OpenAPI definition retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
+
 
     // REST API related codes
     PARAMETER_NOT_PROVIDED(900700, "Parameter value missing", 400,

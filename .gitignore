@@ -9,6 +9,7 @@ features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repositor
 *.DS_Store
 WSO2AM_DB.trace.db
 node_modules
+wso2carbon.log
 features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#calculator#*.war
 features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#pizzashack#*.war
 features/apimgt/org.wso2.carbon.apimgt.rest.api.dcr.feature/src/main/resources/client-registration#*.war

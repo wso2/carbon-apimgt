@@ -8,7 +8,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
@@ -21,12 +20,14 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 
 import java.util.List;
@@ -81,8 +82,10 @@ public interface ApisApiService {
       public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext);
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, String tenantDomain, MessageContext messageContext);
       public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext);
-      public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, String ifMatch, MessageContext messageContext);
       public Response apisPost(APIDTO body, MessageContext messageContext);
-      public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext);
+      public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext);
+      public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext);
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);
+      public Response validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail, Boolean returnContent, MessageContext messageContext);
+      public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail, Boolean returnContent, MessageContext messageContext);
 }
