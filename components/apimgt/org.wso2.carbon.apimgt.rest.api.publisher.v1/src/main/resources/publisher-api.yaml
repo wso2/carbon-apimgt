@@ -3277,59 +3277,6 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The "Individual Subscription" resource APIs
-######################################################
-  '/subscriptions/{subscriptionId}':
-
-#-----------------------------------------------------
-# Retrieve a certain subscription
-#-----------------------------------------------------
-    get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"policy\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"lifeCycleStatus\": \"UNBLOCKED\"\n}"
-      security:
-        - OAuth2Security:
-          - apim:subscription_view
-      summary: Get details of a subscription
-      description: |
-        This operation can be used to get details of a single subscription.
-      parameters:
-        - $ref: '#/parameters/subscriptionId'
-        - $ref: '#/parameters/If-None-Match'
-      tags:
-        - Subscription (Individual)
-      responses:
-        200:
-          description: |
-            OK.
-            Subscription returned
-          schema:
-            $ref: '#/definitions/ExtendedSubscription'
-          headers:
-            Content-Type:
-              description: The content type of the body.
-              type: string
-            ETag:
-              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).'
-              type: string
-            Last-Modified:
-              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional requests (Will be supported in future).'
-              type: string
-        '304':
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-        '404':
-          description: |
-            Not Found.
-            Requested Subscription does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-
-######################################################
 # The get usage billing resource APIs
 ######################################################
   '/subscriptions/{subscriptionId}/usage':
@@ -6774,6 +6721,7 @@ definitions:
       groupId:
         type: string
         example: ""
+
 #-----------------------------------------------------
 # The Application Info resource
 #-----------------------------------------------------
@@ -6789,26 +6737,11 @@ definitions:
       subscriber:
         type: string
         example: admin
-      throttlingPolicy:
-        type: string
-        example: Unlimited
       description:
         type: string
         example: Sample calculator application
-      status:
-        type: string
-        example: APPROVED
-        default: ""
-      groups:
-        type: array
-        items:
-          type: string
-        example: ""
       subscriptionCount:
         type: integer
-      attributes:
-        type: object
-        example: External Reference ID, Billing Tier
 
 #-----------------------------------------------------
 # The Document List resource
@@ -6900,8 +6833,6 @@ definitions:
       lastUpdatedBy:
         type: string
 
-
-
   #-----------------------------------------------------
   # The Mediation List resource
   #-----------------------------------------------------
@@ -6943,6 +6874,7 @@ definitions:
           - out
           - fault
         example: in
+
   #-----------------------------------------------------
   # The Mediation resource
   #-----------------------------------------------------
@@ -6973,7 +6905,6 @@ definitions:
                           <property name="IN_MESSAGE" value="IN_MESSAGE_21133232"/>
                       </log>
                   </sequence>'
-
 
 #-----------------------------------------------------
 # The Tier List resource
@@ -7101,8 +7032,6 @@ definitions:
         example: 01234567-0123-0123-0123-012345678901
       applicationInfo:
         $ref: '#/definitions/ApplicationInfo'
-      apiInfo:
-        $ref: '#/definitions/APIInfo'
       throttlingPolicy:
         type: string
         example: Unlimited
@@ -7115,21 +7044,6 @@ definitions:
           - ON_HOLD
           - REJECTED
         example: BLOCKED
-
-
-  #-----------------------------------------------------
-  # The Extended Subscription resource
-  #-----------------------------------------------------
-  ExtendedSubscription:
-    title: Subscription with Ext. Workflow Reference
-    required:
-      - workflowId
-    allOf:
-      - $ref: '#/definitions/Subscription'
-      - properties:
-          workflowId:
-            type: string
-            example: 01234567-0123-0123-0123-012345678901
 
   #-----------------------------------------------------
   # The API monetization usage resource
