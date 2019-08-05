@@ -26,6 +26,7 @@ public class ApplicationMappingUtil {
 
     /**
      * Create an ApplicationInfoDTO from an Application object
+     * 
      * @param application Application object
      * @return ApplicationInfoDTO containing application information
      */
