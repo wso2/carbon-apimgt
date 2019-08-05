@@ -161,8 +161,10 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //get all the URI templates of the REST API from the base path
         Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath);
         if (uriTemplates.isEmpty()) {
-            log.debug("No matching role validation logic found for app request with path: " + basePath
-                    + ". Skipping role validation.");
+            if (log.isDebugEnabled()) {
+                log.debug("No matching scopes found for request with path: " + basePath
+                        + ". Skipping role validation.");
+            }
             return true;
         }
 
