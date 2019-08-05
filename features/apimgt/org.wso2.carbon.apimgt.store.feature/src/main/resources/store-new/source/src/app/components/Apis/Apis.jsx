@@ -27,34 +27,26 @@ import { PageNotFound } from '../Base/Errors';
 /**
  * Default API Store overview page
  *
- * @class Apis
- * @extends {PureComponent}
+ * @returns {React.Component}
  */
-class Apis extends React.PureComponent {
-    /**
-     * @inheritdoc
-     * @returns {React.PureComponent} @inheritdoc
-     * @memberof Apis
-     */
-    render() {
-        return (
-            <Switch>
-                <Route exact path='/apis' component={APIListing} />
-                <Route exact path='/api-products' component={APIProductListing} />
-                <Route
-                    path='/apis/:api_uuid/'
-                    render={props => (
-                        <Details {...props} path='/apis' />)}
-                />
-                <Route
-                    path='/api-products/:api_uuid/'
-                    render={props => (
-                        <Details {...props} path='/api-products' />)}
-                />
-                <Route component={PageNotFound} />
-            </Switch>
-        );
-    }
+function Apis() {
+    return (
+        <Switch>
+            <Route exact path='/apis' component={APIListing} />
+            <Route exact path='/api-products' component={APIProductListing} />
+            <Route
+                path='/apis/:api_uuid/'
+                render={props => (
+                    <Details {...props} path='/apis' />)}
+            />
+            <Route
+                path='/api-products/:api_uuid/'
+                render={props => (
+                    <Details {...props} path='/api-products' />)}
+            />
+            <Route component={PageNotFound} />
+        </Switch>
+    );
 }
 
 export default Apis;
