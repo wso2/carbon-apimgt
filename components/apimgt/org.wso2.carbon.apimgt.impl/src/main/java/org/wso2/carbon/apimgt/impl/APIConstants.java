@@ -300,8 +300,7 @@ public final class APIConstants {
 
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
-
-
+    
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
