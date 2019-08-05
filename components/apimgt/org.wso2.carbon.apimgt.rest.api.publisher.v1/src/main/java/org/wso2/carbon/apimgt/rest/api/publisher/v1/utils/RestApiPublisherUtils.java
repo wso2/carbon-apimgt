@@ -58,9 +58,8 @@ public class RestApiPublisherUtils {
      *
      * @param api api model
      * @return validity of the web socket api
-     * @throws JSONException
      */
-    public static boolean isValidWSAPI(APIDTO api) throws JSONException {
+    public static boolean isValidWSAPI(APIDTO api) {
 
         boolean isValid = false;
 

@@ -31,7 +31,7 @@ const APICreateMenu = (props) => {
                 </ListItem>
                 <Divider />
                 <ListItem>
-                    <Link to='/apis/create/swagger'>
+                    <Link to='/apis/create/openapi'>
                         <ListItemText
                             primary={
                                 <FormattedMessage

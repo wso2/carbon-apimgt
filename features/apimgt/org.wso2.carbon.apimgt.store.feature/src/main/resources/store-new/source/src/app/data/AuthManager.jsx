@@ -157,8 +157,8 @@ class AuthManager {
     }
 
     /**
-     * Persist an user in browser local storage and in-memory, Since only one use can be logged into the application at a time,
-     * This method will override any previously persist user data.
+     * Persist an user in browser local storage and in-memory, Since only one use can be logged
+     * into the application at a time,This method will override any previously persist user data.
      * @param {User} user : An instance of the {User} class
      * @param {string} environmentName: label of the environment to be set the user
      */
@@ -183,11 +183,14 @@ class AuthManager {
      * @memberof AuthManager
      */
     static hasScopes(resourcePath, resourceMethod) {
-        const userScopes = AuthManager.getUser().scopes;
-        const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then((scope) => {
-            return userScopes.includes(scope);
-        });
+        const user = AuthManager.getUser();
+        if (user) {
+            const userScopes = user.scopes;
+            const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
+            return validScope.then((scope) => {
+                return userScopes.includes(scope);
+            });
+        }
     }
 
 

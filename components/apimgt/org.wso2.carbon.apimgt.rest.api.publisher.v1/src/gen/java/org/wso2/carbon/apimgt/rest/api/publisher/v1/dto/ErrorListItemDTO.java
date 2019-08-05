@@ -16,6 +16,7 @@ public class ErrorListItemDTO   {
   
     private String code = null;
     private String message = null;
+    private String description = null;
 
   /**
    **/
@@ -54,6 +55,24 @@ public class ErrorListItemDTO   {
     this.message = message;
   }
 
+  /**
+   * A detail description about the error message. 
+   **/
+  public ErrorListItemDTO description(String description) {
+    this.description = description;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "A detail description about the error message. ")
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
+  }
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -65,12 +84,13 @@ public class ErrorListItemDTO   {
     }
     ErrorListItemDTO errorListItem = (ErrorListItemDTO) o;
     return Objects.equals(code, errorListItem.code) &&
-        Objects.equals(message, errorListItem.message);
+        Objects.equals(message, errorListItem.message) &&
+        Objects.equals(description, errorListItem.description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(code, message);
+    return Objects.hash(code, message, description);
   }
 
   @Override
@@ -80,6 +100,7 @@ public class ErrorListItemDTO   {
     
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("}");
     return sb.toString();
   }

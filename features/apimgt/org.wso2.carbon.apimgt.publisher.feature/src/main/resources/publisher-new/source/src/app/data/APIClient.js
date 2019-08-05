@@ -54,6 +54,7 @@ class APIClient {
             return new SwaggerClient(argsv);
         });
         this._client.catch(AuthManager.unauthorizedErrorHandler);
+        this.mutex = new Mutex();
     }
 
     /**
@@ -127,7 +128,6 @@ class APIClient {
 
     _getRequestInterceptor() {
         return (request) => {
-            // todo: sync token checking logic
             const existingUser = AuthManager.getUser(this.environment.label);
             if (!existingUser) {
                 console.log('User not found. Token refreshing failed.');
@@ -146,10 +146,9 @@ class APIClient {
                 }
             }
 
-            const mutex = new Mutex();
             const env = this.environment;
             const promise = new Promise((resolve, reject) => {
-                mutex.acquire().then((release) => {
+                this.mutex.acquire().then((release) => {
                     existingToken = AuthManager.getUser(env.label).getPartialToken();
                     if (existingToken) {
                         request.headers.authorization = 'Bearer ' + existingToken;
@@ -160,10 +159,12 @@ class APIClient {
                             .then(() => {
                                 request.headers.authorization = 'Bearer '
                                 + AuthManager.getUser(env.label).getPartialToken();
+                                release();
                                 resolve(request);
                             }).catch((error) => {
                                 console.error('Error:', error);
-                                reject(request);
+                                release();
+                                reject();
                             })
                             .finally(() => {
                                 release();

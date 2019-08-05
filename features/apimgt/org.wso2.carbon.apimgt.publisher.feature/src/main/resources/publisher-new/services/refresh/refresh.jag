@@ -43,7 +43,6 @@
     var base64encoded = Base64.encode(new String(clientId + ":" + clientSecret).getBytes());
     var tokenEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData, {"Authorization": "Basic " + base64encoded});
-
     if (result.xhr.status === 200) {
         response.contentType = "application/json";
         var tokenResponse = JSON.parse(result.data);
@@ -112,7 +111,7 @@
             'value': refreshTokenPart1,
             'path': site.context + "/",
             "secure": true,
-            "maxAge": Integer(tokenResponse.expires_in)
+            "maxAge": 86400
         };
         response.addCookie(cookie);
 

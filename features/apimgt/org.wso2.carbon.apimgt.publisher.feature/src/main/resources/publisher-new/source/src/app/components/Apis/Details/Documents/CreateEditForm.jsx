@@ -32,6 +32,7 @@ import TextField from '@material-ui/core/TextField';
 import Dropzone from 'react-dropzone';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 
 const styles = theme => ({
     button: {
@@ -163,7 +164,8 @@ class CreateEditForm extends React.Component {
     };
 
     addDocument = (apiId) => {
-        const restAPI = new Api();
+        const { apiType } = this.props;
+        const restAPI = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
         const {
             name, type, summary, sourceType, sourceUrl, file, otherTypeName,
         } = this.state;
@@ -198,9 +200,9 @@ class CreateEditForm extends React.Component {
         return { docPromise, file };
     };
     getDocument() {
-        const restAPI = new Api();
-        const { apiId, docId } = this.props;
-        if (docId && docId) {
+        const { apiId, docId, apiType } = this.props;
+        const restAPI = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
+        if (docId && apiId) {
             const docPromise = restAPI.getDocument(apiId, docId);
             docPromise
                 .then((doc) => {
@@ -422,7 +424,8 @@ class CreateEditForm extends React.Component {
                     <FormLabel component='legend'>
                         <FormattedMessage
                             id='Apis.Details.Documents.CreateEditForm.source'
-                            defaultMessage='Source' />
+                            defaultMessage='Source'
+                        />
                     </FormLabel>
                     <RadioGroup
                         aria-label='Source'
@@ -469,7 +472,8 @@ class CreateEditForm extends React.Component {
                             label={
                                 <FormattedMessage
                                     id='Apis.Details.Documents.CreateEditForm.source.file'
-                                    defaultMessage='File' />
+                                    defaultMessage='File'
+                                />
                             }
                         />
                     </RadioGroup>
@@ -548,6 +552,7 @@ CreateEditForm.propTypes = {
     intl: PropTypes.shape({}).isRequired,
     docId: PropTypes.shape({}),
     apiId: PropTypes.shape({}),
+    apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(CreateEditForm));

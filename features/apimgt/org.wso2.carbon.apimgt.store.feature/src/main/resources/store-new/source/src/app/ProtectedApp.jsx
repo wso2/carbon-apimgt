@@ -21,22 +21,13 @@ import qs from 'qs';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import Configurations from 'Config';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { Apis, Applications, Base } from './components';
-import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreateForm';
-import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
+import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
-import ApplicationEdit from './components/Applications/Edit/ApplicationEdit';
 import Loading from './components/Base/Loading/Loading';
 // import 'typeface-roboto'
 import Utils from './data/Utils';
 import ConfigManager from './data/ConfigManager';
-
-
-const themes = [];
-
-themes.push(createMuiTheme(Configurations.themes.light));
-themes.push(createMuiTheme(Configurations.themes.dark));
+import AppRouts from './AppRouts';
 
 /**
  * Language.
@@ -63,7 +54,6 @@ export default class ProtectedApp extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            themeIndex: 0,
             messages: {},
             userResolved: false,
             scopesFound: false,
@@ -71,18 +61,6 @@ export default class ProtectedApp extends Component {
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb */
-    }
-
-    /**
-     * Change the theme index incrementally
-     */
-    componentWillMount() {
-        const storedThemeIndex = localStorage.getItem('themeIndex');
-        if (storedThemeIndex) {
-            this.setState({ themeIndex: parseInt(storedThemeIndex) });
-        }
-        const locale = languageWithoutRegionCode || language || 'en';
-        this.loadLocale(locale);
     }
 
     /**
@@ -150,16 +128,6 @@ export default class ProtectedApp extends Component {
     }
 
     /**
-    *  Update the state of the theme
-    */
-    setTheme() {
-        this.setState({ theme: themes[this.state.themeIndex % 3] });
-        let { themeIndex } = this.state;
-        themeIndex++;
-        localStorage.setItem('themeIndex', themeIndex);
-    }
-
-    /**
      * Load locale file.
      *
      * @param {string} locale Locale name
@@ -213,7 +181,7 @@ export default class ProtectedApp extends Component {
         if (!userResolved) {
             return <Loading />;
         }
-        const { scopesFound, messages, themeIndex } = this.state;
+        const { scopesFound, messages } = this.state;
         const isUserFound = AuthManager.getUser();
         let isAuthenticated = false;
         if (scopesFound && isUserFound) {
@@ -227,61 +195,9 @@ export default class ProtectedApp extends Component {
          */
         return (
             <IntlProvider locale={language} messages={messages}>
-                <MuiThemeProvider theme={themes[themeIndex % 2]}>
-                    <Base setTheme={() => this.setTheme()}>
-                        <Switch>
-                            <Redirect exact from='/' to='/apis' />
-                            <Route path='/apis' component={Apis} />
-                            <Route path='/api-products' component={Apis} />
-                            {isAuthenticated ? (
-                                <React.Fragment>
-                                    <Route
-                                        path='/applications'
-                                        component={Applications}
-                                    />
-                                    <Route
-                                        path='/application/create'
-                                        component={ApplicationCreate}
-                                    />
-                                    <Route
-                                        path='/application/edit/:application_id'
-                                        component={ApplicationEdit}
-                                    />
-                                </React.Fragment>
-                            ) : [isUserFound ? (
-                                <React.Fragment>
-                                    <Route
-                                        path='/applications'
-                                        component={ScopeNotFound}
-                                    />
-                                    <Route
-                                        path='/application/create'
-                                        component={ScopeNotFound}
-                                    />
-                                    <Route
-                                        path='/application/edit/:application_id'
-                                        component={ScopeNotFound}
-                                    />
-                                </React.Fragment>
-                            ) : (
-                                <React.Fragment>
-                                    <Route
-                                        path='/applications'
-                                        component={PageNotFound}
-                                    />
-                                    <Route
-                                        path='/application/create'
-                                        component={PageNotFound}
-                                    />
-                                    <Route
-                                        path='/application/edit/:application_id'
-                                        component={PageNotFound}
-                                    />
-                                </React.Fragment>
-                            ),
-                            ]}
-                            <Route component={PageNotFound} />
-                        </Switch>
+                <MuiThemeProvider theme={createMuiTheme(Configurations.themes.light)}>
+                    <Base>
+                        <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                     </Base>
                 </MuiThemeProvider>
             </IntlProvider>

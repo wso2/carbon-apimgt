@@ -25,7 +25,7 @@ import TextField from '@material-ui/core/TextField';
 import { FileCopy } from '@material-ui/icons';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
-import InlineMessage from '../../Shared/InlineMessage';
+import InlineMessage from '../InlineMessage';
 /**
  *
  *
@@ -111,8 +111,8 @@ class ViewToken extends React.Component {
      * @memberof ViewToken
      */
     getTokeScopesString(tokenScopes) {
-        let scopeString = tokenScopes.splice(0,1);
-        tokenScopes.map(scope => scopeString +=  ", " + scope);
+        let scopeString = tokenScopes.splice(0, 1);
+        tokenScopes.map(scope => scopeString += ', ' + scope);
         return scopeString;
     }
 
@@ -128,25 +128,25 @@ class ViewToken extends React.Component {
             <div className={classes.root}>
                 <InlineMessage type='warn'>
                     <Typography variant='headline' component='h3'>
-                    <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.please.copy'
-                        defaultMessage='Please Copy the Access Token'
-                    />
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.please.copy'
+                            defaultMessage='Please Copy the Access Token'
+                        />
                     </Typography>
                     <Typography component='p'>
-                    <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.please.copy.help'
-                        defaultMessage='Please copy this generated token value as it will be displayed only for the current browser session. ( After a page refresh, the token is not visible in the UI )'
-                    />
-                        </Typography>
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.please.copy.help'
+                            defaultMessage='Please copy this generated token value as it will be displayed only for the current browser session. ( After a page refresh, the token is not visible in the UI )'
+                        />
+                    </Typography>
                 </InlineMessage>
                 <div className={classes.epWrapper}>
                     <Typography className={classes.prodLabel}>
-                    <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.access.token'
-                        defaultMessage='Access Token'
-                    />
-                        </Typography>
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.access.token'
+                            defaultMessage='Access Token'
+                        />
+                    </Typography>
                     <TextField
                         defaultValue={token.accessToken}
                         id='bootstrap-input'
@@ -169,7 +169,7 @@ class ViewToken extends React.Component {
                     </Tooltip>
                 </div>
                 <FormHelperText>
-                <FormattedMessage
+                    <FormattedMessage
                         id='Shared.AppsAndKeys.ViewToken.info.first'
                         defaultMessage='Above token has a validity period of'
                     />

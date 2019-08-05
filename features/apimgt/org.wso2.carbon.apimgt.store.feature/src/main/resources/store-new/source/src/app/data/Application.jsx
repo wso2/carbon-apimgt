@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
 
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
@@ -76,7 +75,7 @@ export default class Application extends Resource {
         return this.client.then(client => client.apis['Application Keys']
             .get_applications__applicationId__keys({ applicationId: this.applicationId }))
             .then((keysResponse) => {
-                let keys = keysResponse.obj.list;
+                const keys = keysResponse.obj.list;
                 this._setKeys(keys);
                 this._setTokens(keys);
                 return this.keys;
@@ -92,20 +91,22 @@ export default class Application extends Resource {
      * instance and return tokenObject received as Promise object
      */
     generateToken(type, validityPeriod, selectedScopes) {
-        const promiseToken = this.client.then((client) => {
-            const keys = this.keys.get(type);
-            const accessToken = this.tokens.get(type);
-            const requestContent = {
-                consumerSecret: keys.consumerSecret,
-                validityPeriod: validityPeriod,
-                revokeToken: accessToken.accessToken,
-                scopes: selectedScopes,
-                additionalProperties: ''
-            };
-            const payload = { applicationId: this.id, keyType: type, body: requestContent };
-            return client.apis['Application Tokens']
-                .post_applications__applicationId__keys__keyType__generate_token(payload);
-        });
+        const promiseToken = this.getKeys()
+            .then(() => this.client)
+            .then((client) => {
+                const keys = this.keys.get(type);
+                const accessToken = this.tokens.get(type);
+                const requestContent = {
+                    consumerSecret: keys.consumerSecret,
+                    validityPeriod,
+                    revokeToken: accessToken.accessToken,
+                    scopes: selectedScopes,
+                    additionalProperties: '',
+                };
+                const payload = { applicationId: this.id, keyType: type, body: requestContent };
+                return client.apis['Application Tokens']
+                    .post_applications__applicationId__keys__keyType__generate_token(payload);
+            });
         return promiseToken.then((tokenResponse) => {
             const token = tokenResponse.obj;
             this.tokens.set(type, token);
@@ -173,7 +174,7 @@ export default class Application extends Resource {
             (client) => {
                 return client.apis.Applications.get_applications__applicationId_({ applicationId: id },
                     this._requestMetaData());
-            }
+            },
         );
         return promised_get.then((response) => {
             const app_json = response.obj;
@@ -186,7 +187,7 @@ export default class Application extends Resource {
         const promised_all = apiClient.client.then(
             (client) => {
                 return client.apis.Applications.get_applications({}, this._requestMetaData());
-            }
+            },
         );
         return promised_all.then(response => response.obj);
     }
@@ -197,7 +198,7 @@ export default class Application extends Resource {
             (client) => {
                 return client.apis.Applications.delete_applications__applicationId_({ applicationId: id },
                     this._requestMetaData());
-            }
+            },
         );
         return promised_delete.then(response => response.ok);
     }

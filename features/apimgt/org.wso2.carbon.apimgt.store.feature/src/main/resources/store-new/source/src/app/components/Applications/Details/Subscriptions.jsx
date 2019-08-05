@@ -163,8 +163,6 @@ class Subscriptions extends React.Component {
         const apiClient = new Api();
         const promisedGetApis = apiClient.getAllAPIs();
         const { subscriptions } = this.state;
-
-
         promisedGetApis
             .then((response) => {
                 const { list } = response.obj;
