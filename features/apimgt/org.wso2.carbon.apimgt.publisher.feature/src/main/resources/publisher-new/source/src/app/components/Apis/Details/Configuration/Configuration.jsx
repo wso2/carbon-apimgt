@@ -355,84 +355,87 @@ class Configuration extends React.Component {
                                             <Typography component='p' variant='body1'>
                                                 {api.context && <React.Fragment>{api.context}</React.Fragment>}
                                             </Typography>
-                                            {/* Version */}
-                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Configuration.Configuration.version'
-                                                    defaultMessage='Version'
-                                                />
-                                            </Typography>
-                                            <Typography component='p' variant='body1'>
-                                                {api.version && <React.Fragment>{api.version}</React.Fragment>}
-                                            </Typography>
-                                            {/* Default Version */}
-                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Configuration.Configuration.default.version'
-                                                    defaultMessage='Default Version'
-                                                />
-                                                <Tooltip
-                                                    placement='top'
-                                                    classes={{
-                                                        tooltip: classes.htmlTooltip,
-                                                    }}
-                                                    disableHoverListener
-                                                    title={
-                                                        <React.Fragment>
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Configuration.Configuration.' +
-                                                                'default.version.tooltip'}
-                                                                defaultMessage={'Marks one API version in a group as ' +
-                                                                'the default so that it can be invoked without ' +
-                                                                'specifying the version number in the URL. ' +
-                                                                'For example, if you mark ' +
-                                                                'http://host:port/youtube/2.0 as the default API, ' +
-                                                                'requests made to http://host:port/youtube/ are ' +
-                                                                'automatically routed to version 2.0. If you mark an ' +
-                                                                'unpublished API as the default, the previous  ' +
-                                                                'default published API will still be used as the ' +
-                                                                'until the new default API is published.'}
+                                            {/* Version */} {/* Default Version */}
+                                            { api.apiType === API.CONSTS.API &&
+                                                <React.Fragment>
+                                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Configuration.Configuration.version'
+                                                            defaultMessage='Version'
+                                                        />
+                                                    </Typography>
+                                                    <Typography component='p' variant='body1'>
+                                                        {api.version && <React.Fragment>{api.version}</React.Fragment>}
+                                                    </Typography>
+                                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Configuration.Configuration.default.version'
+                                                            defaultMessage='Default Version'
+                                                        />
+                                                        <Tooltip
+                                                            placement='top'
+                                                            classes={{
+                                                                tooltip: classes.htmlTooltip,
+                                                            }}
+                                                            disableHoverListener
+                                                            title={
+                                                                <React.Fragment>
+                                                                    <FormattedMessage
+                                                                        id={'Apis.Details.Configuration.Configuration.' +
+                                                                        'default.version.tooltip'}
+                                                                        defaultMessage={'Marks one API version in a group as ' +
+                                                                        'the default so that it can be invoked without ' +
+                                                                        'specifying the version number in the URL. ' +
+                                                                        'For example, if you mark ' +
+                                                                        'http://host:port/youtube/2.0 as the default API, ' +
+                                                                        'requests made to http://host:port/youtube/ are ' +
+                                                                        'automatically routed to version 2.0. If you mark an ' +
+                                                                        'unpublished API as the default, the previous  ' +
+                                                                        'default published API will still be used as the ' +
+                                                                        'until the new default API is published.'}
+                                                                    />
+                                                                </React.Fragment>
+                                                            }
+                                                        >
+                                                            <Button className={classes.helpButton}>
+                                                                <HelpOutline className={classes.helpIcon} />
+                                                            </Button>
+                                                        </Tooltip>
+                                                    </Typography>
+                                                    <Typography component='p' variant='body1'>
+                                                        <RadioGroup
+                                                            name='isDefaultVersion'
+                                                            className={classes.group}
+                                                            value={this.getDefaultVersion(
+                                                                isDefaultVersion,
+                                                                api.isDefaultVersion,
+                                                            )}
+                                                            onChange={this.handleChange('isDefaultVersion')}
+                                                        >
+                                                            <FormControlLabel
+                                                                value='yes'
+                                                                control={<Radio />}
+                                                                label={
+                                                                    <FormattedMessage
+                                                                        id={'Apis.Details.Configuration.Configuration.' +
+                                                                        'default.version.yes'}
+                                                                        defaultMessage='Yes'
+                                                                    />}
                                                             />
-                                                        </React.Fragment>
-                                                    }
-                                                >
-                                                    <Button className={classes.helpButton}>
-                                                        <HelpOutline className={classes.helpIcon} />
-                                                    </Button>
-                                                </Tooltip>
-                                            </Typography>
-                                            <Typography component='p' variant='body1'>
-                                                <RadioGroup
-                                                    name='isDefaultVersion'
-                                                    className={classes.group}
-                                                    value={this.getDefaultVersion(
-                                                        isDefaultVersion,
-                                                        api.isDefaultVersion,
-                                                    )}
-                                                    onChange={this.handleChange('isDefaultVersion')}
-                                                >
-                                                    <FormControlLabel
-                                                        value='yes'
-                                                        control={<Radio />}
-                                                        label={
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Configuration.Configuration.' +
-                                                                'default.version.yes'}
-                                                                defaultMessage='Yes'
-                                                            />}
-                                                    />
-                                                    <FormControlLabel
-                                                        value='no'
-                                                        control={<Radio />}
-                                                        label={
-                                                            <FormattedMessage
-                                                                id={'Apis.Details.Configuration.Configuration.' +
-                                                                'default.version.no'}
-                                                                defaultMessage='No'
-                                                            />}
-                                                    />
-                                                </RadioGroup>
-                                            </Typography>
+                                                            <FormControlLabel
+                                                                value='no'
+                                                                control={<Radio />}
+                                                                label={
+                                                                    <FormattedMessage
+                                                                        id={'Apis.Details.Configuration.Configuration.' +
+                                                                        'default.version.no'}
+                                                                        defaultMessage='No'
+                                                                    />}
+                                                            />
+                                                        </RadioGroup>
+                                                    </Typography>
+                                                </React.Fragment>
+                                            }
                                             {/* Transports */}
                                             <Typography component='p' variant='subtitle2' className={classes.subtitle}>
                                                 <FormattedMessage
@@ -461,7 +464,6 @@ class Configuration extends React.Component {
                                                     </Button>
                                                 </Tooltip>
                                             </Typography>
-
                                             <FormControl
                                                 required
                                                 error={error}
