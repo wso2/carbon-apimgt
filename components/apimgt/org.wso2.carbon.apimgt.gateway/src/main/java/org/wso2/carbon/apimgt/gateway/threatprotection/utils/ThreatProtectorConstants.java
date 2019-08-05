@@ -81,14 +81,17 @@ public class ThreatProtectorConstants {
     public static final String REST_CONTENT_TYPE = "ContentType";
     public static final String HTTP_RESPONSE_METHOD = "api.ut.HTTP_METHOD";
     public static final String SCHEMA_REFERENCE = "$ref";
-    public static final String DEFINITIONS = "definitions";
     public static final String API_SWAGGER_SCHEMA = "swaggerSchemaCache";
     public static final String JSONPATH_PATHS = "$..paths..";
     public static final String JSON_PATH = "$.";
     public static final String JSONPATH_SEPRATER = ".";
-    public static final String KEY = "key";
     public static final String JSONPATH_RESPONSES = ".responses";
     public static final String COMPONENT_SCHEMAS = "components.schemas";
     public static final String EMPTY_ARRAY = "[]";
+    public static final String HASH = "#";
+    public static final String EMPTY = "";
+    public static final String BACKWARD_SLASH = "\"";
+    public static final String FORWARD_SLASH = "/";
+    public static final String REQUESTBODY_SCHEMA = "components.requestBodies.";
 
 }
