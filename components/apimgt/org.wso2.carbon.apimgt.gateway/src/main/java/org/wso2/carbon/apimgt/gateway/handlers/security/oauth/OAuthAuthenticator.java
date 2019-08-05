@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
-import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -26,18 +25,13 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
-import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -46,7 +40,6 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -61,7 +54,6 @@ public class OAuthAuthenticator implements Authenticator {
     private static final Log log = LogFactory.getLog(OAuthAuthenticator.class);
 
     protected APIKeyValidator keyValidator;
-    protected JWTValidator jwtValidator;
 
     private String securityHeader = HttpHeaders.AUTHORIZATION;
     private String defaultAPIHeader="WSO2_AM_API_DEFAULT_VERSION";
@@ -75,22 +67,18 @@ public class OAuthAuthenticator implements Authenticator {
     private String requestOrigin;
     private String remainingAuthHeader;
     private boolean isMandatory;
-    private String apiLevelPolicy;
 
     public OAuthAuthenticator() {
     }
 
-    public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader,
-                              String apiLevelPolicy) {
+    public OAuthAuthenticator(String authorizationHeader, boolean isMandatory, boolean removeOAuthHeader) {
         this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
         this.isMandatory = isMandatory;
-        this.apiLevelPolicy = apiLevelPolicy;
     }
 
     public void init(SynapseEnvironment env) {
         this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
-        this.jwtValidator = new JWTValidator(apiLevelPolicy);
         initOAuthParams();
     }
 
@@ -102,8 +90,6 @@ public class OAuthAuthenticator implements Authenticator {
 
     @MethodStats
     public AuthenticationResponse authenticate(MessageContext synCtx) {
-        boolean isJwtToken = false;
-        OpenAPI openAPI = null;
         String apiKey = null;
         boolean defaultVersionInvoked = false;
         TracingSpan getClientDomainSpan = null;
@@ -149,7 +135,7 @@ public class OAuthAuthenticator implements Authenticator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
+        String httpVerb = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
         if (Util.tracingEnabled()) {
@@ -179,46 +165,7 @@ public class OAuthAuthenticator implements Authenticator {
         }
         String authenticationScheme;
         try {
-            //Initial guess of a JWT token using the presence of a DOT.
-            if (apiKey.contains(APIConstants.DOT)) {
-                try {
-                    JSONObject decodedHeader = new JSONObject(new String(Base64.getUrlDecoder()
-                            .decode(apiKey.split("\\.")[0])));
-                    // Check if the decoded header contains type as 'JWT'.
-                    if (APIConstants.JWT.equals(decodedHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
-                        isJwtToken = true;
-                        if (StringUtils.countMatches(apiKey, APIConstants.DOT) != 2) {
-                            log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
-                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                    "Invalid JWT token");
-                        }
-                    }
-                } catch (JSONException | IllegalArgumentException e) {
-                    isJwtToken = false;
-                    log.debug("Not a JWT token. Failed to decode the token header.", e);
-                }
-            }
-            // Find the resource authentication scheme based on the token type
-            if (isJwtToken) {
-                // If a JWT token
-                openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
-                if (openAPI == null) {
-                    log.error("Swagger is missing in the gateway. " +
-                            "Therefore, JWT authentication cannot be performed.");
-                    return new AuthenticationResponse(false, isMandatory, true,
-                            APISecurityConstants.API_AUTH_MISSING_SWAGGER,
-                            "JWT authentication cannot be performed.");
-                }
-                authenticationScheme = OpenAPIUtils.getResourceAuthenticationScheme(openAPI, synCtx);
-                VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-                verbInfoDTO.setHttpVerb(httpMethod);
-                verbInfoDTO.setAuthType(authenticationScheme);
-                verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
-                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
-            } else {
-                // If an OAuth token
-                authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
-            }
+            authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
         } catch (APISecurityException ex) {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
         }
@@ -240,7 +187,6 @@ public class OAuthAuthenticator implements Authenticator {
             TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
                                                          axis2MessageContext.getProperty
                                                                  (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
             if (transportHeaderMap != null) {
                 clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
             }
@@ -292,20 +238,6 @@ public class OAuthAuthenticator implements Authenticator {
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
         } else {
-            //Start JWT token validation
-            if (isJwtToken) {
-                try {
-                    AuthenticationContext authenticationContext = jwtValidator.authenticate(apiKey, synCtx, openAPI);
-                    APISecurityUtils.setAuthenticationContext(synCtx, authenticationContext, securityContextHeader);
-                    log.debug("User is authorized using JWT token to access the resource.");
-                    return new AuthenticationResponse(true, isMandatory, false, 0, null);
-
-                } catch (APISecurityException ex) {
-                    return new AuthenticationResponse(false, isMandatory, true,
-                            ex.getErrorCode(), ex.getMessage());
-                }
-            }
-
             String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
             if(log.isDebugEnabled()){
                 log.debug("Matching resource is: ".concat(matchingResource));
@@ -322,7 +254,7 @@ public class OAuthAuthenticator implements Authenticator {
             }
             try {
                 info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
-                        matchingResource, httpMethod, defaultVersionInvoked);
+                        matchingResource, httpVerb, defaultVersionInvoked);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
             }

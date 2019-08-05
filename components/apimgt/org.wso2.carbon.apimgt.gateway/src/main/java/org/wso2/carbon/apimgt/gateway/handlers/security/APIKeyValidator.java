@@ -59,6 +59,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.wso2.carbon.apimgt.gateway.handlers.Utils.getRequestPath;
+
 /**
  * This class is used to validate a given API key against a given API context and a version.
  * Actual validation operations are carried out by invoking back-end authentication and
@@ -357,8 +359,7 @@ public class APIKeyValidator {
 
     @MethodStats
     public String getResourceAuthenticationScheme(MessageContext synCtx) throws APISecurityException {
-
-        VerbInfoDTO verb = null;
+        String authType = "";
         List<VerbInfoDTO> verbInfoList;
         TracingSpan span = null;
         try {
@@ -368,15 +369,17 @@ public class APIKeyValidator {
                 span = Util.startSpan(APIMgtGatewayConstants.FIND_MATCHING_VERB, keySpan, tracer);
             }
             verbInfoList = findMatchingVerb(synCtx);
-
-            if (verbInfoList != null && verbInfoList.toArray().length > 0){
-                verb = verbInfoList.get(0);
-                if (synCtx.getProperty(APIConstants.API_TYPE) != null && synCtx.getProperty(APIConstants.API_TYPE)
-                        .equals(APIConstants.GRAPHQL_API)) {
-                    synCtx.setProperty(APIConstants.GRAPHQL_API_OPERATION_VERB_INFO_DTO, verbInfoList);
-                } else {
-                    synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
+            if (verbInfoList != null && verbInfoList.toArray().length > 0) {
+                for (VerbInfoDTO verb : verbInfoList) {
+                    authType = verb.getAuthType();
+                    if (authType == null) {
+                        authType = APIConstants.AUTH_TYPE_NONE;
+                    }
+                    if (!authType.equals(APIConstants.AUTH_TYPE_NONE)) {
+                        break;
+                    }
                 }
+                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
             }
         } catch (ResourceNotFoundException e) {
             if (Util.tracingEnabled() && span != null) {
@@ -391,8 +394,8 @@ public class APIKeyValidator {
             }
         }
 
-        if (verb != null) {
-            return verb.getAuthType();
+        if (!authType.isEmpty()) {
+            return authType;
         } else {
             //No matching resource found. return the highest level of security
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
@@ -478,11 +481,8 @@ public class APIKeyValidator {
 
     public List<VerbInfoDTO> findMatchingVerb(MessageContext synCtx) throws ResourceNotFoundException, APISecurityException {
 
-        String httpVerb = null ;
-        String resourceCacheKey = null;
-        String operationlistCacheKey = null;
-        boolean isGraphQLAPI = false;
-        String resourceString = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+        List<VerbInfoDTO>  verbInfoList =  new ArrayList<>();
+        String resourceCacheKey;
         String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
@@ -490,52 +490,57 @@ public class APIKeyValidator {
         String fullRequestPath = (String) synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         String apiName = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API);
 
-        //This function is used by more than one handler. If on one execution of this function, it has found and placed
-        //the matching verb in the cache, the same can be re-used from all handlers since all handlers share the same
-        //MessageContext. The API_RESOURCE_CACHE_KEY property will be set in the MessageContext to indicate that the
-        //verb has been put into the cache.
-        if (synCtx.getProperty(APIConstants.API_TYPE) != null && synCtx.getProperty(APIConstants.API_TYPE)
-                .equals(APIConstants.GRAPHQL_API)) {
-            isGraphQLAPI = true;
-            httpVerb = synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_TYPE).toString();
-            resourceString = "operation/" + synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_RESOURCE).toString();
-            operationlistCacheKey = apiContext + "/" + apiVersion + "/" + resourceString + ":" + httpVerb;
-            httpMethod = httpVerb;
-            synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE,resourceString);
-            synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, operationlistCacheKey);
-        }
+        String electedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+        ArrayList<String> resourceArray = null;
 
-        if (isGatewayAPIResourceValidationEnabled) {
-            resourceCacheKey = (String) synCtx.getProperty(APIConstants.API_RESOURCE_CACHE_KEY);
-            List<VerbInfoDTO> verbInfoList;
-            if (resourceCacheKey != null) {
-                verbInfoList = (List<VerbInfoDTO>) getResourceCache().get(resourceCacheKey);
-                //Cache hit
-                if (verbInfoList != null && verbInfoList.toArray().length > 0) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Found resource in Cache for key: " + resourceCacheKey);
-                    }
-                    return verbInfoList;
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Resource not found in cache for key: " + resourceCacheKey);
-                }
-            }
+        if (electedResource != null) {
+            resourceArray = new ArrayList<>
+                    (Arrays.asList(electedResource.split(",")));
         }
 
         String requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);
         if ("".equals(requestPath)) {
             requestPath = "/";
         }
-
         if (log.isDebugEnabled()) {
             log.debug("Setting REST_SUB_REQUEST_PATH in msg context: " + requestPath);
         }
         synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, requestPath);
 
-        if (resourceString == null) {
+
+        //This function is used by more than one handler. If on one execution of this function, it has found and placed
+        //the matching verb in the cache, the same can be re-used from all handlers since all handlers share the same
+        //MessageContext. The API_RESOURCE_CACHE_KEY property will be set in the MessageContext to indicate that the
+        //verb has been put into the cache.
+        if (resourceArray != null) {
+            for (String resourceString : resourceArray) {
+                VerbInfoDTO verbInfo;
+                if (isGatewayAPIResourceValidationEnabled) {
+                    // resourceCacheKey = (String) synCtx.getProperty(APIConstants.API_RESOURCE_CACHE_KEY);
+                    resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                            resourceString, httpMethod);
+                    verbInfo = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
+                    //Cache hit
+                    if (verbInfo != null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Found resource in Cache for key: " + resourceCacheKey);
+                        }
+                        verbInfoList.add(verbInfo);
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Resource not found in cache for key: " + resourceCacheKey);
+                        }
+                        break;
+                    }
+                }
+            }
+            if (resourceArray.size() == verbInfoList.size()) {
+                return verbInfoList;
+            }
+        } else {
             API selectedApi = synCtx.getConfiguration().getAPI(apiName);
             Resource selectedResource = null;
+            String resourceString;
 
             if (selectedApi != null) {
                 Resource[] selectedAPIResources = selectedApi.getResources();
@@ -561,7 +566,6 @@ public class APIKeyValidator {
                 }
             }
 
-
             if (selectedResource == null) {
                 //No matching resource found.
                 String msg = "Could not find matching resource for " + requestPath;
@@ -577,24 +581,21 @@ public class APIKeyValidator {
             }
             //Set the elected resource
             synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
-        }
-
-        if (isGatewayAPIResourceValidationEnabled) {
-            List<VerbInfoDTO> verbInfoList;
-            verbInfoList = (List<VerbInfoDTO>) getResourceCache().get(resourceCacheKey);
-
-            //Cache hit
-            if (verbInfoList != null && verbInfoList.toArray().length > 0) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Got Resource from cache for key: " + resourceCacheKey);
+            if (isGatewayAPIResourceValidationEnabled) {
+                VerbInfoDTO verbInfo;
+                verbInfo = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
+                //Cache hit
+                if (verbInfo != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Got Resource from cache for key: " + resourceCacheKey);
+                    }
+                    verbInfoList.add(verbInfo);
+                    //Set cache key in the message context so that it can be used by the subsequent handlers.
+                    //synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+                    return verbInfoList;
+                } else if (log.isDebugEnabled()) {
+                    log.debug("Cache miss for Resource for key: " + resourceCacheKey);
                 }
-                //Set cache key in the message context so that it can be used by the subsequent handlers.
-                synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-                return verbInfoList;
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Cache miss for Resource for key: " + resourceCacheKey);
             }
         }
 
@@ -633,79 +634,36 @@ public class APIKeyValidator {
                 getResourceCache().put(apiCacheKey, apiInfoDTO);
             }
         }
-
-        boolean isResourceMatched = false;
-
         if (apiInfoDTO.getResources() != null) {
             for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
-                if (isGraphQLAPI) {
-                    String operationString = synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_RESOURCE).toString();
-                    final String[] operationResources = operationString.split(",");
-                    for (String resource : operationResources) {
-                        if (isResourcePathMatching(resource, resourceInfoDTO)) {
-                            isResourceMatched = true;
-                        } else{
-                            isResourceMatched = false;
-                            break;
-                        }
-                    }
-                } else {
-                    if (isResourcePathMatching(resourceString, resourceInfoDTO)) {
-                        isResourceMatched = true;
-                    }
-                }
-
-                List<VerbInfoDTO> verbInfoList = new ArrayList<>();
-                if (isResourceMatched) {
-                    for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
-                        if (verbDTO.getHttpVerb().equals(httpMethod)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Putting resource object in cache with key: " + resourceCacheKey);
-                            }
-                            if (isGraphQLAPI) {
-
-                                String operationCacheKey;
-                                List<VerbInfoDTO> operationListVerbInfoDTO = new ArrayList<>();
-                                VerbInfoDTO operationVerbInfoDTO =  new VerbInfoDTO();
-                                String operationList = (String) synCtx.getProperty(APIConstants.GRAPHQL_API_OPERATION_RESOURCE);
-                                List<String> operationResourceArray = new ArrayList<>(Arrays.asList(operationList.split(",")));
-
-                                for (String operationResource : operationResourceArray) {
-                                    operationCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion, operationResource, httpVerb);
-
-                                    operationVerbInfoDTO.setHttpVerb(verbDTO.getHttpVerb());
-                                    operationVerbInfoDTO.setAuthType(verbDTO.getAuthType());
-                                    operationVerbInfoDTO.setThrottling(verbDTO.getThrottling());
-                                    operationVerbInfoDTO.setThrottlingConditions(verbDTO.getThrottlingConditions());
-                                    operationVerbInfoDTO.setConditionGroups(verbDTO.getConditionGroups());
-                                    operationVerbInfoDTO.setApplicableLevel(verbDTO.getApplicableLevel());
-                                    operationVerbInfoDTO.setRequestKey(operationCacheKey);
-                                    operationListVerbInfoDTO.add(operationVerbInfoDTO);
-                                }
-                                verbInfoList = operationListVerbInfoDTO;
-                            } else {
-                                verbDTO.setRequestKey(resourceCacheKey);
-                                verbInfoList.add(verbDTO);
-                            }
-
-                            if (isGatewayAPIResourceValidationEnabled) {
-                                //Store verb in cache
-                                if (isGraphQLAPI) {
-                                    getResourceCache().put(operationlistCacheKey, verbInfoList);
-                                    synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, operationlistCacheKey);
-                                } else{
+                Set<VerbInfoDTO> verbDTOList = resourceInfoDTO.getHttpVerbs();
+                for (VerbInfoDTO verb : verbDTOList) {
+                    if (verb.getHttpVerb().equals(httpMethod)) {
+                        for (String resourceString : resourceArray) {
+                            if (isResourcePathMatching(resourceString, resourceInfoDTO)) {
+                                resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                                        resourceString, httpMethod);
+                                verb.setRequestKey(resourceCacheKey);
+                                verbInfoList.add(verb);
+                                if (isGatewayAPIResourceValidationEnabled) {
+                                    //Store verb in cache
                                     //Set cache key in the message c\ontext so that it can be used by the subsequent handlers.
-                                    getResourceCache().put(resourceCacheKey, verbInfoList);
-                                    synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Putting resource object in cache with key: " + resourceCacheKey);
+                                    }
+                                    getResourceCache().put(resourceCacheKey, verb);
+                                    //synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
                                 }
                             }
-                            return verbInfoList;
                         }
                     }
                 }
             }
         }
-        return null;
+        if (verbInfoList.size() == 0) {
+            verbInfoList = null;
+        }
+        return verbInfoList;
     }
 
     private String getRequestPath(MessageContext synCtx, String apiContext, String apiVersion, String fullRequestPath) {
