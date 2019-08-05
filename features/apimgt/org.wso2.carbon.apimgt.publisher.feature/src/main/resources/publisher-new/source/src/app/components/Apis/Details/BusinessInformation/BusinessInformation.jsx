@@ -53,11 +53,14 @@ const styles = theme => ({
 class BusinessInformation extends React.Component {
     constructor(props) {
         super(props);
+        const {
+            businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
+        } = this.props.api.businessInformation;
         this.state = {
-            businessOwner: null,
-            businessOwnerEmail: null,
-            technicalOwner: null,
-            technicalOwnerEmail: null,
+            businessOwner,
+            businessOwnerEmail,
+            technicalOwner,
+            technicalOwnerEmail,
         };
     }
 
@@ -261,6 +264,12 @@ BusinessInformation.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
+        businessInformation: PropTypes.shape({
+            businessOwner: PropTypes.string,
+            businessOwnerEmail: PropTypes.string,
+            technicalOwner: PropTypes.string,
+            technicalOwnerEmail: PropTypes.string,
+        }).isRequired,
     }).isRequired,
 };
 

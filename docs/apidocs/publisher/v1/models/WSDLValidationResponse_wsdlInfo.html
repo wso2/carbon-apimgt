@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>APIDefinitionValidationResponse_wsdlInfo_bindingInfo</h2>
+        <h2>WSDLValidationResponse_wsdlInfo</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,30 +21,45 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>hasHttpBinding</p>
+                            <p>version</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">Indicates whether the WSDL contains HTTP Bindings</p></td>
+                        <td class="parameter"><p class="marked">WSDL version </p></td>
                         <td class="parameter">
-                                <a href="#!/models#boolean">boolean</a>
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">1.1</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>endpoints</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">A list of endpoints the service exposes </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#array">array</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>hasSoapBinding</p>
+                            <p>bindingInfo</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">Indicates whether the WSDL contains SOAP Bindings</p></td>
+                        <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#boolean">boolean</a>
+                                <a href="#!/models#WSDLValidationResponse_wsdlInfo_bindingInfo">WSDLValidationResponse_wsdlInfo_bindingInfo</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>

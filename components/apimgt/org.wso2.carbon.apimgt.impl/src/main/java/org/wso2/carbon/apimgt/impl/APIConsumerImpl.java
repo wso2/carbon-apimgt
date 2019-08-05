@@ -5021,7 +5021,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Need user name with tenant domain to get correct domain name from
             // MultitenantUtils.getTenantDomain(username)
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            String apiTenantDomain = getTenantDomain(identifier.getProviderName());
+            String apiTenantDomain = getTenantDomain(identifier);
             int apiTenantId = getTenantManager().getTenantId(apiTenantDomain);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
                 APIUtil.loadTenantRegistry(apiTenantId);

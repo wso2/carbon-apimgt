@@ -71,16 +71,62 @@ Content-Type: application/json
                 <div class="pointer" data-toggle="collapse" data-target="#request-apisGet">
                     <h5 class="section-heading">
                         Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <p>Not Available</p>
+                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP/1.1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
 
                 <div class="pointer" data-toggle="collapse" data-target="#response-apisGet">
                     <h5 class="section-heading">
                         Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <p>Not Available</p>
+                    <div id="response-apisGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;count&quot;:2,
+  &quot;list&quot;:[
+  {
+    &quot;id&quot;:&quot;43537569-b701-4f3f-a989-e1b6f42ebcf0&quot;,
+    &quot;name&quot;:&quot;PizzaShackAPI&quot;,
+    &quot;description&quot;:&quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
+    &quot;context&quot;:&quot;/pizzashack&quot;,
+    &quot;version&quot;:&quot;1.0.0&quot;,
+    &quot;provider&quot;:&quot;admin&quot;,
+    &quot;lifeCycleStatus&quot;:&quot;PUBLISHED&quot;,
+    &quot;workflowStatus&quot;:null,
+    &quot;hasThumbnail&quot;:true,
+    &quot;securityScheme&quot;:[
+
+    ]
+  },
+  {
+    &quot;id&quot;:&quot;740aeb01-2d3f-4721-afac-4324988a2e0b&quot;,
+    &quot;name&quot;:&quot;PizzaShackAPI&quot;,
+    &quot;description&quot;:&quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
+    &quot;context&quot;:&quot;/pizzashack&quot;,
+    &quot;version&quot;:&quot;2.0.0&quot;,
+    &quot;provider&quot;:&quot;admin&quot;,
+    &quot;lifeCycleStatus&quot;:&quot;CREATED&quot;,
+    &quot;workflowStatus&quot;:null,
+    &quot;hasThumbnail&quot;:true,
+    &quot;securityScheme&quot;:[
+
+    ]
+  }
+  ],
+  &quot;pagination&quot;:{
+    &quot;offset&quot;:0,
+    &quot;limit&quot;:25,
+    &quot;total&quot;:2,
+    &quot;next&quot;:&quot;&quot;,
+    &quot;previous&quot;:&quot;&quot;
+  }
+}</code></div>
 
                 <h5 class="section-heading">CURL</h5>
                     <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v1.0/apis
@@ -211,20 +257,22 @@ Content-Type: application/json
 You can search in attributes by using an **&quot;&lt;attribute&gt;:&quot;** modifier.
 
 Eg.
-&quot;provider:wso2&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
+&quot;provider:wso2&quot; will match an API if the provider of the API contains &quot;wso2&quot;.
+&quot;provider:&quot;wso2&quot;&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
 &quot;status:PUBLISHED&quot; will match an API if the API is in PUBLISHED state.
 &quot;label:external&quot; will match an API if it contains a Microgateway label called &quot;external&quot;.
 
-Additionally you can use wildcards.
-
+Also you can use combined modifiers
 Eg.
-&quot;provider:wso2*&quot; will match an API if the provider of the API starts with &quot;wso2&quot;.
+name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
 
-Supported attribute modifiers are [**version, context, status,
+Supported attribute modifiers are [**version, context, name, status,
 description, subcontext, doc, provider, label**]
 
-If no advanced attribute modifier has been specified, search will match the
-given query string against API Name.
+If no advanced attribute modifier has been specified,  the API names containing
+the search term will be returned as a result.
+
+Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
 </p>
                         </td>
                         <td>
@@ -551,438 +599,6 @@ variant of the resource.
                     <tr>
                         <td class="parameter"><p class="marked">406</p></td>
                         <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <hr/>
-            <h4 class="operation-heading"><a name="apisImportDefinitionPost"></a>Import API Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/import-definition</code>
-            <p class="marked"></p>
-
-            <p class="marked">This operation can be used to create api from api definition.
-
-API definition can be either Swagger or a WSDL
-
-WSDL can be speficied as a single file or a ZIP archive with WSDLs and reference XSDs etc.
-When the type is WSDL, it is a **must** to specify additionalProperties with API&#39;s name, version, context and endpoints. See the example for additionalProperties.
-</p>
-
-            <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_create</code>
-
-            <h4 class="section-heading">
-                Examples
-            </h4>
-
-            <h4 class="section-heading" id="scroll-to">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>type</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Definition type to upload</p>
-                                <p><b>Accepted values: </b></p>
-
-<code>SWAGGER</code>
-
-<code>WSDL</code>
-
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">SWAGGER</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>file</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Definition to uploadas a file</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                File
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>url</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Definition url</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>additionalProperties</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Additional attributes specified as a stringified JSON with API&#39;s schema</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>implementationType</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Currently this is only used when creating an API using a WSDL.
-
-If &#39;SOAP&#39; is specified, the API will be created with only one resource &#39;POST /&#39; which is to be used for SOAP
-operations.
-
-If &#39;HTTP_BINDING&#39; is specified, the API will be created with resources using HTTP binding operations
-which are extracted from the WSDL.
-</p>
-                                <p><b>Accepted values: </b></p>
-
-<code>soap</code>
-
-<code>httpBinding</code>
-
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">soap</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="parameter"><p class="marked">201</p></td>
-                        <td class="parameter"><p class="marked">Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#API">API</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">415</p></td>
-                        <td class="parameter"><p class="marked">Unsupported Media Type. The entity of the request was in a not supported format. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <hr/>
-            <h4 class="operation-heading"><a name="apisValidateDefinitionPost"></a>Validate API definition and retrieve a summary</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-definition</code>
-            <p class="marked"></p>
-
-            <p class="marked">This operation can be used to validate a swagger or WSDL definition and retrieve a summary.
-</p>
-
-            <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_create</code>
-
-            <h4 class="section-heading">
-                Examples
-            </h4>
-
-            <h4 class="section-heading" id="scroll-to">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>type</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Definition type to upload</p>
-                                <p><b>Accepted values: </b></p>
-
-<code>SWAGGER</code>
-
-<code>WSDL</code>
-
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">SWAGGER</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>url</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Definition url</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>file</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Definition to upload as a file</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                File
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. API definition validation information is returned </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#APIDefinitionValidationResponse">APIDefinitionValidationResponse</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Workflow for the given reference in not found. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

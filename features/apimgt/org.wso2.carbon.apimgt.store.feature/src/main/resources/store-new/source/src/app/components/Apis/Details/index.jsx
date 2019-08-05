@@ -24,6 +24,7 @@ import {
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import APIProduct from 'AppData/APIProduct';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -176,12 +177,26 @@ class Details extends React.Component {
          *
          * @memberof Details
          */
-        this.updateSubscriptionData = (callback) => {
-            const dataApi = new Api();
-            const promisedApi = dataApi.getAPIById(this.api_uuid);
-            const existingSubscriptions = dataApi.getSubscriptions(this.api_uuid, null);
-            const promisedApplications = dataApi.getAllApplications();
-            promisedApi.then((api) => {
+        this.updateSubscriptionData = () => {
+            const { path } = this.props;
+
+            let promisedAPI = null;
+            let existingSubscriptions = null;
+            let promisedApplications = null;
+
+            if (path === '/apis') {
+                const dataApi = new Api();
+                promisedAPI = dataApi.getAPIById(this.api_uuid);
+                existingSubscriptions = dataApi.getSubscriptions(this.api_uuid, null);
+                promisedApplications = dataApi.getAllApplications();
+            } else if (path === '/api-products') {
+                const dataApiProduct = new APIProduct();
+                promisedAPI = dataApiProduct.getAPIProductById(this.api_uuid);
+                existingSubscriptions = dataApiProduct.getSubscriptions(this.api_uuid, null);
+                promisedApplications = dataApiProduct.getAllApplications();
+            }
+
+            promisedAPI.then((api) => {
                 this.setState({ api: api.body });
             }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -192,6 +207,7 @@ class Details extends React.Component {
                     this.setState({ notFound: true });
                 }
             });
+
             Promise.all([existingSubscriptions, promisedApplications])
                 .then((response) => {
                     const [subscriptions, applications] = response.map(data => data.obj);
@@ -215,7 +231,7 @@ class Details extends React.Component {
                     const subscribedAppIds = subscribedApplications.map(sub => sub.value);
                     const applicationsAvailable = applications.list
                         .filter(app => !subscribedAppIds.includes(app.applicationId)
-                         && app.status === 'APPROVED')
+                        && app.status === 'APPROVED')
                         .map((filteredApp) => {
                             return {
                                 value: filteredApp.applicationId,

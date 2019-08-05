@@ -38,6 +38,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import ChipInput from 'material-ui-chip-input';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import API from 'AppData/api';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import ApiContext from '../components/ApiContext';
 
@@ -233,7 +234,7 @@ class Configuration extends React.Component {
             return { tags: [...tags] };
         });
     }
-    handleSubmit(oldAPI, updateAPI, isAPIProduct) {
+    handleSubmit(oldAPI, updateAPI) {
         const {
             description,
             accessControl,
@@ -248,6 +249,7 @@ class Configuration extends React.Component {
             cacheTimeout,
         } = this.state;
 
+        const isAPIProduct = (oldAPI.apiType === API.CONSTS.APIProduct);
         if (description) {
             oldAPI.description = description;
         }
@@ -314,7 +316,7 @@ class Configuration extends React.Component {
                     </Typography>
                 </div>
                 <ApiContext.Consumer>
-                    {({ api, updateAPI, isAPIProduct }) => (
+                    {({ api, updateAPI }) => (
                         <Grid container spacing={24}>
                             <Grid item xs={12}>
                                 <Paper className={classes.root} elevation={1}>
@@ -913,7 +915,7 @@ class Configuration extends React.Component {
                                                 <Button
                                                     variant='contained'
                                                     color='primary'
-                                                    onClick={() => this.handleSubmit(api, updateAPI, isAPIProduct)}
+                                                    onClick={() => this.handleSubmit(api, updateAPI)}
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Configuration.Configuration.save'

@@ -78,15 +78,67 @@
       },
       {
         "Name": "apim:app_update",
-        "Roles": "admin"
+        "Roles": "admin,Internal/subscriber"
       },
       {
         "Name": "apim:app_manage",
-        "Roles": "admin"
+        "Roles": "admin,Internal/subscriber"
       },
       {
         "Name": "apim:sub_manage",
-        "Roles": "admin"
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name" : "apim:monetization_usage_publish",
+        "Roles": "admin, Internal/publisher"
+      },
+      {
+        "Name": "apim:document_create",
+        "Roles": "admin, Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:ep_certificates_update",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:client_certificates_update",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:threat_protection_policy_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:document_manage",
+        "Roles": "admin, Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:client_certificates_add",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:publisher_settings",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:client_certificates_view",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:mediation_policy_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:threat_protection_policy_create",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:ep_certificates_add",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:ep_certificates_view",
+        "Roles": "admin,Internal/creator"
       }
     ]
   },

@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.*;
 
 
 
-public class APIDefinitionValidationResponseWsdlInfoEndpointsDTO   {
+public class WSDLValidationResponseWsdlInfoEndpointsDTO   {
   
     private String name = null;
     private String location = null;
@@ -20,7 +20,7 @@ public class APIDefinitionValidationResponseWsdlInfoEndpointsDTO   {
   /**
    * Name of the endpoint
    **/
-  public APIDefinitionValidationResponseWsdlInfoEndpointsDTO name(String name) {
+  public WSDLValidationResponseWsdlInfoEndpointsDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -38,7 +38,7 @@ public class APIDefinitionValidationResponseWsdlInfoEndpointsDTO   {
   /**
    * Endpoint URL
    **/
-  public APIDefinitionValidationResponseWsdlInfoEndpointsDTO location(String location) {
+  public WSDLValidationResponseWsdlInfoEndpointsDTO location(String location) {
     this.location = location;
     return this;
   }
@@ -62,9 +62,9 @@ public class APIDefinitionValidationResponseWsdlInfoEndpointsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIDefinitionValidationResponseWsdlInfoEndpointsDTO apIDefinitionValidationResponseWsdlInfoEndpoints = (APIDefinitionValidationResponseWsdlInfoEndpointsDTO) o;
-    return Objects.equals(name, apIDefinitionValidationResponseWsdlInfoEndpoints.name) &&
-        Objects.equals(location, apIDefinitionValidationResponseWsdlInfoEndpoints.location);
+    WSDLValidationResponseWsdlInfoEndpointsDTO wsDLValidationResponseWsdlInfoEndpoints = (WSDLValidationResponseWsdlInfoEndpointsDTO) o;
+    return Objects.equals(name, wsDLValidationResponseWsdlInfoEndpoints.name) &&
+        Objects.equals(location, wsDLValidationResponseWsdlInfoEndpoints.location);
   }
 
   @Override
@@ -75,7 +75,7 @@ public class APIDefinitionValidationResponseWsdlInfoEndpointsDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIDefinitionValidationResponseWsdlInfoEndpointsDTO {\n");
+    sb.append("class WSDLValidationResponseWsdlInfoEndpointsDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    location: ").append(toIndentedString(location)).append("\n");

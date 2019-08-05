@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 /**
  * This class will handle the post authentication steps in incoming requests.
- * This will check whether both OAuthAuthenticationInterceptor and BasicAuthInterceptor were skipped and 
+ * This will check whether both OAuthAuthenticationInterceptor and BasicAuthenticationInterceptor were skipped and 
  * throws a 401 unauthenticated error.
  */
 public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {

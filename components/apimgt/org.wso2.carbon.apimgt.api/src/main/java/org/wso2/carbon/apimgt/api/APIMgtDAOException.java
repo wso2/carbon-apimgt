@@ -1,5 +1,4 @@
 /*
- *
  *   Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
@@ -18,20 +17,22 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl.exception;
+package org.wso2.carbon.apimgt.api;
 
 /**
- *  This is the Exception class for DAO related exceptions.
+ * This is the Exception class for DAO related exceptions.
  */
 public class APIMgtDAOException extends APIManagementException {
+
     /**
      * Calling super class constructure.
-     * @param msg Error message
+     *
+     * @param msg  Error message
      * @param code Error code
      */
-   public APIMgtDAOException(String msg, ExceptionCodes code) {
-       super(msg, code);
-   }
+    public APIMgtDAOException(String msg, ExceptionCodes code) {
+        super(msg, code);
+    }
 
     public APIMgtDAOException(String msg, Throwable e, ExceptionCodes code) {
         super(msg, e, code);

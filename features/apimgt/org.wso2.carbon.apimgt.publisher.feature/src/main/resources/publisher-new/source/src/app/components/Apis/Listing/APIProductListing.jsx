@@ -19,7 +19,7 @@
 import React, { Component } from 'react';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import PropTypes from 'prop-types';
-import API from 'AppData/api.js';
+import APIProduct from 'AppData/APIProduct';
 import Listing from './Listing';
 
 /**
@@ -41,7 +41,7 @@ class APIProductListing extends Component {
      * @inheritDoc
      */
     componentDidMount() {
-        API.allProducts()
+        APIProduct.all()
             .then((response) => {
                 this.setState({ apis: response.obj });
             })
@@ -85,7 +85,6 @@ class APIProductListing extends Component {
             notFound={notFound}
             listType={listType}
             updateAPIsList={this.updateAPIsList}
-            isAPIProduct
         />);
     }
 }

@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.*;
 
 @ApiModel(description = "WSDL binding related information ")
 
-public class APIDefinitionValidationResponseWsdlInfoBindingInfoDTO   {
+public class WSDLValidationResponseWsdlInfoBindingInfoDTO   {
   
     private Boolean hasHttpBinding = null;
     private Boolean hasSoapBinding = null;
@@ -24,7 +24,7 @@ public class APIDefinitionValidationResponseWsdlInfoBindingInfoDTO   {
   /**
    * Indicates whether the WSDL contains HTTP Bindings
    **/
-  public APIDefinitionValidationResponseWsdlInfoBindingInfoDTO hasHttpBinding(Boolean hasHttpBinding) {
+  public WSDLValidationResponseWsdlInfoBindingInfoDTO hasHttpBinding(Boolean hasHttpBinding) {
     this.hasHttpBinding = hasHttpBinding;
     return this;
   }
@@ -42,7 +42,7 @@ public class APIDefinitionValidationResponseWsdlInfoBindingInfoDTO   {
   /**
    * Indicates whether the WSDL contains SOAP Bindings
    **/
-  public APIDefinitionValidationResponseWsdlInfoBindingInfoDTO hasSoapBinding(Boolean hasSoapBinding) {
+  public WSDLValidationResponseWsdlInfoBindingInfoDTO hasSoapBinding(Boolean hasSoapBinding) {
     this.hasSoapBinding = hasSoapBinding;
     return this;
   }
@@ -66,9 +66,9 @@ public class APIDefinitionValidationResponseWsdlInfoBindingInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIDefinitionValidationResponseWsdlInfoBindingInfoDTO apIDefinitionValidationResponseWsdlInfoBindingInfo = (APIDefinitionValidationResponseWsdlInfoBindingInfoDTO) o;
-    return Objects.equals(hasHttpBinding, apIDefinitionValidationResponseWsdlInfoBindingInfo.hasHttpBinding) &&
-        Objects.equals(hasSoapBinding, apIDefinitionValidationResponseWsdlInfoBindingInfo.hasSoapBinding);
+    WSDLValidationResponseWsdlInfoBindingInfoDTO wsDLValidationResponseWsdlInfoBindingInfo = (WSDLValidationResponseWsdlInfoBindingInfoDTO) o;
+    return Objects.equals(hasHttpBinding, wsDLValidationResponseWsdlInfoBindingInfo.hasHttpBinding) &&
+        Objects.equals(hasSoapBinding, wsDLValidationResponseWsdlInfoBindingInfo.hasSoapBinding);
   }
 
   @Override
@@ -79,7 +79,7 @@ public class APIDefinitionValidationResponseWsdlInfoBindingInfoDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIDefinitionValidationResponseWsdlInfoBindingInfoDTO {\n");
+    sb.append("class WSDLValidationResponseWsdlInfoBindingInfoDTO {\n");
     
     sb.append("    hasHttpBinding: ").append(toIndentedString(hasHttpBinding)).append("\n");
     sb.append("    hasSoapBinding: ").append(toIndentedString(hasSoapBinding)).append("\n");
