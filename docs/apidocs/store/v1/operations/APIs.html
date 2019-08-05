@@ -1023,16 +1023,63 @@ Content-Type: application/json
                 <div class="pointer" data-toggle="collapse" data-target="#request-apisGet">
                     <h5 class="section-heading">
                         Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <p>Not Available</p>
+                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP/1.1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
 
                 <div class="pointer" data-toggle="collapse" data-target="#response-apisGet">
                     <h5 class="section-heading">
                         Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <p>Not Available</p>
+                    <div id="response-apisGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;count&quot;:2,
+  &quot;list&quot;:[
+  {
+    &quot;id&quot;:&quot;43537569-b701-4f3f-a989-e1b6f42ebcf0&quot;,
+    &quot;name&quot;:&quot;PizzaShackAPI&quot;,
+    &quot;description&quot;:&quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
+    &quot;context&quot;:&quot;/pizzashack&quot;,
+    &quot;version&quot;:&quot;1.0.0&quot;,
+    &quot;provider&quot;:&quot;admin&quot;,
+    &quot;lifeCycleStatus&quot;:&quot;PUBLISHED&quot;,
+    &quot;workflowStatus&quot;:null,
+    &quot;hasThumbnail&quot;:true,
+    &quot;securityScheme&quot;:[
+
+    ]
+  },
+  {
+    &quot;id&quot;:&quot;740aeb01-2d3f-4721-afac-4324988a2e0b&quot;,
+    &quot;name&quot;:&quot;PizzaShackAPI&quot;,
+    &quot;description&quot;:&quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
+    &quot;context&quot;:&quot;/pizzashack&quot;,
+    &quot;version&quot;:&quot;2.0.0&quot;,
+    &quot;provider&quot;:&quot;admin&quot;,
+    &quot;lifeCycleStatus&quot;:&quot;CREATED&quot;,
+    &quot;workflowStatus&quot;:null,
+    &quot;hasThumbnail&quot;:true,
+    &quot;securityScheme&quot;:[
+
+    ]
+  }
+  ],
+  &quot;pagination&quot;:{
+    &quot;offset&quot;:0,
+    &quot;limit&quot;:25,
+    &quot;total&quot;:2,
+    &quot;next&quot;:&quot;&quot;,
+    &quot;previous&quot;:&quot;&quot;
+  }
+}
+</code></div>
 
                 <h5 class="section-heading">CURL</h5>
                     <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v1.0/apis

@@ -27,32 +27,32 @@
                 <div class="pointer" data-toggle="collapse" data-target="#request-{{operationId}}">
                     <h5 class="section-heading">
                         Request
-                        {{#request}}
+                        {{#rawRequest}}
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                        {{/request}}
+                        {{/rawRequest}}
                     </h5>
                 </div>
-                {{#request}}
+                {{#rawRequest}}
                     <div id="request-{{operationId}}"class="pre collapse in"><code class="json">{{rawRequest}}</code></div>
-                {{/request}}
-                {{^request}}
+                {{/rawRequest}}
+                {{^rawRequest}}
                     <p>Not Available</p>
-                {{/request}}
+                {{/rawRequest}}
 
                 <div class="pointer" data-toggle="collapse" data-target="#response-{{operationId}}">
                     <h5 class="section-heading">
                         Response
-                        {{#response}}
+                        {{#rawResponse}}
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                        {{/response}}
+                        {{/rawResponse}}
                     </h5>
                 </div>
-                {{#response}}
+                {{#rawResponse}}
                     <div id="response-{{operationId}}" class="pre collapse in"><code class="json">{{rawResponse}}</code></div>
-                {{/response}}
-                {{^response}}
+                {{/rawResponse}}
+                {{^rawResponse}}
                     <p>Not Available</p>
-                {{/response}}
+                {{/rawResponse}}
 
                 <h5 class="section-heading">CURL</h5>
                 {{#curl}}

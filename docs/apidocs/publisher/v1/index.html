@@ -82,8 +82,6 @@
 </a></li>
                                         <li id="op-apisHead"><a href="#!/operations#APICollection#apisHead">Check given API attibute name is already exist
 </a></li>
-                                        <li id="op-apisImportDefinitionPost"><a href="#!/operations#APICollection#apisImportDefinitionPost">Import API Definition</a></li>
-                                        <li id="op-apisValidateDefinitionPost"><a href="#!/operations#APICollection#apisValidateDefinitionPost">Validate API definition and retrieve a summary</a></li>
                                         <li id="op-searchGet"><a href="#!/operations#APICollection#searchGet">Retrieve/Search APIs and API Documents by content
 </a></li>
                             </ul>
@@ -147,6 +145,14 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                         <li id="op-apisApiIdResourcePathsGet"><a href="#!/operations#APIResourcePaths#apisApiIdResourcePathsGet">Get Resource Paths of an API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">APIs</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-importOpenAPIDefinition"><a href="#!/operations#APIs#importOpenAPIDefinition">Import an OpenAPI Definition</a></li>
+                                        <li id="op-importWSDLDefinition"><a href="#!/operations#APIs#importWSDLDefinition">Import a WSDL Definition</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -310,6 +316,14 @@
                                         <li id="op-getThrottlingPolicyByName"><a href="#!/operations#ThrottlingPolicies#getThrottlingPolicyByName">Get details of a policy</a></li>
                             </ul>
                         </li>
+                        <hr/>
+                        <span class="class-name">Validation</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-validateOpenAPIDefinition"><a href="#!/operations#Validation#validateOpenAPIDefinition">Validate an OpenAPI Definition</a></li>
+                                        <li id="op-validateWSDLDefinition"><a href="#!/operations#Validation#validateWSDLDefinition">Validate a WSDL Definition</a></li>
+                            </ul>
+                        </li>
             </ul>
             <h3>Definitions</h3>
             <ul class="nav nav-stacked fixed">
@@ -326,26 +340,6 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-APICorsConfiguration"><a href="#!/models#APICorsConfiguration">APICorsConfiguration</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-APIDefinitionValidationResponse"><a href="#!/models#APIDefinitionValidationResponse">APIDefinitionValidationResponse</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-APIDefinitionValidationResponse_wsdlInfo"><a href="#!/models#APIDefinitionValidationResponse_wsdlInfo">APIDefinitionValidationResponse_wsdlInfo</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-APIDefinitionValidationResponse_wsdlInfo_bindingInfo"><a href="#!/models#APIDefinitionValidationResponse_wsdlInfo_bindingInfo">APIDefinitionValidationResponse_wsdlInfo_bindingInfo</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-APIDefinitionValidationResponse_wsdlInfo_endpoints"><a href="#!/models#APIDefinitionValidationResponse_wsdlInfo_endpoints">APIDefinitionValidationResponse_wsdlInfo_endpoints</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -421,6 +415,11 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-Application"><a href="#!/models#Application">Application</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationInfo"><a href="#!/models#ApplicationInfo">ApplicationInfo</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -580,6 +579,16 @@
                         </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
+                                <li id="def-OpenAPIDefinitionValidationResponse"><a href="#!/models#OpenAPIDefinitionValidationResponse">OpenAPIDefinitionValidationResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-OpenAPIDefinitionValidationResponse_info"><a href="#!/models#OpenAPIDefinitionValidationResponse_info">OpenAPIDefinitionValidationResponse_info</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
                                 <li id="def-Pagination"><a href="#!/models#Pagination">Pagination</a></li>
                             </ul>
                         </li>
@@ -676,6 +685,26 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-ThrottlingPolicyList"><a href="#!/models#ThrottlingPolicyList">ThrottlingPolicyList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WSDLValidationResponse"><a href="#!/models#WSDLValidationResponse">WSDLValidationResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WSDLValidationResponse_wsdlInfo"><a href="#!/models#WSDLValidationResponse_wsdlInfo">WSDLValidationResponse_wsdlInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WSDLValidationResponse_wsdlInfo_bindingInfo"><a href="#!/models#WSDLValidationResponse_wsdlInfo_bindingInfo">WSDLValidationResponse_wsdlInfo_bindingInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WSDLValidationResponse_wsdlInfo_endpoints"><a href="#!/models#WSDLValidationResponse_wsdlInfo_endpoints">WSDLValidationResponse_wsdlInfo_endpoints</a></li>
                             </ul>
                         </li>
                         <li class="section-box">

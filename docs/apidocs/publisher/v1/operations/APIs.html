@@ -1,0 +1,880 @@
+<div class="main-content">
+    <h1><a name="APIs"></a>APIs</h1>
+
+            <hr/>
+            <h4 class="operation-heading"><a name="importOpenAPIDefinition"></a>Import an OpenAPI Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/import-openapi</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to create an API from an OpenAPI definition. Provide either &#x60;url&#x60; or &#x60;file&#x60;
+to specify the definition.
+
+Specify additionalProperties with **at least** API&#39;s name, version, context and endpointConfig.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-importOpenAPIDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-importOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_4_2096758352.1563880508761&quot;
+Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
+Content-Length: 2972
+
+
+  ------&#x3D;_Part_4_2096758352.1563880508761
+Content-Disposition: form-data; name&#x3D;&quot;additionalProperties&quot;
+
+  { &quot;name&quot;: &quot;PetstoreAPI&quot;, &quot;context&quot; : &quot;/petstore&quot;, &quot;version&quot; : &quot;1.0.0&quot;}
+  ------&#x3D;_Part_4_2096758352.1563880508761
+Content-Type: application/octet-stream; name&#x3D;petstore.v3.yaml
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;petstore.v3.yaml&quot;
+
+openapi: &quot;3.0.0&quot;
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.swagger.io/v1
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      operationId: listPets
+      tags:
+        - pets
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        &#39;200&#39;:
+          description: A paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Pets&quot;
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+    post:
+      summary: Create a pet
+      operationId: createPets
+      tags:
+        - pets
+      responses:
+        &#39;201&#39;:
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      responses:
+        &#39;200&#39;:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Pet&quot;
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+    Pets:
+      type: array
+      items:
+        $ref: &quot;#/components/schemas/Pet&quot;
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  ------&#x3D;_Part_4_2096758352.1563880508761--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-importOpenAPIDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-importOpenAPIDefinition" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
+Location: https://localhost:9443/api/am/publisher/v1.0/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{
+  &quot;id&quot; : &quot;089dac61-a58d-4eaf-9575-3beb5a8eec01&quot;,
+  &quot;name&quot; : &quot;PetstoreAPI&quot;,
+  &quot;description&quot; : null,
+  &quot;context&quot; : &quot;/petstore&quot;,
+  &quot;version&quot; : &quot;1.0.0&quot;,
+  &quot;provider&quot; : &quot;admin&quot;,
+  &quot;lifeCycleStatus&quot; : &quot;CREATED&quot;,
+  &quot;wsdlUri&quot; : null,
+  &quot;responseCaching&quot; : null,
+  &quot;cacheTimeout&quot; : 300,
+  &quot;destinationStatsEnabled&quot; : null,
+  &quot;hasThumbnail&quot; : null,
+  &quot;isDefaultVersion&quot; : false,
+  &quot;type&quot; : &quot;HTTP&quot;,
+  &quot;transport&quot; : [
+    &quot;http&quot;,
+    &quot;https&quot;
+  ],
+  &quot;tags&quot; : [ ],
+  &quot;policies&quot; : [ ],
+  &quot;apiThrottlingPolicy&quot; : &quot;Unlimited&quot;,
+  &quot;authorizationHeader&quot; : null,
+  &quot;securityScheme&quot; : [
+    &quot;oauth2&quot;,
+    &quot;oauth_basic_auth_mandatory&quot;
+  ],
+  &quot;maxTps&quot; : null,
+  &quot;visibility&quot; : &quot;PUBLIC&quot;,
+  &quot;visibleRoles&quot; : [ ],
+  &quot;visibleTenants&quot; : [ ],
+  &quot;endpointSecurity&quot; : null,
+  &quot;gatewayEnvironments&quot; : [ ],
+  &quot;labels&quot; : [ ],
+  &quot;mediationPolicies&quot; : [ ],
+  &quot;subscriptionAvailability&quot; : &quot;ALL_TENANTS&quot;,
+  &quot;subscriptionAvailableTenants&quot; : [ ],
+  &quot;additionalProperties&quot; : { },
+  &quot;monetization&quot; : null,
+  &quot;accessControl&quot; : &quot;NONE&quot;,
+  &quot;accessControlRoles&quot; : [ ],
+  &quot;businessInformation&quot; : {
+    &quot;businessOwner&quot; : null,
+    &quot;businessOwnerEmail&quot; : null,
+    &quot;technicalOwner&quot; : null,
+    &quot;technicalOwnerEmail&quot; : null
+  },
+  &quot;corsConfiguration&quot; : {
+    &quot;corsConfigurationEnabled&quot; : false,
+    &quot;accessControlAllowOrigins&quot; : [
+      &quot;*&quot;
+    ],
+    &quot;accessControlAllowCredentials&quot; : false,
+    &quot;accessControlAllowHeaders&quot; : [
+      &quot;authorization&quot;,
+      &quot;Access-Control-Allow-Origin&quot;,
+      &quot;Content-Type&quot;,
+      &quot;SOAPAction&quot;
+    ],
+    &quot;accessControlAllowMethods&quot; : [
+      &quot;GET&quot;,
+      &quot;PUT&quot;,
+      &quot;POST&quot;,
+      &quot;DELETE&quot;,
+      &quot;PATCH&quot;,
+      &quot;OPTIONS&quot;
+    ]
+  },
+  &quot;workflowStatus&quot; : null,
+  &quot;createdTime&quot; : null,
+  &quot;lastUpdatedTime&quot; : null,
+  &quot;endpointConfig&quot; : null,
+  &quot;scopes&quot; : [ ],
+  &quot;operations&quot; : [
+  {
+    &quot;id&quot; : &quot;&quot;,
+    &quot;uritemplate&quot; : &quot;/pets&quot;,
+    &quot;httpVerb&quot; : &quot;POST&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
+    &quot;scopes&quot; : [ ]
+  },
+  {
+    &quot;id&quot; : &quot;&quot;,
+    &quot;uritemplate&quot; : &quot;/pets&quot;,
+    &quot;httpVerb&quot; : &quot;GET&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
+    &quot;scopes&quot; : [ ]
+  },
+  {
+    &quot;id&quot; : &quot;&quot;,
+    &quot;uritemplate&quot; : &quot;/pets/{petId}&quot;,
+    &quot;httpVerb&quot; : &quot;GET&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
+    &quot;scopes&quot; : [ ]
+  }
+  ],
+  &quot;threatProtectionPolicies&quot; : null
+}
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml -F additionalProperties&#x3D;&#39;{ &quot;name&quot;: &quot;PetstoreAPI&quot;, &quot;context&quot; : &quot;/petstore&quot;, &quot;version&quot; : &quot;1.0.0&quot;}&#39; -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Importing an API with a subset of operations</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-importOpenAPIDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-importOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi HTTP/1.1
+Accept-Encoding: gzip,deflate
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_3_xxxx.xxxxxxx&quot;
+MIME-Version: 1.0
+Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
+Content-Length: xxxx
+Host: localhost:9443
+
+
+  ------&#x3D;_Part_3_163462078.1563876620605
+Content-Disposition: form-data; name&#x3D;&quot;additionalProperties&quot;
+
+  {
+     &quot;name&quot;:&quot;PetstoreAPI&quot;,
+     &quot;context&quot;:&quot;/petstore&quot;,
+     &quot;version&quot;:&quot;1.0.0&quot;,
+     &quot;operations&quot;:[
+        {
+           &quot;id&quot;:&quot;&quot;,
+           &quot;uritemplate&quot;:&quot;/pets&quot;,
+           &quot;httpVerb&quot;:&quot;POST&quot;,
+           &quot;authType&quot;:&quot;Application &amp; Application User&quot;,
+           &quot;throttlingPolicy&quot;:&quot;Unlimited&quot;,
+           &quot;scopes&quot;:[
+
+           ]
+        }
+     ]
+  }
+  ------&#x3D;_Part_3_xxxxx.xxxxx
+Content-Type: application/octet-stream; name&#x3D;petstore.v3.yaml
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;petstore.v3.yaml&quot;
+
+openapi: &quot;3.0.0&quot;
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.swagger.io/v1
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      operationId: listPets
+      tags:
+        - pets
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        &#39;200&#39;:
+          description: A paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Pets&quot;
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+    post:
+      summary: Create a pet
+      operationId: createPets
+      tags:
+        - pets
+      responses:
+        &#39;201&#39;:
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      responses:
+        &#39;200&#39;:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Pet&quot;
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+    Pets:
+      type: array
+      items:
+        $ref: &quot;#/components/schemas/Pet&quot;
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  ------&#x3D;_Part_3_xxxx.xxxxxx--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-importOpenAPIDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-importOpenAPIDefinition" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
+Location: https://localhost:9443/api/am/publisher/v1.0/apis/ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{
+  &quot;id&quot; : &quot;ded1a2fd-1a56-4eab-ae5f-07f8df03b0bd&quot;,
+  &quot;name&quot; : &quot;PetstoreAPI&quot;,
+  &quot;description&quot; : null,
+  &quot;context&quot; : &quot;/petstore&quot;,
+  &quot;version&quot; : &quot;1.0.0&quot;,
+  &quot;provider&quot; : &quot;admin&quot;,
+  &quot;lifeCycleStatus&quot; : &quot;CREATED&quot;,
+  &quot;wsdlUri&quot; : null,
+  &quot;responseCaching&quot; : null,
+  &quot;cacheTimeout&quot; : 300,
+  &quot;destinationStatsEnabled&quot; : null,
+  &quot;hasThumbnail&quot; : null,
+  &quot;isDefaultVersion&quot; : false,
+  &quot;type&quot; : &quot;HTTP&quot;,
+  &quot;transport&quot; : [
+    &quot;http&quot;,
+    &quot;https&quot;
+  ],
+  &quot;tags&quot; : [ ],
+  &quot;policies&quot; : [ ],
+  &quot;apiThrottlingPolicy&quot; : &quot;Unlimited&quot;,
+  &quot;authorizationHeader&quot; : null,
+  &quot;securityScheme&quot; : [
+    &quot;oauth2&quot;,
+    &quot;oauth_basic_auth_mandatory&quot;
+  ],
+  &quot;maxTps&quot; : null,
+  &quot;visibility&quot; : &quot;PUBLIC&quot;,
+  &quot;visibleRoles&quot; : [ ],
+  &quot;visibleTenants&quot; : [ ],
+  &quot;endpointSecurity&quot; : null,
+  &quot;gatewayEnvironments&quot; : [ ],
+  &quot;labels&quot; : [ ],
+  &quot;mediationPolicies&quot; : [ ],
+  &quot;subscriptionAvailability&quot; : &quot;ALL_TENANTS&quot;,
+  &quot;subscriptionAvailableTenants&quot; : [ ],
+  &quot;additionalProperties&quot; : { },
+  &quot;monetization&quot; : null,
+  &quot;accessControl&quot; : &quot;NONE&quot;,
+  &quot;accessControlRoles&quot; : [ ],
+  &quot;businessInformation&quot; : {
+    &quot;businessOwner&quot; : null,
+    &quot;businessOwnerEmail&quot; : null,
+    &quot;technicalOwner&quot; : null,
+    &quot;technicalOwnerEmail&quot; : null
+  },
+  &quot;corsConfiguration&quot; : {
+    &quot;corsConfigurationEnabled&quot; : false,
+    &quot;accessControlAllowOrigins&quot; : [
+      &quot;*&quot;
+    ],
+    &quot;accessControlAllowCredentials&quot; : false,
+    &quot;accessControlAllowHeaders&quot; : [
+      &quot;authorization&quot;,
+      &quot;Access-Control-Allow-Origin&quot;,
+      &quot;Content-Type&quot;,
+      &quot;SOAPAction&quot;
+    ],
+    &quot;accessControlAllowMethods&quot; : [
+      &quot;GET&quot;,
+      &quot;PUT&quot;,
+      &quot;POST&quot;,
+      &quot;DELETE&quot;,
+      &quot;PATCH&quot;,
+      &quot;OPTIONS&quot;
+    ]
+  },
+  &quot;workflowStatus&quot; : null,
+  &quot;createdTime&quot; : null,
+  &quot;lastUpdatedTime&quot; : null,
+  &quot;endpointConfig&quot; : null,
+  &quot;scopes&quot; : [ ],
+  &quot;operations&quot; : [
+  {
+    &quot;id&quot; : &quot;&quot;,
+    &quot;uritemplate&quot; : &quot;/pets&quot;,
+    &quot;httpVerb&quot; : &quot;POST&quot;,
+    &quot;authType&quot; : &quot;Application &amp; Application User&quot;,
+    &quot;throttlingPolicy&quot; : &quot;Unlimited&quot;,
+    &quot;scopes&quot; : [ ]
+  }
+  ],
+  &quot;threatProtectionPolicies&quot; : null
+}
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml -F additionalProperties&#x3D;&#39;{ &quot;name&quot;: &quot;PetstoreAPI&quot;, &quot;context&quot; : &quot;/petstore&quot;, &quot;version&quot; : &quot;1.0.0&quot; , &quot;operations&quot;: [{ &quot;uritemplate&quot;: &quot;/pets&quot;, &quot;httpVerb&quot;: &quot;POST&quot;, &quot;authType&quot;: &quot;Application &amp; Application User&quot;, &quot;throttlingPolicy&quot;: &quot;Unlimited&quot;, &quot;scopes&quot;: []}]}&#39; -X POST https://localhost:9443/api/am/publisher/v1.0/apis/import-openapi
+</code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Definition to upload as a file</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>url</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Definition url</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>additionalProperties</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Additional attributes specified as a stringified JSON with API&#39;s schema</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">201</p></td>
+                        <td class="parameter"><p class="marked">Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#API">API</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">415</p></td>
+                        <td class="parameter"><p class="marked">Unsupported Media Type. The entity of the request was in a not supported format. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="importWSDLDefinition"></a>Import a WSDL Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/import-wsdl</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to create an API using a WSDL definition. Provide either &#x60;url&#x60; or &#x60;file&#x60;
+to specify the definition.
+
+WSDL can be speficied as a single file or a ZIP archive with WSDLs and reference XSDs etc.
+Specify additionalProperties with **at least** API&#39;s name, version, context and endpointConfig.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">WSDL definition as a file</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>url</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">WSDL Definition url</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>additionalProperties</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Additional attributes specified as a stringified JSON with API&#39;s schema</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>implementationType</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">If &#39;SOAP&#39; is specified, the API will be created with only one resource &#39;POST /*&#39; which is to be used for SOAP
+operations.
+
+If &#39;HTTP_BINDING&#39; is specified, the API will be created with resources using HTTP binding operations
+which are extracted from the WSDL.
+</p>
+                                <p><b>Accepted values: </b></p>
+
+<code>soap</code>
+
+<code>httpBinding</code>
+
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">soap</p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">201</p></td>
+                        <td class="parameter"><p class="marked">Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#API">API</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">415</p></td>
+                        <td class="parameter"><p class="marked">Unsupported Media Type. The entity of the request was in a not supported format. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

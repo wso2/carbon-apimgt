@@ -366,7 +366,7 @@ class ThumbnailView extends Component {
      */
     render() {
         const {
-            api, classes, width, height, isEditable, theme, intl, isAPIProduct,
+            api, classes, width, height, isEditable, theme, intl,
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
         const {
@@ -374,7 +374,8 @@ class ThumbnailView extends Component {
         } = this.state;
         let { category } = this.state;
         if (!category) category = MaterialIcons.categories[0].name;
-        const overviewPath = isAPIProduct ? `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
+        const overviewPath = (api.apiType === Api.CONSTS.APIProduct) ?
+            `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
         let view;
 
         if (thumbnail) {
@@ -615,7 +616,6 @@ ThumbnailView.propTypes = {
     isEditable: PropTypes.bool,
     intl: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(ThumbnailView));

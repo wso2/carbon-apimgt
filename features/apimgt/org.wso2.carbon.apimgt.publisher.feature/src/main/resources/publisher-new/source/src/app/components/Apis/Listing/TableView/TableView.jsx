@@ -297,7 +297,7 @@ class TableView extends React.Component {
 
 TableView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    apis: PropTypes.shape({ list: PropTypes.array }).isRequired,
+    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number, apiType: PropTypes.string }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
     intl: PropTypes.shape({}).isRequired,
 };
