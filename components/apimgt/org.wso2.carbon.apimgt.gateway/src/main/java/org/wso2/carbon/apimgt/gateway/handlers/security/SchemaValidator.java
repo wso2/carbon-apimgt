@@ -67,10 +67,10 @@ public class SchemaValidator extends AbstractHandler {
     }
 
     /**
-     * Validate request message body.
+     * Handle the API request message validation.
      *
-     * @param messageContext Context of the message.
-     * @return Continue true the handler chain.
+     * @param messageContext Context of the message to be validated
+     * @return Continue true the handler chain
      */
     @Override
     public boolean handleRequest(MessageContext messageContext) {
@@ -83,8 +83,14 @@ public class SchemaValidator extends AbstractHandler {
         Object objContentType = axis2MC.getProperty(ThreatProtectorConstants.REST_CONTENT_TYPE);
         if (objContentType != null) {
             contentType = objContentType.toString();
+            if (logger.isDebugEnabled()) {
+                logger.info("Content type of the request message :" + contentType);
+            }
             try {
                 RelayUtils.buildMessage(axis2MC);
+                if (logger.isDebugEnabled()) {
+                    logger.info("Successfully built the request message");
+                }
                 if (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType)) {
                     try {
                         initialize(messageContext);
@@ -92,8 +98,8 @@ public class SchemaValidator extends AbstractHandler {
                         logger.error("Error occurred while initializing the swagger elements", e);
                     }
                     if (swagger != null) {
-                        requestMethod = messageContext.getProperty(
-                                APIMgtGatewayConstants.ELECTED_REQUEST_METHOD).toString();
+                        requestMethod = messageContext.getProperty(APIMgtGatewayConstants.
+                                ELECTED_REQUEST_METHOD).toString();
                         if (!APIConstants.SupportedHTTPVerbs.GET.name().equals(requestMethod)) {
                             try {
                                 validateRequest(messageContext);
@@ -103,7 +109,7 @@ public class SchemaValidator extends AbstractHandler {
                         }
                     }
                 }
-            } catch (IOException  | XMLStreamException e) {
+            } catch (IOException | XMLStreamException e) {
                 logger.error("Error occurred while building the API request", e);
             }
         }
@@ -112,22 +118,26 @@ public class SchemaValidator extends AbstractHandler {
 
     /**
      * Validate the response message.
-     * @param messageContext Context of the API response.
-     * @return Continue true the handler chain.
+     *
+     * @param messageContext Context of the API response
+     * @return Continue true the handler chain
      */
     @Override
     public boolean handleResponse(MessageContext messageContext) {
         if (logger.isDebugEnabled()) {
             logger.info("Validating the API response  Body content..");
         }
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
-                messageContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
         try {
             RelayUtils.buildMessage(axis2MC);
+            if (logger.isDebugEnabled()) {
+                logger.info("Successfully built the response message");
+            }
         } catch (IOException e) {
-           logger.error("Error occurred while building the API response", e);
+            logger.error("Error occurred while building the API response", e);
         } catch (XMLStreamException e) {
-           logger.error("Error occurred while validating the API response", e);
+            logger.error("Error occurred while validating the API response", e);
         }
         Object objectResponse = axis2MC.getProperty(ThreatProtectorConstants.REST_CONTENT_TYPE);
         if (objectResponse != null) {
@@ -148,7 +158,7 @@ public class SchemaValidator extends AbstractHandler {
     /**
      * Initialize the swagger from the Local Entry.
      *
-     * @param messageContext Content of the message context.
+     * @param messageContext Content of the message context
      */
     private void initialize(MessageContext messageContext) throws APIManagementException {
         if (logger.isDebugEnabled()) {
@@ -175,9 +185,9 @@ public class SchemaValidator extends AbstractHandler {
     /**
      * Validate the Request/response content.
      *
-     * @param payloadObject  Request/response payload.
-     * @param schemaString   Schema which uses to validate request/response messages.
-     * @param messageContext Message context.
+     * @param payloadObject  Request/response payload
+     * @param schemaString   Schema which uses to validate request/response messages
+     * @param messageContext Message context
      */
     private void validateContent(JSONObject payloadObject, String schemaString, MessageContext messageContext) {
         if (logger.isDebugEnabled()) {
@@ -202,10 +212,12 @@ public class SchemaValidator extends AbstractHandler {
     /**
      * Validate the API Request JSON Body.
      *
-     * @param messageContext Message context.
+     * @param messageContext Message context to be validate the request
      */
     private void validateRequest(MessageContext messageContext) throws APIManagementException {
+        //extract particular schema content.
         String schema = getSchemaContent(messageContext);
+        //extract the request payload.
         JSONObject payloadObject = getMessageContent(messageContext);
         if (schema != null && !ThreatProtectorConstants.EMPTY.equals(schema)) {
             validateContent(payloadObject, schema, messageContext);
@@ -215,7 +227,7 @@ public class SchemaValidator extends AbstractHandler {
     /**
      * Validate the API Response Body  which comes from the BE.
      *
-     * @param messageContext Message context.
+     * @param messageContext Message context to be validate the response
      */
     private void validateResponse(MessageContext messageContext) throws APIManagementException {
         String responseSchema = getSchemaContent(messageContext);
@@ -229,11 +241,10 @@ public class SchemaValidator extends AbstractHandler {
     /**
      * Get the Request/Response messageContent as a JsonObject.
      *
-     * @param messageContext Message context.
-     * @return JsonObject which contains the request/response message content.
+     * @param messageContext Message context
+     * @return JsonObject which contains the request/response message content
      */
     private JSONObject getMessageContent(MessageContext messageContext) {
-
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
         String requestMethod;
@@ -260,8 +271,9 @@ public class SchemaValidator extends AbstractHandler {
 
     /**
      * Extract the schema Object.
-     * @param refNode JSON node to be extracted.
-     * @return Extracted schema.
+     *
+     * @param refNode JSON node to be extracted
+     * @return Extracted schema
      */
     private JsonNode extractSchemaObject(JsonNode refNode) {
         String[] val = refNode.toString().split(ThreatProtectorConstants.HASH);
@@ -273,7 +285,7 @@ public class SchemaValidator extends AbstractHandler {
     /**
      * Get the relevant schema content for the  particular request/response messages.
      *
-     * @param messageContext Message content.
+     * @param messageContext Message content
      * @return particular schema content with its schema initialization pattern(key/schema)
      */
     private String getSchemaContent(MessageContext messageContext) throws APIManagementException {
@@ -295,7 +307,6 @@ public class SchemaValidator extends AbstractHandler {
     private String extractSchemaFromRequest(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
-        StringBuilder jsonPath = new StringBuilder();
 
         String resourcePath = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE).toString();
         String requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
@@ -303,22 +314,26 @@ public class SchemaValidator extends AbstractHandler {
         String value = JsonPath.read(swagger, ThreatProtectorConstants.JSON_PATH + ".openapi").toString();
         if (value != null && !value.equals(ThreatProtectorConstants.EMPTY_ARRAY)) {
             //refer schema
-            schema = JsonPath.read(swagger, jsonPath.append(ThreatProtectorConstants.JSONPATH_PATHS)
-                    .append(resourcePath).append("..requestBody.content.application/json.schema").toString());
-
+            StringBuilder jsonPath = new StringBuilder();
+            jsonPath.append(ThreatProtectorConstants.JSONPATH_PATHS)
+                    .append(resourcePath).append("..requestBody.content.application/json.schema");
+            schema = JsonPath.read(swagger, jsonPath.toString()).toString();
             if (schema == null | ThreatProtectorConstants.EMPTY_ARRAY.equals(schema)) {
                 // refer request bodies
-                schema = JsonPath.read(swagger, ThreatProtectorConstants.JSONPATH_PATHS + resourcePath +
-                        ThreatProtectorConstants.JSONPATH_SEPRATER + requestMethod.toLowerCase()
-                        + "..requestBody").toString();
+                StringBuilder sbRequestBodies = new StringBuilder();
+                sbRequestBodies.append(ThreatProtectorConstants.JSONPATH_PATHS)
+                        .append(resourcePath).append(ThreatProtectorConstants.JSONPATH_PATHS)
+                        .append(requestMethod.toLowerCase()).append("..requestBody");
+                schema = JsonPath.read(swagger, sbRequestBodies.toString()).toString();
             }
         } else {
-            schema = JsonPath.read(swagger, ThreatProtectorConstants.JSONPATH_PATHS + resourcePath +
-                    ThreatProtectorConstants.JSONPATH_SEPRATER + requestMethod.toLowerCase()
-                    + ".parameters..schema").toString();
+            StringBuilder schemaPath = new StringBuilder();
+            schemaPath.append(ThreatProtectorConstants.JSONPATH_PATHS).append(resourcePath).
+                    append(ThreatProtectorConstants.JSONPATH_SEPRATER)
+                    .append(requestMethod.toLowerCase()).append(".parameters..schema");
+            schema = JsonPath.read(swagger, schemaPath.toString()).toString();
         }
-        String content = extractReference(schema);
-        return content;
+        return extractReference(schema);
     }
 
     /**
@@ -329,37 +344,35 @@ public class SchemaValidator extends AbstractHandler {
      * @throws APIManagementException wrap and throw IOException
      */
     private String extractResponse(MessageContext messageContext) throws APIManagementException {
-
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
-                messageContext).getAxis2MessageContext();
-
-        String electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE).toString();
-        String reqMethod = messageContext.getProperty(APIMgtGatewayConstants.ELECTED_REQUEST_METHOD).toString();
-        String responseStatus = axis2MC.getProperty(APIMgtGatewayConstants.HTTP_SC).toString();
-        String Swagger = swagger;
-
         Object resourceSchema;
         Object resource;
         String nonSchema = "";
         String value;
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
+                messageContext).getAxis2MessageContext();
+        String electedResource = messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE).toString();
+        String reqMethod = messageContext.getProperty(APIMgtGatewayConstants.ELECTED_REQUEST_METHOD).toString();
+        String responseStatus = axis2MC.getProperty(APIMgtGatewayConstants.HTTP_SC).toString();
 
-        resource = JsonPath.read(Swagger, ThreatProtectorConstants.JSONPATH_PATHS +
-                electedResource + ThreatProtectorConstants.JSONPATH_SEPRATER + reqMethod.toLowerCase() +
-                ThreatProtectorConstants.JSONPATH_RESPONSES + responseStatus);
+        StringBuilder responseSchemaPath = new StringBuilder();
+        responseSchemaPath.append(ThreatProtectorConstants.JSONPATH_PATHS).append(electedResource).
+                append(ThreatProtectorConstants.JSONPATH_SEPRATER).append(reqMethod.toLowerCase()).
+                append(ThreatProtectorConstants.JSONPATH_RESPONSES).append(responseStatus);
+        resource = JsonPath.read(swagger, responseSchemaPath.toString());
+
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.convertValue(resource, JsonNode.class);
-
         if (jsonNode.get(0) != null && !ThreatProtectorConstants.EMPTY_ARRAY.equals(jsonNode)) {
             value = jsonNode.get(0).toString();
         } else {
             value = jsonNode.toString();
         }
         if (value != null) {
-            resource = JsonPath.read(Swagger, ThreatProtectorConstants.JSONPATH_PATHS + electedResource +
-                    ThreatProtectorConstants.JSONPATH_SEPRATER + reqMethod.toLowerCase() +
-                    ThreatProtectorConstants.JSONPATH_RESPONSES +
-                    responseStatus + ".schema");
-
+            StringBuilder resPath = new StringBuilder();
+            resPath.append(ThreatProtectorConstants.JSONPATH_PATHS).append(electedResource).append(
+                    ThreatProtectorConstants.JSONPATH_SEPRATER).append(reqMethod.toLowerCase()).
+                    append(ThreatProtectorConstants.JSONPATH_RESPONSES).append(responseStatus).append(".schema");
+            resource = JsonPath.read(swagger, resPath.toString());
             JsonNode json = mapper.convertValue(resource, JsonNode.class);
             if (json.get(0) != null && !ThreatProtectorConstants.EMPTY_ARRAY.equals(json.get(0))) {
                 value = json.get(0).toString();
@@ -374,19 +387,18 @@ public class SchemaValidator extends AbstractHandler {
                         Iterator<JsonNode> schemaNode = node.findParent(
                                 ThreatProtectorConstants.SCHEMA_REFERENCE).elements();
                         return extractRef(schemaNode);
-
                     } catch (IOException e) {
                         throw new APIManagementException("Error occurred while converting bytes from json node");
                     }
                 } else {
                     return value;
                 }
-
             } else {
-                resourceSchema = JsonPath.read(Swagger, ThreatProtectorConstants.JSONPATH_PATHS
-                        + electedResource + ThreatProtectorConstants.JSONPATH_SEPRATER + reqMethod.toLowerCase() +
-                        ".responses.default");
-
+                StringBuilder responseDefaultPath = new StringBuilder();
+                responseDefaultPath.append(ThreatProtectorConstants.JSONPATH_PATHS).append(electedResource).
+                        append(ThreatProtectorConstants.JSONPATH_SEPRATER).append(reqMethod.toLowerCase()).
+                        append(".responses.default");
+                resourceSchema = JsonPath.read(swagger, responseDefaultPath.toString());
                 JsonNode jnode = mapper.convertValue(resourceSchema, JsonNode.class);
                 if (jnode.get(0) != null && !ThreatProtectorConstants.EMPTY_ARRAY.equals(jnode)) {
                     value = jnode.get(0).toString();
@@ -419,10 +431,10 @@ public class SchemaValidator extends AbstractHandler {
     }
 
     /**
-     * Replace $ref array elements
+     * Replace $ref array elements.
      *
-     * @param entry Swagger content
-     * @throws APIManagementException
+     * @param entry Array reference to be replaced from actual value
+     * @throws APIManagementException Throws
      */
     private void generateArraySchemas(Map.Entry<String, JsonNode> entry) throws APIManagementException {
         JsonNode entryRef;
@@ -437,8 +449,8 @@ public class SchemaValidator extends AbstractHandler {
                         if (entryRef.has(ThreatProtectorConstants.SCHEMA_REFERENCE)) {
                             entryRef = extractSchemaObject(entryRef);
                             ObjectMapper mapper = new ObjectMapper();
-                            String str[] = schemaProperty.toString().split(",");
-                            if ( str.length > 0) {
+                            String[] str = schemaProperty.toString().split(",");
+                            if (str.length > 0) {
                                 List<String> schemaItems = Arrays.asList(str);
                                 ArrayList<String> convertedSchemaItems = new ArrayList(schemaItems);
                                 for (int x = 0; x < convertedSchemaItems.size(); x++) {
@@ -464,7 +476,7 @@ public class SchemaValidator extends AbstractHandler {
     }
 
     /**
-     * Get Schema path from $ref
+     * Get Schema path from $ref.
      *
      * @param schemaNode Swagger schema content
      * @return $ref path
@@ -487,8 +499,9 @@ public class SchemaValidator extends AbstractHandler {
 
     /**
      * Extract the reference.
-     * @param schemaNode Schema node to be extracted.
-     * @return extracted schema.
+     *
+     * @param schemaNode Schema node to be extracted
+     * @return extracted schema
      */
     private String extractReference(String schemaNode) {
         String[] val = schemaNode.split(ThreatProtectorConstants.HASH);
@@ -499,9 +512,8 @@ public class SchemaValidator extends AbstractHandler {
             searchLastIndex = path.substring(index + 1);
         }
         String nodeVal = path.replaceAll(ThreatProtectorConstants.FORWARD_SLASH, ".");
-        String Swagger = swagger;
         String name;
-        Object object = JsonPath.read(Swagger, ThreatProtectorConstants.JSON_PATH + nodeVal);
+        Object object = JsonPath.read(swagger, ThreatProtectorConstants.JSON_PATH + nodeVal);
         ObjectMapper mapper = new ObjectMapper();
         String value;
         JsonNode jsonSchema = mapper.convertValue(object, JsonNode.class);
@@ -511,32 +523,38 @@ public class SchemaValidator extends AbstractHandler {
             value = jsonSchema.toString();
         }
         if (value.contains(ThreatProtectorConstants.SCHEMA_REFERENCE)) {
-            String res = JsonPath.read(Swagger, ThreatProtectorConstants.JSON_PATH +
-                    ThreatProtectorConstants.REQUESTBODY_SCHEMA +
-                    searchLastIndex + ".content.application/json.schema").toString();
+            StringBuilder extractRefPath = new StringBuilder();
+            extractRefPath.append(ThreatProtectorConstants.JSON_PATH).append(
+                    ThreatProtectorConstants.REQUESTBODY_SCHEMA).
+                    append(searchLastIndex).append(".content.application/json.schema");
+            String res = JsonPath.read(swagger, extractRefPath.toString()).toString();
             if (res.contains("items")) {
-                name = JsonPath.read(Swagger, ThreatProtectorConstants.JSON_PATH +
-                        ThreatProtectorConstants.REQUESTBODY_SCHEMA +
-                        searchLastIndex + ".content.application/json.schema.items.$ref").toString();
+                StringBuilder requestSchemaPath = new StringBuilder();
+                requestSchemaPath.append(ThreatProtectorConstants.JSON_PATH).
+                        append(ThreatProtectorConstants.REQUESTBODY_SCHEMA).append(
+                        searchLastIndex).append(".content.application/json.schema.items.$ref");
+                name = JsonPath.read(swagger, requestSchemaPath.toString()).toString();
                 extractReference(name);
             } else {
-                name = JsonPath.read(Swagger, ThreatProtectorConstants.JSON_PATH +
-                        ThreatProtectorConstants.REQUESTBODY_SCHEMA + searchLastIndex +
-                        ".content.application/json.schema.$ref").toString();
+                StringBuilder jsonSchemaRef = new StringBuilder();
+                jsonSchemaRef.append(ThreatProtectorConstants.JSON_PATH).append(
+                        ThreatProtectorConstants.REQUESTBODY_SCHEMA).append(searchLastIndex).append(
+                        ".content.application/json.schema.$ref");
+                name = JsonPath.read(swagger, jsonSchemaRef.toString()).toString();
                 if (name.contains("components/schemas")) {
-                    Object componentSchema = JsonPath.read(Swagger, "$..components.schemas." + searchLastIndex);
+                    Object componentSchema = JsonPath.read(swagger, "$..components.schemas." + searchLastIndex);
                     mapper = new ObjectMapper();
                     try {
                         JsonNode jsonNode = mapper.convertValue(componentSchema, JsonNode.class);
                         generateSchema(jsonNode);
-                        if (jsonNode.get(0)!= null) {
+                        if (jsonNode.get(0) != null) {
                             name = jsonNode.get(0).toString();
                         } else {
                             name = jsonNode.toString();
                         }
                     } catch (APIManagementException e) {
-                       logger.error("Error occurred while generating the schema content for " +
-                               "the particular request", e);
+                        logger.error("Error occurred while generating the schema content for " +
+                                "the particular request", e);
                     }
                     schemaContent = name;
                 } else {
@@ -554,8 +572,8 @@ public class SchemaValidator extends AbstractHandler {
     /**
      * Replace $ref references with relevant schemas and recreate the swagger definition.
      *
-     * @param parent Swagger definition parent Node.
-     * @throws APIManagementException Throws an APIManagement exception.
+     * @param parent Swagger definition parent Node
+     * @throws APIManagementException Throws an APIManagement exception
      */
     private void generateSchema(JsonNode parent) throws APIManagementException {
         JsonNode schemaProperty;
