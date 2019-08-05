@@ -31,6 +31,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 
 class Documents extends React.Component {
     constructor(props) {
@@ -40,8 +41,10 @@ class Documents extends React.Component {
         };
     }
     componentDidMount() {
-        const API = new Api();
-        const docs = API.getDocuments(this.props.api.id);
+        const { api: { apiType, id } } = this.props;
+        const API = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
+
+        const docs = API.getDocuments(id);
         const { intl } = this.props;
         docs.then((response) => {
             this.setState({ documentsList: response.obj.list });
@@ -105,7 +108,10 @@ class Documents extends React.Component {
 
 Documents.propTypes = {
     parentClasses: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({ id: PropTypes.string }).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        apiType: PropTypes.oneOf(Api.CONSTS.API, Api.CONSTS.APIProduct),
+    }).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,

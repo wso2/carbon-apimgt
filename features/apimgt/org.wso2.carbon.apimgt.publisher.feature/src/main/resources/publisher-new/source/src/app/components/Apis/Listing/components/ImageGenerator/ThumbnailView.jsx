@@ -41,6 +41,7 @@ import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
 import { SketchPicker } from 'react-color';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import MaterialIcons from 'MaterialIcons';
 import Alert from 'AppComponents/Shared/Alert';
 import ImageGenerator from './ImageGenerator';
@@ -216,9 +217,11 @@ class ThumbnailView extends Component {
      * Load required data for showing the thubnail view
      */
     componentDidMount() {
-        const thumbApi = new Api();
-        const { api } = this.props;
-        thumbApi.getAPIThumbnail(api.id).then((response) => {
+        const { api: { apiType, id } } = this.props;
+        const promisedThumbnail = apiType === Api.CONSTS.APIProduct ? new APIProduct().getAPIProductThumbnail(id) :
+            new Api().getAPIThumbnail(id);
+
+        promisedThumbnail.then((response) => {
             if (response && response.data) {
                 if (response.headers['content-type'] === 'application/json') {
                     const iconJson = JSON.parse(response.data);
