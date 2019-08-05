@@ -76,7 +76,6 @@ securityDefinitions:
       openid: Authorize access to user details
       apim:api_view: View API
       apim:api_create: Create API
-      apim:api_update: Update API
       apim:api_delete: Delete API
       apim:api_publish: Publish API
       apim:subscription_view: View Subscription
@@ -593,7 +592,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       security:
         - OAuth2Security:
-          - apim:api_update
+          - apim:api_create
       summary: Update swagger definition
       description: |
         This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter `apiDefinition`.
@@ -957,7 +956,7 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
-          - apim:api_update
+          - apim:api_create
       x-wso2-curl: "curl -X POST -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file=@image.jpg"
       x-wso2-request: |
         POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail
@@ -2786,7 +2785,7 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
-          - apim:api_update
+          - apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F inlineContent=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl\""
       x-wso2-request: |
        PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl
@@ -3048,7 +3047,7 @@ paths:
     put:
       security:
         - OAuth2Security:
-          - apim:api_update
+          - apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/scopes/read\""
       x-wso2-request: "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/scopes/read\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\nContent-Type: application/json\n"
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n"
@@ -3119,7 +3118,7 @@ paths:
     delete:
       security:
         - OAuth2Security:
-          - apim:api_update
+          - apim:api_create
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058"
       x-wso2-request: |
         DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
@@ -4207,7 +4206,7 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
-          - apim:api_update
+          - apim:api_create
       x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1.0/import/apis"
       x-wso2-request: |
         PUT https://127.0.0.1:9443/api/am/publisher/v1.0/import/apis
