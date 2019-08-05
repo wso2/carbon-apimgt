@@ -159,9 +159,9 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         String[] userRoles;
         Map<String, String> restAPIScopes;
         //get all the URI templates of the REST API from the base path
-        Set<URITemplate> uriTemplates = getURITemplatesForBasePath(basePath);
+        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath);
         if (uriTemplates.isEmpty()) {
-            log.debug("No matching scope validation logic found for app request with path: " + basePath
+            log.debug("No matching role validation logic found for app request with path: " + basePath
                     + ". Skipping role validation.");
             return true;
         }
@@ -253,25 +253,6 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
     }
 
     /**
-     * This method is used to get the URI template set for the relevant REST API using the given base path.
-     *
-     * @param basePath Base path of the REST API
-     * @return Set of URI templates for the REST API
-     */
-    private Set<URITemplate> getURITemplatesForBasePath(String basePath) {
-        Set<URITemplate> uriTemplates = new HashSet<>();
-        //get URI templates using the base path in the request 
-        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
-            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
-        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
-            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
-        }
-        return uriTemplates;
-    }
-
-    /**
      * This method validates the user roles against the roles of the REST API scopes defined for the current resource.
      *
      * @param resourceScopeList Scope list of the current resource
@@ -304,7 +285,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                         //skip role check iteration of current scope and move to next resource scope.  
                         validatedUserScopes.add(scope);
                         if (log.isDebugEnabled()) {
-                            log.debug("Basic Authentication: scope validation successful for user: "
+                            log.debug("Basic Authentication: role validation successful for user: "
                                     + username + " with scope: " + scope.getKey()
                                     + " for resource path: " + path + " and verb " + verb);
                         }
