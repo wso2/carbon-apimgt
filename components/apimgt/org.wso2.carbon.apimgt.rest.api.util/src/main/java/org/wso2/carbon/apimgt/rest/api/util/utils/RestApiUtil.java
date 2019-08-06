@@ -83,6 +83,7 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -1573,5 +1574,28 @@ public class RestApiUtil {
     public static boolean checkIfAnonymousAPI(Message inMessage) {
         return (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
                 !((Boolean) inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED)));
+    }
+
+    /**
+     * This method is used to get the URI template set for the relevant REST API using the given base path.
+     *
+     * @param basePath Base path of the REST API
+     * @return Set of URI templates for the REST API
+     */
+    public static Set<URITemplate> getURITemplatesForBasePath(String basePath) {
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        //get URI templates using the base path in the request
+        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
+        }
+        return uriTemplates;
     }
 }

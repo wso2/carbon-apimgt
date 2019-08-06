@@ -19,7 +19,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import SubscriptionPolicySelect from './SubscriptionPolicySelect';
 
@@ -40,15 +40,15 @@ const styles = theme => ({
 /**
  *
  *
- * @class APIList
+ * @class APICardView
  * @extends {React.Component}
  */
-class APIList extends React.Component {
+class APICardView extends React.Component {
     /**
      *
      *
      * @returns
-     * @memberof APIList
+     * @memberof APICardView
      */
     render() {
         const { APIsNotFound } = this.props;
@@ -58,7 +58,7 @@ class APIList extends React.Component {
         }
 
         const {
-            theme, unsubscribedAPIList, handleSubscribe, applicationId, intl, 
+            theme, unsubscribedAPIList, handleSubscribe, applicationId, intl,
         } = this.props;
         const columns = [
             {
@@ -115,11 +115,11 @@ class APIList extends React.Component {
     }
 }
 
-APIList.propTypes = {
+APICardView.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
 };
-export default injectIntl(withStyles(styles, { withTheme: true })(APIList));
+export default injectIntl(withStyles(styles, { withTheme: true })(APICardView));

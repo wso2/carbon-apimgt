@@ -60,7 +60,7 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Imports API(s).", notes = "This operation can be used to import one or more existing APIs. ", response = APIListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "Import Configuration" })
     @ApiResponses(value = { 
