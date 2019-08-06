@@ -488,8 +488,8 @@ class Properties extends React.Component {
                                             </div>
                                         </Grid>
                                         <Grid item>
-                                            <Link to={api.apiType === API.CONSTS.APIProduct ? 'api-products' : '/apis/'
-                                                + api.id + '/overview'}
+                                            <Link to={(api.apiType === API.CONSTS.APIProduct ? '/api-products/' :
+                                                '/apis/') + api.id + '/overview'}
                                             >
                                                 <Button>
                                                     <FormattedMessage
@@ -515,7 +515,7 @@ Properties.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
-        apiType: PropTypes.oneOf(API.CONSTS.API, API.CONSTS.APIProduct),
+        apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };

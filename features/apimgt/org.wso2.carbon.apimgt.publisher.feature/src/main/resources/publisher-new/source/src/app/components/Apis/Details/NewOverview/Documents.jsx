@@ -110,7 +110,7 @@ Documents.propTypes = {
     parentClasses: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
-        apiType: PropTypes.oneOf(Api.CONSTS.API, Api.CONSTS.APIProduct),
+        apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]),
     }).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,

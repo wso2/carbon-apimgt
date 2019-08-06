@@ -27,6 +27,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
+import API from 'AppData/api.js';
 import ApiContext from '../components/ApiContext';
 
 const styles = theme => ({
@@ -242,7 +243,9 @@ class BusinessInformation extends React.Component {
                                             </div>
                                         </Grid>
                                         <Grid item>
-                                            <Link to={'/apis/' + api.id + '/overview'}>
+                                            <Link to={(api.apiType === API.CONSTS.APIProduct ? '/api-products/' :
+                                                '/apis/') + api.id + '/overview'}
+                                            >
                                                 <Button>
                                                     <FormattedMessage id='cancel' defaultMessage='Cancel' />
                                                 </Button>

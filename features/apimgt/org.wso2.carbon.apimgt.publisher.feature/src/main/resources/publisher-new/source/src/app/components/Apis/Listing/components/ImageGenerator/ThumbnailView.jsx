@@ -308,10 +308,12 @@ class ThumbnailView extends Component {
      * @param {File} file new thumbnail image file
      */
     uploadThumbnail(apiId, file, intl) {
-        const api = new Api();
+        const { api: { apiType, id } } = this.props;
+        const promisedThumbnail = apiType === Api.CONSTS.APIProduct ?
+            new APIProduct().addAPIProductThumbnail(id, file) :
+            new Api().addAPIThumbnail(id, file);
 
-        const thumbnailPromise = api.addAPIThumbnail(apiId, file);
-        thumbnailPromise
+        promisedThumbnail
             .then(() => {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.success',
