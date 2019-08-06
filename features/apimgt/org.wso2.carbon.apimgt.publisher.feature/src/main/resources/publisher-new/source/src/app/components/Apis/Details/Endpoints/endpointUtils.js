@@ -133,7 +133,7 @@ function endpointsToList(endpointConfig) {
  * */
 function getEndpointConfigByImpl(implementationType) {
     const tmpEndpointConfig = {};
-    if (implementationType === 'prototyped') {
+    if (implementationType === 'PROTOTYPED') {
         tmpEndpointConfig.endpoint_type = 'http';
         tmpEndpointConfig.implementation_status = 'prototyped';
         tmpEndpointConfig.production_endpoints = { config: null, url: 'http://localhost' };

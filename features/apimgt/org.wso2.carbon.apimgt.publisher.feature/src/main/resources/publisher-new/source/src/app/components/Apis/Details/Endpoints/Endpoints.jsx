@@ -51,7 +51,7 @@ const styles = theme => ({
     },
 });
 
-const endpointImplType = ['managed', 'prototyped'];
+const endpointImplType = ['managed', 'PROTOTYPED'];
 const defaultSwagger = { paths: {} };
 
 /**
@@ -85,10 +85,12 @@ function Endpoints(props) {
     };
 
     useEffect(() => {
+        const { lifeCycleStatus } = api;
         const implType = api.endpointConfig.implementation_status;
         setModifiedAPI(JSON.parse(JSON.stringify(api)));
         setEndpointImplementation(() => {
-            return implType === undefined ? endpointImplType[0] : endpointImplType[1];
+            return lifeCycleStatus === 'PROTOTYPED' && implType === 'prototyped' ?
+                endpointImplType[1] : endpointImplType[0];
         });
     }, []);
 
@@ -96,9 +98,8 @@ function Endpoints(props) {
      * Get the swagger definition if the endpoint implementation type is 'prototyped'
      * */
     useEffect(() => {
-        if (endpointImplementation === 'prototyped') {
+        if (endpointImplementation === 'PROTOTYPED') {
             api.getSwagger(apiObject.id).then((resp) => {
-                console.log(resp.obj);
                 setSwagger(resp.obj);
             }).catch((err) => {
                 console.err(err);
@@ -138,39 +139,41 @@ function Endpoints(props) {
                         />
                     </Typography>
                 </Grid>
-                <Grid item>
-                    <RadioGroup
-                        aria-label='endpointImpl'
-                        name='endpointImpl'
-                        className={classes.radioGroup}
-                        value={endpointImplementation}
-                        onChange={handleEndpointManagedChange}
-                    >
-                        <FormControlLabel
-                            value='managed'
-                            control={<Radio />}
-                            label={<FormattedMessage
-                                id='Apis.Details.Endpoints.Endpoints.managed'
-                                defaultMessage='Managed'
-                            />}
-                        />
-                        <FormControlLabel
-                            value='prototyped'
-                            control={<Radio />}
-                            label={<FormattedMessage
-                                id='Apis.Details.Endpoints.Endpoints.prototyped'
-                                defaultMessage='Prototyped'
-                            />}
-                        />
-                    </RadioGroup>
-                </Grid>
+                {apiObject.type === 'HTTP' ?
+                    <Grid item>
+                        <RadioGroup
+                            aria-label='endpointImpl'
+                            name='endpointImpl'
+                            className={classes.radioGroup}
+                            value={endpointImplementation}
+                            onChange={handleEndpointManagedChange}
+                        >
+                            <FormControlLabel
+                                value='managed'
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Details.Endpoints.Endpoints.managed'
+                                    defaultMessage='Managed'
+                                />}
+                            />
+                            <FormControlLabel
+                                value='PROTOTYPED'
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Details.Endpoints.Endpoints.prototyped'
+                                    defaultMessage='Prototyped'
+                                />}
+                            />
+                        </RadioGroup>
+                    </Grid> : <div />
+                }
             </Grid>
             <ApiContext.Consumer>
                 {({ updateAPI }) => (
                     <div>
                         <Grid container>
                             <Grid item xs={12} className={classes.endpointsContainer}>
-                                {apiObject.endpointConfig.implementation_status ?
+                                {endpointImplementation === 'PROTOTYPED' ?
                                     <PrototypeEndpoints
                                         implementation_method={apiObject.endpointConfig.implementation_status}
                                         api={apiObject}
