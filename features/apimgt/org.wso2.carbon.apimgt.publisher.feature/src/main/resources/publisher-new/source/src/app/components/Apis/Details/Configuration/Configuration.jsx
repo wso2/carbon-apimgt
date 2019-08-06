@@ -358,7 +358,11 @@ class Configuration extends React.Component {
                                             {/* Version */} {/* Default Version */}
                                             { api.apiType === API.CONSTS.API &&
                                                 <React.Fragment>
-                                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                    <Typography
+                                                        component='p'
+                                                        variant='subtitle2'
+                                                        className={classes.subtitle}
+                                                    >
                                                         <FormattedMessage
                                                             id='Apis.Details.Configuration.Configuration.version'
                                                             defaultMessage='Version'
@@ -367,9 +371,14 @@ class Configuration extends React.Component {
                                                     <Typography component='p' variant='body1'>
                                                         {api.version && <React.Fragment>{api.version}</React.Fragment>}
                                                     </Typography>
-                                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
+                                                    <Typography
+                                                        component='p'
+                                                        variant='subtitle2'
+                                                        className={classes.subtitle}
+                                                    >
                                                         <FormattedMessage
-                                                            id='Apis.Details.Configuration.Configuration.default.version'
+                                                            id={'Apis.Details.Configuration.Configuration.default.' +
+                                                            'version'}
                                                             defaultMessage='Default Version'
                                                         />
                                                         <Tooltip
@@ -381,18 +390,19 @@ class Configuration extends React.Component {
                                                             title={
                                                                 <React.Fragment>
                                                                     <FormattedMessage
-                                                                        id={'Apis.Details.Configuration.Configuration.' +
-                                                                        'default.version.tooltip'}
-                                                                        defaultMessage={'Marks one API version in a group as ' +
-                                                                        'the default so that it can be invoked without ' +
-                                                                        'specifying the version number in the URL. ' +
-                                                                        'For example, if you mark ' +
-                                                                        'http://host:port/youtube/2.0 as the default API, ' +
-                                                                        'requests made to http://host:port/youtube/ are ' +
-                                                                        'automatically routed to version 2.0. If you mark an ' +
-                                                                        'unpublished API as the default, the previous  ' +
-                                                                        'default published API will still be used as the ' +
-                                                                        'until the new default API is published.'}
+                                                                        id={'Apis.Details.Configuration.' +
+                                                                        'Configuration.default.version.tooltip'}
+                                                                        defaultMessage={'Marks one API version in a ' +
+                                                                        'group as the default so that it can be ' +
+                                                                        'invoked without specifying the version ' +
+                                                                        'number in the URL. For example, if you mark ' +
+                                                                        'http://host:port/youtube/2.0 as the default ' +
+                                                                        'API, requests made to http://host:port/' +
+                                                                        'youtube/ are automatically routed to version' +
+                                                                        ' 2.0. If you mark an unpublished API as the ' +
+                                                                        'default, the previous default published API ' +
+                                                                        'will still be used as the until the new ' +
+                                                                        'default API is published.'}
                                                                     />
                                                                 </React.Fragment>
                                                             }
@@ -417,8 +427,8 @@ class Configuration extends React.Component {
                                                                 control={<Radio />}
                                                                 label={
                                                                     <FormattedMessage
-                                                                        id={'Apis.Details.Configuration.Configuration.' +
-                                                                        'default.version.yes'}
+                                                                        id={'Apis.Details.Configuration.' +
+                                                                            'Configuration.default.version.yes'}
                                                                         defaultMessage='Yes'
                                                                     />}
                                                             />
@@ -427,8 +437,8 @@ class Configuration extends React.Component {
                                                                 control={<Radio />}
                                                                 label={
                                                                     <FormattedMessage
-                                                                        id={'Apis.Details.Configuration.Configuration.' +
-                                                                        'default.version.no'}
+                                                                        id={'Apis.Details.Configuration.' +
+                                                                            'Configuration.default.version.no'}
                                                                         defaultMessage='No'
                                                                     />}
                                                             />
