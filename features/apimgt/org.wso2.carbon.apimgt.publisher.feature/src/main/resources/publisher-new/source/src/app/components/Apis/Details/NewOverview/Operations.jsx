@@ -22,6 +22,9 @@ import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
+import Table from '@material-ui/core/Table';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
@@ -29,16 +32,21 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import ApiContext from '../components/ApiContext';
 
+/**
+ *
+ * @param {*} props
+ */
 function RenderMethodBase(props) {
     const { theme, method } = props;
-    let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
-    const chipTextColor = '#000000';
-    if (!chipColor && method === 'QUERY') {
-        chipColor = '#EF8B27';
-    } else if (!chipColor && method === 'MUTATION') {
-        chipColor = '#EFEF27';
-    } else if (!chipColor && method === 'SUBSCRIPTION') {
-        chipColor = '#27EFA3';
+    let chipColor = theme.custom.operationChipColor ?
+        theme.custom.operationChipColor[method]
+        : null;
+    let chipTextColor = '#000000';
+    if (!chipColor) {
+        console.log('Check the theme settings. The resourceChipColors is not populated properlly');
+        chipColor = '#cccccc';
+    } else {
+        chipTextColor = theme.palette.getContrastText(theme.custom.operationChipColor[method]);
     }
     return <Chip label={method} style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }} />;
 }
@@ -63,6 +71,10 @@ const styles = {
     },
 };
 
+/**
+ *
+ * @param {*} props
+ */
 function Operations(props) {
     const { parentClasses } = props;
     return (
@@ -83,15 +95,22 @@ function Operations(props) {
                         </Link>
                     </div>
                     <div className={parentClasses.contentWrapper}>
-                        {api.operations
+                        <Table>
+                            {api.operations
                             && api.operations.length !== 0
                             && api.operations.map(item => (
-                                <Typography className={parentClasses.heading} component='p' variant='body1'>
-                                    {item.target}
-                                    {'    '}
-                                    <RenderMethod method={item.verb} />
-                                </Typography>
+                                <TableRow style={{ borderStyle: 'hidden' }}>
+                                    <TableCell>
+                                        <Typography className={parentClasses.heading} component='p' variant='body1'>
+                                            {item.target}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <RenderMethod method={item.verb.toLowerCase()} />
+                                    </TableCell>
+                                </TableRow>
                             ))}
+                        </Table>
                     </div>
                 </Paper>
             )}

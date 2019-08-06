@@ -22,12 +22,11 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Table from '@material-ui/core/Table';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import Grid from '@material-ui/core/Grid';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import { Typography } from '@material-ui/core';
+import Switch from '@material-ui/core/Switch';
 
 const styles = theme => ({
     root: {
@@ -127,6 +126,9 @@ const styles = theme => ({
     },
 });
 
+/**
+ *
+ */
 class Operation extends React.Component {
     /**
      *
@@ -135,135 +137,156 @@ class Operation extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            visible: false,
+            IsSecurity: false,
         };
-        this.toggleMethodData = this.toggleMethodData.bind(this);
+        // this.toggleMethodData = this.toggleMethodData.bind(this);
         this.handleScopeChange = this.handleScopeChange.bind(this);
         this.handlePolicyChange = this.handlePolicyChange.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
-    handleMethodChangeInSwaggerRoot(key, value) {
-        const tempMethod = this.state.method;
-        tempMethod[key] = value;
-        this.setState({ method: tempMethod });
-        this.props.updatePath(this.props.operation.target, this.props.operation.verb, this.state.method);
-    }
-
-
-    toggleMethodData() {
-        this.setState({ visible: !this.state.visible });
-    }
+    /**
+     *
+     * @param {*} e
+     */
     handleScopeChange(e) {
         const operation = JSON.parse(JSON.stringify(this.props.operation));
         operation.scopes = [e.target.value];
         this.props.handleUpdateList(operation);
     }
+    /**
+     *
+     * @param {*} e
+     */
     handlePolicyChange(e) {
         const operation = JSON.parse(JSON.stringify(this.props.operation));
         operation.throttlingPolicy = e.target.value;
         this.props.handleUpdateList(operation);
     }
+
+    /**
+     *
+     */
+    handleChange(event) {
+        const operation = JSON.parse(JSON.stringify(this.props.operation));
+        const { checked } = event.target;
+        if (checked) {
+            operation.authType = 'Any';
+        } else {
+            operation.authType = 'None';
+        }
+        this.setState({
+            IsSecurity: checked,
+        });
+        this.props.handleUpdateList(operation);
+    }
+
     /**
      * @inheritdoc
      */
     render() {
         const {
-            operation, theme, classes, intl, apiPolicies,
+            operation, theme, classes, apiPolicies, scopes,
         } = this.props;
-        let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[operation.verb] : null;
-        const chipTextColor = '#000000';
-        if (!chipColor && operation.verb === 'QUERY') {
-            chipColor = '#EF8B27';
-        } else if (!chipColor && operation.verb === 'MUTATION') {
-            chipColor = '#EFEF27';
-        } else if (!chipColor && operation.verb === 'SUBSCRIPTION') {
-            chipColor = '#27EFA3';
+        const { IsSecurity } = this.state;
+        let chipColor = theme.custom.operationChipColor ?
+            theme.custom.operationChipColor[operation.verb.toLowerCase()]
+            : null;
+        let chipTextColor = '#000000';
+        if (!chipColor) {
+            console.log('Check the theme settings. The resourceChipColors is not populated properlly');
+            chipColor = '#cccccc';
+        } else {
+            chipTextColor =
+            theme.palette.getContrastText(theme.custom.operationChipColor[operation.verb.toLowerCase()]);
         }
         return (
-            <div className={classes.resourceRoot}>
-                <div className={classes.listItem}>
-                    <a onClick={this.toggleMethodData} className={classes.link}>
-                        <Chip label={operation.verb} style={{ backgroundColor: chipColor, color: chipTextColor }} className={classes.chipActive} />
-                    </a>
-                    <a onClick={this.toggleMethodData}>
-                        <Typography variant='h6' className={classes.pathDisplay}>
-                            {operation.target}
-                        </Typography>
-                    </a>
-                </div>
-                {this.state.visible && (
-                    <div>
-                        <Grid container spacing={12}>
-                            <Grid item xs={12}>
-                                <Table>
-                                    <TableRow className={classes.row}>
-                                        <TableCell>
-                                            <Typography variant='subtitle2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Resources.Resource.throttling.policy'
-                                                    defaultMessage='Throttling Policy'
-                                                />
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant='subtitle2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Resources.Resource.scopes'
-                                                    defaultMessage='Scopes'
-                                                />
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow className={classes.row}>
-                                        <TableCell>
-                                            <Select
-                                                value={operation.throttlingPolicy}
-                                                onChange={this.handlePolicyChange}
-                                                fieldName='Throttling Policy'
-                                            >
-                                                {this.props.apiPolicies.map(policy => (
-                                                    <MenuItem
-                                                        key={policy.name}
-                                                        value={policy.name}
-                                                    >
-                                                        {policy.displayName}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Select
-                                                value={operation.scopes}
-                                                onChange={this.handleScopeChange}
-                                                inputProps={{
-                                                    name: 'scopes',
-                                                    id: 'age-simple',
-                                                }}
-                                            >
-                                                {this.props.scopes.map(tempScope => (
-                                                    <MenuItem
-                                                        key={tempScope.name}
-                                                        value={tempScope.name}
-                                                    >
-                                                        {tempScope.name}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </TableCell>
-                                    </TableRow>
-                                </Table>
-                            </Grid>
-                        </Grid>
-                    </div>
-                )}
-            </div>
+            <TableRow style={{ borderStyle: 'hidden' }}>
+                <TableCell>
+                    <Typography variant='body1'>
+                        {operation.target}
+                    </Typography>
+                </TableCell>
+                <TableCell>
+                    <Chip
+                        label={operation.verb.toLowerCase()}
+                        style={{
+                            backgroundColor: chipColor, color: chipTextColor, height: 20, width: 40,
+                        }}
+                        className={classes.chipActive}
+                    />
+                </TableCell>
+                <TableCell>
+                    <Select
+                        value={operation.throttlingPolicy}
+                        onChange={this.handlePolicyChange}
+                        fieldName='Throttling Policy'
+                    >
+                        {apiPolicies.map(policy => (
+                            <MenuItem
+                                key={policy.name}
+                                value={policy.name}
+                            >
+                                {policy.displayName}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </TableCell>
+                <TableCell>
+                    <Select
+                        value={operation.scopes}
+                        onChange={this.handleScopeChange}
+                        inputProps={{
+                            name: 'scopes',
+                            id: 'age-simple',
+                        }}
+                    >
+                        {scopes.map(tempScope => (
+                            <MenuItem
+                                key={tempScope.name}
+                                value={tempScope.name}
+                            >
+                                {tempScope.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </TableCell>
+                <TableCell>
+                    <Switch
+                        checked={(() => {
+                            if (operation.authType === 'None') {
+                                return false;
+                            }
+                            return true;
+                        })()}
+                        onChange={this.handleChange}
+                        value={IsSecurity}
+                        color='primary'
+                    />
+                </TableCell>
+            </TableRow>
         );
     }
 }
 
 Operation.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({
+    }).isRequired,
+    operation: PropTypes.shape({
+        target: PropTypes.string,
+        verb: PropTypes.string,
+        throttlingPolicy: PropTypes.string,
+        auth: PropTypes.string,
+    }).isRequired,
+    apiPolicies: PropTypes.shape({
+    }).isRequired,
+    scopes: PropTypes.shape({
+    }).isRequired,
+    handleUpdateList: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Operation));

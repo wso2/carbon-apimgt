@@ -221,7 +221,7 @@ class APIDefinition extends React.Component {
                 const { isValid, graphQLInfo } = response.obj;
                 if (isValid === true) {
                     api.operations = graphQLInfo.operations;
-                    this.updateGraphQLAPIDefinition(api, file);
+                    this.updateGraphQLAPIDefinition(api, graphQLInfo.graphQLSchema.schemaDefinition);
                 }
             })
             .catch((err) => {
@@ -435,12 +435,17 @@ class APIDefinition extends React.Component {
                 <div className={classes.topBar}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.api.definition'
-                                defaultMessage='API Definition'
-                            />
+                            {graphQL ? (
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.schema.definition'
+                                    defaultMessage='Schema Definition'
+                                />) :
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.api.definition'
+                                    defaultMessage='API Definition'
+                                /> }
                         </Typography>
-                        {isGraphQL === 0 && (
+                        {!graphQL && (
                             <Button size='small' className={classes.button} onClick={this.openEditor}>
                                 <EditRounded className={classes.buttonIcon} />
                                 <FormattedMessage

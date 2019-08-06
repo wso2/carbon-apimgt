@@ -243,6 +243,53 @@ class Details extends Component {
             });
     }
 
+    getLeftMenuItemForAPIType(apiType) {
+        const { active } = this.state;
+        const { intl } = this.props;
+        switch (apiType) {
+            case 'GRAPHQL':
+                return (
+                    <React.Fragment>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.schema.definition',
+                                defaultMessage: 'Schema Definition',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<CodeIcon />}
+                        />
+                        <LeftMenuItem
+                            text='operations'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </React.Fragment>);
+            default:
+                return (
+                    <React.Fragment>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.api.definition',
+                                defaultMessage: 'api definition',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<CodeIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.resources',
+                                defaultMessage: 'resources',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </React.Fragment>);
+        }
+    }
     /**
      *
      *
@@ -396,33 +443,8 @@ class Details extends Component {
                                 active={active}
                                 Icon={<EndpointIcon />}
                             />
-                        }
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.api.definition',
-                                defaultMessage: 'api definition',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<CodeIcon />}
-                        />
-                        {api.type === 'GRAPHQL' ? (
-                            <LeftMenuItem
-                                text='operations'
-                                handleMenuSelect={this.handleMenuSelect}
-                                active={active}
-                                Icon={<ResourcesIcon />}
-                            />) :
-                            (<LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.resources',
-                                    defaultMessage: 'resources',
-                                })}
-                                handleMenuSelect={this.handleMenuSelect}
-                                active={active}
-                                Icon={<ResourcesIcon />}
-                            />)
-                        }
+                        )}
+                        {this.getLeftMenuItemForAPIType(api.type)}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.lifecycle',
@@ -505,6 +527,10 @@ class Details extends Component {
                                     path={Details.subPaths.API_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.SCHEMA_DEFINITION}
+                                    component={() => <APIDefinition api={api} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
@@ -560,6 +586,7 @@ Details.subPaths = {
     OVERVIEW: '/apis/:api_uuid/overview',
     OVERVIEW_PRODUCT: '/api-products/:apiprod_uuid/overview',
     API_DEFINITION: '/apis/:api_uuid/api definition',
+    SCHEMA_DEFINITION: '/apis/:api_uuid/schema definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',

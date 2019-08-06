@@ -49,7 +49,9 @@ import VerticalDivider from '../../Shared/VerticalDivider';
 import ImageGenerator from '../Listing/ImageGenerator';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+import Loading from '../../Base/Loading/Loading';
 import { ApiContext } from './ApiContext';
+import API from '../../../data/api';
 
 /**
  *
@@ -247,6 +249,9 @@ const styles = theme => ({
     margin: {
         marginLeft: 30,
     },
+    downloadLink: {
+        color: 'black',
+    },
 });
 /**
  *
@@ -261,11 +266,13 @@ class StarRatingBar extends React.Component {
             rating: null,
             dummyRateValue: 1,
             showRateNow: false,
+            graphQL: null,
         };
 
         this.handleMouseOver = this.handleMouseOver.bind(this);
         this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
         this.handleMouseOut = this.handleMouseOut.bind(this);
+        this.api = new Api();
     }
 
     /**
@@ -370,7 +377,6 @@ class StarRatingBar extends React.Component {
      */
     doRate(rateIndex) {
         this.setState({ rateIndex, showRateNow: false });
-
         const api = new Api();
         const ratingInfo = { rating: rateIndex / 2 };
         const promise = api.addRating(this.props.apiIdProp, ratingInfo);
@@ -488,6 +494,7 @@ class InfoBar extends React.Component {
         super(props);
         this.state = {
             api: null,
+            graphQL: null,
             applications: null,
             policies: null,
             dropDownApplications: null,
@@ -537,21 +544,61 @@ class InfoBar extends React.Component {
     };
 
     /**
+     * [Temporary function] to get the first hybrid https or http endpoint of an API
+     *
+     * @param {Api} api API object
+     * @returns {string}
+     */
+    getHttpsEP = (api) => {
+        const epHybridUrl = api.endpointURLs.find(url => url.environmentType === 'hybrid');
+        if (epHybridUrl) {
+            return epHybridUrl.environmentURLs.https || epHybridUrl.environmentURLs.http;
+        } else {
+            return '';
+        }
+    };
+
+    // /** commented till fix the issue in <ApiContext.Consumer>
+    //  * @returns
+    //  * @memberof InfoBar
+    //  */
+    // componentDidMount() {
+    //     const { api } = this.props;
+    //     if (api.type === 'GRAPHQL') {
+    //         const apiOfSchema = new API();
+    //         const promisedApi = apiOfSchema.getGraphQLSchemaByAPIId(api.id);
+    //         promisedApi
+    //             .then((response) => {
+    //                 if (response.data !== undefined) {
+    //                     schema = response.data;
+    //                     this.setState({ graphQL: schema });
+    //                 }
+    //             })
+    //             .catch((error) => {
+    //             });
+    //     }
+    // }
+
+    /**
      *
      *
      * @returns
      * @memberof InfoBar
      */
     render() {
-        const { classes, theme, intl } = this.props;
         const {
-            notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl,
+            classes, theme, intl, api,
+        } = this.props;
+        const {
+            showOverview, prodUrlCopied, sandboxUrlCopied, epUrl, graphQL,
         } = this.state;
-        const { resourceNotFountMessage } = this.props;
-        if (notFound) {
-            return <ResourceNotFound message={resourceNotFountMessage} />;
-        }
-
+        const format = 'txt';
+        const schema = 'text';
+        const fileName = 'schema.graphql';
+        // if (api.type === 'GRAPHQL' && graphQL === null) {
+        //     <Progress />;
+        // }
+        const downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(schema);
         return (
             <ApiContext.Consumer>
                 {({ api }) => (

@@ -30,11 +30,11 @@ import List from '@material-ui/core/List';
 import ScopesIcon from '@material-ui/icons/VpnKey';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
+import Table from '@material-ui/core/Table';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Grid from '@material-ui/core/Grid';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
@@ -115,7 +115,14 @@ const styles = theme => ({
     },
 });
 
+/**
+ * This class defined for operation List
+ */
 class Operations extends React.Component {
+    /**
+     *
+     * @param {*} props the props parameters
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -124,60 +131,44 @@ class Operations extends React.Component {
             notFound: false,
             showScopes: false,
             apiPolicies: [],
-            isAuthorize: false,
-            api: null,
-            operationList: this.props.api.operations,
+            operationList: null,
         };
 
         this.newApi = new Api();
-        this.api = this.props.api;
         this.handleUpdateList = this.handleUpdateList.bind(this);
         this.toggleAssignScopes = this.toggleAssignScopes.bind(this);
         this.handleScopeChange = this.handleScopeChange.bind(this);
         this.updateOperations = this.updateOperations.bind(this);
         this.handleScopeChangeInSwaggerRoot = this.handleScopeChangeInSwaggerRoot.bind(this);
     }
-    componentDidMount() {
-        const promisedApiObject = this.newApi.get(this.api.id);
-        promisedApiObject
-            .then((api) => {
-                this.setState({
-                    api,
-                    scopes: api.scopes,
-                });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    doRedirectToLogin();
-                }
-            });
 
-        const promised_api = this.newApi.getSwagger(this.api.id);
-        promised_api
+    /**
+     *
+     */
+    componentDidMount() {
+        this.setState({
+            operationList: this.props.api.operations,
+            scopes: this.props.api.scopes,
+        });
+        const promisedApi = this.newApi.getSwagger(this.props.api.id);
+        promisedApi
             .then((response) => {
                 let tempScopes = [];
                 if (response.obj.security && response.obj.security.length !== 0) {
-                    response.obj.security.map((object, i) => {
+                    response.obj.security.map((object) => {
                         if (object.OAuth2Security) {
                             tempScopes = object.OAuth2Security;
                         }
+                        return tempScopes;
                     });
                 }
                 this.setState({ swagger: response.obj, scopes: tempScopes });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
-                const status = error.status;
+                const { status } = error.status;
                 if (status === 404) {
                     this.setState({ notFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
                 }
             });
         const promisedResPolicies = Api.policies('api');
@@ -189,7 +180,7 @@ class Operations extends React.Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error.status;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
@@ -198,18 +189,27 @@ class Operations extends React.Component {
             });
     }
 
-    handleScopeChange(e) {
-        this.setState({ scopes: e.target.value });
-        this.handleScopeChangeInSwaggerRoot(e.target.value);
+    /**
+     *
+     * @param {*} event triggered for scope change
+     */
+    handleScopeChange(event) {
+        this.setState({ scopes: event.target.value });
+        this.handleScopeChangeInSwaggerRoot(event.target.value);
     }
 
+    /**
+     *
+     * @param {*} scopes
+     */
     handleScopeChangeInSwaggerRoot(scopes) {
         const { swagger } = this.state.swagger;
         if (swagger.security) {
-            swagger.security.map((object, i) => {
+            swagger.security.map((object) => {
                 if (object.OAuth2Security) {
                     object.OAuth2Security = scopes;
                 }
+                return object.OAuth2Security;
             });
         } else {
             swagger.security = [{ OAuth2Security: scopes }];
@@ -217,18 +217,25 @@ class Operations extends React.Component {
         this.setState({ swagger });
     }
 
-    handleUpdateList(operation) {
-        const operationList = this.state.operationList;
-        const index = this.state.operationList.findIndex(opr => opr.target === operation.target);
-        operationList[index] = operation;
-        this.setState({ operationList });
-        console.log('*******');
-        console.log(this.state.operationList);
+    /**
+     *
+     * @param {*} newOperation
+     */
+    handleUpdateList(newOperation) {
+        const operationList = JSON.parse(JSON.stringify(this.state.operationList));
+        const updatedList = operationList.map(opertion => (opertion.target === newOperation.target
+            ? newOperation : opertion));
+        this.setState({ operationList: updatedList });
     }
 
+    /**
+     *
+     */
     updateOperations() {
-        const api = this.state.api.body;
-        api.operations = this.state.operationList;
+        const { api } = this.props;
+        const { operationList, intl } = this.state;
+        const apiObject = api._data;
+        apiObject.operations = operationList;
         /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
         /* eslint no-param-reassign: ["error", { "props": false }] */
         if (api._data) delete api._data;
@@ -236,25 +243,26 @@ class Operations extends React.Component {
         const promisedApi = this.newApi.update(api);
         promisedApi
             .then(() => {
-                Alert.info('API updated successfully');
-                // Alert.info(intl.formatMessage({
-                //     id: 'Apis.Details.Operations.Operations.api.updated.successfully',
-                //     defaultMessage: 'API updated successfully!',
-                // }));
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Operations.Operations.api.updated.successfully',
+                    defaultMessage: 'API updated successfully!',
+                }));
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
+                if (process.env.NODE_ENV !== 'production') { console.log(error); }
                 const { status } = error.status;
                 if (status === 404) {
                     this.setState({ notFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
                 }
             });
     }
     toggleAssignScopes = () => {
         this.setState({ showScopes: !this.state.showScopes });
     }
+
+    /**
+     * @inheritdoc
+     */
     render() {
         const {
             operationList, scopes, showScopes, apiPolicies,
@@ -262,15 +270,18 @@ class Operations extends React.Component {
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
-        if (!this.props.api) {
+        if (!operationList) {
             return <Progress />;
         }
-        const { classes, intl } = this.props;
+        const { classes } = this.props;
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage id='Apis.Details.Operations.Operations.operation' defaultMessage='Operations' />
+                        <FormattedMessage
+                            id='Apis.Details.Operations.Operations.operation'
+                            defaultMessage='Operations'
+                        />
                     </Typography>
                     <Button size='small' className={classes.button} onClick={this.toggleAssignScopes}>
                         <ScopesIcon className={classes.buttonIcon} />
@@ -293,14 +304,24 @@ class Operations extends React.Component {
                                 <Divider className={classes.divider} />
                                 <div className={classes.addNewOther}>
                                     <FormControl className={classes.formControl}>
-                                        <InputLabel htmlFor='select-multiple'><FormattedMessage id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.input' defaultMessage='Assign Global Scopes for API' /></InputLabel>
-                                        <Select multiple value={this.state.scopes} onChange={this.handleScopeChange} className={classes.scopes}>
+                                        <InputLabel htmlFor='select-multiple'><FormattedMessage
+                                            id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.input'
+                                            defaultMessage='Assign Global Scopes for API'
+                                        />
+                                        </InputLabel>
+                                        <Select
+                                            multiple
+                                            value={this.state.scopes}
+                                            onChange={this.handleScopeChange}
+                                            className={classes.scopes}
+                                        >
                                             {scopes.list.map(tempScope => (
                                                 <MenuItem
                                                     key={tempScope.name}
                                                     value={tempScope.name}
                                                     style={{
-                                                        fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
+                                                        fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1
+                                                            ? '500' : '400',
                                                         width: 400,
                                                     }}
                                                 >
@@ -329,42 +350,95 @@ class Operations extends React.Component {
                         </React.Fragment>
                     }
                     <List>
-                        {operationList.map((item) => {
-                            return (
-                                <div>
-                                    <ExpansionPanel defaultExpanded className={classes.expansionPanel}>
-                                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                            <Typography className={classes.heading} variant='h6'>{item.target}
-                                            </Typography>
-                                        </ExpansionPanelSummary>
-                                        <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                                            <Operation
-                                                operation={item}
-                                                handleUpdateList={this.handleUpdateList}
-                                                scopes={this.api.scopes}
-                                                apiPolicies={apiPolicies}
+                        <Grid>
+                            <Table>
+                                <TableRow>
+                                    <TableCell>
+                                        <Typography variant='subtitle2'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Resources.Resource.Operation'
+                                                defaultMessage='Operation'
                                             />
-                                        </ExpansionPanelDetails>
-                                    </ExpansionPanel>
-                                </div>
-                            );
-                        })}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='subtitle2'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Resources.Resource.OperationType'
+                                                defaultMessage='Operation Type'
+                                            />
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='subtitle2'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Resources.Resource.throttling.policy'
+                                                defaultMessage='Throttling Policy'
+                                            />
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='subtitle2'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Resources.Resource.scopes'
+                                                defaultMessage='Scopes'
+                                            />
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='subtitle2'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Resources.Resource.authType'
+                                                defaultMessage='Security Enabled'
+                                            />
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                                {operationList.map((item) => {
+                                    return (
+                                        <Operation
+                                            operation={item}
+                                            handleUpdateList={this.handleUpdateList}
+                                            scopes={this.props.api.scopes}
+                                            apiPolicies={apiPolicies}
+                                        />
+                                    );
+                                })}
+                            </Table>
+                        </Grid>
                     </List>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        className={classes.buttonMain}
-                        onClick={this.updateOperations}
-                    >
-                        <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
-                    </Button>
+                    <div>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            className={classes.buttonMain}
+                            onClick={this.updateOperations}
+                        >
+                            <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
+                        </Button>
+                    </div>
                 </div>
             </div>
         );
     }
 }
+
 Operations.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({
+    }).isRequired,
+    api: PropTypes.shape({
+        operations: PropTypes.object,
+        scopes: PropTypes.object,
+        updateOperations: PropTypes.func,
+        getSwagger: PropTypes.func,
+        policies: PropTypes.func,
+        id: PropTypes.string,
+    }).isRequired,
+    resourceNotFountMessage: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Operations));

@@ -67,6 +67,7 @@ export default class API extends Resource {
             return promiseGet;
         }
     }
+
     /*
      Get the inline content of a given document
      */
@@ -74,9 +75,9 @@ export default class API extends Resource {
         const promised_getDocContent = this.client.then((client) => {
             const payload = {
                 apiId: api_id,
-                documentId: docId
+                documentId: docId,
             };
-            return client.apis['Documents'].get_apis__apiId__documents__documentId__content(payload);
+            return client.apis.Documents.get_apis__apiId__documents__documentId__content(payload);
         });
         return promised_getDocContent;
     }
@@ -89,7 +90,7 @@ export default class API extends Resource {
      */
     getDocumentsByAPIId(id, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['Documents'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
+            return client.apis.Documents.get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -110,17 +111,18 @@ export default class API extends Resource {
             const payload = {
                 apiId: api_id,
                 documentId: docId,
-                Accept: 'application/octet-stream'
+                Accept: 'application/octet-stream',
             };
-            return client.apis['Documents'].get_apis__apiId__documents__documentId__content(
+            return client.apis.Documents.get_apis__apiId__documents__documentId__content(
                 payload,
                 this._requestMetaData({
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
                 }),
             );
         });
         return promised_getDocContent;
     }
+
     /**
      * Get the swagger of an API
      * @param apiId {String} UUID of the API in which the swagger is needed
@@ -130,6 +132,23 @@ export default class API extends Resource {
     getSwaggerByAPIId(apiId, callback = null) {
         const promiseGet = this.client.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the schema of an GraphQL API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getGraphQLSchemaByAPIId(apiId, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.APIs.get_apis__apiId__graphql_schema({ apiId }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);

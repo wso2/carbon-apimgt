@@ -386,7 +386,7 @@
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.orbit.re2j.*; version="1.2.wso2v1",
-                            org.wso2.orbit.graphQL.*;version="13.0.wso2v1",
+                            graphql.*; version="${graphql.java.version}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

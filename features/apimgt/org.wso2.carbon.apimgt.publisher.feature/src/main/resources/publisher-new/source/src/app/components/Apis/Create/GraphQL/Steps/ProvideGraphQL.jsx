@@ -28,6 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import Dropzone from 'react-dropzone';
 import classNames from 'classnames';
 import Backup from '@material-ui/icons/Backup';
+import Icon from '@material-ui/core/Icon';
 import API from 'AppData/api';
 
 const styles = theme => ({
@@ -50,6 +51,11 @@ const styles = theme => ({
         width: 100,
         height: 100,
     },
+    fileIcon: {
+        width: 100,
+        height: 100,
+        size: 32,
+    },
     dropZoneError: {
         color: theme.palette.error.main,
     },
@@ -64,7 +70,6 @@ const styles = theme => ({
         marginRight: theme.spacing.unit * 2,
     },
     fileNameWrapper: {
-        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         '& div': {
@@ -72,6 +77,9 @@ const styles = theme => ({
             flexDirection: 'row',
             alignItems: 'center',
         },
+    },
+    largeIcon: {
+        fontSize: 60,
     },
     FormControl: {
         padding: 0,
@@ -198,18 +206,6 @@ class ProvideGraphQL extends Component {
         return (
             <React.Fragment>
                 <React.Fragment>
-                    {file && (
-                        <div className={classes.fileNameWrapper}>
-                            <Typography variant='subtitle2' gutterBottom>
-                                <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
-                            </Typography>
-                            <div className={classes.fileName}>
-                                <Typography variant='body2' gutterBottom>
-                                    {file.name} - {file.size} bytes
-                                </Typography>
-                            </div>
-                        </div>
-                    )}
                     {valid.graphQLFile.invalidFile && (
                         <div className={classes.errorMessageWrapper}>
                             <ErrorOutline className={classes.errorIcon} />
@@ -225,13 +221,30 @@ class ProvideGraphQL extends Component {
                             [classes.dropZoneErrorBox]: valid.graphQLFile.empty,
                         })}
                     >
-                        <Backup className={classes.dropZoneIcon} />
-                        <div>
-                            <FormattedMessage
-                                id='try.dropping.schema.file.here.or.click.to.select.schema.to.upload'
-                                defaultMessage='Try dropping schema file here, or click to select schema to upload.'
-                            />
-                        </div>
+
+                        {file.name ? (
+                            <div>
+                                <Icon className={classes.largeIcon}>
+                                    insert_drive_file
+                                </Icon>
+                                <div className={classes.fileNameWrapper}>
+                                    <Typography variant='body2' gutterBottom>
+                                        {file.name} - {file.size} bytes
+                                    </Typography>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <Backup className={classes.dropZoneIcon} />
+                                <div>
+                                    <FormattedMessage
+                                        id='try.dropping.schema.file.here.or.click.to.select.schema.to.upload'
+                                        defaultMessage='Try dropping schema file here, or click to select
+                                        schema to upload.'
+                                    />
+                                </div>
+                            </div>)}
+
                     </Dropzone>
                     <FormHelperText className={classes.errorMessage}>
                         {valid.graphQLFile.empty && (
