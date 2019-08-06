@@ -1,12 +1,30 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
 import { injectIntl } from 'react-intl';
+import API from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
-import API from '../../../data/api';
 import ApiThumb from './ApiThumb';
 
 function LinkGenerator(props) {
@@ -119,11 +137,16 @@ class ApiTableView extends React.Component {
         });
     };
 
-    // mock async function
     xhrRequest = () => {
-        const api = new API();
         const { page, rowsPerPage } = this;
-        return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+        const { kind } = this.props;
+        if (kind === 'apis') {
+            const api = new API();
+            return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+        } else {
+            const apiProduct = new APIProduct();
+            return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+        }
     };
 
     changePage = (page) => {
@@ -140,12 +163,14 @@ class ApiTableView extends React.Component {
 
     setLocalStorage = () => {
         // Set the page to the localstorage
+        const { kind } = this.props;
         const pagination = { page: this.page, count: this.count, rowsPerPage: this.rowsPerPage };
-        window.localStorage.setItem('pagination', JSON.stringify(pagination));
+        window.localStorage.setItem('pagination-' + kind, JSON.stringify(pagination));
     };
 
     getLocalStorage = () => {
-        const storedPagination = window.localStorage.getItem('pagination');
+        const { kind } = this.props;
+        const storedPagination = window.localStorage.getItem('pagination-' + kind);
         if (storedPagination) {
             const pagination = JSON.parse(storedPagination);
             if (pagination.page && pagination.count && pagination.rowsPerPage) {

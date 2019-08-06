@@ -17,6 +17,10 @@
         "Roles": "admin,Internal/publisher,Internal/creator"
       },
       {
+        "Name": "apim:api_delete",
+        "Roles": "admin,Internal/creator"
+      },
+      {
         "Name": "apim:subscribe",
         "Roles": "admin,Internal/subscriber"
       },
@@ -42,7 +46,7 @@
       },
       {
         "Name": "apim:subscription_block",
-        "Roles": "admin,Internal/creator"
+        "Roles": "admin,Internal/publisher"
       },
       {
         "Name": "apim:mediation_policy_view",
@@ -55,6 +59,86 @@
       {
         "Name": "apim:api_workflow",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:app_owner_change",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:app_import_export",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:label_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:label_read",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:app_update",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name": "apim:app_manage",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name": "apim:sub_manage",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name" : "apim:monetization_usage_publish",
+        "Roles": "admin, Internal/publisher"
+      },
+      {
+        "Name": "apim:document_create",
+        "Roles": "admin, Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:ep_certificates_update",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:client_certificates_update",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:threat_protection_policy_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:document_manage",
+        "Roles": "admin, Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:client_certificates_add",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:publisher_settings",
+        "Roles": "admin,Internal/creator,Internal/publisher"
+      },
+      {
+        "Name": "apim:client_certificates_view",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:mediation_policy_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:threat_protection_policy_create",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:ep_certificates_add",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:ep_certificates_view",
+        "Roles": "admin,Internal/creator"
       }
     ]
   },

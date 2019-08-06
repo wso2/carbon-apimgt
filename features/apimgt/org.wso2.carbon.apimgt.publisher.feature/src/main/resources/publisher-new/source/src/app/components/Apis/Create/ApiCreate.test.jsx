@@ -16,9 +16,9 @@
  * under the License.
  */
 
- describe('Unit test for ApiCreate component', () => {
-     test.todo('should render ApiCreateEndpoint when navigating to /apis/create/rest url');
-     test.todo('should render ApiCreateSwagger when navigating to /apis/create/swagger url');
-     test.todo('should render ApiCreateWSDL when navigating to /apis/create/wsdl url');
-     test.todo('should render page not found when navigating to /apis/create/chuck/norris url');
- });
+describe('Unit test for ApiCreate component', () => {
+    test.todo('should render ApiCreateEndpoint when navigating to /apis/create/rest url');
+    test.todo('should render ApiCreateSwagger when navigating to /apis/create/swagger url');
+    test.todo('should render ApiCreateWSDL when navigating to /apis/create/wsdl url');
+    test.todo('should render page not found when navigating to /apis/create/chuck/norris url');
+});

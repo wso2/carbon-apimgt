@@ -35,6 +35,14 @@ public class BadRequestException extends WebApplicationException {
         message = errorDTO.getDescription();
     }
 
+    public BadRequestException(String message, Throwable e, ErrorDTO errorDTO){
+        super(message, e, Response.status(Response.Status.BAD_REQUEST)
+                .entity(errorDTO)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .build());
+        this.message = message;
+    }
+
     public BadRequestException(){
         super(Response.Status.BAD_REQUEST);
     }

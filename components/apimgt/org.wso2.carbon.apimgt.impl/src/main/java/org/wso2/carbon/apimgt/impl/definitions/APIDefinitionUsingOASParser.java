@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.models.Contact;
@@ -44,19 +45,39 @@ import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.parser.OpenAPIParser;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ErrorItem;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -94,13 +115,13 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                 template.setUriTemplate(pathString);
 
                 if (op.getSecurity() != null) {
-                    // If scopes defined in the operation level set those to the URL template 
+                    // If scopes defined in the operation level set those to the URL template
                     List<String> scopes = getOAuth2ScopeListFromSecurityElementMap(oauth2SchemeKey, op.getSecurity());
                     if (scopes != null) {
                         template = setScopesToTemplate(template, scopes);
                     }
                 } else if (globalScopes != null && globalScopes.size() > 0) {
-                    // If there are no scopes defined in the operation level but there are global scopes, then set those 
+                    // If there are no scopes defined in the operation level but there are global scopes, then set those
                     template = setScopesToTemplate(template, globalScopes);
                 }
 
@@ -166,7 +187,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         OAuth2Definition oAuth2Definition = new OAuth2Definition().password("https://test.com");
 
         Set<Scope> scopes = api.getScopes();
-        
+
         if (scopes != null && !scopes.isEmpty()) {
             List<Map<String,String>> xSecurityScopesArray = new ArrayList<>();
             for (Scope scope : scopes) {
@@ -198,7 +219,8 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     @Override
-    public String generateAPIDefinition(API api, String apiDefinition) throws APIManagementException {
+    public String generateAPIDefinition(API api, String apiDefinition, boolean syncOperations)
+            throws APIManagementException {
         SwaggerParser parser = new SwaggerParser();
         Swagger swaggerObj = parser.parse(apiDefinition);
 
@@ -214,7 +236,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                 //remove paths that are not in URI Templates
                 swaggerObj.getPaths().remove(pathName);
             } else {
-                //If path is available in the URI template, then check for operations(verbs) 
+                //If path is available in the URI template, then check for operations(verbs)
                 for (Map.Entry<HttpMethod, Operation> operationEntry : path.getOperationMap().entrySet()) {
                     HttpMethod httpMethod = operationEntry.getKey();
                     Operation operation = operationEntry.getValue();
@@ -223,7 +245,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
                         // if particular operation is not available in URI templates, then remove it from swagger
                         path.set(httpMethod.toString().toLowerCase(), null);
                     } else {
-                        // if operation is available in URI templates, update swagger operation 
+                        // if operation is available in URI templates, update swagger operation
                         // with auth type, scope etc
                         updateOperationManagedInfo(template, operation);
                     }
@@ -243,14 +265,14 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
             }
         }
 
-        // add to swagger if there are any new templates 
+        // add to swagger if there are any new templates
         for (Map.Entry<String, Map<String, URITemplate>> uriTemplateMapEntry : uriTemplateMap.entrySet()) {
             String path = uriTemplateMapEntry.getKey();
             Map<String, URITemplate> verbMap = uriTemplateMapEntry.getValue();
             if (swaggerObj.getPath(path) == null) {
                 for (Map.Entry<String, URITemplate> verbMapEntry : verbMap.entrySet()) {
                     URITemplate uriTemplate = verbMapEntry.getValue();
-                    addOrUpdatePathToSwagger(swaggerObj, uriTemplate);   
+                    addOrUpdatePathToSwagger(swaggerObj, uriTemplate);
                 }
             }
         }
@@ -265,9 +287,131 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     @Override
-    public String validateAPIDefinition(String apiDefinition) throws APIManagementException {
+    public APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, boolean returnJsonContent)
+            throws APIManagementException {
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        boolean fallbackToV2 = false;
 
-        return null;
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
+            validationResponse.setValid(false);
+            for (String message : parseAttemptForV3.getMessages()) {
+                addErrorToValidationResponse(validationResponse, message);
+                if (message.contains("openapi is missing")) {
+                    //reset the validation status and fallback to v2 validation
+                    fallbackToV2 = true;
+                    validationResponse = new APIDefinitionValidationResponse();
+                    break;
+                }
+            }
+        } else {
+            OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+            io.swagger.v3.oas.models.info.Info info = openAPI.getInfo();
+            updateValidationResponseAsSuccess(validationResponse, apiDefinition,
+                    openAPI.getOpenapi(), info.getTitle(), info.getVersion(), null, info.getDescription());
+            if (returnJsonContent) {
+                validationResponse.setJsonContent(Json.pretty(parseAttemptForV3.getOpenAPI()));
+            }
+        }
+
+        if (fallbackToV2) {
+            SwaggerParser parser = new SwaggerParser();
+            SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition, false);
+            if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
+                for (String message : parseAttemptForV2.getMessages()) {
+                    ErrorItem errorItem = addErrorToValidationResponse(validationResponse, message);
+                    if (message.contains("swagger is missing")) {
+                        errorItem.setDescription("attribute swagger or openapi should present");
+                        break;
+                    }
+                }
+            } else {
+                Swagger swagger = parseAttemptForV2.getSwagger();
+                Info info = swagger.getInfo();
+                updateValidationResponseAsSuccess(validationResponse, apiDefinition,
+                        swagger.getSwagger(), info.getTitle(), info.getVersion(), swagger.getBasePath(),
+                        info.getDescription());
+                if (returnJsonContent) {
+                    validationResponse.setJsonContent(getSwaggerJsonString(parseAttemptForV2.getSwagger()));
+                }
+
+            }
+        }
+
+        return validationResponse;
+    }
+
+    /**
+     * Update the APIDefinitionValidationResponse object with success state using the values given
+     *
+     * @param validationResponse APIDefinitionValidationResponse object to be updated
+     * @param originalAPIDefinition original API Definition
+     * @param openAPIVersion version of OpenAPI Spec (2.0 or 3.0.0)
+     * @param title title of the OpenAPI Definition
+     * @param version version of the OpenAPI Definition
+     * @param context base path of the OpenAPI Definition
+     * @param description description of the OpenAPI Definition
+     */
+    private void updateValidationResponseAsSuccess(APIDefinitionValidationResponse validationResponse,
+            String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
+            String description) {
+        validationResponse.setValid(true);
+        validationResponse.setContent(originalAPIDefinition);
+        APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
+        info.setOpenAPIVersion(openAPIVersion);
+        info.setName(title);
+        info.setVersion(version);
+        info.setContext(context);
+        info.setDescription(description);
+        validationResponse.setInfo(info);
+    }
+
+    /**
+     * Add error item with the provided message to the provided validation response object
+     *
+     * @param validationResponse APIDefinitionValidationResponse object
+     * @param errMessage error message
+     * @return added ErrorItem object
+     */
+    private ErrorItem addErrorToValidationResponse(APIDefinitionValidationResponse validationResponse,
+            String errMessage) {
+        ErrorItem errorItem = new ErrorItem();
+        errorItem.setErrorCode(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode());
+        errorItem.setMessage(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorMessage());
+        errorItem.setDescription(errMessage);
+        validationResponse.getErrorItems().add(errorItem);
+        return errorItem;
+    }
+
+    @Override
+    public APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent)
+            throws APIManagementException {
+
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        try {
+            URL urlObj = new URL(url);
+            HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+            HttpGet httpGet = new HttpGet(url);
+
+            HttpResponse response = httpClient.execute(httpGet);
+
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
+                String responseStr = EntityUtils.toString(response.getEntity());
+                validationResponse = validateAPIDefinition(responseStr, returnJsonContent);
+            } else {
+                validationResponse.setValid(false);
+                validationResponse.getErrorItems().add(ExceptionCodes.OPENAPI_URL_NO_200);
+            }
+        } catch (IOException e) {
+            ErrorHandler errorHandler = ExceptionCodes.OPENAPI_URL_MALFORMED;
+            //Log the error and continue since this method is only intended to validate a definition
+            log.error(errorHandler.getErrorDescription(), e);
+
+            validationResponse.setValid(false);
+            validationResponse.getErrorItems().add(errorHandler);
+        }
+        return validationResponse;
     }
 
     /**
@@ -350,7 +494,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     /**
      * Add a new path based on the provided URI template to swagger if it does not exists. If it exists,
      * adds the respective operation to the existing path
-     * 
+     *
      * @param swagger swagger object
      * @param uriTemplate URI template
      */
@@ -370,7 +514,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     /**
      * Creates a new operation object using the URI template object
-     * 
+     *
      * @param uriTemplate URI template
      * @return a new operation object using the URI template object
      */
@@ -394,7 +538,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     /**
      *  Updates managed info of a provided operation such as auth type and throttling
-     * 
+     *
      * @param uriTemplate URI template
      * @param operation swagger operation
      */
@@ -414,7 +558,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     /**
-     * Creates a json string using the swagger object. 
+     * Creates a json string using the swagger object.
      *
      * @param swaggerObj swagger object
      * @return json string using the swagger object

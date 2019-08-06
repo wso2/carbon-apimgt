@@ -174,7 +174,7 @@ class ApiThumb extends React.Component {
         const details_link = '/apis/' + this.props.api.id;
         const { api, classes, theme } = this.props;
         const { thumbnail } = theme.custom;
-        const { 
+        const {
             name, version, context, provider,
         } = api;
         const { rating } = this.state;
@@ -256,8 +256,8 @@ class ApiThumb extends React.Component {
 }
 
 ApiThumb.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(ApiThumb);

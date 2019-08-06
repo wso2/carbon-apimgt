@@ -208,7 +208,6 @@ class APIInputForm extends Component {
                 {isAPIProduct ? null : (
                     <FormControl margin='normal' className={classes.FormControlOdd}>
                         <TextField
-                            error={valid.version.empty}
                             fullWidth
                             id='endpoint'
                             placeholder='E.g: http://appserver/resource'

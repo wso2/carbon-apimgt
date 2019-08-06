@@ -1,92 +1,68 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+/**
+ * This class will handle the post authentication steps in incoming requests.
+ * This will check whether both OAuthAuthenticationInterceptor and BasicAuthenticationInterceptor were skipped and 
+ * throws a 401 unauthenticated error.
+ */
 public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
-    private static final Log logger = LogFactory.getLog(PostAuthenticationInterceptor.class);
-    private static final String SUPER_TENANT_DOMAIN_NAME = "carbon.super";
+    private static final Log log = LogFactory.getLog(PostAuthenticationInterceptor.class);
+
     public PostAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
     }
 
+    /**
+     * Handles the incoming message after post authentication. Validate the authentication scheme of the incoming request
+     * based on the properties set by previous interceptors. If non of the authentication scheme is set, return a 401
+     * unauthenticated response.
+     * 
+     * @param inMessage cxf incoming message
+     */
     @Override
-    public void handleMessage(Message message) throws Fault {
-        String username = RestApiUtil.getLoggedInUsername();
-        String groupId = RestApiUtil.getLoggedInUserGroupId();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        try {
-            //takes a consumer object using the user set in thread local carbon context
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            Subscriber subscriber = apiConsumer.getSubscriber(username);
-            if (subscriber == null) {
-                try {
-                    APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
-                } catch (APIManagementException e) {
-                    // When user does not have subscribe permission we will log it and continue flow.
-                    // This happens when user tries to access anonymous apis although he does not have subscribe permission. It should be allowed.
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("User " + username + " does not have subscribe permission", e);
-                    }
-                    return;
-                }
-                if (!SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain)) {
-                    loadTenantRegistry();
-                }
-                apiConsumer.addSubscriber(username, groupId);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Subscriber " + username + " added to AM_SUBSCRIBER database");
-                }
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Unable to add the subscriber " + username, e, logger);
+    public void handleMessage(Message inMessage) {
+        //by-passes the interceptor if user calls an anonymous api
+        if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
+            return;
+        }
+
+        String authScheme = (String) inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME);
+        //check if the request does not have either the bearer or basic auth header. If so, throw 401 
+        //unauthenticated error.
+        if (!StringUtils.equals(authScheme, RestApiConstants.OAUTH2_AUTHENTICATION)
+                && !StringUtils.equals(authScheme, RestApiConstants.BASIC_AUTHENTICATION)) {
+            log.error("Authentication failed: Bearer/Basic authentication header is missing");
+            throw new AuthenticationException("Unauthenticated request");
         }
     }
-
-    private void loadTenantRegistry() throws APIManagementException {
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        try {
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            APIUtil.loadTenantRegistry(tenantId);
-            APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
-            APIUtil.loadTenantExternalStoreConfig(tenantId);
-            APIUtil.loadTenantWorkFlowExtensions(tenantId);
-            APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-            APIUtil.loadTenantConf(tenantId);
-
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error occured while loading registry for tenant '" + tenantDomain + "'");
-        }
-    }
-
 }

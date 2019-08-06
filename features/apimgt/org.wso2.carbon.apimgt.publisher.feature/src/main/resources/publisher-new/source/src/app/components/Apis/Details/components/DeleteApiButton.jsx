@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 
+import API from 'AppData/api';
 import { resourceMethod, resourcePath, ScopeValidation } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
@@ -99,8 +100,8 @@ class DeleteApiButton extends React.Component {
      * @memberof DeleteApiButton
      */
     handleApiDelete() {
-        const { api, history, isAPIProduct } = this.props;
-        if (isAPIProduct) {
+        const { api, history } = this.props;
+        if (api.apiType === API.CONSTS.APIProduct) {
             api.deleteProduct().then((response) => {
                 if (response.status !== 200) {
                     console.log(response);
@@ -133,10 +134,10 @@ class DeleteApiButton extends React.Component {
      */
     render() {
         const {
-            api, onClick, classes, isAPIProduct,
+            api, onClick, classes,
         } = this.props;
-        const type = isAPIProduct ? 'API Product ' : 'API ';
-        const version = isAPIProduct ? null : '-' + api.version;
+        const type = (api.apiType === API.CONSTS.APIProduct) ? 'API Product ' : 'API ';
+        const version = (api.apiType === API.CONSTS.APIProduct) ? null : '-' + api.version;
         const deleteHandler = onClick || this.handleApiDelete;
         return (
             <React.Fragment>
@@ -203,7 +204,6 @@ DeleteApiButton.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     onClick: PropTypes.func,
     classes: PropTypes.shape({}).isRequired,
-    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default withRouter(withStyles(styles, { withTheme: true })(DeleteApiButton));

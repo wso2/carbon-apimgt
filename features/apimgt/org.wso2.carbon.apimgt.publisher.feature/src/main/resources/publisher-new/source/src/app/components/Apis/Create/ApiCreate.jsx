@@ -24,7 +24,7 @@ import { PageNotFound } from 'AppComponents/Base/Errors/index';
 
 import APICreateWrapper from './Default/APICreateWrapper';
 import APIProductCreateWrapper from './Default/APIProductCreateWrapper';
-import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
+import ApiCreateSwagger from './OpenAPI/ApiCreateOpenAPI';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
 
@@ -48,7 +48,7 @@ function ApiCreate(props) {
             <Switch>
                 <Route path='/apis/create/rest' component={APICreateWrapper} />
                 <Route path='/api-products/create' component={APIProductCreateWrapper} />
-                <Route path='/apis/create/swagger' component={ApiCreateSwagger} />
+                <Route path='/apis/create/openapi' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
                 <Route path='/apis/create/ws' component={ApiCreateWebSocket} />
                 <Route component={PageNotFound} />
