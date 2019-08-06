@@ -24,6 +24,7 @@ import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import API from 'AppData/api';
 import ApiContext from '../components/ApiContext';
 
 function Policies(props) {
@@ -39,7 +40,9 @@ function Policies(props) {
                                 defaultMessage='Throttling Policies'
                             />
                         </Typography>
-                        <Link to={'/apis/' + api.id + '/documents'}>
+                        <Link to={(api.apiType === API.CONSTS.APIProduct ? '/api-products/' : '/apis/')
+                            + api.id + '/documents'}
+                        >
                             <Button variant='contained' color='default'>
                                 <FormattedMessage
                                     id='Apis.Details.NewOverview.Policies.edit'
