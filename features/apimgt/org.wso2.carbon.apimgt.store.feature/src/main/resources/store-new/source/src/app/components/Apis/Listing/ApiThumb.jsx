@@ -18,7 +18,6 @@
 
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -177,7 +176,7 @@ class ApiThumb extends React.Component {
         const { thumbnail } = theme.custom;
         const { 
             name, version, context, provider,
-        } = this.props.api;
+        } = api;
         const { rating } = this.state;
         const starColor = theme.palette.getContrastText(thumbnail.contentBackgroundColor);
         const imageWidth = thumbnail.width;

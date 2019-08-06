@@ -17,13 +17,7 @@
  */
 
 import React from 'react';
-import qs from 'qs';
-import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
 import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -31,9 +25,6 @@ import List from '@material-ui/icons/List';
 import { FormattedMessage } from 'react-intl';
 import GridIcon from '@material-ui/icons/GridOn';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Loading from '../../Base/Loading/Loading';
-import API from '../../../data/api';
-import ApiThumb from './ApiThumb';
 import CustomIcon from '../../Shared/CustomIcon';
 import ApiTableView from './ApiTableView';
 
@@ -43,9 +34,6 @@ import ApiTableView from './ApiTableView';
  * @param {*} theme
  */
 const styles = theme => ({
-    rightIcon: {
-        marginLeft: theme.spacing.unit,
-    },
     button: {
         margin: theme.spacing.unit,
         marginBottom: 0,
@@ -53,11 +41,6 @@ const styles = theme => ({
     buttonRight: {
         alignSelf: 'flex-end',
         display: 'flex',
-    },
-    ListingWrapper: {
-        paddingTop: 10,
-        paddingLeft: 35,
-        width: theme.custom.contentAreaWidth,
     },
     root: {
         height: 70,
@@ -80,100 +63,7 @@ const styles = theme => ({
         flexGrow: 1,
     },
 });
-/**
- *
- *
- * @param {*} order
- * @param {*} orderBy
- * @returns
- */
-function getSorting(order, orderBy) {
-    return order === 'desc'
-        ? (a, b) => (b[orderBy] < a[orderBy] ? -1 : 1)
-        : (a, b) => (a[orderBy] < b[orderBy] ? -1 : 1);
-}
-/**
- *
- *
- * @class EnhancedAPITableHead
- * @extends {React.Component}
- */
-class EnhancedAPITableHead extends React.Component {
-    static propTypes = {
-        onRequestSort: PropTypes.func.isRequired,
-        order: PropTypes.string.isRequired,
-        orderBy: PropTypes.string.isRequired,
-    };
 
-    /**
-     *
-     *
-     * @memberof EnhancedAPITableHead
-     */
-    createSortHandler = property => (event) => {
-        this.props.onRequestSort(event, property);
-    };
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof EnhancedAPITableHead
-     */
-    render() {
-        const columnData = [
-            {
-                id: 'name',
-                numeric: false,
-                disablePadding: true,
-                label: 'Name',
-            },
-            {
-                id: 'version',
-                numeric: false,
-                disablePadding: false,
-                label: 'Version',
-            },
-            {
-                id: 'context',
-                numeric: false,
-                disablePadding: false,
-                label: 'Context',
-            },
-            {
-                id: 'rating',
-                numeric: false,
-                disablePadding: false,
-                label: 'Rating',
-            },
-        ];
-        const { order, orderBy } = this.props;
-
-        return (
-            <TableHead>
-                <TableRow>
-                    {columnData.map((column) => {
-                        return (
-                            <TableCell
-                                key={column.id}
-                                numeric={column.numeric}
-                                sortDirection={orderBy === column.id ? order : false}
-                            >
-                                <TableSortLabel
-                                    active={orderBy === column.id}
-                                    direction={order}
-                                    onClick={this.createSortHandler(column.id)}
-                                >
-                                    {column.label}
-                                </TableSortLabel>
-                            </TableCell>
-                        );
-                    }, this)}
-                </TableRow>
-            </TableHead>
-        );
-    }
-}
 /**
  *
  *
@@ -204,46 +94,6 @@ class Listing extends React.Component {
     /**
      *
      *
-     * @memberof Listing
-     */
-    componentDidMount() {
-        const api = new API();
-        const promised_apis = api.getAllAPIs();
-        promised_apis
-            .then((response) => {
-                this.setState({ apis: response.obj });
-            })
-            .catch((error) => {
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
-                }
-            });
-    }
-
-    /**
-     *
-     *
-     * @memberof Listing
-     */
-    handleRequestSort = (event, property) => {
-        const orderBy = property;
-        let order = 'desc';
-
-        if (this.state.orderBy === property && this.state.order === 'desc') {
-            order = 'asc';
-        }
-
-        this.setState({ order, orderBy });
-    };
-
-    /**
-     *
-     *
      * @returns
      * @memberof Listing
      */
@@ -252,7 +102,6 @@ class Listing extends React.Component {
             return <ResourceNotFound />;
         }
 
-        const { order, orderBy, apis } = this.state;
         const { theme, classes } = this.props;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
@@ -283,26 +132,8 @@ class Listing extends React.Component {
                         </IconButton>
                     </div>
                 </div>
-
-                <Grid container spacing={0} justify='center'>
-                    <Grid item xs={12}>
-                        {this.state.apis ? (
-                            this.state.listType === 'grid' ? (
-                                <Grid container className={classes.ListingWrapper}>
-                                    {this.state.apis.list.map(api => (
-                                        <ApiThumb api={api} key={api.id} />
-                                    ))}
-                                </Grid>
-                            ) : (
-                                <React.Fragment>
-                                    <ApiTableView apis={apis.list} />
-                                </React.Fragment>
-                            )
-                        ) : (
-                            <Loading />
-                        )}
-                    </Grid>
-                </Grid>
+                {this.state.listType === 'grid' && <ApiTableView gridView />}
+                {this.state.listType === 'list' && <ApiTableView gridView={false} />}
             </main>
         );
     }
