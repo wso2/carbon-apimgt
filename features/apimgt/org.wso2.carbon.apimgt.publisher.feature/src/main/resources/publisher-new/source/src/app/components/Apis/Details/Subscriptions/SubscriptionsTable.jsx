@@ -4,15 +4,15 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
 import withStyles from '@material-ui/core/styles/withStyles';
 import PropTypes from 'prop-types';
 
-import API from 'AppData/api';
-import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import Alert from 'AppComponents/Shared/Alert';
+import SubscriptionsBlock from 'AppComponents/Apis/Details/Subscriptions/SubscriptionsBlock';
+import API from 'AppData/api';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 
 const styles = theme => ({
     button: {
@@ -50,145 +50,6 @@ class SubscriptionsTable extends Component {
 
     componentDidMount() {
         this.fetchSubscriptionData();
-    }
-
-    /**
-     * Returns the set of action buttons based on the current subscription state
-     *
-     * @param {*} state State of the subscription (PROD_ONLY_BLOCKED/BLOCKED/ACTIVE)
-     * @param {*} subscriptionId Subscription ID
-     * @returns {JSX} Action buttons in JSX
-     * @memberof SubscriptionsTable
-     */
-    getSubscriptionBlockingButtons(state, subscriptionId) {
-        const { classes } = this.props;
-        if (state === 'PROD_ONLY_BLOCKED') {
-            return (
-                <dev>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.blockProductionOnly(subscriptionId)}
-                        className={classes.button}
-                        disabled='true'
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.block.production.only.state.prod.only'
-                            defaultMessage='Block Production Only'
-                        />
-                    </Button>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.blockSubscription(subscriptionId)}
-                        className={classes.button}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.block.all.state.prod.only'
-                            defaultMessage='Block All'
-                        />
-                    </Button>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.unblockSubscription(subscriptionId)}
-                        className={classes.button}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.unblock.state.prod.only'
-                            defaultMessage='Unblock'
-                        />
-                    </Button>
-                </dev>
-            );
-        } else if (state === 'BLOCKED') {
-            return (
-                <dev>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.blockProductionOnly(subscriptionId)}
-                        className={classes.button}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.block.production.only.state.blocked'
-                            defaultMessage='Block Production Only'
-                        />
-                    </Button>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.blockSubscription(subscriptionId)}
-                        className={classes.button}
-                        disabled='true'
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.block.all.state.blocked'
-                            defaultMessage='Block All'
-                        />
-                    </Button>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.unblockSubscription(subscriptionId)}
-                        className={classes.button}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.unblock.state.blocked'
-                            defaultMessage='Unblock'
-                        />
-                    </Button>
-                </dev>
-            );
-        } else {
-            return (
-                <dev>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.blockProductionOnly(subscriptionId)}
-                        className={classes.button}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.block.production.only.active'
-                            defaultMessage='Block Production Only'
-                        />
-                    </Button>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.blockSubscription(subscriptionId)}
-                        className={classes.button}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.block.all.active'
-                            defaultMessage='Block All'
-                        />
-                    </Button>
-                    <Button
-                        size='small'
-                        variant='outlined'
-                        color='primary'
-                        onClick={() => this.unblockSubscription(subscriptionId)}
-                        className={classes.button}
-                        disabled='true'
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.unblock.active'
-                            defaultMessage='Unblock'
-                        />
-                    </Button>
-                </dev>
-            );
-        }
     }
 
     /**
@@ -330,10 +191,8 @@ class SubscriptionsTable extends Component {
 
     render() {
         const { subscriptions } = this.state;
-        const { api } = this;
         const { classes } = this.props;
-        console.info(subscriptions);
-        console.info(api);
+
         if (subscriptions != null) {
             return (
                 <dev>
@@ -377,12 +236,17 @@ class SubscriptionsTable extends Component {
                                         defaultMessage='Status'
                                     />
                                 </TableCell>
-                                <TableCell>
-                                    <FormattedMessage
-                                        id='Apis.Details.Subscriptions.SubscriptionsTable.actions'
-                                        defaultMessage='Actions'
-                                    />
-                                </TableCell>
+                                <ScopeValidation
+                                    resourceMethod={resourceMethod.POST}
+                                    resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
+                                >
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionsTable.actions'
+                                            defaultMessage='Actions'
+                                        />
+                                    </TableCell>
+                                </ScopeValidation>
                             </TableRow>
                         </TableHead>
                         <TableBody className={classes.body}>
@@ -403,29 +267,23 @@ class SubscriptionsTable extends Component {
                                         <TableRow key={row.subscriptionId}>
                                             <TableCell>{row.applicationInfo.subscriber}</TableCell>
                                             <TableCell>{row.applicationInfo.name}</TableCell>
-                                            <TableCell>{row.policy}</TableCell>
+                                            <TableCell>{row.throttlingPolicy}</TableCell>
                                             <TableCell>
                                                 {this.formatSubscriptionStateString(row.subscriptionStatus)}
                                             </TableCell>
                                             <TableCell>
-                                                <div>
-                                                    <ApiPermissionValidation
-                                                        userPermissions={api.userPermissionsForApi}
-                                                    >
-                                                        <ApiPermissionValidation
-                                                            checkingPermissionType={
-                                                                ApiPermissionValidation.permissionType
-                                                                    .MANAGE_SUBSCRIPTION
-                                                            }
-                                                            userPermissions={api.userPermissionsForApi}
-                                                        >
-                                                            {this.getSubscriptionBlockingButtons(
-                                                                row.subscriptionStatus,
-                                                                row.subscriptionId,
-                                                            )}
-                                                        </ApiPermissionValidation>
-                                                    </ApiPermissionValidation>
-                                                </div>
+                                                <ScopeValidation
+                                                    resourceMethod={resourceMethod.POST}
+                                                    resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
+                                                >
+                                                    <SubscriptionsBlock
+                                                        subscriptionId={row.subscriptionId}
+                                                        subscriptionStatus={row.subscriptionStatus}
+                                                        blockProductionSubs={this.blockProductionOnly}
+                                                        blockAllSubs={this.blockSubscription}
+                                                        unblockSubs={this.unblockSubscription}
+                                                    />
+                                                </ScopeValidation>
                                             </TableCell>
                                         </TableRow>
                                     );

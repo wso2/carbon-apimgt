@@ -48,9 +48,9 @@ class Subscriptions extends Component {
     }
 
     render() {
-        const { api } = this.state;
+        const { api, notFound } = this.state;
         const { resourceNotFoundMessage } = this.props;
-        if (this.state.notFound) {
+        if (notFound) {
             return (<ResourceNotFound message={resourceNotFoundMessage} />);
         }
 
