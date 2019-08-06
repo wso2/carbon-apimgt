@@ -6430,7 +6430,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api != null) {
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
-		apiProductResource.setEndpointConfig(api.getEndpointConfig());
+		        apiProductResource.setEndpointConfig(api.getEndpointConfig());
                 URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
                 Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);
@@ -6815,13 +6815,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(errorMessage);
             }
 
-            Resource apiResource = registry.get(artifact.getPath());
             GenericArtifact updateApiProductArtifact = APIUtil.createAPIProductArtifactContent(artifact, apiProduct);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiProductArtifact.getId());
 
             artifactManager.updateGenericArtifact(updateApiProductArtifact);
 
-            //todo: implement visibility and access control and set permissions accordingly
+            String visibleRolesList = apiProduct.getVisibleRoles();
+            String[] visibleRoles = new String[0];
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+
+            String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
+                    apiProduct.getAdditionalProperties());
+            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
+                    artifactPath, registry);
             registry.commitTransaction();
             transactionCommitted = true;
         } catch (Exception e) {
