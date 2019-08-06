@@ -137,6 +137,7 @@ public class APIGatewayManager {
                 }
                 localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
                 if (api.getType() != null && api.getType().equals(APIConstants.APITransportType.GRAPHQL.toString())) {
+                    //Build schema with scopes and roles
                     definition = buildSchemaWithScopesAndRoles(api);
                     localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");
                     localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
@@ -444,7 +445,6 @@ public class APIGatewayManager {
      * @return schemaDefinition
      */
     private String buildSchemaWithScopesAndRoles(API api) {
-
         Swagger swagger = null;
         Map<String, String> scopeRoleMap = new HashMap<>();
         Map<String, String> scopeOperationMap = new HashMap<>();
@@ -530,7 +530,7 @@ public class APIGatewayManager {
                         scopeRoles.add(role);
                     }
 
-                    if (!scopeRoleBuilder.toString().isEmpty()) {
+                    if (!StringUtils.isEmpty(scopeRoleBuilder.toString())) {
                         scopeRoleMappingType = scopeRoleBuilder.toString() + "}\n";
                         scopeRoleMappingBuilder.append(scopeRoleMappingType);
                     }
@@ -1252,7 +1252,6 @@ public class APIGatewayManager {
      * @param api
      * @param tenantDomain
      * @param environment
-     * @param operation -add,delete,update operations for an API
      * @throws APIManagementException
      */
 	private void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain, Environment

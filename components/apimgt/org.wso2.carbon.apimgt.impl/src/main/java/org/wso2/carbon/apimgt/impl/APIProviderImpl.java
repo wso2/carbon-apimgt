@@ -1490,7 +1490,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException, FaultGatewaysException {
         Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         String currentStatus = api.getStatus();
-        String definition = "";
         if (!currentStatus.equals(status)) {
             api.setStatus(status);
             try {

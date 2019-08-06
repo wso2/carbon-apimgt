@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
+import graphql.parser.InvalidSyntaxException;
 import graphql.schema.GraphQLType;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -69,20 +70,17 @@ import javax.xml.stream.XMLStreamException;
 public class GraphQLAPIHandler extends AbstractHandler {
 
     private static final String QUERY_PATH_STRING = "/?query=";
-    private static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
     private static final String GRAPHQL_SCOPE_ROLE_MAPPING = "GRAPHQL_SCOPE_ROLE_MAPPING";
     private static final String GRAPHQL_SCOPE_OPERATION_MAPPING = "GRAPHQL_SCOPE_OPERATION_MAPPING";
-    private static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
     private static final String API_TYPE = "API_TYPE";
     private static final String GRAPHQL_API = "GRAPHQL";
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
     private static final String INVALID_QUERY = "INVALID QUERY";
-
-    private static final String scopeRoleMapping = "ScopeRoleMapping";
-    private static final String scopeOperationMapping = "ScopeOperationMapping";
-    private static final String graphQLIdentifier = "_graphQL";
-    private static final String classNameAndMethod = "_GraphQLAPIHandler_handleRequest";
+    private static final String SCOPE_ROLE_MAPPING = "ScopeRoleMapping";
+    private static final String SCOPE_OPERATION_MAPPING = "ScopeOperationMapping";
+    private static final String GRAPHQL_IDENTIFIER = "_graphQL";
+    private static final String CLASS_NAME_AND_METHOD = "_GraphQLAPIHandler_handleRequest";
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
     private static GraphQLSchema schema = null;
     private static Validator validator;
@@ -93,12 +91,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private String apiUUID;
 
     public String getApiUUID() {
-
         return apiUUID;
     }
 
     public void setApiUUID(String apiUUID) {
-
         this.apiUUID = apiUUID;
     }
 
@@ -144,10 +140,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
             // Validate payload with graphQLSchema
             Document document = parser.parseDocument(payload);
-            synchronized (apiUUID + classNameAndMethod) {
+            synchronized (apiUUID + CLASS_NAME_AND_METHOD) {
                 if (schema == null) {
                     Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID +
-                                graphQLIdentifier);
+                                GRAPHQL_IDENTIFIER);
                     if (localEntryObj != null) {
                         SchemaParser schemaParser = new SchemaParser();
                         TypeDefinitionRegistry registry = schemaParser.parse(localEntryObj.getValue().toString());
@@ -176,11 +172,11 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalType.getName().
                             split("_", 2)[1]));
                     for (GraphQLType type : additionalType.getChildren()) {
-                        if (additionalType.getName().contains(scopeRoleMapping)) {
+                        if (additionalType.getName().contains(SCOPE_ROLE_MAPPING)) {
                             String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
                             roleArrayList = new ArrayList<>();
                             roleArrayList.add(base64DecodedURLRole);
-                        } else if (additionalType.getName().contains(scopeOperationMapping)) {
+                        } else if (additionalType.getName().contains(SCOPE_OPERATION_MAPPING)) {
                             String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
                             operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
                         }
@@ -229,7 +225,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     return false;
                 }
             }
-        } catch (IOException | XMLStreamException e) {
+        } catch (IOException | XMLStreamException | InvalidSyntaxException e) {
             log.error(e.getMessage());
             handleFailure(messageContext, e.getMessage());
         }
@@ -243,7 +239,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
     }
 
     private static void setFaultPayload(MessageContext messageContext, OMElement payload) {
-
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         JsonUtil.removeJsonPayload(axis2MC);
@@ -275,7 +270,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
     }
 
     private static void sendFault(MessageContext messageContext) {
-
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
 
@@ -297,7 +291,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
     }
 
     private OMElement getFaultPayload(String message) {
-
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
                 APISecurityConstants.API_SECURITY_NS_PREFIX);
@@ -318,7 +311,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     @Override
     public boolean handleResponse(MessageContext messageContext) {
-
         return true;
     }
 }
