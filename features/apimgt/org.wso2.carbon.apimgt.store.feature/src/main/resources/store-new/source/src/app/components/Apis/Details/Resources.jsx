@@ -24,6 +24,7 @@ import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { injectIntl } from 'react-intl';
 import Api from '../../../data/api';
+import CONSTS from '../../../data/Constants';
 
 /**
  *
@@ -140,7 +141,7 @@ class Resources extends React.Component {
                                     {key}
                                 </Typography>
                                 {Object.keys(path).map((innerKey) => {
-                                    return Api.CONSTS.HTTP_METHODS.includes(innerKey)
+                                    return CONSTS.HTTP_METHODS.includes(innerKey)
                                         ? <RenderMethod method={innerKey} /> : null;
                                 })}
                             </div>

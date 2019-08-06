@@ -582,9 +582,3 @@ export default class API extends Resource {
         return promised_getAPIThumbnail;
     }
 }
-
-API.CONSTS = {
-    HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head'],
-};
-
-Object.freeze(API.CONSTS);

@@ -43,6 +43,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Resource from './Resource';
 import Api from 'AppData/api';
+import CONSTS from 'AppData/Constants';
 import { Progress } from 'AppComponents/Shared';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import { Radio, RadioGroup} from "@material-ui/core";
@@ -345,7 +346,7 @@ class Resources extends React.Component {
                 existingPathVale = tmpPaths[this.state.tmpResourceName];
             }
         }
-        Api.CONSTS.HTTP_METHODS.map((method) => {
+        CONSTS.HTTP_METHODS.map((method) => {
             switch (method) {
                 case 'get':
                     if ('get' in existingPathVale) {
@@ -730,7 +731,7 @@ class Resources extends React.Component {
                                     </ExpansionPanelSummary>
                                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
                                         {Object.keys(path).map((innerKey) => {
-                                            return Api.CONSTS.HTTP_METHODS.includes(innerKey) ?
+                                            return CONSTS.HTTP_METHODS.includes(innerKey) ?
                                                 <Resource path={key} method={innerKey} methodData={path[innerKey]}
                                                              updatePath={that.updatePath} scopes={api.scopes}
                                                              apiPolicies={apiPolicies}

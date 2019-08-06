@@ -1430,7 +1430,6 @@ class API extends Resource {
 API.CONSTS = {
     API: 'API',
     APIProduct: 'APIProduct',
-    HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head'],
 };
 
 Object.freeze(API.CONSTS);
