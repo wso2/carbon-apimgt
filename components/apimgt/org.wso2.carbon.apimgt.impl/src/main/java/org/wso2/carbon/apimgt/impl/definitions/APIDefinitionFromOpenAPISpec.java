@@ -358,6 +358,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                 addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
             }
         }
+
         swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
         swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
         populateSwaggerScopeInfo(swaggerObject, api.getScopes());
@@ -398,9 +399,9 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                         JSONObject typeOfPayload = new JSONObject();
                         schema.put("type", "object");
                         typeOfPayload.put("type", "string");
-                        payload.put("payload",typeOfPayload);
-                        schema.put("properties" , payload);
-                        queryParamObj.put("schema",schema);
+                        payload.put("payload", typeOfPayload);
+                        schema.put("properties", payload);
+                        queryParamObj.put("schema", schema);
                         parameter = "payload";
                         inValue = "body";
                         description = "query or mutation to be passed to graphQL API";
@@ -427,19 +428,15 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         JSONParser parser = new JSONParser();
         try {
             JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
-
-            //Generates below model using the API's URI template
-            // path -> [verb1 -> template1, verb2 -> template2, ..]
-            Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
-
-            if (syncOperations) {
-                syncAPIDefinitionWithURITemplates(swaggerObj, uriTemplateMap);
-            } else {
-                setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
             if (!api.getType().equals(APIConstants.GRAPHQL_API)) {
                 //Generates below model using the API's URI template
                 // path -> [verb1 -> template1, verb2 -> template2, ..]
                 Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
+                if (syncOperations) {
+                    syncAPIDefinitionWithURITemplates(swaggerObj, uriTemplateMap);
+                } else {
+                    setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
+                }
                 JSONObject pathsJsonObj = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_PATHS);
                 Iterator pathEntriesIterator = pathsJsonObj.entrySet().iterator();
                 while (pathEntriesIterator.hasNext()) {
@@ -497,7 +494,6 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                     }
                 }
             }
-
             // add scope in the API object to swagger
             populateSwaggerScopeInfo(swaggerObj, api.getScopes());
             return swaggerObj.toJSONString();
