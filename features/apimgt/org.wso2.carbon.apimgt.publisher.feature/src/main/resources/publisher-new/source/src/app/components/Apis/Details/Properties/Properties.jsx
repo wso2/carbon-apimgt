@@ -339,6 +339,7 @@ class Properties extends React.Component {
                     handleUpdateList={this.handleUpdateList}
                     handleDelete={this.handleDelete}
                     apiAdditionalProperties={data}
+                    {...this.props}
                 />);
             }
         }
