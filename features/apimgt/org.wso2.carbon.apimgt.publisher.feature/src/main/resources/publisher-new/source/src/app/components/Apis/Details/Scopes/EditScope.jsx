@@ -59,9 +59,9 @@ class EditScope extends React.Component {
         this.api_uuid = props.match.params.api_uuid;
         const { api, location } = this.props;
         this.state = {
-            apiScope: api.scopes.filter((scope) => {
+            apiScope: api.scopes.find((scope) => {
                 return scope.name === location.state.scopeName;
-            })[0],
+            }),
         };
         this.updateScope = this.updateScope.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
@@ -75,8 +75,9 @@ class EditScope extends React.Component {
         const restApi = new Api();
         const updatedScope = this.state.apiScope;
         const { intl, api, history } = this.props;
+        // temp fix to deep copy
         // eslint-disable-next-line no-underscore-dangle
-        const apiData = api._data;
+        const apiData = JSON.parse(JSON.stringify(api._data));
         apiData.scopes = api.scopes.map((scope) => {
             if (scope.name === updatedScope.name) {
                 return updatedScope;
@@ -100,6 +101,13 @@ class EditScope extends React.Component {
             const redirectURL = '/apis/' + api.id + '/scopes/';
             history.push(redirectURL);
         });
+        promisedApiUpdate.catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                const { description } = response.body;
+                Alert.error(description);
+            }
+        });
     }
 
     /**
@@ -108,6 +116,7 @@ class EditScope extends React.Component {
      * @memberof Scopes
      */
     handleInputs(event) {
+        // console.log(event);
         if (Array.isArray(event)) {
             const { apiScope } = this.state;
             apiScope.bindings.values = event;

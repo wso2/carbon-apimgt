@@ -134,7 +134,7 @@ function Overview(props) {
         loadScopes = null;
     } else if (newApi.apiType === API.CONSTS.API) {
         endpointsCheckItem = <CheckItem itemSuccess itemLabel='Endpoints' />;
-        scopesCheckItem = <CheckItem itemSuccess={false} itemLabel='Scopes' />;
+        scopesCheckItem = <CheckItem itemSuccess={newApi.scopes.length > 0} itemLabel='Scopes' />;
         loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
     }
     return (
