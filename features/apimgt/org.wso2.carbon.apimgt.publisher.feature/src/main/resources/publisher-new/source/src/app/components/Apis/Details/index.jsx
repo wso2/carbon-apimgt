@@ -251,7 +251,7 @@ class Details extends Component {
      * @memberof Details
      */
     updateAPI(newAPI, isAPIProduct) {
-        const restAPI = new Api();
+        const restAPI = (isAPIProduct || newAPI.apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
         /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
         /* eslint no-param-reassign: ["error", { "props": false }] */
         if (newAPI._data) delete newAPI._data;
@@ -261,7 +261,7 @@ class Details extends Component {
         if (modifiedNewAPI.apiType) delete modifiedNewAPI.apiType;
 
         if (isAPIProduct) {
-            const promisedApi = restAPI.updateProduct(modifiedNewAPI);
+            const promisedApi = restAPI.update(modifiedNewAPI);
             promisedApi
                 .then((response) => {
                     const { obj: api } = response;
@@ -539,7 +539,11 @@ class Details extends Component {
                                     path={Details.subPaths.BUSINESS_INFO_PRODUCT}
                                     component={() => <BusinessInformation api={api} />}
                                 />
-                                <Route path={Details.subPaths.PROPERTIES} component={() => <Properties />} />
+                                <Route path={Details.subPaths.PROPERTIES} component={() => <Properties api={api} />} />
+                                <Route
+                                    path={Details.subPaths.PROPERTIES_PRODUCT}
+                                    component={() => <Properties api={api} />}
+                                />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
                             </Switch>
                         </div>
@@ -576,6 +580,7 @@ Details.subPaths = {
     BUSINESS_INFO: '/apis/:api_uuid/business info',
     BUSINESS_INFO_PRODUCT: '/api-products/:apiprod_uuid/business info',
     PROPERTIES: '/apis/:api_uuid/properties',
+    PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
 };
 

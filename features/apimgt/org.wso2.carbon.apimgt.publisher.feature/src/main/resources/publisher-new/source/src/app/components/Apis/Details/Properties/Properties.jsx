@@ -37,6 +37,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import API from 'AppData/api.js';
 import ApiContext from '../components/ApiContext';
 
 const styles = theme => ({
@@ -486,7 +487,9 @@ class Properties extends React.Component {
                                             </div>
                                         </Grid>
                                         <Grid item>
-                                            <Link to={'/apis/' + api.id + '/overview'}>
+                                            <Link to={api.apiType === API.CONSTS.APIProduct ? 'api-products' : '/apis/'
+                                                + api.id + '/overview'}
+                                            >
                                                 <Button>
                                                     <FormattedMessage
                                                         id='Apis.Details.Properties.Properties.cancel'
@@ -511,6 +514,7 @@ Properties.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
+        apiType: PropTypes.oneOf(API.CONSTS.API, API.CONSTS.APIProduct),
     }).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };

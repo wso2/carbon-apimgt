@@ -131,6 +131,21 @@ class APIProduct extends Resource {
     }
 
     /**
+     * Update an api Product via PUT HTTP method, Need to give the updated API Product object as the argument.
+     * @param apiProduct {Object} Updated API Product object(JSON) which needs to be updated
+     */
+    update(apiProduct) {
+        const promised_update = this.client.then((client) => {
+            const payload = {
+                apiProductId: apiProduct.id,
+                body: apiProduct
+            };
+            return client.apis['API Product (Individual)'].put_api_products__apiProductId_(payload);
+        });
+        return promised_update;
+    }
+
+    /**
      * Get the thumnail of an API Product
      *
      * @param id {string} UUID of the api product
