@@ -143,6 +143,7 @@ class APIThumb extends Component {
                     height={140}
                     title='Thumbnail'
                     api={api}
+                    isAPIProduct={isAPIProduct}
                 />
                 <CardContent className={classes.apiDetails}>
                     <Typography gutterBottom variant='h5' component='h2'>
@@ -170,11 +171,15 @@ class APIThumb extends Component {
                     </Grid>
                 </CardContent>
                 <CardActions className={classes.apiActions}>
+                    <Chip
+                        label={(apiType === API.CONSTS.APIProduct) ? api.state : api.lifeCycleStatus}
+                        color='default'
+                    />
                     <Chip label={isAPIProduct ? api.state : api.lifeCycleStatus} color='default' />
                     {api.type === 'GRAPHQL' && (
                         <Chip label={api.type} color='primary' />
                     )}
-                    <DeleteApiButton onClick={this.handleApiDelete} api={api} isAPIProduct={isAPIProduct} />
+                      <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>
             </Card>

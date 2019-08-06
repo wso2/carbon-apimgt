@@ -93,6 +93,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
@@ -1548,6 +1552,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(validationResponseDTO).build();
     }
 
+    @Override
+    public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+
+        return null;
+    }
+
     /**
      * Importing an OpenAPI definition and create an API
      *
@@ -1634,7 +1644,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
     public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
           Boolean returnContent, MessageContext messageContext) {
         return Response.ok().entity("magic!").build();
@@ -1763,14 +1772,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity("magic!").build();
     }
 
-    @Override
-    public Response apisImportDefinitionPost(String type, InputStream fileInputStream, Attachment fileDetail,
-            String url, String additionalProperties, String implementationType, String ifMatch,
-            MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
-    }
-
     /**
      * Import a GraphQL Schema
      * @param type APIType
@@ -1806,7 +1807,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            API apiToAdd = createAPIByDTO(additionalPropertiesAPI);
+            API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
 
             //Save swagger definition of graphQL
             APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
@@ -1850,15 +1851,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
         return null;
     }
-
-    @Override
-    public Response apisValidateDefinitionPost(String type, String url, InputStream fileInputStream,
-            Attachment fileDetail, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
-    }
-
-
     /**
      * Validate graphQL Schema
      * @param fileInputStream  input file

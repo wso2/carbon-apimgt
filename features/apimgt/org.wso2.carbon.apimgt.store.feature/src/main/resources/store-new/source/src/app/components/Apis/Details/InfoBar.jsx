@@ -377,6 +377,7 @@ class StarRatingBar extends React.Component {
      */
     doRate(rateIndex) {
         this.setState({ rateIndex, showRateNow: false });
+
         const api = new Api();
         const ratingInfo = { rating: rateIndex / 2 };
         const promise = api.addRating(this.props.apiIdProp, ratingInfo);

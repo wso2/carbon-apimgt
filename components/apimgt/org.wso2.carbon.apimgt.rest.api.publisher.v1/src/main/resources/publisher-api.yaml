@@ -1207,7 +1207,7 @@ paths:
       x-examples:
         $ref: docs/examples/apis/apis_copyapi.yaml#/post
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         201:
           description: |

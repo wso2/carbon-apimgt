@@ -24,7 +24,6 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { FormattedMessage } from 'react-intl';
-import MaterialIcons from 'MaterialIcons';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import Api from '../../../data/api';
@@ -36,7 +35,7 @@ import Api from '../../../data/api';
  */
 const styles = theme => ({
     thumbContent: {
-        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.imageThumbnail.width - theme.spacing.unit,
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing.unit,
     },
@@ -51,7 +50,7 @@ const styles = theme => ({
         display: 'flex',
     },
     thumbHeader: {
-        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.imageThumbnail.width,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -59,7 +58,7 @@ const styles = theme => ({
         margin: 0,
     },
     contextBox: {
-        width: parseInt((theme.custom.thumbnail.width - theme.spacing.unit) / 2),
+        width: parseInt((theme.custom.imageThumbnail.width - theme.spacing.unit) / 2),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -71,27 +70,18 @@ const styles = theme => ({
     thumbWrapper: {
         position: 'relative',
         paddingTop: 20,
-        marginRight: theme.spacing.unit * 2,
     },
     deleteIcon: {
         fill: 'red',
     },
-    textWrapper: {
-        color: theme.palette.text.secondary,
-        textDecoration: 'none',
-    },
     imageWrapper: {
         color: theme.palette.text.secondary,
-        backgroundColor: theme.palette.background.paper,
-        width: theme.custom.thumbnail.width + theme.spacing.unit,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        textDecoration: 'none',
     },
     imageOverlap: {
         position: 'absolute',
         bottom: 1,
-        backgroundColor: theme.custom.thumbnail.contentBackgroundColor,
+        backgroundColor: theme.custom.imageThumbnail.contentBackgroundColor,
     },
 });
 /**
@@ -100,8 +90,6 @@ const styles = theme => ({
  * @class ApiThumb
  * @extends {React.Component}
  */
-const windowURL = window.URL || window.webkitURL;
-
 class ApiThumb extends React.Component {
     constructor(props) {
         super(props);
@@ -113,11 +101,6 @@ class ApiThumb extends React.Component {
             isRedirect: false,
             openMoreMenu: false,
             rating: 0,
-            category: MaterialIcons.categories[0].name,
-            selectedIcon: null,
-            color: null,
-            backgroundIndex: null,
-            imageObj: null,
         };
     }
 
@@ -127,39 +110,11 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     componentDidMount() {
-        const restApi = new Api();
-        const { api } = this.props;
-        restApi.getAPIThumbnail(api.id).then((response) => {
-            if (response && response.data) {
-                if (response.headers['content-type'] === 'application/json') {
-                    const iconJson = JSON.parse(response.data);
-                    this.setState({
-                        selectedIcon: iconJson.key,
-                        category: iconJson.category,
-                        color: iconJson.color,
-                        backgroundIndex: iconJson.backgroundIndex,
-                    });
-                } else if (response && response.data.size > 0) {
-                    const url = windowURL.createObjectURL(response.data);
-                    this.setState({ imageObj: url });
-                }
-            }
-        });
-        const promised_rating = restApi.getRatingFromUser(api.id, null);
+        const api = new Api();
+        const promised_rating = api.getRatingFromUser(this.props.api.id, null);
         promised_rating.then((response) => {
-            if (response) {
-                this.setState({ rating: response.obj.userRating });
-            }
+            this.setState({ rating: response.obj.userRating });
         });
-    }
-
-    /**
-     * Clean up resource
-     */
-    componentWillUnmount() {
-        if (this.state.thumbnail) {
-            windowURL.revokeObjectURL(this.state.imageObj);
-        }
     }
 
     /**
@@ -169,58 +124,29 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     render() {
-        const {
-            imageObj, selectedIcon, color, backgroundIndex, category,
-        } = this.state;
         const details_link = '/apis/' + this.props.api.id;
         const { api, classes, theme } = this.props;
-        const { thumbnail } = theme.custom;
+        const { imageThumbnail } = theme.custom;
         const {
             name, version, context, provider,
-        } = api;
+        } = this.props.api;
         const { rating } = this.state;
-        const starColor = theme.palette.getContrastText(thumbnail.contentBackgroundColor);
-        const imageWidth = thumbnail.width;
-        const defaultImage = thumbnail.defaultApiImage;
-
-        let ImageView;
-        if (imageObj) {
-            ImageView = <img height={140} src={imageObj} alt='API Thumbnail' className={classes.media} />;
-        } else {
-            ImageView = (
-                <ImageGenerator
-                    width={imageWidth}
-                    height={140}
-                    api={api}
-                    fixedIcon={{
-                        key: selectedIcon,
-                        color,
-                        backgroundIndex,
-                        category,
-                        api,
-                    }}
-                />
-            );
-        }
+        const starColor = theme.palette.getContrastText(theme.custom.imageThumbnail.contentBackgroundColor);
+        const imageWidth = theme.custom.imageThumbnail.width;
+        const defaultImage = theme.custom.imageThumbnail.defaultApiImage;
         return (
-            <div className={classes.thumbWrapper}>
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={3} className={classes.thumbWrapper}>
                 <Link to={details_link} className={classes.imageWrapper}>
-                    {!defaultImage && ImageView}
+                    {!defaultImage && <ImageGenerator api={api} width={imageWidth} />}
                     {defaultImage && <img src={defaultImage} />}
                 </Link>
                 <div
                     className={classNames(classes.thumbContent, {
-                        [classes.imageOverlap]: thumbnail.contentPictureOverlap,
+                        [classes.imageOverlap]: imageThumbnail.contentPictureOverlap,
                     })}
                 >
-                    <Link to={details_link} className={classes.textWrapper}>
-                        <Typography
-                            className={classes.thumbHeader}
-                            variant='display1'
-                            gutterBottom
-                            onClick={this.handleRedirectToAPIOverview}
-                            title={name}
-                        >
+                    <Link to={details_link} className={classes.imageWrapper}>
+                        <Typography className={classes.thumbHeader} variant='display1' gutterBottom onClick={this.handleRedirectToAPIOverview} title={name}>
                             {name}
                         </Typography>
                     </Link>
@@ -259,14 +185,14 @@ class ApiThumb extends React.Component {
                         </div>
                     </div>
                 </div>
-            </div>
+            </Grid>
         );
     }
 }
 
 ApiThumb.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(ApiThumb);
