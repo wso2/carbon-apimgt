@@ -113,7 +113,6 @@ class Resources extends React.Component {
                 </div>);
         }
         const { classes, parentClasses, api } = this.props;
-
         return (
             <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                 {console.info('api....', api)}
@@ -143,7 +142,8 @@ class Resources extends React.Component {
                                         {key}
                                     </Typography>
                                     {Object.keys(path).map((innerKey) => {
-                                        return <RenderMethod method={innerKey} />;
+                                        return Api.CONSTS.HTTP_METHODS.includes(innerKey) ?
+                                            <RenderMethod method={innerKey} /> : null;
                                     })}
                                 </div>
                             );

@@ -1239,7 +1239,7 @@ class API extends Resource {
         return promisedAPIs.then((response) => {
             response.obj.apiType = API.CONSTS.API;
             return response;
-        }); 
+        });
     }
 
     /**
@@ -1430,7 +1430,8 @@ class API extends Resource {
 API.CONSTS = {
     API: 'API',
     APIProduct: 'APIProduct',
-}
+    HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head'],
+};
 
 Object.freeze(API.CONSTS);
 

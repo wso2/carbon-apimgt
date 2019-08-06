@@ -41,8 +41,8 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import Api from 'AppData/api';
 import Resource from './Resource';
+import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import { Radio, RadioGroup} from "@material-ui/core";
@@ -277,7 +277,6 @@ class Resources extends React.Component {
         this.setState({ [name]: value });
     };
     addResources() {
-        const allMehtods = ['get', 'put', 'post', 'delete', 'patch', 'head'];
         const defaultGet = {
             description: '',
             parameters: [],
@@ -346,7 +345,7 @@ class Resources extends React.Component {
                 existingPathVale = tmpPaths[this.state.tmpResourceName];
             }
         }
-        allMehtods.map((method) => {
+        Api.CONSTS.HTTP_METHODS.map((method) => {
             switch (method) {
                 case 'get':
                     if ('get' in existingPathVale) {
@@ -629,7 +628,10 @@ class Resources extends React.Component {
                                     <div className={classes.radioGroup}>
                                         {plainOptions.map((option, index) => (
                                             <FormGroup key={index} row>
-                                                <FormControlLabel control={<Checkbox checked={this.state.tmpMethods.indexOf(option) > -1} onChange={this.handleChange(option)} value={option} />} label={option.toUpperCase()} />
+                                                <FormControlLabel control={<Checkbox
+                                                    checked={this.state.tmpMethods.indexOf(option) > -1}
+                                                    onChange={this.handleChange(option)} value={option} />
+                                                } label={option.toUpperCase()} />
                                             </FormGroup>
                                         ))}
                                     </div>
@@ -728,13 +730,13 @@ class Resources extends React.Component {
                                     </ExpansionPanelSummary>
                                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
                                         {Object.keys(path).map((innerKey) => {
-                                            return <Resource path={key} method={innerKey} methodData={path[innerKey]}
+                                            return Api.CONSTS.HTTP_METHODS.includes(innerKey) ?
+                                                <Resource path={key} method={innerKey} methodData={path[innerKey]}
                                                              updatePath={that.updatePath} scopes={api.scopes}
                                                              apiPolicies={apiPolicies}
                                                              addRemoveToDeleteList={that.addRemoveToDeleteList}
                                                              onRef={ref => this.childResources.push(ref)}
-                                                             policyLevel={policyLevel}
-                                            />;
+                                                             policyLevel={policyLevel}/> : null;
                                         })}
                                     </ExpansionPanelDetails>
                                 </ExpansionPanel>
