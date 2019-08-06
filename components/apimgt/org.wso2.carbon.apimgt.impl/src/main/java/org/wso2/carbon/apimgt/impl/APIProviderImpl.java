@@ -6430,7 +6430,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api != null) {
                 apiProductResource.setApiIdentifier(api.getId());
                 apiProductResource.setProductIdentifier(product.getId());
-		        apiProductResource.setEndpointConfig(api.getEndpointConfig());
+                apiProductResource.setEndpointConfig(api.getEndpointConfig());
                 URITemplate uriTemplate = apiProductResource.getUriTemplate();
 
                 Map<String, URITemplate> templateMap = apiMgtDAO.getURITemplatesForAPI(api);

@@ -101,7 +101,6 @@ import java.util.Map;
 import java.util.Set;
 import java.sql.Timestamp;
 
-
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class APIMappingUtil {

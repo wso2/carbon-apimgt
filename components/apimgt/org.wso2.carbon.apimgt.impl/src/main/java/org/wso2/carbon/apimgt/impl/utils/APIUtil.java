@@ -7930,11 +7930,11 @@ public final class APIUtil {
     }
 
     /**
-     * To set the resource properties to the API.
+     * To set the resource properties to the API Product.
      *
      * @param apiProduct          API Product that need to set the resource properties.
      * @param registry     Registry to get the resource from.
-     * @param artifactPath Path of the API artifact.
+     * @param artifactPath Path of the API Product artifact.
      * @return Updated API.
      * @throws RegistryException Registry Exception.
      */

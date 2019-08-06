@@ -41,11 +41,10 @@ class Documents extends React.Component {
         };
     }
     componentDidMount() {
-        const { api: { apiType, id } } = this.props;
+        const { api: { apiType, id }, intl } = this.props;
         const API = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
 
         const docs = API.getDocuments(id);
-        const { intl } = this.props;
         docs.then((response) => {
             this.setState({ documentsList: response.obj.list });
         }).catch((errorResponse) => {

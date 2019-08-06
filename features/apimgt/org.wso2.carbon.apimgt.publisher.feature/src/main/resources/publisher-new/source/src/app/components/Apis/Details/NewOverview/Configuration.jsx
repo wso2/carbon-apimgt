@@ -138,63 +138,65 @@ function Configuration(props) {
                                 {api.context && <React.Fragment>{api.context}</React.Fragment>}
                             </Typography>
                             {/* Version */}
-                            {(api.apiType === API.CONSTS.APIProduct) ?
-                                null :
-                                <React.Fragment>
-                                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.Configuration.version'
-                                            defaultMessage='Version'
-                                        />
-                                    </Typography>
-                                    <Typography component='p' variant='body1'>
-                                        {api.version && <React.Fragment>{api.version}</React.Fragment>}
-                                    </Typography>
-                                </React.Fragment>
+                            {(api.apiType === API.CONSTS.API) &&
+                                (
+                                    <React.Fragment>
+                                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.version'
+                                                defaultMessage='Version'
+                                            />
+                                        </Typography>
+                                        <Typography component='p' variant='body1'>
+                                            {api.version && <React.Fragment>{api.version}</React.Fragment>}
+                                        </Typography>
+                                    </React.Fragment>
+                                )
                             }
                             {/* Default Version */}
-                            {(api.apiType === API.CONSTS.APIProduct) ?
-                                null :
-                                <React.Fragment>
-                                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.Configuration.default.version'
-                                            defaultMessage='Default Version'
-                                        />
-                                        <Tooltip
-                                            placement='top'
-                                            classes={{
-                                                tooltip: parentClasses.htmlTooltip,
-                                            }}
-                                            disableHoverListener
-                                            title={
-                                                <React.Fragment>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.NewOverview.Configuration.tooltip'
-                                                        defaultMessage={'Marks one API version in a group as ' +
-                                                    'the default so that it can be invoked without specifying ' +
-                                                    'the version number in the URL. For example, if you mark ' +
-                                                    'http://host:port/youtube/2.0 as the default API, ' +
-                                                    'requests made to ' +
-                                                    'http://host:port/youtube/ are automatically ' +
-                                                    'routed to version 2.0.' +
-                                                    'If you mark an unpublished API as the default, ' +
-                                                    'the previous default published API will still be used' +
-                                                    ' as the default until the new default API is published.'}
-                                                    />
-                                                </React.Fragment>
-                                            }
-                                        >
-                                            <Button className={parentClasses.helpButton}>
-                                                <HelpOutline className={parentClasses.helpIcon} />
-                                            </Button>
-                                        </Tooltip>
-                                    </Typography>
-                                    <Typography component='p' variant='body1'>
-                                        {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
-                                        {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
-                                    </Typography>
-                                </React.Fragment>
+                            {(api.apiType === API.CONSTS.API) &&
+                                (
+                                    <React.Fragment>
+                                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.default.version'
+                                                defaultMessage='Default Version'
+                                            />
+                                            <Tooltip
+                                                placement='top'
+                                                classes={{
+                                                    tooltip: parentClasses.htmlTooltip,
+                                                }}
+                                                disableHoverListener
+                                                title={
+                                                    <React.Fragment>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.NewOverview.Configuration.tooltip'
+                                                            defaultMessage={'Marks one API version in a group as ' +
+                                                        'the default so that it can be invoked without specifying ' +
+                                                        'the version number in the URL. For example, if you mark ' +
+                                                        'http://host:port/youtube/2.0 as the default API, ' +
+                                                        'requests made to ' +
+                                                        'http://host:port/youtube/ are automatically ' +
+                                                        'routed to version 2.0.' +
+                                                        'If you mark an unpublished API as the default, ' +
+                                                        'the previous default published API will still be used' +
+                                                        ' as the default until the new default API is published.'}
+                                                        />
+                                                    </React.Fragment>
+                                                }
+                                            >
+                                                <Button className={parentClasses.helpButton}>
+                                                    <HelpOutline className={parentClasses.helpIcon} />
+                                                </Button>
+                                            </Tooltip>
+                                        </Typography>
+                                        <Typography component='p' variant='body1'>
+                                            {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
+                                            {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
+                                        </Typography>
+                                    </React.Fragment>
+                                )
                             }
                             {/* Transports */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>

@@ -135,14 +135,14 @@ class APIProduct extends Resource {
      * @param apiProduct {Object} Updated API Product object(JSON) which needs to be updated
      */
     update(apiProduct) {
-        const promised_update = this.client.then((client) => {
+        const promisedUpdate = this.client.then((client) => {
             const payload = {
                 apiProductId: apiProduct.id,
                 body: apiProduct
             };
             return client.apis['API Product (Individual)'].put_api_products__apiProductId_(payload);
         });
-        return promised_update;
+        return promisedUpdate;
     }
 
     /**
@@ -391,7 +391,7 @@ class APIProduct extends Resource {
      * @param {*} swagger 
      */
     updateSwagger(swagger) {
-        const promised_update = this.client.then((client) => {
+        const promisedUpdate = this.client.then((client) => {
             const payload = {
                 apiProductId: this.id,
                 apiDefinition: JSON.stringify(swagger),
@@ -406,7 +406,7 @@ class APIProduct extends Resource {
                 console.error(error);
             });
         });
-        return promised_update.then(response => {
+        return promisedUpdate.then(response => {
             return this;
         });
     }
@@ -414,17 +414,16 @@ class APIProduct extends Resource {
     /**
      * Get the swagger of an API Product
      * @param id {String} UUID of the API Product in which the swagger is needed
-
      */
     getSwagger(id) {
-        const promise_get = this.client.then((client) => {
+        const promiseGet = this.client.then((client) => {
             return client.apis['API Product (Individual)'].get_api_products__apiProductId__swagger({
                 apiProductId: id
             }, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
-        return promise_get;
+        return promiseGet;
     }
 }
 
