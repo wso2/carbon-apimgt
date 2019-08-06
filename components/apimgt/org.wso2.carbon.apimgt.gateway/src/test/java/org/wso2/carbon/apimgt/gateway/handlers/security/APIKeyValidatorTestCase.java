@@ -383,6 +383,7 @@ public class APIKeyValidatorTestCase {
         Resource resource = Mockito.mock(Resource.class);
         API api = new API("abc", "/");
         Mockito.when(synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/menu");
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
 
         api.addResource(resource);
         Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn((api));
@@ -393,9 +394,7 @@ public class APIKeyValidatorTestCase {
         } catch (APISecurityException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals("None", result1);
-
-
+        Assert.assertEquals(APIConstants.AUTH_TYPE_NONE, result1);
     }
 
     /*
