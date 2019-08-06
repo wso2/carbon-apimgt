@@ -116,7 +116,6 @@ class EditScope extends React.Component {
      * @memberof Scopes
      */
     handleInputs(event) {
-        // console.log(event);
         if (Array.isArray(event)) {
             const { apiScope } = this.state;
             apiScope.bindings.values = event;
@@ -159,8 +158,7 @@ class EditScope extends React.Component {
                             type='text'
                             name='name'
                             margin='normal'
-                            value={apiScope.name}
-                            onChange={this.handleInputs}
+                            value={apiScope.name}}
                         />
                     </APIPropertyField>
                     <APIPropertyField name='Description'>

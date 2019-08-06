@@ -102,13 +102,6 @@ class CreateScope extends React.Component {
         newApi.scopes.push(scope);
         const promisedApiUpdate = restApi.update(newApi);
         promisedApiUpdate.then((response) => {
-            if (response.status === 400) {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
-                    defaultMessage: 'Something went wrong while adding a scope',
-                }));
-                return;
-            }
             if (response.status !== 200) {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
