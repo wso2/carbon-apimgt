@@ -478,6 +478,7 @@ export default class API extends Resource {
      * @param applicationId id of the application that needs to be subscribed
      * @param policy throttle policy applicable for the subscription
      * @param callback callback url
+     * @param apiType API type
      */
     subscribe(apiId, applicationId, policy, callback = null, apiType = 'API') {
         const promiseCreateSubscription = this.client.then((client) => {
