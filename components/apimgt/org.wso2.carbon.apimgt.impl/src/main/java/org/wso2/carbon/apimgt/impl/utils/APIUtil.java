@@ -774,7 +774,7 @@ public final class APIUtil {
     public static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
             throws ParseException, ClassCastException {
         Set<String> environmentList = new HashSet<String>();
-        if (endpointConfigs != null) {
+        if (StringUtils.isNotBlank(endpointConfigs) && !"null".equals(endpointConfigs)) {
             JSONParser parser = new JSONParser();
             JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfigs);
             if (endpointConfigJson.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) &&

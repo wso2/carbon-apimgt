@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>APIDefinitionValidationResponse</h2>
+        <h2>WSDLValidationResponse_wsdlInfo_bindingInfo</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,45 +21,30 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>isValid</p>
+                            <p>hasHttpBinding</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">This attribute declares whether this definition is valid or not. </p></td>
+                        <td class="parameter"><p class="marked">Indicates whether the WSDL contains HTTP Bindings</p></td>
                         <td class="parameter">
                                 <a href="#!/models#boolean">boolean</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">true</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>definitionType</p>
+                            <p>hasSoapBinding</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">This attribute declares whether this definition is a swagger or WSDL </p></td>
+                        <td class="parameter"><p class="marked">Indicates whether the WSDL contains SOAP Bindings</p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">WSDL</p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>wsdlInfo</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked"></p></td>
-                        <td class="parameter">
-                                <a href="#!/models#APIDefinitionValidationResponse_wsdlInfo">APIDefinitionValidationResponse_wsdlInfo</a>
+                                <a href="#!/models#boolean">boolean</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>

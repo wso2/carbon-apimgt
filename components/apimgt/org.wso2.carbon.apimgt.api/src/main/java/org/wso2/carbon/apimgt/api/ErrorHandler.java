@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl.exception;
+package org.wso2.carbon.apimgt.api;
 
 /**
  * This error handler interface must use in all exceptions class, for example please see APIManagementException class.

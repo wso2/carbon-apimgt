@@ -114,20 +114,16 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
-        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
-        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
-            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
-        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
-            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
-        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
-            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
-        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
-            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
-        } else {
-            log.error("No matching scope validation logic found for app request with path: " + basePath);
+        //get all the URI templates of the REST API from the base path
+        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath);
+        if (uriTemplates.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No matching scopes found for request with path: " + basePath
+                        + ". Skipping scope validation.");
+            }
+            return true;
         }
+
         for (Object template : uriTemplates.toArray()) {
             org.wso2.uri.template.URITemplate templateToValidate = null;
             Map<String, String> var = new HashMap<String, String>();
